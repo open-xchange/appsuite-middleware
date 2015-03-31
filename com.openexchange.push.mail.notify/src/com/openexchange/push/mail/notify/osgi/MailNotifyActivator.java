@@ -59,6 +59,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushDeleteListener;
 import com.openexchange.push.mail.notify.MailNotifyPushListenerRegistry;
@@ -72,12 +73,12 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link PushActivator} - The push activator.
+ * {@link MailNotifyActivator} - The push activator.
  *
  */
-public final class PushActivator extends HousekeepingActivator {
+public final class MailNotifyActivator extends HousekeepingActivator {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyActivator.class);
 
     private static final String PROP_UDP_LISTEN_MULTICAST = "com.openexchange.push.mail.notify.udp_listen_multicast";
 
@@ -91,7 +92,7 @@ public final class PushActivator extends HousekeepingActivator {
 
     private static final String PROP_USE_EMAIL_ADDRESS = "com.openexchange.push.mail.notify.use_full_email_address";
 
-    private final class Config {
+    private static final class Config {
         boolean multicast;
         String udpListenHost;
         String imapLoginDelimiter;
@@ -104,20 +105,22 @@ public final class PushActivator extends HousekeepingActivator {
         }
     }
 
-    private volatile Future<Object> udpThread;
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
+    private volatile Future<Object> udpThread;
     private volatile MailNotifyPushListenerRegistry registry;
 
     /**
-     * Initializes a new {@link PushActivator}.
+     * Initializes a new {@link MailNotifyActivator}.
      */
-    public PushActivator() {
+    public MailNotifyActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { MailService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, SessiondService.class, TimerService.class };
+        return new Class<?>[] { MailService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class,
+            SessiondService.class, TimerService.class, PushListenerService.class };
     }
 
     @Override
@@ -146,14 +149,12 @@ public final class PushActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         try {
             stopUdpListener();
-            /*
-             * Unregister push manager
-             */
+
+            // Unregister push manager
             cleanUp();
-            /*
-             * Shut down
-             */
-            final MailNotifyPushListenerRegistry registry = this.registry;
+
+            // Shut down
+            MailNotifyPushListenerRegistry registry = this.registry;
             if (null != registry) {
                 registry.cancel();
                 registry.clear();

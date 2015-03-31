@@ -35,5 +35,5 @@ Import-Package: com.openexchange.config,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.push.mail.notify.osgi.PushActivator
+Bundle-Activator: com.openexchange.push.mail.notify.osgi.MailNotifyActivator
 Bundle-ClassPath: .
