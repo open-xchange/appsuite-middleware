@@ -154,8 +154,8 @@ public final class PushManagerRegistry implements PushListenerService {
 
         for (PushUser pushUser : pushUsers) {
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                PushManagerService pushManager = pushManagersIterator.next();
                 try {
-                    PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
                         PushListener pl = ((PushManagerExtendedService) pushManager).startPermanentListener(pushUser);
                         if (null != pl) {
@@ -163,9 +163,9 @@ public final class PushManagerRegistry implements PushListenerService {
                         }
                     }
                 } catch (OXException e) {
-                    LOG.error("Error while starting permanent push listener.", e);
+                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                 } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting permanent push listener.", e);
+                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                 }
             }
         }
@@ -197,8 +197,8 @@ public final class PushManagerRegistry implements PushListenerService {
 
             PushUser pushUser = new PushUser(userId, contextId);
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                PushManagerService pushManager = pushManagersIterator.next();
                 try {
-                    PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
                         PushListener pl = ((PushManagerExtendedService) pushManager).startPermanentListener(pushUser);
                         if (null != pl) {
@@ -206,9 +206,9 @@ public final class PushManagerRegistry implements PushListenerService {
                         }
                     }
                 } catch (OXException e) {
-                    LOG.error("Error while starting permanent push listener.", e);
+                    LOG.error("Error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
                 } catch (RuntimeException e) {
-                    LOG.error("Runtime error while starting permanent push listener.", e);
+                    LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
                 }
             }
         }
@@ -241,8 +241,8 @@ public final class PushManagerRegistry implements PushListenerService {
 
             PushUser pushUser = new PushUser(userId, contextId);
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+                PushManagerService pushManager = pushManagersIterator.next();
                 try {
-                    PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
                         // Stop listener for session
                         boolean stopped = ((PushManagerExtendedService) pushManager).stopPermanentListener(pushUser);
@@ -251,9 +251,9 @@ public final class PushManagerRegistry implements PushListenerService {
                         }
                     }
                 } catch (OXException e) {
-                    LOG.error("Error while stopping push listener.", e);
+                    LOG.error("Error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
                 } catch (RuntimeException e) {
-                    LOG.error("Runtime error while stopping push listener.", e);
+                    LOG.error("Runtime error while stopping push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager, e);
                 }
             }
         }
