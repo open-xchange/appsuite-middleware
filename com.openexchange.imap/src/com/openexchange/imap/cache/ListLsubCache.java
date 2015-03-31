@@ -293,6 +293,9 @@ public final class ListLsubCache {
      */
     public static void clearCache(int accountId, int userId, int contextId) {
         ConcurrentMap<Integer, Future<ListLsubCollection>> map = getCache(userId, contextId).get();
+        if (null == map) {
+            return;
+        }
         ListLsubCollection collection = getSafeFrom(map.get(Integer.valueOf(accountId)));
         if (null != collection) {
             synchronized (collection) {
