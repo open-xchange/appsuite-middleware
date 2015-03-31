@@ -193,12 +193,14 @@ public final class PushManagerRegistry implements PushListenerService {
         }
 
         for (PushUser pushUser : toStop) {
+            boolean rescheduled = false;
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 PushManagerService pushManager = pushManagersIterator.next();
                 try {
                     if (pushManager instanceof PushManagerExtendedService) {
                         boolean stopped = ((PushManagerExtendedService) pushManager).stopPermanentListener(pushUser, false);
                         if (stopped) {
+                            rescheduled = true;
                             LOG.debug("Rescheduling permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
                         }
                     }
@@ -207,6 +209,10 @@ public final class PushManagerRegistry implements PushListenerService {
                 } catch (RuntimeException e) {
                     LOG.error("Runtime error while starting permanent push listener for user {} in context {} by push manager \"{}\".", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager, e);
                 }
+            }
+
+            if (rescheduled) {
+                LOG.info("Rescheduled permanent push listener for user {} in context {} on another cluster node.", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()));
             }
         }
     }

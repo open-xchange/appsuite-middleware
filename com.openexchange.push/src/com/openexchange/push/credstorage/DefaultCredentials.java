@@ -153,4 +153,18 @@ public class DefaultCredentials implements Credentials {
         this.login = login;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append("DefaultCredentials [userId=").append(userId).append(", contextId=").append(contextId).append(", ");
+        if (password != null) {
+            builder.append("password=").append(password).append(", ");
+        }
+        if (login != null) {
+            builder.append("login=").append(login);
+        }
+        builder.append(']');
+        return builder.toString();
+    }
+
 }
