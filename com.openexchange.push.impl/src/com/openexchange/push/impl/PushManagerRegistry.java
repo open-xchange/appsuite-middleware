@@ -68,6 +68,8 @@ import com.openexchange.push.PushUtility;
 import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
+import com.openexchange.push.credstorage.DefaultCredentials;
+import com.openexchange.push.impl.PushDbUtils.DeleteResult;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -178,17 +180,29 @@ public final class PushManagerRegistry implements PushListenerService {
             return false;
         }
 
-        boolean inserted = PushDbUtils.insertPushRegistration(session.getUserId(), session.getContextId(), clientId);
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+
+        boolean inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
 
         if (inserted) {
-            PushUser pushUser = new PushUser(session.getUserId(), session.getContextId());
+            CredentialStorage credentialStorage = optCredentialStorage();
+            if (null != credentialStorage) {
+                try {
+                    credentialStorage.storeCredentials(new DefaultCredentials(session));
+                } catch (Exception e) {
+                    LOG.error("Failed to store credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                }
+            }
+
+            PushUser pushUser = new PushUser(userId, contextId);
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 try {
                     PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
                         PushListener pl = ((PushManagerExtendedService) pushManager).startPermanentListener(pushUser);
                         if (null != pl) {
-                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                            LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager);
                         }
                     }
                 } catch (OXException e) {
@@ -210,10 +224,22 @@ public final class PushManagerRegistry implements PushListenerService {
              */
             return false;
         }
-        boolean deleted = PushDbUtils.deletePushRegistration(session.getUserId(), session.getContextId(), clientId);
 
-        if (deleted) {
-            PushUser pushUser = new PushUser(session.getUserId(), session.getContextId());
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+
+        DeleteResult deleteResult = PushDbUtils.deletePushRegistration(userId, contextId, clientId);
+        if (DeleteResult.DELETED_COMPLETELY == deleteResult) {
+            CredentialStorage credentialStorage = optCredentialStorage();
+            if (null != credentialStorage) {
+                try {
+                    credentialStorage.deleteCredentials(userId, contextId);
+                } catch (Exception e) {
+                    LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                }
+            }
+
+            PushUser pushUser = new PushUser(userId, contextId);
             for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                 try {
                     PushManagerService pushManager = pushManagersIterator.next();
@@ -221,7 +247,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         // Stop listener for session
                         boolean stopped = ((PushManagerExtendedService) pushManager).stopPermanentListener(pushUser);
                         if (stopped) {
-                            LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                            LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(userId), Integer.valueOf(contextId), pushManager);
                         }
                     }
                 } catch (OXException e) {
@@ -232,7 +258,7 @@ public final class PushManagerRegistry implements PushListenerService {
             }
         }
 
-        return deleted;
+        return (DeleteResult.NOT_DELETED != deleteResult);
     }
 
     @Override
@@ -249,15 +275,18 @@ public final class PushManagerRegistry implements PushListenerService {
     public Session generateSessionFor(PushUser pushUser) throws OXException {
         // Check push user
         if (false == PushDbUtils.hasPushRegistration(pushUser)) {
-            throw PushExceptionCodes.NO_PUSH_REGISTRATION.create(pushUser.getUserId(), pushUser.getContextId());
+            throw PushExceptionCodes.NO_PUSH_REGISTRATION.create(Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()));
         }
 
+        int contextId = pushUser.getContextId();
+        int userId = pushUser.getUserId();
+
         // Generate session instance
-        GeneratedSession session = new GeneratedSession(pushUser.getUserId(), pushUser.getContextId());
+        GeneratedSession session = new GeneratedSession(userId, contextId);
 
         // Get credentials
         {
-            Credentials credentials = optCredentials(pushUser.getUserId(), pushUser.getContextId());
+            Credentials credentials = optCredentials(userId, contextId);
             if (null != credentials) {
                 session.setPassword(credentials.getPassword());
                 session.setLoginName(credentials.getLogin());

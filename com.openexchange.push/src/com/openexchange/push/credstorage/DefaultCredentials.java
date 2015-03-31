@@ -49,6 +49,8 @@
 
 package com.openexchange.push.credstorage;
 
+import com.openexchange.session.Session;
+
 /**
  * {@link DefaultCredentials} - The default credentials implementation.
  *
@@ -72,7 +74,7 @@ public class DefaultCredentials implements Credentials {
     /**
      * Initializes a new {@link DefaultCredentials}.
      *
-     * @param credentials
+     * @param credentials The source credentials
      */
     public DefaultCredentials(Credentials credentials) {
         super();
@@ -80,6 +82,19 @@ public class DefaultCredentials implements Credentials {
         userId = credentials.getUserId();
         password = credentials.getPassword();
         login = credentials.getLogin();
+    }
+
+    /**
+     * Initializes a new {@link DefaultCredentials}.
+     *
+     * @param session The source session
+     */
+    public DefaultCredentials(Session session) {
+        super();
+        contextId = session.getContextId();
+        userId = session.getUserId();
+        password = session.getPassword();
+        login = session.getLoginName();
     }
 
     @Override

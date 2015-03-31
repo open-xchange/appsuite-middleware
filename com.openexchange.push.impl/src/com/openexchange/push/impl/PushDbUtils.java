@@ -82,6 +82,24 @@ public class PushDbUtils {
         super();
     }
 
+    /**
+     * Possible delete results.
+     */
+    public static enum DeleteResult {
+        /**
+         * Nothing deleted.
+         */
+        NOT_DELETED,
+        /**
+         * Deleted registration only for associated client.
+         */
+        DELETED_FOR_CLIENT,
+        /**
+         * Deleted last and therefore all registrations.
+         */
+        DELETED_COMPLETELY;
+    }
+
     // ----------------------------------------------------------------------------------------------------------------------------
 
     /**
@@ -313,7 +331,7 @@ public class PushDbUtils {
      * @return <code>true</code> on successful deletion; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
-    public static boolean deletePushRegistration(int userId, int contextId, String clientId) throws OXException {
+    public static DeleteResult deletePushRegistration(int userId, int contextId, String clientId) throws OXException {
         DatabaseService service = Services.requireService(DatabaseService.class);
         Connection con = service.getWritable(contextId);
         boolean rollback = false;
@@ -326,13 +344,15 @@ public class PushDbUtils {
 
             boolean deleted = deletePushRegistration(userId, contextId, clientId, unmark, con);
 
+            DeleteResult deleteResult = null;
             if (unmark[0]) {
                 unmarkContextForPush(contextId, service);
+                deleteResult = DeleteResult.DELETED_COMPLETELY;
             }
 
             con.commit();
             rollback = false;
-            return deleted;
+            return null == deleteResult ? (deleted ? DeleteResult.DELETED_FOR_CLIENT : DeleteResult.NOT_DELETED) : deleteResult;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
