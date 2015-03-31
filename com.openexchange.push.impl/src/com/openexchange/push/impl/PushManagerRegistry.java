@@ -153,7 +153,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), pushManager);
                     }
                 } catch (OXException e) {
-                    LOG.error("Push error while starting permanent push listener.", e);
+                    LOG.error("Error while starting permanent push listener.", e);
                 } catch (RuntimeException e) {
                     LOG.error("Runtime error while starting permanent push listener.", e);
                 }
@@ -198,7 +198,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
                     }
                 } catch (OXException e) {
-                    LOG.error("Push error while starting permanent push listener.", e);
+                    LOG.error("Error while starting permanent push listener.", e);
                 } catch (RuntimeException e) {
                     LOG.error("Runtime error while starting permanent push listener.", e);
                 }
@@ -228,7 +228,7 @@ public final class PushManagerRegistry implements PushListenerService {
                         LOG.debug("Stopped push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
                     }
                 } catch (OXException e) {
-                    LOG.error("Push error while stopping push listener.", e);
+                    LOG.error("Error while stopping push listener.", e);
                 } catch (RuntimeException e) {
                     LOG.error("Runtime error while stopping push listener.", e);
                 }
@@ -319,7 +319,7 @@ public final class PushManagerRegistry implements PushListenerService {
                     return pl;
                 }
             } catch (OXException e) {
-                LOG.error("Push error while starting push listener.", e);
+                LOG.error("Error while starting push listener.", e);
             } catch (RuntimeException e) {
                 LOG.error("Runtime error while starting push listener.", e);
             }
@@ -348,7 +348,7 @@ public final class PushManagerRegistry implements PushListenerService {
                     return true;
                 }
             } catch (OXException e) {
-                LOG.error("Push error while stopping push listener.", e);
+                LOG.error("Error while stopping push listener.", e);
             } catch (RuntimeException e) {
                 LOG.error("Runtime error while stopping push listener.", e);
             }
