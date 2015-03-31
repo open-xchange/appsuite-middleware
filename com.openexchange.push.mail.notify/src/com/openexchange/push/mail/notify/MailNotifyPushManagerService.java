@@ -49,9 +49,12 @@
 
 package com.openexchange.push.mail.notify;
 
+import static com.openexchange.java.Autoboxing.I;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushUser;
 import com.openexchange.session.Session;
 
 /**
@@ -59,17 +62,41 @@ import com.openexchange.session.Session;
  */
 public final class MailNotifyPushManagerService implements PushManagerService {
 
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(MailNotifyPushManagerService.class);
+
     private final String name;
     private final MailNotifyPushListenerRegistry registry;
 
     /**
      * Initializes a new {@link MailNotifyPushManagerService}.
      */
-    public MailNotifyPushManagerService(final MailNotifyPushListenerRegistry registry) {
+    public MailNotifyPushManagerService(MailNotifyPushListenerRegistry registry) {
         super();
         name = "Mail Push Manager";
         this.registry = registry;
     }
+
+    private boolean hasPermanentPush(int userId, int contextId) {
+        try {
+            PushListenerService pushListenerService = Services.getService(PushListenerService.class, true);
+            return pushListenerService.hasRegistration(new PushUser(userId, contextId));
+        } catch (Exception e) {
+            LOGGER.warn("Failed to check for push registration for user {} in context {}", I(userId), I(contextId), e);
+            return false;
+        }
+    }
+
+    private Session generateSessionFor(int userId, int contextId) throws OXException {
+        PushListenerService pushListenerService = Services.getService(PushListenerService.class, true);
+        return pushListenerService.generateSessionFor(new PushUser(userId, contextId));
+    }
+
+    private Session generateSessionFor(PushUser pushUser) throws OXException {
+        PushListenerService pushListenerService = Services.getService(PushListenerService.class, true);
+        return pushListenerService.generateSessionFor(pushUser);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public PushListener startListener(final Session session) throws OXException {
@@ -85,6 +112,8 @@ public final class MailNotifyPushManagerService implements PushManagerService {
     public boolean stopListener(final Session session) throws OXException {
         return registry.removePushListener(session.getContextId(), session.getUserId());
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public String toString() {
