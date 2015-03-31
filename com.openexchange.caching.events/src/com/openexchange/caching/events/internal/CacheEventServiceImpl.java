@@ -53,16 +53,21 @@ import static com.openexchange.caching.events.internal.StampedCacheEvent.POISON;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.events.CacheEvent;
+import com.openexchange.caching.events.CacheEventConfiguration;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.caching.events.monitoring.CacheEventMonitor;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -73,7 +78,7 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheEventServiceImpl implements CacheEventService, CacheEventMonitor {
+public final class CacheEventServiceImpl implements CacheEventService, CacheEventMonitor, Reloadable {
 
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheEventServiceImpl.class);
@@ -81,6 +86,7 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     private final ConcurrentMap<String, List<CacheListener>> cacheRegionListeners;
     private final List<CacheListener> cacheListeners;
     private final CacheEventQueue delayedEvents;
+    private final AtomicReference<CacheEventConfiguration> configurationRef;
     private final AtomicBoolean keepgoing;
     private final AtomicLong offeredEvents;
     final AtomicLong deliveredEvents;
@@ -88,12 +94,13 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     /**
      * Initializes a new {@link CacheEventServiceImpl}.
      */
-    public CacheEventServiceImpl() {
+    public CacheEventServiceImpl(CacheEventConfiguration initialConfiguration) {
         super();
         cacheRegionListeners = new ConcurrentHashMap<String, List<CacheListener>>();
         cacheListeners = new ArrayList<CacheListener>();
         offeredEvents = new AtomicLong();
         deliveredEvents = new AtomicLong();
+        configurationRef = new AtomicReference<CacheEventConfiguration>(initialConfiguration);
 
         final CacheEventQueue delayedEvents = new CacheEventQueue();
         this.delayedEvents = delayedEvents;
@@ -138,6 +145,11 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
             }
         };
         ThreadPools.getThreadPool().submit(ThreadPools.task(queueConsumer, "CacheEventQueueConsumer"));
+    }
+
+    @Override
+    public CacheEventConfiguration getConfiguration() {
+        return configurationRef.get();
     }
 
     @Override
@@ -277,6 +289,16 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
     private static ExecutorService getExecutorService() {
         ThreadPoolService threadPoolService = CacheEventServiceLookup.getService(ThreadPoolService.class);
         return null != threadPoolService ? threadPoolService.getExecutor() : null;
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        configurationRef.set(new CacheEventConfigurationImpl(configService));
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return null;
     }
 
 }

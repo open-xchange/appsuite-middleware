@@ -63,7 +63,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -83,7 +82,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
-
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -665,7 +663,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     /**
-     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
      * <p>
      * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
      * caller can decide to treat as an error or to simply ignore it.

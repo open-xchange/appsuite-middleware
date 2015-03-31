@@ -148,6 +148,11 @@ public class NotifyingCache extends AbstractCache implements CacheListener {
     }
 
     @Override
+    public void localClear() throws OXException {
+        delegate.localClear();
+    }
+
+    @Override
     public void dispose() {
         delegate.dispose();
     }

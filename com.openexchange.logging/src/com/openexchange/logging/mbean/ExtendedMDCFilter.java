@@ -62,7 +62,7 @@ import ch.qos.logback.core.spi.FilterReply;
 
 /**
  * {@link ExtendedMDCFilter}
- * 
+ *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
@@ -97,7 +97,7 @@ public class ExtendedMDCFilter extends TurboFilter {
         boolean loggerCheck = false;
         if (check) {
             for (String s : levels.keySet()) {
-                if (logger.getName().startsWith(s) && level.levelInt <= levels.get(s).levelInt) {
+                if (logger.getName().startsWith(s) && level.levelInt >= levels.get(s).levelInt) {
                     loggerCheck = true;
                     break;
                 }
@@ -122,7 +122,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
     /**
      * Adds a tuple for this filter
-     * 
+     *
      * @param k The tuple's key to query MDC map
      * @param v The tuple's expected value
      */
@@ -132,7 +132,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
     /**
      * Add a logger level for this filter
-     * 
+     *
      * @param loggerName
      * @param level
      */
@@ -142,13 +142,13 @@ public class ExtendedMDCFilter extends TurboFilter {
 
     /**
      * Remove a logger level from this filter
-     * 
+     *
      * @param loggerName
      */
     public void removeLogger(String loggerName) {
         levels.remove(loggerName);
     }
-    
+
     public boolean hasLoggers() {
         return (levels.size() > 0);
     }
@@ -179,7 +179,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Initializes a new {@link Tuple}.
-         * 
+         *
          * @param k
          * @param v
          */
@@ -232,7 +232,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Gets the key
-         * 
+         *
          * @return The key
          */
         public String getKey() {
@@ -241,7 +241,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Gets the value
-         * 
+         *
          * @return The value
          */
         public String getValue() {
@@ -250,7 +250,7 @@ public class ExtendedMDCFilter extends TurboFilter {
 
         /**
          * Get outer type
-         * 
+         *
          * @return
          */
         private ExtendedMDCFilter getOuterType() {

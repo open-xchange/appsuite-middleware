@@ -231,14 +231,16 @@ public final class CachingJSlobStorage implements JSlobStorage, Runnable {
                 }
             }
         }
+
         // Store them
         delegate.storeMultiple(jslobs);
 
-        // Invalidate remote caches
+        // Invalidate caches
         for (Entry<JSlobId, JSlob> entry : jslobs.entrySet()) {
             JSlobId id = entry.getKey();
             cache.putInGroup(id.getId(), groupName(id), entry.getValue().setId(id), true);
         }
+
         return leave;
     }
 

@@ -90,24 +90,25 @@ public class CachingUserStorage extends UserStorage {
     /**
      * Default constructor.
      */
-    public CachingUserStorage(final UserStorage delegate) {
+    public CachingUserStorage(UserStorage delegate) {
         super();
         this.delegate = delegate;
     }
 
     @Override
-    public User getUser(final int uid, final Context context) throws OXException {
-        final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
+    public User getUser(int uid, Context context) throws OXException {
+        CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
             return delegate.getUser(uid, context);
         }
-        final Cache cache = cacheService.getCache(REGION_NAME);
-        final Object object = cache.get(cacheService.newCacheKey(context.getContextId(), uid));
+        Cache cache = cacheService.getCache(REGION_NAME);
+        CacheKey key = cacheService.newCacheKey(context.getContextId(), uid);
+        Object object = cache.get(key);
         if (object instanceof User) {
             return (User) object;
         }
-        final User user = delegate.getUser(uid, context);
-        cache.put(cacheService.newCacheKey(context.getContextId(), uid), user, false);
+        User user = delegate.getUser(uid, context);
+        cache.put(key, user, false);
         return user;
     }
 
