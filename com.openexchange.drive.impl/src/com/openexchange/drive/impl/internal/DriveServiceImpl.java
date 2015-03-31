@@ -636,6 +636,7 @@ public class DriveServiceImpl implements DriveService {
             DriveShare driveShare = new DriveShare(shareInfo.getShare());
             driveShare.setTarget(driveShareTarget);
             driveShareInfo.setDriveShare(driveShare);
+            retval.add(driveShareInfo);
         }
 
         return retval;
