@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl;
 
+import static com.openexchange.tools.update.Tools.tableExists;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -173,6 +174,9 @@ public class PushDbUtils {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
+            if (false == tableExists(con, "context2push_registration")) {
+                return Collections.emptySet();
+            }
             stmt = con.prepareStatement("SELECT cid FROM context2push_registration");
             rs = stmt.executeQuery();
             if (false == rs.next()) {
