@@ -81,6 +81,7 @@ import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
+import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallableFactory;
 import com.openexchange.push.impl.credstorage.OSGiCredentialStorageProvider;
 import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
@@ -234,6 +235,7 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
 
             registerService(CustomPortableFactory.class, new PortablePushUserFactory());
             registerService(CustomPortableFactory.class, new PortableCredentialsFactory());
+            registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
 
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);

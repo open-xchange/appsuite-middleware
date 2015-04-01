@@ -142,7 +142,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     List<Member> candidates = new LinkedList<Member>();
                     candidates.add(localMember);
                     {
-                        Map<Member, Future<Boolean>> futures = hzInstance.getExecutorService("default").submitToMembers(new CheckForExtendedServiceCallable(), otherMembers);
+                        Map<Member, Future<Boolean>> futures = hzInstance.getExecutorService("default").submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
                         for (Map.Entry<Member,Future<Boolean>> entry : futures.entrySet()) {
                             // Check Future's return value
                             Future<Boolean> future = entry.getValue();
