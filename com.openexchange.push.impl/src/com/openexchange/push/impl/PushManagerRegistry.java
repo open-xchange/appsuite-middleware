@@ -117,8 +117,6 @@ public final class PushManagerRegistry implements PushListenerService {
      * --------------------------------------------------------- Member section ----------------------------------------------------------
      */
 
-    private static final Object PRESENCE = new Object();
-
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
     private final Set<PushUser> initialPushUsers;
@@ -131,7 +129,7 @@ public final class PushManagerRegistry implements PushListenerService {
     private PushManagerRegistry(ServiceLookup services) {
         super();
         this.services = services;
-        initialPushUsers = new HashSet<PushUser>(256);
+        initialPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
