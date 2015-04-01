@@ -66,6 +66,9 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeMessage.RecipientType;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
@@ -86,8 +89,10 @@ import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.osgi.Services;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -130,18 +135,22 @@ public class OAuthMailNotificationService {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
         } catch (MessagingException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
+        } catch (JSONException e) {
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
 
-    private ComposedMailMessage buildNewExternalApplicationMail(User user, int contextId, String clientId, InternetAddress address) throws OXException, UnsupportedEncodingException, MessagingException {
+    private ComposedMailMessage buildNewExternalApplicationMail(User user, int contextId, String clientId, InternetAddress address) throws OXException, UnsupportedEncodingException, MessagingException, JSONException {
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
+        ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
+        JSONObject json = serverConfigService.getServerConfig(new AJAXRequestData(), ServerSessionAdapter.valueOf(user.getId(), contextId));
         Client client = oAuthProviderService.getClientById(clientId);
         String title = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_TITLE);
-        title = String.format(title, "<OX_PRODUCT_NAME>"); //TODO
+        title = String.format(title, json.getString("productName"));
         String intro = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_INTRO);
         intro = String.format(intro, user.getDisplayName());
         String message = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_MESSAGE);
-        message = String.format(message, client.getName(), "<OX_PRODUCT_NAME>", "settingsblabla"); //TODO
+        message = String.format(message, client.getName(), json.getString("productName"), "settingsblabla"); //TODO
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(INTRO_FIELD, intro);
         vars.put(MESSAGE_FIELD, message);

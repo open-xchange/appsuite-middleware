@@ -84,6 +84,7 @@ import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.authcode.DbAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.HzAuthorizationCodeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
@@ -228,7 +229,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
-            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class };
+            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class };
     }
 
     @Override
