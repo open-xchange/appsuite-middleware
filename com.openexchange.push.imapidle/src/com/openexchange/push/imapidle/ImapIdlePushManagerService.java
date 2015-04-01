@@ -102,6 +102,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
     // ---------------------------------------------------------------------------------------------------- //
 
+    private final String name;
     private final ServiceLookup services;
     private final ConcurrentMap<SimpleKey, ImapIdlePushListener> listeners;
     private final String fullName;
@@ -115,6 +116,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      */
     private ImapIdlePushManagerService(String fullName, int accountId, PushMode pushMode, long delay, ImapIdleClusterLock clusterLock, ServiceLookup services) {
         super();
+        name = "IMAP-IDLE Push Manager";
         this.pushMode = pushMode;
         this.delay = delay;
         this.fullName = fullName;
@@ -122,6 +124,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.clusterLock = clusterLock;
         this.services = services;
         listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     /**
