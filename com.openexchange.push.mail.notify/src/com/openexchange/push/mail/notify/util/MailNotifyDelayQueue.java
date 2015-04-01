@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.mail.notify;
+package com.openexchange.push.mail.notify.util;
 
 import java.util.AbstractQueue;
 import java.util.Collection;

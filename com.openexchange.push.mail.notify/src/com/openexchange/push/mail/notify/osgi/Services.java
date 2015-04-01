@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.mail.notify;
+package com.openexchange.push.mail.notify.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;

@@ -66,7 +66,6 @@ import com.openexchange.push.mail.notify.MailNotifyPushListenerRegistry;
 import com.openexchange.push.mail.notify.MailNotifyPushMailAccountDeleteListener;
 import com.openexchange.push.mail.notify.MailNotifyPushManagerService;
 import com.openexchange.push.mail.notify.MailNotifyPushUdpSocketListener;
-import com.openexchange.push.mail.notify.Services;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -128,17 +127,21 @@ public final class MailNotifyActivator extends HousekeepingActivator {
         try {
             Services.set(this);
 
+            // Read configuration
             Config config = readConfiguration();
 
-            // Register push manager
+            // Initialize listener registry
             MailNotifyPushListenerRegistry registry = new MailNotifyPushListenerRegistry(config.useOXLogin, config.useEmailAddress);
             this.registry = registry;
 
+            // Register push manager
             registerService(PushManagerService.class, new MailNotifyPushManagerService(registry), null);
 
+            // Register groupware stuff
             registerService(MailAccountDeleteListener.class, new MailNotifyPushMailAccountDeleteListener(registry), null);
             registerService(DeleteListener.class, new MailNotifyPushDeleteListener(registry), null);
 
+            // Start UPD listener
             startUdpListener(registry, config);
         } catch (final Exception e) {
             LOG.error("", e);
@@ -149,6 +152,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         try {
+            // Stop UPD listener
             stopUdpListener();
 
             // Unregister push manager
@@ -249,7 +253,7 @@ public final class MailNotifyActivator extends HousekeepingActivator {
 
         // Submit to thread pool
         Future<Object> udpThread = ThreadPools.getThreadPool().submit(ThreadPools.task(udpListener));
-        udpListener.setUdpThread(udpThread);
+        udpListener.setFuture(udpThread);
     }
 
     private void stopUdpListener() {
