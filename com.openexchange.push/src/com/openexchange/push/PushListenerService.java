@@ -49,11 +49,13 @@
 
 package com.openexchange.push;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link PushListenerService} - The singleton push listener service to manually start/stop psuh listeners.
+ * {@link PushListenerService} - The singleton push listener service to manually start/stop push listeners.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -65,25 +67,65 @@ public interface PushListenerService {
      *
      * @param session The session
      * @return A newly started listener or <code>null</code> if a listener could not be started
+     * @throws OXException If operation fails
      */
-    PushListener startListenerFor(Session session);
+    PushListener startListenerFor(Session session) throws OXException;
 
     /**
      * Stops the listener for specified session.
      *
      * @param session The session
      * @return <code>true</code> if listener has been successfully stopped; otherwise <code>false</code>
+     * @throws OXException If operation fails
      */
-    boolean stopListenerFor(Session session);
+    boolean stopListenerFor(Session session) throws OXException;
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Checks cluster-wide if the user has already a registered IMAP PUSH listener
+     * Gets the users with permanent listeners
      *
-     * @param cid - The context id
-     * @param userIds - The user ids
-     * @return An array of booleans which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
+     * @return The users with permanent listeners
+     * @throws OXException If users cannot be returned
      */
-    boolean[] hasListenerFor(int cid, int[] userIds);
+    List<PushUser> getUsersWithPermanentListeners() throws OXException;
+
+    /**
+     * Has push registration
+     *
+     * @param pushUser The push user to check
+     * @return <code>true</code> if a push registration is available; otherwise <code>false</code>
+     * @throws OXException If push registrations cannot be returned
+     */
+    boolean hasRegistration(PushUser pushUser) throws OXException;
+
+    /**
+     * Generates a session for specified push user according to configuration settings/possibilities.
+     *
+     * @param pushUser The push user
+     * @return The generated session
+     * @throws OXException If no session can be generated for specified push user
+     */
+    Session generateSessionFor(PushUser pushUser) throws OXException;
+
+    /**
+     * Registers a permanent listener for specified user.
+     *
+     * @param session The session
+     * @param clientId The client identifier
+     * @return <code>true</code> if a permanent listener is successfully registered; otherwise <code>false</code> if there is already such a listener
+     * @throws OXException If operation fails
+     */
+    boolean registerPermanentListenerFor(Session session, String clientId) throws OXException;
+
+    /**
+     * Unregisters a permanent listener for specified user.
+     *
+     * @param session The session
+     * @param clientId The client identifier
+     * @return <code>true</code> if a permanent listener is successfully unregistered; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    boolean unregisterPermanentListenerFor(Session session, String clientId) throws OXException;
 
 }

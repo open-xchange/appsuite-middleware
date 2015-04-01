@@ -50,10 +50,13 @@
 package com.openexchange.push.mail.notify;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.net.SocketException;
+import java.util.concurrent.Future;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -67,52 +70,83 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushUdpSocketListener.class);
 
-    private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
+    private static final int MAX_UDP_PACKET_SIZE = 4 + 64 + 1; // 69
 
-    private static DatagramSocket datagramSocket = null;
+    // --------------------------------------------------------------------------------------------------------------------------------
 
+    private final DatagramSocket datagramSocket;
     private final String imapLoginDelimiter;
-
     private final MailNotifyPushListenerRegistry registry;
+    private volatile Future<Object> future;
 
-    public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, final String udpListenHost, final int udpListenPort, final String imapLoginDelimiter, final boolean multicast) throws OXException, IOException {
+    /**
+     * Initializes a new {@link MailNotifyPushUdpSocketListener}.
+     */
+    public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, String udpListenHost, int udpListenPort, String imapLoginDelimiter, boolean multicast) throws OXException, IOException {
         super();
-        this.registry = registry;
-        final InetAddress senderAddress = InetAddress.getByName(udpListenHost);
+        InetAddress senderAddress = InetAddress.getByName(udpListenHost);
+        if (senderAddress == null) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get Internet Protocol (IP) addres for given hostname " + udpListenHost);
+        }
 
+        this.registry = registry;
         this.imapLoginDelimiter = imapLoginDelimiter;
-        if (senderAddress != null) {
-            if (multicast) {
-                datagramSocket = new MulticastSocket(udpListenPort);
-                ((MulticastSocket)datagramSocket).joinGroup(senderAddress);
-            } else {
-                datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
-            }
+        if (multicast) {
+            datagramSocket = new MulticastSocket(udpListenPort);
+            ((MulticastSocket)datagramSocket).joinGroup(senderAddress);
         } else {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get internet addres to given hostname " + udpListenHost);
+            datagramSocket = new DatagramSocket(udpListenPort, senderAddress);
         }
     }
 
-    private void start() {
+    /**
+     * Sets the associated <code>Future</code> instance
+     *
+     * @param future The <code>Future</code> instance
+     */
+    public void setFuture(Future<Object> future) {
+        this.future = future;
+    }
+
+    /**
+     * Closes this UDP listener.
+     */
+    public void close() {
+        datagramSocket.close();
+
+        Future<Object> future = this.future;
+        if (null != future) {
+            future.cancel(true);
+            this.future = null;
+        }
+    }
+
+    @Override
+    public void run() {
         while (true) {
-            final DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
+            DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
             try {
                 datagramSocket.receive(datagramPacket);
 
-                if (datagramPacket.getLength() > 0) {
-                    // Packet received
-                    final String mailboxName = getMailboxName(datagramPacket);
-                    registry.scheduleEvent(mailboxName);
-                } else {
+                // Check packet length
+                if (datagramPacket.getLength() <= 0) {
                     LOG.warn("recieved empty udp package: {}", datagramSocket);
+                    return;
                 }
-            } catch (final IOException e) {
+
+                // Valid packet received - Schedule an event for extracted mailbox name
+                registry.scheduleEvent(getMailboxNameFromPacket(datagramPacket));
+            } catch (SocketException e) {
+                LOG.info("UDP socket closed");
+            } catch (InterruptedIOException e) {
+                LOG.error("Receiving of UDP packet interrupted", e);
+            } catch (IOException e) {
                 LOG.error("Receiving of UDP packet failed", e);
             }
         }
     }
 
-    private String getMailboxName(final DatagramPacket datagramPacket) {
+    private String getMailboxNameFromPacket(DatagramPacket datagramPacket) {
         /* TODO: this currently works with cyrus notify must be configurable somehow later
          *
          * Format:
@@ -127,25 +161,19 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
          */
 
         String packetDataString = new String(datagramPacket.getData());
-        // user name at position 3, see above
+        // User name at position 3, see above
         packetDataString = packetDataString.split("\0")[3];
-        if (null != imapLoginDelimiter) {
-        	final int idx;
-        	idx = packetDataString.indexOf(imapLoginDelimiter);
-        	if (idx != -1) {
+
+        String delimiter = imapLoginDelimiter;
+        if (null != delimiter) {
+        	int idx = packetDataString.indexOf(delimiter);
+        	if (idx >= 0) {
         		packetDataString = packetDataString.substring(0, idx);
         	}
         }
+
         LOG.debug("Username={}", packetDataString);
-        if (null != packetDataString && packetDataString.length() > 0) {
-            return packetDataString;
-        } else {
-            return null;
-        }
+        return null != packetDataString && packetDataString.length() > 0 ? packetDataString : null;
     }
 
-    @Override
-    public void run() {
-        start();
-    }
 }

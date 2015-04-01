@@ -57,7 +57,9 @@ import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
+import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
@@ -100,6 +102,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
     // ---------------------------------------------------------------------------------------------------- //
 
+    private final String name;
     private final ServiceLookup services;
     private final ConcurrentMap<SimpleKey, ImapIdlePushListener> listeners;
     private final String fullName;
@@ -113,6 +116,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      */
     private ImapIdlePushManagerService(String fullName, int accountId, PushMode pushMode, long delay, ImapIdleClusterLock clusterLock, ServiceLookup services) {
         super();
+        name = "IMAP-IDLE Push Manager";
         this.pushMode = pushMode;
         this.delay = delay;
         this.fullName = fullName;
@@ -120,6 +124,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.clusterLock = clusterLock;
         this.services = services;
         listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512);
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 
     /**
@@ -130,6 +139,88 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     public int getAccountId() {
         return accountId;
     }
+
+    private boolean hasPermanentPush(int userId, int contextId) {
+        try {
+            PushListenerService pushListenerService = services.getService(PushListenerService.class);
+            return pushListenerService.hasRegistration(new PushUser(userId, contextId));
+        } catch (Exception e) {
+            LOGGER.warn("Failed to check for push registration for user {} in context {}", I(userId), I(contextId), e);
+            return false;
+        }
+    }
+
+    private Session generateSessionFor(int userId, int contextId) throws OXException {
+        PushListenerService pushListenerService = services.getService(PushListenerService.class);
+        return pushListenerService.generateSessionFor(new PushUser(userId, contextId));
+    }
+
+    private Session generateSessionFor(PushUser pushUser) throws OXException {
+        PushListenerService pushListenerService = services.getService(PushListenerService.class);
+        return pushListenerService.generateSessionFor(pushUser);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public PushListener startPermanentListener(PushUser pushUser) throws OXException {
+        if (null == pushUser) {
+            return null;
+        }
+
+        Session session = generateSessionFor(pushUser);
+        int contextId = session.getContextId();
+        int userId = session.getUserId();
+
+        if (clusterLock.acquireLock(session)) {
+            // Locked...
+            boolean unlock = true;
+            try {
+                ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, services);
+                if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
+                    listener.start();
+                    unlock = false;
+                    LOGGER.info("Started permanent IMAP-IDLE listener for user {} in context {}", I(userId), I(contextId));
+                    return listener;
+                }
+
+                // Already running for session user
+                LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+            } finally {
+                if (unlock) {
+                    releaseLock(session);
+                }
+            }
+        } else {
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+        }
+
+        // No listener registered for given session
+        return null;
+    }
+
+    @Override
+    public boolean stopPermanentListener(PushUser pushUser, boolean tryToReconnect) throws OXException {
+        if (null == pushUser) {
+            return false;
+        }
+
+        StopResult stopResult = stopListener(tryToReconnect, true, pushUser.getUserId(), pushUser.getContextId());
+        switch (stopResult) {
+        case RECONNECTED:
+            LOGGER.info("Reconnected permanent IMAP-IDLE listener for user {} in context {} using another session", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            return true;
+        case STOPPED:
+            LOGGER.info("Stopped permanent IMAP-IDLE listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            return true;
+        default:
+            break;
+        }
+
+        return false;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public PushListener startListener(Session session) throws OXException {
@@ -142,7 +233,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             // Locked...
             boolean unlock = true;
             try {
-                ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, services);
+                ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, services);
                 if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                     listener.start();
                     unlock = false;
@@ -171,7 +262,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             return false;
         }
 
-        StopResult stopResult = stopListener(true, session.getUserId(), session.getContextId());
+        StopResult stopResult = stopListener(true, false, session.getUserId(), session.getContextId());
         switch (stopResult) {
         case RECONNECTED:
             LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()));
@@ -190,14 +281,22 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * Stops the listener associated with given user.
      *
      * @param tryToReconnect <code>true</code> to signal that a reconnect using another sessions should be performed; otherwise <code>false</code>
+     * @param stopIfPermanent <code>true</code> to signal that current listener is supposed to be stopped even though it might be associated with a permanent push registration; otherwise <code>false</code>
      * @param userId The user identifier
      * @param contextId The corresponding context identifier
      * @return The stop result
      */
-    public StopResult stopListener(boolean tryToReconnect, int userId, int contextId) {
-        ImapIdlePushListener listener = listeners.remove(SimpleKey.valueOf(userId, contextId));
+    public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) {
+        SimpleKey key = SimpleKey.valueOf(userId, contextId);
+        ImapIdlePushListener listener = listeners.remove(key);
         if (null != listener) {
-            boolean reconnected = listener.cancel(tryToReconnect);
+            if (!stopIfPermanent && listener.isPermanent()) {
+                listeners.put(key, listener);
+                return StopResult.NONE;
+            }
+
+            boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
+            boolean reconnected = listener.cancel(tryRecon);
             return reconnected ? StopResult.RECONNECTED : StopResult.STOPPED;
         }
 
@@ -234,19 +333,27 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     public ImapIdlePushListener injectAnotherListenerFor(Session oldSession) {
         int contextId = oldSession.getContextId();
         int userId = oldSession.getUserId();
-        String oldSessionId = oldSession.getSessionID();
+
+        // Prefer permanent listener prior to performing look-up for another valid session
+        if (hasPermanentPush(userId, contextId)) {
+            try {
+                Session session = generateSessionFor(userId, contextId);
+                return injectAnotherListenerUsing(session, true).injectedPushListener;
+            } catch (OXException e) {
+                // Failed to inject a permanent listener
+            }
+        }
 
         // Look-up sessions
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null != sessiondService) {
+            String oldSessionId = oldSession.getSessionID();
+
             // Query local ones first
             Collection<Session> sessions = sessiondService.getSessions(userId, contextId);
             for (Session session : sessions) {
                 if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
-                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, services);
-                    // Replace old/existing one
-                    listeners.put(SimpleKey.valueOf(userId, contextId), listener);
-                    return listener;
+                    return injectAnotherListenerUsing(session, false).injectedPushListener;
                 }
             }
 
@@ -255,16 +362,38 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
                 for (Session session : sessions) {
                     if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
-                        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, services);
-                        // Replace old/existing one
-                        listeners.put(SimpleKey.valueOf(userId, contextId), listener);
-                        return listener;
+                        return injectAnotherListenerUsing(session, false).injectedPushListener;
+                    }
+                }
+            }
+
+            // Look-up remote sessions, too, if possible
+            if (sessiondService instanceof SessiondServiceExtended) {
+                sessions = ((SessiondServiceExtended) sessiondService).getSessions(userId, contextId, true);
+                for (Session session : sessions) {
+                    if (!oldSessionId.equals(session.getSessionID()) && PushUtility.allowedClient(session.getClient())) {
+                        return injectAnotherListenerUsing(session, false).injectedPushListener;
                     }
                 }
             }
         }
 
         return null;
+    }
+
+    /**
+     * Tries to look-up another valid session and injects a new listener for it (discarding the existing one bound to given <code>oldSession</code>)
+     *
+     * @param newSession The new session to use
+     * @param permanent <code>true</code> if permanent; otherwise <code>false</code>
+     * @return The new listener or <code>null</code>
+     * @throws OXException If operation fails
+     */
+    public InjectedImapIdlePushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
+        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, newSession, permanent, services);
+        // Replace old/existing one
+        ImapIdlePushListener prev = listeners.put(SimpleKey.valueOf(newSession), listener);
+        return new InjectedImapIdlePushListener(listener, prev);
     }
 
     /**
@@ -282,19 +411,18 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
     }
 
-    @Override
-    public boolean[] hasListenerFor(int contextId, int[] userIds) {
-        boolean[] hasListener = new boolean[userIds.length];
-        int index = 0;
-        for(int userId : userIds) {
-            SimpleKey sk = SimpleKey.valueOf(userId, contextId);
-            ImapIdlePushListener listener = listeners.get(sk);
-            if(listener == null) {
-                hasListener[index++] = false;
-            } else {
-                hasListener[index++] = true;
-            }
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private static class InjectedImapIdlePushListener {
+
+        final ImapIdlePushListener injectedPushListener;
+        final ImapIdlePushListener replacedPushListener;
+
+        InjectedImapIdlePushListener(ImapIdlePushListener injectedPushListener, ImapIdlePushListener replacedPushListener) {
+            super();
+            this.injectedPushListener = injectedPushListener;
+            this.replacedPushListener = replacedPushListener;
         }
-        return hasListener;
     }
+
 }
