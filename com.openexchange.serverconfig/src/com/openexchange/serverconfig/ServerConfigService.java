@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,33 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.osgi;
+package com.openexchange.serverconfig;
 
-import java.util.List;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
-import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.ServerConfigMatcherService;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServerConfigServicesLookup}
+ * {@link ServerConfigService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.0
  */
-public interface ServerConfigServicesLookup {
+public interface ServerConfigService {
 
-    public List<ComputedServerConfigValueService> getComputed();
+    /**
+     * Get the computed server config
+     * 
+     * @return the computed server config
+     * @throws OXException if computing the server config fails
+     */
+    public JSONObject getServerConfig(AJAXRequestData requestData, ServerSession sessions) throws OXException;
 
-    public List<ServerConfigMatcherService> getMatchers();
-    
-    public List<ManifestContributor> getContributors();
+    /**
+     * Get the {@link ServerConfigServicesLookup} that is used when computing the server config.
+     * 
+     * @return
+     */
+    ServerConfigServicesLookup getServerConfigServicesLookup();
 }

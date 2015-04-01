@@ -47,40 +47,27 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.serverconfig.impl.values;
 
-import java.util.Set;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
-import com.openexchange.capabilities.Capability;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.conversion.simple.SimpleConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Capabilities}
+ * {@link Hosts}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Capabilities implements ComputedServerConfigValueService {
-
-    private final ServiceLookup services;
-
-    public Capabilities(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
+public class Hosts implements ComputedServerConfigValueService {
 
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
-        CapabilityService capabilityService = services.getService(CapabilityService.class);
-        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true).asSet();
-        serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
+    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws JSONException {
+        if (!serverConfig.has("hosts")) {
+            serverConfig.put("hosts", new JSONArray(1).put(request.getHostname()));
+        }
     }
 
 }

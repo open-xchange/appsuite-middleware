@@ -47,27 +47,40 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.serverconfig.impl.values;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Hosts}
+ * {@link ForcedHttpsValue} - Ensured that value of property <code>"com.openexchange.forceHTTPS"</code> is contained in server configuration
+ * passed to App Suite UI.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Hosts implements ComputedServerConfigValueService {
+public class ForcedHttpsValue implements ComputedServerConfigValueService {
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ForcedHttpsValue}.
+     */
+    public ForcedHttpsValue(final ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
-    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        if (!serverConfig.has("hosts")) {
-            serverConfig.put("hosts", new JSONArray(1).put(request.getHostname()));
+    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws JSONException {
+        if (!serverConfig.has("forceHTTPS")) {
+            final ConfigurationService service = services.getService(ConfigurationService.class);
+            final boolean forceHttps = service.getBoolProperty("com.openexchange.forceHTTPS", false);
+            serverConfig.put("forceHTTPS", forceHttps);
         }
     }
 

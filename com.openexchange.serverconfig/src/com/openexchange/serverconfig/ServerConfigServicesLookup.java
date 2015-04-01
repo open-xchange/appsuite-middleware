@@ -47,20 +47,30 @@
  *
  */
 
-package com.openexchange.apps.manifests;
+package com.openexchange.serverconfig;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
+import java.util.List;
 
 /**
- * {@link ComputedServerConfigValueService}
+ * {@link ServerConfigServicesLookup} - Contains services that can be used when building the server config.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ComputedServerConfigValueService {
-	public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException;
+public interface ServerConfigServicesLookup {
+
+    /**
+     * Get services that contribute computed values to the server config
+     * 
+     * @return A {@link List} of services.
+     */
+    public List<ComputedServerConfigValueService> getComputed();
+
+    /**
+     * Get matchers that can be used to check if parts of a given <code>config-as</code> should be applied to the configuration you are
+     * currently building.
+     * 
+     * @return A {@link List} of services. 
+     */
+    public List<ServerConfigMatcherService> getMatchers();
+
 }

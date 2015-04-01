@@ -47,42 +47,40 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.serverconfig.impl.values;
 
+import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ForcedHttpsValue} - Ensured that value of property <code>"com.openexchange.forceHTTPS"</code> is contained in server configuration
- * passed to App Suite UI.
+ * {@link Capabilities}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class ForcedHttpsValue implements ComputedServerConfigValueService {
+public class Capabilities implements ComputedServerConfigValueService {
 
     private final ServiceLookup services;
 
-    /**
-     * Initializes a new {@link ForcedHttpsValue}.
-     */
-    public ForcedHttpsValue(final ServiceLookup services) {
+    public Capabilities(ServiceLookup services) {
         super();
         this.services = services;
     }
 
+
     @Override
-    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
-        if (!serverConfig.has("forceHTTPS")) {
-            final ConfigurationService service = services.getService(ConfigurationService.class);
-            final boolean forceHttps = service.getBoolProperty("com.openexchange.forceHTTPS", false);
-            serverConfig.put("forceHTTPS", forceHttps);
-        }
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true).asSet();
+        serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
     }
 
 }

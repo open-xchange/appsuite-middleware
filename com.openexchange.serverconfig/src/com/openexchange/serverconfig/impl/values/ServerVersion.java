@@ -47,28 +47,33 @@
  *
  */
 
-package com.openexchange.apps.manifests;
+package com.openexchange.serverconfig.impl.values;
 
-import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.version.Version;
 
 /**
- * {@link ServerConfigMatcherService}
+ * {@link ServerVersion}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface ServerConfigMatcherService {
+public class ServerVersion implements ComputedServerConfigValueService {
 
-    /**
-     * Checks if given argument look applicable for this matcher service.
-     *
-     * @param config The configuration
-     * @param request The associated AJAX request
-     * @param session The user session
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     * @throws OXException If check fails
-     */
-    boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) throws OXException;
+	@Override
+	public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws JSONException {
+
+		if (!serverConfig.has("serverVersion")) {
+			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
+		}
+		
+		if (!serverConfig.has("buildDate")) {
+		    serverConfig.put("buildDate", Version.getInstance().getBuildDate());
+		}
+
+	}
+
 }

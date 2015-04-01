@@ -47,36 +47,21 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.serverconfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.exception.OXException;
-import com.openexchange.version.Version;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServerVersion}
+ * {@link ComputedServerConfigValueService} - Services implementing this interface are able to add computed values to the server config object that is being generated.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ServerVersion implements ComputedServerConfigValueService {
+public interface ComputedServerConfigValueService {
 
-	@Override
-	public void addValue(JSONObject serverConfig, AJAXRequestData request,
-			ServerSession session) throws OXException, JSONException {
-
-		if (!serverConfig.has("serverVersion")) {
-			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
-		}
-		
-		if (!serverConfig.has("buildDate")) {
-		    serverConfig.put("buildDate", Version.getInstance().getBuildDate());
-		}
-
-	}
-
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException;
 }

@@ -47,39 +47,30 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.serverconfig;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.json.AllAction;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.NearRegistryServiceTracker;
-import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link Manifests}
+ * {@link ServerConfigMatcherService} - Implementations of this interface can decide if a value from the file <code>as-config.yml</code> are
+ * applicable for the current request and should be added to the server config that is currently being generated.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class Manifests implements ComputedServerConfigValueService {
+public interface ServerConfigMatcherService {
 
-    private final JSONArray manifests;
-    private NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker;
-
-
-    public Manifests(JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
-        super();
-        this.manifests = manifests;
-        this.manifestContributorTracker = manifestContributorTracker;
-    }
-
-    @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
-        serverConfig.put("manifests", AllAction.getManifests(session, manifests, manifestContributorTracker));
-    }
-
+    /**
+     * Checks if given argument look applicable for this matcher service.
+     *
+     * @param config The configuration
+     * @param request The associated AJAX request
+     * @param session The user session
+     * @return <code>true</code> if applicable; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) throws OXException;
 }

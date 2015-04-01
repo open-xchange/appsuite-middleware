@@ -63,7 +63,6 @@ import com.openexchange.apps.manifests.json.osgi.ManifestJSONActivatorTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     AllActionTest.class,
-    ConfigActionTest.class,
     ManifestJSONActivatorTest.class
 })
 public class UnitTests {

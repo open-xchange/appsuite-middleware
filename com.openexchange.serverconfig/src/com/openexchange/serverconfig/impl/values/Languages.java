@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.serverconfig.impl.values;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -58,21 +58,23 @@ import java.util.Properties;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Languages}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class Languages implements ComputedServerConfigValueService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Languages.class);
+    private static final Logger LOG = LoggerFactory.getLogger(Languages.class);
 
     private final JSONArray allLanguages;
 
@@ -129,7 +131,7 @@ public class Languages implements ComputedServerConfigValueService {
     }
 
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws JSONException {
 
         Object languages = serverConfig.opt("languages");
         if (languages == null || languages.equals("all")) {

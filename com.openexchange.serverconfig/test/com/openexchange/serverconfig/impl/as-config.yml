@@ -1,0 +1,35 @@
+# Override certain settings
+default:
+    host: all
+    contact: ''
+    
+host*.mycloud.net:
+    hostRegex: host.*\.mycloud\.net
+    someRegexHostKey: someRegexHostValue
+
+# Override certain settings for certain hosts
+host1.mycloud.net:
+    host: host1.mycloud.net
+    pageTitle: 'Professional Webmail OX '
+    productName: 'Professional Webmail OX'
+    pageHeaderPrefix: ''
+    pageHeader: ''
+    signinTheme: 'host1.mycloud.net'
+    contact: 'E-Mail: cloudservice@host1-support.de'
+
+host2.mycloud.net:
+    host: host2.mycloud.net
+    pageTitle: 'OXaaS'
+    productName: 'OX as a Service'
+    pageHeaderPrefix: 'OX'
+    pageHeader: 'Cloud Service'
+    forgotPassword: false
+
+host3.mycloud.net:
+    host: host3.mycloud.net
+    productName: 'OX Cloud'
+    pageTitle: 'OX Cloud'
+    pageHeaderPrefix: 'OX Cloud'
+    pageHeader: ''
+    contact: 'Please contact your service provider'
+    signinTheme: 'host3.mycloud.net'
