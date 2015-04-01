@@ -61,7 +61,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import org.slf4j.Logger;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
@@ -81,7 +80,7 @@ import com.openexchange.push.impl.PushManagerRegistry;
  */
 public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>, MembershipListener {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PermanentListenerRescheduler.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermanentListenerRescheduler.class);
 
     private final PushManagerRegistry pushManagerRegistry;
     private final BundleContext context;
@@ -124,68 +123,70 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             return;
         }
 
-        try {
-            List<PushUser> allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
-            if (false == allPushUsers.isEmpty()) {
-                // Get local member
-                Member localMember = hzInstance.getCluster().getLocalMember();
+        synchronized (this) {
+            try {
+                List<PushUser> allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
+                if (false == allPushUsers.isEmpty()) {
+                    // Get local member
+                    Member localMember = hzInstance.getCluster().getLocalMember();
 
-                // Determine other cluster members
-                Set<Member> otherMembers = getOtherMembers(allMembers, localMember);
+                    // Determine other cluster members
+                    Set<Member> otherMembers = getOtherMembers(allMembers, localMember);
 
-                if (otherMembers.isEmpty()) {
-                    // No other cluster members - assign all available permanent listeners to this node
-                    pushManagerRegistry.applyInitialListeners(allPushUsers);
-                } else {
-                    // Otherwise equally distribute among suitable cluster nodes
+                    if (otherMembers.isEmpty()) {
+                        // No other cluster members - assign all available permanent listeners to this node
+                        pushManagerRegistry.applyInitialListeners(allPushUsers);
+                    } else {
+                        // Otherwise equally distribute among suitable cluster nodes
 
-                    // Identify those members having at least one "PushManagerExtendedService" instance
-                    List<Member> candidates = new LinkedList<Member>();
-                    candidates.add(localMember);
-                    {
-                        IExecutorService executor = hzInstance.getExecutorService("default");
-                        Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
-                        for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
-                            // Check Future's return value
-                            Future<Boolean> future = entry.getValue();
-                            if (future.get().booleanValue()) {
-                                candidates.add(entry.getKey());
+                        // Identify those members having at least one "PushManagerExtendedService" instance
+                        List<Member> candidates = new LinkedList<Member>();
+                        candidates.add(localMember);
+                        {
+                            IExecutorService executor = hzInstance.getExecutorService("default");
+                            Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
+                            for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
+                                // Check Future's return value
+                                Future<Boolean> future = entry.getValue();
+                                if (future.get().booleanValue()) {
+                                    candidates.add(entry.getKey());
+                                }
                             }
                         }
-                    }
 
-                    // First, sort by UUID
-                    Collections.sort(candidates, new Comparator<Member>() {
+                        // First, sort by UUID
+                        Collections.sort(candidates, new Comparator<Member>() {
 
-                        @Override
-                        public int compare(Member m1, Member m2) {
-                            return m1.getUuid().compareTo(m2.getUuid());
+                            @Override
+                            public int compare(Member m1, Member m2) {
+                                return m1.getUuid().compareTo(m2.getUuid());
+                            }
+                        });
+
+                        // Determine the position of this cluster node
+                        int pos = 0;
+                        while (!localMember.getUuid().equals(candidates.get(pos).getUuid())) {
+                            pos = pos + 1;
                         }
-                    });
 
-                    // Determine the position of this cluster node
-                    int pos = 0;
-                    while (!localMember.getUuid().equals(candidates.get(pos).getUuid())) {
-                        pos = pos + 1;
-                    }
-
-                    // Determine the permanent listeners for this node
-                    List<PushUser> ps = new LinkedList<PushUser>();
-                    int numMembers = candidates.size();
-                    int numPushUsers = allPushUsers.size();
-                    for (int i = 0; i < numPushUsers; i++) {
-                        if ((i % numMembers) == pos) {
-                            ps.add(allPushUsers.get(i));
+                        // Determine the permanent listeners for this node
+                        List<PushUser> ps = new LinkedList<PushUser>();
+                        int numMembers = candidates.size();
+                        int numPushUsers = allPushUsers.size();
+                        for (int i = 0; i < numPushUsers; i++) {
+                            if ((i % numMembers) == pos) {
+                                ps.add(allPushUsers.get(i));
+                            }
                         }
-                    }
 
-                    // Apply newly calculated initial permanent listeners
-                    pushManagerRegistry.applyInitialListeners(ps);
+                        // Apply newly calculated initial permanent listeners
+                        pushManagerRegistry.applyInitialListeners(ps);
+                    }
                 }
+            } catch (Exception e) {
+                LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
             }
-        } catch (Exception e) {
-            LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
-        }
+        } // End of synchronized block
     }
 
     private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
