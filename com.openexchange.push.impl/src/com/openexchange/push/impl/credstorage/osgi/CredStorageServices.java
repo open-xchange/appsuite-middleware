@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.impl.osgi;
+package com.openexchange.push.impl.credstorage.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
@@ -55,16 +55,16 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link CredStorageServices} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Services {
+public final class CredStorageServices {
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link CredStorageServices}.
      */
-    private Services() {
+    private CredStorageServices() {
         super();
     }
 
@@ -77,6 +77,15 @@ public final class Services {
      */
     public static void setServiceLookup(final ServiceLookup serviceLookup) {
         REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**

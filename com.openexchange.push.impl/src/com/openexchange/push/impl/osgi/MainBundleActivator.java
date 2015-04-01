@@ -49,63 +49,29 @@
 
 package com.openexchange.push.impl.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
+import com.openexchange.push.impl.credstorage.osgi.CredStorageActivator;
+
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link MainBundleActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public final class Services {
+public class MainBundleActivator extends CompositeBundleActivator {
 
     /**
-     * Initializes a new {@link Services}.
+     * Initializes a new {@link MainBundleActivator}.
      */
-    private Services() {
+    public MainBundleActivator() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
-    }
-
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws OXException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
-        S service = optService(clazz);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(clazz);
-        }
-        return service;
-    }
-
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            return null;
-        }
-        return serviceLookup.getOptionalService(clazz);
+    @Override
+    protected BundleActivator[] getActivators() {
+        return new BundleActivator[] { new PushImplActivator(), new CredStorageActivator() };
     }
 
 }

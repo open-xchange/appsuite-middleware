@@ -47,4 +47,4 @@ Import-Package: com.hazelcast.config,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.push.impl.osgi.PushImplActivator
+Bundle-Activator: com.openexchange.push.impl.osgi.MainBundleActivator
