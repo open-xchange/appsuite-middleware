@@ -50,6 +50,7 @@
 package com.openexchange.saml.state;
 
 
+
 /**
  * Default implementation of {@link AuthnRequestInfo}.
  *
@@ -62,6 +63,8 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
 
     private String domainName;
 
+    private String loginPath;
+
     @Override
     public String getRequestId() {
         return requestId;
@@ -72,14 +75,21 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         return domainName;
     }
 
+    @Override
+    public String getLoginPath() {
+        return loginPath;
+    }
 
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
 
-
     public void setDomainName(String relayState) {
         this.domainName = relayState;
+    }
+
+    public void setLoginPath(String loginPath) {
+        this.loginPath = loginPath;
     }
 
     @Override
@@ -88,6 +98,7 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         int result = 1;
         result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
         result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
+        result = prime * result + ((loginPath == null) ? 0 : loginPath.hashCode());
         return result;
     }
 
@@ -110,12 +121,17 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
                 return false;
         } else if (!requestId.equals(other.requestId))
             return false;
+        if (loginPath == null) {
+            if (other.loginPath != null)
+                return false;
+        } else if (!loginPath.equals(other.loginPath))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName + "]";
+        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName + ", loginPath=" + loginPath + "]";
     }
 
 }

@@ -49,6 +49,7 @@
 
 package com.openexchange.saml.state;
 
+
 /**
  * Contains the available information about an already sent authentication request.
  * This is for example used to assign responses to their according requests, i.e.
@@ -61,7 +62,7 @@ package com.openexchange.saml.state;
 public interface AuthnRequestInfo {
 
     /**
-     * Gets the unique ID of the AuthnRequest
+     * Gets the unique ID of the AuthnRequest.
      *
      * @return The ID
      */
@@ -69,10 +70,21 @@ public interface AuthnRequestInfo {
 
     /**
      * Gets the domain name via which the HTTP request initiating the AuthnRequest was
-     * received.
+     * received. This domain is later on used to redirect to the <code>redeemReservation</code>
+     * login action.
      *
      * @return The domain name
      */
     String getDomainName();
+
+    /**
+     * Gets the path that is later on passed as <code>uiWebPath</code> parameter to the
+     * <code>redeemReservation</code>. This action will redirect the client to this path
+     * and append the session ID and other user-specific parameters as fragment parameters.
+     *
+     * @return The path or <code>null</code> to omit the <code>uiWebPath</code> parameter
+     * and force the default. This will be the configured <code>com.openexchange.UIWebPath</code>.
+     */
+    String getLoginPath();
 
 }

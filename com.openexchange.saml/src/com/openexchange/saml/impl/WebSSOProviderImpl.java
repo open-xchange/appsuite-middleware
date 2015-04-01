@@ -111,6 +111,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -202,6 +203,8 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         DefaultAuthnRequestInfo requestInfo = new DefaultAuthnRequestInfo();
         requestInfo.setRequestId(authnRequest.getID());
         requestInfo.setDomainName(domainName);
+        requestInfo.setLoginPath(httpRequest.getParameter("loginPath"));
+
         String relayState = stateManagement.addAuthnRequestInfo(requestInfo, AUTHN_REQUEST_TIMEOUT, TimeUnit.MILLISECONDS);
         try {
             String authnRequestXML = openSAML.marshall(authnRequest);
@@ -211,7 +214,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                     return XMLHelper.prettyPrintXML(authnRequest.getDOM());
                 }
             });
-            return compileAuthnRequestRedirectURI(authnRequestXML, relayState, httpRequest, httpResponse);
+            return compileAuthnRequestRedirectURI(authnRequestXML, relayState);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
@@ -264,16 +267,20 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                 TimeUnit.SECONDS,
                 properties.isEmpty() ? null : properties);
 
-            URI redirectLocation = new URIBuilder()
+            URIBuilder redirectLocation = new URIBuilder()
                 .setScheme(getRedirectScheme(httpRequest))
                 .setHost(requestInfo.getDomainName())
                 .setPath(getRedirectPathPrefix() + "login")
                 .setParameter("action", "redeemReservation")
-                .setParameter("token", sessionToken)
-                .build();
+                .setParameter("token", sessionToken);
+
+            String loginPath = requestInfo.getLoginPath();
+            if (loginPath != null) {
+                redirectLocation.setParameter(LoginFields.UI_WEB_PATH_PARAM, loginPath);
+            }
 
             Tools.disableCaching(httpResponse);
-            httpResponse.sendRedirect(redirectLocation.toString());
+            httpResponse.sendRedirect(redirectLocation.build().toString());
         } catch (URISyntaxException e) {
             throw SAMLExceptionCode.INTERNAL_ERROR.create(e.getMessage());
         } catch (ValidationException e) {
@@ -299,7 +306,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
                     return XMLHelper.prettyPrintXML(logoutRequest.getDOM());
                 }
             });
-            return compileLogoutRequestRedirectURI(logoutRequestXML, relayState, httpRequest, httpResponse);
+            return compileLogoutRequestRedirectURI(logoutRequestXML, relayState);
         } catch (MarshallingException e) {
             throw SAMLExceptionCode.MARSHALLING_PROBLEM.create(e, e.getMessage());
         }
@@ -464,7 +471,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         }
     }
 
-    private String compileLogoutRequestRedirectURI(String logoutRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    private String compileLogoutRequestRedirectURI(String logoutRequestXML, String relayState) throws OXException {
         String encoded = deflateAndEncode(logoutRequestXML);
         try {
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderLogoutURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
@@ -713,7 +720,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         properties.put(SAMLSessionProperties.AUTHENTICATED, Boolean.TRUE.toString());
     }
 
-    private String compileAuthnRequestRedirectURI(String authnRequestXML, String relayState, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+    private String compileAuthnRequestRedirectURI(String authnRequestXML, String relayState) throws OXException {
         String encoded = deflateAndEncode(authnRequestXML);
         try {
             URIBuilder redirectLocationBuilder = new URIBuilder(config.getIdentityProviderAuthnURL()).setParameter("SAMLRequest", encoded).setParameter("RelayState", relayState);
