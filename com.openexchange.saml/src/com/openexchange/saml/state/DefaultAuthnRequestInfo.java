@@ -84,8 +84,8 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         this.requestId = requestId;
     }
 
-    public void setDomainName(String relayState) {
-        this.domainName = relayState;
+    public void setDomainName(String domainName) {
+        this.domainName = domainName;
     }
 
     public void setLoginPath(String loginPath) {
