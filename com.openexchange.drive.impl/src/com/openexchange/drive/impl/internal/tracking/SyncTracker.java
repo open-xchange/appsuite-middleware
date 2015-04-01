@@ -56,11 +56,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveVersion;
-import com.openexchange.drive.DirectoryVersion;
-import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.actions.AbstractAction;
 import com.openexchange.drive.impl.actions.ErrorDirectoryAction;
 import com.openexchange.drive.impl.actions.SyncDirectoriesAction;
@@ -307,12 +307,12 @@ public class SyncTracker {
      * @param path The path
      * @return A directory checksum to be used in error actions
      */
-    private static DirectoryVersion getDirectoryVersion(SyncSession session, final String path) {
+    private static DirectoryVersion getDirectoryVersion(SyncSession session, String path) {
         /*
          * try to use current server checksum if possible
          */
         try {
-            FileStorageFolder folder = session.getStorage().optFolder(path, false);
+            FileStorageFolder folder = session.getStorage().optFolder(path);
             if (null != folder) {
                 List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, Arrays.asList(new String[] { folder.getId() }));
                 if (null != checksums && 1 == checksums.size()) {

@@ -58,15 +58,13 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -90,7 +88,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session.getServerSession()), Services.getService(ModuleSupport.class));
+            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(json);
             int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
             String password = json.hasAndNotNull("password") ? json.getString("password") : null;
             /*

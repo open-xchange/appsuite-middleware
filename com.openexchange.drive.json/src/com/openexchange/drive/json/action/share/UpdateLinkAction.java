@@ -81,10 +81,9 @@ public class UpdateLinkAction extends AbstractDriveShareAction {
             String token = json.getString("token");
 
             Date expiry = null;
-            if (json.has("expiry_date")) {
-                String exp = json.getString("expiry_date");
+            if (json.hasAndNotNull("expiry_date")) {
                 try {
-                    expiry = exp == null ? null : new Date(ShareJSONParser.removeTimeZoneOffset(Long.valueOf(exp), getTimeZone(requestData, session.getServerSession())));
+                    expiry = new Date(ShareJSONParser.removeTimeZoneOffset(Long.parseLong(json.getString("expiry_date")), getTimeZone(requestData, session.getServerSession())));
                 } catch (NumberFormatException e) {
                     throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
                 }

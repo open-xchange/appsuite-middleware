@@ -54,24 +54,25 @@ import java.util.Collection;
 import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
-import com.openexchange.exception.OXException;
+import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ManifestActionFactory}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ManifestActionFactory implements AJAXActionServiceFactory {
 
     private final AJAXActionService all;
     private final ConfigAction config;
 
-    public ManifestActionFactory(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
+    public ManifestActionFactory(ServiceLookup services, JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
         super();
-        all = new AllAction(services, manifests, registry);
-        config = new ConfigAction(services, manifests, registry);
+        all = new AllAction(manifests, manifestContributorTracker);
+        config = new ConfigAction(services);
     }
 
     @Override
@@ -80,7 +81,7 @@ public class ManifestActionFactory implements AJAXActionServiceFactory {
     }
 
     @Override
-    public AJAXActionService createActionService(String action) throws OXException {
+    public AJAXActionService createActionService(String action) {
         if (action.equals("config")) {
             return config;
         }

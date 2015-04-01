@@ -49,22 +49,35 @@
 
 package com.openexchange.push;
 
+import com.openexchange.exception.OXException;
+
 
 /**
- * {@link PushManagerExtendedService} - Extends {@link PushManagerService} by {@link #hasListenerFor(int, int[])} method.
+ * {@link PushManagerExtendedService} - Extends {@link PushManagerService}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface PushManagerExtendedService extends PushManagerService {
 
     /**
-     * Checks cluster-wide if the user has already a registered IMAP PUSH listener
+     * Starts a permanent listener for specified push user.
+     * <p>
+     * The push manager is supposed to keep track of started listeners; e.g. only one listener per session or per user-context-pair exists.
      *
-     * @param contextId The context identifier
-     * @param userIds The user identifiers
-     * @return An array of booleans which indicates if the user has an activated push listener.
-     * The order of the booleans is arranged to the input of usersIds
+     * @param pushUser The associated push user
+     * @return A newly started permanent listener or <code>null</code> if a listener could not be started
+     * @throws OXException If permanent listener cannot be started due to an error
      */
-    boolean[] hasListenerFor(int contextId, int[] userIds);
+    PushListener startPermanentListener(PushUser pushUser) throws OXException;
+
+    /**
+     * Stops the permanent listener for specified session.
+     *
+     * @param pushUser The associated push user
+     * @param tryToReconnect <code>true</code> to signal that a reconnect attempt should be performed; otherwise <code>false</code>
+     * @return <code>true</code> if permanent listener has been successfully stopped; otherwise <code>false</code>
+     * @throws OXException If permanent listener cannot be stopped due to an error
+     */
+    boolean stopPermanentListener(PushUser pushUser, boolean tryToReconnect) throws OXException;
 
 }

@@ -3192,6 +3192,20 @@ msgstr ""
 msgid "Invalid OAuth account specified."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/notification/NotificationStrings.java:63
+msgid "New external application connected with your %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/notification/NotificationStrings.java:65
+msgid "Hello %1$s,"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/notification/NotificationStrings.java:67
+msgid ""
+"you have have connected the application %1$s with your %2$s. You can manage "
+"and check the access of external applications in your %3$s."
+msgstr ""
+
 #. Application "%1$s" wants to access to your data. It requires the following permissions:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:64
 msgid ""

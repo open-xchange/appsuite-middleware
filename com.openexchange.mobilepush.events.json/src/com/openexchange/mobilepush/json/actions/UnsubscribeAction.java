@@ -57,6 +57,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.MobilePushProviders;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.json.MobilePushRequest;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -68,6 +69,9 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class UnsubscribeAction extends AbstractMobilePushAction {
+
+    private static final String CLIENT_ID = com.openexchange.mobilepush.Constants.CLIENT_ID;
+
     /**
      * Initializes a new {@link UnsubscribeAction}.
      * @param services
@@ -103,9 +107,12 @@ public class UnsubscribeAction extends AbstractMobilePushAction {
         }
 
         MobilePushStorageService mnss = getService(MobilePushStorageService.class);
+        PushListenerService pls = getService(PushListenerService.class);
 
         Session session = req.getSession();
         mnss.deleteSubscription(session.getContextId(), token, serviceId, provider);
+
+        pls.unregisterPermanentListenerFor(session, CLIENT_ID);
 
         /*
          * return empty json object to indicate success

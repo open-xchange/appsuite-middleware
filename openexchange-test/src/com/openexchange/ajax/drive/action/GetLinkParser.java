@@ -74,7 +74,13 @@ public class GetLinkParser extends AbstractAJAXParser<GetLinkResponse> {
     @Override
     protected GetLinkResponse createResponse(Response response) throws JSONException {
         JSONObject json = (JSONObject) response.getData();
+        
         GetLinkResponse retval = new GetLinkResponse(response);
+        
+        if (json == null) {
+            return retval;
+        }
+        
         if (json.has("url")) {
             retval.setUrl(json.getString("url"));
         }

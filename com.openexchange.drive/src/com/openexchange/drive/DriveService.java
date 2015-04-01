@@ -199,7 +199,7 @@ public interface DriveService {
      * @return A map, with all recipients and their shares
      * @throws OXException
      */
-    Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<ShareTarget> targets) throws OXException;
+    Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException;
 
     /**
      * Updates a single share.
@@ -231,7 +231,7 @@ public interface DriveService {
      * @return A list of all shares
      * @throws OXException
      */
-    List<ShareInfo> getAllLinks(DriveSession session) throws OXException;
+    List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException;
 
 }
 

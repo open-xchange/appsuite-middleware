@@ -77,6 +77,24 @@
     <changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
         <tagDatabase tag="7.6.2:milestone" />
     </changeSet>
+    
+    <changeSet id="7.6.2:context2push_registration" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="context2push_registration" />
+            </not>
+        </preConditions>
+        <comment>Creates the 'context2push_registration' table</comment>
+        <sql>
+            CREATE TABLE context2push_registration (
+            cid INT4 UNSIGNED NOT NULL,
+            PRIMARY KEY (cid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="context2push_registration" />
+        </rollback>
+    </changeSet>
 
     <!-- ******************************************************* -->
     <!-- ************** Release 7.8.0 starts here ************** -->

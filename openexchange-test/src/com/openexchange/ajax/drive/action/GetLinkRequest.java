@@ -54,8 +54,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.drive.DriveShareTarget;
 
 /**
  * {@link GetLinkRequest}
@@ -66,15 +65,15 @@ import com.openexchange.share.ShareTarget;
 public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
 
     private boolean failOnError;
-    private List<ShareTarget> targets;
+    private List<DriveShareTarget> targets;
     private Integer bits;
     private String password;
 
-    public GetLinkRequest(Integer root, List<ShareTarget> targets) {
+    public GetLinkRequest(Integer root, List<DriveShareTarget> targets) {
         this(root, targets, null, null, true);
     }
 
-    public GetLinkRequest(Integer root, List<ShareTarget> targets, Integer bits, String password, boolean failOnError) {
+    public GetLinkRequest(Integer root, List<DriveShareTarget> targets, Integer bits, String password, boolean failOnError) {
         super(root);
         this.targets = targets;
         this.bits = bits;
@@ -105,7 +104,7 @@ public class GetLinkRequest extends AbstractDriveRequest<GetLinkResponse> {
         JSONObject retval = new JSONObject();
         retval.putOpt("bits", bits.intValue());
         retval.putOpt("password", password);
-        retval.put("targets", ShareWriter.writeTargets(targets));
+        DriveShareWriter.writeDriveTargets(targets, retval);
         return retval;
     }
 

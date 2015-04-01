@@ -80,6 +80,7 @@ import com.openexchange.oauth.provider.internal.client.RdbOAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.DbGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
+import com.openexchange.oauth.provider.notification.OAuthMailNotificationService;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.servlets.ClientIconEndpoint;

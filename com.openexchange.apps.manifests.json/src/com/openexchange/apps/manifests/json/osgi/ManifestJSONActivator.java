@@ -52,29 +52,27 @@ package com.openexchange.apps.manifests.json.osgi;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.util.Collections;
-import java.util.List;
 import org.json.JSONArray;
 import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
 import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.ServerConfigMatcherService;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
+import com.openexchange.apps.manifests.json.values.Manifests;
 import com.openexchange.apps.manifests.json.values.UIVersion;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.serverconfig.ServerConfigService;
 
 /**
  * {@link ManifestJSONActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ManifestJSONActivator extends AJAXModuleActivator {
 
@@ -86,13 +84,21 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
     public ManifestJSONActivator() {
         super();
     }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ConfigurationService.class, CapabilityService.class, SimpleConverter.class, ConfigViewFactory.class};
+        return new Class<?>[]{ConfigurationService.class, ServerConfigService.class};
     }
 
     @Override
@@ -106,50 +112,28 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
      */
     @Override
     protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-
-        UIVersion.UIVERSION.set(context.getBundle().getVersion().toString());
-
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
         rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
 
-        final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(
-            context,
-            ServerConfigMatcherService.class);
-        rememberTracker(matcherTracker);
+        //Read manifests from files
+        JSONArray readManifests = readManifests();
 
-        final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(
-            context,
-            ComputedServerConfigValueService.class);
-        rememberTracker(computedValueTracker);
-
+        //And track ManifestContributors
         final NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker = new NearRegistryServiceTracker<ManifestContributor>(
             context,
             ManifestContributor.class
         );
         rememberTracker(manifestContributorTracker);
-
-        registerModule(new ManifestActionFactory(this, readManifests(), new ServerConfigServicesLookup() {
-
-            @Override
-            public List<ServerConfigMatcherService> getMatchers() {
-                return Collections.unmodifiableList(matcherTracker.getServiceList());
-            }
-
-            @Override
-            public List<ComputedServerConfigValueService> getComputed() {
-                return Collections.unmodifiableList(computedValueTracker.getServiceList());
-            }
-
-            @Override
-            public List<ManifestContributor> getContributors() {
-                return Collections.unmodifiableList(manifestContributorTracker.getServiceList());
-            }
-        }), "apps/manifests");
-
         openTrackers();
-    }
 
+        //Enhance computed server config by adding UIVersion and Manifests to it
+        UIVersion.UIVERSION.set(context.getBundle().getVersion().toString());
+        registerService(ComputedServerConfigValueService.class, new UIVersion());
+        registerService(ComputedServerConfigValueService.class, new Manifests(readManifests, manifestContributorTracker));
+
+        registerModule(new ManifestActionFactory(this, readManifests, manifestContributorTracker), "apps/manifests");
+    }
+    
     private JSONArray readManifests() {
         String[] paths;
         {

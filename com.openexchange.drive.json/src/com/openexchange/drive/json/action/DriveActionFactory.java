@@ -54,7 +54,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.drive.json.action.share.AllAction;
+import com.openexchange.drive.json.action.share.SharesAction;
 import com.openexchange.drive.json.action.share.DeleteLinkAction;
 import com.openexchange.drive.json.action.share.GetLinkAction;
 import com.openexchange.drive.json.action.share.InviteAction;
@@ -94,7 +94,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("invite", new InviteAction());
         actions.put("updateLink", new UpdateLinkAction());
         actions.put("deleteLink", new DeleteLinkAction());
-        actions.put("all", new AllAction());
+        actions.put("shares", new SharesAction());
     }
 
     @Override

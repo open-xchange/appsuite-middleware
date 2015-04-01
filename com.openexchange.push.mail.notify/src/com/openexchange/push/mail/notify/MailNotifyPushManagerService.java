@@ -51,13 +51,17 @@ package com.openexchange.push.mail.notify;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
+import com.openexchange.push.PushListenerService;
+import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
+import com.openexchange.push.PushUser;
+import com.openexchange.push.mail.notify.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
  * {@link MailNotifyPushManagerService} - The {@link PushManagerService} for primary mail account.
  */
-public final class MailNotifyPushManagerService implements PushManagerService {
+public final class MailNotifyPushManagerService implements PushManagerExtendedService {
 
     private final String name;
     private final MailNotifyPushListenerRegistry registry;
@@ -65,26 +69,66 @@ public final class MailNotifyPushManagerService implements PushManagerService {
     /**
      * Initializes a new {@link MailNotifyPushManagerService}.
      */
-    public MailNotifyPushManagerService(final MailNotifyPushListenerRegistry registry) {
+    public MailNotifyPushManagerService(MailNotifyPushListenerRegistry registry) {
         super();
         name = "Mail Push Manager";
         this.registry = registry;
     }
 
+    private Session generateSessionFor(PushUser pushUser) throws OXException {
+        PushListenerService pushListenerService = Services.getService(PushListenerService.class, true);
+        return pushListenerService.generateSessionFor(pushUser);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     @Override
-    public PushListener startListener(final Session session) throws OXException {
-        final MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session);
-        if (registry.addPushListener(session.getContextId(), session.getUserId(), pushListener)) {
-            pushListener.open();
+    public PushListener startListener(Session session) throws OXException {
+        if (null == session) {
+            return null;
+        }
+
+        MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(session, false);
+        if (registry.addPushListener(session.getUserId(), session.getContextId(), pushListener)) {
             return pushListener;
         }
         return null;
     }
 
     @Override
-    public boolean stopListener(final Session session) throws OXException {
-        return registry.removePushListener(session.getContextId(), session.getUserId());
+    public boolean stopListener(Session session) throws OXException {
+        if (null == session) {
+            return false;
+        }
+
+        return registry.stopPushListener(true, false, session.getUserId(), session.getContextId());
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public PushListener startPermanentListener(PushUser pushUser) throws OXException {
+        if (null == pushUser) {
+            return null;
+        }
+
+        MailNotifyPushListener pushListener = MailNotifyPushListener.newInstance(generateSessionFor(pushUser), true);
+        if (registry.addPushListener(pushUser.getUserId(), pushUser.getContextId(), pushListener)) {
+            return pushListener;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean stopPermanentListener(PushUser pushUser, boolean tryToReconnect) throws OXException {
+        if (null == pushUser) {
+            return false;
+        }
+
+        return registry.stopPushListener(tryToReconnect, true, pushUser.getUserId(), pushUser.getContextId());
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public String toString() {

@@ -53,11 +53,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ComputedServerConfigValueService;
+import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.apps.manifests.json.AllAction;
-import com.openexchange.apps.manifests.json.osgi.ServerConfigServicesLookup;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -68,23 +68,18 @@ import com.openexchange.tools.session.ServerSession;
 public class Manifests implements ComputedServerConfigValueService {
 
     private final JSONArray manifests;
-    private final ServiceLookup services;
-    private ServerConfigServicesLookup registry;
+    private NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker;
 
 
-    public Manifests(ServiceLookup services, JSONArray manifests, ServerConfigServicesLookup registry) {
+    public Manifests(JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
         super();
-        this.services = services;
         this.manifests = manifests;
-        this.registry = registry;
+        this.manifestContributorTracker = manifestContributorTracker;
     }
 
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request,
-        ServerSession session) throws OXException, JSONException {
-
-        serverConfig.put("manifests", AllAction.getManifests(session, manifests, services, registry));
-
+    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+        serverConfig.put("manifests", AllAction.getManifests(session, manifests, manifestContributorTracker));
     }
 
 }

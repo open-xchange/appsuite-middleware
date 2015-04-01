@@ -253,8 +253,8 @@ public final class SimHttpServletResponse implements HttpServletResponse {
 
     @Override
     public void sendRedirect(String location) throws IOException {
-        // TODO Auto-generated method stub
-
+        setStatus(HttpServletResponse.SC_FOUND);
+        setHeader("location", location);
     }
 
     @Override
