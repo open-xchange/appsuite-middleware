@@ -604,26 +604,24 @@ public class DriveServiceImpl implements DriveService {
         List<ShareInfo> allShares = shareService.getAllShares(session.getServerSession(), "infostore");
         List<DriveShareInfo> retval = new ArrayList<DriveShareInfo>();
 
-        Map<String, String> fileId2FileName = new HashMap<String, String>();
+        Map<String, File> fileId2File = new HashMap<String, File>();
         Map<String, String> folderId2Directory = new HashMap<String, String>();
         for (ShareInfo shareInfo : allShares) {
             ShareTarget shareTarget = shareInfo.getShare().getTarget();
             DriveShareTarget driveShareTarget = new DriveShareTarget();
-            StoredChecksum checksum = null;
 
             // Set drive fileName
+            String fileId = null;
             if (shareTarget.getItem() != null && !Strings.isEmpty(shareTarget.getItem())) {
-                String fileId = new FileID(shareTarget.getItem()).getFileId();
-                if (!fileId2FileName.containsKey(fileId)) {
+                fileId = new FileID(shareTarget.getItem()).getFileId();
+                if (!fileId2File.containsKey(fileId)) {
                     try {
                         File file = storage.getFile(fileId);
-                        fileId2FileName.put(fileId, file.getFileName());
-                        checksum = ChecksumProvider.getChecksum(syncSession, file);
+                        fileId2File.put(fileId, file);
                     } catch (OXException e) {
                         LOG.warn("A Share (" + shareTarget + ") is pointing to a file which seems not to exist.");
                     }
                 }
-                driveShareTarget.setName(fileId2FileName.get(fileId));
             }
 
             // Set drive path
@@ -631,29 +629,39 @@ public class DriveServiceImpl implements DriveService {
             if (!folderId2Directory.containsKey(folderId)) {
                 try {
                     folderId2Directory.put(folderId, storage.getPath(folderId));
-                    if (checksum == null) {
-                        checksum = ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderId)).get(0);
-                    }
                 } catch (OXException e) {
                     LOG.warn("A Share (" + shareTarget + ") is pointing to a folder which seems not to exist.");
                 }
             }
 
             String folderName = folderId2Directory.get(folderId);
+            File file = fileId2File.get(fileId);
             if (folderName != null) {
                 driveShareTarget.setPath(folderName);
-                driveShareTarget.setChecksum(checksum.getChecksum());
+                driveShareTarget.setChecksum(calculateChecksum(folderId, file, syncSession).getChecksum());
 
                 DriveShareInfo driveShareInfo = new DriveShareInfo(shareInfo);
                 DriveShare driveShare = new DriveShare(shareInfo.getShare());
                 driveShare.setTarget(driveShareTarget);
                 driveShareInfo.setDriveShare(driveShare);
+                
+                if (file != null) {
+                    driveShareTarget.setName(file.getFileName());
+                }
 
                 retval.add(driveShareInfo);
             }
         }
 
         return retval;
+    }
+    
+    private StoredChecksum calculateChecksum(String folderId, File file, SyncSession syncSession) throws OXException {
+        if (file != null) {
+            return ChecksumProvider.getChecksum(syncSession, file);
+        }
+        
+        return ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderId)).get(0);
     }
 
 }
