@@ -208,10 +208,10 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         StopResult stopResult = stopListener(tryToReconnect, true, pushUser.getUserId(), pushUser.getContextId());
         switch (stopResult) {
         case RECONNECTED:
-            LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            LOGGER.info("Reconnected permanent IMAP-IDLE listener for user {} in context {} using another session", I(pushUser.getUserId()), I(pushUser.getContextId()));
             return true;
         case STOPPED:
-            LOGGER.info("Stopped IMAP-IDLE listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
+            LOGGER.info("Stopped permanent IMAP-IDLE listener for user {} in context {}", I(pushUser.getUserId()), I(pushUser.getContextId()));
             return true;
         default:
             break;
