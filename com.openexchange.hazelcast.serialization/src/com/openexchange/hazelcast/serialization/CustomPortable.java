@@ -114,6 +114,11 @@ public interface CustomPortable extends Portable {
      * <li><code>  20</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
      * <li><code>  21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
      * <li><code>  22</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMap</li>
+     *
+     *
+     * <li><code>  101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
+     * <li><code>  102</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser</li>
+     * <li><code>  103</code>: com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallable</li>
      * </ul>
      *
      * @return The class ID
