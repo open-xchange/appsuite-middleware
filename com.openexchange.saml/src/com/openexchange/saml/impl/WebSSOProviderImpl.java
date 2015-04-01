@@ -112,8 +112,6 @@ import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -664,11 +662,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
     }
 
     private String getRedirectScheme(HttpServletRequest httpRequest) {
-        ConfigurationService configService = services.getService(ConfigurationService.class);
-        boolean secure = Tools.considerSecure(
-            httpRequest,
-            Boolean.parseBoolean(configService.getProperty(Property.FORCE_HTTPS.getPropertyName(), Property.FORCE_HTTPS.getDefaultValue())));
-
+        boolean secure = Tools.considerSecure(httpRequest);
         return secure ? "https" : "http";
     }
 
