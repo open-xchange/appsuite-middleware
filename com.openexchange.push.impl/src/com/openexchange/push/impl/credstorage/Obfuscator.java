@@ -54,7 +54,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
-import com.openexchange.push.impl.osgi.Services;
+import com.openexchange.push.impl.credstorage.osgi.CredStorageServices;
 
 /**
  * Obfuscator class.
@@ -97,7 +97,7 @@ public class Obfuscator {
             return string;
         }
         try {
-            CryptoService cryptoService = Services.requireService(CryptoService.class);
+            CryptoService cryptoService = CredStorageServices.requireService(CryptoService.class);
             return cryptoService.encrypt(string, obfuscationKey);
         } catch (OXException e) {
             LOG.error("Could not obfuscate string", e);
@@ -125,7 +125,7 @@ public class Obfuscator {
             return string;
         }
         try {
-            CryptoService cryptoService = Services.requireService(CryptoService.class);
+            CryptoService cryptoService = CredStorageServices.requireService(CryptoService.class);
             return cryptoService.decrypt(string, obfuscationKey);
         } catch (OXException e) {
             LOG.error("Could not unobfuscate string", e);

@@ -61,7 +61,7 @@ import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.credstorage.Obfuscator;
-import com.openexchange.push.impl.osgi.Services;
+import com.openexchange.push.impl.credstorage.osgi.CredStorageServices;
 
 /**
  * {@link RdbCredentialStorage}
@@ -83,7 +83,7 @@ public class RdbCredentialStorage implements CredentialStorage {
 
     @Override
     public Credentials getCredentials(int userId, int contextId) throws OXException {
-        DatabaseService service = Services.requireService(DatabaseService.class);
+        DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getReadOnly(contextId);
         try {
             return obfuscator.unobfuscateCredentials(getCredentials(userId, contextId, connection));
@@ -121,7 +121,7 @@ public class RdbCredentialStorage implements CredentialStorage {
     @Override
     public void storeCredentials(Credentials credentials) throws OXException {
         int contextId = credentials.getContextId();
-        DatabaseService service = Services.requireService(DatabaseService.class);
+        DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getWritable(contextId);
         try {
             storeCredentials(obfuscator.obfuscateCredentials(credentials), connection);
@@ -176,7 +176,7 @@ public class RdbCredentialStorage implements CredentialStorage {
 
     @Override
     public Credentials deleteCredentials(int userId, int contextId) throws OXException {
-        DatabaseService service = Services.requireService(DatabaseService.class);
+        DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getWritable(contextId);
         try {
             return obfuscator.unobfuscateCredentials(deleteCredentials(userId, contextId, connection));

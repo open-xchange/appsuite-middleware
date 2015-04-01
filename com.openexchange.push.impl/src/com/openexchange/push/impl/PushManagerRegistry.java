@@ -255,6 +255,7 @@ public final class PushManagerRegistry implements PushListenerService {
             if (null != credentialStorage) {
                 try {
                     credentialStorage.storeCredentials(new DefaultCredentials(session));
+                    LOG.info("Successfully stored credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
                 } catch (Exception e) {
                     LOG.error("Failed to store credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                 }
@@ -299,6 +300,7 @@ public final class PushManagerRegistry implements PushListenerService {
             if (null != credentialStorage) {
                 try {
                     credentialStorage.deleteCredentials(userId, contextId);
+                    LOG.info("Successfully deleted credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId));
                 } catch (Exception e) {
                     LOG.error("Failed to delete credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                 }

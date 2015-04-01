@@ -52,46 +52,30 @@ package com.openexchange.push.impl.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
-import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
-import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.event.EventFactoryService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
-import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
-import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallableFactory;
-import com.openexchange.push.impl.credstorage.OSGiCredentialStorageProvider;
-import com.openexchange.push.impl.credstorage.Obfuscator;
-import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
-import com.openexchange.push.impl.credstorage.inmemory.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUserFactory;
-import com.openexchange.push.impl.credstorage.rdb.RdbCredentialStorage;
-import com.openexchange.push.impl.credstorage.rdb.groupware.CreateCredStorageTable;
-import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageCreateTableTask;
-import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageDeleteListener;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -103,7 +87,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class PushImplActivator extends HousekeepingActivator implements HazelcastInstanceNotActiveExceptionHandler {
+public final class PushImplActivator extends HousekeepingActivator  {
 
     /**
      * Initializes a new {@link PushImplActivator}.
@@ -113,26 +97,8 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
     }
 
     @Override
-    public void propagateNotActive(HazelcastInstanceNotActiveException notActiveException) {
-        BundleContext context = this.context;
-        if (null != context) {
-            context.registerService(HazelcastInstanceNotActiveException.class, notActiveException, null);
-        }
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
-    }
-
-    @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, ConfigurationService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class };
     }
 
     @Override
@@ -150,75 +116,14 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             track(ConfigurationService.class, new ConfigurationServiceTracker(context));
 
             // Thread pool service tracker
+            trackService(ConfigurationService.class);
             trackService(EventFactoryService.class);
             trackService(ThreadPoolService.class);
             trackService(EventAdmin.class);
             trackService(DatabaseService.class);
             trackService(CryptoService.class);
 
-            final HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
-
-            ConfigurationService configService = getService(ConfigurationService.class);
-            boolean credStoreEnabled = configService.getBoolProperty("com.openexchange.push.credstorage.enabled", false);
-
-            final HazelcastCredentialStorage hzCredStorage;
-            final RdbCredentialStorage rdbCredStorage;
-            if (credStoreEnabled) {
-                String key = configService.getProperty("com.openexchange.push.credstorage.passcrypt");
-                if (Strings.isEmpty(key)) {
-                    throw new BundleException("Property \"com.openexchange.push.credstorage.enabled\" set to \"true\", but missing value for \"com.openexchange.push.credstorage.passcrypt\" property.");
-                }
-
-                Obfuscator obfuscator = new Obfuscator(key.trim());
-
-                hzCredStorage = new HazelcastCredentialStorage(obfuscator, this, this);
-                rdbCredStorage = configService.getBoolProperty("com.openexchange.push.credstorage.rdb", false) ? new RdbCredentialStorage(obfuscator) : null;
-                // Check Hazelcast stuff
-                if (hazelcastConfig.isEnabled()) {
-                    // Track HazelcastInstance service
-                    ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> customizer = new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
-
-                        @Override
-                        public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
-                            HazelcastInstance hzInstance = context.getService(reference);
-                            try {
-                                String mapName = hazelcastConfig.discoverMapName("credentials");
-                                if (null == mapName) {
-                                    context.ungetService(reference);
-                                    return null;
-                                }
-                                addService(HazelcastInstance.class, hzInstance);
-                                hzCredStorage.setHzMapName(mapName);
-                                hzCredStorage.changeBackingMapToHz();
-                                return hzInstance;
-                            } catch (OXException e) {
-                                log.warn("Couldn't initialize remote credentials map.", e);
-                            } catch (RuntimeException e) {
-                                log.warn("Couldn't initialize remote credentials map.", e);
-                            }
-                            context.ungetService(reference);
-                            return null;
-                        }
-
-                        @Override
-                        public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                            // Ignore
-                        }
-
-                        @Override
-                        public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance service) {
-                            removeService(HazelcastInstance.class);
-                            hzCredStorage.changeBackingMapToLocalMap();
-                            context.ungetService(reference);
-                        }
-                    };
-                    track(HazelcastInstance.class, customizer);
-                }
-            } else {
-                hzCredStorage = null;
-                rdbCredStorage = null;
-            }
-
+            HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
             if (hazelcastConfig.isEnabled()) {
                 // Track HazelcastInstance service
                 PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(PushManagerRegistry.getInstance(), context);
@@ -227,9 +132,6 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
                 PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
                 pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
             }
-
-            OSGiCredentialStorageProvider storageProvider = new OSGiCredentialStorageProvider(context);
-            rememberTracker(storageProvider);
 
             openTrackers();
 
@@ -240,23 +142,6 @@ public final class PushImplActivator extends HousekeepingActivator implements Ha
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PushCreateTableTask()));
-            registerService(CreateTableService.class, new CreateCredStorageTable(), null);
-            registerService(DeleteListener.class, new CredStorageDeleteListener(), null);
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CredStorageCreateTableTask()));
-
-            registerService(CredentialStorageProvider.class, storageProvider);
-            addService(CredentialStorageProvider.class, storageProvider);
-            if (null != hzCredStorage) {
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-                registerService(CredentialStorage.class, hzCredStorage, serviceProperties);
-            }
-            if (null != rdbCredStorage) {
-                // Higher ranked
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-                registerService(CredentialStorage.class, rdbCredStorage, serviceProperties);
-            }
 
             registerService(PushListenerService.class, PushManagerRegistry.getInstance());
 
