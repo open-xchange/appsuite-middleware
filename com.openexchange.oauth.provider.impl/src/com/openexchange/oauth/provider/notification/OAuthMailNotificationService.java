@@ -66,9 +66,11 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeMessage.RecipientType;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
@@ -121,12 +123,12 @@ public class OAuthMailNotificationService {
         transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
     }
 
-    public void sendNotification(int userId, int contextId, String clientId) throws OXException {
+    public void sendNotification(int userId, int contextId, String clientId, HttpServletRequest request) throws OXException {
         try {
             UserService userService = Services.requireService(UserService.class);
             User user = userService.getUser(userId, contextId);
             InternetAddress address = new InternetAddress(user.getMail());
-            ComposedMailMessage mail = buildNewExternalApplicationMail(user, contextId, clientId, address);
+            ComposedMailMessage mail = buildNewExternalApplicationMail(user, contextId, clientId, address, request);
             MailTransport transport = transportProvider.createNewNoReplyTransport(contextId);
             transport.sendMailMessage(mail, ComposeType.NEW, new Address[] { address });
         } catch (AddressException e) {
@@ -140,7 +142,7 @@ public class OAuthMailNotificationService {
         }
     }
 
-    private ComposedMailMessage buildNewExternalApplicationMail(User user, int contextId, String clientId, InternetAddress address) throws OXException, UnsupportedEncodingException, MessagingException, JSONException {
+    private ComposedMailMessage buildNewExternalApplicationMail(User user, int contextId, String clientId, InternetAddress address, HttpServletRequest request) throws OXException, UnsupportedEncodingException, MessagingException, JSONException {
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
         JSONObject json = serverConfigService.getServerConfig(new AJAXRequestData(), ServerSessionAdapter.valueOf(user.getId(), contextId));
@@ -150,12 +152,13 @@ public class OAuthMailNotificationService {
         String intro = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_INTRO);
         intro = String.format(intro, user.getDisplayName());
         String message = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_MESSAGE);
-        message = String.format(message, client.getName(), json.getString("productName"), "settingsblabla"); //TODO
+        String settingsUrl = getSettingsUrl(request);
+        message = String.format(message, client.getName(), json.getString("productName"), settingsUrl);
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(INTRO_FIELD, intro);
         vars.put(MESSAGE_FIELD, message);
         MimeMessage mail = prepareEnvelope(title, address);
-        mail.addHeader(MessageHeaders.HDR_RETURN_PATH, "<>");
+        mail.setHeader(MessageHeaders.HDR_RETURN_PATH, "<>");
         mail.setContent(prepareContent("oauth-new-external-application-mail.txt.tmpl", vars, "oauth-new-external-application-mail.html.tmpl", vars));
         mail.saveChanges();
         return new ContentAwareComposedMailMessage(mail, contextId);
@@ -212,6 +215,19 @@ public class OAuthMailNotificationService {
         multipart.addBodyPart(textPart);
         multipart.addBodyPart(htmlPart);
         return multipart;
+    }
+
+    private final String url = "[[protocol]]://[[host]][[uiWebPath]]/#&[[app]]";
+
+    private String getSettingsUrl(HttpServletRequest request) throws OXException {
+        String protocol = request.isSecure() ? "https" : "http";
+        String host = request.getLocalName();
+        String uiWebPath = Services.requireService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite");
+        String settingsUrl = url.replace("[[protocol]]", protocol)
+            .replace("[[host]]", host)
+            .replace("[[uiWebPath]]", uiWebPath)
+            .replace("[[app]]", "app=io.ox/settings");
+        return settingsUrl;
     }
 
 }

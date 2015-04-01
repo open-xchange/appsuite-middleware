@@ -273,7 +273,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 String code = oAuthProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, user.getId(), ctx.getContextId());
                 try {
                     OAuthMailNotificationService notificationService = new OAuthMailNotificationService(oAuthProvider);
-                    notificationService.sendNotification(user.getId(), ctx.getContextId(), clientId);
+                    notificationService.sendNotification(user.getId(), ctx.getContextId(), clientId, request);
                 } catch (OXException e) {
                     LOG.error("Send oauth notification mail for {} to {} failed.", client.getName(), user.getMail(), e);
                 }
