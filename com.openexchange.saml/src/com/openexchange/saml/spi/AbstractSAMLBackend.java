@@ -75,11 +75,6 @@ import com.openexchange.saml.validation.ValidationStrategy;
  */
 public abstract class AbstractSAMLBackend implements SAMLBackend {
 
-
-    protected AbstractSAMLBackend() throws Exception {
-        super();
-    }
-
     /**
      * Initializes the credential provider and returns it.
      *
