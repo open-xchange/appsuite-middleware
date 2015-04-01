@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,23 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.oauth.provider.notification;
 
-import java.io.InputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Document;
-import com.openexchange.groupware.infostore.DocumentAndMetadata;
-import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link InfostoreDocument}
+ * {@link NotificationStrings}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.0
  */
-public class InfostoreDocument extends Document {
+public class NotificationStrings implements LocalizableStrings {
 
-    private final DocumentAndMetadata documentAndMetadata;
+    public static final String NEW_EXTERNAL_APPLICATION_TITLE = "New external application connected with your %1$s";
 
-    /**
-     * Initializes a new {@link InfostoreDocument}.
-     *
-     * @param documentAndMetadata The underlying document and metadata
-     */
-    public InfostoreDocument(DocumentAndMetadata documentAndMetadata) throws OXException {
-        super();
-        this.documentAndMetadata = documentAndMetadata;
-        setEtag(documentAndMetadata.getETag());
-        DocumentMetadata metadata = documentAndMetadata.getMetadata();
-        if (null != metadata) {
-            setFile(new InfostoreFile(metadata));
-            setMimeType(metadata.getFileMIMEType());
-            setName(metadata.getFileName());
-            setSize(metadata.getFileSize());
-            if (null != metadata.getLastModified()) {
-                setLastModified(metadata.getLastModified().getTime());
-            }
-        }
-    }
+    public static final String NEW_EXTERNAL_APPLICATION_INTRO = "Hello %1$s,";
 
-    @Override
-    public InputStream getData() throws OXException {
-        return documentAndMetadata.getData();
-    }
+    public static final String NEW_EXTERNAL_APPLICATION_MESSAGE = "you have have connected the application %1$s with your %2$s. You can manage and check the access of external applications in your %3$s.";
 
 }

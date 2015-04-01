@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,46 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.drive;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
 
 /**
- * {@link Services} - The static service lookup.
+ * {@link DriveShareInfo}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public final class Services {
+public class DriveShareInfo {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
+    private DriveShare driveShare;
+
+    private ShareInfo delegate;
+
+    public DriveShareInfo(ShareInfo shareInfo) {
+        this.delegate = shareInfo;
     }
 
-    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Sets the service lookup.
-     *
-     * @param serviceLookup The service lookup or <code>null</code>
-     */
-    public static void setServiceLookup(final ServiceLookup serviceLookup) {
-        REF.set(serviceLookup);
+    public DriveShare getDriveShare() {
+        return driveShare;
     }
 
-    /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
+    public void setDriveShare(DriveShare driveShare) {
+        this.driveShare = driveShare;
     }
 
-    /**
-     * Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service
-     * @throws IllegalStateException If an error occurs while returning the demanded service
-     */
-    public static <S extends Object> S getService(final Class<? extends S> clazz) {
-        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
-        if (null == serviceLookup) {
-            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.file.storage.infostore\" not started?");
-        }
-        return serviceLookup.getService(clazz);
+    public String getToken() throws OXException {
+        return delegate.getToken();
     }
 
-    /**
-     * (Optionally) Gets the service of specified type
-     *
-     * @param clazz The service's class
-     * @return The service or <code>null</code> if absent
-     */
-    public static <S extends Object> S optService(final Class<? extends S> clazz) {
-        try {
-            return getService(clazz);
-        } catch (final IllegalStateException e) {
-            return null;
-        }
+    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
+        return delegate.getShareURL(protocol, fallbackHostname);
+    }
+
+    public GuestInfo getGuest() {
+        return delegate.getGuest();
     }
 
 }

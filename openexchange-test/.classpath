@@ -133,5 +133,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.database.migration"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.drive"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.drive.impl"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

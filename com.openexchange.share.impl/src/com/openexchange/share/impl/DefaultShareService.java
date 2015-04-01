@@ -261,17 +261,26 @@ public class DefaultShareService implements ShareService {
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
                 User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
                 List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
+                /*
+                 * prepare shares for each target, remember new guest shares for storing 
+                 */
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
-                    sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));
-                    sharesToStore.add(share);
+                    if (guestUser.isGuest()) {
+                        sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));    
+                        sharesToStore.add(share);
+                    } else {
+                        sharesForGuest.add(new InternalUserShareInfo(contextID, guestUser, share));
+                    }
                 }
                 sharesPerRecipient.put(recipient, sharesForGuest);
             }
             /*
              * store shares & trigger collection of e-mail addresses
              */
-            shareStorage.storeShares(contextID, sharesToStore, connectionHelper.getParameters());
+            if (0 < sharesToStore.size()) {
+                shareStorage.storeShares(contextID, sharesToStore, connectionHelper.getParameters());
+            }
             connectionHelper.commit();
             LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
             collectAddresses(session, recipients);
@@ -732,6 +741,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Gets a guest user for a new share. A new guest user is created if no matching one exists, the permission bits are applied as needed.
+     * In case the guest recipient denotes an already existing, internal user, this user is returned. 
      *
      * @param connection A (writable) connection to the database
      * @param context The context
@@ -739,44 +749,49 @@ public class DefaultShareService implements ShareService {
      * @param permissionBits The permission bits to apply to the guest user
      * @param recipient The recipient description
      * @return The guest user
-     * @throws OXException
      */
     private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
         UserService userService = services.getService(UserService.class);
-        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
              * re-use existing, non-anonymous guest user if possible
              */
             GuestRecipient guestRecipient = (GuestRecipient) recipient;
-            User existingGuestUser = null;
+            User existingUser = null;
             try {
-                existingGuestUser = userService.searchUser(guestRecipient.getEmailAddress(), context, false, true, true);
+                existingUser = userService.searchUser(guestRecipient.getEmailAddress(), context, true, true, false);
             } catch (OXException e) {
                 if (false == LdapExceptionCode.NO_USER_BY_MAIL.equals(e)) {
                     throw e;
                 }
             }
-            if (null != existingGuestUser) {
-                /*
-                 * combine permission bits with existing ones, reset any last modified marker if present
-                 */
-                UserPermissionBits userPermissionBits = ShareTool.setPermissionBits(services, connection, context, existingGuestUser.getId(), permissionBits, true);
-                GuestLastModifiedMarker.clearLastModified(services, context, existingGuestUser);
-                LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingGuestUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingGuestUser.getId());
-                /*
-                 * As the recipient already belongs to an existing user, its password must be set to null, to avoid wrong notification
-                 * messages
-                 */
-                guestRecipient.setPassword(null);
-
-                return existingGuestUser;
+            if (null != existingUser) {
+                if (existingUser.isGuest()) {
+                    /*
+                     * combine permission bits with existing ones, reset any last modified marker if present
+                     */
+                    UserPermissionBits userPermissionBits = ShareTool.setPermissionBits(services, connection, context, existingUser.getId(), permissionBits, true);
+                    GuestLastModifiedMarker.clearLastModified(services, context, existingUser);
+                    LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingUser.getId());
+                    /*
+                     * As the recipient already belongs to an existing user, its password must be set to null, to avoid wrong notification
+                     * messages
+                     */
+                    guestRecipient.setPassword(null);
+                } else {
+                    /*
+                     * guest recipient points to internal user
+                     */
+                    LOG.debug("Guest recipient {} points to internal user {} in context {}: {}", 
+                        guestRecipient.getEmailAddress(), existingUser.getLoginInfo(), context.getContextId(), existingUser.getId());
+                }
+                return existingUser;
             }
         }
         /*
          * create new guest user & contact
          */
+        ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient);
         Contact contact = ShareTool.prepareGuestContact(services, context.getContextId(), sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);

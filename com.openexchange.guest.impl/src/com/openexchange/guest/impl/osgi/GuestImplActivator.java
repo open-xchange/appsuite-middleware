@@ -55,9 +55,11 @@ import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.delete.DeleteListener;
+import com.openexchange.groupware.delete.contextgroup.DeleteContextGroupListener;
 import com.openexchange.guest.GuestService;
 import com.openexchange.guest.impl.internal.DefaultGuestService;
 import com.openexchange.guest.impl.internal.DelegateGuestService;
+import com.openexchange.guest.impl.internal.GuestDeleteContextGroupListener;
 import com.openexchange.guest.impl.internal.GuestDeleteListenerImpl;
 import com.openexchange.guest.impl.internal.GuestStorageServiceLookup;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -98,6 +100,7 @@ public class GuestImplActivator extends HousekeepingActivator {
         registerService(GuestService.class, delegateGuestService, 5);
 
         registerService(DeleteListener.class, new GuestDeleteListenerImpl(delegateGuestService));
+        registerService(DeleteContextGroupListener.class, new GuestDeleteContextGroupListener(delegateGuestService));
     }
 
     @Override

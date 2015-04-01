@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,48 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.ajax.drive.action;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.iterator.SearchIterator;
-
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
 
 /**
- * {@link InfostoreTimedResult}
+ * {@link SharesRequest}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public class InfostoreTimedResult implements TimedResult<File> {
+public class SharesRequest extends AbstractDriveRequest<SharesResponse> {
 
-    private final TimedResult<DocumentMetadata> documents;
+    private boolean failOnError;
 
-    public InfostoreTimedResult(TimedResult<DocumentMetadata> documents) {
-        this.documents = documents;
+    public SharesRequest(Integer root) {
+        super(root);
+        failOnError = true;
     }
 
     @Override
-    public SearchIterator<File> results() throws OXException {
-        SearchIterator<DocumentMetadata> results = documents.results();
-        if(results == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(results);
+    public Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    public long sequenceNumber() throws OXException {
-        return documents.sequenceNumber();
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] {
+            new Parameter(AJAXServlet.PARAMETER_ACTION, "shares"),
+            new Parameter("root", root)
+        };
+    }
+
+    @Override
+    public SharesParser getParser() {
+        return new SharesParser(failOnError);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
 }

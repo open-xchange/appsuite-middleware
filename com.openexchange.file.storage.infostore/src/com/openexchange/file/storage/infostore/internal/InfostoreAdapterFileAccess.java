@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
 import static com.openexchange.file.storage.FileStorageUtility.checkUrl;
 import gnu.trove.list.TIntList;
@@ -75,6 +75,10 @@ import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
+import com.openexchange.file.storage.infostore.FileMetadata;
+import com.openexchange.file.storage.infostore.InfostoreFile;
+import com.openexchange.file.storage.infostore.InfostoreSearchIterator;
+import com.openexchange.file.storage.infostore.ToInfostoreTermVisitor;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;

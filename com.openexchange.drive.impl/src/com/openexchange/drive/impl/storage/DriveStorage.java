@@ -680,7 +680,16 @@ public class DriveStorage {
         }
     }
 
+    /**
+     * Gets the directory path for the supplied folder identifier, relative to the root synchronization folder.
+     * 
+     * @param folderID The folder identifier to get the path for
+     * @return The path
+     */
     public String getPath(String folderID) throws OXException {
+        if (rootFolderID.toUniqueID().equals(folderID)) {
+            return ROOT_PATH;
+        }
         String path = knownFolders.getPath(folderID);
         if (null == path) {
             path = resolveToRoot(folderID);
@@ -688,16 +697,64 @@ public class DriveStorage {
         return path;
     }
 
+    /**
+     * Gets the identifier of the folder behind the supplied path.
+     * 
+     * @param path The path to get the folder identifier for
+     * @return The folder identifier
+     */
     public String getFolderID(String path) throws OXException {
         return getFolderID(path, false);
     }
 
+    /**
+     * Gets the identifier of the folder behind the supplied path.
+     * 
+     * @param path The path to get the folder identifier for
+     * @param createIfNeeded <code>true</code> to create new folders in case the path not exists, <code>false</code>, otherwise
+     * @return The folder identifier
+     */
     public String getFolderID(String path, boolean createIfNeeded) throws OXException {
         return getFolder(path, createIfNeeded).getId();
     }
 
+    /**
+     * Gets the folder behind the supplied path.
+     * 
+     * @param path The path to get the folder for
+     * @return The folder
+     */
     public FileStorageFolder getFolder(String path) throws OXException {
         return getFolder(path, false);
+    }
+
+    /**
+     * Gets the folder behind the supplied path.
+     * 
+     * @param path The path to get the folder for
+     * @param createIfNeeded <code>true</code> to create new folders in case the path not exists, <code>false</code>, otherwise
+     * @return The folder
+     */
+    public FileStorageFolder getFolder(String path, boolean createIfNeeded) throws OXException {
+        FileStorageFolder folder = knownFolders.getFolder(path);
+        if (null == folder) {
+            folder = resolveToLeaf(path, createIfNeeded, true);
+        }
+        return folder;
+    }
+
+    /**
+     * Optionally gets the folder behind the supplied path, not throwing exceptions in case it not yet exists.
+     * 
+     * @param path The path to get the folder for
+     * @return The folder, or <code>null</code> if not found
+     */
+    public FileStorageFolder optFolder(String path) throws OXException {
+        FileStorageFolder folder = knownFolders.getFolder(path);
+        if (null == folder) {
+            folder = resolveToLeaf(path, false, false);
+        }
+        return folder;
     }
 
     /**
@@ -732,22 +789,6 @@ public class DriveStorage {
             trashFolder = getFolderAccess().getTrashFolder(rootFolderID.toUniqueID());
         }
         return trashFolder;
-    }
-
-    public FileStorageFolder getFolder(String path, boolean createIfNeeded) throws OXException {
-        FileStorageFolder folder = knownFolders.getFolder(path);
-        if (null == folder) {
-            folder = resolveToLeaf(path, createIfNeeded, true);
-        }
-        return folder;
-    }
-
-    public FileStorageFolder optFolder(String path, boolean createIfNeeded) throws OXException {
-        FileStorageFolder folder = knownFolders.getFolder(path);
-        if (null == folder) {
-            folder = resolveToLeaf(path, createIfNeeded, false);
-        }
-        return folder;
     }
 
     /**

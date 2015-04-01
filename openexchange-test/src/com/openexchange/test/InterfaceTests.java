@@ -138,7 +138,7 @@ public final class InterfaceTests {
         // tests.addTest(ManifestsTestSuite.suite());
         tests.addTest(new JUnit4TestAdapter(OAuthTests.class));
         // TODO: enable
-        // tests.addTest(DriveAJAXSuite.suite());
+        tests.addTest(DriveAJAXSuite.suite());
         return tests;
     }
 }

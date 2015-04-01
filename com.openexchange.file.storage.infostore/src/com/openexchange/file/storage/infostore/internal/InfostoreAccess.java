@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,41 +47,53 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.file.storage.infostore.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.infostore.InfostoreFacade;
+
 
 /**
- * {@link AllParser}
+ * Encapsulates common methods needed by classes that delegate calls to {@link InfostoreFacade}.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class AllParser extends AbstractAJAXParser<AllResponse> {
+public abstract class InfostoreAccess {
 
-    protected AllParser(boolean failOnError) {
-        super(failOnError);
+    protected static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
+    protected static final Set<Long> VIRTUAL_FOLDERS;
+    static {
+        final Set<Long> set = new HashSet<Long>(4);
+        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
+        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
+        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
     }
 
-    @Override
-    protected AllResponse createResponse(Response response) throws JSONException {
-        AllResponse retval = new AllResponse(response);
+    protected final InfostoreFacade infostore;
 
-        JSONArray jsonArray = (JSONArray) response.getData();
-        List<ParsedShare> parsedShares = new ArrayList<ParsedShare>(jsonArray.length());
-        for (int i = 0; i < jsonArray.length(); i++) {
-            parsedShares.add(new ParsedShare(jsonArray.getJSONObject(i)));
+    protected InfostoreAccess(InfostoreFacade infostore) {
+        super();
+        this.infostore = infostore;
+    }
+
+    protected InfostoreFacade getInfostore(final String folderId) {
+        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
+            return VIRTUAL_INFOSTORE;
         }
+        return infostore;
+    }
 
-        retval.setParsedShares(parsedShares);
+    protected static int ID(final String id) {
+        return Integer.parseInt(id);
+    }
 
-        return retval;
+    protected static long FOLDERID(final String folderId) {
+        return Long.parseLong(folderId);
     }
 
 }

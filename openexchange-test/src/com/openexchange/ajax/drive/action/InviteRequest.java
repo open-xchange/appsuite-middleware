@@ -55,7 +55,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -65,17 +65,17 @@ import com.openexchange.share.recipient.ShareRecipient;
  * @since v7.8.0
  */
 public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
-    
-    private List<ShareTarget> targets;
+
+    private List<DriveShareTarget> targets;
     private List<ShareRecipient> recipients;
     private String message;
     private boolean failOnError;
 
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients) {
+    public InviteRequest(Integer root, List<DriveShareTarget> targets, List<ShareRecipient> recipients) {
         this(root, targets, recipients, null, true);
     }
 
-    public InviteRequest(Integer root, List<ShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
+    public InviteRequest(Integer root, List<DriveShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
         super(root);
         this.targets = targets;
         this.recipients = recipients;
@@ -104,7 +104,7 @@ public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
     @Override
     public JSONObject getBody() throws IOException, JSONException {
         JSONObject retval = new JSONObject();
-        retval.put("targets", ShareWriter.writeTargets(targets));
+        DriveShareWriter.writeDriveTargets(targets, retval);
         retval.put("recipients", ShareWriter.writeRecipients(recipients));
         retval.putOpt("message", message);
         return retval;

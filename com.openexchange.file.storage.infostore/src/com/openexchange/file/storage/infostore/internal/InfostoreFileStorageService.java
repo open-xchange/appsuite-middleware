@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
 import java.util.Collections;
 import java.util.Set;
@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.infostore.internal.AdministrativeInfostoreFileAccess;
+import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.session.Session;

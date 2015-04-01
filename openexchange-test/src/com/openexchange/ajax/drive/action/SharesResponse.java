@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,32 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.ajax.drive.action;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.infostore.InfostoreFacade;
-
+import java.util.List;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
 
 /**
- * Encapsulates common methods needed by classes that delegate calls to {@link InfostoreFacade}.
+ * {@link SharesResponse}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public abstract class InfostoreAccess {
+public class SharesResponse extends AbstractAJAXResponse {
 
-    protected static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
-    protected static final Set<Long> VIRTUAL_FOLDERS;
-    static {
-        final Set<Long> set = new HashSet<Long>(4);
-        set.add(Long.valueOf(FolderObject.VIRTUAL_LIST_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID));
-        set.add(Long.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID));
-        VIRTUAL_FOLDERS = Collections.unmodifiableSet(set);
+    private List<ParsedDriveShareInfo> shares;
+
+    protected SharesResponse(Response response) {
+        super(response);
     }
 
-    protected final InfostoreFacade infostore;
-
-    protected InfostoreAccess(InfostoreFacade infostore) {
-        super();
-        this.infostore = infostore;
+    public void setShares(List<ParsedDriveShareInfo> shares) {
+        this.shares = shares;
     }
 
-    protected InfostoreFacade getInfostore(final String folderId) {
-        if (folderId != null && VIRTUAL_FOLDERS.contains(Long.valueOf(folderId))) {
-            return VIRTUAL_INFOSTORE;
-        }
-        return infostore;
-    }
-
-    protected static int ID(final String id) {
-        return Integer.parseInt(id);
-    }
-
-    protected static long FOLDERID(final String folderId) {
-        return Long.parseLong(folderId);
+    public List<ParsedDriveShareInfo> shares() {
+        return shares;
     }
 
 }

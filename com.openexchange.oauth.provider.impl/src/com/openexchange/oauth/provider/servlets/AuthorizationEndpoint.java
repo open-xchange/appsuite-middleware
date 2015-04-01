@@ -100,6 +100,7 @@ import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
+import com.openexchange.oauth.provider.notification.OAuthMailNotificationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
@@ -267,9 +268,15 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                     sendErrorPage(response, HttpServletResponse.SC_FORBIDDEN, "You are not allowed to grant access via OAuth to 3rd party applications.");
                 }
 
-                // Everything OK, do the redirect with authorization code & state
+                // Everything OK, send notification mail and do the redirect with authorization code & state
                 // YOUR_REDIRECT_URI/?code=AUTHORIZATION_CODE&state=STATE
                 String code = oAuthProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, user.getId(), ctx.getContextId());
+                try {
+                    OAuthMailNotificationService notificationService = new OAuthMailNotificationService(oAuthProvider);
+                    notificationService.sendNotification(user.getId(), ctx.getContextId(), clientId);
+                } catch (OXException e) {
+                    LOG.error("Send oauth notification mail for {} to {} failed.", client.getName(), user.getMail(), e);
+                }
                 response.sendRedirect(URLHelper.getRedirectLocation(redirectURI, OAuthProviderConstants.PARAM_CODE, code, OAuthProviderConstants.PARAM_STATE, state));
             } catch (OXException e) {
                 if (OAuthProviderExceptionCodes.GRANTS_EXCEEDED.equals(e)) {

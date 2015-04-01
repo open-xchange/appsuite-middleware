@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,48 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.file.storage.infostore.internal;
 
-import java.util.Date;
-import java.util.List;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.file.storage.Document;
+import com.openexchange.file.storage.infostore.InfostoreFile;
+import com.openexchange.groupware.infostore.DocumentAndMetadata;
+import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
- * {@link AllAction}
+ * {@link InfostoreDocument}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AllAction extends AbstractDriveShareAction {
+public class InfostoreDocument extends Document {
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        DriveService driveService = Services.getService(DriveService.class, true);
-        List<ShareInfo> shares = driveService.getAllLinks(session);
+    private final DocumentAndMetadata documentAndMetadata;
 
-        if (null == shares || 0 == shares.size()) {
-            return new AJAXRequestResult(new JSONArray());
-        }
-
-        Date lastModified = null;
-        for (ShareInfo shareInfo : shares) {
-            Date shareLastModified = shareInfo.getShare().getModified();
-            if (lastModified == null || shareLastModified != null && shareLastModified.after(lastModified)) {
-                lastModified = shareLastModified;
+    /**
+     * Initializes a new {@link InfostoreDocument}.
+     *
+     * @param documentAndMetadata The underlying document and metadata
+     */
+    public InfostoreDocument(DocumentAndMetadata documentAndMetadata) throws OXException {
+        super();
+        this.documentAndMetadata = documentAndMetadata;
+        setEtag(documentAndMetadata.getETag());
+        DocumentMetadata metadata = documentAndMetadata.getMetadata();
+        if (null != metadata) {
+            setFile(new InfostoreFile(metadata));
+            setMimeType(metadata.getFileMIMEType());
+            setName(metadata.getFileName());
+            setSize(metadata.getFileSize());
+            if (null != metadata.getLastModified()) {
+                setLastModified(metadata.getLastModified().getTime());
             }
         }
+    }
 
-        return new AJAXRequestResult(shares, lastModified, "shareinfo");
+    @Override
+    public InputStream getData() throws OXException {
+        return documentAndMetadata.getData();
     }
 
 }

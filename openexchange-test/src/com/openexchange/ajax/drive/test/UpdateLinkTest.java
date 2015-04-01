@@ -66,13 +66,14 @@ import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.test.TestInit;
 
 /**
@@ -87,6 +88,7 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
     private FolderObject rootFolder;
     private FolderObject folder;
     private DefaultFile file;
+    private FolderObject folder2;
 
     /**
      * Initializes a new {@link UpdateLinkTest}.
@@ -105,19 +107,24 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         UserValues values = client.getValues();
         rootFolder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), values.getPrivateInfostoreFolder());
         folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
+        folder2 = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), rootFolder.getObjectID());
 
         long now = System.currentTimeMillis();
         file = new DefaultFile();
-        file.setFolderId(String.valueOf(folder.getObjectID()));
+        file.setFolderId(String.valueOf(folder2.getObjectID()));
         file.setTitle("GetLinkTest_" + now);
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
+        file.setFileMD5Sum(getChecksum(new File(TestInit.getTestProperty("ajaxPropertiesFile"))));
         itm.newAction(file, new File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
     public void testUpdateFileLink() throws Exception {
         // Create Link
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName(), file.getFileName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath("/" + folder2.getFolderName());
+        target.setName(file.getFileName());
+        target.setChecksum(file.getFileMD5Sum());
         int bits = createAnonymousGuestPermission().getPermissionBits();
         String password = UUIDs.getUnformattedString(UUID.randomUUID());
         GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);
@@ -144,7 +151,7 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
         GuestClient newClient = resolveShare(url, null, newPassword);
         int guestId = newClient.getValues().getUserId();
         newClient.checkFileAccessible(file.getId(), allPermission);
-        ParsedShare share = discoverShare(guestId, folder.getObjectID(), file.getId());
+        ParsedShare share = discoverShare(guestId, folder2.getObjectID(), file.getId());
         assertNotNull(share);
         assertEquals(newExpiry, share.getTarget().getExpiryDate());
 
@@ -157,7 +164,9 @@ public class UpdateLinkTest extends AbstractDriveShareTest {
 
     public void testUpdateFolderLink() throws Exception {
         // Create Link
-        ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
+        DriveShareTarget target = new DriveShareTarget();
+        target.setPath("/" + folder.getFolderName());
+        target.setChecksum(DriveConstants.EMPTY_MD5);
         int bits = createAnonymousGuestPermission().getPermissionBits();
         String password = UUIDs.getUnformattedString(UUID.randomUUID());
         GetLinkRequest getLinkRequest = new GetLinkRequest(rootFolder.getObjectID(), Collections.singletonList(target), bits, password, true);

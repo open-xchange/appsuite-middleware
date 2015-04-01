@@ -47,35 +47,81 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
-
-import java.util.List;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.share.actions.ParsedShare;
-
+package com.openexchange.drive;
 
 /**
- * {@link AllResponse}
+ * {@link DriveShareTarget}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class AllResponse extends AbstractAJAXResponse {
+public class DriveShareTarget {
 
-    private List<ParsedShare> parsedShares;
+    private String name;
 
+    private String path;
 
-    protected AllResponse(Response response) {
-        super(response);
+    private String checksum;
+
+    public String getChecksum() {
+        return checksum;
     }
-    
-    public void setParsedShares(List<ParsedShare> parsedShares) {
-        this.parsedShares = parsedShares;
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
-    
-    public List<ParsedShare> getParsedShares() {
-        return parsedShares;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((checksum == null) ? 0 : checksum.hashCode());
+        result = prime * result + ((name == null) ? 0 : name.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        DriveShareTarget other = (DriveShareTarget) obj;
+        if (checksum == null) {
+            if (other.checksum != null)
+                return false;
+        } else if (!checksum.equals(other.checksum))
+            return false;
+        if (name == null) {
+            if (other.name != null)
+                return false;
+        } else if (!name.equals(other.name))
+            return false;
+        if (path == null) {
+            if (other.path != null)
+                return false;
+        } else if (!path.equals(other.path))
+            return false;
+        return true;
     }
 
 }

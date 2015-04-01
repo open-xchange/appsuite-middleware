@@ -49,7 +49,10 @@
 
 package com.openexchange.ajax.drive.test;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.List;
+import jonelo.jacksum.algorithm.MD;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -105,6 +108,24 @@ public abstract class AbstractDriveShareTest extends ShareTest {
         FileID fileID = new FileID(file.getId());
         fileID.setFolderId(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID));
         return fileID.toUniqueID();
+    }
+
+    protected String getChecksum(java.io.File file) throws Exception {
+        InputStream document = new FileInputStream(file);
+
+        byte[] buffer = new byte[2048];
+        MD md5 = new MD("MD5");
+        int read;
+        do {
+            read = document.read(buffer);
+            if (0 < read) {
+                md5.update(buffer, 0, read);
+            }
+        } while (-1 != read);
+
+        document.close();
+
+        return md5.getFormattedValue();
     }
 
 }

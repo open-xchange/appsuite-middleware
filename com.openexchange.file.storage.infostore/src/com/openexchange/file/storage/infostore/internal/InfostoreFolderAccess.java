@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.file.storage.infostore.internal;
 
 import java.sql.Connection;
 import com.openexchange.exception.OXException;
@@ -60,6 +60,7 @@ import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.infostore.folder.FolderParser;
 import com.openexchange.file.storage.infostore.folder.FolderWriter;
 import com.openexchange.file.storage.infostore.folder.ParsedFolder;
+import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderService;

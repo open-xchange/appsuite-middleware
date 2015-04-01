@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,72 +47,36 @@
  *
  */
 
-package com.openexchange.file.storage.infostore;
+package com.openexchange.ajax.drive.action;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.groupware.results.Delta;
-import com.openexchange.tools.iterator.SearchIterator;
-
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.share.actions.ShareWriter;
+import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.java.Strings;
 
 /**
- * {@link InfostoreDeltaWrapper}
+ * {@link DriveShareWriter}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public class InfostoreDeltaWrapper implements Delta<File>{
+public class DriveShareWriter {
 
-    private Delta<DocumentMetadata> delegate = null;
-
-    public InfostoreDeltaWrapper(Delta<DocumentMetadata> delegate) {
-        this.delegate = delegate;
-    }
-
-
-    @Override
-    public SearchIterator<File> getDeleted() {
-        SearchIterator<DocumentMetadata> deleted = delegate.getDeleted();
-        if(deleted == null) {
-            return null;
+    public static void writeDriveTargets(List<DriveShareTarget> targets, JSONObject json) throws JSONException {
+        JSONArray jsonFileTargets = new JSONArray();
+        JSONArray jsonDirectoryTargets = new JSONArray();
+        for (DriveShareTarget target : targets) {
+            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
+                jsonFileTargets.put(ShareWriter.writeDriveTarget(target));
+            } else {
+                jsonDirectoryTargets.put(ShareWriter.writeDriveTarget(target));
+            }
         }
-        return new InfostoreSearchIterator(deleted);
+
+        json.put("directoryVersions", jsonDirectoryTargets);
+        json.put("fileVersions", jsonFileTargets);
     }
-
-
-    @Override
-    public SearchIterator<File> getModified() {
-        SearchIterator<DocumentMetadata> modified = delegate.getModified();
-        if(modified == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(modified);
-    }
-
-
-    @Override
-    public SearchIterator<File> getNew() {
-        SearchIterator<DocumentMetadata> new1 = delegate.getNew();
-        if(new1 == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(new1);
-    }
-
-
-    @Override
-    public SearchIterator<File> results() throws OXException {
-        SearchIterator<DocumentMetadata> results = delegate.results();
-        if(results == null) {
-            return null;
-        }
-        return new InfostoreSearchIterator(results);
-    }
-
-
-    @Override
-    public long sequenceNumber() throws OXException {
-        return delegate.sequenceNumber();
-    }
-
 }

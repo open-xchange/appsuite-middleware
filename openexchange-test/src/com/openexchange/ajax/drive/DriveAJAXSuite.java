@@ -51,7 +51,7 @@ package com.openexchange.ajax.drive;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-import com.openexchange.ajax.drive.test.AllTest;
+import com.openexchange.ajax.drive.test.SharesTest;
 import com.openexchange.ajax.drive.test.DeleteLinkTest;
 import com.openexchange.ajax.drive.test.GetLinkTest;
 import com.openexchange.ajax.drive.test.InviteTest;
@@ -72,7 +72,7 @@ public class DriveAJAXSuite extends TestSuite {
         tests.addTestSuite(UpdateLinkTest.class);
         tests.addTestSuite(InviteTest.class);
         tests.addTestSuite(DeleteLinkTest.class);
-        tests.addTestSuite(AllTest.class);
+        tests.addTestSuite(SharesTest.class);
 
         return tests;
     }

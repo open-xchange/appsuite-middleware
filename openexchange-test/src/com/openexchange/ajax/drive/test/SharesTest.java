@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.drive.test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.ajax.drive.action.AllRequest;
+import com.openexchange.ajax.drive.action.ParsedDriveShareInfo;
+import com.openexchange.ajax.drive.action.SharesRequest;
 import com.openexchange.ajax.drive.action.InviteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -60,13 +62,15 @@ import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -75,12 +79,12 @@ import com.openexchange.test.FolderTestManager;
 import com.openexchange.test.TestInit;
 
 /**
- * {@link AllTest}
+ * {@link SharesTest}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class AllTest extends AbstractDriveShareTest {
+public class SharesTest extends AbstractDriveShareTest {
 
     private InfostoreTestManager itm;
     private FolderObject rootFolder;
@@ -99,7 +103,7 @@ public class AllTest extends AbstractDriveShareTest {
 
     private static String PASSWORD = "password123";
 
-    public AllTest(String name) {
+    public SharesTest(String name) {
         super(name);
     }
 
@@ -121,14 +125,20 @@ public class AllTest extends AbstractDriveShareTest {
         file.setTitle("GetLinkTest_" + now);
         file.setFileName(file.getTitle());
         file.setDescription(file.getTitle());
+        file.setFileMD5Sum(getChecksum(new File(TestInit.getTestProperty("ajaxPropertiesFile"))));
         itm.newAction(file, new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile")));
     }
 
     public void testAll() throws Exception {
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        ShareTarget fileTarget = new ShareTarget(FolderObject.INFOSTORE, "/" + folder2.getFolderName(), file.getFileName());
+        List<DriveShareTarget> targets = new ArrayList<DriveShareTarget>();
+        DriveShareTarget fileTarget = new DriveShareTarget();
+        fileTarget.setPath("/" + folder2.getFolderName());
+        fileTarget.setName(file.getFileName());
+        fileTarget.setChecksum(file.getFileMD5Sum());
         targets.add(fileTarget);
-        ShareTarget folderTarget = new ShareTarget(FolderObject.INFOSTORE, "/" + folder.getFolderName());
+        DriveShareTarget folderTarget = new DriveShareTarget();
+        folderTarget.setPath("/" + folder.getFolderName());
+        folderTarget.setChecksum(DriveConstants.EMPTY_MD5);
         targets.add(folderTarget);
 
         List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
@@ -144,20 +154,20 @@ public class AllTest extends AbstractDriveShareTest {
         InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), targets, recipients);
         client.execute(inviteRequest);
 
-        List<ParsedShare> allShares = client.execute(new AllRequest(rootFolder.getObjectID())).getParsedShares();
-        ParsedShare anonymousFile = null;
-        ParsedShare anonymousFolder = null;
-        ParsedShare internalFile = null;
-        ParsedShare internalFolder = null;
+        List<ParsedDriveShareInfo> allShares = client.execute(new SharesRequest(rootFolder.getObjectID())).shares();
+        ParsedDriveShareInfo anonymousFile = null;
+        ParsedDriveShareInfo anonymousFolder = null;
+        ParsedDriveShareInfo internalFile = null;
+        ParsedDriveShareInfo internalFolder = null;
 
-        for (ParsedShare parsedShare : allShares) {
-            if (parsedShare.getTarget().equals(fileTarget)) {
+        for (ParsedDriveShareInfo parsedShare : allShares) {
+            if (parsedShare.getDriveShare().getTarget().equals(fileTarget)) {
                 if (parsedShare.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     anonymousFile = parsedShare;
                 } else if (parsedShare.getRecipient().equals(internalRecipient)) {
                     internalFile = parsedShare;
                 }
-            } else if (parsedShare.getTarget().equals(folderTarget)) {
+            } else if (parsedShare.getDriveShare().getTarget().equals(folderTarget)) {
                 if (parsedShare.getRecipient().getType() == RecipientType.ANONYMOUS) {
                     anonymousFolder = parsedShare;
                 } else if (parsedShare.getRecipient().equals(internalRecipient)) {
@@ -169,7 +179,7 @@ public class AllTest extends AbstractDriveShareTest {
         assertNotNull("Missing share.", anonymousFile);
         assertNotNull("Missing share.", anonymousFolder);
 
-        GuestClient guestClient = new GuestClient(anonymousFile.getShareURL(), null, anonymous.getPassword());
+        GuestClient guestClient = new GuestClient(anonymousFile.getShareURL(null, null), null, anonymous.getPassword());
         InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
         checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
         FolderTestManager ftmGuest = new FolderTestManager(guestClient);
