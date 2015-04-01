@@ -146,6 +146,21 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     /**
+     * Checks if this registry contains at least one <i>{@link PushManagerExtendedService}</i> instance at the time of invocation.
+     *
+     * @return <code>true</code> if this registry contains at least one <code>PushManagerExtendedService</code> instance; otherwise <code>false</code>
+     */
+    public boolean hasExtendedService() {
+        for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+            PushManagerService pushManager = pushManagersIterator.next();
+            if (pushManager instanceof PushManagerExtendedService) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Starts the permanent listeners for given push users.
      *
      * @param pushUsers The push users

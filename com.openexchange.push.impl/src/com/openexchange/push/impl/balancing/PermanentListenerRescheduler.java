@@ -47,14 +47,16 @@
  *
  */
 
-package com.openexchange.push.impl.osgi;
+package com.openexchange.push.impl.balancing;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -71,7 +73,7 @@ import com.openexchange.push.impl.PushManagerRegistry;
 
 
 /**
- * {@link PermanentListenerRescheduler}
+ * {@link PermanentListenerRescheduler} - Reschedules permanent listeners equally among cluster nodes, whenever cluster members do change.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
@@ -83,14 +85,14 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     private final PushManagerRegistry pushManagerRegistry;
     private final BundleContext context;
     private final AtomicReference<String> registrationIdRef;
-    private final AtomicReference<Member> localMemberRef;
+    private final AtomicReference<HazelcastInstance> hzInstancerRef;
 
     /**
      * Initializes a new {@link PermanentListenerRescheduler}.
      */
     public PermanentListenerRescheduler(PushManagerRegistry pushManagerRegistry, BundleContext context) {
         super();
-        localMemberRef = new AtomicReference<Member>();
+        hzInstancerRef = new AtomicReference<HazelcastInstance>();
         registrationIdRef = new AtomicReference<String>();
         this.pushManagerRegistry = pushManagerRegistry;
         this.context = context;
@@ -100,12 +102,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
-        reschedule(localMemberRef.get(), membershipEvent.getMembers());
+        reschedule(membershipEvent.getMembers(), hzInstancerRef.get());
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        reschedule(localMemberRef.get(), membershipEvent.getMembers());
+        reschedule(membershipEvent.getMembers(), hzInstancerRef.get());
     }
 
     @Override
@@ -115,24 +117,43 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private void reschedule(Member localMember, Set<Member> allMembers) {
+    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance) {
+        if (null == hzInstance) {
+            LOG.warn("Aborted re-scheduling of permanent listeners as passed HazelcastInstance is null.");
+            return;
+        }
+
         try {
             List<PushUser> allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
             if (false == allPushUsers.isEmpty()) {
-                // Determine cluster members
-                Set<Member> otherMembers = new HashSet<Member>(allMembers);
-                if (!otherMembers.remove(localMember)) {
-                    LOG.warn("Couldn't remove local member from cluster members.");
-                }
+                // Get local member
+                Member localMember = hzInstance.getCluster().getLocalMember();
+
+                // Determine other cluster members
+                Set<Member> otherMembers = getOtherMembers(allMembers, localMember);
 
                 if (otherMembers.isEmpty()) {
                     // No other cluster members - assign all available permanent listeners to this node
                     pushManagerRegistry.applyInitialListeners(allPushUsers);
                 } else {
-                    // Otherwise equally distribute among available cluster nodes
+                    // Otherwise equally distribute among suitable cluster nodes
+
+                    // Identify those members having at least one "PushManagerExtendedService" instance
+                    List<Member> candidates = new LinkedList<Member>();
+                    candidates.add(localMember);
+                    {
+                        Map<Member, Future<Boolean>> futures = hzInstance.getExecutorService("default").submitToMembers(new CheckForExtendedServiceCallable(), otherMembers);
+                        for (Map.Entry<Member,Future<Boolean>> entry : futures.entrySet()) {
+                            // Check Future's return value
+                            Future<Boolean> future = entry.getValue();
+                            if (future.get().booleanValue()) {
+                                candidates.add(entry.getKey());
+                            }
+                        }
+                    }
+
                     // First, sort by UUID
-                    List<Member> ms = new LinkedList<Member>(allMembers);
-                    Collections.sort(ms, new Comparator<Member>() {
+                    Collections.sort(candidates, new Comparator<Member>() {
 
                         @Override
                         public int compare(Member m1, Member m2) {
@@ -142,25 +163,35 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                     // Determine the position of this cluster node
                     int pos = 0;
-                    while (!localMember.getUuid().equals(ms.get(pos).getUuid())) {
+                    while (!localMember.getUuid().equals(candidates.get(pos).getUuid())) {
                         pos = pos + 1;
                     }
 
                     // Determine the permanent listeners for this node
                     List<PushUser> ps = new LinkedList<PushUser>();
-                    int numMembers = ms.size();
+                    int numMembers = candidates.size();
                     int numPushUsers = allPushUsers.size();
                     for (int i = 0; i < numPushUsers; i++) {
                         if ((i % numMembers) == pos) {
                             ps.add(allPushUsers.get(i));
                         }
                     }
+
+                    // Apply newly calculated initial permanent listeners
                     pushManagerRegistry.applyInitialListeners(ps);
                 }
             }
         } catch (Exception e) {
             LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
         }
+    }
+
+    private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
+        Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
+        if (!otherMembers.remove(localMember)) {
+            LOG.warn("Couldn't remove local member from cluster members.");
+        }
+        return otherMembers;
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
@@ -173,10 +204,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             String registrationId = cluster.addMembershipListener(this);
             registrationIdRef.set(registrationId);
 
-            Member localMember = cluster.getLocalMember();
-            localMemberRef.set(localMember);
+            hzInstancerRef.set(hzInstance);
 
-            reschedule(localMember, cluster.getMembers());
+            reschedule(cluster.getMembers(), hzInstance);
 
             return hzInstance;
         } catch (Exception e) {
@@ -193,14 +223,13 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     @Override
     public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
-        localMemberRef.set(null);
-
         String registrationId = registrationIdRef.get();
         if (null != registrationId) {
             hzInstance.getCluster().removeMembershipListener(registrationId);
             registrationIdRef.set(null);
         }
 
+        hzInstancerRef.set(null);
         context.ungetService(reference);
     }
 
