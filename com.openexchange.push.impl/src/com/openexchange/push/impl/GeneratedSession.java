@@ -51,8 +51,10 @@ package com.openexchange.push.impl;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.session.Session;
 
 /**
@@ -71,12 +73,14 @@ public final class GeneratedSession implements Session, Serializable {
     private final int userId;
     private final int contextId;
     private final ConcurrentMap<String, Object> parameters;
+    private final String sessionId;
 
     GeneratedSession(int userId, int contextId) {
         super();
         this.userId = userId;
         this.contextId = contextId;
         parameters = new ConcurrentHashMap<String, Object>(8);
+        sessionId = UUIDs.getUnformattedString(UUID.randomUUID());
     }
 
     @Override
@@ -144,7 +148,7 @@ public final class GeneratedSession implements Session, Serializable {
 
     @Override
     public String getSessionID() {
-        return null;
+        return sessionId;
     }
 
     @Override
