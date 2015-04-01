@@ -80,6 +80,7 @@ import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
+import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.credstorage.OSGiCredentialStorageProvider;
 import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
