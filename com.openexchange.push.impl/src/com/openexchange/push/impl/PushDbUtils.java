@@ -202,7 +202,7 @@ public class PushDbUtils {
                 return Collections.emptySet();
             }
             Set<Integer> contextIds = new LinkedHashSet<Integer>(128);
-            Set<Integer> alreadyProcessed = new HashSet<Integer>();
+            Set<Integer> alreadyProcessed = new HashSet<Integer>(1024);
             do {
                 Integer contextId = Integer.valueOf(rs.getInt(1));
                 if (alreadyProcessed.add(contextId)) {
