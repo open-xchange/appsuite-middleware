@@ -94,7 +94,7 @@ public class AssertionValidators {
         public ValidationError validate(Response response, Assertion assertion) {
             String assertionID = assertion.getID();
             if (assertion.isSigned()) {
-                ValidationError error = SignatureHelper.validateSignature(response, validationCredential);
+                ValidationError error = SignatureHelper.validateSignature(assertion, validationCredential);
                 if (error == null) {
                     LOG.debug("Assertion '{}' contains a valid signature", assertionID);
                 } else if (error.getThrowable() != null) {
