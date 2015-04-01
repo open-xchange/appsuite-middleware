@@ -64,6 +64,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
@@ -142,8 +143,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                     List<Member> candidates = new LinkedList<Member>();
                     candidates.add(localMember);
                     {
-                        Map<Member, Future<Boolean>> futures = hzInstance.getExecutorService("default").submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
-                        for (Map.Entry<Member,Future<Boolean>> entry : futures.entrySet()) {
+                        IExecutorService executor = hzInstance.getExecutorService("default");
+                        Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
+                        for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
                             // Check Future's return value
                             Future<Boolean> future = entry.getValue();
                             if (future.get().booleanValue()) {
