@@ -345,15 +345,18 @@ public class PushDbUtils {
 
             boolean deleted = deletePushRegistration(userId, contextId, clientId, unmark, con);
 
-            DeleteResult deleteResult = null;
+            DeleteResult deleteResult;
             if (unmark[0]) {
                 unmarkContextForPush(contextId, service);
                 deleteResult = DeleteResult.DELETED_COMPLETELY;
+            } else {
+                deleteResult = (deleted ? DeleteResult.DELETED_FOR_CLIENT : DeleteResult.NOT_DELETED);
             }
 
             con.commit();
             rollback = false;
-            return null == deleteResult ? (deleted ? DeleteResult.DELETED_FOR_CLIENT : DeleteResult.NOT_DELETED) : deleteResult;
+
+            return deleteResult;
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
