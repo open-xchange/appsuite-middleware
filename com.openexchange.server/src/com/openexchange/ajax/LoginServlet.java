@@ -671,7 +671,6 @@ public class LoginServlet extends AJAXServlet {
         handlerMap.put(ACTION_LOGIN, new Login(conf, rampUpServices));
         handlerMap.put(ACTION_RAMPUP, new RampUp(rampUpServices));
         handlerMap.put("/httpAuth", new HTTPAuthLogin(conf));
-        handlerMap.put(ACTION_REDEEM_RESERVATION, new RedeemReservationLogin(conf));
     }
 
     public LoginRequestHandler addRequestHandler(String action, LoginRequestHandler handler) {
