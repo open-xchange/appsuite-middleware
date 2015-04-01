@@ -158,7 +158,7 @@ public class OAuthMailNotificationService {
         vars.put(INTRO_FIELD, intro);
         vars.put(MESSAGE_FIELD, message);
         MimeMessage mail = prepareEnvelope(title, address);
-        mail.setHeader(MessageHeaders.HDR_RETURN_PATH, "<>");
+        mail.setHeader("Auto-Submitted", "auto-generated");
         mail.setContent(prepareContent("oauth-new-external-application-mail.txt.tmpl", vars, "oauth-new-external-application-mail.html.tmpl", vars));
         mail.saveChanges();
         return new ContentAwareComposedMailMessage(mail, contextId);
