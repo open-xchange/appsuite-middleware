@@ -113,12 +113,12 @@ public class SignatureHelper {
 
         String queryString = httpRequest.getQueryString();
         StringBuilder signedContent = new StringBuilder();
-        signedContent.append("SAMLRequest=").append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SAMLRequest"));
+        signedContent.append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SAMLRequest"));
         String rawRelayState = HTTPTransportUtils.getRawQueryStringParameter(queryString, "RelayState");
         if (rawRelayState != null) {
-            signedContent.append("&RelayState=").append(rawRelayState);
+            signedContent.append('&').append(rawRelayState);
         }
-        signedContent.append("&SigAlg=").append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SigAlg"));
+        signedContent.append('&').append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SigAlg"));
 
         try {
             if (!SigningUtil.verifyWithURI(credential, sigAlg, Base64.decodeBase64(signature), signedContent.toString().getBytes("UTF-8"))) {
