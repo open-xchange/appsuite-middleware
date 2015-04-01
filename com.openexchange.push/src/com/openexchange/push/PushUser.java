@@ -132,7 +132,7 @@ public class PushUser implements Comparable<PushUser> {
 
     @Override
     public String toString() {
-        return new StringBuilder(32).append("PushUser [userId=").append(userId).append(", contextId=").append(contextId).append(']').toString();
+        return new StringBuilder(32).append("[userId=").append(userId).append(", contextId=").append(contextId).append(']').toString();
     }
 
 }
