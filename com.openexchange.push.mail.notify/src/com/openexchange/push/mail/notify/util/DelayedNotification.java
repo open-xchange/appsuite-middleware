@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.push.mail.notify;
+package com.openexchange.push.mail.notify.util;
 
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.push.mail.notify.osgi.Services;
 
 
 /**

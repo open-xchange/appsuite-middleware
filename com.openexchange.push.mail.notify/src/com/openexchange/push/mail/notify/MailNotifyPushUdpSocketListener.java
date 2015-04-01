@@ -70,14 +70,14 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushUdpSocketListener.class);
 
-    private static final int MAX_UDP_PACKET_SIZE = 4+64+1;
+    private static final int MAX_UDP_PACKET_SIZE = 4 + 64 + 1; // 69
 
     // --------------------------------------------------------------------------------------------------------------------------------
 
     private final DatagramSocket datagramSocket;
     private final String imapLoginDelimiter;
     private final MailNotifyPushListenerRegistry registry;
-    private volatile Future<Object> udpThread;
+    private volatile Future<Object> future;
 
     /**
      * Initializes a new {@link MailNotifyPushUdpSocketListener}.
@@ -86,7 +86,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
         super();
         InetAddress senderAddress = InetAddress.getByName(udpListenHost);
         if (senderAddress == null) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get internet addres to given hostname " + udpListenHost);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get Internet Protocol (IP) addres for given hostname " + udpListenHost);
         }
 
         this.registry = registry;
@@ -100,12 +100,12 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     }
 
     /**
-     * Sets the associated thread
+     * Sets the associated <code>Future</code> instance
      *
-     * @param udpThread The thread
+     * @param future The <code>Future</code> instance
      */
-    public void setUdpThread(Future<Object> udpThread) {
-        this.udpThread = udpThread;
+    public void setFuture(Future<Object> future) {
+        this.future = future;
     }
 
     /**
@@ -114,19 +114,15 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     public void close() {
         datagramSocket.close();
 
-        Future<Object> udpThread = this.udpThread;
-        if (null != udpThread) {
-            udpThread.cancel(true);
-            this.udpThread = null;
+        Future<Object> future = this.future;
+        if (null != future) {
+            future.cancel(true);
+            this.future = null;
         }
     }
 
     @Override
     public void run() {
-        start();
-    }
-
-    private void start() {
         while (true) {
             DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
             try {
@@ -138,9 +134,8 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
                     return;
                 }
 
-                // Packet received
-                final String mailboxName = getMailboxNameFromPacket(datagramPacket);
-                registry.scheduleEvent(mailboxName);
+                // Valid packet received - Schedule an event for extracted mailbox name
+                registry.scheduleEvent(getMailboxNameFromPacket(datagramPacket));
             } catch (SocketException e) {
                 LOG.info("UDP socket closed");
             } catch (InterruptedIOException e) {
@@ -168,12 +163,15 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
         String packetDataString = new String(datagramPacket.getData());
         // User name at position 3, see above
         packetDataString = packetDataString.split("\0")[3];
-        if (null != imapLoginDelimiter) {
-        	int idx = packetDataString.indexOf(imapLoginDelimiter);
-        	if (idx != -1) {
+
+        String delimiter = imapLoginDelimiter;
+        if (null != delimiter) {
+        	int idx = packetDataString.indexOf(delimiter);
+        	if (idx >= 0) {
         		packetDataString = packetDataString.substring(0, idx);
         	}
         }
+
         LOG.debug("Username={}", packetDataString);
         return null != packetDataString && packetDataString.length() > 0 ? packetDataString : null;
     }
