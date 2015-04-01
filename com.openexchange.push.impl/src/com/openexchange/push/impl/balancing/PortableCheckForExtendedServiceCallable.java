@@ -49,28 +49,61 @@
 
 package com.openexchange.push.impl.balancing;
 
+import java.io.IOException;
 import java.util.concurrent.Callable;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
 import com.openexchange.push.impl.PushManagerRegistry;
 
 
 /**
- * {@link CheckForExtendedServiceCallable}
+ * {@link PortableCheckForExtendedServiceCallable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class CheckForExtendedServiceCallable implements Callable<Boolean> {
+public class PortableCheckForExtendedServiceCallable extends AbstractCustomPortable implements Callable<Boolean> {
+
+    private static final String FIELD_ID = "id";
+
+    private String id;
 
     /**
-     * Initializes a new {@link CheckForExtendedServiceCallable}.
+     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
      */
-    public CheckForExtendedServiceCallable() {
+    public PortableCheckForExtendedServiceCallable() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
+     *
+     * @param id The associated UUID
+     */
+    public PortableCheckForExtendedServiceCallable(String id) {
+        super();
+        this.id = id;
     }
 
     @Override
     public Boolean call() throws Exception {
         return Boolean.valueOf(PushManagerRegistry.getInstance().hasExtendedService());
+    }
+
+    @Override
+    public int getClassId() {
+        return 103;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(FIELD_ID, id);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        this.id = reader.readUTF(FIELD_ID);
     }
 
 }
