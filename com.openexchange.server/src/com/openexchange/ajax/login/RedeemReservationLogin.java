@@ -131,7 +131,7 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         }
 
         SessionReservationService service = ServerServiceRegistry.getInstance().getService(SessionReservationService.class);
-        Reservation reservation = null == service ? null : service.getReservation(token);
+        Reservation reservation = null == service ? null : service.removeReservation(token);
         if (null == reservation) {
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
             return;

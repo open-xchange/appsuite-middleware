@@ -82,12 +82,12 @@ public interface SessionReservationService {
     String reserveSessionFor(int userId, int contextId, long timeout, TimeUnit unit, Map<String, String> optState) throws OXException;
 
     /**
-     * Gets the reservation associated with given token.
+     * Removes the reservation associated with the given token and returns it.
      *
      * @param token The reservation's token
      * @return The reservation or <code>null</code> if there is no such reservation or reservation is elapsed
      * @throws OXException If operation fails
      */
-    Reservation getReservation(String token) throws OXException;
+    Reservation removeReservation(String token) throws OXException;
 
 }

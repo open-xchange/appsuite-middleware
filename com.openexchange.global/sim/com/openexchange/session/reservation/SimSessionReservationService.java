@@ -76,7 +76,7 @@ public class SimSessionReservationService implements SessionReservationService {
     }
 
     @Override
-    public Reservation getReservation(String token) throws OXException {
+    public Reservation removeReservation(String token) throws OXException {
         return reservations.remove(token);
     }
 

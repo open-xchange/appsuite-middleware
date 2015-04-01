@@ -202,7 +202,7 @@ public class SessionReservationServiceImpl implements SessionReservationService 
     }
 
     @Override
-    public Reservation getReservation(String token) throws OXException {
+    public Reservation removeReservation(String token) throws OXException {
         Reservation reservation = pollReservation(token);
         if (null == reservation) {
             return null;
