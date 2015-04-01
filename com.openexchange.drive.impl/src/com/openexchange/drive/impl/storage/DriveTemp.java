@@ -106,7 +106,7 @@ public class DriveTemp {
     	if (null != parentFolder) {
     		String parentPath = session.getStorage().getPath(parentFolder.getId());
     		String tempPath = DriveUtils.combine(parentPath, DriveConstants.TEMP_FOLDER_NAME);
-    		return null != session.getStorage().optFolder(tempPath, false);
+    		return null != session.getStorage().optFolder(tempPath);
     	}
     	return false;
     }

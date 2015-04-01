@@ -133,7 +133,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                 /*
                  * Clear all stored file- and directory-checksums of referenced folder
                  */
-                FileStorageFolder folder = session.getStorage().optFolder(action.getVersion().getPath(), false);
+                FileStorageFolder folder = session.getStorage().optFolder(action.getVersion().getPath());
                 if (null != folder) {
                     FolderID id = new FolderID(folder.getId());
                     session.getChecksumStore().removeDirectoryChecksum(id);
@@ -232,7 +232,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                  * try to move whole directory to temp folder
                  */
                 String targetPath = DriveUtils.combine(session.getTemp().getPath(true), action.getVersion().getChecksum());
-                FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath, false);
+                FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath);
                 if (null == targetFolder) {
                     String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());
                     String movedFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), targetPath);
@@ -330,7 +330,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
                  * try to move whole directory to temp folder
                  */
                 String targetPath = DriveUtils.combine(session.getTemp().getPath(true), action.getVersion().getChecksum());
-                FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath, false);
+                FileStorageFolder targetFolder = session.getStorage().optFolder(targetPath);
                 if (null == targetFolder) {
                     String currentFolderID = session.getStorage().getFolderID(action.getVersion().getPath());
                     String movedFolderID = session.getStorage().moveFolder(action.getVersion().getPath(), targetPath);
