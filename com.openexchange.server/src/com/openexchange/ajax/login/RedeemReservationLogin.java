@@ -63,12 +63,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
@@ -164,7 +166,12 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         LoginServlet.writeSecretCookie(req, resp, session, session.getHash(), req.isSecure(), req.getServerName(), conf);
 
         // Send redirect
-        resp.sendRedirect(generateRedirectURL(session, user.getPreferredLanguage(), conf.getUiWebPath(), conf.getHttpAuthAutoLogin()));
+        String uiWebPath = req.getParameter(LoginFields.UI_WEB_PATH_PARAM);
+        if (Strings.isEmpty(uiWebPath)) {
+            uiWebPath = conf.getUiWebPath();
+        }
+
+        resp.sendRedirect(generateRedirectURL(session, user.getPreferredLanguage(), uiWebPath, conf.getHttpAuthAutoLogin()));
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
