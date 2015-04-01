@@ -50,6 +50,7 @@
 package com.openexchange.saml;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -57,9 +58,12 @@ import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
+import java.security.KeyStore.PasswordProtection;
+import java.security.KeyStore.PrivateKeyEntry;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
+import java.util.Arrays;
 import java.util.Date;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
@@ -74,39 +78,42 @@ import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDSAContentSignerBuilder;
 import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.opensaml.xml.security.credential.BasicCredential;
+import org.opensaml.xml.security.credential.Credential;
+import org.opensaml.xml.security.credential.UsageType;
+import org.opensaml.xml.security.x509.BasicX509Credential;
+import com.openexchange.saml.spi.CredentialProvider;
+import com.openexchange.saml.spi.KeyStoreCredentialProvider;
 
 /**
- * {@link Credentials}
+ * {@link TestCredentials}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class Credentials {
+public class TestCredentials {
 
-    private static final String SP_KEY_STORE_PASSWORD = "lkd789013sd";
+    public static final String SP_KEY_STORE_PASSWORD = "lkd789013sd";
 
-    private static final String SP_ENCRYPTION_CERT_ALIAS = "sp-encryption-cert";
+    public static final String SP_ENCRYPTION_CERT_ALIAS = "sp-encryption-cert";
 
-    private static final String SP_ENCRYPTION_KEY_ALIAS = "sp-encryption-key";
+    public static final String SP_ENCRYPTION_KEY_ALIAS = "sp-encryption-key";
 
-    private static final String SP_ENCRYPTION_KEY_PASSWORD = "fsdafs78";
+    public static final String SP_ENCRYPTION_KEY_PASSWORD = "fsdafs78";
 
-    private static final String SP_SIGNING_KEY_ALIAS = "sp-signing-key";
+    public static final String SP_SIGNING_KEY_ALIAS = "sp-signing-key";
 
-    private static final String SP_SIGNING_KEY_PASSWORD = "cpl#al56df";
+    public static final String SP_SIGNING_KEY_PASSWORD = "cpl#al56df";
 
-    private static final String SP_SIGNING_CERT_ALIAS = "sp-signing-cert";
+    public static final String SP_SIGNING_CERT_ALIAS = "sp-signing-cert";
 
-    private static final String IDP_KEY_STORE_PASSWORD = "dsjk546565";
+    public static final String IDP_KEY_STORE_PASSWORD = "dsjk546565";
 
-    private static final String IDP_SIGNING_KEY_ALIAS = "idp-signing-key";
+    public static final String IDP_SIGNING_KEY_ALIAS = "idp-signing-key";
 
-    private static final String IDP_SIGNING_KEY_PASSWORD = "jh!65gaasa";
+    public static final String IDP_SIGNING_KEY_PASSWORD = "jh!65gaasa";
 
-    private static final String IDP_SIGNING_CERT_ALIAS = "idp-signing-cert";
+    public static final String IDP_SIGNING_CERT_ALIAS = "idp-signing-cert";
 
 
     /**
@@ -117,7 +124,7 @@ public class Credentials {
      * <li>A private key for signing response data</li>
      * </ul>
      */
-    private KeyStore idpKeyStore;
+    private final KeyStore idpKeyStore;
 
     /**
      * KeyStore of the SP. Contains:
@@ -127,10 +134,9 @@ public class Credentials {
      * <li>A certificate of the IDP to validate signed response data</li>
      * </ul>
      */
-    private KeyStore spKeyStore;
+    private final KeyStore spKeyStore;
 
-    @Before
-    public void setup() throws Exception {
+    public TestCredentials() throws Exception {
         KeyPairGenerator dsaGenerator = KeyPairGenerator.getInstance("DSA");
         dsaGenerator.initialize(1024);
         KeyPairGenerator rsaGenerator = KeyPairGenerator.getInstance("RSA");
@@ -167,13 +173,44 @@ public class Credentials {
         spKeyStore.setCertificateEntry(IDP_SIGNING_CERT_ALIAS, idpSigningCert);
     }
 
-    @Test
-    public void testCredentials() throws Exception {
-        Certificate certificate = spKeyStore.getCertificate(IDP_SIGNING_CERT_ALIAS);
-        Assert.assertNotNull(certificate);
-        spKeyStore.store(new FileOutputStream("/tmp/spKeyStore.jks"), SP_KEY_STORE_PASSWORD.toCharArray());
-        idpKeyStore.store(new FileOutputStream("/tmp/idpKeyStore.jks"), IDP_KEY_STORE_PASSWORD.toCharArray());
+    public CredentialProvider getSPCredentialProvider() throws Exception {
+        File tmpFile = File.createTempFile("sp-test-key-store", ".jks");
+        tmpFile.deleteOnExit();
+        spKeyStore.store(new FileOutputStream(tmpFile), SP_KEY_STORE_PASSWORD.toCharArray());
+        return KeyStoreCredentialProvider.newInstance(
+            tmpFile.getAbsolutePath(),
+            SP_KEY_STORE_PASSWORD.toCharArray(),
+            IDP_SIGNING_CERT_ALIAS,
+            SP_SIGNING_KEY_ALIAS,
+            SP_SIGNING_KEY_PASSWORD.toCharArray(),
+            SP_ENCRYPTION_KEY_ALIAS,
+            SP_ENCRYPTION_KEY_PASSWORD.toCharArray());
     }
+
+    public Credential getEncryptionCredential() throws Exception {
+        BasicCredential credential = new BasicCredential();
+        credential.setUsageType(UsageType.ENCRYPTION);
+        Certificate cert = idpKeyStore.getCertificate(SP_ENCRYPTION_CERT_ALIAS);
+        credential.setPublicKey(cert.getPublicKey());
+        return credential;
+    }
+
+    public Credential getDecryptionCredential() throws Exception {
+        BasicCredential credential = new BasicCredential();
+        credential.setUsageType(UsageType.ENCRYPTION);
+        PrivateKeyEntry entry = (PrivateKeyEntry) spKeyStore.getEntry(SP_ENCRYPTION_KEY_ALIAS, new PasswordProtection(SP_ENCRYPTION_KEY_PASSWORD.toCharArray()));
+        credential.setPrivateKey(entry.getPrivateKey());
+        return credential;
+    }
+
+
+//    @Test
+//    public void testCredentials() throws Exception {
+//        Certificate certificate = spKeyStore.getCertificate(IDP_SIGNING_CERT_ALIAS);
+//        Assert.assertNotNull(certificate);
+//        spKeyStore.store(new FileOutputStream("/tmp/spKeyStore.jks"), SP_KEY_STORE_PASSWORD.toCharArray());
+//        idpKeyStore.store(new FileOutputStream("/tmp/idpKeyStore.jks"), IDP_KEY_STORE_PASSWORD.toCharArray());
+//    }
 
     private static Certificate getCertificateForKeyPair(KeyPair keyPair) throws OperatorCreationException, IOException, CertificateException {
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA1with" + keyPair.getPrivate().getAlgorithm());
@@ -207,6 +244,30 @@ public class Credentials {
         } finally {
             is.close();
         }
+    }
+
+    public Credential getIDPSigningCredential() throws Exception {
+        BasicX509Credential signingCredential = new BasicX509Credential();
+        signingCredential.setUsageType(UsageType.SIGNING);
+        PrivateKeyEntry signingKeyEntry = (PrivateKeyEntry) idpKeyStore.getEntry(IDP_SIGNING_KEY_ALIAS, new PasswordProtection(IDP_SIGNING_KEY_PASSWORD.toCharArray()));
+        signingCredential.setPrivateKey(signingKeyEntry.getPrivateKey());
+        Certificate certificate = signingKeyEntry.getCertificate();
+        signingCredential.setEntityCertificate((java.security.cert.X509Certificate) certificate);
+        signingCredential.setEntityCertificateChain(Arrays.asList((java.security.cert.X509Certificate[]) signingKeyEntry.getCertificateChain()));
+
+        return signingCredential;
+    }
+
+    public Credential getSPSigningCredential() throws Exception {
+        BasicX509Credential signingCredential = new BasicX509Credential();
+        signingCredential.setUsageType(UsageType.SIGNING);
+        PrivateKeyEntry signingKeyEntry = (PrivateKeyEntry) spKeyStore.getEntry(SP_SIGNING_KEY_ALIAS, new PasswordProtection(SP_SIGNING_KEY_PASSWORD.toCharArray()));
+        signingCredential.setPrivateKey(signingKeyEntry.getPrivateKey());
+        Certificate certificate = signingKeyEntry.getCertificate();
+        signingCredential.setEntityCertificate((java.security.cert.X509Certificate) certificate);
+        signingCredential.setEntityCertificateChain(Arrays.asList((java.security.cert.X509Certificate[]) signingKeyEntry.getCertificateChain()));
+
+        return signingCredential;
     }
 
 }

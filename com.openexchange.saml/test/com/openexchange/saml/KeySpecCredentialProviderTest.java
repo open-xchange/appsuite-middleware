@@ -58,6 +58,7 @@ import org.opensaml.xml.security.credential.Credential;
 import org.opensaml.xml.util.Base64;
 import com.openexchange.saml.spi.KeySpecCredentialProvider;
 import com.openexchange.saml.spi.KeySpecCredentialProvider.Algorithm;
+import com.openexchange.saml.spi.KeySpecCredentialProvider.SpecContainer;
 
 
 /**
@@ -87,7 +88,7 @@ public class KeySpecCredentialProviderTest {
     public void testSigningWithRawDERKeys() throws Exception {
         X509EncodedKeySpec idpPublicKeySpec = new X509EncodedKeySpec(Base64.decode(B64_DSA_512_DER_PUBLIC_KEY));
         PKCS8EncodedKeySpec idpPrivateKeySpec = new PKCS8EncodedKeySpec(Base64.decode(B64_DSA_512_DER_PRIVATE_KEY));
-        KeySpecCredentialProvider credentialProvider = KeySpecCredentialProvider.newInstance(idpPublicKeySpec, Algorithm.DSA, idpPrivateKeySpec, Algorithm.DSA, null, null);
+        KeySpecCredentialProvider credentialProvider = KeySpecCredentialProvider.newInstance(new SpecContainer(idpPublicKeySpec, null, Algorithm.DSA), new SpecContainer(null, idpPrivateKeySpec, Algorithm.DSA), null);
         Assert.assertTrue(credentialProvider.hasValidationCredential());
         Credential validationCredential = credentialProvider.getValidationCredential();
         Assert.assertNotNull(validationCredential);
