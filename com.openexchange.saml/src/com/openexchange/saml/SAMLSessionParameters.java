@@ -56,7 +56,7 @@ package com.openexchange.saml;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
-public class SAMLSessionProperties {
+public class SAMLSessionParameters {
 
     /**
      * com.openexchange.saml.Authenticated

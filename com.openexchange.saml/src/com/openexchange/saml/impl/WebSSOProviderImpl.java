@@ -64,6 +64,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
+import java.util.zip.Inflater;
 import java.util.zip.InflaterInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -121,7 +122,7 @@ import com.openexchange.saml.OpenSAML;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLConfig.Binding;
 import com.openexchange.saml.SAMLExceptionCode;
-import com.openexchange.saml.SAMLSessionProperties;
+import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.saml.SAMLWebSSOProvider;
 import com.openexchange.saml.spi.AuthenticationInfo;
 import com.openexchange.saml.spi.CredentialProvider;
@@ -494,14 +495,14 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         logoutRequest.setVersion(SAMLVersion.VERSION_20);
         logoutRequest.setReason(LogoutRequest.USER_REASON);
         logoutRequest.setNotOnOrAfter(new DateTime(System.currentTimeMillis() + LOGOUT_REQUEST_TIMEOUT));
-        String sessionIndex = (String) session.getParameter(SAMLSessionProperties.SESSION_INDEX);
+        String sessionIndex = (String) session.getParameter(SAMLSessionParameters.SESSION_INDEX);
         if (sessionIndex != null) {
             SessionIndex indexElement = openSAML.buildSAMLObject(SessionIndex.class);
             indexElement.setSessionIndex(sessionIndex);
             logoutRequest.getSessionIndexes().add(indexElement);
         }
 
-        String subjectID = (String) session.getParameter(SAMLSessionProperties.SUBJECT_ID);
+        String subjectID = (String) session.getParameter(SAMLSessionParameters.SUBJECT_ID);
         if (subjectID != null) {
             try {
                 SAMLObject subjectIDElement = openSAML.unmarshall(SAMLObject.class, subjectID);
@@ -626,11 +627,11 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         if (numIndexes > 0) {
             String filterString;
             if (numIndexes == 1) {
-                filterString = "(" + SAMLSessionProperties.SESSION_INDEX + "=" + sessionIndexes.get(0).getSessionIndex() + ")";
+                filterString = "(" + SAMLSessionParameters.SESSION_INDEX + "=" + sessionIndexes.get(0).getSessionIndex() + ")";
             } else {
                 StringBuilder fsBuilder = new StringBuilder(128).append("(|");
                 for (SessionIndex sessionIndex : sessionIndexes) {
-                    fsBuilder.append("(" + SAMLSessionProperties.SESSION_INDEX + "=" + sessionIndex.getSessionIndex() + ")");
+                    fsBuilder.append("(" + SAMLSessionParameters.SESSION_INDEX + "=" + sessionIndex.getSessionIndex() + ")");
                 }
                 fsBuilder.append(')');
                 filterString = fsBuilder.toString();
@@ -680,7 +681,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
              * We need this for subsequent logout requests. However if the IDP does not comply to the specification,
              * the attribute might be missing.
              */
-            properties.put(SAMLSessionProperties.SESSION_INDEX, sessionIndex);
+            properties.put(SAMLSessionParameters.SESSION_INDEX, sessionIndex);
         }
 
         String sessionNotOnOrAfter = extractSessionNotOnOrAfter(bearerAssertion);
@@ -694,7 +695,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
              *
              * The SAMLSessionInspector takes care of that parameter and logs out expired sessions if necessary.
              */
-            properties.put(SAMLSessionProperties.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
+            properties.put(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER, sessionNotOnOrAfter);
         }
 
         /*
@@ -704,14 +705,14 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
          */
         String subjectID = extractSubjectID(bearerAssertion);
         if (subjectID != null) {
-            properties.put(SAMLSessionProperties.SUBJECT_ID, subjectID);
+            properties.put(SAMLSessionParameters.SUBJECT_ID, subjectID);
         }
 
         /*
          * This parameter must be checked within the AuthenticationService implementation. If not set, the login request is triggered
          * by any other authentication mechanism (e.g. HTTP Basic Auth) and its credentials must be checked.
          */
-        properties.put(SAMLSessionProperties.AUTHENTICATED, Boolean.TRUE.toString());
+        properties.put(SAMLSessionParameters.AUTHENTICATED, Boolean.TRUE.toString());
     }
 
     private String compileAuthnRequestRedirectURI(String authnRequestXML, String relayState) throws OXException {
@@ -915,7 +916,7 @@ public class WebSSOProviderImpl implements SAMLWebSSOProvider {
         try {
             if (binding == Binding.HTTP_REDIRECT) {
                 // bytes are deflated in redirect binding
-                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes)));
+                return openSAML.getParserPool().parse(new InflaterInputStream(new ByteArrayInputStream(requestBytes), new Inflater(true)));
             } else {
                 return openSAML.getParserPool().parse(new ByteArrayInputStream(requestBytes));
             }

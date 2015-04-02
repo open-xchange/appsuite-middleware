@@ -113,7 +113,11 @@ public class SignatureHelper {
 
         String queryString = httpRequest.getQueryString();
         StringBuilder signedContent = new StringBuilder();
-        signedContent.append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SAMLRequest"));
+        if (httpRequest.getParameter("SAMLRequest") != null) {
+            signedContent.append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SAMLRequest"));
+        } else {
+            signedContent.append(HTTPTransportUtils.getRawQueryStringParameter(queryString, "SAMLResponse"));
+        }
         String rawRelayState = HTTPTransportUtils.getRawQueryStringParameter(queryString, "RelayState");
         if (rawRelayState != null) {
             signedContent.append('&').append(rawRelayState);

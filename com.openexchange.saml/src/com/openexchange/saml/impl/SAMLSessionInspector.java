@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.saml.SAMLSessionProperties;
+import com.openexchange.saml.SAMLSessionParameters;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
 import com.openexchange.session.inspector.Reason;
@@ -82,7 +82,7 @@ public class SAMLSessionInspector implements SessionInspectorService {
 
     @Override
     public Reply onSessionHit(Session session, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        Object parameter = session.getParameter(SAMLSessionProperties.SESSION_NOT_ON_OR_AFTER);
+        Object parameter = session.getParameter(SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER);
         if (parameter != null && parameter instanceof String) {
             try {
                 long notOnOrAfter = Long.parseLong((String) parameter);
@@ -91,7 +91,7 @@ public class SAMLSessionInspector implements SessionInspectorService {
                     throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
                 }
             } catch (NumberFormatException e) {
-                LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SAMLSessionProperties.SESSION_NOT_ON_OR_AFTER, parameter);
+                LOG.warn("Session contained parameter '{}' but its value was not a valid timestamp: {}", SAMLSessionParameters.SESSION_NOT_ON_OR_AFTER, parameter);
             }
         }
 

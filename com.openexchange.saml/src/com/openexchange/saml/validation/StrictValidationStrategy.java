@@ -535,7 +535,7 @@ public class StrictValidationStrategy implements ValidationStrategy {
          * [bindings 05 - 3.4.5.2p19/3.5.5.2p24]
          */
         boolean allowNullDestination = !((binding == Binding.HTTP_POST || binding == Binding.HTTP_REDIRECT) && response.isSigned());
-        responseValidators.add(new ResponseDestinationValidator(config.getAssertionConsumerServiceURL(), allowNullDestination));
+        responseValidators.add(new ResponseDestinationValidator(config.getSingleLogoutServiceURL(), allowNullDestination));
 
         /*
          * The status code of the response must be 'urn:oasis:names:tc:SAML:2.0:status:Success'
