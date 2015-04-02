@@ -321,7 +321,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
 
                 ImapIdlePushListener newListener = listeners.get(key);
-                return newListener.isPermanent() ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
+                return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
             return StopResult.NONE;
         }
