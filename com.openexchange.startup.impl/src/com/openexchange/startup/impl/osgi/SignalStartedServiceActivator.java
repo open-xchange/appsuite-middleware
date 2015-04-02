@@ -49,14 +49,8 @@
 
 package com.openexchange.startup.impl.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import org.slf4j.Logger;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.startup.SignalStartedService;
-import com.openexchange.startup.impl.SignalStartedServiceImpl;
 
 /**
  * {@link SignalStartedServiceActivator}
