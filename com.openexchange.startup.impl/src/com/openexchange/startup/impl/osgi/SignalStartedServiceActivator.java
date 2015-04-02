@@ -77,8 +77,6 @@ public final class SignalStartedServiceActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        cleanUp();
-
         super.stopBundle();
     }
 
