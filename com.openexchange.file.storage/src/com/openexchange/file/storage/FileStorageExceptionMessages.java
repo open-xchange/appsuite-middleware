@@ -142,6 +142,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The associated %2$s account does no more exist
     public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
 
+    // Individual permissions are not supported in account \"%1$s\".
+    public static final String NO_PERMISSION_SUPPORT_MSG = "Individual permissions are not supported in account \"%1$s\".";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

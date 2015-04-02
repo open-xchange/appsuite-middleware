@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.containsForeignPermissions;
 import static com.openexchange.file.storage.composition.internal.FileStorageTools.getEventProperties;
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withRelativeID;
 import static com.openexchange.file.storage.composition.internal.IDManglingFolder.withUniqueID;
@@ -66,7 +67,6 @@ import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.DefaultTypeAwareFileStorageFolder;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -74,6 +74,7 @@ import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.composition.FolderID;
@@ -106,7 +107,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FolderID folderID = new FolderID(folderId);
         try {
             return getFolderAccess(folderID).exists(folderID.getFolderId());
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (FileStorageExceptionCodes.UNKNOWN_FILE_STORAGE_SERVICE.equals(e)) {
                 return false;
             }
@@ -146,17 +147,23 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     public String createFolder(FileStorageFolder toCreate) throws OXException {
         FolderID parentFolderID = new FolderID(toCreate.getParentId());
         FileStorageFolderAccess folderAccess = getFolderAccess(parentFolderID);
+        if (containsForeignPermissions(session.getUserId(), toCreate) && false == PermissionAware.class.isInstance(folderAccess)) {
+            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, parentFolderID), parentFolderID, session.getContextId()); 
+        }
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(parentFolderID.getFolderId());
         String newID = folderAccess.createFolder(withRelativeID(toCreate));
         FolderID newFolderID = new FolderID(parentFolderID.getService(), parentFolderID.getAccountId(), newID);
         fire(new Event(FileStorageEventConstants.CREATE_FOLDER_TOPIC, getEventProperties(session, newFolderID, path)));
         return newFolderID.toUniqueID();
     }
-
+    
     @Override
     public String updateFolder(String identifier, FileStorageFolder toUpdate) throws OXException {
         FolderID folderID = new FolderID(identifier);
         FileStorageFolderAccess folderAccess = getFolderAccess(folderID);
+        if (containsForeignPermissions(session.getUserId(), toUpdate) && false == PermissionAware.class.isInstance(folderAccess)) {
+            throw FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(FileStorageTools.getAccountName(this, folderID), folderID, session.getContextId()); 
+        }
         FileStorageFolder[] path = folderAccess.getPath2DefaultFolder(folderID.getFolderId());
         String newID = folderAccess.updateFolder(folderID.getFolderId(), withRelativeID(toUpdate));
         FolderID newFolderID = new FolderID(folderID.getService(), folderID.getAccountId(), newID);
@@ -329,38 +336,30 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     }
 
     @Override
-    public FileStorageFolder[] getRootFolders(final Locale locale) throws OXException {
-        // Sort according to account name
-        List<AccessWrapper> accessWrappers = getAllAccountAccesses();
-        Collections.sort(accessWrappers, new AccessWrapperComparator(locale == null ? Locale.US : locale));
-
-        // Get root folders
-        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(accessWrappers.size());
-        for (AccessWrapper accessWrapper : accessWrappers) {
-            FileStorageAccountAccess accountAccess = accessWrapper.accountAccess;
-            folders.add(getRootFolder(session.getUserId(), accountAccess.getService().getId(), accountAccess.getAccountId(), accessWrapper.displayName));
-        }
-
-        return folders.toArray(new FileStorageFolder[folders.size()]);
-    }
-
-    protected List<AccessWrapper> getAllAccountAccesses() throws OXException {
-        List<FileStorageService> allFileStorageServices = getFileStorageServiceRegistry().getAllServices();
-        List<AccessWrapper> accountAccesses = new ArrayList<AccessWrapper>(allFileStorageServices.size());
-        for (FileStorageService fsService : allFileStorageServices) {
+    public FileStorageFolder[] getRootFolders(Locale locale) throws OXException {
+        /*
+         * get root folder for all accounts from all filestorage services
+         */
+        List<FileStorageFolder> rootFolders = new ArrayList<FileStorageFolder>();
+        for (FileStorageService service : getFileStorageServiceRegistry().getAllServices()) {
             List<FileStorageAccount> accounts = null;
-            if (fsService instanceof AccountAware) {
-                accounts = ((AccountAware)fsService).getAccounts(session);
+            if (AccountAware.class.isInstance(service)) {
+                accounts = ((AccountAware) service).getAccounts(session);
             }
             if (null == accounts) {
-                accounts = fsService.getAccountManager().getAccounts(session);
+                accounts = service.getAccountManager().getAccounts(session);
             }
-            for (FileStorageAccount fileStorageAccount : accounts) {
-                FileStorageAccountAccess accountAccess = getAccountAccess(fsService.getId(), fileStorageAccount.getId());
-                accountAccesses.add(new AccessWrapper(accountAccess, fileStorageAccount.getDisplayName()));
+            for (FileStorageAccount account : accounts) {
+                rootFolders.add(getRootFolder(session.getUserId(), service.getId(), account.getId(), account.getDisplayName()));
             }
         }
-        return accountAccesses;
+        /*
+         * sort them by display/account name & return
+         */
+        if (1 < rootFolders.size()) {
+            Collections.sort(rootFolders, new FolderComparator(locale));
+        }
+        return rootFolders.toArray(new FileStorageFolder[rootFolders.size()]);
     }
 
     private void fire(final Event event) {
@@ -385,7 +384,7 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
         FileStorageAccount account = serviceRegistry.getFileStorageService(serviceID).getAccountManager().getAccount(accountID, session);
         return getRootFolder(session.getUserId(), serviceID, accountID, account.getDisplayName());
     }
-
+    
     /**
      * Creates a file storage root folder for a specific file storage account.
      *
@@ -438,34 +437,26 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     private static boolean isSameAccount(FolderID folderID1, FolderID folderID2) {
         return folderID1.getService().equals(folderID2.getService()) && folderID1.getAccountId().equals(folderID2.getAccountId());
     }
-
-    private static final class AccessWrapper {
-
-        final FileStorageAccountAccess accountAccess;
-        final String displayName;
-
-        AccessWrapper(FileStorageAccountAccess accountAccess, String displayName) {
-            super();
-            this.accountAccess = accountAccess;
-            this.displayName = displayName;
-        }
-
-    }
-
-    private static final class AccessWrapperComparator implements Comparator<AccessWrapper> {
+    
+    private static final class FolderComparator implements Comparator<FileStorageFolder> {
 
         private final Collator collator;
 
-        AccessWrapperComparator(final Locale locale) {
+        /**
+         * Initializes a new {@link FolderComparator}.
+         * 
+         * @param locale The locale to use, or <code>null</code> to fall back to the default locale
+         */
+        public FolderComparator(Locale locale) {
             super();
-            collator = Collators.getSecondaryInstance(locale);
+            collator = Collators.getSecondaryInstance(null == locale ? Locale.US : locale);
         }
 
         @Override
-        public int compare(final AccessWrapper o1, final AccessWrapper o2) {
-            return collator.compare(o1.displayName, o2.displayName);
+        public int compare(FileStorageFolder folder1, FileStorageFolder folder2) {
+            return collator.compare(folder1.getName(), folder2.getName());
         }
 
-    } // End of FileStorageAccountComparator
+    }
 
 }

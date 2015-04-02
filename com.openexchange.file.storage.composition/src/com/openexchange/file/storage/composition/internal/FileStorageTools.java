@@ -62,20 +62,21 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageETagProvider;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
+import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper.EventProperty;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
-import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
+import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
-import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
@@ -311,5 +312,49 @@ public class FileStorageTools {
         }
         return stringBuilder.toString();
     }
+
+    /**
+     * Gets a value indicating whether the supplied folder contains permissions for entities other than the supplied current user.
+     * 
+     * @param userID The entity identifier of the user that should be considered as "not" foreign
+     * @param folder The folder to check
+     * @return <code>true</code> if foreign permissions were found, <code>false</code>, otherwise
+     */
+    public static boolean containsForeignPermissions(int userID, FileStorageFolder folder) {
+        List<FileStoragePermission> permissions = folder.getPermissions();
+        if (null != permissions && 0 < permissions.size()) {
+            for (FileStoragePermission permission : permissions) {
+                if (permission.getEntity() != userID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * Gets the display name for a specific file storage account.   
+     * 
+     * @param compositingAccess a reference to the compositing access
+     * @param serviceID The service identifier to get the account name for
+     * @param accountID The account identifier to get the account name for
+     * @return The account name
+     */
+    public static String getAccountName(AbstractCompositingIDBasedAccess compositingAccess, String serviceID, String accountID) throws OXException {
+        return compositingAccess.getAccountAccess(serviceID, accountID).getService().getAccountManager()
+            .getAccount(accountID, compositingAccess.getSession()).getDisplayName();
+    }
+
+    /**
+     * Gets the display name for the file storage account of a specific folder.   
+     * 
+     * @param compositingAccess a reference to the compositing access
+     * @param folderID The identifier of the folder to get the account name for
+     * @return The account name
+     */
+    public static String getAccountName(AbstractCompositingIDBasedAccess compositingAccess, FolderID folderID) throws OXException {
+        return getAccountName(compositingAccess, folderID.getService(), folderID.getAccountId());
+    }
+
 
 }

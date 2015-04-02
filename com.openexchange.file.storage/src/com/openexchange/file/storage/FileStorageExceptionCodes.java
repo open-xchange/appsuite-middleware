@@ -292,6 +292,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * The file %1$s doesn't have any content.
      */
     NO_CONTENT("The file %1$s doesn't have any content.", Category.CATEGORY_ERROR, 57, FileStorageExceptionMessages.NO_CONTENT_MSG),
+    /**
+     * Individual permissions are not supported in account \"%1$s\". | No permission support in account \"%1$s\" (folder \"%2$s\", context %3$s.)
+     */
+    NO_PERMISSION_SUPPORT("No permission support in account \"%1$s\" (folder \"%2$s\", context %3$s.)", Category.CATEGORY_ERROR, 58, FileStorageExceptionMessages.NO_PERMISSION_SUPPORT_MSG),
 
     ;
 

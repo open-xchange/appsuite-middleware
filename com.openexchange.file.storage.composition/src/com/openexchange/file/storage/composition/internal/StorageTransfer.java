@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getAccountName;
+import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -61,11 +63,10 @@ import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
-import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
@@ -75,7 +76,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tx.ConnectionHolder;
-import static com.openexchange.file.storage.composition.internal.FileStorageTools.getPathString;
 
 /**
  * {@link StorageTransfer}
@@ -254,46 +254,30 @@ public class StorageTransfer {
         List<OXException> warnings = new ArrayList<OXException>();
         if (false == Strings.isEmpty(sourceFile.getDescription())) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_NOTES.create(sourceFile.getFileName(), getPathString(sourcePath),
-                getAccountName(targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
+                getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (false == Strings.isEmpty(sourceFile.getCategories())) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_CATEGORIES.create(sourceFile.getFileName(), getPathString(sourcePath),
-                getAccountName(targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
+                getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (1 < sourceFile.getNumberOfVersions() && false == FileStorageTools.supports(targetFileAccess, FileStorageCapability.FILE_VERSIONS)) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_VERSIONS.create(sourceFile.getFileName(), getPathString(sourcePath),
-                getAccountName(targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
+                getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
         if (null != sourceFile.getObjectPermissions() && 0 < sourceFile.getObjectPermissions().size()) {
             warnings.add(FileStorageExceptionCodes.LOSS_OF_FILE_SHARES.create(sourceFile.getFileName(), getPathString(sourcePath),
-                getAccountName(targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
+                getAccountName(compositingAccess, targetFolderID), getFileID(sourceFileAccess, sourceFile).toUniqueID(), targetFolderID.toUniqueID()));
         }
         return warnings;
     }
 
     private List<OXException> collectWarnings(FileStorageFolder sourceFolder, FileStorageFolder[] sourcePath, FolderID targetParentFolderID) throws OXException {
         ArrayList<OXException> warnings = new ArrayList<OXException>();
-        if (null != sourceFolder.getPermissions()) {
-            int userID = compositingAccess.getSession().getUserId();
-            for (FileStoragePermission permission : sourceFolder.getPermissions()) {
-                if (userID != permission.getEntity()) {
-                    OXException warning = FileStorageExceptionCodes.LOSS_OF_FOLDER_SHARES.create(getPathString(sourcePath),
-                        getAccountName(targetParentFolderID), getFolderID(sourceFileAccess, sourceFolder).toUniqueID(), targetParentFolderID.toUniqueID());
-                    warnings.add(warning);
-                    break;
-                }
-            }
+        if (FileStorageTools.containsForeignPermissions(compositingAccess.getSession().getUserId(), sourceFolder)) {
+            warnings.add(FileStorageExceptionCodes.LOSS_OF_FOLDER_SHARES.create(getPathString(sourcePath),
+                getAccountName(compositingAccess, targetParentFolderID), getFolderID(sourceFileAccess, sourceFolder).toUniqueID(), targetParentFolderID.toUniqueID()));
         }
         return warnings;
-    }
-
-    private String getAccountName(String serviceID, String accountID) throws OXException {
-        return compositingAccess.getAccountAccess(serviceID, accountID).getService().getAccountManager()
-            .getAccount(accountID, compositingAccess.getSession()).getDisplayName();
-    }
-
-    private String getAccountName(FolderID folderID) throws OXException {
-        return getAccountName(folderID.getService(), folderID.getAccountId());
     }
 
     private static FileID getFileID(FileStorageFileAccess fileAccess, File file) {

@@ -164,8 +164,11 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
     // void checkDefaultFolders() throws OXException;
 
     /**
-     * Creates a new file storage folder with attributes taken from given file storage folder description
-     *
+     * Creates a new file storage folder with attributes taken from given file storage folder description.
+     * <p>
+     * <b>Note</b>: If underlying file storage system does not support the capability to store an attribute, the creation fails with an 
+     * exception.
+     * 
      * @param toCreate The file storage folder to create
      * @return The identifier of the created file storage folder
      * @throws OXException If creation fails
@@ -183,7 +186,7 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      * </ul>
      * Of course more folder attributes may be checked by implementation to enhance update operations.
      * <p>
-     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update is treated as a no-op.
+     * <b>Note</b>: If underlying file storage system does not support the corresponding capability, the update fails with an exception.
      *
      * @param identifier The identifier of the file storage folder to update
      * @param toUpdate The file storage folder to update containing only the modified fields
