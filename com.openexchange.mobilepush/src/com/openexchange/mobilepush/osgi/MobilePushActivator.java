@@ -50,9 +50,7 @@
 package com.openexchange.mobilepush.osgi;
 
 import com.openexchange.ajax.requesthandler.Dispatcher;
-import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.mobilepush.loginhandler.SessionToucher;
 import com.openexchange.mobilepush.rampup.MobileLoginRampUp;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -77,7 +75,7 @@ public class MobilePushActivator extends HousekeepingActivator {
         try {
             logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
             registerService(LoginRampUpService.class, new MobileLoginRampUp(this));
-            registerService(LoginHandlerService.class, new SessionToucher(this));
+            // registerService(LoginHandlerService.class, new com.openexchange.mobilepush.loginhandler.SessionToucher(this));
         } catch (Exception e) {
             logger.error("starting bundle {} failed: ", context.getBundle().getSymbolicName(), e);
             throw e;
