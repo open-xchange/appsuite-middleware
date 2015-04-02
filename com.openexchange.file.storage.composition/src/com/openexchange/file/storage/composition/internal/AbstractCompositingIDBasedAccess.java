@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,12 +163,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         List<FileStorageAccountAccess> accesses = accessesToClose.get();
         for (FileStorageAccountAccess access : accesses) {
             if (WarningsAware.class.isInstance(access)) {
-                List<OXException> warnings = ((WarningsAware) access).getAndFlushWarnings();
-                if (null != warnings && 0 < warnings.size()) {
-                    for (OXException warning : warnings) {
-                        warningsAware.addWarning(warning);
-                    }
-                }
+                addWarnings(((WarningsAware) access).getAndFlushWarnings());
             }
             access.close();
         }
@@ -204,6 +200,19 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
      */
     protected Session getSession() {
         return session;
+    }
+
+    /**
+     * Adds multiple warnings.
+     * 
+     * @param warnings The warnings to add
+     */
+    protected void addWarnings(Collection<OXException> warnings) {
+        if (null != warnings && 0 < warnings.size()) {
+            for (OXException warning : warnings) {
+                warningsAware.addWarning(warning);
+            }
+        }
     }
 
     /**

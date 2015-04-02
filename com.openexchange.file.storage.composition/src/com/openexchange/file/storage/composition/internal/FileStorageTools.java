@@ -65,6 +65,7 @@ import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper.EventProperty;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageExtendedMetadata;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -78,6 +79,7 @@ import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.ThumbnailAware;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.log.LogProperties;
@@ -94,7 +96,7 @@ import com.openexchange.tools.iterator.SearchIterators;
 public class FileStorageTools {
 
     /**
-     * Gets a value indicating whether a specific account supports one or more capabilities.
+     * Gets a value indicating whether a specific account supports a specific capability.
      *
      * @param fileAccess The file access reference to check the capability for
      * @param capability The capability to check
@@ -128,10 +130,27 @@ public class FileStorageTools {
             return ObjectPermissionAware.class.isInstance(fileAccess);
         case RANGES:
             return FileStorageRangeFileAccess.class.isInstance(fileAccess);
+        case EXTENDED_METADATA:
+            return FileStorageExtendedMetadata.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageTools.class).warn("Unknown capability: {}", capability);
             return false;
         }
+    }
+
+    /**
+     * Gets a value indicating whether a specific account supports storing a specific file metadata field.
+     *
+     * @param fileAccess The file access reference to check the capability for
+     * @param field The field to check
+     * @return <code>true</code> if extended metadata and the field itself is supported, <code>false</code>, otherwise
+     */
+    public static boolean supports(FileStorageFileAccess fileAccess, File.Field field) throws OXException {
+        if (supports(fileAccess, FileStorageCapability.EXTENDED_METADATA)) {
+            List<Field> supportedFields = ((FileStorageExtendedMetadata) fileAccess).getSupportedFields();
+            return null != supportedFields && supportedFields.contains(field);
+        }
+        return false;
     }
 
     /**
@@ -348,7 +367,7 @@ public class FileStorageTools {
     /**
      * Gets the display name for the file storage account of a specific folder.   
      * 
-     * @param compositingAccess a reference to the compositing access
+     * @param compositingAccess A reference to the compositing access
      * @param folderID The identifier of the folder to get the account name for
      * @return The account name
      */
@@ -356,5 +375,28 @@ public class FileStorageTools {
         return getAccountName(compositingAccess, folderID.getService(), folderID.getAccountId());
     }
 
+    /**
+     * Gets the display name for the file storage account of a specific file.   
+     * 
+     * @param compositingAccess A reference to the compositing access
+     * @param fileID The identifier of the file to get the account name for
+     * @return The account name
+     */
+    public static String getAccountName(AbstractCompositingIDBasedAccess compositingAccess, FileID fileID) throws OXException {
+        return getAccountName(compositingAccess, fileID.getService(), fileID.getAccountId());
+    }
+
+    /**
+     * Gets the display name for the file storage account of a specific storage service.   
+     * 
+     * @param compositingAccess A reference to the compositing access
+     * @param compositingAccess A reference to the compositing access
+     * @return The account name
+     */
+    public static String getAccountName(AbstractCompositingIDBasedAccess compositingAccess, FileStorageFileAccess fileAccess) throws OXException {
+        String accountID = fileAccess.getAccountAccess().getAccountId();
+        String serviceID = fileAccess.getAccountAccess().getService().getId();
+        return getAccountName(compositingAccess, serviceID, accountID); 
+    }
 
 }

@@ -230,14 +230,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
             }
         }
         /*
-         * take over any warnings
+         * take over any warnings & return resulting folder identifier
          */
-        List<OXException> warnings = transferResult.getWarnings(true);
-        if (null != warnings && 0 < warnings.size()) {
-            for (OXException warning : warnings) {
-                this.addWarning(warning);
-            }
-        }
+        addWarnings(transferResult.getWarnings(true));
         return dryRun ? null : transferResult.getTargetFolderID().toUniqueID();
     }
 

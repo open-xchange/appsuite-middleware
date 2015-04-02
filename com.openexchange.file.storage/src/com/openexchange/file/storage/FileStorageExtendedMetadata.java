@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
 
-import com.openexchange.exception.OXException;
+import java.util.List;
 
 /**
- * {@link IDBasedRandomFileAccess}
+ * {@link FileStorageExtendedMetadata}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- *
- * @deprecated Use {@link IDBasedFileAccess#supports(String, String, FileStorageCapability...)} with
- *             {@link FileStorageCapability#RANDOM_FILE_ACCESS} instead.
  */
-@Deprecated
-public interface IDBasedRandomFileAccess extends IDBasedIgnorableVersionFileAccess {
+public interface FileStorageExtendedMetadata {
 
     /**
-     * Gets a value indicating whether random file access is supported for the supplied service/account or not.
-     *
-     * @param serviceId The service ID
-     * @param accountId The account ID
-     * @return <code>true</code> if random access file operations are supported, <code>false</code>, otherwise
-     * @throws OXException
+     * Gets a list of extended file metadata fields that are supported by the storage.
+     * 
+     * @return The supported metadata fields
      */
-    boolean supportsRandomFileAccess(String serviceId, String accountId) throws OXException;
-
+    List<File.Field> getSupportedFields();
+    
 }

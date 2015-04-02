@@ -241,7 +241,7 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     LOSS_OF_FOLDER_SHARES("Metadata of folder \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 44, FileStorageExceptionMessages.LOSS_OF_FOLDER_SHARES_MSG),
     /**
-     * File update aborted: %2$s
+     * The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details. | File update aborted: %2$s
      */
     FILE_UPDATE_ABORTED("File update aborted: %2$s", Category.CATEGORY_CONFLICT, 45, FileStorageExceptionMessages.FILE_UPDATE_ABORTED_MSG),
     /**
@@ -296,6 +296,18 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Individual permissions are not supported in account \"%1$s\". | No permission support in account \"%1$s\" (folder \"%2$s\", context %3$s.)
      */
     NO_PERMISSION_SUPPORT("No permission support in account \"%1$s\" (folder \"%2$s\", context %3$s.)", Category.CATEGORY_ERROR, 58, FileStorageExceptionMessages.NO_PERMISSION_SUPPORT_MSG),
+    /**
+     * Saving notes for file \"%1$s\" is not supported in account \"%2$s\". | Metadata of file \"%3$s\" not supported in target folder \"%4$s\"
+     */
+    NO_NOTES_SUPPORT("Metadata of file \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 59, FileStorageExceptionMessages.NO_NOTES_SUPPORT_MSG),
+    /**
+     * Assigning categories to file \"%1$s\" is not supported in account \"%2$s\". | Metadata of file \"%3$s\" not supported in target folder \"%4$s\"
+     */
+    NO_CATEGORIES_SUPPORT("Metadata of file \"%3$s\" not supported in target folder \"%4$s\"", CATEGORY_WARNING, 60, FileStorageExceptionMessages.NO_CATEGORIES_SUPPORT_MSG),
+    /**
+     * The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details. | File save aborted: %2$s
+     */
+    FILE_SAVE_ABORTED("File save aborted: %2$s", Category.CATEGORY_CONFLICT, 61, FileStorageExceptionMessages.FILE_SAVE_ABORTED_MSG),
 
     ;
 

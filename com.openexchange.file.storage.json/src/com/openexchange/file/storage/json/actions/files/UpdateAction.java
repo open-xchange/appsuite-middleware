@@ -98,22 +98,17 @@ public class UpdateAction extends AbstractWriteAction {
         }
         FileID id = new FileID(file.getId());
         IDBasedFileAccess fileAccess = request.getFileAccess();
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
 
+        String newId;
         if (request.hasUploads()) {
             // Save file metadata with binary payload
-            String result;
-            if (request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION)) {
-                result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), true);
-            } else {
-                result = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns());
-            }
-            return request.extendedResponse() ? result(fileAccess.getFileMetadata(result, FileStorageFileAccess.CURRENT_VERSION), request) : success(file.getSequenceNumber());
+            boolean ignoreVersion = request.getBoolParameter("ignoreVersion") && fileAccess.supports(id.getService(), id.getAccountId(), FileStorageCapability.IGNORABLE_VERSION); 
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), request.getTimestamp(), request.getSentColumns(), ignoreVersion, ignoreWarnings);
+        } else {
+            // Save file metadata without binary payload
+            newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns(), ignoreWarnings);
         }
-
-        // Save file metadata without binary payload
-        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
-        String newId = fileAccess.saveFileMetadata(file, request.getTimestamp(), request.getSentColumns(), ignoreWarnings);
-
         // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
         AJAXRequestResult result;
         if (null != newId && request.extendedResponse()) {
@@ -123,35 +118,10 @@ public class UpdateAction extends AbstractWriteAction {
         }
         Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
         result.addWarnings(warnings);
-        if ((null == newId) && (null != warnings) && (false == warnings.isEmpty()) && (false == ignoreWarnings)) {
+        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
             result.setException(FileStorageExceptionCodes.FILE_UPDATE_ABORTED.create(getFilenameSave(file, id, fileAccess), id.toUniqueID()));
         }
         return result;
-    }
-
-    private static String getFilenameSave(File file, FileID id, IDBasedFileAccess fileAccess) {
-        String name = file.getFileName();
-        if (null != name) {
-            return name;
-        }
-        name = file.getTitle();
-        if (null != name) {
-            return name;
-        }
-        if (null != id && null != fileAccess) {
-            try {
-                File metadata = fileAccess.getFileMetadata(id.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                if (null != metadata) {
-                    name = metadata.getFileName();
-                    if (null == name) {
-                        name = metadata.getTitle();
-                    }
-                }
-            } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(UpdateAction.class).debug("Error getting name for file {}: {}", id, e.getMessage(), e);
-            }
-        }
-        return name;
     }
 
 }
