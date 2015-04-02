@@ -677,7 +677,11 @@ public final class SessionUtility {
     }
 
     private static String detectClientId(Session session, HttpServletRequest req) {
-        return null == session ? (null == req ? null : req.getParameter("client")) : session.getClient();
+        String clientByRequest = null == req ? null : req.getParameter("client");
+        if (null != clientByRequest) {
+            return clientByRequest;
+        }
+        return null == session ? null : session.getClient();
     }
 
     private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));
