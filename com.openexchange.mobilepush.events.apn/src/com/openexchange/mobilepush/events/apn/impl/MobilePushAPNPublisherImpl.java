@@ -266,7 +266,6 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
 
     private PushNotificationPayload constructPayload(MobilePushEvent event) throws JSONException {
         PushNotificationPayload payload = new PushNotificationPayload();
-        payload.addSound("beep.wav");
         Map<String, Object> messageData = event.getMessageData();
 
         String subject = MailPushUtility.getSubject(messageData);
