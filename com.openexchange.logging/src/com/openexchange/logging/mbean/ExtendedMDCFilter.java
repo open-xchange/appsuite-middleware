@@ -97,7 +97,7 @@ public class ExtendedMDCFilter extends TurboFilter {
         boolean loggerCheck = false;
         if (check) {
             for (String s : levels.keySet()) {
-                if (logger.getName().startsWith(s) && level.levelInt >= levels.get(s).levelInt) {
+                if (logger.getName().startsWith(s) && level.levelInt <= levels.get(s).levelInt) {
                     loggerCheck = true;
                     break;
                 }
