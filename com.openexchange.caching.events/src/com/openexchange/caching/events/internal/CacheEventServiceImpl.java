@@ -137,6 +137,8 @@ public final class CacheEventServiceImpl implements CacheEventService, CacheEven
                         if (leave) {
                             return;
                         }
+                    } catch (InterruptedException e) {
+                        LOG.debug("Interrupted while checking for delayed cache events", e);
                     } catch (Exception e) {
                         LOG.error("Checking for delayed cache events failed", e);
                     }
