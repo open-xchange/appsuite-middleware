@@ -1781,6 +1781,11 @@ msgstr ""
 msgid "The associated %2$s account does no more exist"
 msgstr ""
 
+#. Individual permissions are not supported in account \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+msgid "Individual permissions are not supported in account \"%1$s\"."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
