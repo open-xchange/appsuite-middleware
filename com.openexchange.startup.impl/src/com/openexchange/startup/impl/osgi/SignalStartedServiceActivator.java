@@ -60,8 +60,6 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public final class SignalStartedServiceActivator extends HousekeepingActivator {
 
-//    private volatile ServiceRegistration<SignalStartedService> registration;
-
     /**
      * Initializes a new {@link SignalStartedServiceActivator}.
      */
@@ -70,19 +68,14 @@ public final class SignalStartedServiceActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
+    }
+
+    @Override
     protected void startBundle() throws Exception {
         track(DBMigrationMonitorService.class, new DBMigrationMonitorTracker(context));
         openTrackers();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-    }
-
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
 }
