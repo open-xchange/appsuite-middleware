@@ -142,8 +142,6 @@ public class AdminActivator extends HousekeepingActivator {
         track(Remote.class, new OXContextInterfaceTracker(context)).open();
         UserServiceInterceptorRegistry interceptorRegistry = new UserServiceInterceptorRegistry(context);
         track(UserServiceInterceptor.class, interceptorRegistry);
-
-
         track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
 
         // Plugin interfaces
