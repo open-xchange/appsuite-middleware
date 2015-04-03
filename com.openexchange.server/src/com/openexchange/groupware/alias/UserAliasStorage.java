@@ -52,6 +52,7 @@ package com.openexchange.groupware.alias;
 import java.sql.Connection;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
@@ -60,6 +61,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface UserAliasStorage {
     /**
      * Gets all aliases of the user
