@@ -85,7 +85,6 @@ import java.util.UUID;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
-import com.openexchange.groupware.alias.UserAliasStorageProvider;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -532,7 +531,7 @@ public class RdbUserStorage extends UserStorage {
             throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
         }
 
-        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorageProvider.class).getUserAliasStorage();
+        UserAliasStorage userAlias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
          // Proceed iterating users
         for (final UserImpl user : users.valueCollection()) {
             final Map<String, UserAttribute> attrs = usersAttrs.get(user.getId());
@@ -1163,7 +1162,7 @@ public class RdbUserStorage extends UserStorage {
             }
             try {
                 if (userId == -1 && considerAliases) {
-                    UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorageProvider.class).getUserAliasStorage();
+                    UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
                     int retUserId = alias.getUserId(context.getContextId(), pattern);
                     if(retUserId != -1) {
                         userId = retUserId;

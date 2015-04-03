@@ -103,7 +103,6 @@ public class ServerCompositeActivator extends CompositeBundleActivator {
         new com.openexchange.report.osgi.ReportActivator(),
         new com.openexchange.groupware.update.tasks.quota.QuotaGWActivator(),
         new com.openexchange.server.osgi.PingActivator(),
-        new com.openexchange.groupware.alias.osgi.AliasActivator(),
     };
 
     public ServerCompositeActivator() {
