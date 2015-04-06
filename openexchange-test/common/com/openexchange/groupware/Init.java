@@ -126,7 +126,6 @@ import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupInit;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
-import com.openexchange.groupware.alias.UserAliasStorageProvider;
 import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
@@ -908,13 +907,8 @@ public final class Init {
     }
 
     public static void startAndInjectAliasService() {
-        if (null == TestServiceRegistry.getInstance().getService(UserAliasStorageProvider.class)) {
-            TestServiceRegistry.getInstance().addService(UserAliasStorageProvider.class, new UserAliasStorageProvider() {
-                @Override
-                public UserAliasStorage getUserAliasStorage() throws OXException {
-                    return new RdbAliasStorage();
-                }
-            });
+        if (null == TestServiceRegistry.getInstance().getService(UserAliasStorage.class)) {
+            TestServiceRegistry.getInstance().addService(UserAliasStorage.class, new RdbAliasStorage());
         }
     }
 
