@@ -1,3 +1,8 @@
+* 2015-04-06 - thorbenb.betten@open-xchange.com
+
+ - Fix for bug 37205: Do not perform checks for mail addresses if not touched/changed on user change operation
+                      (This effectively reverts the changes performed for bug 33626 and solves associated issue in a consistent way)
+
 * 2015-01-30 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35430: Do not query by 'cid' if the sqlPattern is not a number.
