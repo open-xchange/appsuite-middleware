@@ -98,7 +98,8 @@ public class LoginShareHandler extends AbstractShareHandler {
             String message = null;
             String messageType = null;
             String action = null;
-            String replacement = target.isFolder() ? target.getFolder() : target.getFolder() + "/" + target.getItem();
+            //FIXME: share target may be null (and if not, the identifier's are not something we want to show the users)  
+            String replacement = "";//target.isFolder() ? target.getFolder() : target.getFolder() + "/" + target.getItem();
             if (!share.getGuest().isPasswordSet()) {
                 message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, share.getGuest().getLocale()), replacement));
                 messageType = "WARN";
