@@ -130,7 +130,7 @@ public class ComparedPermissions {
         final Map<Integer, Permission> newUsers = new HashMap<Integer, Permission>();
         final Map<Integer, Permission> newGroups = new HashMap<Integer, Permission>();
         for (Permission permission : newPermissions) {
-            if (permission.getSystem() == 0 && permission.getEntity() > 0) {
+            if (permission.getSystem() == 0 && permission.getEntity() >= 0) {
                 if (permission.isGroup()) {
                     newGroups.put(permission.getEntity(), permission);
                 } else {
