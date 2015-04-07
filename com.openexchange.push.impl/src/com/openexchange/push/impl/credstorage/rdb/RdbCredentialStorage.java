@@ -131,6 +131,10 @@ public class RdbCredentialStorage implements CredentialStorage {
     }
 
     private void storeCredentials(Credentials obfuscatedCredentials, Connection connection) throws OXException {
+        storeCredentials(obfuscatedCredentials, true, connection);
+    }
+
+    private void storeCredentials(Credentials obfuscatedCredentials, boolean retry, Connection connection) throws OXException {
         int contextId = obfuscatedCredentials.getContextId();
         int userId = obfuscatedCredentials.getUserId();
 
@@ -163,6 +167,11 @@ public class RdbCredentialStorage implements CredentialStorage {
                     stmt.executeUpdate();
                 } catch (SQLException e) {
                     // Duplicate write attempt
+                    if (!retry) {
+                        throw e;
+                    }
+                    storeCredentials(obfuscatedCredentials, false, connection);
+                    return;
                 }
             }
         } catch (SQLException e) {

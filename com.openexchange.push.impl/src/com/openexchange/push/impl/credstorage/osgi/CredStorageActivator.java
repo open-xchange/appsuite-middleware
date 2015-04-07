@@ -55,6 +55,8 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
+import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.hazelcast.core.HazelcastInstance;
@@ -192,6 +194,13 @@ public class CredStorageActivator extends HousekeepingActivator implements Hazel
         rememberTracker(storageProvider);
 
         openTrackers();
+
+        {
+            CredStoragePasswordChangeHandler handler = new CredStoragePasswordChangeHandler();
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put(EventConstants.EVENT_TOPIC, handler.getTopic());
+            registerService(EventHandler.class, handler, props);
+        }
 
         registerService(CreateTableService.class, new CreateCredStorageTable(), null);
         registerService(DeleteListener.class, new CredStorageDeleteListener(), null);
