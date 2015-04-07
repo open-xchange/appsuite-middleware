@@ -88,6 +88,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Group;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -473,6 +474,13 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             // ########## Update login2user table if USERNAME_CHANGEABLE=true
             // ##################
             if (cache.getProperties().getUserProp(AdminProperties.User.USERNAME_CHANGEABLE, false) && usrdata.getName() != null && usrdata.getName().trim().length() > 0) {
+                if (cache.getProperties().getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
+                    OXToolStorageInterface.getInstance().validateUserName(usrdata.getName());
+                }
+
+                if (cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+                    usrdata.setName(usrdata.getName().toLowerCase());
+                }
 
                 stmt = con.prepareStatement("UPDATE login2user SET uid=? WHERE cid=? AND id=?");
                 stmt.setString(1, usrdata.getName().trim());
@@ -1120,6 +1128,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         } catch (final URISyntaxException e) {
             log.error("", e);
             throw new StorageException(e.toString());
+        } catch (InvalidDataException e) {
+            log.error("", e);
+            throw new StorageException(e);
         } finally {
             if (rollback) {
                 DBUtils.rollback(con);
@@ -2088,6 +2099,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             final OXToolStorageInterface oxtool = OXToolStorageInterface.getInstance();
             final int adminForContext = oxtool.getAdminForContext(ctx, read_ox_con);
 
+            boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+
             stmt = read_ox_con.prepareStatement("SELECT uid FROM login2user WHERE cid = ? AND id = ?");
             stmt.setInt(1, cid);
             stmt2 = read_ox_con.prepareStatement(query.toString());
@@ -2102,6 +2115,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int user_id = user.getId();
                 final User newuser = (User) user.clone();
                 String username = user.getName();
+                if (autoLowerCase && null != username) {
+                    username = username.toLowerCase();
+                }
 
                 final Map<String, String> guiPrefs = readGUISettings(ctx, newuser, read_ox_con);
 
@@ -2133,7 +2149,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     }
                     stmt2.setInt(1, user_id);
                 } else if (null != user.getName()) {
-                    stmtusername.setString(2, user.getName());
+                    String name = autoLowerCase ? user.getName().toLowerCase() : user.getName();
+                    stmtusername.setString(2, name);
                     rs = stmtusername.executeQuery();
                     if (rs.next()) {
                         user_id = rs.getInt("id");
