@@ -154,6 +154,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -200,7 +203,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (null == user) {
             throw new InvalidDataException("Missing user.");
         }
+
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
 
         LOGGER.debug("{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
 
@@ -856,6 +863,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         Integer userid = null;
@@ -1027,6 +1038,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {} - {} - {}", ctx, user, moduleAccess, auth);
 
         try {
@@ -1111,6 +1126,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         LOGGER.debug("{} - {} - {} - {}", ctx, user, access_combination_name, auth);
@@ -1239,6 +1258,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e3;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         LOGGER.debug("{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
 
         basicauth.doAuthentication(auth, ctx);
@@ -1272,6 +1295,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for create is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
             LOGGER.debug("{} - {} - {}", ctx, usrdata, auth);
@@ -1505,6 +1532,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         basicauth.doAuthentication(auth,ctx);
 
             LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
@@ -1641,7 +1672,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public User[] getData(final Context ctx, final User[] users, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck((Object[]) users);
         } catch (final InvalidDataException e1) {
@@ -1657,6 +1688,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", e);
             throw e;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
         try {
             // enable check who wants to get data if authentication is enabled
@@ -1775,6 +1811,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {} - {}", ctx, user, auth);
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -1821,6 +1862,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {} - {}", ctx, user, auth);
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -1875,6 +1921,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {}", ctx, auth);
 
         basicauth.doAuthentication(auth,ctx);
@@ -1899,6 +1949,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final InvalidDataException e1) {
             LOGGER.error("One of the given arguments for list is null", e1);
             throw e1;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
             LOGGER.debug("{} - {}", ctx, auth);
@@ -1953,7 +2007,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
                     tool.validateUserName(newuser.getName());
                 }
-                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                     newuser.setName(newuser.getName().toLowerCase());
                 }
             }
@@ -2105,9 +2159,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return list.toArray(new User[list.size()]);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.OXUserInterface#changeModuleAccessGlobal(java.lang.String, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void changeModuleAccessGlobal(final String filter, final UserModuleAccess addAccess, final UserModuleAccess removeAccess, final Credentials credentials) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("","") : credentials;
@@ -2118,6 +2169,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         try {
             checkForGABRestriction(addAccess);
             checkForGABRestriction(removeAccess);
@@ -2183,6 +2239,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {

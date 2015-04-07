@@ -705,8 +705,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
      */
     @Override
     public boolean existsUser(final Context ctx, final int[] user_ids) throws StorageException {
-        final AdminCache cache = ClientAdminThread.cache;
-        final int contextId = ctx.getId().intValue();
+        AdminCache cache = ClientAdminThread.cache;
+        int contextId = ctx.getId().intValue();
 
         boolean ret = false;
         Connection con = null;
@@ -714,9 +714,8 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         PreparedStatement prep = null;
         try {
             final StringBuffer sb = new StringBuffer();
-            for (final int element : user_ids) {
+            for (int j = user_ids.length; j-- > 0;) {
                 sb.append("?,");
-                // sb.append(user_ids[a]+",");
             }
             sb.delete(sb.length() - 1, sb.length());
             con = cache.getConnectionForContext(contextId);
@@ -763,7 +762,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public boolean existsUser(final Context ctx, final User[] users) throws StorageException {
         int intValue = ctx.getId().intValue();
-        final AdminCache cache = ClientAdminThread.cache;
+        AdminCache cache = ClientAdminThread.cache;
+
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
 
         Connection con = null;
         ResultSet rs = null;
@@ -775,9 +776,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             prep.setInt(1, intValue);
             prep2 = con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
             prep2.setInt(1, intValue);
-            for (final User user : users) {
-                final Integer userid = user.getId();
-                final String username = user.getName();
+            for (User user : users) {
+                Integer userid = user.getId();
+                String username = user.getName();
                 if (null != userid) {
                     prep.setInt(2, userid.intValue());
                     rs = prep.executeQuery();
@@ -786,6 +787,9 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                     }
                     rs.close();
                 } else if (null != username) {
+                    if (autoLowerCase) {
+                        username = username.toLowerCase();
+                    }
                     prep2.setString(2, username);
                     rs = prep.executeQuery();
                     if (rs.next()) {
@@ -1082,12 +1086,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Pool Error",e);
             throw new StorageException(e);
         }
+
+        boolean autoLowerCase = cache.getProperties().getGroupProp(AdminProperties.Group.AUTO_LOWERCASE, false);
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT id from groups where cid=? and identifier=?");
             stmt.setInt(1, i(ctx.getId()));
-            stmt.setString(2, groupName);
+            stmt.setString(2, autoLowerCase ? groupName.toLowerCase() : groupName);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -1156,12 +1163,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Pool Error",e);
             throw new StorageException(e);
         }
+
+        boolean autoLowerCase = cache.getProperties().getResourceProp(AdminProperties.Resource.AUTO_LOWERCASE, false);
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT id from resource where cid=? and identifier=?");
             stmt.setInt(1, i(ctx.getId()));
-            stmt.setString(2, resourceName);
+            stmt.setString(2, autoLowerCase ? resourceName.toLowerCase() : resourceName);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -1230,12 +1240,15 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Pool Error",e);
             throw new StorageException(e);
         }
+
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             stmt = con.prepareStatement("SELECT id from login2user where cid=? and uid=?");
             stmt.setInt(1, i(ctx.getId()));
-            stmt.setString(2, userName);
+            stmt.setString(2, autoLowerCase ? userName.toLowerCase() : userName);
             rs = stmt.executeQuery();
             if (rs.next()) {
                 // grab user id and return
@@ -2271,13 +2284,16 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             log.error("Pool Error", e);
             throw new StorageException(e);
         }
+
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         boolean foundOther = false;
         try {
             stmt = con.prepareStatement("SELECT uid FROM login2user WHERE cid=? AND uid=? AND id!=?");
             stmt.setInt(1, contextId);
-            stmt.setString(2, user.getName());
+            stmt.setString(2, autoLowerCase ? user.getName().toLowerCase() : user.getName());
             stmt.setInt(3, user.getId().intValue());
             result = stmt.executeQuery();
             while (!foundOther && result.next()) {
@@ -2325,7 +2341,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
             validateUserName(usr.getName());
         }
-        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
             usr.setName(usr.getName().toLowerCase());
         }
         // checks below throw InvalidDataException
