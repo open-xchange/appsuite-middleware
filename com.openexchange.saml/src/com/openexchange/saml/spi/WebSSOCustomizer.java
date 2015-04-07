@@ -63,12 +63,9 @@ import com.openexchange.session.Session;
 
 /**
  * In order to fulfill the requirements of a certain identity provider, it might be necessary
- * to customize the generated XML objects of the service provider side. This interface provides
- * a set of customization functions for this purpose.
- *
- * A concrete implementation must be registered as OSGi service under the {@link WebSSOCustomizer}
- * interface. At most one instance is allowed to exist at runtime. It's recommended to inherit from
- * {@link AbstractWebSSOCustomizer} instead implementing this interface directly.
+ * to customize the generation and decoding of SAML XML objects. This interface provides a set
+ * of customization functions for this purpose. It is  recommended to inherit from {@link AbstractWebSSOCustomizer}
+ * instead implementing this interface directly.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1

@@ -58,6 +58,8 @@ import org.opensaml.xml.security.credential.Credential;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
+ * @see KeyStoreCredentialProvider
+ * @see KeySpecCredentialProvider
  */
 public interface CredentialProvider {
 

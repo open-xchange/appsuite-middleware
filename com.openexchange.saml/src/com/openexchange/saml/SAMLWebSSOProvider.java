@@ -114,7 +114,7 @@ public interface SAMLWebSSOProvider {
      * @throws IOException If writing to the servlet response fails
      * @see SAMLLogoutRequestHandler
      */
-    void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding httpRedirect) throws IOException, OXException;
+    void handleLogoutResponse(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException, OXException;
 
     /**
      * Handles a logout request from the IdP. After successful validation of the response the sessions to terminate are determined
@@ -127,7 +127,6 @@ public interface SAMLWebSSOProvider {
      * @throws IOException If writing to the servlet response fails
      */
     void handleLogoutRequest(HttpServletRequest httpRequest, HttpServletResponse httpResponse, Binding binding) throws IOException;
-
 
     /**
      * Generates the service providers metadata XML.
