@@ -195,7 +195,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     }
 
                     // Already running for session user
-                    LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+                    LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
                 } finally {
                     if (unlock) {
                         releaseLock(session);
@@ -203,7 +203,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
@@ -254,7 +254,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     }
 
                     // Already running for session user
-                    LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+                    LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
                 } finally {
                     if (unlock) {
                         releaseLock(session);
@@ -262,7 +262,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
