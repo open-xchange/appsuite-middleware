@@ -112,7 +112,10 @@ public class CredStoragePasswordChangeHandler implements EventHandler {
                 credentials.setContextId(contextId);
                 credentials.setUserId(userId);
                 credentials.setPassword((String) event.getProperty("com.openexchange.passwordchange.newPassword"));
-                credentials.setLogin(((Session) event.getProperty("com.openexchange.passwordchange.session")).getLoginName());
+                Session session = (Session) event.getProperty("com.openexchange.passwordchange.session");
+                if (null != session) {
+                    credentials.setLogin(session.getLoginName());
+                }
 
                 // Store credentials
                 credentialStorage.storeCredentials(credentials);
