@@ -1,3 +1,7 @@
+* 2015-04-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37572: Restored old behavior for file / document metadata delegates 
+
 * 2015-04-07 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37309: Don't ignore entity 0 when calculating permission changes

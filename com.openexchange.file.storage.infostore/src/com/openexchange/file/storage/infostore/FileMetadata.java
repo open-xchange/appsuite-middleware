@@ -71,28 +71,12 @@ public class FileMetadata implements DocumentMetadata {
 
     private static final long serialVersionUID = 2097235173990058583L;
 
-    /**
-     * Gets the InfoStore {@link DocumentMetadata} from given file.
-     *
-     * @param file The file
-     * @return The appropriate {@link DocumentMetadata} instance
-     */
-    public static DocumentMetadata getMetadata(File file) throws OXException {
-        return new FileMetadata(file);
-    }
-
     private final File file;
     private String fileSpool;
 
-    /**
-     * Initializes a new {@link FileMetadata}.
-     * 
-     * @param file The underlying file
-     */
-    public FileMetadata(File file) throws OXException {
-        super();
-        validate(file);
-        this.file = file;
+    public FileMetadata(final File document) throws OXException {
+        validate(document);
+        this.file = document;
     }
 
     @Override
@@ -380,28 +364,303 @@ public class FileMetadata implements DocumentMetadata {
      * @param file The file to check
      * @throws OXException If validation fails
      */
-    private static void validate(File file) throws OXException {
+    private static void validate(final File file) throws OXException {
         if (null != file) {
             /*
              * check for numerical identifiers if set
              */
-            String id = file.getId();
+            final String id = file.getId();
             if (FileStorageFileAccess.NEW != id) {
                 try {
                     Integer.valueOf(id);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FILE_IDENTIFIER.create(e, id);
                 }
             }
-            String folderID = file.getFolderId();
+            final String folderID = file.getFolderId();
             if (null != folderID) {
                 try {
                     Integer.valueOf(folderID);
-                } catch (NumberFormatException e) {
+                } catch (final NumberFormatException e) {
                     throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderID);
                 }
             }
         }
+    }
+
+    /**
+     * Gets the InfoStore {@link DocumentMetadata} from given file.
+     *
+     * @param file The file
+     * @return The appropriate {@link DocumentMetadata} instance
+     */
+    public static DocumentMetadata getMetadata(final File file) {
+        final DocumentMetadata metaData = new DocumentMetadata() {
+
+            private static final long serialVersionUID = -1476628439761201503L;
+
+            @Override
+            public void setVersionComment(final String string) {
+                // nothing to do
+            }
+
+            @Override
+            public void setVersion(final int version) {
+                // nothing to do
+            }
+
+            @Override
+            public void setURL(final String url) {
+                // nothing to do
+            }
+
+            @Override
+            public void setTitle(final String title) {
+                // nothing to do
+            }
+
+            @Override
+            public void setNumberOfVersions(final int numberOfVersions) {
+                // nothing to do
+            }
+
+            @Override
+            public void setModifiedBy(final int lastEditor) {
+                // nothing to do
+            }
+
+            @Override
+            public void setLockedUntil(final Date lockedUntil) {
+                // nothing to do
+            }
+
+            @Override
+            public void setLastModified(final Date now) {
+                // nothing to do
+            }
+
+            @Override
+            public void setIsCurrentVersion(final boolean bool) {
+                // nothing to do
+            }
+
+            @Override
+            public void setId(final int id) {
+                // nothing to do
+            }
+
+            @Override
+            public void setFolderId(final long folderId) {
+                // nothing to do
+            }
+
+            @Override
+            public void setFilestoreLocation(final String string) {
+                // nothing to do
+            }
+
+            @Override
+            public void setFileSize(final long length) {
+                // nothing to do
+            }
+
+            @Override
+            public void setFileName(final String fileName) {
+                // nothing to do
+            }
+
+            @Override
+            public void setFileMIMEType(final String type) {
+                // nothing to do
+            }
+
+            @Override
+            public void setFileMD5Sum(final String sum) {
+                // nothing to do
+            }
+
+            @Override
+            public void setDescription(final String description) {
+                // nothing to do
+            }
+
+            @Override
+            public void setCreationDate(final Date creationDate) {
+                // nothing to do
+            }
+
+            @Override
+            public void setCreatedBy(final int cretor) {
+                // nothing to do
+            }
+
+            @Override
+            public void setColorLabel(final int color) {
+                // nothing to do
+            }
+
+            @Override
+            public void setCategories(final String categories) {
+                // nothing to do
+            }
+
+            @Override
+            public boolean isCurrentVersion() {
+                return file.isCurrentVersion();
+            }
+
+            @Override
+            public String getVersionComment() {
+                return file.getVersionComment();
+            }
+
+            @Override
+            public int getVersion() {
+                return Integer.parseInt(file.getVersion());
+            }
+
+            @Override
+            public String getURL() {
+                return file.getURL();
+            }
+
+            @Override
+            public String getTitle() {
+                return file.getTitle();
+            }
+
+            @Override
+            public long getSequenceNumber() {
+                return file.getSequenceNumber();
+            }
+
+            @Override
+            public Set<String> getPropertyNames() {
+                return file.getPropertyNames();
+            }
+
+            @Override
+            public String getProperty(final String key) {
+                return file.getProperty(key);
+            }
+
+            @Override
+            public int getNumberOfVersions() {
+                return file.getNumberOfVersions();
+            }
+
+            @Override
+            public int getModifiedBy() {
+                return file.getModifiedBy();
+            }
+
+            @Override
+            public Date getLockedUntil() {
+                return file.getLockedUntil();
+            }
+
+            @Override
+            public Date getLastModified() {
+                return file.getLastModified();
+            }
+
+            @Override
+            public int getId() {
+                return Integer.parseInt(file.getId());
+            }
+
+            @Override
+            public long getFolderId() {
+                return Long.parseLong(file.getFolderId());
+            }
+
+            @Override
+            public String getFilestoreLocation() {
+                // TODO
+                return null;
+            }
+
+            @Override
+            public long getFileSize() {
+                return file.getFileSize();
+            }
+
+            @Override
+            public String getFileName() {
+                return file.getFileName();
+            }
+
+            @Override
+            public String getFileMIMEType() {
+                return file.getFileMIMEType();
+            }
+
+            @Override
+            public String getFileMD5Sum() {
+                return file.getFileMD5Sum();
+            }
+
+            @Override
+            public String getDescription() {
+                return file.getDescription();
+            }
+
+            @Override
+            public Date getCreationDate() {
+                return file.getCreated();
+            }
+
+            @Override
+            public int getCreatedBy() {
+                return file.getCreatedBy();
+            }
+
+            @Override
+            public String getContent() {
+                return file.getContent();
+            }
+
+            @Override
+            public int getColorLabel() {
+                return file.getColorLabel();
+            }
+
+            @Override
+            public String getCategories() {
+                return file.getCategories();
+            }
+
+            @Override
+            public Map<String, Object> getMeta() {
+                return file.getMeta();
+            }
+
+            @Override
+            public void setMeta(Map<String, Object> properties) {
+                // Nothing to do
+            }
+
+            @Override
+            public List<ObjectPermission> getObjectPermissions() {
+                return PermissionHelper.getObjectPermissions(file.getObjectPermissions());
+            }
+
+            @Override
+            public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
+                // Nothing to do
+            }
+
+            @Override
+            public boolean isShareable() {
+                return file.isShareable();
+            }
+
+            @Override
+            public void setShareable(boolean shareable) {
+                file.setShareable(shareable);
+            }
+        };
+        return metaData;
     }
 
 }
