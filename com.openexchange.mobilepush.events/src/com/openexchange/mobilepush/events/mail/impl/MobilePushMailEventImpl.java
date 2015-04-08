@@ -64,6 +64,7 @@ import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
@@ -167,33 +168,22 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             if (mailIds != null) {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
-                    mailAccess = Services.getService(MailService.class, true).getMailAccess(session, MailAccount.DEFAULT_ID);
+                    int accountId = MailAccount.DEFAULT_ID;
+                    mailAccess = Services.getService(MailService.class, true).getMailAccess(session, accountId);
                     mailAccess.connect(false);
 
                     MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds, event, session);
                     int unread = mailAccess.getUnreadMessagesCount(INBOX);
-                    String rootFolder = mailAccess.getFolderStorage().getRootFolder().getFullname();
                     if (mms != null) {
-                        Map<String, Object> map = new HashMap<String, Object>();
                         for (MailMessage mm : mms) {
-                            int accountId = mm.getAccountId();
                             String subject = mm.getSubject();
-                            InternetAddress[] ia = mm.getFrom();
-                            String personalFrom = ia[0].getPersonal();
-                            String receivedFrom = ia[0].getAddress();
-                            String mailId = mm.getMailId();
-                            String folder = mm.getFolder();
+                            String[] senderInfo = getSenderInfo(mm);
 
-
-                            String strSubject = Strings.isEmpty(subject) ? "(no subject)" : subject;
-                            String strSender = personalFrom == null ? receivedFrom : personalFrom;
-
-                            String cid = generateCid(rootFolder, folder, accountId, mailId);
-
-                            map.put(MailPushUtility.KEY_CID, cid);
-                            map.put(MailPushUtility.KEY_SUBJECT, strSubject);
-                            map.put(MailPushUtility.KEY_SENDER, strSender);
-                            map.put(MailPushUtility.KEY_UNREAD, unread);
+                            Map<String, Object> map = new HashMap<String, Object>(6);
+                            map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
+                            map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
+                            map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
+                            map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread));
                             props.add(map);
                         }
                     }
@@ -213,13 +203,17 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         return props;
     }
 
-    private String generateCid(String folderRootName, String folder, int accountId, String mailId) {
-        StringBuffer sb = new StringBuffer(folderRootName);
-        sb.append(accountId);
-        sb.append("/");
-        sb.append(folder);
-        sb.append(":");
-        sb.append(mailId);
+    private String[] getSenderInfo(MailMessage m) {
+        InternetAddress addr = m.getFrom()[0];
+        return new String[] { addr.getPersonal(), addr.getAddress() };
+    }
+
+    private String generateCidFor(MailMessage m, int accountId) {
+        // E.g. "default0/INBOX:3412"
+        StringBuilder sb = new StringBuilder(32);
+        sb.append(MailFolder.DEFAULT_FOLDER_ID).append(accountId);
+        sb.append('/').append(m.getFolder());
+        sb.append(':').append(m.getMailId());
         return sb.toString();
     }
 
