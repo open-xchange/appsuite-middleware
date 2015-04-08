@@ -1,3 +1,7 @@
+* 2015-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
+
 * 2015-03-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener

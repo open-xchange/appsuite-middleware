@@ -49,6 +49,7 @@
 
 package com.openexchange.push;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -116,10 +117,10 @@ public final class PushUtility {
      * @param session The session providing needed user data
      * @param props The optional additional properties to put into OSGi event
      * @param includeCommonEvent <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>, otherwise
-     * @param remoteMarker <code>true</code> to include remote marker; otherwise <code>false</code>
+     * @param publishMarker <code>true</code> to include publish marker; otherwise <code>false</code>
      * @throws OXException If posting event fails
      */
-    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props, boolean includeCommonEvent, boolean remoteMarker) throws OXException {
+    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props, boolean includeCommonEvent, boolean publishMarker) throws OXException {
         if (null == folder || null == session) {
             return;
         }
@@ -161,8 +162,9 @@ public final class PushUtility {
                         session);
                 properties.put(CommonEvent.EVENT_KEY, commonEvent);
             }
-            if (remoteMarker) {
-                properties.put(CommonEvent.REMOTE_MARKER, Boolean.TRUE);
+            if (publishMarker) {
+                // Add this property (with any or without a value) to distribute to remote nodes in the cluster
+                properties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
             }
             /*
              * Create event with push topic
@@ -172,7 +174,7 @@ public final class PushUtility {
              * Finally post it
              */
             eventAdmin.postEvent(event);
-            LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, userId, contextId);
+            LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, I(userId), I(contextId));
         } catch (final OXException e) {
             throw e;
         }
