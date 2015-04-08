@@ -82,15 +82,9 @@ public class MobilePushEventsActivator extends HousekeepingActivator {
 
         //register event handler to listen on push events
         registerService(MobilePushEventService.class, service);
-        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-        serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] {
-            PushEventConstants.TOPIC,
-            PushEventConstants.PROPERTY_IMMEDIATELY,
-            PushEventConstants.PROPERTY_IDS,
-            PushEventConstants.PROPERTY_DELETED,
-            PushEventConstants.PROPERTY_SESSION,
-        });
 
+        Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
+        serviceProperties.put(EventConstants.EVENT_TOPIC, PushEventConstants.TOPIC);
         registerService(EventHandler.class, service, serviceProperties);
     }
 
