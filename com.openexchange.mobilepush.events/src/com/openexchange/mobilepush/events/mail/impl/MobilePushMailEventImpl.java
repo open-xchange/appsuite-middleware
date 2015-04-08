@@ -102,64 +102,46 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
 
     @Override
     public void handleEvent(Event event) {
-        /**
-         * Check event
-         */
-        Session session = getSession(event);
-        if (session == null) {
-            LOG.debug("Unable to handle incomplete event: {}", event);
-            return;
-        }
-        if (!isRemoteEvent(event)) {
-            LOG.debug("Unable to handle incomplete event: {}", event);
-            return;
-        }
-        if (!hasFolderProperty(event)) {
-            LOG.debug("Unable to handle incomplete event: {}", event);
-            return;
-        }
-        /**
-         * Build publish message for push provider
-         */
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-        List<Map<String, Object>> events = handleEvents(event, session);
-
-        if (events != null) {
-            for (Map<String, Object> props : events) {
-                notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
+        if (null != event && PushEventConstants.TOPIC.equals(event.getTopic())) {
+            // Check event...
+            Session session = getSession(event);
+            if (session != null && markedForRemoteDistribution(event) && hasFolderProperty(event)) {
+                // Build message for push provider
+                List<Map<String, Object>> events = handleEvents(event, session);
+                if (events != null) {
+                    int userId = session.getUserId();
+                    int contextId = session.getContextId();
+                    for (Map<String, Object> props : events) {
+                        notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
+                    }
+                }
+            } else {
+                LOG.debug("Unable to handle incomplete event: {}", event);
             }
         }
     }
 
     private boolean hasFolderProperty(Event event) {
-        if (event != null && event.containsProperty(PushEventConstants.PROPERTY_FOLDER)) {
-            String folder = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
-            if (false == Strings.isEmpty(folder)) {
-                return true;
-            }
+        String folder = (String) event.getProperty(PushEventConstants.PROPERTY_FOLDER);
+        if (false == Strings.isEmpty(folder)) {
+            return true;
         }
         return false;
     }
 
-    private boolean isRemoteEvent(Event event) {
-        if (event != null && event.containsProperty(OX_EVENT)) {
-            Object commonEvent = event.getProperty(OX_EVENT);
-            if (commonEvent instanceof CommonEvent) {
-                return true;
-            }
+    private boolean markedForRemoteDistribution(Event event) {
+        Object commonEvent = event.getProperty(OX_EVENT);
+        if (commonEvent instanceof CommonEvent) {
+            return true;
         }
         return false;
     }
 
     private Session getSession(Event event) {
-        if (event != null && event.containsProperty(PushEventConstants.PROPERTY_SESSION)) {
-            if (event.getProperty(PushEventConstants.PROPERTY_SESSION) instanceof Session) {
-                Session session = (Session) event.getProperty(PushEventConstants.PROPERTY_SESSION);
-                if (session != null) {
-                    return session;
-                }
-            }
+        Object obj = event.getProperty(PushEventConstants.PROPERTY_SESSION);
+        if (obj instanceof Session) {
+            Session session = (Session) obj;
+            return session;
         }
         return null;
     }
@@ -172,32 +154,22 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      * @param props - A map
      */
     private List<Map<String, Object>> handleEvents(Event event, Session session) {
-        boolean containsDeletedProperty = event.containsProperty(PushEventConstants.PROPERTY_DELETED);
-        Boolean isDeleted = null;
-
-        if(containsDeletedProperty) {
-            isDeleted = (Boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED);
-        }
-
-        if (isDeleted != null && isDeleted.booleanValue()) {
-            return getDeleteMailPayload(event);
-        } else {
-            return getNewMailProperties(event, session);
-        }
+        Boolean isDeleted = (Boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED);
+        return null != isDeleted && isDeleted.booleanValue() ? getDeleteMailPayload(event) : getNewMailProperties(event, session);
     }
 
     private List<Map<String, Object>> getNewMailProperties(Event event, Session session) {
         List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(3);
 
-        if (event != null && event.containsProperty(OX_EVENT) && event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
-            // check if its a new mail event
+        if (event.containsProperty(OX_EVENT) && event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
+            // Check if its a new mail event
             String mailIds = (String) event.getProperty(PushEventConstants.PROPERTY_IDS);
             if (mailIds != null) {
                 MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                 try {
-                    MailService mailService = Services.getService(MailService.class, true);
-                    mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
+                    mailAccess = Services.getService(MailService.class, true).getMailAccess(session, MailAccount.DEFAULT_ID);
                     mailAccess.connect(false);
+
                     MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds, event, session);
                     int unread = mailAccess.getUnreadMessagesCount(INBOX);
                     String rootFolder = mailAccess.getFolderStorage().getRootFolder().getFullname();
@@ -260,9 +232,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      * @throws OXException
      */
     private MailMessage[] fetchMessageInformation(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String mailIds, Event event, Session session) throws OXException {
-        IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-        return messageStorage.getMessages(INBOX, getMailIds(mailIds),
-            new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM });
+        MailField[] fields = new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM };
+        return mailAccess.getMessageStorage().getMessages(INBOX, getMailIds(mailIds), fields);
     }
 
     private final static Pattern COMMA_SEPERATED_PATTERN = Pattern.compile("\\s*,\\s*");
