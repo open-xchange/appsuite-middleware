@@ -1,3 +1,7 @@
+* 2015-04-08 - marc.arens@open-xchange.com
+
+ - Fix for bug 37577: Make maximum http header size configurable in grizzly.properties
+
 * 2015-04-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
