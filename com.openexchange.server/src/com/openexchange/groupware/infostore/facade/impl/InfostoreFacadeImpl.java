@@ -1923,6 +1923,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
                         document.setShareable(infostorePermission.canWriteObject());
                     }
                 } else {
+                    /*
+                     * adjust parent folder id to match requested identifier
+                     */
+                    Long requestedFolderID = idsToFolders.get(I(document.getId()));
+                    if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
+                        document.setFolderId(requestedFolderID.longValue());    
+                    }
                     document.setShareable(folderPermission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS ||
                         folderPermission.getWritePermission() >= OCLPermission.WRITE_OWN_OBJECTS && document.getCreatedBy() == user.getId());
                 }
