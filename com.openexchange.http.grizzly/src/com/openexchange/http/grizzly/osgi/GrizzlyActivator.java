@@ -144,6 +144,8 @@ public class GrizzlyActivator extends HousekeepingActivator {
             int maxBodySize = grizzlyConfig.getMaxBodySize();
             networkListener.setMaxFormPostSize(maxBodySize);
             networkListener.setMaxBufferedPostSize(maxBodySize);
+            
+            networkListener.setMaxHttpHeaderSize(grizzlyConfig.getMaxHttpHeaderSize());
 
             if (grizzlyConfig.isAJPEnabled()) {
                 networkListener.registerAddOn(new AjpAddOn());
