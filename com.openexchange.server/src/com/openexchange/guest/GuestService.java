@@ -54,7 +54,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link GuestService} defines methods to handle guests across context boundaries so, for instance, it is possible to set a password for a guest only once even it is a guest within multiple contexts.
@@ -62,7 +61,6 @@ import com.openexchange.osgi.annotation.SingletonService;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-@SingletonService
 public interface GuestService {
 
     /**
