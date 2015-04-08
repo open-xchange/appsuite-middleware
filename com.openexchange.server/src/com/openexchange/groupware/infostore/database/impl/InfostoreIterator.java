@@ -68,7 +68,6 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.FieldChooser;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog.Table;
-import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.ldap.User;
@@ -79,9 +78,8 @@ import com.openexchange.tools.sql.DBUtils;
 
 public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
 
-    private static final InfostoreQueryCatalog QUERIES = InfostoreFacadeImpl.QUERIES;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreIterator.class);
+    private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
 
     public static InfostoreIterator loadDocumentIterator(final int id, final int version, final DBProvider provider, final Context ctx) {
         final String query = QUERIES.getSelectDocument(id, version, ctx.getContextId());
@@ -163,13 +161,8 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins(), filename);
     }
 
-    public static InfostoreIterator sharedDocumentsForUser(final Context ctx, final User user, final int leastPermission, final Metadata[] metadata, final DBProvider provider) {
-        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, -1, -1, new InfostoreQueryCatalog.DocumentWins());
-        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
-    }
-
-    public static InfostoreIterator sharedDocumentsForUser(final Context ctx, final User user, final int leastPermission, final Metadata[] metadata, int start, int end, final DBProvider provider) {
-        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, start, end, new InfostoreQueryCatalog.DocumentWins());
+    public static InfostoreIterator sharedDocumentsForUser(final Context ctx, final User user, final int leastPermission, final Metadata[] metadata, Metadata sort, int order, int start, int end, final DBProvider provider) {
+        final String query = QUERIES.getSharedDocumentsForUserQuery(ctx.getContextId(), user.getId(), user.getGroups(), leastPermission, metadata, sort, order, start, end, new InfostoreQueryCatalog.DocumentWins());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 

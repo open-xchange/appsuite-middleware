@@ -735,7 +735,7 @@ public class InfostoreQueryCatalog {
         return allocator.toString();
     }
 
-    public String getSharedDocumentsForUserQuery(final int contextId, final int userId, final int[] groups, int leastPermission, final Metadata[] metadata, int start, int end, final DocumentWins wins) {
+    public String getSharedDocumentsForUserQuery(final int contextId, final int userId, final int[] groups, int leastPermission, final Metadata[] metadata, Metadata sort, int order, int start, int end, final DocumentWins wins) {
         final StringBuilder builder = new StringBuilder(STR_SELECT).append(fields(metadata, wins));
         builder.append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId).append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id");
         builder.append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id");
@@ -744,6 +744,9 @@ public class InfostoreQueryCatalog {
 
         builder.append(" AND object_permission.bits >=").append(leastPermission);
 
+        if (sort != null) {
+            builder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
         if (start >= 0 && end > 0) {
             builder.append(STR_LIMIT);
             if (start > 0) {
@@ -1003,6 +1006,11 @@ public class InfostoreQueryCatalog {
             return null;
         }
 
+        @Override
+        public Object shareable() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreColumnsSwitch implements MetadataSwitcher {
@@ -1134,6 +1142,11 @@ public class InfostoreQueryCatalog {
 
         @Override
         public Object objectPermissions() {
+            return null;
+        }
+
+        @Override
+        public Object shareable() {
             return null;
         }
 
@@ -1271,6 +1284,11 @@ public class InfostoreQueryCatalog {
             return null;
         }
 
+        @Override
+        public Object shareable() {
+            return null;
+        }
+
     }
 
     public static final class DelInfostoreDocumentColumnsSwitch implements MetadataSwitcher {
@@ -1402,6 +1420,11 @@ public class InfostoreQueryCatalog {
 
         @Override
         public Object objectPermissions() {
+            return null;
+        }
+
+        @Override
+        public Object shareable() {
             return null;
         }
 

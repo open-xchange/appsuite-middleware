@@ -175,6 +175,22 @@ public interface File {
      */
     void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions);
 
+    /**
+     * Gets a value indicating whether the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * the requesting user.
+     * 
+     * @return <code>true</code> if the file is shareable, <code>false</code>, otherwise
+     */
+    boolean isShareable();
+    
+    /**
+     * Sets the flag indicating that the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * the requesting user.
+     * 
+     * @param shareable <code>true</code> if the file is shareable, <code>false</code>, otherwise
+     */
+    void setShareable(boolean shareable);
+    
     File dup();
 
     void copyInto(File other);
@@ -227,7 +243,8 @@ public interface File {
         LAST_MODIFIED_UTC("last_modified_utc", 6),
         NUMBER_OF_VERSIONS("number_of_versions", 711),
         META("meta", 23),
-        OBJECT_PERMISSIONS("object_permissions", 108)
+        OBJECT_PERMISSIONS("object_permissions", 108),
+        SHAREABLE("shareable", 109)
         ;
 
         private final int number;
@@ -299,6 +316,8 @@ public interface File {
                 return switcher.meta(args);
             case OBJECT_PERMISSIONS:
                 return switcher.objectPermissions(args);
+            case SHAREABLE:
+                return switcher.shareable(args);
             default:
                 throw new IllegalArgumentException("Don't know field: " + getName());
             }

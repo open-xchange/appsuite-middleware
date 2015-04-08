@@ -184,4 +184,9 @@ public class FileFieldGet extends AbstractFileFieldSwitcher {
         return md( args ).getObjectPermissions();
     }
 
+    @Override
+    public Object shareable(Object... args) {
+        return md(args).isShareable();
+    }
+    
 }

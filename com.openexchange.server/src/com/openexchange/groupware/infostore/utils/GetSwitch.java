@@ -189,4 +189,9 @@ public class GetSwitch implements MetadataSwitcher {
         return metadata.getObjectPermissions();
     }
 
+    @Override
+    public Object shareable() {
+        return metadata.isShareable();
+    }
+
 }

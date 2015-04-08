@@ -692,6 +692,16 @@ public final class Utils {
                 doc.setObjectPermissions(PermissionHelper.getObjectPermissions(objectPermissions));
             }
 
+            @Override
+            public boolean isShareable() {
+                return doc.isShareable();
+            }
+
+            @Override
+            public void setShareable(boolean shareable) {
+                doc.setShareable(shareable);
+            }
+
         };
         return file;
     }

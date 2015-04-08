@@ -548,4 +548,22 @@ public class JSONDocumentMetadata implements DocumentMetadata {
         }
     }
 
+    @Override
+    public boolean isShareable() {
+        return jsonObject.optBoolean(Metadata.OBJECT_PERMISSIONS_LITERAL.getName());
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        if (shareable) {
+            try {
+                jsonObject.put(Metadata.SHAREABLE_LITERAL.getName(), shareable);
+            } catch (JSONException e) {
+                LOG.error("", e);
+            }
+        } else {
+            jsonObject.remove(Metadata.SHAREABLE_LITERAL.getName());
+        }
+    }
+
 }

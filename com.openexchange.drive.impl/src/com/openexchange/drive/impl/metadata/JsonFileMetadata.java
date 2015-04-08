@@ -121,6 +121,9 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
                 if (isShared(file)) {
                     jsonObject.put("shared", true);
                 }
+                if (file.isShareable()) {
+                    jsonObject.put("shareable", true);
+                }
                 break;
             case LOCKS:
                 Date lockedUntil = file.getLockedUntil();
