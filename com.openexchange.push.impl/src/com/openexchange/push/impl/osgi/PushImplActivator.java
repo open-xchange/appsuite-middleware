@@ -74,8 +74,6 @@ import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallableFactory;
-import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
-import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUserFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -123,27 +121,31 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(DatabaseService.class);
             trackService(CryptoService.class);
 
-            HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
-            if (hazelcastConfig.isEnabled()) {
-                // Track HazelcastInstance service
-                PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(PushManagerRegistry.getInstance(), context);
-                track(HazelcastInstance.class, rescheduler);
-            } else {
-                PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
-                pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
+            // Get initialized registry instance
+            PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
+
+            if (pushManagerRegistry.isPermanentPushAllowed()) {
+                // Register portable
+                registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
+
+                // Track HazelcastInstance
+                HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
+                if (hazelcastConfig.isEnabled()) {
+                    // Track HazelcastInstance service
+                    PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, context);
+                    track(HazelcastInstance.class, rescheduler);
+                } else {
+                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
+                }
             }
 
             openTrackers();
-
-            registerService(CustomPortableFactory.class, new PortablePushUserFactory());
-            registerService(CustomPortableFactory.class, new PortableCredentialsFactory());
-            registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
 
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new PushCreateTableTask()));
 
-            registerService(PushListenerService.class, PushManagerRegistry.getInstance());
+            registerService(PushListenerService.class, pushManagerRegistry);
 
             // Register event handler to detect removed sessions
             Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);

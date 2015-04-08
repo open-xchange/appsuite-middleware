@@ -70,6 +70,7 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
+import com.openexchange.hazelcast.serialization.CustomPortableFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.credstorage.CredentialStorage;
@@ -78,6 +79,8 @@ import com.openexchange.push.impl.credstorage.OSGiCredentialStorageProvider;
 import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
+import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUserFactory;
 import com.openexchange.push.impl.credstorage.rdb.RdbCredentialStorage;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CreateCredStorageTable;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageCreateTableTask;
@@ -139,6 +142,10 @@ public class CredStorageActivator extends HousekeepingActivator implements Hazel
             if (Strings.isEmpty(key)) {
                 throw new BundleException("Property \"com.openexchange.push.credstorage.enabled\" set to \"true\", but missing value for \"com.openexchange.push.credstorage.passcrypt\" property.");
             }
+
+            // Register portables
+            registerService(CustomPortableFactory.class, new PortablePushUserFactory());
+            registerService(CustomPortableFactory.class, new PortableCredentialsFactory());
 
             Obfuscator obfuscator = new Obfuscator(key.trim());
 
