@@ -1,3 +1,7 @@
+* 2015-04-07 - thorbenb.betten@open-xchange.com
+
+ - Fix for bug 37501: Consider "AUTO_TO_LOWERCASE_UID" setting all over the place
+
 * 2015-01-30 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 35430: Do not query by 'cid' if the sqlPattern is not a number.
