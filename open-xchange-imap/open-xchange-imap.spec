@@ -95,6 +95,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Apr 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-09 (2486)
 * Thu Mar 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-03-30 (2459)
 * Wed Mar 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
