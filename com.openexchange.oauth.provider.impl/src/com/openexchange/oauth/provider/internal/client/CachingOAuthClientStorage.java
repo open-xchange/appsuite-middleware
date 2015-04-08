@@ -51,6 +51,7 @@ package com.openexchange.oauth.provider.internal.client;
 
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
+import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.Client;
@@ -72,6 +73,7 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
 
     private final String miss;
     private final OAuthClientStorage delegate;
+    private final int cachingContextId = -1;
 
     /**
      * Initializes a new {@link CachingOAuthClientStorage}.
@@ -88,13 +90,14 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client getClientById(String clientId) throws OXException {
+    public Client getClientById(String groupId, String clientId) throws OXException {
         Cache cache = optCache();
         if (null == cache) {
-            return delegate.getClientById(clientId);
+            return delegate.getClientById(groupId, clientId);
         }
 
-        Object object = cache.get(clientId);
+        CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
+        Object object = cache.get(newCacheKey);
         if (object == miss) {
             return null;
         }
@@ -102,13 +105,13 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
             return (Client) object;
         }
 
-        Client client = delegate.getClientById(clientId);
+        Client client = delegate.getClientById(groupId, clientId);
         if (null == client) {
             //  No such client
-            cache.put(clientId, miss, false);
+            cache.put(newCacheKey, miss, false);
             return null;
         }
-        cache.put(clientId, client, false);
+        cache.put(newCacheKey, client, false);
         return client;
     }
 
@@ -118,22 +121,23 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
 
         Cache cache = optCache();
         if (null != cache) {
-            cache.put(newClient.getId(), newClient, false);
+            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, clientData.getGroupId(), newClient.getId());
+            cache.put(newCacheKey, newClient, false);
         }
 
         return newClient;
     }
 
     @Override
-    public void enableClient(String clientId) throws OXException {
-        delegate.enableClient(clientId);
-        invalidateClient(clientId);
+    public void enableClient(String groupId, String clientId) throws OXException {
+        delegate.enableClient(groupId, clientId);
+        invalidateClient(groupId, clientId);
     }
 
     @Override
-    public void disableClient(String clientId) throws OXException {
-        delegate.disableClient(clientId);
-        invalidateClient(clientId);
+    public void disableClient(String groupId, String clientId) throws OXException {
+        delegate.disableClient(groupId, clientId);
+        invalidateClient(groupId, clientId);
     }
 
     @Override
@@ -142,46 +146,49 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
 
         Cache cache = optCache();
         if (null != cache) {
-            cache.put(clientId, updatedClient, true);
+            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, clientData.getGroupId(), clientId);
+            cache.put(newCacheKey, updatedClient, true);
         }
 
         return updatedClient;
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws OXException {
-        boolean result = delegate.unregisterClient(clientId);
+    public boolean unregisterClient(String groupId, String clientId) throws OXException {
+        boolean result = delegate.unregisterClient(groupId, clientId);
         if (result) {
             Cache cache = optCache();
             if (null != cache) {
-                cache.remove(clientId);
+                CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
+                cache.remove(newCacheKey);
             }
         }
         return result;
     }
 
     @Override
-    public Client revokeClientSecret(String clientId) throws OXException {
-        Client revokedClient = delegate.revokeClientSecret(clientId);
+    public Client revokeClientSecret(String groupId, String clientId) throws OXException {
+        Client revokedClient = delegate.revokeClientSecret(groupId, clientId);
 
         Cache cache = optCache();
         if (null != cache) {
-            cache.put(clientId, revokedClient, true);
+            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
+            cache.put(newCacheKey, revokedClient, true);
         }
 
         return revokedClient;
     }
 
     @Override
-    public void invalidateClient(String clientId) {
+    public void invalidateClient(String groupId, String clientId) {
         try {
             Cache cache = optCache();
             if (null != cache) {
-                cache.remove(clientId);
+                CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
+                cache.remove(newCacheKey);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to invalidate client {}", clientId, e);
+            LOGGER.error("Failed to invalidate client {} in group {}", clientId, groupId, e);
         }
     }
-
 }

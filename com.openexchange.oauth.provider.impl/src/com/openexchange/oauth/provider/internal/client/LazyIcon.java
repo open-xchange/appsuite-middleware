@@ -62,6 +62,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.Icon;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.osgi.Services;
 
 /**
@@ -74,6 +76,8 @@ public class LazyIcon implements Icon {
 
     private static final long serialVersionUID = 4458877977630523049L;
 
+    private final String baseToken;
+    private final String groupId;
     private final String clientId;
     private volatile Icon delegate;
 
@@ -81,10 +85,18 @@ public class LazyIcon implements Icon {
      * Initializes a new {@link LazyIcon}.
      *
      * @param clientId The client identifier
+     * @throws OXException
      */
-    public LazyIcon(String clientId) {
+    public LazyIcon(String clientId) throws OXException {
         super();
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            throw OAuthProviderExceptionCodes.BAD_CLIENT_ID.create(clientId);
+        }
+
         this.clientId = clientId;
+        this.groupId = clientIdObj.getGroupId();
+        this.baseToken = clientIdObj.getBaseToken();
     }
 
     @Override
@@ -114,9 +126,10 @@ public class LazyIcon implements Icon {
                     ResultSet rs = null;
                     try {
                         dbService = Services.requireService(DatabaseService.class);
-                        con = dbService.getReadOnly();
-                        stmt = con.prepareStatement("SELECT icon, icon_mime_type FROM oauth_client WHERE id = ?");
-                        stmt.setString(1, clientId);
+                        con = dbService.getReadOnlyForGlobal(this.groupId);
+                        stmt = con.prepareStatement("SELECT icon, icon_mime_type FROM oauth_client WHERE id = ? AND gid = ?");
+                        stmt.setString(1, this.clientId);
+                        stmt.setString(2, this.groupId);
                         rs = stmt.executeQuery();
                         if (!rs.next()) {
                             throw new IllegalStateException("The client has been removed in the meantime");
@@ -134,7 +147,7 @@ public class LazyIcon implements Icon {
                     } finally {
                         Databases.closeSQLStuff(rs, stmt);
                         if (con != null && null != dbService) {
-                            dbService.backReadOnly(con);
+                            dbService.backReadOnlyForGlobal(this.groupId, con);
                         }
                     }
                 }

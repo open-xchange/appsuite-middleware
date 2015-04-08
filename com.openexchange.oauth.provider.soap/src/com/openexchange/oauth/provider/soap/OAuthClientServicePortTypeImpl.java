@@ -316,7 +316,15 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
             }
         }
 
+        {
+            String groupId = soapClientData.getGroupId();
+            if (null != groupId) {
+                clientData.setGroupId(groupId);
+            } else {
+                clientData.setGroupId("default");
+            }
+        }
+
         return clientData;
     }
-
 }

@@ -125,6 +125,7 @@ public abstract class AbstractOAuthTest {
         redirectURIs.add("http://localhost:8080");
 
         ClientData clientData = new ClientData();
+        clientData.setGroupId("default");
         clientData.setName(name);
         clientData.setDescription(name);
         clientData.setIcon(icon);
