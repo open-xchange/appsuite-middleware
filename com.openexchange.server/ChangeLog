@@ -1,6 +1,10 @@
+* 2015-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
+
 * 2015-04-08 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 37572: Restored old behavior for file / document metadata delegates 
+ - Fix for bug 37572: Restored old behavior for file / document metadata delegates
 
 * 2015-04-07 - tobias.friedrich@open-xchange.com
 
