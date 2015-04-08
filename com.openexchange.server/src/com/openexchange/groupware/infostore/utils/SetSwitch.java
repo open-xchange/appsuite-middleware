@@ -268,4 +268,11 @@ public class SetSwitch implements MetadataSwitcher{
         return null;
     }
 
+    @Override
+    public Object shareable() {
+        if(null == value) { return null; }
+        impl.setShareable(((Boolean)value).booleanValue());
+        return null;
+    }
+
 }

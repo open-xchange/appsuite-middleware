@@ -47,30 +47,31 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.push.impl.osgi;
 
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleActivator;
+import com.openexchange.osgi.CompositeBundleActivator;
+import com.openexchange.push.impl.credstorage.osgi.CredStorageActivator;
+
 
 /**
- * {@link IDBasedIgnorableVersionFileAccess} - Extends {@link IDBasedFileAccess} by a <tt>saveDocument()</tt> method that allows to
- * specify whether a document's version shall be set to a new value or not.
+ * {@link MainBundleActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- *
- * @deprecated Use {@link IDBasedFileAccess#supports(String, String, FileStorageCapability...)} with
- *             {@link FileStorageCapability#IGNORABLE_VERSION} instead.
+ * @since v7.8.0
  */
-@Deprecated
-public interface IDBasedIgnorableVersionFileAccess extends IDBasedFileAccess {
+public class MainBundleActivator extends CompositeBundleActivator {
 
     /**
-     * Indicates whether it is supported to <b><small>NOT</small></b> set a new version when saving/updating a document's binary content
-     *
-     * @param serviceId The service identifier
-     * @param accountId The account identifier
-     * @return <code>true</code> if supported; otherwise <code>false</code>
-     * @throws OXException If test fails
+     * Initializes a new {@link MainBundleActivator}.
      */
-    boolean supportsIgnorableVersion(String serviceId, String accountId) throws OXException;
+    public MainBundleActivator() {
+        super();
+    }
+
+    @Override
+    protected BundleActivator[] getActivators() {
+        return new BundleActivator[] { new PushImplActivator(), new CredStorageActivator() };
+    }
 
 }

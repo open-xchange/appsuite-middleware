@@ -102,4 +102,6 @@ public interface MetadataSwitcher {
     public Object meta();
 
     Object objectPermissions();
+    
+    Object shareable();
 }

@@ -49,9 +49,12 @@
 
 package com.openexchange.drive.impl.internal;
 
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.json.JSONObject;
 import com.openexchange.drive.DriveSession;
@@ -61,6 +64,7 @@ import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.metadata.JsonDirectoryMetadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.java.Collators;
 import com.openexchange.session.Session;
 
 /**
@@ -121,10 +125,34 @@ public class DriveUtilityImpl implements DriveUtility {
             return Collections.emptyList();
         }
         List<JSONObject> metadata = new ArrayList<JSONObject>();
-        for (FileStorageFolder subfolder : subfolders.values()) {
+        List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(subfolders.values());
+        if (1 < folders.size()) {
+            Collections.sort(folders, new FolderComparator(session.getLocale()));
+        }
+        for (FileStorageFolder subfolder : folders) {
             metadata.add(new JsonDirectoryMetadata(syncSession, subfolder).build(false));
         }
         return metadata;
+    }
+    
+    private static final class FolderComparator implements Comparator<FileStorageFolder> {
+
+        private final Collator collator;
+
+        /**
+         * Initializes a new {@link FolderComparator}.
+         * 
+         * @param locale The locale to use, or <code>null</code> to fall back to the default locale
+         */
+        public FolderComparator(Locale locale) {
+            super();
+            collator = Collators.getSecondaryInstance(null == locale ? Locale.US : locale);
+        }
+
+        @Override
+        public int compare(FileStorageFolder folder1, FileStorageFolder folder2) {
+            return collator.compare(folder1.getName(), folder2.getName());
+        }
     }
 
 }

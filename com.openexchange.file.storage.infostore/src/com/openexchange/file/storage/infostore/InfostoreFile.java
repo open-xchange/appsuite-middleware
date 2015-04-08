@@ -70,6 +70,11 @@ public class InfostoreFile extends AbstractFile implements File {
 
     private final DocumentMetadata document;
 
+    /**
+     * Initializes a new {@link InfostoreFile}.
+     * 
+     * @param documentMetadata The underlying document metadata.
+     */
     public InfostoreFile(final DocumentMetadata documentMetadata) {
         this.document = documentMetadata;
     }
@@ -315,10 +320,19 @@ public class InfostoreFile extends AbstractFile implements File {
         return PermissionHelper.getFileStorageObjectPermissions(document.getObjectPermissions());
     }
 
-
     @Override
     public void setObjectPermissions(List<FileStorageObjectPermission> objectPermissions) {
         document.setObjectPermissions(PermissionHelper.getObjectPermissions(objectPermissions));
+    }
+
+    @Override
+    public boolean isShareable() {
+        return document.isShareable();
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        document.setShareable(shareable);
     }
 
 }

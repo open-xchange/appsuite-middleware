@@ -137,8 +137,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
-import com.openexchange.groupware.alias.UserAliasStorageProvider;
-import com.openexchange.groupware.alias.osgi.OsgiUserAliasStorage;
+import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -597,17 +596,10 @@ public final class ServerActivator extends HousekeepingActivator {
         track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
 
         /*
-         * Track UserAliasStorages
+         * User Alias Service
          */
-        final OsgiUserAliasStorage aliasStorage = new OsgiUserAliasStorage(context);
-        rememberTracker(aliasStorage);
-
-        ServerServiceRegistry.getInstance().addService(UserAliasStorageProvider.class, new UserAliasStorageProvider() {
-            @Override
-            public UserAliasStorage getUserAliasStorage() throws OXException {
-                return aliasStorage;
-            }
-        });
+        RdbAliasStorage aliasStorage = new RdbAliasStorage();
+        ServerServiceRegistry.getInstance().addService(UserAliasStorage.class, aliasStorage);
 
         /*
          * User Service
@@ -626,6 +618,7 @@ public final class ServerActivator extends HousekeepingActivator {
         openTrackers();
         // Register server's services
         registerService(UserService.class, userService);
+        registerService(UserAliasStorage.class, aliasStorage);
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());

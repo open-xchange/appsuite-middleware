@@ -54,6 +54,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageExtendedMetadata;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
@@ -99,7 +101,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
     FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess,
-    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess {
+    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
@@ -690,6 +692,12 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         update.setId(source.getId());
         this.saveFileMetadata(update, sequenceNumber, modifiedFields);
         return new IDTuple(update.getFolderId(), update.getId());
+    }
+
+    @Override
+    public List<Field> getSupportedFields() {
+        // all supported
+        return Arrays.asList(File.Field.values());
     }
 
     /**

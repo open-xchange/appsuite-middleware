@@ -73,9 +73,10 @@ import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
+import com.openexchange.oauth.provider.internal.tools.ClientId;
+import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelper;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link RdbOAuthClientStorage}
@@ -111,13 +112,13 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public void enableClient(String clientId) throws OXException {
+    public void enableClient(String groupId, String clientId) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritableForGlobal(groupId);
         try {
             enableClient(clientId, con);
         } finally {
-            dbService.backWritable(con);
+            dbService.backWritableForGlobal(groupId, con);
         }
     }
 
@@ -145,13 +146,13 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public void disableClient(String clientId) throws OXException {
+    public void disableClient(String groupId, String clientId) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritableForGlobal(groupId);
         try {
             disableClient(clientId, con);
         } finally {
-            dbService.backWritable(con);
+            dbService.backWritableForGlobal(groupId, con);
         }
     }
 
@@ -179,30 +180,32 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client getClientById(String clientId) throws OXException {
+    public Client getClientById(String groupId, String clientId) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getReadOnly();
+        Connection con = dbService.getReadOnlyForGlobal(groupId);
         try {
-            return getClientById(clientId, con);
+            return getClientById(groupId, clientId, con);
         } finally {
-            dbService.backReadOnly(con);
+            dbService.backReadOnlyForGlobal(groupId, con);
         }
     }
 
     /**
      * Gets the client identified by the given identifier.
      *
-     * @param clientId The client identifier
+     * @param groupId The context group identifier
+     * @param clientToken The client identifier
      * @param con The connection to use
      * @return The client or <code>null</code> if there is no such client
      * @throws OXException If operation fails
      */
-    public Client getClientById(String clientId, Connection con) throws OXException {
+    public Client getClientById(String groupId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT name, description, secret, default_scope, contact_address, website, enabled, registration_date FROM oauth_client WHERE id = ?");
+            stmt = con.prepareStatement("SELECT name, description, secret, default_scope, contact_address, website, enabled, registration_date FROM oauth_client WHERE id = ? AND gid = ?");
             stmt.setString(1, clientId);
+            stmt.setString(2, groupId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return null;
@@ -210,6 +213,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             DefaultClient client = new DefaultClient();
             client.setId(clientId);
+
             client.setName(rs.getString(1));
 
             String description = rs.getString(2);
@@ -258,7 +262,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     @Override
     public Client registerClient(ClientData clientData) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritableForGlobal(clientData.getGroupId());
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
@@ -276,7 +280,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            dbService.backWritable(con);
+            dbService.backWritableForGlobal(clientData.getGroupId(), con);
         }
     }
 
@@ -291,25 +295,25 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public Client registerClient(ClientData clientData, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            // TODO: move generation out of storage layer
-            String clientId = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
+            String clientId = OAuthClientIdHelper.getInstance().generateClientId(clientData.getGroupId());
             String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
 
-            stmt = con.prepareStatement("INSERT INTO oauth_client (id, secret, name, description, icon, icon_mime_type, default_scope, contact_address, website, enabled, registration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt = con.prepareStatement("INSERT INTO oauth_client (id, gid, secret, name, description, icon, icon_mime_type, default_scope, contact_address, website, enabled, registration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             stmt.setString(1, clientId);
-            stmt.setString(2, obfuscator.obfuscate(secret));
-            stmt.setString(3, clientData.getName());
-            stmt.setString(4, clientData.getDescription());
+            stmt.setString(2, clientData.getGroupId());
+            stmt.setString(3, obfuscator.obfuscate(secret));
+            stmt.setString(4, clientData.getName());
+            stmt.setString(5, clientData.getDescription());
 
             Icon icon = clientData.getIcon();
-            stmt.setBlob(5, icon.getInputStream());
-            stmt.setString(6, icon.getMimeType());
-            stmt.setString(7, clientData.getDefaultScope().scopeString());
-            stmt.setString(8, clientData.getContactAddress());
-            stmt.setString(9, clientData.getWebsite());
-            stmt.setBoolean(10, true);
+            stmt.setBlob(6, icon.getInputStream());
+            stmt.setString(7, icon.getMimeType());
+            stmt.setString(8, clientData.getDefaultScope().scopeString());
+            stmt.setString(9, clientData.getContactAddress());
+            stmt.setString(10, clientData.getWebsite());
+            stmt.setBoolean(11, true);
             long now = System.currentTimeMillis();
-            stmt.setLong(11, now);
+            stmt.setLong(12, now);
 
             stmt.executeUpdate();
 
@@ -321,7 +325,6 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 stmt.addBatch();
             }
             stmt.executeBatch();
-
 
             DefaultClient client = toClient(clientData);
             client.setRegistrationDate(new Date(now));
@@ -351,11 +354,10 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         return client;
     }
 
-
     @Override
     public Client updateClient(String clientId, ClientData clientData) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritableForGlobal(clientData.getGroupId());
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
@@ -373,7 +375,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            dbService.backWritable(con);
+            dbService.backWritableForGlobal(clientData.getGroupId(), con);
         }
     }
 
@@ -390,6 +392,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         PreparedStatement stmt = null;
         try {
             class TypedObject {
+
                 final int type;
                 final Object object;
 
@@ -435,7 +438,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             if (!values.isEmpty()) {
                 sql.setLength(sql.length() - 1); // Delete last character
-                sql.append(" WHERE id = ?");
+                sql.append(" WHERE id = ? AND gid = ?");
                 stmt = con.prepareStatement(sql.toString());
                 int pos = 1;
                 for (TypedObject value : values) {
@@ -446,7 +449,8 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                         stmt.setObject(pos++, obj, value.type);
                     }
                 }
-                stmt.setString(pos, clientId);
+                stmt.setString(pos++, clientId);
+                stmt.setString(pos, clientData.getGroupId());
                 int result = stmt.executeUpdate();
                 if (result <= 0) {
                     throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
@@ -474,7 +478,14 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             Databases.closeSQLStuff(stmt);
             stmt = null;
 
-            return getClientById(clientId, con);
+            ClientId clientIdObj = ClientId.parse(clientId);
+            if (clientIdObj == null) {
+                return null;
+            }
+
+            String groupId = clientIdObj.getGroupId();
+
+            return getClientById(groupId, clientId, con);
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -483,15 +494,15 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws OXException {
+    public boolean unregisterClient(String groupId, String clientId) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritableForGlobal(groupId);
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
             rollback = true;
 
-            boolean deleted = unregisterClient(clientId, con);
+            boolean deleted = unregisterClient(groupId, clientId, con);
 
             con.commit();
             rollback = false;
@@ -503,23 +514,25 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            dbService.backWritable(con);
+            dbService.backWritableForGlobal(groupId, con);
         }
     }
 
     /**
      * Unregisters an existing client
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
      * @param con The connection to use
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
      * @throws OXException
      */
-    public boolean unregisterClient(String clientId, Connection con) throws OXException {
+    public boolean unregisterClient(String groupId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM oauth_client WHERE id = ?");
+            stmt = con.prepareStatement("DELETE FROM oauth_client WHERE id = ? AND gid = ?");
             stmt.setString(1, clientId);
+            stmt.setString(2, groupId);
             int result = stmt.executeUpdate();
             if (result <= 0) {
                 return false;
@@ -539,15 +552,15 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client revokeClientSecret(String clientId) throws OXException {
+    public Client revokeClientSecret(String groupId, String clientId) throws OXException {
         DatabaseService dbService = getDbService();
-        Connection con = dbService.getWritable();
+        Connection con = dbService.getWritableForGlobal(groupId);
         boolean rollback = false;
         try {
             Databases.startTransaction(con);
             rollback = true;
 
-            Client client = revokeClientSecret(clientId, con);
+            Client client = revokeClientSecret(groupId, clientId, con);
 
             con.commit();
             rollback = false;
@@ -559,24 +572,26 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 Databases.rollback(con);
             }
             Databases.autocommit(con);
-            dbService.backWritable(con);
+            dbService.backWritableForGlobal(groupId, con);
         }
     }
 
     /**
      * Revokes a client's current secret and generates a new one.
      *
+     * @param groupId id of the group the client is assigned to
      * @param clientId The client identifier
      * @param con The connection to use
      * @return The client with revoked/new secret
      * @throws OXException If revoke operation fails
      */
-    public Client revokeClientSecret(String clientId, Connection con) throws OXException {
+    public Client revokeClientSecret(String groupId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT secret FROM oauth_client WHERE id = ?");
+            stmt = con.prepareStatement("SELECT secret FROM oauth_client WHERE id = ? AND gid = ?");
             stmt.setString(1, clientId);
+            stmt.setString(2, groupId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
@@ -585,10 +600,11 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             String plainNewSecret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
 
             Databases.closeSQLStuff(rs, stmt);
-            stmt = con.prepareStatement("UPDATE oauth_client SET secret = ? WHERE id = ? AND secret = ?");
+            stmt = con.prepareStatement("UPDATE oauth_client SET secret = ? WHERE id = ? AND gid = ? AND secret = ?");
             stmt.setString(1, obfuscator.obfuscate(plainNewSecret));
             stmt.setString(2, clientId);
-            stmt.setString(3, obfusOldSecret);
+            stmt.setString(3, groupId);
+            stmt.setString(4, obfusOldSecret);
             int result = stmt.executeUpdate();
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
@@ -598,7 +614,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 throw OAuthProviderExceptionCodes.CONCURRENT_SECRET_REVOKE.create(clientId);
             }
 
-            return getClientById(clientId, con);
+            return getClientById(groupId, clientId, con);
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -607,8 +623,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public void invalidateClient(String clientId) {
+    public void invalidateClient(String groupId, String clientId) {
         // Nothing to do
     }
-
 }

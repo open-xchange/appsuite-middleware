@@ -187,6 +187,7 @@ public abstract class EndpointTest {
 
         ClientData clientData = new ClientData();
         clientData.setName(name);
+        clientData.setGroupId("default");
         clientData.setDescription(name);
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");

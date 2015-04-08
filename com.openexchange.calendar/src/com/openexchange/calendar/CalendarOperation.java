@@ -746,7 +746,37 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsFilename() && recColl.check(cdao.getFilename(), edao.getFilename()) && recColl.getFieldName(CommonObject.FILENAME) != null) {
             ucols[uc++] = CommonObject.FILENAME;
         }
+        if (cdao.containsTimezone() && recColl.check(cdao.getTimezone(), edao.getTimezone()) && recColl.getFieldName(CalendarDataObject.TIMEZONE) != null && canChangeTZ(cdao, edao)) {
+            ucols[uc++] = CalendarDataObject.TIMEZONE;
+        }
         return uc;
+    }
+
+    /**
+     * Checks, if it is allowed to change the timezone.
+     * 
+     * @param cdao
+     * @param edao
+     * @return
+     */
+    private static boolean canChangeTZ(CalendarDataObject cdao, CalendarDataObject edao) {
+        if (edao.getRecurrenceType() != CalendarDataObject.NO_RECURRENCE) {
+            return false;
+        }
+
+        if (edao.getFullTime()) {
+            return false;
+        }
+
+        if (cdao.getRecurrenceType() != CalendarDataObject.NO_RECURRENCE) {
+            return false;
+        }
+
+        if (cdao.getFullTime()) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

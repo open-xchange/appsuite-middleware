@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.google.common.base.CharMatcher;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
@@ -92,10 +93,11 @@ public class GlobalDbInit {
         String fileName = "globaldb.yml";
         Map<String, GlobalDbConfig> configs = null;
         Object yaml = configService.getYaml(fileName);
+
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
             if (0 < map.size()) {
-                configs = parse(map, configDatabaseService);
+                configs = parse(map, configDatabaseService, configService);
             }
         }
         if (null == configs || 0 == configs.size()) {
@@ -176,13 +178,14 @@ public class GlobalDbInit {
      *
      * @param yaml The global database configurations in a YAML map
      * @param configDatabaseService A reference to the configuration database service
+     * @param configService A reference to the {@link ConfigurationService}
      * @return The global db configurations, mapped by their assigned group names, or an empty map if none are defined
      */
-    private static Map<String, GlobalDbConfig> parse(Map<String, Object> yaml, ConfigDatabaseService configDatabaseService) throws OXException {
+    private static Map<String, GlobalDbConfig> parse(Map<String, Object> yaml, ConfigDatabaseService configDatabaseService, ConfigurationService configService) throws OXException {
         /*
          * get context groups mapped to their database pool identifier
          */
-        Map<Integer, Set<String>> groupsByPool = getGroupsByPool(yaml);
+        Map<Integer, Set<String>> groupsByPool = getGroupsByPool(yaml, configService);
         if (null == groupsByPool || 0 == groupsByPool.size()) {
             return Collections.emptyMap();
         }
@@ -213,9 +216,10 @@ public class GlobalDbInit {
      * Parses the pool identifiers and their associated context group names from the supplied YAML map and.
      *
      * @param yaml The global database configurations in a YAML map
+     * @param configService A reference to the {@link ConfigurationService}
      * @return The configured database pool identifiers, mapped to their associated context group names, or an empty map if none are defined
      */
-    private static Map<Integer, Set<String>> getGroupsByPool(Map<String, Object> yaml) throws OXException {
+    private static Map<Integer, Set<String>> getGroupsByPool(Map<String, Object> yaml, ConfigurationService configService) throws OXException {
         Map<Integer, Set<String>> groupsByPool = new HashMap<Integer, Set<String>>();
         for (Map.Entry<String, Object> entry : yaml.entrySet()) {
             if (null == entry.getValue() || false == Map.class.isInstance(entry.getValue())) {
@@ -231,7 +235,7 @@ public class GlobalDbInit {
                 try {
                     poolID = Integer.valueOf(String.valueOf(values.get("id")));
                 } catch (NumberFormatException e) {
-                    throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create(e, "Database pool identifier can't be parsed for section \"" + entry.getKey() +'"');
+                    throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create(e, "Database pool identifier can't be parsed for section \"" + entry.getKey() + '"');
                 }
                 Object groupsValue = values.get("groups");
                 if (null == groupsValue || false == List.class.isInstance(groupsValue)) {
@@ -245,12 +249,34 @@ public class GlobalDbInit {
                     groups = new HashSet<String>();
                     groupsByPool.put(poolID, groups);
                 }
-                groups.addAll((List<String>) groupsValue);
+                List<String> groupNames = (List<String>) groupsValue;
+                int maxGroupNameLength = configService.getIntProperty("com.openexchange.database.contextgroup.nameLength", 32);
+                checkGroupNameContraints(groupNames, maxGroupNameLength);
+
+                groups.addAll(groupNames);
             } else {
                 LOG.info("No pool identifier defined at section \"{}\", ignoring global database section", entry.getKey());
             }
         }
         return groupsByPool;
+    }
+
+    /**
+     * Checks if the configured context group names do not exceed the configured size and only contain ASCII characters
+     *
+     * @param groupNames - List<String> with the used group names
+     * @param maxGroupNameLength - int with the max allowed characters for one group
+     * @throws OXException
+     */
+    private static void checkGroupNameContraints(List<String> groupNames, int maxGroupNameLength) throws OXException {
+        for (String groupName : groupNames) {
+            if (groupName.length() > maxGroupNameLength) {
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group name \'" + groupName + "\' has more character than the allowed " + maxGroupNameLength + " one.");
+            }
+            if (!CharMatcher.ASCII.matchesAllOf(groupName)) {
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("Group name \'" + groupName + "\' does contain non ascii characters.");
+            }
+        }
     }
 
     /**

@@ -59,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.push.impl.osgi.Services;
+import com.openexchange.push.impl.credstorage.osgi.CredStorageServices;
 
 /**
  * {@link CredStorageCreateTableTask} - Inserts necessary tables.
@@ -79,7 +79,7 @@ public class CredStorageCreateTableTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        DatabaseService dbService = Services.requireService(DatabaseService.class);
+        DatabaseService dbService = CredStorageServices.requireService(DatabaseService.class);
         int contextId = params.getContextId();
         Connection writeCon = dbService.getForUpdateTask(contextId);
         PreparedStatement stmt = null;

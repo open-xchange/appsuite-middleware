@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,29 +47,62 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.ajax.appointment;
 
-import com.openexchange.exception.OXException;
+import static com.openexchange.groupware.calendar.TimeTools.D;
+import java.util.Date;
+import java.util.TimeZone;
+import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.groupware.container.Appointment;
+import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link IDBasedRandomFileAccess}
+ * {@link ChangeTimeZoneTest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- *
- * @deprecated Use {@link IDBasedFileAccess#supports(String, String, FileStorageCapability...)} with
- *             {@link FileStorageCapability#RANDOM_FILE_ACCESS} instead.
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-@Deprecated
-public interface IDBasedRandomFileAccess extends IDBasedIgnorableVersionFileAccess {
+public class ChangeTimeZoneTest extends AbstractAJAXSession {
 
-    /**
-     * Gets a value indicating whether random file access is supported for the supplied service/account or not.
-     *
-     * @param serviceId The service ID
-     * @param accountId The account ID
-     * @return <code>true</code> if random access file operations are supported, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    boolean supportsRandomFileAccess(String serviceId, String accountId) throws OXException;
+    private final TimeZone UTC = TimeZone.getTimeZone("UTC");
+    private final TimeZone BERLIN = TimeZone.getTimeZone("Europe/Berlin");
+    private final TimeZone US = TimeZone.getTimeZone("US/Eastern");
+    private CalendarTestManager ctm;
+    private Appointment app;
+
+    public ChangeTimeZoneTest(String name) {
+        super(name);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+
+        ctm = new CalendarTestManager(client);
+        app = new Appointment();
+        app.setTitle("ChangeTimeZoneTest");
+        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app.setStartDate(D("01.04.2015 08:00", UTC));
+        app.setEndDate(D("01.04.2015 09:00", UTC));
+        app.setTimezone("Europe/Berlin");
+
+        ctm.insert(app);
+    }
+
+    public void testSimpleTimeZoneChange() throws Exception {
+        app.setLastModified(new Date(Long.MAX_VALUE));
+        app.setTimezone("US/Eastern");
+        ctm.update(app);
+
+        Appointment loaded = ctm.get(client.getValues().getPrivateAppointmentFolder(), app.getObjectID());
+        assertEquals("Wrong tmezone.", "US/Eastern", loaded.getTimezone());
+        assertTrue(true);
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        //ctm.cleanUp();
+        super.tearDown();
+    }
 
 }

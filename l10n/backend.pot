@@ -1781,6 +1781,29 @@ msgstr ""
 msgid "The associated %2$s account does no more exist"
 msgstr ""
 
+#. Individual permissions are not supported in account \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+msgid "Individual permissions are not supported in account \"%1$s\"."
+msgstr ""
+
+#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:149
+msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
+
+#. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:152
+msgid ""
+"Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
+
+#. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:155
+msgid ""
+"The file \"%1$s\" was not saved due to possible data loss. Please review the "
+"warnings for details."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."

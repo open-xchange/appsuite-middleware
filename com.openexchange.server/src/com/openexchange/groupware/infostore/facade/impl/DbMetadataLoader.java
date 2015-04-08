@@ -78,7 +78,7 @@ public abstract class DbMetadataLoader<T> extends MetadataLoader<T> {
     }
 
     /**
-     * Performs a query against the database, utilitzing the supplied result processor to iterate over the result set.
+     * Performs a query against the database, utilizing the supplied result processor to iterate over the result set.
      *
      * @param context The context
      * @param query The query, may contain placeholders that will be replaced in the statement by the supplied arguments

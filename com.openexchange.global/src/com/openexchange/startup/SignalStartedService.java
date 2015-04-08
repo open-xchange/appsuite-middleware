@@ -49,6 +49,8 @@
 
 package com.openexchange.startup;
 
+import com.openexchange.osgi.annotation.SingletonService;
+
 
 /**
  * {@link SignalStartedService} - The marker service to signal server start-up is completed and ready to serve requests.
@@ -56,6 +58,7 @@ package com.openexchange.startup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
+@SingletonService
 public interface SignalStartedService {
     // Marker service interface
 }

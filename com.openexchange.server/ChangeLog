@@ -1,3 +1,19 @@
+* 2015-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
+
+* 2015-04-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37572: Restored old behavior for file / document metadata delegates
+
+* 2015-04-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37309: Don't ignore entity 0 when calculating permission changes
+
+* 2015-04-02- thorben.betten@open-xchange.com
+
+ - Fix for bug 37527: Pass header/cookie information on password change to AuthenticationService instance
+
 * 2015-03-30 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 37391: Retain the structure of the 'mpasswd' file when updating the password.

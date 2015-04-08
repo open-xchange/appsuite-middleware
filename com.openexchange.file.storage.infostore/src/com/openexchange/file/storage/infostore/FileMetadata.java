@@ -336,6 +336,16 @@ public class FileMetadata implements DocumentMetadata {
         file.setObjectPermissions(PermissionHelper.getFileStorageObjectPermissions(objectPermissions));
     }
 
+    @Override
+    public boolean isShareable() {
+        return file.isShareable();
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        file.setShareable(shareable);
+    }
+
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;
@@ -638,6 +648,16 @@ public class FileMetadata implements DocumentMetadata {
             @Override
             public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
                 // Nothing to do
+            }
+
+            @Override
+            public boolean isShareable() {
+                return file.isShareable();
+            }
+
+            @Override
+            public void setShareable(boolean shareable) {
+                file.setShareable(shareable);
             }
         };
         return metaData;

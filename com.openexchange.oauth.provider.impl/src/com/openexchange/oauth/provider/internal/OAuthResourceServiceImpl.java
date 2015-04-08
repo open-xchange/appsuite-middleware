@@ -61,6 +61,7 @@ import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.StoredGrant;
+import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 
 
@@ -110,12 +111,18 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
 
     @Override
     public Client getClient(OAuthGrant grant) throws OXException {
-        Client client = clientStorage.getClientById(grant.getClientId());
+        String clientId = grant.getClientId();
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return null;
+        }
+
+        String groupId = clientIdObj.getGroupId();
+
+        Client client = clientStorage.getClientById(groupId, clientId);
         if (client == null) {
             throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
         }
-
         return client;
     }
-
 }

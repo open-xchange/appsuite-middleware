@@ -410,6 +410,12 @@ public class InfostoreWriter extends TimedWriter<DocumentMetadata> {
             writeInteger(dm.getNumberOfVersions());
             return null;
         }
+
+        @Override
+        public Object shareable() {
+            writeBoolean(dm.isShareable());
+            return null;
+        }
     }
 
 	@Override

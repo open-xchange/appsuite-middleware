@@ -80,15 +80,6 @@ public final class Services {
     }
 
     /**
-     * Gets the service lookup.
-     *
-     * @return The service lookup or <code>null</code>
-     */
-    public static ServiceLookup getServiceLookup() {
-        return REF.get();
-    }
-
-    /**
      * Gets the service of specified type
      *
      * @param clazz The service's class

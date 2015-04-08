@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.composition.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -162,12 +163,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         List<FileStorageAccountAccess> accesses = accessesToClose.get();
         for (FileStorageAccountAccess access : accesses) {
             if (WarningsAware.class.isInstance(access)) {
-                List<OXException> warnings = ((WarningsAware) access).getAndFlushWarnings();
-                if (null != warnings && 0 < warnings.size()) {
-                    for (OXException warning : warnings) {
-                        warningsAware.addWarning(warning);
-                    }
-                }
+                addWarnings(((WarningsAware) access).getAndFlushWarnings());
             }
             access.close();
         }
@@ -204,6 +200,19 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
      */
     protected Session getSession() {
         return session;
+    }
+
+    /**
+     * Adds multiple warnings.
+     * 
+     * @param warnings The warnings to add
+     */
+    protected void addWarnings(Collection<OXException> warnings) {
+        if (null != warnings && 0 < warnings.size()) {
+            for (OXException warning : warnings) {
+                warningsAware.addWarning(warning);
+            }
+        }
     }
 
     /**
@@ -259,7 +268,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
         if (null == accountAccess) {
             FileStorageService fileStorage = getFileStorageServiceRegistry().getFileStorageService(serviceId);
             accountAccess = fileStorage.getAccountAccess(accountId, session);
-            connect(accountAccess);
+            return connect(accountAccess);
         }
         return accountAccess;
     }
@@ -282,29 +291,37 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
             }
             for (FileStorageAccount fileStorageAccount : accounts) {
                 FileStorageAccountAccess accountAccess = fsService.getAccountAccess(fileStorageAccount.getId(), session);
-                connect(accountAccess);
-                retval.add(accountAccess.getFileAccess());
+                retval.add(connect(accountAccess).getFileAccess());
             }
         }
         return retval;
     }
 
-    private void connect(FileStorageAccountAccess accountAccess) throws OXException {
+    /**
+     * Connects the supplied account access if not already done, remembering the account for closing during the {@link #finish()}.
+     * 
+     * @param accountAccess The account access to connect
+     * @return The account access, or a previously connected account access.
+     */
+    private FileStorageAccountAccess connect(FileStorageAccountAccess accountAccess) throws OXException {
         String id = accountAccess.getService().getId() + '/' + accountAccess.getAccountId();
         Map<String, FileStorageAccountAccess> accounts = connectedAccounts.get();
-        if (false == accounts.containsKey(id)) {
-            try {
-                accountAccess.connect();
-            } catch (OXException e) {
-                // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
-                if (e.equalsCode(4, "OAUTH") || OXExceptions.containsCommunicationError(e)) {
-                    throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountAccess.getAccountId(), accountAccess.getService().getId(), session.getUserId(), session.getContextId());
-                }
-                throw e;
-            }
-            accounts.put(id, accountAccess);
-            accessesToClose.get().add(accountAccess);
+        FileStorageAccountAccess connectedAccountAccess = accounts.get(id);
+        if (null != connectedAccountAccess) {
+            return connectedAccountAccess;
         }
+        try {
+            accountAccess.connect();
+        } catch (OXException e) {
+            // OAuthExceptionCodes.UNKNOWN_OAUTH_SERVICE_META_DATA -- 'OAUTH-0004'
+            if (e.equalsCode(4, "OAUTH") || OXExceptions.containsCommunicationError(e)) {
+                throw FileStorageExceptionCodes.ACCOUNT_NOT_ACCESSIBLE.create(e, accountAccess.getAccountId(), accountAccess.getService().getId(), session.getUserId(), session.getContextId());
+            }
+            throw e;
+        }
+        accounts.put(id, accountAccess);
+        accessesToClose.get().add(accountAccess);
+        return accountAccess;
     }
 
 }

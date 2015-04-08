@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,74 @@
  *
  */
 
-package com.openexchange.groupware.alias.osgi;
+package com.openexchange.push.impl.credstorage.osgi;
 
-import java.sql.Connection;
-import java.util.Set;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.server.ServiceExceptionCode;
-
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OsgiUserAliasStorage}
+ * {@link CredStorageServices} - The static service lookup.
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OsgiUserAliasStorage extends ServiceTracker<UserAliasStorage, UserAliasStorage> implements UserAliasStorage {
+public final class CredStorageServices {
 
-    public OsgiUserAliasStorage(BundleContext context) {
-        super(context, UserAliasStorage.class, null);
+    /**
+     * Initializes a new {@link CredStorageServices}.
+     */
+    private CredStorageServices() {
+        super();
     }
 
-    @Override
-    public Set<String> getAliases(int contextId, int userId) throws OXException {
-        return getUserAliasStorage().getAliases(contextId, userId);
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
-    @Override
-    public int getUserId(int contextId, String alias) throws OXException {
-        return getUserAliasStorage().getUserId(contextId, alias);
+    /**
+     * Gets the service lookup.
+     *
+     * @return The service lookup or <code>null</code>
+     */
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
-    @Override
-    public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
-        return getUserAliasStorage().createAlias(con, contextId, userId, alias);
-    }
-
-    @Override
-    public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
-        return getUserAliasStorage().updateAlias(con, contextId, userId, oldAlias, newAlias);
-    }
-
-    @Override
-    public boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException {
-        return getUserAliasStorage().deleteAlias(con, contextId, userId, alias);
-    }
-
-    @Override
-    public boolean deleteAliase(Connection con, int contextId, int userId) throws OXException {
-        return getUserAliasStorage().deleteAliase(con, contextId, userId);
-    }
-
-    private UserAliasStorage getUserAliasStorage() throws OXException {
-        UserAliasStorage userAlias = getService();
-        if(userAlias == null) {
-            throw ServiceExceptionCode.absentService(UserAliasStorage.class);
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws OXException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S requireService(final Class<? extends S> clazz) throws OXException {
+        S service = optService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
         }
-        return userAlias;
+        return service;
     }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            return null;
+        }
+        return serviceLookup.getOptionalService(clazz);
+    }
+
 }

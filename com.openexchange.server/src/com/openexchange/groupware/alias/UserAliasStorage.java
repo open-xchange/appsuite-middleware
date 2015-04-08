@@ -52,84 +52,82 @@ package com.openexchange.groupware.alias;
 import java.sql.Connection;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link UserAliasStorage}
+ * {@link UserAliasStorage} - The storage for user aliases.
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface UserAliasStorage {
+
     /**
-     * Gets all aliases of the user
+     * Gets all aliases of the user.
      *
-     * @param contextId
-     * @param userId
-     * @return A <code>Set</code> of aliases belonging to user and context id
-     * @throws OXException - If an SQL error happened
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return A <code>Set</code> of aliases belonging to given user
+     * @throws OXException If an SQL error happened
      */
     Set<String> getAliases(int contextId, int userId) throws OXException;
 
     /**
-     * Gets the user id of the alias
+     * Gets the identifier of the user owning the alias.
      *
-     * @param contextId - the context id
-     * @param alias - the alias to search for
-     * @return the user id or <code>-1</code> if this alias does not belongs to an internal user.
-     * @throws OXException - If an SQL error happened
+     * @param contextId The context identifier
+     * @param alias The alias to search for
+     * @return The user identifier or <code>-1</code> if this alias does not belong to any user
+     * @throws OXException If an SQL error happened
      */
     int getUserId(int contextId, String alias) throws OXException;
 
     /**
-     * Creates an alias
+     * Creates an alias.
      *
-     * @param con - A write connection object to use or <code>null</code> to obtain a new database write connection.
-     *              Keep in mind to pull the connection back to the pool, if an existing connection is used.
-     * @param contextId - the context id
-     * @param userId - the user id
-     * @param alias
-     * @return
-     * @throws OXException - If an SQL error happened
+     * @param con A write connection object to use or <code>null</code> to obtain a new database write connection.
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param alias The alias to create
+     * @return <code>true</code> on successful creation; otherwise <code>false</code>
+     * @throws OXException If an SQL error happened
      */
     boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException;
 
     /**
      * Updates the alias
      *
-     * @param con - A write connection object to use or <code>null</code> to obtain a new database write connection.
-     *              Keep in mind to pull the connection back to the pool, if an existing connection is used.
-     * @param contextId - the context id
-     * @param userId - the user id
-     * @param oldAlias - the old alias
-     * @param newAlias - the alias to update
-     * @return boolean <code>true</code> if update alias was successful or <code>false</code>
-     * @throws OXException - If an SQL error happened
+     * @param con A write connection object to use or <code>null</code> to obtain a new database write connection.
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param oldAlias The old alias
+     * @param newAlias The alias to update
+     * @return <code>true</code> if update alias was successful; otherwise <code>false</code>
+     * @throws OXException If an SQL error happened
      */
     boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException;
 
     /**
      * Deletes a specific alias belonging to user and context
      *
-     * @param con - A write connection object to use or <code>null</code> to obtain a new database write connection.
-     *              Keep in mind to pull the connection back to the pool, if an existing connection is used.
-     * @param contextId - the context id
-     * @param userId - the user id
-     * @param alias - the alias to delete
-     * @return boolean <code>true</code> if delete alias was successful or <code>false</code>
-     * @throws OXException - If an SQL error happened
+     * @param con A write connection object to use or <code>null</code> to obtain a new database write connection.
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param alias The alias to delete
+     * @return <code>true</code> if delete alias was successful; otherwise <code>false</code>
+     * @throws OXException If delete attempt fails
      */
     boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException;
 
     /**
      * Deletes all aliases belonging to user and context
      *
-     * @param con - A write connection object to use or <code>null</code> to obtain a new database connection.
-     *              Keep in mind to pull the connection back to the pool, if an existing connection is used.
-     * @param userId - the user id
-     * @param alias - the alias to delete
-     * @return boolean <code>true</code> if delete alias was successful or <code>false</code>
-     * @throws OXException - If an SQL error happened
+     * @param con A write connection object to use or <code>null</code> to obtain a new database connection..
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return <code>true</code> if delete operation was successful; otherwise <code>false</code>
+     * @throws OXException If delete attempt fails
      */
     boolean deleteAliase(Connection con, int contextId, int userId) throws OXException;
 }

@@ -55,13 +55,13 @@ import com.openexchange.ajax.appointment.bugtests.AppointmentBugTestSuite;
 import com.openexchange.ajax.appointment.bugtests.FolderIdTestAjax;
 import com.openexchange.ajax.appointment.recurrence.RecurrenceTestSuite;
 
-public class AppointmentAJAXSuite extends TestSuite{
+public class AppointmentAJAXSuite extends TestSuite {
 
     private AppointmentAJAXSuite() {
         super();
     }
 
-    public static Test suite(){
+    public static Test suite() {
         final TestSuite tests = new TestSuite("com.openexchange.ajax.appointment.AppointmentAJAXSuite");
         tests.addTestSuite(AllTest.class);
         tests.addTestSuite(ConfirmTest.class);
@@ -101,6 +101,7 @@ public class AppointmentAJAXSuite extends TestSuite{
         tests.addTestSuite(PrivateTests.class);
         tests.addTestSuite(FolderIdTestAjax.class);
         tests.addTestSuite(MoveTestNew.class);
+        tests.addTestSuite(ChangeTimeZoneTest.class);
         return tests;
     }
 }

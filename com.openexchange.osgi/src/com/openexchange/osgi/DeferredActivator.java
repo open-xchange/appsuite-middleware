@@ -289,7 +289,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     private final void init(final BundleContext context) throws Exception {
         updateServiceState();
         final Class<?>[] classes = getNeededServices();
-        if (null == classes) {
+        if (null == classes || 0 == classes.length) {
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
@@ -417,7 +417,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  */
                 try {
                     startUp(false);
-                    started.set(true);
                 } catch (final Exception e) {
                     Throwable t = e;
                     if (t.getCause() instanceof BundleException) {
@@ -521,6 +520,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 public void run() {
                     try {
                         startBundle();
+                        started.set(true);
                     } catch (final Throwable t) {
                         ExceptionUtils.handleThrowable(t);
                         LOG.error("", t);
@@ -530,6 +530,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             new Thread(task).run();
         } else {
             startBundle();
+            started.set(true);
         }
     }
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Mail Push Implementation Bundle
 Bundle-SymbolicName: com.openexchange.push.impl
-Bundle-Version: 7.6.2
+Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
@@ -47,4 +47,4 @@ Import-Package: com.hazelcast.config,
  org.osgi.service.event,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.push.impl.osgi.PushImplActivator
+Bundle-Activator: com.openexchange.push.impl.osgi.MainBundleActivator

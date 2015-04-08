@@ -81,6 +81,7 @@ import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.StoredGrant;
+import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.tools.URIValidator;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
@@ -101,7 +102,6 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     private final ServiceLookup services;
 
-
     public OAuthProviderServiceImpl(AbstractAuthorizationCodeProvider authCodeProvider, OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage, ServiceLookup services) {
         super();
         this.authCodeProvider = authCodeProvider;
@@ -112,7 +112,13 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public Client getClientById(String clientId) throws OXException {
-        return clientStorage.getClientById(clientId);
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return null;
+        }
+        String groupId = clientIdObj.getGroupId();
+
+        return clientStorage.getClientById(groupId, clientId);
     }
 
     @Override
@@ -122,14 +128,26 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public boolean unregisterClient(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            throw OAuthProviderExceptionCodes.BAD_CLIENT_ID.create(clientId);
+        }
         grantStorage.deleteGrantsByClientId(clientId);
-        return clientStorage.unregisterClient(clientId);
+
+        String groupId = clientIdObj.getGroupId();
+        return clientStorage.unregisterClient(groupId, clientId);
     }
 
     @Override
     public Client revokeClientSecret(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return null;
+        }
         grantStorage.deleteGrantsByClientId(clientId);
-        return clientStorage.revokeClientSecret(clientId);
+
+        String groupId = clientIdObj.getGroupId();
+        return clientStorage.revokeClientSecret(groupId, clientId);
     }
 
     @Override
@@ -139,13 +157,25 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public void enableClient(String clientId) throws OXException {
-        clientStorage.enableClient(clientId);
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return;
+        }
+
+        String groupId = clientIdObj.getGroupId();
+        clientStorage.enableClient(groupId, clientId);
     }
 
     @Override
     public void disableClient(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return;
+        }
         grantStorage.deleteGrantsByClientId(clientId); // TODO: really?
-        clientStorage.disableClient(clientId);
+
+        String groupId = clientIdObj.getGroupId();
+        clientStorage.disableClient(groupId, clientId);
     }
 
     @Override
@@ -299,7 +329,15 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
         List<GrantView> grantViews = new ArrayList<GrantView>(grantsByClient.size());
         for (Entry<String, List<StoredGrant>> entry : grantsByClient.entrySet()) {
-            Client client = clientStorage.getClientById(entry.getKey());
+            String clientId = entry.getKey();
+            ClientId clientIdObj = ClientId.parse(clientId);
+            if (clientIdObj == null) {
+                continue;
+            }
+
+            String groupId = clientIdObj.getGroupId();
+
+            Client client = clientStorage.getClientById(groupId, clientId);
             Set<String> scopes = new HashSet<>();
             Date latestGrantDate = new Date(0);
             for (StoredGrant grant : entry.getValue()) {
@@ -322,7 +360,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public void revokeGrants(String clientId, int contextId, int userId) throws OXException {
-       grantStorage.deleteGrantsByClientAndUser(clientId, contextId, userId);
+        grantStorage.deleteGrantsByClientAndUser(clientId, contextId, userId);
     }
 
     @Override

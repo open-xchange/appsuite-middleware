@@ -63,7 +63,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
@@ -88,7 +87,7 @@ public final class MailNotifyPushListenerRegistry {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
     private static enum StopResult {
-        NONE, RECONNECTED, STOPPED;
+        NONE, RECONNECTED, RECONNECTED_AS_PERMANENT, STOPPED;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -332,6 +331,9 @@ public final class MailNotifyPushListenerRegistry {
                     case RECONNECTED:
                         LOG.info("Reconnected UDP-based mail listener {} for user {} in context {} using another session", mboxId, I(userId), I(contextId));
                         return true;
+                    case RECONNECTED_AS_PERMANENT:
+                        LOG.info("Reconnected as permanent UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
+                        return true;
                     case STOPPED:
                         LOG.info("Stopped UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
                         return true;
@@ -355,12 +357,14 @@ public final class MailNotifyPushListenerRegistry {
      * @return The stop result
      */
     private StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, String mboxId, int userId, int contextId) {
-        MailNotifyPushListener listener = mboxId2Listener.remove(mboxId);
+        MailNotifyPushListener listener = mboxId2Listener.get(mboxId);
         if (null != listener) {
             if (!stopIfPermanent && listener.isPermanent()) {
-                mboxId2Listener.put(mboxId, listener);
                 return StopResult.NONE;
             }
+
+            // Remove
+            mboxId2Listener.remove(mboxId);
 
             boolean reconnected;
             {
@@ -373,7 +377,12 @@ public final class MailNotifyPushListenerRegistry {
                 }
             }
 
-            return reconnected ? StopResult.RECONNECTED : StopResult.STOPPED;
+            if (!reconnected) {
+                return StopResult.STOPPED;
+            }
+
+            MailNotifyPushListener newListener = mboxId2Listener.get(mboxId);
+            return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
         }
 
         MailNotifyPushListener newListener = injectAnotherListenerFor(null, mboxId, userId, contextId);
@@ -436,16 +445,6 @@ public final class MailNotifyPushListenerRegistry {
         return null;
     }
 
-
-
-
-
-
-
-
-
-
-
     /**
      * Purges specified user's push listener and all of user-associated session identifiers from this registry.
      *
@@ -455,31 +454,19 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException
      */
     public boolean purgeUserPushListener(final int contextId, final int userId) throws OXException {
-        return removeListener(getMboxIdsFor(userId, contextId));
-    }
-
-    /**
-     * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
-     * user-associated session identifiers are present.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
-     * @throws OXException
-     */
-    public boolean removePushListener(final int contextId, final int userId) throws OXException {
-        final SessiondService sessiondService = Services.optService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            return removeListener(getMboxIdsFor(userId, contextId));
+        Set<String> mboxIds = getMboxIdsFor(userId, contextId);
+        if (mboxIds.isEmpty()) {
+            LOG.warn("No resolvable aliases for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+            return false;
         }
-        return false;
-    }
 
-    private boolean removeListener(final Collection<String> mboxIds) {
-        for(final String id : mboxIds) {
-            LOG.debug("Removing alias {} from map", id);
-            mboxId2Listener.remove(id);
+        synchronized (this) {
+            for (String id : mboxIds) {
+                LOG.debug("Removing alias {} from map", id);
+                mboxId2Listener.remove(id);
+            }
         }
+
         return true;
     }
 
@@ -492,19 +479,26 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException If mailbox identifiers cannot be returned
      */
     private Set<String> getMboxIdsFor(int userId, int contextId) throws OXException {
-        User user = UserStorage.getInstance().getUser(userId, contextId);
+        // Get the associated user
+        User user = Services.getService(UserService.class, true).getUser(userId, contextId);
 
+        // Get user aliases
         String[] aliases = user.getAliases();
+
+        // Iterate aliases and fill into set
         Set<String> mboxIds = new LinkedHashSet<String>(aliases.length + 1);
-        for (String alias : aliases) {
-            if (useEmailAddress) {
+        if (useEmailAddress) {
+            for (String alias : aliases) {
                 mboxIds.add(Strings.toLowerCase(alias));
-            } else {
+            }
+        } else {
+            for (String alias : aliases) {
                 int idx = alias.indexOf('@');
                 mboxIds.add(Strings.toLowerCase( (idx > 0) ? alias.substring(0, idx) : alias) );
             }
         }
 
+        // Add login-info as well (if demanded)
         if (useOXLogin) {
             mboxIds.add(user.getLoginInfo().toLowerCase());
         }

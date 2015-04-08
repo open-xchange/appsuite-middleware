@@ -49,8 +49,11 @@
 
 package com.openexchange.passwordchange.servlet;
 
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -218,14 +221,20 @@ public final class PasswordChangeServlet extends SessionServlet {
                     throw ServiceExceptionCode.absentService(BasicPasswordChangeService.class);
                 }
 
-                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw));
+                Map<String, List<String>> headers = copyHeaders(req);
+                com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+
+                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies));
             } else {
                 PasswordChangeService passwordChangeService = services.getService(PasswordChangeService.class);
                 if (passwordChangeService == null) {
                     throw ServiceExceptionCode.absentService(PasswordChangeService.class);
                 }
 
-                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw));
+                Map<String, List<String>> headers = copyHeaders(req);
+                com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+
+                passwordChangeService.perform(new PasswordChangeEvent(session, context, newPw, oldPw, headers, cookies));
             }
         } catch (final OXException e) {
             LOGGER.error("", e);

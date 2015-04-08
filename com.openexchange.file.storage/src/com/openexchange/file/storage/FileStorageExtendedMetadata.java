@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,22 @@
  *
  */
 
-package com.openexchange.groupware.alias;
+package com.openexchange.file.storage;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.annotation.SingletonService;
-
+import java.util.List;
 
 /**
- * {@link UserAliasStorageProvider}
+ * {@link FileStorageExtendedMetadata}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+public interface FileStorageExtendedMetadata {
 
-@SingletonService
-public interface UserAliasStorageProvider {
     /**
-     * Returns a UserAliasStorage instance
-     *
-     * @throws OXException
+     * Gets a list of extended file metadata fields that are supported by the storage.
+     * 
+     * @return The supported metadata fields
      */
-    UserAliasStorage getUserAliasStorage() throws OXException;
+    List<File.Field> getSupportedFields();
+    
 }

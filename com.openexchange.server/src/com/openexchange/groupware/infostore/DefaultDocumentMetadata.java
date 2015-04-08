@@ -91,6 +91,7 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     protected Map<String, Object> meta;
     protected List<ObjectPermission> objectPermissions;
     protected Map<String, String> properties;
+    protected boolean shareable;
 
 
     @Override
@@ -349,6 +350,16 @@ public abstract class DefaultDocumentMetadata implements DocumentMetadata {
     @Override
     public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
         this.objectPermissions = objectPermissions;
+    }
+
+    @Override
+    public boolean isShareable() {
+        return shareable;
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        this.shareable = shareable;
     }
 
     @Override
