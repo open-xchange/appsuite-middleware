@@ -133,6 +133,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 if (hazelcastConfig.isEnabled()) {
                     // Track HazelcastInstance service
                     PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, context);
+                    pushManagerRegistry.setRescheduler(rescheduler);
                     track(HazelcastInstance.class, rescheduler);
                 } else {
                     pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
