@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,53 @@
  *
  */
 
-package com.openexchange.mobilepush.json;
+package com.openexchange.mobilepush.json.actions;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.documentation.annotations.Module;
+import javax.servlet.http.HttpServletRequest;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.mobilepush.json.actions.AbstractMobilePushAction;
-import com.openexchange.mobilepush.json.actions.PublicInfoAction;
-import com.openexchange.mobilepush.json.actions.SubscribeAction;
-import com.openexchange.mobilepush.json.actions.UnsubscribeAction;
-import com.openexchange.mobilepush.json.actions.UpdateAction;
+import com.openexchange.mobilepush.json.MobilePushRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link MobilePushActionFactory} - The mobile notifier action factory.
+ * {@link PublicInfoAction}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-@Module(name = "mobilenotifier", description = "Provides access to mobile notifier module.")
-public class MobilePushActionFactory implements AJAXActionServiceFactory {
-
-    private final Map<String, AbstractMobilePushAction> actions;
+public class PublicInfoAction extends AbstractMobilePushAction {
 
     /**
-     * Initializes a new {@link MobilePushActionFactory}.
+     * Initializes a new {@link PublicInfoAction}.
      */
-    public MobilePushActionFactory(final ServiceLookup serviceLookup) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractMobilePushAction>(3);
-        actions.put("subscribe", new SubscribeAction(serviceLookup));
-        actions.put("unsubscribe", new UnsubscribeAction(serviceLookup));
-        actions.put("updateToken", new UpdateAction(serviceLookup));
-        actions.put("publicInfo", new PublicInfoAction(serviceLookup));
+    public PublicInfoAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
+    protected AJAXRequestResult perform(MobilePushRequest req) throws OXException, JSONException {
+        ServerSession session = req.getSession();
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+        JSONObject jResponse = new JSONObject(2);
+
+        String publicSessionId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+        if (null == publicSessionId) {
+            return new AJAXRequestResult(jResponse, "json");
+        }
+
+        HttpServletRequest httpRequest = req.getRequest().optHttpServletRequest();
+        if (null == httpRequest) {
+            return new AJAXRequestResult(jResponse, "json");
+        }
+
+        String publicSessionCookieName = com.openexchange.ajax.LoginServlet.getPublicSessionCookieName(httpRequest);
+        jResponse.put(publicSessionCookieName, publicSessionId);
+        return new AJAXRequestResult(jResponse, "json");
     }
 
 }
