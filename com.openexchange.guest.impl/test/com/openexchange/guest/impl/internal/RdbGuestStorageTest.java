@@ -378,6 +378,6 @@ public class RdbGuestStorageTest {
         List<Long> groupIds = Arrays.asList(3L, 5L, 10L, 13L);
         String commaSeperatedString = rdbGuestStorage.getIdsAsString(groupIds);
 
-        Assert.assertEquals("3, 5, 10, 13", commaSeperatedString);
+        Assert.assertEquals("3, 5, 10, 13".replaceAll("\\s",""), commaSeperatedString);
     }
 }

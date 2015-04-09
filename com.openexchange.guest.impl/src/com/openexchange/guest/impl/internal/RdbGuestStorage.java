@@ -433,7 +433,7 @@ public class RdbGuestStorage extends GuestStorage {
             }
         }
 
-        return commaSepValueBuilder.toString();
+        return commaSepValueBuilder.toString().replaceAll("\\s","");
     }
 
     /**
