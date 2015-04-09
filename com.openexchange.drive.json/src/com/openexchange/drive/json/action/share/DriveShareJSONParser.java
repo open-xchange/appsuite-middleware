@@ -50,13 +50,14 @@
 package com.openexchange.drive.json.action.share;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -78,15 +79,15 @@ public class DriveShareJSONParser {
      * @param timeZone
      * @return The share targets
      */
-    public static List<DriveShareTarget> parseTargets(JSONObject jsonTargets) throws OXException, JSONException {
+    public static List<DriveShareTarget> parseTargets(JSONObject jsonTargets, TimeZone timezone) throws OXException, JSONException {
         List<DriveShareTarget> targets = new ArrayList<DriveShareTarget>();
 
         if (jsonTargets.has(DIRECTORY_VERSIONS) && jsonTargets.getJSONArray(DIRECTORY_VERSIONS).length() != 0) {
-            targets.addAll(parseDirectoryTargets(jsonTargets.getJSONArray(DIRECTORY_VERSIONS)));
+            targets.addAll(parseDirectoryTargets(jsonTargets.getJSONArray(DIRECTORY_VERSIONS), timezone));
         }
 
         if (jsonTargets.has(FILE_VERSIONS) && jsonTargets.getJSONArray(FILE_VERSIONS).length() != 0) {
-            targets.addAll(parseFileTargets(jsonTargets.getJSONArray(FILE_VERSIONS)));
+            targets.addAll(parseFileTargets(jsonTargets.getJSONArray(FILE_VERSIONS), timezone));
         }
 
         return targets;
@@ -100,7 +101,7 @@ public class DriveShareJSONParser {
      * @throws OXException
      * @throws JSONException
      */
-    public static List<DriveShareTarget> parseDirectoryTargets(JSONArray jsonTargets) throws OXException, JSONException {
+    public static List<DriveShareTarget> parseDirectoryTargets(JSONArray jsonTargets, TimeZone timezone) throws OXException, JSONException {
         if (jsonTargets == null || jsonTargets.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(DIRECTORY_VERSIONS);
         }
@@ -109,7 +110,7 @@ public class DriveShareJSONParser {
 
         for (int i = 0; i < jsonTargets.length(); i++) {
             JSONObject jsonTarget = jsonTargets.getJSONObject(i);
-            targets.add(parseTarget(jsonTarget));
+            targets.add(parseTarget(jsonTarget, timezone));
         }
 
         return targets;
@@ -123,7 +124,7 @@ public class DriveShareJSONParser {
      * @throws OXException
      * @throws JSONException
      */
-    public static List<DriveShareTarget> parseFileTargets(JSONArray jsonTargets) throws OXException, JSONException {
+    public static List<DriveShareTarget> parseFileTargets(JSONArray jsonTargets, TimeZone timezone) throws OXException, JSONException {
         if (jsonTargets == null || jsonTargets.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(FILE_VERSIONS);
         }
@@ -136,7 +137,7 @@ public class DriveShareJSONParser {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
             }
 
-            targets.add(parseTarget(jsonTarget));
+            targets.add(parseTarget(jsonTarget, timezone));
         }
 
         return targets;
@@ -150,7 +151,7 @@ public class DriveShareJSONParser {
      * @throws OXException
      * @throws JSONException
      */
-    public static DriveShareTarget parseTarget(JSONObject jsonTarget) throws OXException, JSONException {
+    public static DriveShareTarget parseTarget(JSONObject jsonTarget, TimeZone timezone) throws OXException, JSONException {
         if (!jsonTarget.hasAndNotNull("path")) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
         }
@@ -167,7 +168,15 @@ public class DriveShareJSONParser {
             target.setName(jsonTarget.getString("name"));
         }
 
+        if (jsonTarget.hasAndNotNull("expiry_date")) {
+            target.setExpiryDate(new Date(removeTimeZoneOffset(jsonTarget.getLong("expiry_date"), timezone)));
+        }
+
         return target;
+    }
+
+    public static long removeTimeZoneOffset(final long date, final TimeZone timeZone) {
+        return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 
 }

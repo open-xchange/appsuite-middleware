@@ -81,7 +81,7 @@ public class InviteAction extends AbstractDriveShareAction {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
             List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data);
+            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data, getTimeZone(requestData, session.getServerSession()));
             String message = data.optString("message", null);
             /*
              * create the shares

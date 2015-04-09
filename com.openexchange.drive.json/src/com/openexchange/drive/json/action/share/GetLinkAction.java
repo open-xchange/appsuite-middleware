@@ -88,7 +88,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(json);
+            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(json, getTimeZone(requestData, session.getServerSession()));
             int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
             String password = json.hasAndNotNull("password") ? json.getString("password") : null;
             /*
