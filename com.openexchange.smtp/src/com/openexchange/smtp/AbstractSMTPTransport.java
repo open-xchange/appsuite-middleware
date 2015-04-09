@@ -114,6 +114,8 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MimeSupport;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.transport.listener.Reply;
+import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -567,11 +569,31 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             transport.addTransportListener(new AddressAddingTransportListener(mtaInfo));
         }
 
+        // Grab listener chain instance
+        ListenerChain listenerChain = ListenerChain.getInstance();
+
         // Try to send the message
+        MimeMessage messageToSend = smtpMessage;
+        Exception exception = null;
         try {
-            transport.sendMessage(smtpMessage, recipients);
-            logMessageTransport(smtpMessage, smtpConfig);
+            // Check listener chain
+            Result result = listenerChain.onBeforeMessageTransport(messageToSend);
+            if (Reply.DENY == result.getReply()) {
+                throw MailExceptionCode.SEND_DENIED.create();
+            }
+            MimeMessage resultingMimeMessage = result.getMimeMessage();
+            if (null != resultingMimeMessage) {
+                messageToSend = resultingMimeMessage;
+            }
+
+            // Transport
+            transport.sendMessage(messageToSend, recipients);
+            logMessageTransport(messageToSend, smtpConfig);
+        } catch (OXException e) {
+            exception = e;
+            throw e;
         } catch (SMTPSendFailedException sendFailed) {
+            exception = sendFailed;
             OXException oxe = handleMessagingException(sendFailed, smtpConfig);
             if (null != mtaInfo) {
                 mtaInfo.setReturnCode(sendFailed.getReturnCode());
@@ -579,6 +601,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
             throw oxe;
         } catch (final MessagingException e) {
+            exception = e;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
                 final String message = e.getNextException().getMessage();
@@ -586,7 +609,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                    transportAlt(smtpMessage, recipients, transport, smtpConfig);
+                    transportAlt(messageToSend, recipients, transport, smtpConfig);
                     return;
                 }
             } else if (e.getNextException() instanceof IOException) {
@@ -595,6 +618,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
             throw handleMessagingException(e, smtpConfig);
+        } catch (RuntimeException e) {
+            exception = e;
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            listenerChain.onAfterMessageTransport(messageToSend, exception);
         }
     }
 
