@@ -324,17 +324,17 @@ public class NotificationMail {
 
         // Interested in state changes, but not in other changes
         if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (1), User: " + getRecipient().getUser().getId() + ", " + getRecipient().getConfiguration().interestedInStateChanges() + ", " + getRecipient().getConfiguration().interestedInChanges() + ", " + isAboutStateChanges());
+            LOG.debug("NotificationMail.shouldBeSend (1), User: " + getRecipient().getUser().getId() + ", " + getRecipient().getConfiguration().interestedInStateChanges() + ", " + getRecipient().getConfiguration().interestedInChanges() + ", " + isAboutStateChanges() + "\nDiffering Fields: " + getDiff().getDifferingFieldNames());
             return isAboutStateChanges();
         }
 
         // Interested in other changes, but not in state changes
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: " + getRecipient().getUser().getId() + ", " + getRecipient().getConfiguration().interestedInStateChanges() + ", " + getRecipient().getConfiguration().interestedInChanges() + ", " + isAboutStateChangesOnly());
+            LOG.debug("NotificationMail.shouldBeSend (2), User: " + getRecipient().getUser().getId() + ", " + getRecipient().getConfiguration().interestedInStateChanges() + ", " + getRecipient().getConfiguration().interestedInChanges() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + getDiff().getDifferingFieldNames());
             return !isAboutStateChangesOnly();
         }
 
-        LOG.debug("NotificationMail.shouldBeSend (3), User: " + getRecipient().getUser().getId());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: " + getRecipient().getUser().getId() + "\nDiffering Fields: " + getDiff().getDifferingFieldNames());
         return true;
     }
 
