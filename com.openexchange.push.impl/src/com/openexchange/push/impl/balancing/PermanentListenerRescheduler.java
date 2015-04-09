@@ -118,24 +118,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    /**
-     * Reschedules permanent listeners among available cluster members.
-     */
-    public void reschedule() {
-        try {
-            HazelcastInstance hzInstance = hzInstancerRef.get();
-            if (null == hzInstance) {
-                LOG.warn("Aborted re-scheduling of permanent listeners as passed HazelcastInstance is null.");
-                return;
-            }
-
-            // Reschedule...
-            reschedule(hzInstance.getCluster().getMembers(), hzInstance);
-        } catch (Exception e) {
-            LOG.warn("Failed to reschedule permanent listeners among available cluster members.", e);
-        }
-    }
-
     private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance) {
         if (null == hzInstance) {
             LOG.warn("Aborted re-scheduling of permanent listeners as passed HazelcastInstance is null.");
