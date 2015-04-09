@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -76,7 +75,6 @@ import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.PushDbUtils.DeleteResult;
-import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -125,7 +123,6 @@ public final class PushManagerRegistry implements PushListenerService {
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
     private final Set<PushUser> initialPushUsers;
-    private final AtomicReference<PermanentListenerRescheduler> reschedulerRef;
 
     /**
      * Initializes a new {@link PushManagerRegistry}.
@@ -134,7 +131,6 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     private PushManagerRegistry(ServiceLookup services) {
         super();
-        reschedulerRef = new AtomicReference<PermanentListenerRescheduler>();
         this.services = services;
         initialPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
@@ -148,15 +144,6 @@ public final class PushManagerRegistry implements PushListenerService {
     private Credentials optCredentials(int userId, int contextId) throws OXException {
         CredentialStorage storage = optCredentialStorage();
         return null == storage ? null : storage.getCredentials(userId, contextId);
-    }
-
-    /**
-     * Sets given rescheduler.
-     *
-     * @param rescheduler The rescheduler to set
-     */
-    public void setRescheduler(PermanentListenerRescheduler rescheduler) {
-        reschedulerRef.set(rescheduler);
     }
 
     /**
@@ -499,13 +486,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
         if (added && (pushManager instanceof PushManagerExtendedService)) {
             synchronized (this) {
-                PermanentListenerRescheduler rescheduler = reschedulerRef.get();
-                if (null == rescheduler) {
-                    startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
-                } else {
-                    rescheduler.reschedule();
-                }
-
+                startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
             }
         }
 
