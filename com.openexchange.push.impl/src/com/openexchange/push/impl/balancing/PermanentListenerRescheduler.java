@@ -65,6 +65,9 @@ import com.hazelcast.core.Cluster;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
+import com.hazelcast.core.MemberAttributeEvent;
+import com.hazelcast.core.MembershipEvent;
+import com.hazelcast.core.MembershipListener;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.impl.PushManagerRegistry;
@@ -76,7 +79,7 @@ import com.openexchange.push.impl.PushManagerRegistry;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
+public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>, MembershipListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermanentListenerRescheduler.class);
 
@@ -98,7 +101,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    /*
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         reschedule(membershipEvent.getMembers(), hzInstancerRef.get());
@@ -113,7 +115,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     public void memberAttributeChanged(MemberAttributeEvent memberAttributeEvent) {
         // Don't care
     }
-    */
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
@@ -227,8 +228,8 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         HazelcastInstance hzInstance = context.getService(reference);
         try {
             Cluster cluster = hzInstance.getCluster();
-            // String registrationId = cluster.addMembershipListener(this);
-            // registrationIdRef.set(registrationId);
+            String registrationId = cluster.addMembershipListener(this);
+            registrationIdRef.set(registrationId);
 
             hzInstancerRef.set(hzInstance);
 
