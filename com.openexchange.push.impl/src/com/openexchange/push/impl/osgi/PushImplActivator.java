@@ -123,8 +123,6 @@ public final class PushImplActivator extends HousekeepingActivator  {
 
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
-            PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, context);
-            pushManagerRegistry.setRescheduler(rescheduler);
 
             if (pushManagerRegistry.isPermanentPushAllowed()) {
                 // Register portable
@@ -134,9 +132,9 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
                 if (hazelcastConfig.isEnabled()) {
                     // Track HazelcastInstance service
-                    track(HazelcastInstance.class, rescheduler);
+                    track(HazelcastInstance.class, new PermanentListenerRescheduler(pushManagerRegistry, context));
                 } else {
-                    rescheduler.reschedule();
+                    pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
                 }
             }
 

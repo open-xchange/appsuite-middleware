@@ -58,7 +58,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -76,7 +75,6 @@ import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.PushDbUtils.DeleteResult;
-import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -125,7 +123,6 @@ public final class PushManagerRegistry implements PushListenerService {
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
     private final Set<PushUser> initialPushUsers;
-    private final AtomicReference<PermanentListenerRescheduler> reschedulerRef;
 
     /**
      * Initializes a new {@link PushManagerRegistry}.
@@ -134,7 +131,6 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     private PushManagerRegistry(ServiceLookup services) {
         super();
-        reschedulerRef = new AtomicReference<PermanentListenerRescheduler>();
         this.services = services;
         initialPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
@@ -149,33 +145,6 @@ public final class PushManagerRegistry implements PushListenerService {
         CredentialStorage storage = optCredentialStorage();
         return null == storage ? null : storage.getCredentials(userId, contextId);
     }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * Sets given rescheduler.
-     *
-     * @param rescheduler The rescheduler to set
-     */
-    public void setRescheduler(PermanentListenerRescheduler rescheduler) {
-        reschedulerRef.set(rescheduler);
-    }
-
-    /**
-     * Reschedules permanent listeners among cluster members.
-     *
-     * @return <code>true</code> on successful rescheduling; otherwise <code>false</code>
-     */
-    public boolean reschedule() {
-        PermanentListenerRescheduler rescheduler = reschedulerRef.get();
-        if (null != rescheduler) {
-            rescheduler.reschedule();
-            return true;
-        }
-        return false;
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Checks if permanent push is allowed as per configuration
@@ -232,13 +201,17 @@ public final class PushManagerRegistry implements PushListenerService {
             initialPushUsers.removeAll(toStop);
         }
 
+        if (toStart.isEmpty() && toStop.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+
         // Determine currently available push managers
         List<PushManagerService> managers = new LinkedList<PushManagerService>(map.values());
 
         // Start permanent candidates
         boolean allowPermanentPush = isPermanentPushAllowed();
-        for (Iterator<PushManagerService> pushManagersIterator = managers.iterator(); pushManagersIterator.hasNext();) {
-            PushManagerService pushManager = pushManagersIterator.next();
+        for (PushManagerService pushManager : managers) {
             if (pushManager instanceof PushManagerExtendedService) {
                 startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
             }
@@ -247,8 +220,7 @@ public final class PushManagerRegistry implements PushListenerService {
         // Stop permanent candidates
         for (PushUser pushUser : toStop) {
             boolean rescheduled = false;
-            for (Iterator<PushManagerService> pushManagersIterator = managers.iterator(); pushManagersIterator.hasNext();) {
-                PushManagerService pushManager = pushManagersIterator.next();
+            for (PushManagerService pushManager : managers) {
                 if (pushManager instanceof PushManagerExtendedService) {
                     try {
                         boolean stopped = ((PushManagerExtendedService) pushManager).stopPermanentListener(pushUser, false);
@@ -517,9 +489,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
         if (added && (pushManager instanceof PushManagerExtendedService)) {
             synchronized (this) {
-                if (false == reschedule()) {
-                    startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
-                }
+                startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
             }
         }
 
