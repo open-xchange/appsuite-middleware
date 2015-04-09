@@ -68,6 +68,7 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.impl.PushManagerRegistry;
 
@@ -150,6 +151,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                 Future<Boolean> future = entry.getValue();
                                 if (future.get().booleanValue()) {
                                     candidates.add(entry.getKey());
+                                    LOG.info("Cluster member {} has a {} running, hence considered for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
+                                } else {
+                                    LOG.info("Cluster member {} has no {} running, hence ignored for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
                                 }
                             }
                         }
