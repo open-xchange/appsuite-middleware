@@ -57,6 +57,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
@@ -566,12 +568,20 @@ public class FileMetadata implements DocumentMetadata {
 
             @Override
             public int getId() {
-                return Integer.parseInt(file.getId());
+                String id = file.getId();
+                if (FileStorageFileAccess.NEW == id) {
+                    return InfostoreFacade.NEW;
+                }
+                return Integer.parseInt(new FileID(id).getFileId());
             }
 
             @Override
             public long getFolderId() {
-                return Long.parseLong(file.getFolderId());
+                String id = file.getFolderId();
+                if (FileStorageFileAccess.NEW == id) {
+                    return InfostoreFacade.NEW;
+                }
+                return Long.parseLong(new FolderID(id).getFolderId());
             }
 
             @Override
