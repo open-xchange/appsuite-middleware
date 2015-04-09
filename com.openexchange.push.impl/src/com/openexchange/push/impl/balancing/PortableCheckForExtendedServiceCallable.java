@@ -88,7 +88,7 @@ public class PortableCheckForExtendedServiceCallable extends AbstractCustomPorta
 
     @Override
     public Boolean call() throws Exception {
-        return Boolean.valueOf(PushManagerRegistry.getInstance().isPermanentPushAllowed());
+        return Boolean.valueOf(PushManagerRegistry.getInstance().reschedule());
     }
 
     @Override
@@ -103,7 +103,7 @@ public class PortableCheckForExtendedServiceCallable extends AbstractCustomPorta
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        this.id = reader.readUTF(FIELD_ID);
+        id = reader.readUTF(FIELD_ID);
     }
 
 }
