@@ -88,7 +88,8 @@ public class PortableCheckForExtendedServiceCallable extends AbstractCustomPorta
 
     @Override
     public Boolean call() throws Exception {
-        return Boolean.valueOf(PushManagerRegistry.getInstance().reschedule());
+        PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
+        return Boolean.valueOf(pushManagerRegistry.isPermanentPushAllowed() && pushManagerRegistry.reschedule());
     }
 
     @Override
