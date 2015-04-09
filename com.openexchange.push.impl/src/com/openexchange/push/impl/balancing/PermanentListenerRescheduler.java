@@ -134,7 +134,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             try {
                 // Determine push users
                 List<PushUser> allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
-                if (false == allPushUsers.isEmpty()) {
+                if (allPushUsers.isEmpty()) {
                     // Nothing to do
                     return;
                 }
