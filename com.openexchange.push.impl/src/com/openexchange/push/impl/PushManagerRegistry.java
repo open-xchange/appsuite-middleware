@@ -201,13 +201,17 @@ public final class PushManagerRegistry implements PushListenerService {
             initialPushUsers.removeAll(toStop);
         }
 
+        if (toStart.isEmpty() && toStop.isEmpty()) {
+            // Nothing to do
+            return;
+        }
+
         // Determine currently available push managers
         List<PushManagerService> managers = new LinkedList<PushManagerService>(map.values());
 
         // Start permanent candidates
         boolean allowPermanentPush = isPermanentPushAllowed();
-        for (Iterator<PushManagerService> pushManagersIterator = managers.iterator(); pushManagersIterator.hasNext();) {
-            PushManagerService pushManager = pushManagersIterator.next();
+        for (PushManagerService pushManager : managers) {
             if (pushManager instanceof PushManagerExtendedService) {
                 startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
             }
@@ -216,8 +220,7 @@ public final class PushManagerRegistry implements PushListenerService {
         // Stop permanent candidates
         for (PushUser pushUser : toStop) {
             boolean rescheduled = false;
-            for (Iterator<PushManagerService> pushManagersIterator = managers.iterator(); pushManagersIterator.hasNext();) {
-                PushManagerService pushManager = pushManagersIterator.next();
+            for (PushManagerService pushManager : managers) {
                 if (pushManager instanceof PushManagerExtendedService) {
                     try {
                         boolean stopped = ((PushManagerExtendedService) pushManager).stopPermanentListener(pushUser, false);
