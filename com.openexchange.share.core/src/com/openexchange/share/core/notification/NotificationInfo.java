@@ -47,58 +47,44 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.share.core.notification;
 
-import java.util.TimeZone;
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.dispatcher.DispatcherPrefixService;
-import com.openexchange.drive.json.action.AbstractDriveAction;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.tools.session.ServerSession;
+import java.util.List;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link AbstractDriveShareAction}
+ * A simple container holding all necessary information to send out a notification about the shares creation.
  *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public abstract class AbstractDriveShareAction extends AbstractDriveAction {
+public class NotificationInfo {
 
-    protected TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
-        String timeZoneID = requestData.getParameter("timezone");
-        if (null == timeZoneID) {
-            timeZoneID = session.getUser().getTimeZone();
-        }
-        TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
-        return timeZone;
+    private final ShareRecipient recipient;
+    private final GuestInfo guestInfo;
+    private final List<ShareInfo> shareInfos;
+
+    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos) {
+        super();
+        this.recipient = recipient;
+        this.guestInfo = guestInfo;
+        this.shareInfos = shareInfos;
     }
 
-    protected String determineProtocol(AJAXRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
-        } else {
-            return requestData.isSecure() ? "https://" : "http://";
-        }
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
-    protected String determineHostname(AJAXRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return servletRequest.getServerName();
-        } else {
-            return requestData.getHostname();
-        }
+    public GuestInfo getGuestInfo() {
+        return guestInfo;
     }
 
-    protected String getServletPrefix() {
-        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-
-        return prefixService.getPrefix();
+    public List<ShareInfo> getShareInfos() {
+        return shareInfos;
     }
 
 }

@@ -70,6 +70,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.test.FolderTestManager;
@@ -178,6 +179,34 @@ public class InviteTest extends AbstractDriveShareTest {
         InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
         checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
     }
+
+//    // Debug local stuff.
+//    public void testInviFileExternal2() throws Exception {
+//        DriveShareTarget target = new DriveShareTarget();
+//        target.setPath("/" + folder2.getFolderName());
+//        target.setName(file.getFileName());
+//        target.setChecksum(file.getFileMD5Sum());
+//        GuestRecipient recipient = new GuestRecipient();
+//        recipient.setEmailAddress("martin.herfurth@context4712.devel.open-xchange.com");
+//        recipient.setBits(FOLDER_READ_PERMISSION);
+//        recipient.setPassword(PASSWORD);
+//        InviteRequest inviteRequest = new InviteRequest(rootFolder.getObjectID(), Collections.<DriveShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient));
+//        client.execute(inviteRequest);
+//
+//        List<ParsedDriveShareInfo> allShares = client.execute(new SharesRequest(rootFolder.getObjectID())).shares();
+//        DriveShareInfo share = null;
+//        for (DriveShareInfo parsedShare : allShares) {
+//            if (parsedShare.getDriveShare().getTarget().equals(target)) {
+//                share = parsedShare;
+//                break;
+//            }
+//        }
+//        assertNotNull("Missing share.", share);
+//
+//        GuestClient guestClient = new GuestClient(share.getShareURL(null, null), null, recipient.getPassword());
+//        InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
+//        checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
+//    }
 
     public void testInviteFolderExternal() throws Exception {
         DriveShareTarget target = new DriveShareTarget();
