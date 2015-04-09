@@ -151,9 +151,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                 Future<Boolean> future = entry.getValue();
                                 if (future.get().booleanValue()) {
                                     candidates.add(entry.getKey());
-                                    LOG.info("Cluster member {} has a {} running, hence considered for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
+                                    LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
                                 } else {
-                                    LOG.info("Cluster member {} has no {} running, hence ignored for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
+                                    LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
                                 }
                             }
                         }
