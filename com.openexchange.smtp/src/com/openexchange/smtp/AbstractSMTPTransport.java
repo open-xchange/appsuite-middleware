@@ -577,7 +577,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         Exception exception = null;
         try {
             // Check listener chain
-            Result result = listenerChain.onBeforeMessageTransport(messageToSend);
+            Result result = listenerChain.onBeforeMessageTransport(messageToSend, session);
             if (Reply.DENY == result.getReply()) {
                 throw MailExceptionCode.SEND_DENIED.create();
             }
@@ -622,7 +622,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             exception = e;
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            listenerChain.onAfterMessageTransport(messageToSend, exception);
+            listenerChain.onAfterMessageTransport(messageToSend, exception, session);
         }
     }
 

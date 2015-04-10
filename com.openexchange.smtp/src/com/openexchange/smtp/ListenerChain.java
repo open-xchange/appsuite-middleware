@@ -56,6 +56,7 @@ import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.osgi.ServiceListing;
+import com.openexchange.session.Session;
 
 /**
  * {@link ListenerChain} - The listener chain.
@@ -107,14 +108,14 @@ public class ListenerChain implements MailTransportListener {
     }
 
     @Override
-    public Result onBeforeMessageTransport(MimeMessage message) throws OXException {
+    public Result onBeforeMessageTransport(MimeMessage message, Session session) throws OXException {
         List<MailTransportListener> listeners = this.listeners.getServiceList();
         if (null == listeners || listeners.isEmpty()) {
             return new ChainResult(message, Reply.NEUTRAL);
         }
 
         for (MailTransportListener listener : listeners) {
-            Result result = listener.onBeforeMessageTransport(message);
+            Result result = listener.onBeforeMessageTransport(message, session);
             Reply reply = result.getReply();
             if (Reply.DENY == reply || Reply.ACCEPT == reply) {
                 return result;
@@ -125,14 +126,14 @@ public class ListenerChain implements MailTransportListener {
     }
 
     @Override
-    public void onAfterMessageTransport(MimeMessage message, Exception exception) throws OXException {
+    public void onAfterMessageTransport(MimeMessage message, Exception exception, Session session) throws OXException {
         List<MailTransportListener> listeners = this.listeners.getServiceList();
         if (null == listeners || listeners.isEmpty()) {
             return;
         }
 
         for (MailTransportListener listener : listeners) {
-            listener.onAfterMessageTransport(message, exception);
+            listener.onAfterMessageTransport(message, exception, session);
         }
     }
 

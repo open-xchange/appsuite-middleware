@@ -51,6 +51,7 @@ package com.openexchange.mail.transport.listener;
 
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 
 /**
@@ -65,19 +66,21 @@ public interface MailTransportListener {
      * Called before a message transport takes place.
      *
      * @param message The message about to send
+     * @param session The associated session
      * @return The processing result
      * @throws OXException If processing the message fails
      */
-    Result onBeforeMessageTransport(MimeMessage message) throws OXException;
+    Result onBeforeMessageTransport(MimeMessage message, Session session) throws OXException;
 
     /**
      * Called after a message transport took place.
      *
      * @param message The sent message
      * @param exception The possible exception that occurred while attempting to transport the message; otherwise <code>null</code>
+     * @param session The associated session
      * @return The processing result
      * @throws OXException If processing the sent message fails
      */
-    void onAfterMessageTransport(MimeMessage message, Exception exception) throws OXException;
+    void onAfterMessageTransport(MimeMessage message, Exception exception, Session session) throws OXException;
 
 }

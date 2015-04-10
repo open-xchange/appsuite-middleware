@@ -56,6 +56,7 @@ import com.openexchange.guard.GuardApi;
 import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
+import com.openexchange.session.Session;
 
 
 /**
@@ -76,7 +77,7 @@ public class GuardTransportListener extends AbstractGuardAccess implements MailT
     }
 
     @Override
-    public Result onBeforeMessageTransport(MimeMessage message) throws OXException {
+    public Result onBeforeMessageTransport(MimeMessage message, Session session) throws OXException {
         if (!"true".equalsIgnoreCase(getHeaderSafe(message))) {
             return new GuardResult(message, Reply.NEUTRAL);
         }
@@ -87,7 +88,7 @@ public class GuardTransportListener extends AbstractGuardAccess implements MailT
             return new GuardResult(message, Reply.NEUTRAL);
         }
 
-        MimeMessage processedMessage = guardApi.processMimeMessage(message, mapFor("action", "process_message"));
+        MimeMessage processedMessage = guardApi.processMimeMessage(message, mapFor("action", "process_message", "user", Integer.toString(session.getUserId()), "context", Integer.toString(session.getContextId())));
         return new GuardResult(processedMessage, Reply.ACCEPT);
     }
 
@@ -100,7 +101,7 @@ public class GuardTransportListener extends AbstractGuardAccess implements MailT
     }
 
     @Override
-    public void onAfterMessageTransport(MimeMessage message, Exception exception) throws OXException {
+    public void onAfterMessageTransport(MimeMessage message, Exception exception, Session session) throws OXException {
         // Nothing to do
     }
 
