@@ -147,13 +147,28 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             IExecutorService executor = hzInstance.getExecutorService("default");
                             Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
                             for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
-                                // Check Future's return value
+                                Member member = entry.getKey();
                                 Future<Boolean> future = entry.getValue();
-                                if (future.get().booleanValue()) {
-                                    candidates.add(entry.getKey());
-                                    LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
-                                } else {
-                                    LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", entry.getKey(), PushManagerExtendedService.class.getSimpleName());
+                                // Check Future's return value
+                                int retryCount = 3;
+                                while (retryCount-- > 0) {
+                                    try {
+                                        if (future.get().booleanValue()) {
+                                            candidates.add(member);
+                                            LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
+                                        } else {
+                                            LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
+                                        }
+                                    } catch (com.hazelcast.core.OperationTimeoutException x) {
+                                        // Timeout while awaiting remote result
+                                        if (retryCount > 0) {
+                                            LOG.info("Timeout while awaiting remote result from cluster member \"{}\". Retry...", member);
+                                        } else {
+                                            // No further retry
+                                            LOG.info("Giving up awaiting remote result from cluster member \"{}\", hence ignored for rescheduling computation.", member);
+                                            cancelFutureSafe(future);
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -191,6 +206,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                 LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
             }
         } // End of synchronized block
+    }
+
+    private void cancelFutureSafe(Future<Boolean> future) {
+        if (null != future) {
+            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        }
     }
 
     private Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
