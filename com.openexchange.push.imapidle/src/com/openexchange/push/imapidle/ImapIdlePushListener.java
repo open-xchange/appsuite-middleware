@@ -489,6 +489,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             if (!capabilities.hasIdle()) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
             }
+        } catch (OXException e) {
+            if (!e.equalsCode(7, "CTX")) {
+                throw e;
+            }
+            // Updating database...
         } finally {
             if (null != access) {
                 access.close(false);
