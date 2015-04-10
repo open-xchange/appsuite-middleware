@@ -52,13 +52,17 @@ package com.openexchange.oauth.provider;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link OAuthProviderService}
+ * The management service to be used by the OAuth provider implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
+ * @see OAuthResourceService
  */
+@SingletonService
 public interface OAuthProviderService {
 
     /**

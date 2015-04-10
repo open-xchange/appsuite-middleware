@@ -53,7 +53,7 @@ import java.util.Date;
 
 
 /**
- * {@link DefaultGrantView}
+ * Default implementation of a {@link GrantView}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

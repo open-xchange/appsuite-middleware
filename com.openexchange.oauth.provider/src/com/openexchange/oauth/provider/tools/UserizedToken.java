@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link UserizedToken}
+ * A token that consists of a context ID, a user ID and a random part.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0

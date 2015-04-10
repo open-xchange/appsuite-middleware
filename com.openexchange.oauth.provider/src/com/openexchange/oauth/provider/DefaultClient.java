@@ -55,7 +55,7 @@ import java.util.List;
 import com.openexchange.oauth.provider.tools.URIValidator;
 
 /**
- * {@link DefaultClient} - The default {@link Client} implementation.
+ * The default {@link Client} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0

@@ -53,7 +53,7 @@ import java.io.Serializable;
 import java.util.Set;
 
 /**
- * {@link ClientData}
+ * DTO class for the client management API.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

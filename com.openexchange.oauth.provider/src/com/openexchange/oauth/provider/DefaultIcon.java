@@ -53,7 +53,7 @@ import java.io.InputStream;
 import com.openexchange.java.Streams;
 
 /**
- * {@link DefaultIcon}
+ * Default implementation of an {@link Icon}, based on a byte array.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

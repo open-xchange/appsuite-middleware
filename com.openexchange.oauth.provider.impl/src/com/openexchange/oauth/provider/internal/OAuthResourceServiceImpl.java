@@ -114,11 +114,10 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
         String clientId = grant.getClientId();
         ClientId clientIdObj = ClientId.parse(clientId);
         if (clientIdObj == null) {
-            return null;
+            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
         }
 
         String groupId = clientIdObj.getGroupId();
-
         Client client = clientStorage.getClientById(groupId, clientId);
         if (client == null) {
             throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
