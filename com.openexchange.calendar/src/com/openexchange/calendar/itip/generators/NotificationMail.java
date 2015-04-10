@@ -324,18 +324,50 @@ public class NotificationMail {
 
         // Interested in state changes, but not in other changes
         if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (1), User: " + getRecipient().getUser().getId() + ", " + getRecipient().getConfiguration().interestedInStateChanges() + ", " + getRecipient().getConfiguration().interestedInChanges() + ", " + isAboutStateChanges() + "\nDiffering Fields: " + getDiff().getDifferingFieldNames());
+            LOG.debug("NotificationMail.shouldBeSend (1), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChanges() + "\nDiffering Fields: " + diffs());
             return isAboutStateChanges();
         }
 
         // Interested in other changes, but not in state changes
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: " + getRecipient().getUser().getId() + ", " + getRecipient().getConfiguration().interestedInStateChanges() + ", " + getRecipient().getConfiguration().interestedInChanges() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + getDiff().getDifferingFieldNames());
+            LOG.debug("NotificationMail.shouldBeSend (2), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
             return !isAboutStateChangesOnly();
         }
 
-        LOG.debug("NotificationMail.shouldBeSend (3), User: " + getRecipient().getUser().getId() + "\nDiffering Fields: " + getDiff().getDifferingFieldNames());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: " + id() + "\nDiffering Fields: " + diffs());
         return true;
+    }
+    
+    private String id() {
+        try {
+            return getRecipient().getUser().getId() + "";
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+    
+    private String diffs() {
+        try {
+            return getDiff().getDifferingFieldNames().toString();
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+    
+    private String changes() {
+        try {
+            return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+    
+    private String stateChanges() {
+        try {
+            return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
+        } catch (Exception e) {
+            return "NPE";
+        }
     }
 
     private boolean onlyPseudoChangesOnParticipants() {
