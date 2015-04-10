@@ -58,7 +58,9 @@ import com.openexchange.guard.AbstractGuardAccess;
 import com.openexchange.guard.GuardApi;
 import com.openexchange.guard.interceptor.GuardProvisioningContextPlugin;
 import com.openexchange.guard.interceptor.GuardUserServiceInterceptor;
+import com.openexchange.guard.transport.listener.GuardTransportListener;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserServiceInterceptor;
 
@@ -115,6 +117,9 @@ public class GuardActivator extends HousekeepingActivator {
 
             // Register interceptor
             registerService(UserServiceInterceptor.class, new GuardUserServiceInterceptor(this));
+
+            // Register transport listener
+            registerService(MailTransportListener.class, new GuardTransportListener());
         } catch (Exception e) {
             logger.error("Failed starting bundle {}", context.getBundle().getSymbolicName(), e);
             throw e;
