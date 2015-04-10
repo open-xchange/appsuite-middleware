@@ -156,7 +156,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
@@ -871,20 +870,15 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private void registerInfostore() {
         DBProvider dbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
-        InfostoreFacade infostoreFacade = new InfostoreFacadeImpl(dbProvider);
+        InfostoreFacadeImpl infostoreFacade = new InfostoreFacadeImpl(dbProvider);
         infostoreFacade.setTransactional(true);
         infostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
-
-        InfostoreSearchEngine infostoreSearchEngine = new SearchEngineImpl(dbProvider);
-        infostoreSearchEngine.setTransactional(true);
-
         EventFiringInfostoreFacade eventFiringInfostoreFacade = new EventFiringInfostoreFacadeImpl(dbProvider);
         eventFiringInfostoreFacade.setTransactional(true);
         eventFiringInfostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
-
         registerService(InfostoreFacade.class, infostoreFacade);
         registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
-        registerService(InfostoreSearchEngine.class, infostoreSearchEngine);
+        registerService(InfostoreSearchEngine.class, infostoreFacade);
     }
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {

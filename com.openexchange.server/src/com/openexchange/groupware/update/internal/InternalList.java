@@ -781,6 +781,9 @@ public final class InternalList {
         // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
         list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
 
+        // Grants "read all" permissions for the user infostore folder
+        list.add(new com.openexchange.groupware.update.tasks.FolderPermissionReadAllForUserInfostore());
+        
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

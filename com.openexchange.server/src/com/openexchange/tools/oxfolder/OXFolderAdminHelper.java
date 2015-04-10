@@ -54,6 +54,7 @@ import static com.openexchange.server.impl.OCLPermission.ALL_GROUPS_AND_USERS;
 import static com.openexchange.server.impl.OCLPermission.ALL_GUESTS;
 import static com.openexchange.server.impl.OCLPermission.CREATE_SUB_FOLDERS;
 import static com.openexchange.server.impl.OCLPermission.NO_PERMISSIONS;
+import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
 import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
 import static com.openexchange.server.impl.OCLPermission.WRITE_OWN_OBJECTS;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
@@ -718,7 +719,7 @@ public final class OXFolderAdminHelper {
         /*
          * Insert system userstore infostore folder
          */
-        systemPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
+        systemPermission.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
@@ -732,7 +733,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
-        guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system public infostore folder

@@ -101,6 +101,7 @@ import com.openexchange.groupware.infostore.EffectiveInfostoreFolderPermission;
 import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
 import com.openexchange.groupware.infostore.database.BatchFilenameReserver;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
@@ -130,6 +131,8 @@ import com.openexchange.groupware.infostore.database.impl.UpdateObjectPermission
 import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
 import com.openexchange.groupware.infostore.index.InfostoreUUID;
+import com.openexchange.groupware.infostore.search.SearchTerm;
+import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
@@ -170,6 +173,7 @@ import com.openexchange.tools.file.SaveFileAction;
 import com.openexchange.tools.iterator.Customizer;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -181,7 +185,7 @@ import com.openexchange.tx.UndoableAction;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
+public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
     private static final ValidationChain VALIDATION = new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator());
     private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
@@ -229,6 +233,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
     private final ObjectPermissionLoader objectPermissionLoader;
     private final NumberOfVersionsLoader numberOfVersionsLoader;
     private final LockedUntilLoader lockedUntilLoader;
+    private final SearchEngineImpl searchEngine;
 
     /**
      * Initializes a new {@link InfostoreFacadeImpl}.
@@ -237,6 +242,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         super();
         expiredLocksListener = new TouchInfoitemsWithExpiredLocksListener(null, this);
         lockManager.addExpiryListener(expiredLocksListener);
+        this.searchEngine = new SearchEngineImpl(this);
         this.objectPermissionLoader = new ObjectPermissionLoader(this);
         this.numberOfVersionsLoader = new NumberOfVersionsLoader(this);
         this.lockedUntilLoader = new LockedUntilLoader(lockManager);
@@ -2174,6 +2180,127 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade {
         db.removeUser(userId, ctx, session, lockManager);
     }
 
+    @Override
+    public SearchIterator<DocumentMetadata> search(ServerSession session, String query, int folderId, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
+        /*
+         * get folders for search and corresponding permissions
+         */
+        List<Integer> all = new ArrayList<Integer>();
+        List<Integer> own = new ArrayList<Integer>();
+        int[] requestedFolderIDs = NOT_SET == folderId || NO_FOLDER == folderId ? null : new int[] { folderId };        
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, requestedFolderIDs, all, own);
+        if (all.isEmpty() && own.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        /*
+         * perform search & enhance results with additional metadata as needed 
+         */
+        Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        SearchIterator<DocumentMetadata> searchIterator = searchEngine.search(session, query, all, own, fields, sortedBy, dir, start, end);
+        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID); 
+    }
+    
+    @Override
+    public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, int[] folderIds, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
+        /*
+         * get folders for search and corresponding permissions
+         */
+        List<Integer> all = new ArrayList<Integer>();
+        List<Integer> own = new ArrayList<Integer>();
+        int[] requestedFolderIDs = null == folderIds || 0 == folderIds.length  ? null : folderIds;        
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, requestedFolderIDs, all, own);
+        if (all.isEmpty() && own.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        /*
+         * perform search & enhance results with additional metadata as needed 
+         */
+        Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        SearchIterator<DocumentMetadata> searchIterator = searchEngine.search(session, searchTerm, all, own, fields, sortedBy, dir, start, end);
+        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID); 
+    }
+
+    /**
+     * Adds additional metadata based on the requested columns to a search iterator result.
+     * 
+     * @param session The session
+     * @param searchIterator The search iterator as fetched from the search engine
+     * @param fields The requested fields
+     * @param permissionsByFolderID A map holding the effective permissions of all used folders during the search
+     * @return The enhanced search results
+     */
+    private SearchIterator<DocumentMetadata> postProcessSearch(ServerSession session, SearchIterator<DocumentMetadata> searchIterator, Metadata[] fields, final Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID) throws OXException {
+        /*
+         * check requested metadata
+         */
+        int sharedFilesFolderID = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
+        boolean containsSharedFilesResults = permissionsByFolderID.containsKey(I(sharedFilesFolderID)); 
+        boolean addLocked = contains(fields, Metadata.LOCKED_UNTIL_LITERAL);
+        boolean addNumberOfVersions = contains(fields, Metadata.NUMBER_OF_VERSIONS_LITERAL);
+        boolean addObjectPermissions = contains(fields, Metadata.OBJECT_PERMISSIONS_LITERAL);
+        boolean addShareable = contains(fields, Metadata.SHAREABLE_LITERAL);
+        if (false == addLocked && false == addNumberOfVersions && false == addObjectPermissions && false == addShareable && false == containsSharedFilesResults) {
+            /*
+             * stick to plain search iterator result if no further metadata is needed
+             */
+            return searchIterator;
+        }        
+        /*
+         * prepare customizable search iterator to add additional metadata as requested
+         */
+        List<DocumentMetadata> documents;
+        try {
+            documents = SearchIterators.asList(searchIterator);
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        if (null == documents || 0 == documents.size()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }       
+        List<Integer> objectIDs = Tools.getIDs(documents);
+        /*
+         * add object permissions if requested or needed to evaluate "shareable" flag
+         */
+        if (addObjectPermissions || addShareable || containsSharedFilesResults) {
+            documents = objectPermissionLoader.add(documents, session.getContext(), objectIDs);
+        }
+        if (addLocked) {
+            documents = lockedUntilLoader.add(documents, session.getContext(), objectIDs);
+        }
+        if (addNumberOfVersions) {
+            documents = numberOfVersionsLoader.add(documents, session.getContext(), objectIDs);
+        }
+        if (addShareable || containsSharedFilesResults) {
+            for (DocumentMetadata document : documents) {
+                int physicalFolderID = (int) document.getFolderId();
+                EffectiveInfostoreFolderPermission folderPermission = permissionsByFolderID.get(I(physicalFolderID));
+                if (null != folderPermission && (folderPermission.canReadAllObjects() || folderPermission.canReadOwnObjects() && document.getCreatedBy() == session.getUserId())) {
+                    /*
+                     * document is readable at physical location
+                     */
+                    document.setShareable(folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == session.getUserId());                    
+                } else {
+                    /*
+                     * set 'shareable' flag and parent folder based on object permissions
+                     */
+                    List<ObjectPermission> objectPermissions = document.getObjectPermissions();
+                    if (null != objectPermissions) {
+                        ObjectPermission matchingPermission = EffectiveObjectPermissions.find(session.getUser(), objectPermissions);
+                        if (null != matchingPermission && matchingPermission.canRead()) {
+                            document.setFolderId(sharedFilesFolderID);
+                            document.setShareable(matchingPermission.canWrite());
+                        } else {
+                            throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+                        }
+                    } else {
+                        throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
+                    }
+                }
+            }
+        }
+        return new SearchIteratorDelegator<DocumentMetadata>(documents);
+    }    
+    
     private int getId(final Context context, final Connection writeCon) throws SQLException {
         final boolean autoCommit = writeCon.getAutoCommit();
         if (autoCommit) {

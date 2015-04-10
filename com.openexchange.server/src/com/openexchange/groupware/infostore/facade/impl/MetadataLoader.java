@@ -61,7 +61,9 @@ import com.openexchange.groupware.results.CustomizableDelta;
 import com.openexchange.groupware.results.CustomizableTimedResult;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.tools.iterator.CustomizableSearchIterator;
 import com.openexchange.tools.iterator.Customizer;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link MetadataLoader}
@@ -144,6 +146,18 @@ public abstract class MetadataLoader<T> {
     }
 
     /**
+     * Adds additional metadata to the documents in the supplied search iterator result.
+     *
+     * @param searchIterator The search iterator holding the documents to add the metadata for
+     * @param context The context
+     * @param ids The identifiers of the documents in the search iterator to pre-fetch the required metadata
+     * @return A search iterator result holding the documents with added metadata
+     */
+    public SearchIterator<DocumentMetadata> add(SearchIterator<DocumentMetadata> searchIterator, Context context, Collection<Integer> ids) throws OXException {
+        return new CustomizableSearchIterator<DocumentMetadata>(searchIterator, getMetadataCustomizer(context, load(ids, context)));
+    }
+
+    /**
      * Adds additional metadata to the supplied document.
      *
      * @param document The document to add the metadata for
@@ -158,7 +172,7 @@ public abstract class MetadataLoader<T> {
     /**
      * Adds additional metadata to the supplied documents.
      *
-     * @param document The documents to add the metadata for
+     * @param documents The documents to add the metadata for
      * @param context The context
      * @param ids The identifiers of the documents in the timed results to pre-fetch the required metadata
      * @return The documents with added metadata
@@ -171,7 +185,7 @@ public abstract class MetadataLoader<T> {
     /**
      * Adds additional metadata to the supplied documents.
      *
-     * @param document The documents to add the metadata for
+     * @param documents The documents to add the metadata for
      * @param context The context
      * @param knownMetadata A map of known metadata, or <code>null</code> if not available
      * @return The documents with added metadata

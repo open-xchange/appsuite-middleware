@@ -64,16 +64,13 @@ import com.openexchange.find.Document;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.drive.FileDocument;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.chunk.ChunkPerformer;
 import com.openexchange.groupware.tools.chunk.ListPerformable;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -104,25 +101,20 @@ public class InfostoreSearcher {
     private Metadata[] fields;
     private final int start;
     private final int size;
-    private final Context context;
-    private final User user;
-    private final UserPermissionBits permissionBits;
+    private final ServerSession session;
     private final InfostoreSearchEngine searchEngine;
 
     public InfostoreSearcher(final SearchRequest searchRequest, final ServerSession session, final com.openexchange.file.storage.search.SearchTerm<?> searchTerm, final List<Integer> folderIDs, final Metadata[] fields) throws OXException {
         super();
         this.folderIDs = folderIDs;
         this.fields = fields;
+        this.session = session;
         start = searchRequest.getStart();
         size = searchRequest.getSize();
-        context = session.getContext();
-        user = session.getUser();
-        permissionBits = session.getUserPermissionBits();
         searchEngine = Services.getInfostoreSearchEngine();
         if (null == searchEngine) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(InfostoreFacade.class.getName());
         }
-
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         searchTerm.visit(visitor);
         infostoreTerm = visitor.getInfostoreTerm();
@@ -134,21 +126,10 @@ public class InfostoreSearcher {
         } else {
             SearchIterator<DocumentMetadata> it = null;
             try {
-                it = searchEngine.search(
-                    I2i(folderIDs),
-                    infostoreTerm,
-                    fields,
-                    Metadata.TITLE_LITERAL,
-                    InfostoreSearchEngine.ASC,
-                    start,
-                    start + size,
-                    context,
-                    user,
-                    permissionBits);
-
-                final List<Document> results = new ArrayList<Document>(100);
+                it = searchEngine.search(session, infostoreTerm, I2i(folderIDs), fields, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, start, start + size);
+                List<Document> results = new ArrayList<Document>(100);
                 while (it.hasNext()) {
-                    final DocumentMetadata doc = it.next();
+                    DocumentMetadata doc = it.next();
                     results.add(new FileDocument(documentMetadata2File(doc)));
                 }
 
@@ -173,18 +154,7 @@ public class InfostoreSearcher {
             public void perform(List<Integer> subList) throws OXException {
                 SearchIterator<DocumentMetadata> it = null;
                 try {
-                    it = searchEngine.search(
-                        I2i(subList),
-                        infostoreTerm,
-                        extendedFields,
-                        Metadata.TITLE_LITERAL,
-                        InfostoreSearchEngine.ASC,
-                        0,
-                        limitPerChunk,
-                        context,
-                        user,
-                        permissionBits);
-
+                    it = searchEngine.search(session, infostoreTerm, I2i(subList), extendedFields, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, 0, limitPerChunk);
                     while (it.hasNext()) {
                         final DocumentMetadata doc = it.next();
                         results.add(new FileDocument(documentMetadata2File(doc)));
@@ -199,7 +169,7 @@ public class InfostoreSearcher {
             return Collections.emptyList();
         }
 
-        final AlphanumComparator alphanumComparator = new AlphanumComparator(user.getLocale());
+        final AlphanumComparator alphanumComparator = new AlphanumComparator(session.getUser().getLocale());
         Collections.sort(results, new Comparator<Document>() {
             @Override
             public int compare(Document o1, Document o2) {

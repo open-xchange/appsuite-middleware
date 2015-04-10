@@ -209,8 +209,7 @@ public class TrashCleaner implements Runnable {
         SearchTerm<?> searchTerm = buildSearchTerm();
         Metadata[] columns = { Metadata.LAST_MODIFIED_LITERAL, Metadata.ID_LITERAL, Metadata.SEQUENCE_NUMBER_LITERAL };
         InfostoreSearchEngine searchEngine = Services.getService(InfostoreSearchEngine.class);
-        return searchEngine.search(folderIDs, searchTerm, columns, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET,
-            InfostoreSearchEngine.NOT_SET, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        return searchEngine.search(session, searchTerm, folderIDs, columns, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
     }
 
     private SearchTerm<?> buildSearchTerm() {
