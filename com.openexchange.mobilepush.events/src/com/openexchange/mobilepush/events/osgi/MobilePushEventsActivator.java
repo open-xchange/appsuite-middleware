@@ -59,6 +59,7 @@ import com.openexchange.mobilepush.events.mail.impl.MobilePushMailEventImpl;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushEventConstants;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link MobilePushEventsActivator}
@@ -71,7 +72,7 @@ public class MobilePushEventsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MobilePushStorageService.class, MailService.class };
+        return new Class[] { MobilePushStorageService.class, MailService.class, ThreadPoolService.class };
     }
 
     @Override
