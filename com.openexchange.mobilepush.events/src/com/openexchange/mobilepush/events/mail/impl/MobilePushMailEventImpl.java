@@ -77,21 +77,27 @@ import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 
 /**
  * {@link MobilePushMailEventImpl}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class MobilePushMailEventImpl implements org.osgi.service.event.EventHandler, MobilePushEventService {
 
-    private static final String OX_EVENT = "OX_EVENT";
+    /** The logger constant for this class */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushMailEventImpl.class);
 
+    private static final String OX_EVENT = "OX_EVENT";
     private static final String INBOX = "INBOX";
 
-    private final List<MobilePushPublisher> publishers;
+    // --------------------------------------------------------------------------------------------------------------------------------
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushMailEventImpl.class);
+    private final List<MobilePushPublisher> publishers;
 
     /**
      * Initializes a new {@link MobilePushMailEventImpl}.
@@ -104,21 +110,39 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     @Override
     public void handleEvent(Event event) {
         if (null != event && PushEventConstants.TOPIC.equals(event.getTopic())) {
-            // Check event...
-            Session session = getSession(event);
-            if (session != null && markedForRemoteDistribution(event) && hasFolderProperty(event)) {
-                // Build message for push provider
-                List<Map<String, Object>> events = handleEvents(event, session);
-                if (events != null) {
-                    int userId = session.getUserId();
-                    int contextId = session.getContextId();
-                    for (Map<String, Object> props : events) {
-                        notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
-                    }
+            ThreadPoolService threadPool = ThreadPools.getThreadPool();
+            if (null == threadPool) {
+                try {
+                    doHandleEvent(event);
+                } catch (Exception e) {
+                    LOG.warn("Failed handling event {}", event, e);
                 }
             } else {
-                LOG.debug("Unable to handle incomplete event: {}", event);
+                threadPool.submit(new MobilePushMailEventTask(event, this));
             }
+        }
+    }
+
+    /**
+     * Handles specified push event.
+     *
+     * @param event The push event
+     */
+    protected void doHandleEvent(Event event) {
+        // Check event...
+        Session session = getSession(event);
+        if (session != null && markedForRemoteDistribution(event) && hasFolderProperty(event)) {
+            // Build message for push provider
+            List<Map<String, Object>> events = handleEvents(event, session);
+            if (events != null) {
+                int userId = session.getUserId();
+                int contextId = session.getContextId();
+                for (Map<String, Object> props : events) {
+                    notifySubscribers(new MobilePushMailEvent(contextId, userId, props));
+                }
+            }
+        } else {
+            LOG.debug("Unable to handle incomplete event: {}", event);
         }
     }
 
@@ -156,7 +180,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      */
     private List<Map<String, Object>> handleEvents(Event event, Session session) {
         Boolean isDeleted = (Boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED);
-        return null != isDeleted && isDeleted.booleanValue() ? getDeleteMailPayload(event) : getNewMailProperties(event, session);
+        return null != isDeleted && isDeleted.booleanValue() ? getDeleteMailPayload() : getNewMailProperties(event, session);
     }
 
     private List<Map<String, Object>> getNewMailProperties(Event event, Session session) {
@@ -172,7 +196,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                     mailAccess = Services.getService(MailService.class, true).getMailAccess(session, accountId);
                     mailAccess.connect(false);
 
-                    MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds, event, session);
+                    MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds);
                     int unread = mailAccess.getUnreadMessagesCount(INBOX);
                     if (mms != null) {
                         for (MailMessage mm : mms) {
@@ -220,12 +244,10 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     /**
      * Fetches the message information from event mail id properties. If there are no property ids returned <code>null</code> is returned
      *
-     * @param event - The event
-     * @param session - The session
      * @return an array of mail messages or <code>null</code> if property does not exist or mail id does not exist
      * @throws OXException
      */
-    private MailMessage[] fetchMessageInformation(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String mailIds, Event event, Session session) throws OXException {
+    private MailMessage[] fetchMessageInformation(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String mailIds) throws OXException {
         MailField[] fields = new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM };
         return mailAccess.getMessageStorage().getMessages(INBOX, getMailIds(mailIds), fields);
     }
@@ -239,7 +261,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         return null;
     }
 
-    private List<Map<String, Object>> getDeleteMailPayload(Event event) {
+    private List<Map<String, Object>> getDeleteMailPayload() {
         List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(1);
         Map<String, Object> map = new HashMap<String, Object>(4);
         map.put("SYNC_EVENT", "MAIL");
@@ -294,5 +316,29 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         Map<String, Object> props = new HashMap<String, Object>(2);
         props.put("message", "You've received a new login");
         return props;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    private static class MobilePushMailEventTask extends AbstractTask<Void> {
+
+        private final Event event;
+        private final MobilePushMailEventImpl eventHandler;
+
+        MobilePushMailEventTask(Event event, MobilePushMailEventImpl eventHandler) {
+            super();
+            this.event = event;
+            this.eventHandler = eventHandler;
+        }
+
+        @Override
+        public Void call() throws Exception {
+            try {
+                eventHandler.doHandleEvent(event);
+            } catch (Exception e) {
+                LOG.warn("Failed handling event {}", event, e);
+            }
+            return null;
+        }
     }
 }
