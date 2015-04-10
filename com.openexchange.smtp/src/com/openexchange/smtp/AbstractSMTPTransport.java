@@ -117,6 +117,7 @@ import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
@@ -192,6 +193,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     protected final Context ctx;
 
+    protected final Session session;
+
     private volatile SMTPConfig cachedSmtpConfig;
 
     private User user;
@@ -205,23 +208,35 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         super();
         accountId = MailAccount.DEFAULT_ID;
         ctx = null;
+        session = null;
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
 
-    protected AbstractSMTPTransport(final int contextId) throws OXException {
-        this(contextId, MailAccount.DEFAULT_ID);
+    /**
+     * Initializes a new {@link AbstractSMTPTransport}.
+     *
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
+    protected AbstractSMTPTransport(int contextId) throws OXException {
+        super();
+        this.session = null;
+        this.ctx = Services.getService(ContextService.class).getContext(contextId);
+        this.accountId = MailAccount.DEFAULT_ID;
+        pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
 
     /**
      * Constructor
      *
-     * @param ctx The context
+     * @param session The session
      * @param accountId The account ID
-     * @throws OXException
+     * @throws OXException If initialization fails
      */
-    protected AbstractSMTPTransport(final int contextId, final int accountId) throws OXException {
+    protected AbstractSMTPTransport(Session session, int accountId) throws OXException {
         super();
-        this.ctx = Services.getService(ContextService.class).getContext(contextId);
+        this.session = session;
+        this.ctx = Services.getService(ContextService.class).getContext(session.getContextId());
         this.accountId = accountId;
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
