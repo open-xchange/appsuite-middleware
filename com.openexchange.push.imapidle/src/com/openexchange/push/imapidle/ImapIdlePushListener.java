@@ -602,9 +602,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    private long getUIDNext(IMAPFolder imapFolder) {
+    private long getUIDNext(IMAPFolder imapFolder) throws MessagingException {
         try {
             return imapFolder.getUIDNext();
+        } catch (javax.mail.StoreClosedException e) {
+            // Re-throw...
+            throw e;
         } catch (MessagingException e) {
             LOGGER.warn("Could not determine UIDNEXT. Assuming -1 instead.", e);
             return -1L;
