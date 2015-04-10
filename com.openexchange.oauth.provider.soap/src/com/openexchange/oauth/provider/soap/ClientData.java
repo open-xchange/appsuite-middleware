@@ -43,7 +43,8 @@ import javax.xml.bind.annotation.XmlType;
     "icon",
     "name",
     "redirectURIs",
-    "website"
+    "website",
+    "groupId"
 })
 public class ClientData {
 
