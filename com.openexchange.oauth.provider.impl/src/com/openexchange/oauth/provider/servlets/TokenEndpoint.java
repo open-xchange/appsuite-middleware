@@ -92,6 +92,7 @@ public class TokenEndpoint extends OAuthEndpoint {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            Tools.disableCaching(response);
             if (!Tools.considerSecure(request)) {
                 response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
                 response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);

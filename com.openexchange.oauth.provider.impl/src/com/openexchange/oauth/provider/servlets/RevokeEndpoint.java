@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -84,6 +85,7 @@ public class RevokeEndpoint extends OAuthEndpoint {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            Tools.disableCaching(response);
             String accessToken = request.getParameter("access_token");
             if (Strings.isEmpty(accessToken)) {
                 String refreshToken = request.getParameter("refresh_token");
