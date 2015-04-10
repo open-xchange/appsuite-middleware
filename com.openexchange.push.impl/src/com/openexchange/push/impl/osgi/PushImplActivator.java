@@ -51,10 +51,13 @@ package com.openexchange.push.impl.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import javax.management.ObjectName;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.EventAdmin;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.crypto.CryptoService;
@@ -66,6 +69,8 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.CustomPortableFactory;
+import com.openexchange.management.ManagementService;
+import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
@@ -77,6 +82,8 @@ import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCalla
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
+import com.openexchange.push.impl.mbean.PushMBeanImpl;
+import com.openexchange.push.mbean.PushMBean;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -120,6 +127,43 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(EventAdmin.class);
             trackService(DatabaseService.class);
             trackService(CryptoService.class);
+
+            // Track management service & register MBean
+            {
+                ServiceTrackerCustomizer<ManagementService, ManagementService> customizer = new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
+
+                    @Override
+                    public void removedService(ServiceReference<ManagementService> reference, ManagementService management) {
+                        try {
+                            management.unregisterMBean(Managements.getObjectName(PushMBean.class.getName(), PushMBean.DOMAIN));
+                        } catch (Exception e) {
+                            log.warn("Could not un-register MBean {}", PushMBean.class.getName());
+                        }
+                        context.ungetService(reference);
+                    }
+
+                    @Override
+                    public void modifiedService(ServiceReference<ManagementService> reference, ManagementService management) {
+                        // Nothing
+                    }
+
+                    @Override
+                    public ManagementService addingService(ServiceReference<ManagementService> reference) {
+                        ManagementService management = context.getService(reference);
+                        try {
+                            ObjectName objectName = Managements.getObjectName(PushMBean.class.getName(), PushMBean.DOMAIN);
+                            management.registerMBean(objectName, new PushMBeanImpl());
+                            return management;
+                        } catch (Exception e) {
+                            log.warn("Could not register MBean {}", PushMBean.class.getName());
+                        }
+
+                        context.ungetService(reference);
+                        return null;
+                    }
+                };
+                track(ManagementService.class, customizer);
+            }
 
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
