@@ -433,6 +433,7 @@ public class PushDbUtils {
 
             if (deleted) {
                 stmt = con.prepareStatement("SELECT COUNT(user) FROM registeredPush WHERE cid=?");
+                stmt.setInt(1, contextId);
                 rs = stmt.executeQuery();
                 rs.next();
                 int count = rs.getInt(1);
