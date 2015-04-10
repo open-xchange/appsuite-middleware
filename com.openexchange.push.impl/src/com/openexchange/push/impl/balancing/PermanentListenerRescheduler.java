@@ -153,7 +153,9 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                 int retryCount = 3;
                                 while (retryCount-- > 0) {
                                     try {
-                                        if (future.get().booleanValue()) {
+                                        boolean isCapable = future.get().booleanValue();
+                                        retryCount = 0;
+                                        if (isCapable) {
                                             candidates.add(member);
                                             LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
                                         } else {
