@@ -49,10 +49,10 @@
 
 package com.openexchange.guard.transport.listener;
 
-import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.guard.AbstractGuardAccess;
+import com.openexchange.guard.GuardApi;
 import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
@@ -64,7 +64,7 @@ import com.openexchange.mail.transport.listener.Result;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class GuardTransportListener implements MailTransportListener {
+public class GuardTransportListener extends AbstractGuardAccess implements MailTransportListener {
 
     private static final String HEADER_GUARD = "X-OX-Guard-Marker";
 
@@ -77,17 +77,25 @@ public class GuardTransportListener implements MailTransportListener {
 
     @Override
     public Result onBeforeMessageTransport(MimeMessage message) throws OXException {
-        try {
-            if (!"true".equalsIgnoreCase(message.getHeader(HEADER_GUARD, null))) {
-                return new GuardResult(message, Reply.NEUTRAL);
-            }
-
-            // TODO: Pass MIME message to Guard for processing
-
-
+        if (!"true".equalsIgnoreCase(getHeaderSafe(message))) {
             return new GuardResult(message, Reply.NEUTRAL);
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+        }
+
+        GuardApi guardApi = getGuardApi();
+        if (null == guardApi) {
+            // Guard end point not available
+            return new GuardResult(message, Reply.NEUTRAL);
+        }
+
+        MimeMessage processedMessage = guardApi.processMimeMessage(message, mapFor("action", "process_message"));
+        return new GuardResult(processedMessage, Reply.ACCEPT);
+    }
+
+    private String getHeaderSafe(MimeMessage message) {
+        try {
+            return message.getHeader(HEADER_GUARD, null);
+        } catch (Exception e) {
+            return null;
         }
     }
 
