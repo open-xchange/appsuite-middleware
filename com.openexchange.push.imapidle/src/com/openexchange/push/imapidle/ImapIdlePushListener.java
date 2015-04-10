@@ -370,7 +370,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 } finally {
                     this.imapFolderInUse = null;
                     try {
-                        imapFolder.close(false);
+                        imapFolder.forceClose();
                     } catch (final Exception e) {
                         // Ignore
                     }
@@ -515,7 +515,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             if (null != imapFolderInUse) {
                 this.imapFolderInUse = null;
                 try {
-                    imapFolderInUse.close(false);
+                    imapFolderInUse.forceClose();
                 } catch (final Exception e) {
                     // Ignore
                 }
