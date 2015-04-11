@@ -143,35 +143,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      */
     protected static final String SMTP = SMTPProvider.PROTOCOL_SMTP.getName();
 
-    private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
-
-        private final Transport transport;
-
-        private final String server;
-
-        private final int port;
-
-        private final String login;
-
-        private final String pw;
-
-        protected SaslSmtpLoginAction(final Transport transport, final String server, final int port, final String login, final String pw) {
-            super();
-            this.transport = transport;
-            this.server = server;
-            this.port = port;
-            this.login = login;
-            this.pw = pw;
-        }
-
-        @Override
-        public Object run() throws MessagingException {
-            transport.connect(server, port, login, pw);
-            return null;
-        }
-
-    }
-
     private static volatile String staticHostName;
 
     private static volatile UnknownHostException warnSpam;
@@ -185,20 +156,21 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    private final Queue<Runnable> pendingInvocations;
+    // -------------------------------------------------------------------------------------------------------------------------------
 
-    private volatile javax.mail.Session smtpSession;
-
+    /** The account identifier */
     protected final int accountId;
 
+    /** The associated context */
     protected final Context ctx;
 
+    /** The associated session or <code>null</code> */
     protected final Session session;
 
+    private final Queue<Runnable> pendingInvocations;
+    private volatile javax.mail.Session smtpSession;
     private volatile SMTPConfig cachedSmtpConfig;
-
     private User user;
-
     private transient Subject kerberosSubject;
 
     /**
@@ -503,10 +475,20 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return smtpSession;
     }
 
+    /**
+     * Sets the user
+     *
+     * @param user The user
+     */
     protected void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Sets the Kerberos subject
+     *
+     * @param kerberosSubject The subject
+     */
     protected void setKerberosSubject(Subject kerberosSubject) {
         this.kerberosSubject = kerberosSubject;
     }
@@ -1108,11 +1090,13 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private static final class MailCleanerTask implements Runnable {
 
         private final ComposedMailMessage composedMail;
 
-        public MailCleanerTask(final ComposedMailMessage composedMail) {
+        MailCleanerTask(ComposedMailMessage composedMail) {
             super();
             this.composedMail = composedMail;
         }
@@ -1122,6 +1106,30 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             composedMail.cleanUp();
         }
 
-    }
+    } // End of class MailCleanerTask
+
+    private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
+
+        private final Transport transport;
+        private final String server;
+        private final int port;
+        private final String login;
+        private final String pw;
+
+        SaslSmtpLoginAction(Transport transport, String server, int port, String login, String pw) {
+            super();
+            this.transport = transport;
+            this.server = server;
+            this.port = port;
+            this.login = login;
+            this.pw = pw;
+        }
+
+        @Override
+        public Object run() throws MessagingException {
+            transport.connect(server, port, login, pw);
+            return null;
+        }
+    } // End of class SaslSmtpLoginAction
 
 }
