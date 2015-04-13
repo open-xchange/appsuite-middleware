@@ -50,6 +50,8 @@
 package com.openexchange.database.migration.mbean;
 
 import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -152,11 +154,11 @@ public class MBeanRegisterer implements ServiceTrackerCustomizer<ManagementServi
     private void unregisterMBeans() {
         ManagementService managementService = this.managementService;
         if (null != managementService) {
-            for (Entry<DBMigration, ObjectName> entry : migrations.entrySet()) {
-                ObjectName objectName = entry.getValue();
+            for (Iterator<Entry<DBMigration, ObjectName>> it = migrations.entrySet().iterator(); it.hasNext();) {
+                ObjectName objectName = it.next().getValue();
                 if (PLACEHOLDER != objectName) {
                     unregisterMBean(objectName);
-                    entry.setValue(null);
+                    it.remove();
                 }
             }
         }

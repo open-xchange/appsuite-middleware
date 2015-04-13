@@ -50,7 +50,6 @@
 package com.openexchange.mailfilter.json.ajax.servlet;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
@@ -65,15 +64,10 @@ import com.openexchange.server.Initialization;
 
 /**
  * {@link MailFilterServletInit}
- * 
+ *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public class MailFilterServletInit implements Initialization {
-
-    /**
-     * The {@link DefaultDeferringURLService} reference.
-     */
-    public static final AtomicReference<DispatcherPrefixService> PREFIX = new AtomicReference<DispatcherPrefixService>();
 
     private static final Logger LOG = LoggerFactory.getLogger(MailFilterServletInit.class);
 
@@ -83,7 +77,10 @@ public class MailFilterServletInit implements Initialization {
         return instance;
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private final AtomicBoolean started;
+    private volatile String alias;
 
     /**
      * Initializes a new {@link MailFilterServletInit}
@@ -93,10 +90,6 @@ public class MailFilterServletInit implements Initialization {
         started = new AtomicBoolean();
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.Initialization#start()
-     */
     @Override
     public void start() throws OXException {
         if (!started.compareAndSet(false, true)) {
@@ -110,48 +103,54 @@ public class MailFilterServletInit implements Initialization {
         // adding writer to WriterFactory
         LOG.debug("add action writer implementations");
 
-        final HttpService httpService = Services.getService(HttpService.class);
+        HttpService httpService = Services.getService(HttpService.class);
         if (httpService == null) {
             LOG.error("HTTP service is null. Mail Filter servlet cannot be registered");
             return;
         }
-        PREFIX.set(Services.getService(DispatcherPrefixService.class));
+
         try {
             /*
              * Register mail filter servlet
              */
-            httpService.registerServlet(PREFIX.get().getPrefix() + "mailfilter", new MailFilterServlet(), null, null);
-        } catch (final ServletException e) {
+            DispatcherPrefixService dispatcherPrefix = Services.getService(DispatcherPrefixService.class);
+            String alias = dispatcherPrefix.getPrefix() + "mailfilter";
+            this.alias = alias;
+            httpService.registerServlet(alias, new MailFilterServlet(), null, null);
+        } catch (ServletException e) {
             throw MailFilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e.getMessage());
-        } catch (final NamespaceException e) {
+        } catch (NamespaceException e) {
             throw MailFilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e.getMessage());
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.server.Initialization#stop()
-     */
     @Override
     public void stop() {
         if (!started.compareAndSet(true, false)) {
             LOG.error("Mail filter servlet has not been started.");
             return;
         }
-        final HttpService httpService = Services.getService(HttpService.class);
+
+        HttpService httpService = Services.getService(HttpService.class);
         if (httpService == null) {
             LOG.error("HTTP service is null. Mail Filter servlet cannot be unregistered");
         } else {
             /*
              * Unregister mail filter servlet
              */
-            httpService.unregister(PREFIX.get().getPrefix() + "mailfilter");
+            String alias = this.alias;
+            if (null == alias) {
+                LOG.error("Servlet alias is null. Mail Filter servlet cannot be unregistered");
+            } else {
+                httpService.unregister(alias);
+                this.alias = null;
+            }
         }
     }
 
     /**
      * Checks if {@link SessiondInit} is started
-     * 
+     *
      * @return <code>true</code> if {@link SessiondInit} is started; otherwise <code>false</code>
      */
     public boolean isStarted() {
