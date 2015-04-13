@@ -478,7 +478,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, NO_PERMISSIONS);
                 } else {
                     stmt.setInt(pos++, READ_FOLDER);
-                    stmt.setInt(pos++, READ_FOLDER);
+                    stmt.setInt(pos++, READ_ALL_OBJECTS);
                     stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS);
                 }
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
@@ -500,7 +500,7 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, NO_PERMISSIONS); // owp
                 } else {
                     stmt.setInt(pos++, READ_FOLDER); // fp
-                    stmt.setInt(pos++, READ_FOLDER); // orp
+                    stmt.setInt(pos++, READ_ALL_OBJECTS); // orp
                     stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS); // owp
                 }
                 stmt.setInt(pos++, NO_PERMISSIONS); // odp
