@@ -30,19 +30,27 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link Exception }
-     * 
-     */
-    public Exception createException() {
-        return new Exception();
-    }
-
-    /**
      * Create an instance of {@link GetClientById }
      * 
      */
     public GetClientById createGetClientById() {
         return new GetClientById();
+    }
+
+    /**
+     * Create an instance of {@link OAuthClientServiceException }
+     * 
+     */
+    public OAuthClientServiceException createOAuthClientServiceException() {
+        return new OAuthClientServiceException();
+    }
+
+    /**
+     * Create an instance of {@link ServiceException }
+     * 
+     */
+    public ServiceException createServiceException() {
+        return new ServiceException();
     }
 
     /**

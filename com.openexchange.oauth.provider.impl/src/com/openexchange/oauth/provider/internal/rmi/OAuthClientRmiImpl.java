@@ -83,80 +83,82 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public Client getClientById(String clientId) throws RemoteException {
+    public Client getClientById(String clientId) throws RemoteException, ClientManagementException {
         try {
             return getClientManagement().getClientById(clientId);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws RemoteException {
+    public Client registerClient(ClientData clientData) throws RemoteException, ClientManagementException {
         try {
             return getClientManagement().registerClient(clientData);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
     }
 
     @Override
-    public Client updateClient(String clientId, ClientData clientData) throws RemoteException {
+    public Client updateClient(String clientId, ClientData clientData) throws RemoteException, ClientManagementException {
         try {
             return getClientManagement().updateClient(clientId, clientData);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws RemoteException {
+    public boolean unregisterClient(String clientId) throws RemoteException, ClientManagementException {
         try {
             return getClientManagement().unregisterClient(clientId);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
     }
 
     @Override
-    public Client revokeClientSecret(String clientId) throws RemoteException {
+    public Client revokeClientSecret(String clientId) throws RemoteException, ClientManagementException {
         try {
             return getClientManagement().revokeClientSecret(clientId);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
     }
 
     @Override
-    public void enableClient(String clientId) throws RemoteException {
+    public boolean enableClient(String clientId) throws RemoteException, ClientManagementException {
         try {
-            getClientManagement().enableClient(clientId);
+            return getClientManagement().enableClient(clientId);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
     }
 
     @Override
-    public void disableClient(String clientId) throws RemoteException {
+    public boolean disableClient(String clientId) throws RemoteException, ClientManagementException {
         try {
-            getClientManagement().disableClient(clientId);
+            return getClientManagement().disableClient(clientId);
         } catch (ClientManagementException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            throw serializableException(e);
         }
+    }
+
+    private static ClientManagementException serializableException(ClientManagementException e) {
+        Throwable cause = e.getCause();
+        if (cause == null) {
+            return e;
+        }
+
+        /*
+         * Underlying exceptions are potentially not serializable, we have to strip them.
+         * Additionally exceptions with a causes are most likely worth to be logged.
+         */
+        LOGGER.error("", e);
+        ClientManagementException stripped = new ClientManagementException(e.getReason(), e.getMessage());
+        stripped.setStackTrace(e.getStackTrace());
+        return stripped;
     }
 
 }

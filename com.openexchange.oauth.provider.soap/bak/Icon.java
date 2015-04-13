@@ -8,17 +8,17 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Icon complex type.
+ * <p>Java-Klasse f&uuml;r Icon complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
  * &lt;complexType name="Icon">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="data" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="mimeType" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="data" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="mimeType" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="size" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -36,14 +36,14 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Icon {
 
-    @XmlElement(required = true, nillable = true)
+    @XmlElement(nillable = true)
     protected String data;
-    @XmlElement(required = true, nillable = true)
+    @XmlElement(nillable = true)
     protected String mimeType;
     protected Integer size;
 
     /**
-     * Gets the value of the data property.
+     * Ruft den Wert der data-Eigenschaft ab.
      * 
      * @return
      *     possible object is
@@ -55,7 +55,7 @@ public class Icon {
     }
 
     /**
-     * Sets the value of the data property.
+     * Legt den Wert der data-Eigenschaft fest.
      * 
      * @param value
      *     allowed object is
@@ -67,7 +67,7 @@ public class Icon {
     }
 
     /**
-     * Gets the value of the mimeType property.
+     * Ruft den Wert der mimeType-Eigenschaft ab.
      * 
      * @return
      *     possible object is
@@ -79,7 +79,7 @@ public class Icon {
     }
 
     /**
-     * Sets the value of the mimeType property.
+     * Legt den Wert der mimeType-Eigenschaft fest.
      * 
      * @param value
      *     allowed object is
@@ -91,7 +91,7 @@ public class Icon {
     }
 
     /**
-     * Gets the value of the size property.
+     * Ruft den Wert der size-Eigenschaft ab.
      * 
      * @return
      *     possible object is
@@ -103,7 +103,7 @@ public class Icon {
     }
 
     /**
-     * Sets the value of the size property.
+     * Legt den Wert der size-Eigenschaft fest.
      * 
      * @param value
      *     allowed object is

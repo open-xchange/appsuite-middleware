@@ -9,56 +9,56 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for anonymous complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p>Java-Klasse f&uuml;r anonymous complex type.
+ *
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="return" type="{http://soap.provider.oauth.openexchange.com}Client"/>
+ *         &lt;element name="return" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "_return"
+    "_success"
 })
-@XmlRootElement(name = "registerClientResponse")
-public class RegisterClientResponse {
+@XmlRootElement(name = "enableClientResponse")
+public class EnableClientResponse {
 
-    @XmlElement(name = "return", required = true, nillable = true)
-    protected Client _return;
+    @XmlElement(name = "success")
+    protected Boolean _success;
 
     /**
-     * Gets the value of the return property.
-     * 
+     * Ruft den Wert der return-Eigenschaft ab.
+     *
      * @return
      *     possible object is
-     *     {@link Client }
-     *     
+     *     {@link Boolean }
+     *
      */
-    public Client getReturn() {
-        return _return;
+    public Boolean isSuccess() {
+        return _success;
     }
 
     /**
-     * Sets the value of the return property.
-     * 
+     * Legt den Wert der return-Eigenschaft fest.
+     *
      * @param value
      *     allowed object is
-     *     {@link Client }
-     *     
+     *     {@link Boolean }
+     *
      */
-    public void setReturn(Client value) {
-        this._return = value;
+    public void setSuccess(Boolean value) {
+        this._success = value;
     }
 
 }

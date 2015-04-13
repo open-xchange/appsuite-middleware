@@ -87,7 +87,7 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
                 if (service instanceof OAuthClientRmi) {
-                    OAuthClientServicePortTypeImpl.RMI_REF.set(null);
+                    unregisterServices();
                     context.ungetService(reference);
                 }
             }
@@ -101,7 +101,7 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);
                 if (service instanceof OAuthClientRmi) {
-                    OAuthClientServicePortTypeImpl.RMI_REF.set((OAuthClientRmi) service);
+                    registerService(OAuthClientServicePortType.class, new OAuthClientServicePortTypeImpl((OAuthClientRmi) service));
                     return service;
                 }
                 context.ungetService(reference);
@@ -110,8 +110,5 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
         };
         track(Remote.class, trackerCustomizer);
         openTrackers();
-
-        OAuthClientServicePortTypeImpl soapService = new OAuthClientServicePortTypeImpl();
-        registerService(OAuthClientServicePortType.class, soapService);
     }
 }

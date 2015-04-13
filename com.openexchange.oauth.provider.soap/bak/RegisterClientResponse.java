@@ -9,56 +9,56 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for anonymous complex type.
- * 
- * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ * <p>Java-Klasse f&uuml;r anonymous complex type.
+ *
+ * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="return" type="{http://soap.provider.oauth.openexchange.com}Client"/>
+ *         &lt;element name="return" type="{http://soap.provider.oauth.openexchange.com}Client" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "_return"
+    "client"
 })
 @XmlRootElement(name = "registerClientResponse")
 public class RegisterClientResponse {
 
-    @XmlElement(name = "return", required = true, nillable = true)
-    protected Client _return;
+    @XmlElement(name = "client", nillable = true)
+    protected Client client;
 
     /**
-     * Gets the value of the return property.
-     * 
+     * Ruft den Wert der return-Eigenschaft ab.
+     *
      * @return
      *     possible object is
      *     {@link Client }
-     *     
+     *
      */
-    public Client getReturn() {
-        return _return;
+    public Client getClient() {
+        return client;
     }
 
     /**
-     * Sets the value of the return property.
-     * 
+     * Legt den Wert der return-Eigenschaft fest.
+     *
      * @param value
      *     allowed object is
      *     {@link Client }
-     *     
+     *
      */
-    public void setReturn(Client value) {
-        this._return = value;
+    public void setClient(Client value) {
+        this.client = value;
     }
 
 }
