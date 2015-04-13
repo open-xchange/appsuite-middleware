@@ -1549,7 +1549,7 @@ public final class OXFolderAdminHelper {
      * @param p The permission instance whose permissions shall be set
      */
     private static void setGABPermissions(final OCLPermission p) {
-        p.setAllPermission(READ_FOLDER, READ_FOLDER, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
+        p.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
     }
 
 }

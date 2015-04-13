@@ -1,3 +1,7 @@
+* 2015-04-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37638: Grant READ_ALL_OBJECTS permissions for global addressbook 
+
 * 2015-04-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 37636: Handle InterruptedException gracefully
