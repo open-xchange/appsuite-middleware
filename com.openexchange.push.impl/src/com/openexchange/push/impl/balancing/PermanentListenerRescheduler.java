@@ -128,15 +128,29 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             return;
         }
 
+        // Determine push users
+        List<PushUser> allPushUsers;
+        try {
+            allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
+            if (allPushUsers.isEmpty()) {
+                return;
+            }
+        } catch (Exception e) {
+            LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
+            return;
+        }
+
+        // Acquire optional thread pool
         ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
         if (null != threadPool) {
-            threadPool.submit(new ReschedulerTask(allMembers, hzInstance, monitor, pushManagerRegistry));
+            // Submit task
+            threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, monitor, pushManagerRegistry));
             return;
         }
 
         // Perform with current thread
         Thread thread = Thread.currentThread();
-        ReschedulerTask task = new ReschedulerTask(allMembers, hzInstance, monitor, pushManagerRegistry);
+        ReschedulerTask task = new ReschedulerTask(allMembers, allPushUsers, hzInstance, monitor, pushManagerRegistry);
 
         boolean ran = false;
         task.beforeExecute(thread);
@@ -199,6 +213,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     private static class ReschedulerTask extends AbstractTask<Void> {
 
         private final Set<Member> allMembers;
+        private final List<PushUser> allPushUsers;
         private final HazelcastInstance hzInstance;
         private final Object monitor;
         private final PushManagerRegistry pushManagerRegistry;
@@ -206,9 +221,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         /**
          * Initializes a new {@link ReschedulerTask}.
          */
-        ReschedulerTask(Set<Member> allMembers, HazelcastInstance hzInstance, Object monitor, PushManagerRegistry pushManagerRegistry) {
+        ReschedulerTask(Set<Member> allMembers, List<PushUser> allPushUsers, HazelcastInstance hzInstance, Object monitor, PushManagerRegistry pushManagerRegistry) {
             super();
             this.allMembers = allMembers;
+            this.allPushUsers = allPushUsers;
             this.hzInstance = hzInstance;
             this.monitor = monitor;
             this.pushManagerRegistry = pushManagerRegistry;
@@ -218,83 +234,80 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         public Void call() {
             synchronized (monitor) {
                 try {
-                    List<PushUser> allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
-                    if (false == allPushUsers.isEmpty()) {
-                        // Get local member
-                        Member localMember = hzInstance.getCluster().getLocalMember();
+                    // Get local member
+                    Member localMember = hzInstance.getCluster().getLocalMember();
 
-                        // Determine other cluster members
-                        Set<Member> otherMembers = getOtherMembers(allMembers, localMember);
+                    // Determine other cluster members
+                    Set<Member> otherMembers = getOtherMembers(allMembers, localMember);
 
-                        if (otherMembers.isEmpty()) {
-                            // No other cluster members - assign all available permanent listeners to this node
-                            pushManagerRegistry.applyInitialListeners(allPushUsers);
-                        } else {
-                            // Otherwise equally distribute among suitable cluster nodes
+                    if (otherMembers.isEmpty()) {
+                        // No other cluster members - assign all available permanent listeners to this node
+                        pushManagerRegistry.applyInitialListeners(allPushUsers);
+                    } else {
+                        // Otherwise equally distribute among suitable cluster nodes
 
-                            // Identify those members having at least one "PushManagerExtendedService" instance
-                            List<Member> candidates = new LinkedList<Member>();
-                            candidates.add(localMember);
-                            {
-                                IExecutorService executor = hzInstance.getExecutorService("default");
-                                Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
-                                for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
-                                    Member member = entry.getKey();
-                                    Future<Boolean> future = entry.getValue();
-                                    // Check Future's return value
-                                    int retryCount = 3;
-                                    while (retryCount-- > 0) {
-                                        try {
-                                            boolean isCapable = future.get().booleanValue();
-                                            retryCount = 0;
-                                            if (isCapable) {
-                                                candidates.add(member);
-                                                LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
-                                            } else {
-                                                LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
-                                            }
-                                        } catch (com.hazelcast.core.OperationTimeoutException x) {
-                                            // Timeout while awaiting remote result
-                                            if (retryCount > 0) {
-                                                LOG.info("Timeout while awaiting remote result from cluster member \"{}\". Retry...", member);
-                                            } else {
-                                                // No further retry
-                                                LOG.info("Giving up awaiting remote result from cluster member \"{}\", hence ignored for rescheduling computation.", member);
-                                                cancelFutureSafe(future);
-                                            }
+                        // Identify those members having at least one "PushManagerExtendedService" instance
+                        List<Member> candidates = new LinkedList<Member>();
+                        candidates.add(localMember);
+                        {
+                            IExecutorService executor = hzInstance.getExecutorService("default");
+                            Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
+                            for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
+                                Member member = entry.getKey();
+                                Future<Boolean> future = entry.getValue();
+                                // Check Future's return value
+                                int retryCount = 3;
+                                while (retryCount-- > 0) {
+                                    try {
+                                        boolean isCapable = future.get().booleanValue();
+                                        retryCount = 0;
+                                        if (isCapable) {
+                                            candidates.add(member);
+                                            LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
+                                        } else {
+                                            LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
+                                        }
+                                    } catch (com.hazelcast.core.OperationTimeoutException x) {
+                                        // Timeout while awaiting remote result
+                                        if (retryCount > 0) {
+                                            LOG.info("Timeout while awaiting remote result from cluster member \"{}\". Retry...", member);
+                                        } else {
+                                            // No further retry
+                                            LOG.info("Giving up awaiting remote result from cluster member \"{}\", hence ignored for rescheduling computation.", member);
+                                            cancelFutureSafe(future);
                                         }
                                     }
                                 }
                             }
-
-                            // First, sort by UUID
-                            Collections.sort(candidates, new Comparator<Member>() {
-
-                                @Override
-                                public int compare(Member m1, Member m2) {
-                                    return m1.getUuid().compareTo(m2.getUuid());
-                                }
-                            });
-
-                            // Determine the position of this cluster node
-                            int pos = 0;
-                            while (!localMember.getUuid().equals(candidates.get(pos).getUuid())) {
-                                pos = pos + 1;
-                            }
-
-                            // Determine the permanent listeners for this node
-                            List<PushUser> ps = new LinkedList<PushUser>();
-                            int numMembers = candidates.size();
-                            int numPushUsers = allPushUsers.size();
-                            for (int i = 0; i < numPushUsers; i++) {
-                                if ((i % numMembers) == pos) {
-                                    ps.add(allPushUsers.get(i));
-                                }
-                            }
-
-                            // Apply newly calculated initial permanent listeners
-                            pushManagerRegistry.applyInitialListeners(ps);
                         }
+
+                        // First, sort by UUID
+                        Collections.sort(candidates, new Comparator<Member>() {
+
+                            @Override
+                            public int compare(Member m1, Member m2) {
+                                return m1.getUuid().compareTo(m2.getUuid());
+                            }
+                        });
+
+                        // Determine the position of this cluster node
+                        int pos = 0;
+                        while (!localMember.getUuid().equals(candidates.get(pos).getUuid())) {
+                            pos = pos + 1;
+                        }
+
+                        // Determine the permanent listeners for this node
+                        List<PushUser> ps = new LinkedList<PushUser>();
+                        int numMembers = candidates.size();
+                        int numPushUsers = allPushUsers.size();
+                        for (int i = 0; i < numPushUsers; i++) {
+                            if ((i % numMembers) == pos) {
+                                ps.add(allPushUsers.get(i));
+                            }
+                        }
+
+                        // Apply newly calculated initial permanent listeners
+                        pushManagerRegistry.applyInitialListeners(ps);
                     }
                 } catch (Exception e) {
                     LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
