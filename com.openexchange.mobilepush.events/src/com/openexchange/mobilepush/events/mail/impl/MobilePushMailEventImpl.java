@@ -212,7 +212,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                         }
                     }
                 } catch (OXException e) {
-                    LOG.error("An unexpected mail exception occured", e);
+                    LOG.error("Failed to retrieve mail information.", e);
                 } finally {
                     if (mailAccess != null) {
                         try {
