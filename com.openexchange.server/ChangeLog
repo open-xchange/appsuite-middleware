@@ -1,3 +1,7 @@
+* 2015-04-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37636: Handle InterruptedException gracefully
+
 * 2015-04-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
