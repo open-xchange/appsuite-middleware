@@ -194,7 +194,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 try {
                     int accountId = MailAccount.DEFAULT_ID;
                     mailAccess = Services.getService(MailService.class, true).getMailAccess(session, accountId);
-                    mailAccess.connect(false);
+                    mailAccess.connect(true);
 
                     MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds);
                     int unread = mailAccess.getUnreadMessagesCount(INBOX);
