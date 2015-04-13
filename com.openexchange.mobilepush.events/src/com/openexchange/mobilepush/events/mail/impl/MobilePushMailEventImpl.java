@@ -228,7 +228,12 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     }
 
     private String[] getSenderInfo(MailMessage m) {
-        InternetAddress addr = m.getFrom()[0];
+        InternetAddress[] fromAddresses = m.getFrom();
+        if (null == fromAddresses || fromAddresses.length <= 0) {
+            return new String[] { null, "(no sender)" };
+        }
+
+        InternetAddress addr = fromAddresses[0];
         return new String[] { addr.getPersonal(), addr.getAddress() };
     }
 
