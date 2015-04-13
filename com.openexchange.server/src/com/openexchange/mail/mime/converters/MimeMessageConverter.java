@@ -2984,6 +2984,30 @@ public final class MimeMessageConverter {
     }
 
     /**
+     * Returns the value of the RFC 822 "Date" field. This is the date on which this message was sent. Returns <code>null</code> if this
+     * field is unavailable or its value is absent.
+     *
+     * @param mimeMessage The MIME message
+     * @return The sent Date
+     * @throws MessagingException If sent date cannot be returned
+     */
+    public static Date getSentDate(MimeMessage mimeMessage) throws MessagingException {
+        String s = mimeMessage.getHeader("Date", null);
+        if (s != null) {
+            try {
+                MailDateFormat mailDateFormat = MimeMessageUtility.getDefaultMailDateFormat();
+                synchronized (mailDateFormat) {
+                    return mailDateFormat.parse(s);
+                }
+            } catch (ParseException pex) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Parses the value of header <code>X-Priority</code>.
      *
      * @param priorityStr The header value
