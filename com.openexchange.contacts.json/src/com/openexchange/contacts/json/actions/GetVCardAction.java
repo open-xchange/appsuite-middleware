@@ -98,19 +98,20 @@ public class GetVCardAction extends ContactAction {
         try {
             VersitObject versitObj = converter.convertContact(contact, "3.0");
             ByteArrayOutputStream os = Streams.newByteArrayOutputStream();
-            VersitDefinition def = Versit.getDefinition(MimeTypes.MIME_TEXT_VCARD);
+            String mimeTextVcard = MimeTypes.MIME_TEXT_VCARD;
+            VersitDefinition def = Versit.getDefinition(mimeTextVcard);
             VersitDefinition.Writer w = def.getWriter(os, "UTF-8");
             def.write(w, versitObj);
             w.flush();
             os.flush();
 
             AJAXRequestData ajaxRequestData = request.getRequest();
-            if (ajaxRequestData.setResponseHeader("Content-Type", MimeTypes.MIME_TEXT_VCARD)) {
+            if (ajaxRequestData.setResponseHeader("Content-Type", mimeTextVcard)) {
                 // Set HTTP response headers
                 {
                     final StringBuilder sb = new StringBuilder(512);
                     sb.append("attachment");
-                    DownloadUtility.appendFilenameParameter("vcard.vcf", MimeTypes.MIME_TEXT_VCARD, ajaxRequestData.getUserAgent(), sb);
+                    DownloadUtility.appendFilenameParameter("vcard.vcf", mimeTextVcard, ajaxRequestData.getUserAgent(), sb);
                     ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
                 }
 
@@ -130,7 +131,7 @@ public class GetVCardAction extends ContactAction {
             ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(os.toByteArray());
             fileHolder.setDisposition("attachment");
             fileHolder.setName("vcard.vcf");
-            fileHolder.setContentType(MimeTypes.MIME_TEXT_VCARD);
+            fileHolder.setContentType(mimeTextVcard);
             fileHolder.setDelivery("download");
 
             ajaxRequestData.setFormat("file");
