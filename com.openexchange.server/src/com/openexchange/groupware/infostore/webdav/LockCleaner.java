@@ -48,11 +48,17 @@
  */
 package com.openexchange.groupware.infostore.webdav;
 
+import static com.openexchange.file.storage.FileStorageEventHelper.createDebugMessage;
+import static com.openexchange.file.storage.FileStorageEventHelper.extractObjectId;
+import static com.openexchange.file.storage.FileStorageEventHelper.extractSession;
+import static com.openexchange.file.storage.FileStorageEventHelper.extractVersions;
+import static com.openexchange.file.storage.FileStorageEventHelper.isDeleteEvent;
+import static com.openexchange.file.storage.FileStorageEventHelper.isInfostoreEvent;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.event.impl.FolderEventInterface;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageEventHelper;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.FolderLockManager;
 import com.openexchange.session.Session;
@@ -75,7 +81,6 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
 	@Override
     public void folderDeleted(final FolderObject folderObj, final Session session) {
 		try {
-            final ServerSession sessionObj = ServerSessionAdapter.valueOf(session);
             folderLockManager.removeAll(folderObj.getObjectID(), session);
 		} catch (final OXException e) {
 			LOG.error("Couldn't remove folder locks from folder {} in context {}. Run the consistency tool.", folderObj.getObjectID(), session.getContextId());
@@ -94,19 +99,21 @@ public class LockCleaner implements FolderEventInterface, EventHandler {
 
     @Override
     public void handleEvent(final Event event) {
-        if (FileStorageEventHelper.isInfostoreEvent(event) && FileStorageEventHelper.isDeleteEvent(event) &&
-            null == FileStorageEventHelper.extractVersions(event)) {
+        if (isInfostoreEvent(event) && isDeleteEvent(event) && null == extractVersions(event)) {
             try {
-                int id = Integer.parseInt(FileStorageEventHelper.extractObjectId(event));
-                ServerSession session = ServerSessionAdapter.valueOf(FileStorageEventHelper.extractSession(event));
-                infoLockManager.removeAll(id, session);
+                FileID fileID = new FileID(extractObjectId(event));
+                if (FileID.INFOSTORE_SERVICE_ID.equals(fileID.getService()) && FileID.INFOSTORE_ACCOUNT_ID.equals(fileID.getAccountId())) {
+                    int objectID = Integer.parseInt(fileID.getFileId());
+                    ServerSession session = ServerSessionAdapter.valueOf(extractSession(event));
+                    infoLockManager.removeAll(objectID, session);
+                }
             } catch (OXException e) {
                 LOG.error("Couldn't remove locks from infoitem. Run the consistency tool.", e);
             } catch (NumberFormatException e) {
                 // Obviously no numeric identifier; therefore not related to InfoStore file storage
                 LOG.debug("", e);
             }
-            LOG.debug("{}", new Object() { @Override public String toString() { return FileStorageEventHelper.createDebugMessage("DeleteEvent", event);}});
+            LOG.debug("{}", new Object() { @Override public String toString() { return createDebugMessage("DeleteEvent", event);}});
         }
     }
 }
