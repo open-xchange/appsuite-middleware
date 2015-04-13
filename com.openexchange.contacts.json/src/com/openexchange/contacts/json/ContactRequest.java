@@ -550,6 +550,15 @@ public class ContactRequest {
     }
 
     /**
+     * Gets the associated {@code AJAXRequestData} instance.
+     *
+     * @return The request data
+     */
+    public AJAXRequestData getRequest() {
+        return request;
+    }
+
+    /**
      * {@link ContactSearchTermParser}
      *
      * Custom {@link SearchTermParser} producing {@link ContactFieldOperand}s
