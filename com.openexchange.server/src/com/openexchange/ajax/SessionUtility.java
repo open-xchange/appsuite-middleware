@@ -267,7 +267,7 @@ public final class SessionUtility {
             // No such cookie
             final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
             if (null != publicSessionId) {
-                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
+                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth || isChangeable(session, req));
             }
 
             // No such "public_session" parameter
