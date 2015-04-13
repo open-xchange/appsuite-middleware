@@ -66,6 +66,7 @@ public class Activator extends HousekeepingActivator {
     private static final String ALIAS_APPENDIX = "recaptcha";
 
     private ReCaptchaServlet servlet;
+    private String alias;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -106,19 +107,19 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-
         cleanUp();
-
         unregisterServlet();
         ReCaptchaServiceRegistry.getInstance().clearRegistry();
     }
 
-    private void registerServlet() {
-        final ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
-        final HttpService httpService = registry.getService(HttpService.class);
-        if(servlet == null) {
+    private synchronized void registerServlet() {
+        ServiceRegistry registry = ReCaptchaServiceRegistry.getInstance();
+        HttpService httpService = registry.getService(HttpService.class);
+        if (servlet == null) {
             try {
-                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX, servlet = new ReCaptchaServlet(), null, null);
+                String alias = getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX;
+                this.alias = alias;
+                httpService.registerServlet(alias, servlet = new ReCaptchaServlet(), null, null);
                 LOG.info("reCAPTCHA Servlet registered.");
             } catch (final Exception e) {
                 LOG.error("", e);
@@ -126,10 +127,10 @@ public class Activator extends HousekeepingActivator {
         }
     }
 
-    private void unregisterServlet() {
-        final HttpService httpService = getService(HttpService.class);
-        if(httpService != null && servlet != null) {
-            httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX);
+    private synchronized void unregisterServlet() {
+        HttpService httpService = getService(HttpService.class);
+        if (httpService != null && servlet != null && null != alias) {
+            httpService.unregister(alias);
             servlet = null;
             LOG.info("reCAPTCHA Servlet unregistered.");
         }
