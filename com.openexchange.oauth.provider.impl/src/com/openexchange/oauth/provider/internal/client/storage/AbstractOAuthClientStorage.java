@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,107 +47,28 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.internal.client.storage;
 
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
+import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link Client} - Represents an OAuth client.
+ * {@link AbstractOAuthClientStorage}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client extends Serializable {
+abstract class AbstractOAuthClientStorage implements OAuthClientStorage {
+
+    /** The service look-up */
+    protected final ServiceLookup services;
 
     /**
-     * Gets the client's public identifier
-     *
-     * @return The public identifier
+     * Initializes a new {@link AbstractOAuthClientStorage}.
      */
-    String getId();
-
-    /**
-     * Gets the client's name
-     *
-     * @return The name
-     */
-    String getName();
-
-    /**
-     * Gets the client's description
-     *
-     * @return The description
-     */
-    String getDescription();
-
-    /**
-     * Gets the icon
-     *
-     * @return The icon
-     */
-    Icon getIcon();
-
-    /**
-     * Gets the date of this clients registration.
-     *
-     * @return The date
-     */
-    Date getRegistrationDate();
-
-    /**
-     * Gets the contact address
-     *
-     * @return The address
-     */
-    String getContactAddress();
-
-    /**
-     * Gets the website
-     *
-     * @return The website
-     */
-    String getWebsite();
-
-    /**
-     * Gets the default scope that should be assumed when the authorization request does not
-     * specify a certain scope.
-     *
-     * @return The default scope
-     */
-    Scopes getDefaultScope();
-
-    /**
-     * Gets the client's secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
-
-    /**
-     * Gets the redirect URIs
-     *
-     * @return The URIs
-     */
-    List<String> getRedirectURIs();
-
-    /**
-     * Checks if given redirect URI is contained in registered redirect URIs for this client
-     *
-     * @param uri The URI to check
-     * @return <code>true</code> if contained; otherwise <code>false</code>
-     */
-    boolean hasRedirectURI(String uri);
-
-    /**
-     * Returns whether this client is enabled or not.
-     *
-     * @return <code>true</code> if the client is enabled
-     */
-    boolean isEnabled();
-
+    protected AbstractOAuthClientStorage(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
 }

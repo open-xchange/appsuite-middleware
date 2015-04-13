@@ -61,8 +61,8 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
-import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.osgi.Services;
 
@@ -76,7 +76,6 @@ public class LazyIcon implements Icon {
 
     private static final long serialVersionUID = 4458877977630523049L;
 
-    private final String baseToken;
     private final String groupId;
     private final String clientId;
     private volatile Icon delegate;
@@ -96,7 +95,6 @@ public class LazyIcon implements Icon {
 
         this.clientId = clientId;
         this.groupId = clientIdObj.getGroupId();
-        this.baseToken = clientIdObj.getBaseToken();
     }
 
     @Override

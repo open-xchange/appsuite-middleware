@@ -62,10 +62,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -105,7 +105,7 @@ public class TokenEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            Client client = oAuthProvider.getClientById(clientId);
+            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null) {
                 failWithInvalidParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;

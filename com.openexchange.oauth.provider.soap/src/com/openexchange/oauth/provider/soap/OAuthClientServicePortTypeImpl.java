@@ -16,11 +16,11 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import org.apache.commons.codec.binary.Base64;
 import com.openexchange.java.Streams;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 /**
@@ -190,7 +190,7 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
         }
 
         {
-            com.openexchange.oauth.provider.Icon icon = client.getIcon();
+            com.openexchange.oauth.provider.client.Icon icon = client.getIcon();
             if (null != icon) {
                 try {
                     Icon soapIcon = new Icon();

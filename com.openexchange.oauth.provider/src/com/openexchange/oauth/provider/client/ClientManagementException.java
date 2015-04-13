@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,46 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.client;
-
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.oauth.provider.client;
 
 
 /**
- * {@link AbstractOAuthClientStorage}
+ * This Exception is thrown on client provisioning errors.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-abstract class AbstractOAuthClientStorage implements OAuthClientStorage {
+public class ClientManagementException extends Exception {
 
-    /** The service look-up */
-    protected final ServiceLookup services;
+    private static final long serialVersionUID = 578991491960268465L;
+
+    public static enum Reason {
+
+        INTERNAL_ERROR,
+
+        INVALID_CLIENT_DATA
+
+    }
+
+    private final Reason reason;
+
+    public ClientManagementException(Reason reason, String message) {
+        super(message);
+        this.reason = reason;
+    }
+
+    public ClientManagementException(Reason reason, String message, Throwable cause) {
+        super(message, cause);
+        this.reason = reason;
+    }
 
     /**
-     * Initializes a new {@link AbstractOAuthClientStorage}.
+     * Gets the reason
+     *
+     * @return The reason
      */
-    protected AbstractOAuthClientStorage(ServiceLookup services) {
-        super();
-        this.services = services;
+    public Reason getReason() {
+        return reason;
     }
 
 }

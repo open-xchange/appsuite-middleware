@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.client;
+package com.openexchange.oauth.provider.internal.client.storage;
 
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.server.ServiceLookup;
 
 

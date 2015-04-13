@@ -87,9 +87,9 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.OXTemplate;
@@ -105,8 +105,8 @@ import com.openexchange.user.UserService;
  */
 public class OAuthMailNotificationService {
 
-    private TransportProvider transportProvider;
-    private OAuthProviderService oAuthProviderService;
+    private final TransportProvider transportProvider;
+    private final OAuthProviderService oAuthProviderService;
 
     private static final String INTRO_FIELD = "intro";
     private static final String MESSAGE_FIELD = "message";
@@ -146,7 +146,7 @@ public class OAuthMailNotificationService {
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
         JSONObject json = serverConfigService.getServerConfig(new AJAXRequestData(), ServerSessionAdapter.valueOf(user.getId(), contextId));
-        Client client = oAuthProviderService.getClientById(clientId);
+        Client client = oAuthProviderService.getClientManagement().getClientById(clientId);
         String title = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_TITLE);
         title = String.format(title, json.getString("productName"));
         String intro = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_INTRO);

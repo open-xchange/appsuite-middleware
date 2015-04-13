@@ -47,44 +47,38 @@
  *
  */
 
-package com.openexchange.oauth.provider.rmi;
+package com.openexchange.oauth.provider.internal.client.storage;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 
-
 /**
- * {@link OAuthClientRmi} - The RMI stub for OAuth Client management.
+ * {@link OAuthClientStorage} - The storage for clients.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface OAuthClientRmi extends Remote {
+public interface OAuthClientStorage {
 
     /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = OAuthClientRmi.class.getSimpleName();
-
-    /**
-     * Gets the client identified by the given identifier.
+     * Gets the client identified by the given context group and client identifier.
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The clients identifier
      * @return The client or <code>null</code> if there is no such client
-     * @throws RemoteException If operation fails
+     * @throws OXException If operation fails
      */
-    Client getClientById(String clientId) throws RemoteException;
+    Client getClientById(String groupId, String clientId) throws OXException;
 
     /**
      * Registers (adds) a client according to given client data.
      *
      * @param clientData The client data to create the client from
      * @return The newly created client
-     * @throws RemoteException If create operation fails
+     * @throws OXException If create operation fails
      */
-    Client registerClient(ClientData clientData) throws RemoteException;
+    Client registerClient(ClientData clientData) throws OXException;
 
     /**
      * Updates an existing client's attributes according to given client data.
@@ -92,42 +86,54 @@ public interface OAuthClientRmi extends Remote {
      * @param clientId The client identifier
      * @param clientData The client data
      * @return The updated client
-     * @throws RemoteException If update operation fails
+     * @throws OXException If update operation fails
      */
-    Client updateClient(String clientId, ClientData clientData) throws RemoteException;
+    Client updateClient(String clientId, ClientData clientData) throws OXException;
 
     /**
      * Unregisters an existing client
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws RemoteException If un-registration fails
+     * @throws OXException If un-registration fails
      */
-    boolean unregisterClient(String clientId) throws RemoteException;
+    boolean unregisterClient(String groupId, String clientId) throws OXException;
 
     /**
      * Revokes a client's current secret and generates a new one.
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
      * @return The client with revoked/new secret
-     * @throws RemoteException If revoke operation fails
+     * @throws OXException If revoke operation fails
      */
-    Client revokeClientSecret(String clientId) throws RemoteException;
+    Client revokeClientSecret(String groupId, String clientId) throws OXException;
 
     /**
      * Enables denoted client
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
-     * @throws RemoteException If client could not be enabled
+     * @throws OXException If client could not be enabled
      */
-    void enableClient(String clientId) throws RemoteException;
+    void enableClient(String groupId, String clientId) throws OXException;
 
     /**
      * Disables denoted client
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
-     * @throws RemoteException If client could not be disabled
+     * @throws OXException If client could not be disabled
      */
-    void disableClient(String clientId) throws RemoteException;
+    void disableClient(String groupId, String clientId) throws OXException;
+
+    /**
+     * Invalidates denoted client from cache
+     *
+     * @param groupId id of the context group the client is assigned to
+     * @param clientId The client identifier
+     */
+    void invalidateClient(String groupId, String clientId);
 
 }

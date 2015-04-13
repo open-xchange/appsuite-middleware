@@ -61,10 +61,10 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.tasks.json.TaskActionFactory;
 

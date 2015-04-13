@@ -57,9 +57,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.common.io.ByteStreams;
 import com.google.common.net.HttpHeaders;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.Icon;
 
 
 /**
@@ -88,7 +88,7 @@ public class ClientIconEndpoint extends OAuthEndpoint {
         Icon icon;
         try {
             String clientId = pathInfo.substring(1);
-            Client client = oAuthProvider.getClientById(clientId);
+            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null) {
                 sendEmptyErrorResponse(response, HttpServletResponse.SC_NOT_FOUND);
                 return;

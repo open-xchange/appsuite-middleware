@@ -51,6 +51,7 @@ package com.openexchange.oauth.provider;
 
 import java.io.InputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.oauth.provider.client.Icon;
 
 /**
  * Default implementation of an {@link Icon}, based on a byte array.

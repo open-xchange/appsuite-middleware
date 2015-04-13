@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.osgi.annotation.SingletonService;
 
 

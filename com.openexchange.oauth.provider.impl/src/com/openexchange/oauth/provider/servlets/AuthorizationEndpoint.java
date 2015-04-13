@@ -91,13 +91,13 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.oauth.provider.notification.OAuthMailNotificationService;
@@ -160,7 +160,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            Client client = oAuthProvider.getClientById(clientId);
+            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null || !client.isEnabled()) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
@@ -329,7 +329,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            Client client = oAuthProvider.getClientById(clientId);
+            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);

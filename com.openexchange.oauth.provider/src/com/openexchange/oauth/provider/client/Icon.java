@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.provider;
+package com.openexchange.oauth.provider.client;
 
 import java.io.InputStream;
 import java.io.Serializable;

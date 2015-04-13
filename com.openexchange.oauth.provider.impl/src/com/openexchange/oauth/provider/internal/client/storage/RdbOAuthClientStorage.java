@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.client;
+package com.openexchange.oauth.provider.internal.client.storage;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -66,13 +66,15 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
-import com.openexchange.oauth.provider.DefaultClient;
 import com.openexchange.oauth.provider.DefaultScopes;
-import com.openexchange.oauth.provider.Icon;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.DefaultClient;
+import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
+import com.openexchange.oauth.provider.internal.client.LazyIcon;
+import com.openexchange.oauth.provider.internal.client.Obfuscator;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelper;
 import com.openexchange.server.ServiceExceptionCode;

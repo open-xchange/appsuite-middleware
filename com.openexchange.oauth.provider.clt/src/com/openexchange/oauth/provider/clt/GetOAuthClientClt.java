@@ -55,7 +55,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.Client;
+import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 /**

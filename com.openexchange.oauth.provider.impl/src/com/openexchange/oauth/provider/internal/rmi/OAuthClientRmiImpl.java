@@ -52,9 +52,9 @@ package com.openexchange.oauth.provider.internal.rmi;
 import java.rmi.RemoteException;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 
@@ -68,24 +68,24 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OAuthClientRmiImpl.class);
 
-    private final OAuthProviderService oAuthProvider;
+    private final ClientManagement clientManagement;
 
     /**
      * Initializes a new {@link OAuthClientRmiImpl}.
      */
-    public OAuthClientRmiImpl(OAuthProviderService oAuthProvider) {
+    public OAuthClientRmiImpl(ClientManagement clientManagement) {
         super();
-        this.oAuthProvider = oAuthProvider;
+        this.clientManagement = clientManagement;
     }
 
-    private OAuthProviderService getProviderService() throws OXException {
-        return oAuthProvider;
+    private ClientManagement getClientManagement() throws OXException {
+        return clientManagement;
     }
 
     @Override
     public Client getClientById(String clientId) throws RemoteException {
         try {
-            return getProviderService().getClientById(clientId);
+            return getClientManagement().getClientById(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -96,7 +96,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client registerClient(ClientData clientData) throws RemoteException {
         try {
-            return getProviderService().registerClient(clientData);
+            return getClientManagement().registerClient(clientData);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -107,7 +107,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client updateClient(String clientId, ClientData clientData) throws RemoteException {
         try {
-            return getProviderService().updateClient(clientId, clientData);
+            return getClientManagement().updateClient(clientId, clientData);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -118,7 +118,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public boolean unregisterClient(String clientId) throws RemoteException {
         try {
-            return getProviderService().unregisterClient(clientId);
+            return getClientManagement().unregisterClient(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -129,7 +129,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public Client revokeClientSecret(String clientId) throws RemoteException {
         try {
-            return getProviderService().revokeClientSecret(clientId);
+            return getClientManagement().revokeClientSecret(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -140,7 +140,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public void enableClient(String clientId) throws RemoteException {
         try {
-            getProviderService().enableClient(clientId);
+            getClientManagement().enableClient(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
@@ -151,7 +151,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     @Override
     public void disableClient(String clientId) throws RemoteException {
         try {
-            getProviderService().disableClient(clientId);
+            getClientManagement().disableClient(clientId);
         } catch (OXException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();

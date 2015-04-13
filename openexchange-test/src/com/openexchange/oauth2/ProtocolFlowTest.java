@@ -80,8 +80,8 @@ import org.junit.Test;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 

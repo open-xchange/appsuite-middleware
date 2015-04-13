@@ -79,11 +79,11 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 

@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider;
 
 import java.util.Date;
+import com.openexchange.oauth.provider.client.Client;
 
 
 /**

@@ -47,80 +47,107 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal;
+package com.openexchange.oauth.provider.internal.client;
 
-import java.util.Date;
-import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.internal.client.storage.OAuthClientStorage;
-import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
-import com.openexchange.oauth.provider.internal.grant.StoredGrant;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
-import com.openexchange.oauth.provider.tools.UserizedToken;
+
 
 /**
- * {@link OAuthResourceServiceImpl}
+ * {@link ClientManagementImpl}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthResourceServiceImpl implements OAuthResourceService {
-
-    /*
-     * From https://tools.ietf.org/html/rfc6750#section-2.1:
-     * The syntax for Bearer credentials is as follows:
-     * b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
-     * credentials = "Bearer" 1*SP b64token
-     */
-    private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
+public class ClientManagementImpl implements ClientManagement {
 
     private final OAuthClientStorage clientStorage;
 
     private final OAuthGrantStorage grantStorage;
 
-    public OAuthResourceServiceImpl(OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage) {
+    /**
+     * Initializes a new {@link ClientManagementImpl}.
+     * @param clientStorage
+     * @param grantStorage
+     */
+    public ClientManagementImpl(OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage) {
         super();
         this.clientStorage = clientStorage;
         this.grantStorage = grantStorage;
     }
 
     @Override
-    public OAuthGrant validate(String accessToken) throws OXException {
-        if (!TOKEN_PATTERN.matcher(accessToken).matches() || !UserizedToken.isValid(accessToken)) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
+    public Client getClientById(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return null;
         }
+        String groupId = clientIdObj.getGroupId();
 
-        StoredGrant grant = grantStorage.getGrantByAccessToken(UserizedToken.parse(accessToken));
-        if (grant == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-
-        if (grant.getExpirationDate().before(new Date())) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
-        }
-
-        return new OAuthGrantImpl(grant);
+        return clientStorage.getClientById(groupId, clientId);
     }
 
     @Override
-    public Client getClient(OAuthGrant grant) throws OXException {
-        String clientId = grant.getClientId();
+    public Client registerClient(ClientData clientData) throws OXException {
+        return clientStorage.registerClient(clientData);
+    }
+
+    @Override
+    public boolean unregisterClient(String clientId) throws OXException {
         ClientId clientIdObj = ClientId.parse(clientId);
         if (clientIdObj == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+            throw OAuthProviderExceptionCodes.BAD_CLIENT_ID.create(clientId);
+        }
+        grantStorage.deleteGrantsByClientId(clientId);
+
+        String groupId = clientIdObj.getGroupId();
+        return clientStorage.unregisterClient(groupId, clientId);
+    }
+
+    @Override
+    public Client revokeClientSecret(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return null;
+        }
+        grantStorage.deleteGrantsByClientId(clientId);
+
+        String groupId = clientIdObj.getGroupId();
+        return clientStorage.revokeClientSecret(groupId, clientId);
+    }
+
+    @Override
+    public Client updateClient(String clientId, ClientData clientData) throws OXException {
+        return clientStorage.updateClient(clientId, clientData);
+    }
+
+    @Override
+    public void enableClient(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return;
         }
 
         String groupId = clientIdObj.getGroupId();
-        Client client = clientStorage.getClientById(groupId, clientId);
-        if (client == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-        return client;
+        clientStorage.enableClient(groupId, clientId);
     }
+
+    @Override
+    public void disableClient(String clientId) throws OXException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            return;
+        }
+        grantStorage.deleteGrantsByClientId(clientId); // TODO: really?
+
+        String groupId = clientIdObj.getGroupId();
+        clientStorage.disableClient(groupId, clientId);
+    }
+
 }

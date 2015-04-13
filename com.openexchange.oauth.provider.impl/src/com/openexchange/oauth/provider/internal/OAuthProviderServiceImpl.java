@@ -64,8 +64,6 @@ import java.util.Set;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
 import com.openexchange.oauth.provider.DefaultGrantView;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.GrantView;
@@ -75,13 +73,13 @@ import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.StoredGrant;
-import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.tools.URIValidator;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
@@ -96,86 +94,23 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     private final AbstractAuthorizationCodeProvider authCodeProvider;
 
-    private final OAuthClientStorage clientStorage;
+    private final ClientManagement clientManagement;
 
     private final OAuthGrantStorage grantStorage;
 
     private final ServiceLookup services;
 
-    public OAuthProviderServiceImpl(AbstractAuthorizationCodeProvider authCodeProvider, OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage, ServiceLookup services) {
+    public OAuthProviderServiceImpl(AbstractAuthorizationCodeProvider authCodeProvider, ClientManagement clientManagement, OAuthGrantStorage grantStorage, ServiceLookup services) {
         super();
         this.authCodeProvider = authCodeProvider;
-        this.clientStorage = clientStorage;
+        this.clientManagement = clientManagement;
         this.grantStorage = grantStorage;
         this.services = services;
     }
 
     @Override
-    public Client getClientById(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            return null;
-        }
-        String groupId = clientIdObj.getGroupId();
-
-        return clientStorage.getClientById(groupId, clientId);
-    }
-
-    @Override
-    public Client registerClient(ClientData clientData) throws OXException {
-        return clientStorage.registerClient(clientData);
-    }
-
-    @Override
-    public boolean unregisterClient(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            throw OAuthProviderExceptionCodes.BAD_CLIENT_ID.create(clientId);
-        }
-        grantStorage.deleteGrantsByClientId(clientId);
-
-        String groupId = clientIdObj.getGroupId();
-        return clientStorage.unregisterClient(groupId, clientId);
-    }
-
-    @Override
-    public Client revokeClientSecret(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            return null;
-        }
-        grantStorage.deleteGrantsByClientId(clientId);
-
-        String groupId = clientIdObj.getGroupId();
-        return clientStorage.revokeClientSecret(groupId, clientId);
-    }
-
-    @Override
-    public Client updateClient(String clientId, ClientData clientData) throws OXException {
-        return clientStorage.updateClient(clientId, clientData);
-    }
-
-    @Override
-    public void enableClient(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            return;
-        }
-
-        String groupId = clientIdObj.getGroupId();
-        clientStorage.enableClient(groupId, clientId);
-    }
-
-    @Override
-    public void disableClient(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            return;
-        }
-        grantStorage.deleteGrantsByClientId(clientId); // TODO: really?
-
-        String groupId = clientIdObj.getGroupId();
-        clientStorage.disableClient(groupId, clientId);
+    public ClientManagement getClientManagement() {
+        return clientManagement;
     }
 
     @Override
@@ -330,14 +265,12 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         List<GrantView> grantViews = new ArrayList<GrantView>(grantsByClient.size());
         for (Entry<String, List<StoredGrant>> entry : grantsByClient.entrySet()) {
             String clientId = entry.getKey();
-            ClientId clientIdObj = ClientId.parse(clientId);
-            if (clientIdObj == null) {
+            Client client = clientManagement.getClientById(clientId);
+            if (client == null) {
+                // The according client has been removed in the meantime. We'll ignore this grant...
                 continue;
             }
 
-            String groupId = clientIdObj.getGroupId();
-
-            Client client = clientStorage.getClientById(groupId, clientId);
             Set<String> scopes = new HashSet<>();
             Date latestGrantDate = new Date(0);
             for (StoredGrant grant : entry.getValue()) {
