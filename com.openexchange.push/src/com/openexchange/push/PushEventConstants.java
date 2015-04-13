@@ -136,4 +136,11 @@ public final class PushEventConstants {
      */
     public static final String PROPERTY_DELETED = "com.openexchange.push.deleted";
 
+    /**
+     * <b>Optional</b> property providing an instance of type <code>com.openexchange.push.Container</code>.
+     * <p>
+     * Will not be remotely distributed!
+     */
+    public static final String PROPERTY_CONTAINER = "com.openexchange.push.container";
+
 }

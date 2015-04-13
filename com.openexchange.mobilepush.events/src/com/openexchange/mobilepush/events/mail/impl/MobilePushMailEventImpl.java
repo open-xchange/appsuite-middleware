@@ -75,6 +75,7 @@ import com.openexchange.mobilepush.events.MobilePushPublisher;
 import com.openexchange.mobilepush.events.osgi.Services;
 import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
+import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -186,39 +187,56 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     private List<Map<String, Object>> getNewMailProperties(Event event, Session session) {
         List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(3);
 
-        if (event.containsProperty(OX_EVENT) && event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
-            // Check if its a new mail event
-            String mailIds = (String) event.getProperty(PushEventConstants.PROPERTY_IDS);
-            if (mailIds != null) {
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-                try {
-                    int accountId = MailAccount.DEFAULT_ID;
-                    mailAccess = Services.getService(MailService.class, true).getMailAccess(session, accountId);
-                    mailAccess.connect(true);
+        if (event.containsProperty(OX_EVENT)) {
+            int accountId = MailAccount.DEFAULT_ID;
 
-                    MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds);
-                    int unread = mailAccess.getUnreadMessagesCount(INBOX);
-                    if (mms != null) {
-                        for (MailMessage mm : mms) {
-                            String subject = mm.getSubject();
-                            String[] senderInfo = getSenderInfo(mm);
+            if (event.containsProperty(PushEventConstants.PROPERTY_CONTAINER)) {
+                @SuppressWarnings("unchecked")
+                Container<MailMessage> messageInfos = (Container<MailMessage>) event.getProperty(PushEventConstants.PROPERTY_CONTAINER);
+                for (MailMessage mm : messageInfos) {
+                    String subject = mm.getSubject();
+                    String[] senderInfo = getSenderInfo(mm);
 
-                            Map<String, Object> map = new HashMap<String, Object>(6);
-                            map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
-                            map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
-                            map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
-                            map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread));
-                            props.add(map);
+                    Map<String, Object> map = new HashMap<String, Object>(6);
+                    map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
+                    map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
+                    map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
+                    map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(mm.getUnreadMessages()));
+                    props.add(map);
+                }
+            } else if (event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
+                // Check if its a new mail event
+                String mailIds = (String) event.getProperty(PushEventConstants.PROPERTY_IDS);
+                if (mailIds != null) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    try {
+                        mailAccess = Services.getService(MailService.class, true).getMailAccess(session, accountId);
+                        mailAccess.connect(true);
+
+                        MailMessage[] mms = fetchMessageInformation(mailAccess, mailIds);
+                        int unread = mailAccess.getUnreadMessagesCount(INBOX);
+                        if (mms != null) {
+                            for (MailMessage mm : mms) {
+                                String subject = mm.getSubject();
+                                String[] senderInfo = getSenderInfo(mm);
+
+                                Map<String, Object> map = new HashMap<String, Object>(6);
+                                map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
+                                map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
+                                map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
+                                map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread));
+                                props.add(map);
+                            }
                         }
-                    }
-                } catch (OXException e) {
-                    LOG.error("Failed to retrieve mail information.", e);
-                } finally {
-                    if (mailAccess != null) {
-                        try {
-                            mailAccess.close();
-                        } catch (Exception e) {
-                            //Ignore
+                    } catch (OXException e) {
+                        LOG.error("Failed to retrieve mail information.", e);
+                    } finally {
+                        if (mailAccess != null) {
+                            try {
+                                mailAccess.close();
+                            } catch (Exception e) {
+                                //Ignore
+                            }
                         }
                     }
                 }

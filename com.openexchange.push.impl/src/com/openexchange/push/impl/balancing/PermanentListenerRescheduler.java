@@ -107,12 +107,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
-        reschedule(membershipEvent.getMembers(), hzInstancerRef.get(), this);
+        reschedule(membershipEvent.getMembers(), hzInstancerRef.get(), this, true);
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        reschedule(membershipEvent.getMembers(), hzInstancerRef.get(), this);
+        reschedule(membershipEvent.getMembers(), hzInstancerRef.get(), this, true);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
-    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, Object monitor) {
+    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, Object monitor, boolean async) {
         if (null == hzInstance) {
             LOG.warn("Aborted re-scheduling of permanent listeners as passed HazelcastInstance is null.");
             return;
@@ -141,7 +141,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         }
 
         // Acquire optional thread pool
-        ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
+        ThreadPoolService threadPool = async ? Services.optService(ThreadPoolService.class) : null;
         if (null != threadPool) {
             // Submit task
             threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, monitor, pushManagerRegistry));
@@ -181,7 +181,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             hzInstancerRef.set(hzInstance);
 
-            reschedule(cluster.getMembers(), hzInstance, this);
+            reschedule(cluster.getMembers(), hzInstance, this, false);
 
             return hzInstance;
         } catch (Exception e) {
