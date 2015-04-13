@@ -187,7 +187,7 @@ public abstract class PasswordChangeService {
                 authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
             }
         } catch (final OXException e) {
-            if ("LGI-0006".equals(e.getErrorCode())) {
+            if (e.equalsCode(6, "LGI")) {
                 /*
                  * Verification of old password failed
                  */
