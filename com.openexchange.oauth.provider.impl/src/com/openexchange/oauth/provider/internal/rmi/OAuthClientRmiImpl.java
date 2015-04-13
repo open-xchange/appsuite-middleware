@@ -51,10 +51,10 @@ package com.openexchange.oauth.provider.internal.rmi;
 
 import java.rmi.RemoteException;
 import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 
@@ -78,7 +78,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
         this.clientManagement = clientManagement;
     }
 
-    private ClientManagement getClientManagement() throws OXException {
+    private ClientManagement getClientManagement() {
         return clientManagement;
     }
 
@@ -86,7 +86,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public Client getClientById(String clientId) throws RemoteException {
         try {
             return getClientManagement().getClientById(clientId);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -97,7 +97,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public Client registerClient(ClientData clientData) throws RemoteException {
         try {
             return getClientManagement().registerClient(clientData);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -108,7 +108,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public Client updateClient(String clientId, ClientData clientData) throws RemoteException {
         try {
             return getClientManagement().updateClient(clientId, clientData);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -119,7 +119,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public boolean unregisterClient(String clientId) throws RemoteException {
         try {
             return getClientManagement().unregisterClient(clientId);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -130,7 +130,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public Client revokeClientSecret(String clientId) throws RemoteException {
         try {
             return getClientManagement().revokeClientSecret(clientId);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -141,7 +141,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public void enableClient(String clientId) throws RemoteException {
         try {
             getClientManagement().enableClient(clientId);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));
@@ -152,7 +152,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     public void disableClient(String clientId) throws RemoteException {
         try {
             getClientManagement().disableClient(clientId);
-        } catch (OXException e) {
+        } catch (ClientManagementException e) {
             LOGGER.error("", e);
             final String message = e.getMessage();
             throw new RemoteException(message, new Exception(message));

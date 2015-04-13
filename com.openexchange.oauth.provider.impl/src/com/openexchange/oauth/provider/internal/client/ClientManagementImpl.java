@@ -49,11 +49,15 @@
 
 package com.openexchange.oauth.provider.internal.client;
 
+import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
+import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.internal.client.storage.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
@@ -83,71 +87,154 @@ public class ClientManagementImpl implements ClientManagement {
     }
 
     @Override
-    public Client getClientById(String clientId) throws OXException {
+    public Client getClientById(String clientId) throws ClientManagementException {
         ClientId clientIdObj = ClientId.parse(clientId);
         if (clientIdObj == null) {
             return null;
         }
-        String groupId = clientIdObj.getGroupId();
 
+        String groupId = clientIdObj.getGroupId();
         return clientStorage.getClientById(groupId, clientId);
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws OXException {
+    public Client registerClient(ClientData clientData) throws ClientManagementException {
+        assertNotNullOrEmpty("Property 'group ID' is mandatory and must be set", clientData.getGroupId());
+        assertNotNullOrEmpty("Property 'name' is mandatory and must be set", clientData.getName());
+        assertNotNullOrEmpty("Property 'description' is mandatory and must be set", clientData.getDescription());
+        assertNotNullOrEmpty("Property 'contact address' is mandatory and must be set", clientData.getContactAddress());
+        assertNotNullOrEmpty("Property 'website' is mandatory and must be set", clientData.getWebsite());
+        assertNotNullOrEmpty("Property 'redirect URIs' is mandatory and must be set", clientData.getRedirectURIs());
+
+        Icon icon = clientData.getIcon();
+        assertNotNullOrEmpty("Property 'icon' is mandatory and must be set", icon);
+        assertNotNullOrEmpty("The icons mime type is mandatory and must be set", icon.getMimeType());
+
+        Scopes scope = clientData.getDefaultScope();
+        assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope);
+        assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope.get());
+
         return clientStorage.registerClient(clientData);
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            throw OAuthProviderExceptionCodes.BAD_CLIENT_ID.create(clientId);
+    public Client updateClient(String clientId, ClientData clientData) throws ClientManagementException {
+        assertNotNullOrEmpty("Property 'group ID' is mandatory and must be set", clientData.getGroupId());
+        if (clientData.containsName()) {
+            assertNotNullOrEmpty("Property 'name' was set to an empty value", clientData.getName());
         }
-        grantStorage.deleteGrantsByClientId(clientId);
-
-        String groupId = clientIdObj.getGroupId();
-        return clientStorage.unregisterClient(groupId, clientId);
-    }
-
-    @Override
-    public Client revokeClientSecret(String clientId) throws OXException {
-        ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            return null;
+        if (clientData.containsDescription()) {
+            assertNotNullOrEmpty("Property 'description' was set to an empty value", clientData.getDescription());
         }
-        grantStorage.deleteGrantsByClientId(clientId);
+        if (clientData.containsContactAddress()) {
+            assertNotNullOrEmpty("Property 'contact address' was set to an empty value", clientData.getContactAddress());
+        }
+        if (clientData.containsWebsite()) {
+            assertNotNullOrEmpty("Property 'website' was set to an empty value", clientData.getWebsite());
+        }
+        if (clientData.containsRedirectURIs()) {
+            assertNotNullOrEmpty("Property 'redirect URIs' was set to an empty value", clientData.getRedirectURIs());
+        }
+        if (clientData.containsIcon()) {
+            Icon icon = clientData.getIcon();
+            assertNotNullOrEmpty("Property 'icon' was set to an empty value", icon);
+            assertNotNullOrEmpty("The icons mime type was set to an empty value", icon.getMimeType());
+        }
+        if (clientData.containsDefaultScope()) {
+            Scopes scope = clientData.getDefaultScope();
+            assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope);
+            assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope.get());
+        }
 
-        String groupId = clientIdObj.getGroupId();
-        return clientStorage.revokeClientSecret(groupId, clientId);
-    }
-
-    @Override
-    public Client updateClient(String clientId, ClientData clientData) throws OXException {
         return clientStorage.updateClient(clientId, clientData);
     }
 
     @Override
-    public void enableClient(String clientId) throws OXException {
+    public boolean unregisterClient(String clientId) throws ClientManagementException {
         ClientId clientIdObj = ClientId.parse(clientId);
         if (clientIdObj == null) {
-            return;
+            throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
         }
 
         String groupId = clientIdObj.getGroupId();
-        clientStorage.enableClient(groupId, clientId);
+        try {
+            grantStorage.deleteGrantsByClientId(clientId);
+            return clientStorage.unregisterClient(groupId, clientId);
+        } catch (OXException e) {
+            return handleOXException(e);
+        }
     }
 
     @Override
-    public void disableClient(String clientId) throws OXException {
+    public Client revokeClientSecret(String clientId) throws ClientManagementException {
         ClientId clientIdObj = ClientId.parse(clientId);
         if (clientIdObj == null) {
-            return;
+            throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
         }
-        grantStorage.deleteGrantsByClientId(clientId); // TODO: really?
 
         String groupId = clientIdObj.getGroupId();
-        clientStorage.disableClient(groupId, clientId);
+        try {
+            grantStorage.deleteGrantsByClientId(clientId);
+        } catch (OXException e) {
+            return handleOXException(e);
+        }
+
+        return clientStorage.revokeClientSecret(groupId, clientId);
+    }
+
+    @Override
+    public boolean enableClient(String clientId) throws ClientManagementException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
+        }
+
+        String groupId = clientIdObj.getGroupId();
+        return clientStorage.enableClient(groupId, clientId);
+    }
+
+    @Override
+    public boolean disableClient(String clientId) throws ClientManagementException {
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
+        }
+
+        String groupId = clientIdObj.getGroupId();
+        try {
+            grantStorage.deleteGrantsByClientId(clientId);
+        } catch (OXException e) {
+            handleOXException(e);
+        }
+
+        return clientStorage.disableClient(groupId, clientId);
+    }
+
+    private static void assertNotNullOrEmpty(String message, Object obj) throws ClientManagementException {
+        boolean assertionFailed = false;
+        if (obj == null) {
+            assertionFailed = true;
+        } else if (obj instanceof String && ((String)obj).trim().isEmpty()) {
+            assertionFailed = true;
+        } else if (obj instanceof Collection<?> && ((Collection<?>)obj).isEmpty()) {
+            assertionFailed = true;
+        }
+
+        if (assertionFailed) {
+            throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, message);
+        }
+    }
+
+    /**
+     * Re-throws the OXException as ClientManagementException with reason 'INTERNAL_ERROR'.
+     *
+     * @param e The OXException
+     * @return Nothing but you may type 'return handleOXException(e)' for your convenience
+     * @throws ClientManagementException Will always be thrown
+     */
+    private <T> T handleOXException(OXException e) throws ClientManagementException {
+        ClientManagementException cme = new ClientManagementException(Reason.INTERNAL_ERROR, e.getMessage(), e);
+        throw cme;
     }
 
 }

@@ -66,6 +66,7 @@ import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -141,7 +142,7 @@ public class TokenEndpoint extends OAuthEndpoint {
                 failWithInvalidParameter(response, OAuthProviderConstants.PARAM_GRANT_TYPE);
                 return;
             }
-        } catch (OXException | JSONException e) {
+        } catch (OXException | JSONException | ClientManagementException e) {
             LOG.error("Token request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }

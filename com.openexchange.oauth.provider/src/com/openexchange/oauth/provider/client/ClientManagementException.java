@@ -62,21 +62,48 @@ public class ClientManagementException extends Exception {
 
     public static enum Reason {
 
-        INTERNAL_ERROR,
+        /**
+         * An internal error occurred: %1$s
+         */
+        INTERNAL_ERROR("An internal error occurred: %1$s"),
+        /**
+         * Invalid client data: %1$s
+         */
+        INVALID_CLIENT_DATA("Invalid client data: %1$s"),
+        /**
+         * The client ID '%1$s' is invalid.
+         */
+        INVALID_CLIENT_ID("The client ID '%1$s' is invalid."),
+        /**
+         * A client with name '$1%s' does already exist.
+         */
+        DUPLICATE_NAME("A client with name '$1%s' does already exist."),
+        /**
+         * The client storage threw an error: %1$s
+         */
+        STORAGE_ERROR("The client storage threw an error: %1$s");
 
-        INVALID_CLIENT_DATA
+        private final String baseMessage;
+
+        private Reason(String baseMessage) {
+            this.baseMessage = baseMessage;
+        }
+
+        public String getBaseMessage() {
+            return baseMessage;
+        }
 
     }
 
     private final Reason reason;
 
     public ClientManagementException(Reason reason, String message) {
-        super(message);
+        super(compileMessage(reason, message));
         this.reason = reason;
     }
 
     public ClientManagementException(Reason reason, String message, Throwable cause) {
-        super(message, cause);
+        super(compileMessage(reason, message), cause);
         this.reason = reason;
     }
 
@@ -87,6 +114,10 @@ public class ClientManagementException extends Exception {
      */
     public Reason getReason() {
         return reason;
+    }
+
+    private static String compileMessage(Reason reason, String message) {
+        return String.format(reason.getBaseMessage(), message);
     }
 
 }

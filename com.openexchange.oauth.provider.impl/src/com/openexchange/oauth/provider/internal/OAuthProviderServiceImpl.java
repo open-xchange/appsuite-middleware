@@ -75,6 +75,7 @@ import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.AuthCodeInfo;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
@@ -265,10 +266,20 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         List<GrantView> grantViews = new ArrayList<GrantView>(grantsByClient.size());
         for (Entry<String, List<StoredGrant>> entry : grantsByClient.entrySet()) {
             String clientId = entry.getKey();
-            Client client = clientManagement.getClientById(clientId);
-            if (client == null) {
-                // The according client has been removed in the meantime. We'll ignore this grant...
-                continue;
+            Client client;
+            try {
+                client = clientManagement.getClientById(clientId);
+                if (client == null) {
+                    // The according client has been removed in the meantime. We'll ignore this grant...
+                    continue;
+                }
+            } catch (ClientManagementException e) {
+                if (e.getReason() == com.openexchange.oauth.provider.client.ClientManagementException.Reason.INVALID_CLIENT_ID) {
+                   // The according client has been removed in the meantime. We'll ignore this grant...
+                   continue;
+                }
+
+                throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
 
             Set<String> scopes = new HashSet<>();

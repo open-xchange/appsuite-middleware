@@ -132,7 +132,7 @@ public class OAuthProvider {
 
                 ClientManagementImpl clientManagement = new ClientManagementImpl(clientStorage, grantStorage);
                 OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(authCodeProvider, clientManagement, grantStorage, activator);
-                OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(clientStorage, grantStorage);
+                OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(clientManagement, grantStorage);
                 registeredServices.add(context.registerService(OAuthProviderService.class, oAuthProvider, null));
                 registeredServices.add(context.registerService(OAuthResourceService.class, resourceService, null));
                 registeredServices.add(context.registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory(), null));

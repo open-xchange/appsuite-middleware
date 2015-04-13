@@ -67,7 +67,7 @@ public interface ClientManagement {
      * @return The client or <code>null</code> if there is no such client
      * @throws OXException If operation fails
      */
-    Client getClientById(String clientId) throws OXException;
+    Client getClientById(String clientId) throws ClientManagementException;
 
     /**
      * Registers (adds) a client according to given client data.
@@ -76,7 +76,7 @@ public interface ClientManagement {
      * @return The newly created client
      * @throws OXException If create operation fails
      */
-    Client registerClient(ClientData clientData) throws OXException;
+    Client registerClient(ClientData clientData) throws ClientManagementException;
 
     /**
      * Updates an existing client's attributes according to given client data.
@@ -86,7 +86,7 @@ public interface ClientManagement {
      * @return The updated client
      * @throws OXException If update operation fails
      */
-    Client updateClient(String clientId, ClientData clientData) throws OXException;
+    Client updateClient(String clientId, ClientData clientData) throws ClientManagementException;
 
     /**
      * Unregisters an existing client
@@ -95,7 +95,7 @@ public interface ClientManagement {
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
      * @throws OXException If un-registration fails
      */
-    boolean unregisterClient(String clientId) throws OXException;
+    boolean unregisterClient(String clientId) throws ClientManagementException;
 
     /**
      * Revokes a client's current secret and generates a new one.
@@ -104,22 +104,24 @@ public interface ClientManagement {
      * @return The client with revoked/new secret
      * @throws OXException If revoke operation fails
      */
-    Client revokeClientSecret(String clientId) throws OXException;
+    Client revokeClientSecret(String clientId) throws ClientManagementException;
 
     /**
      * Enables denoted client
      *
      * @param clientId The client identifier
+     * @return
      * @throws OXException If client could not be enabled
      */
-    void enableClient(String clientId) throws OXException;
+    boolean enableClient(String clientId) throws ClientManagementException;
 
     /**
      * Disables denoted client
      *
      * @param clientId The client identifier
+     * @return
      * @throws OXException If client could not be disabled
      */
-    void disableClient(String clientId) throws OXException;
+    boolean disableClient(String clientId) throws ClientManagementException;
 
 }

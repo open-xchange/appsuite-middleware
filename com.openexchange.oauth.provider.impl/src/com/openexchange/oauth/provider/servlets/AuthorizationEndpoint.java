@@ -98,6 +98,7 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.oauth.provider.notification.OAuthMailNotificationService;
@@ -294,7 +295,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
                 return;
             }
-        } catch (OXException e) {
+        } catch (OXException | ClientManagementException e) {
             LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
@@ -387,7 +388,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             PrintWriter writer = response.getWriter();
             writer.write(loginPage);
             writer.flush();
-        } catch (OXException e) {
+        } catch (OXException | ClientManagementException e) {
             LOG.error("Login request failed", e);
             sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal error");
         }

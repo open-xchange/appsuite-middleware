@@ -90,6 +90,7 @@ import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.osgi.Services;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.OXTemplate;
@@ -146,7 +147,7 @@ public class OAuthMailNotificationService {
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
         JSONObject json = serverConfigService.getServerConfig(new AJAXRequestData(), ServerSessionAdapter.valueOf(user.getId(), contextId));
-        Client client = oAuthProviderService.getClientManagement().getClientById(clientId);
+        Client client = getClient(clientId);
         String title = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_TITLE);
         title = String.format(title, json.getString("productName"));
         String intro = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_INTRO);
@@ -162,6 +163,23 @@ public class OAuthMailNotificationService {
         mail.setContent(prepareContent("oauth-new-external-application-mail.txt.tmpl", vars, "oauth-new-external-application-mail.html.tmpl", vars));
         mail.saveChanges();
         return new ContentAwareComposedMailMessage(mail, contextId);
+    }
+
+    private Client getClient(String clientId) throws OXException {
+        try {
+            Client client = oAuthProviderService.getClientManagement().getClientById(clientId);
+            if (client == null) {
+                throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
+            }
+
+            return client;
+        } catch (ClientManagementException e) {
+            if (e.getReason() == com.openexchange.oauth.provider.client.ClientManagementException.Reason.INVALID_CLIENT_ID) {
+                throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
+            }
+
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     private MimeMessage prepareEnvelope(String subject, InternetAddress recipient) throws MessagingException {

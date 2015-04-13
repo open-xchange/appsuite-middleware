@@ -56,6 +56,8 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -84,13 +86,17 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
         miss = "miss";
     }
 
-    private Cache optCache() throws OXException {
-        CacheService cacheService = services.getOptionalService(CacheService.class);
-        return null == cacheService ? null : cacheService.getCache(REGION_NAME);
+    private Cache optCache() throws ClientManagementException {
+        CacheService cacheService = services.getService(CacheService.class);
+        try {
+            return null == cacheService ? null : cacheService.getCache(REGION_NAME);
+        } catch (OXException e) {
+            throw new ClientManagementException(Reason.INTERNAL_ERROR, "Error while getting JCS cache region", e);
+        }
     }
 
     @Override
-    public Client getClientById(String groupId, String clientId) throws OXException {
+    public Client getClientById(String groupId, String clientId) throws ClientManagementException {
         Cache cache = optCache();
         if (null == cache) {
             return delegate.getClientById(groupId, clientId);
@@ -106,74 +112,100 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
         }
 
         Client client = delegate.getClientById(groupId, clientId);
-        if (null == client) {
-            //  No such client
-            cache.put(newCacheKey, miss, false);
-            return null;
+        try {
+            if (null == client) {
+                //  No such client
+                cache.put(newCacheKey, miss, false);
+                return null;
+            }
+            cache.put(newCacheKey, client, false);
+        } catch (OXException e) {
+            LOGGER.warn("Could not put client into cache", e);
         }
-        cache.put(newCacheKey, client, false);
         return client;
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws OXException {
+    public Client registerClient(ClientData clientData) throws ClientManagementException {
         Client newClient = delegate.registerClient(clientData);
 
         Cache cache = optCache();
         if (null != cache) {
             CacheKey newCacheKey = cache.newCacheKey(cachingContextId, clientData.getGroupId(), newClient.getId());
-            cache.put(newCacheKey, newClient, false);
+            try {
+                cache.put(newCacheKey, newClient, false);
+            } catch (OXException e) {
+                LOGGER.warn("Could not put client into cache", e);
+            }
         }
 
         return newClient;
     }
 
     @Override
-    public void enableClient(String groupId, String clientId) throws OXException {
-        delegate.enableClient(groupId, clientId);
-        invalidateClient(groupId, clientId);
+    public boolean enableClient(String groupId, String clientId) throws ClientManagementException {
+        try {
+            return delegate.enableClient(groupId, clientId);
+        } finally {
+            invalidateClient(groupId, clientId);
+        }
     }
 
     @Override
-    public void disableClient(String groupId, String clientId) throws OXException {
-        delegate.disableClient(groupId, clientId);
-        invalidateClient(groupId, clientId);
+    public boolean disableClient(String groupId, String clientId) throws ClientManagementException {
+        try {
+            return delegate.disableClient(groupId, clientId);
+        } finally {
+            invalidateClient(groupId, clientId);
+        }
     }
 
     @Override
-    public Client updateClient(String clientId, ClientData clientData) throws OXException {
+    public Client updateClient(String clientId, ClientData clientData) throws ClientManagementException {
         Client updatedClient = delegate.updateClient(clientId, clientData);
 
         Cache cache = optCache();
         if (null != cache) {
             CacheKey newCacheKey = cache.newCacheKey(cachingContextId, clientData.getGroupId(), clientId);
-            cache.put(newCacheKey, updatedClient, true);
+            try {
+                cache.put(newCacheKey, updatedClient, true);
+            } catch (OXException e) {
+                LOGGER.warn("Could not put client into cache", e);
+            }
         }
 
         return updatedClient;
     }
 
     @Override
-    public boolean unregisterClient(String groupId, String clientId) throws OXException {
+    public boolean unregisterClient(String groupId, String clientId) throws ClientManagementException {
         boolean result = delegate.unregisterClient(groupId, clientId);
         if (result) {
             Cache cache = optCache();
             if (null != cache) {
                 CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
-                cache.remove(newCacheKey);
+                try {
+                    cache.remove(newCacheKey);
+                } catch (OXException e) {
+                    LOGGER.warn("Could not remove client from cache", e);
+                }
             }
         }
         return result;
     }
 
     @Override
-    public Client revokeClientSecret(String groupId, String clientId) throws OXException {
+    public Client revokeClientSecret(String groupId, String clientId) throws ClientManagementException {
         Client revokedClient = delegate.revokeClientSecret(groupId, clientId);
 
         Cache cache = optCache();
         if (null != cache) {
             CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
-            cache.put(newCacheKey, revokedClient, true);
+            try {
+                cache.put(newCacheKey, revokedClient, true);
+            } catch (OXException e) {
+                LOGGER.warn("Could not remove client from cache", e);
+            }
         }
 
         return revokedClient;

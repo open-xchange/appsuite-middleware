@@ -49,9 +49,9 @@
 
 package com.openexchange.oauth.provider.internal.client.storage;
 
-import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 
 /**
  * {@link OAuthClientStorage} - The storage for clients.
@@ -67,18 +67,18 @@ public interface OAuthClientStorage {
      * @param groupId id of the context group the client is assigned to
      * @param clientId The clients identifier
      * @return The client or <code>null</code> if there is no such client
-     * @throws OXException If operation fails
+     * @throws ClientManagementException If operation fails
      */
-    Client getClientById(String groupId, String clientId) throws OXException;
+    Client getClientById(String groupId, String clientId) throws ClientManagementException;
 
     /**
      * Registers (adds) a client according to given client data.
      *
      * @param clientData The client data to create the client from
      * @return The newly created client
-     * @throws OXException If create operation fails
+     * @throws ClientManagementException If create operation fails
      */
-    Client registerClient(ClientData clientData) throws OXException;
+    Client registerClient(ClientData clientData) throws ClientManagementException;
 
     /**
      * Updates an existing client's attributes according to given client data.
@@ -86,9 +86,9 @@ public interface OAuthClientStorage {
      * @param clientId The client identifier
      * @param clientData The client data
      * @return The updated client
-     * @throws OXException If update operation fails
+     * @throws ClientManagementException If update operation fails
      */
-    Client updateClient(String clientId, ClientData clientData) throws OXException;
+    Client updateClient(String clientId, ClientData clientData) throws ClientManagementException;
 
     /**
      * Unregisters an existing client
@@ -96,9 +96,9 @@ public interface OAuthClientStorage {
      * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws OXException If un-registration fails
+     * @throws ClientManagementException If un-registration fails
      */
-    boolean unregisterClient(String groupId, String clientId) throws OXException;
+    boolean unregisterClient(String groupId, String clientId) throws ClientManagementException;
 
     /**
      * Revokes a client's current secret and generates a new one.
@@ -106,27 +106,29 @@ public interface OAuthClientStorage {
      * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
      * @return The client with revoked/new secret
-     * @throws OXException If revoke operation fails
+     * @throws ClientManagementException If revoke operation fails
      */
-    Client revokeClientSecret(String groupId, String clientId) throws OXException;
+    Client revokeClientSecret(String groupId, String clientId) throws ClientManagementException;
 
     /**
      * Enables denoted client
      *
      * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
-     * @throws OXException If client could not be enabled
+     * @return <code>true</code> if the client was enabled, <code>false</code> if it was not in disabled state before
+     * @throws ClientManagementException If client could not be enabled
      */
-    void enableClient(String groupId, String clientId) throws OXException;
+    boolean enableClient(String groupId, String clientId) throws ClientManagementException;
 
     /**
      * Disables denoted client
      *
      * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
-     * @throws OXException If client could not be disabled
+     * @return <code>true</code> if the client was disabled, <code>false</code> if it was not in enabled state before
+     * @throws ClientManagementException If client could not be disabled
      */
-    void disableClient(String groupId, String clientId) throws OXException;
+    boolean disableClient(String groupId, String clientId) throws ClientManagementException;
 
     /**
      * Invalidates denoted client from cache

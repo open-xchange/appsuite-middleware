@@ -61,7 +61,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
-import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.osgi.Services;
@@ -83,16 +82,12 @@ public class LazyIcon implements Icon {
     /**
      * Initializes a new {@link LazyIcon}.
      *
-     * @param clientId The client identifier
+     * @param clientId The client identifier. Only pass already validated IDs here!
      * @throws OXException
      */
-    public LazyIcon(String clientId) throws OXException {
+    public LazyIcon(String clientId) {
         super();
         ClientId clientIdObj = ClientId.parse(clientId);
-        if (clientIdObj == null) {
-            throw OAuthProviderExceptionCodes.BAD_CLIENT_ID.create(clientId);
-        }
-
         this.clientId = clientId;
         this.groupId = clientIdObj.getGroupId();
     }
