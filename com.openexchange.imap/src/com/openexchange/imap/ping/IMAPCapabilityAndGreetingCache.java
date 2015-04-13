@@ -66,7 +66,9 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Pattern;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.imap.config.IIMAPProperties;
+import com.openexchange.imap.services.Services;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -76,8 +78,27 @@ import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
  */
 public final class IMAPCapabilityAndGreetingCache {
 
-    static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(IMAPCapabilityAndGreetingCache.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPCapabilityAndGreetingCache.class);
+
+    private static volatile Integer capabiltiesCacheIdleTime;
+    private static int capabiltiesCacheIdleTime() {
+        Integer tmp = capabiltiesCacheIdleTime;
+        if (null == tmp) {
+            synchronized (IMAPCapabilityAndGreetingCache.class) {
+                tmp = capabiltiesCacheIdleTime;
+                if (null == tmp) {
+                    int defaultValue = 0; // Do not check again
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.imap.capabiltiesCacheIdleTime", defaultValue));
+                    capabiltiesCacheIdleTime = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
 
     private static volatile ConcurrentMap<String, Future<CapabilityAndGreeting>> MAP;
 
@@ -150,31 +171,65 @@ public final class IMAPCapabilityAndGreetingCache {
     }
 
     private static CapabilityAndGreeting getCapabilityAndGreeting(String address, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
+        int idleTime = capabiltiesCacheIdleTime();
+        if (idleTime < 0) {
+            // Never cache
+            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
+            ft.run();
+            return getFrom(ft);
+        }
+
         ConcurrentMap<String, Future<CapabilityAndGreeting>> map = MAP;
         if (null == map) {
             init();
             map = MAP;
         }
+
         String key = new StringBuilder(address).append('-').append(isSecure).toString();
         Future<CapabilityAndGreeting> f = map.get(key);
         if (null == f) {
-            final FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
+            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
             f = map.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
             }
         }
+
+        CapabilityAndGreeting cag = getFrom(f);
+        if (isElapsed(cag, idleTime)) {
+            FutureTask<CapabilityAndGreeting> ft = new FutureTask<CapabilityAndGreeting>(new CapabilityAndGreetingCallable(address, isSecure, imapProperties));
+            if (map.replace(key, f, ft)) {
+                f = ft;
+                ft.run();
+            } else {
+                f = map.get(key);
+            }
+            cag = getFrom(f);
+        }
+
+        return cag;
+    }
+
+    private static boolean isElapsed(CapabilityAndGreeting cag, int idleTime) {
+        if (idleTime == 0) {
+            return false; // never
+        }
+        // Check if elapsed
+        return ((System.currentTimeMillis() - cag.getStamp()) > idleTime);
+    }
+
+    private static CapabilityAndGreeting getFrom(Future<CapabilityAndGreeting> f) throws IOException {
         try {
             return f.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw new IOException(e.getMessage());
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             throw new IOException(e.getMessage());
-        } catch (final ExecutionException e) {
-            final Throwable cause = e.getCause();
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 throw ((IOException) cause);
             }
@@ -368,6 +423,7 @@ public final class IMAPCapabilityAndGreetingCache {
 
         private final Map<String, String> capabilities;
         private final String greeting;
+        private final long stamp;
 
         CapabilityAndGreeting(final String capability, final String greeting) {
             super();
@@ -383,6 +439,11 @@ public final class IMAPCapabilityAndGreetingCache {
                 this.capabilities = Collections.unmodifiableMap(capabilities);
             }
             this.greeting = greeting;
+            this.stamp = System.currentTimeMillis();
+        }
+
+        long getStamp() {
+            return stamp;
         }
 
         Map<String, String> getCapability() {
