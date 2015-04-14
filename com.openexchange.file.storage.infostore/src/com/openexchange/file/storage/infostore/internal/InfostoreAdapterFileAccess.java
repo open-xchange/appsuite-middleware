@@ -92,7 +92,6 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -108,7 +107,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     private final InfostoreSearchEngine search;
     private final Context ctx;
     private final User user;
-    private final UserPermissionBits userPermissions;
     private final ServerSession sessionObj;
     private final FileStorageAccountAccess accountAccess;
     private final int hash;
@@ -125,7 +123,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         this.ctx = sessionObj.getContext();
         this.user = sessionObj.getUser();
-        this.userPermissions = sessionObj.getUserPermissionBits();
 
         this.search = search;
         this.accountAccess = accountAccess;
