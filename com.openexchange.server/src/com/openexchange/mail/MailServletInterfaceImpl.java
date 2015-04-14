@@ -795,10 +795,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mergeWithSent,
                     cache,
                     null == fromToIndices ? IndexRange.NULL : new IndexRange(fromToIndices[0], fromToIndices[1]),
-                        lookAhead,
-                        MailSortField.getField(sortCol),
-                        OrderDirection.getOrderDirection(order),
-                        mailFields.toArray());
+                    lookAhead,
+                    MailSortField.getField(sortCol),
+                    OrderDirection.getOrderDirection(order),
+                    mailFields.toArray());
             } catch (OXException e) {
                 // Check for missing "THREAD=REFERENCES" capability
                 if ((2046 != e.getCode() || (!"MSG".equals(e.getPrefix()) && !"IMAP".equals(e.getPrefix()))) && !MailExceptionCode.UNSUPPORTED_OPERATION.equals(e)) {
@@ -1740,17 +1740,25 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     }
 
     @Override
+    public SearchTerm<?> createSearchTermFrom(com.openexchange.search.SearchTerm<?> searchTerm) throws OXException {
+        return SearchTermMapper.map(searchTerm);
+    }
+
+    @Override
     public SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, com.openexchange.search.SearchTerm<?> searchTerm, boolean linkSearchTermsWithOR, int[] fields, String[] headerFields, boolean supportsContinuation) throws OXException {
         return getMessagesInternal(prepareMailFolderParam(folder), SearchTermMapper.map(searchTerm), fromToIndices, sortCol, order, fields, headerFields, supportsContinuation);
     }
 
     @Override
-    public SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, String[] headerFields, boolean supportsContinuation) throws OXException {
+    public com.openexchange.mail.search.SearchTerm<?> createSearchTermFrom(int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR) throws OXException {
         checkPatternLength(searchPatterns);
-        SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(
-            searchCols,
-            searchPatterns,
-            linkSearchTermsWithOR);
+        SearchTerm<?> searchTerm = (searchCols == null) || (searchCols.length == 0) ? null : SearchUtility.parseFields(searchCols, searchPatterns, linkSearchTermsWithOR);
+        return searchTerm;
+    }
+
+    @Override
+    public SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, String[] headerFields, boolean supportsContinuation) throws OXException {
+        SearchTerm<?> searchTerm = createSearchTermFrom(searchCols, searchPatterns, linkSearchTermsWithOR);
         return getMessagesInternal(prepareMailFolderParam(folder), searchTerm, fromToIndices, sortCol, order, fields, headerFields, supportsContinuation);
     }
 

@@ -64,6 +64,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.json.writer.MessageWriter.MailFieldWriter;
@@ -80,8 +81,6 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
 }, responseDescription = "Just an empty JSON array is going to be returned since this action cannot be applied to IMAP.")
 public final class GetUpdatesAction extends AbstractMailAction {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GetUpdatesAction.class);
 
     /**
      * Initializes a new {@link GetUpdatesAction}.
@@ -117,10 +116,12 @@ public final class GetUpdatesAction extends AbstractMailAction {
             final OXJSONWriter jsonWriter = new OXJSONWriter();
             jsonWriter.array();
             if (!bIgnoreModified || !bIgnoreDelete) {
-                final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-                final int userId = session.getUserId();
-                final int contextId = session.getContextId();
-                final MailServletInterface mailInterface = getMailInterface(req);
+                ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+                int[] columns = columnCollection.getFields();
+                String[] headers = columnCollection.getHeaders();
+                int userId = session.getUserId();
+                int contextId = session.getContextId();
+                MailServletInterface mailInterface = getMailInterface(req);
 
                 if (!bIgnoreModified) {
                     final MailMessage[] modified = mailInterface.getUpdatedMessages(folderId, columns);
