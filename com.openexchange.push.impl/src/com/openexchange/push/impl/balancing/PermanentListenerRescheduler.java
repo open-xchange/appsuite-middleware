@@ -309,6 +309,13 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             }
                         }
 
+                        // Check capable members
+                        if (1 == candidates.size()) {
+                            // No other cluster members - assign all available permanent listeners to this node
+                            pushManagerRegistry.applyInitialListeners(allPushUsers);
+                            return null;
+                        }
+
                         // First, sort by UUID
                         Collections.sort(candidates, new Comparator<Member>() {
 
