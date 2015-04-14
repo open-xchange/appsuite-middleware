@@ -1,3 +1,7 @@
+* 2015-04-14 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34340: Added EXECUTE privilege to avoid user creation
+
 * 2015-04-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37619: Use more intelligent filename reservation 
