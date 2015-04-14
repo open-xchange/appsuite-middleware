@@ -113,34 +113,38 @@ public class FacebookRegisterer implements ServiceTrackerCustomizer<Object,Objec
             lock.unlock();
         }
         if (needsRegistration) {
-            LOG.info("Registering Facebook MetaData service.");
-            final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
-            registration = context.registerService(OAuthServiceMetaData.class, facebookMetaDataService, null);
+            try {
+                LOG.info("Registering Facebook MetaData service.");
+                final OAuthServiceMetaDataFacebookImpl facebookMetaDataService = new OAuthServiceMetaDataFacebookImpl(deferrer);
+                registration = context.registerService(OAuthServiceMetaData.class, facebookMetaDataService, null);
 
-            LOG.info("Registering Facebook service.");
-            registration2 = context.registerService(FacebookService.class, new FacebookServiceImpl(oAuthService, facebookMetaDataService), null);
-            registration3 = context.registerService(Reloadable.class, facebookMetaDataService, null);
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
-            final String sCapability = "facebook";
-            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
-            capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
-                @Override
-                public boolean isEnabled(String capability, Session ses) throws OXException {
-                    if (sCapability.equals(capability)) {
-                        final ServerSession session = ServerSessionAdapter.valueOf(ses);
-                        if (session.isAnonymous()) {
-                            return false;
+                LOG.info("Registering Facebook service.");
+                registration2 = context.registerService(FacebookService.class, new FacebookServiceImpl(oAuthService, facebookMetaDataService), null);
+                registration3 = context.registerService(Reloadable.class, facebookMetaDataService, null);
+                final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+                final String sCapability = "facebook";
+                properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+                capabilityChecker = context.registerService(CapabilityChecker.class, new CapabilityChecker() {
+                    @Override
+                    public boolean isEnabled(String capability, Session ses) throws OXException {
+                        if (sCapability.equals(capability)) {
+                            final ServerSession session = ServerSessionAdapter.valueOf(ses);
+                            if (session.isAnonymous()) {
+                                return false;
+                            }
+
+                            return facebookMetaDataService.isEnabled(session.getUserId(), session.getContextId());
                         }
 
-                        return facebookMetaDataService.isEnabled(session.getUserId(), session.getContextId());
+                        return true;
                     }
+                }, properties);
 
-                    return true;
-                }
-            }, properties);
-
-            ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
-            context.getService(capabilityRef).declareCapability(sCapability);
+                ServiceReference<CapabilityService> capabilityRef = context.getServiceReference(CapabilityService.class);
+                context.getService(capabilityRef).declareCapability(sCapability);
+            } catch (Exception e) {
+                LOG.error("Failed to register Facebook MetaData service.", e);
+            }
         }
         return obj;
     }
