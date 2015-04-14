@@ -115,12 +115,21 @@ public abstract class AbstractAJAXParser<T extends AbstractAJAXResponse> extends
 
     public String checkResponse(final HttpResponse resp, final HttpRequest request) throws ParseException, IOException {
         if (HttpStatus.SC_OK != resp.getStatusLine().getStatusCode()) {
-            if (null != request) {
-                assertEquals("Response code is not okay for [" + request.getRequestLine() + "] (" 
-                    + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
-            } else {
-                assertEquals("Response code is not okay. (" + resp.getStatusLine().getReasonPhrase() + ")", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+            String entity = null;
+            try {
+                entity = EntityUtils.toString(resp.getEntity());
+            } catch (Exception e) {
+                // ignored
             }
+            StringBuilder stringBuilder = new StringBuilder("Response code is not okay");
+            if (null != request) {
+                stringBuilder.append(" for [") .append(request.getRequestLine()).append(']');
+            }
+            stringBuilder.append(": ").append(resp.getStatusLine()).append(". ");
+            if (null != entity) {
+                stringBuilder.append("Server response: ").append(entity);
+            }
+            fail(stringBuilder.toString());
         }
         return EntityUtils.toString(resp.getEntity());
     }
