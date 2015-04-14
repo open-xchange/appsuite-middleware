@@ -6,16 +6,14 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
  * <p>Java class for Client complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="Client">
  *   &lt;complexContent>
@@ -28,7 +26,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="icon" type="{http://soap.provider.oauth.openexchange.com}Icon"/>
  *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="redirectURIs" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
+ *         &lt;element name="redirectURI" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
  *         &lt;element name="registrationDate" type="{http://www.w3.org/2001/XMLSchema}date"/>
  *         &lt;element name="secret" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="website" type="{http://www.w3.org/2001/XMLSchema}string"/>
@@ -37,22 +35,22 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Client", propOrder = {
-    "contactAddress",
-    "defaultScope",
-    "description",
-    "enabled",
-    "icon",
     "id",
     "name",
+    "description",
+    "contactAddress",
+    "website",
+    "defaultScope",
     "redirectURIs",
-    "registrationDate",
     "secret",
-    "website"
+    "registrationDate",
+    "enabled",
+    "icon"
 })
 public class Client {
 
@@ -69,11 +67,10 @@ public class Client {
     protected String id;
     @XmlElement(required = true, nillable = true)
     protected String name;
-    @XmlElement(required = true, nillable = true)
+    @XmlElement(name = "redirectURI", required = true, nillable = true)
     protected List<String> redirectURIs;
     @XmlElement(required = true, nillable = true)
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar registrationDate;
+    protected long registrationDate;
     @XmlElement(required = true, nillable = true)
     protected String secret;
     @XmlElement(required = true, nillable = true)
@@ -81,11 +78,11 @@ public class Client {
 
     /**
      * Gets the value of the contactAddress property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getContactAddress() {
         return contactAddress;
@@ -93,11 +90,11 @@ public class Client {
 
     /**
      * Sets the value of the contactAddress property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setContactAddress(String value) {
         this.contactAddress = value;
@@ -105,11 +102,11 @@ public class Client {
 
     /**
      * Gets the value of the defaultScope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDefaultScope() {
         return defaultScope;
@@ -117,11 +114,11 @@ public class Client {
 
     /**
      * Sets the value of the defaultScope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDefaultScope(String value) {
         this.defaultScope = value;
@@ -129,11 +126,11 @@ public class Client {
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDescription() {
         return description;
@@ -141,11 +138,11 @@ public class Client {
 
     /**
      * Sets the value of the description property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDescription(String value) {
         this.description = value;
@@ -153,7 +150,7 @@ public class Client {
 
     /**
      * Gets the value of the enabled property.
-     * 
+     *
      */
     public boolean isEnabled() {
         return enabled;
@@ -161,7 +158,7 @@ public class Client {
 
     /**
      * Sets the value of the enabled property.
-     * 
+     *
      */
     public void setEnabled(boolean value) {
         this.enabled = value;
@@ -169,11 +166,11 @@ public class Client {
 
     /**
      * Gets the value of the icon property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Icon }
-     *     
+     *
      */
     public Icon getIcon() {
         return icon;
@@ -181,11 +178,11 @@ public class Client {
 
     /**
      * Sets the value of the icon property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Icon }
-     *     
+     *
      */
     public void setIcon(Icon value) {
         this.icon = value;
@@ -193,11 +190,11 @@ public class Client {
 
     /**
      * Gets the value of the id property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getId() {
         return id;
@@ -205,11 +202,11 @@ public class Client {
 
     /**
      * Sets the value of the id property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setId(String value) {
         this.id = value;
@@ -217,11 +214,11 @@ public class Client {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -229,37 +226,37 @@ public class Client {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
     }
 
     /**
-     * Gets the value of the redirectURIs property.
-     * 
+     * Gets the value of the redirectURI property.
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the redirectURIs property.
-     * 
+     * This is why there is not a <CODE>set</CODE> method for the redirectURI property.
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRedirectURIs().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getRedirectURIs() {
         if (redirectURIs == null) {
@@ -270,35 +267,35 @@ public class Client {
 
     /**
      * Gets the value of the registrationDate property.
-     * 
+     *
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
-     *     
+     *     {@link Long }
+     *
      */
-    public XMLGregorianCalendar getRegistrationDate() {
+    public long getRegistrationDate() {
         return registrationDate;
     }
 
     /**
      * Sets the value of the registrationDate property.
-     * 
+     *
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
-     *     
+     *     {@link Long }
+     *
      */
-    public void setRegistrationDate(XMLGregorianCalendar value) {
+    public void setRegistrationDate(long value) {
         this.registrationDate = value;
     }
 
     /**
      * Gets the value of the secret property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getSecret() {
         return secret;
@@ -306,11 +303,11 @@ public class Client {
 
     /**
      * Sets the value of the secret property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setSecret(String value) {
         this.secret = value;
@@ -318,11 +315,11 @@ public class Client {
 
     /**
      * Gets the value of the website property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getWebsite() {
         return website;
@@ -330,11 +327,11 @@ public class Client {
 
     /**
      * Sets the value of the website property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setWebsite(String value) {
         this.website = value;

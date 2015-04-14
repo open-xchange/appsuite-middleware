@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.internal.client.storage;
 
+import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
@@ -96,6 +97,28 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
+    public List<Client> getClients(String groupId) throws ClientManagementException {
+        List<Client> clients = delegate.getClients(groupId);
+        Cache cache = optCache();
+        if (cache != null) {
+            for (Client client : clients) {
+                String clientId = client.getId();
+                CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
+                Object object = cache.get(newCacheKey);
+                if (object == null) {
+                    try {
+                        cache.put(newCacheKey, client, false);
+                    } catch (OXException e) {
+                        LOGGER.warn("Could not put client into cache", e);
+                    }
+                }
+            }
+        }
+
+        return clients;
+    }
+
+    @Override
     public Client getClientById(String groupId, String clientId) throws ClientManagementException {
         Cache cache = optCache();
         if (null == cache) {
@@ -126,12 +149,12 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws ClientManagementException {
-        Client newClient = delegate.registerClient(clientData);
+    public Client registerClient(String groupId, ClientData clientData) throws ClientManagementException {
+        Client newClient = delegate.registerClient(groupId, clientData);
 
         Cache cache = optCache();
         if (null != cache) {
-            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, clientData.getGroupId(), newClient.getId());
+            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, newClient.getId());
             try {
                 cache.put(newCacheKey, newClient, false);
             } catch (OXException e) {
@@ -161,12 +184,12 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client updateClient(String clientId, ClientData clientData) throws ClientManagementException {
-        Client updatedClient = delegate.updateClient(clientId, clientData);
+    public Client updateClient(String groupId, String clientId, ClientData clientData) throws ClientManagementException {
+        Client updatedClient = delegate.updateClient(groupId, clientId, clientData);
 
         Cache cache = optCache();
         if (null != cache) {
-            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, clientData.getGroupId(), clientId);
+            CacheKey newCacheKey = cache.newCacheKey(cachingContextId, groupId, clientId);
             try {
                 cache.put(newCacheKey, updatedClient, true);
             } catch (OXException e) {

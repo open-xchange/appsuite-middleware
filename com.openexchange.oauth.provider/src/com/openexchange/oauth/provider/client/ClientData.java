@@ -84,9 +84,6 @@ public class ClientData implements Serializable {
     private String website;
     private boolean bWebsite;
 
-    private String groupId;
-    private boolean bGroupId;
-
 
     public ClientData() {
         super();
@@ -150,18 +147,9 @@ public class ClientData implements Serializable {
         return website;
     }
 
-    public String getGroupId() {
-        return groupId;
-    }
-
     public void setWebsite(String website) {
         this.website = website;
         bWebsite = true;
-    }
-
-    public void setGroupId(String groupId) {
-        this.groupId = groupId;
-        bGroupId = true;
     }
 
     public boolean containsIcon() {
@@ -190,9 +178,5 @@ public class ClientData implements Serializable {
 
     public boolean containsWebsite() {
         return bWebsite;
-    }
-
-    public boolean containsGroupId() {
-        return bGroupId;
     }
 }

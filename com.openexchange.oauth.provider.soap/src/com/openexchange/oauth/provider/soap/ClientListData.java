@@ -8,18 +8,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Icon complex type.
+ * <p>Java class for ClientListData complex type.
  *
  * <p>The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
- * &lt;complexType name="Icon">
+ * &lt;complexType name="ClientListData">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="data" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="mimeType" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="size" type="{http://www.w3.org/2001/XMLSchema}int" minOccurs="0"/>
+ *         &lt;element name="groupId" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,63 +29,63 @@ import javax.xml.bind.annotation.XmlType;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Icon", propOrder = {
-    "mimeType",
-    "data"
+@XmlType(name = "ClientListData", propOrder = {
+    "id",
+    "name"
 })
-public class Icon {
+public class ClientListData {
 
-    @XmlElement(required = true, nillable = true)
-    protected String data;
-    @XmlElement(required = true, nillable = true)
-    protected String mimeType;
+    @XmlElement(required = true)
+    protected String id;
+    @XmlElement(required = true)
+    protected String name;
 
     /**
-     * Gets the value of the data property.
+     * Gets the value of the id property.
      *
      * @return
      *     possible object is
      *     {@link String }
      *
      */
-    public String getData() {
-        return data;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Sets the value of the data property.
+     * Sets the value of the id property.
      *
      * @param value
      *     allowed object is
      *     {@link String }
      *
      */
-    public void setData(String value) {
-        this.data = value;
+    public void setId(String value) {
+        this.id = value;
     }
 
     /**
-     * Gets the value of the mimeType property.
+     * Gets the value of the name property.
      *
      * @return
      *     possible object is
      *     {@link String }
      *
      */
-    public String getMimeType() {
-        return mimeType;
+    public String getName() {
+        return name;
     }
 
     /**
-     * Sets the value of the mimeType property.
+     * Sets the value of the name property.
      *
      * @param value
      *     allowed object is
      *     {@link String }
      *
      */
-    public void setMimeType(String value) {
-        this.mimeType = value;
+    public void setName(String value) {
+        this.name = value;
     }
 
 }

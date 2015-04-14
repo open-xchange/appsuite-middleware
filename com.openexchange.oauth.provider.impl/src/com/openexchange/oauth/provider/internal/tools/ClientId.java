@@ -73,7 +73,7 @@ public class ClientId {
             String baseToken = OAuthClientIdHelper.getInstance().getBaseTokenFrom(clientId);
             return new ClientId(groupId, baseToken);
         } catch (OXException oxException) {
-            LOG.warn("Given client identifier {} is not valid.", clientId, oxException);
+            LOG.debug("Given client identifier {} is not valid.", clientId, oxException);
             return null;
         }
     }

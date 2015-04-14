@@ -50,7 +50,9 @@
 package com.openexchange.oauth.provider.internal.client;
 
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
@@ -87,6 +89,14 @@ public class ClientManagementImpl implements ClientManagement {
     }
 
     @Override
+    public List<Client> getClients(String contextGroup) throws ClientManagementException {
+        if (Strings.isEmpty(contextGroup)) {
+            contextGroup = DEFAULT_GID;
+        }
+        return clientStorage.getClients(contextGroup);
+    }
+
+    @Override
     public Client getClientById(String clientId) throws ClientManagementException {
         ClientId clientIdObj = ClientId.parse(clientId);
         if (clientIdObj == null) {
@@ -98,8 +108,8 @@ public class ClientManagementImpl implements ClientManagement {
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws ClientManagementException {
-        assertNotNullOrEmpty("Property 'group ID' is mandatory and must be set", clientData.getGroupId());
+    public Client registerClient(String contextGroup, ClientData clientData) throws ClientManagementException {
+        assertNotNullOrEmpty("A context group ID must be set to which the client will be assigned. In setups without multiple context groups you can pass '" + DEFAULT_GID + "'.", contextGroup);
         assertNotNullOrEmpty("Property 'name' is mandatory and must be set", clientData.getName());
         assertNotNullOrEmpty("Property 'description' is mandatory and must be set", clientData.getDescription());
         assertNotNullOrEmpty("Property 'contact address' is mandatory and must be set", clientData.getContactAddress());
@@ -114,12 +124,16 @@ public class ClientManagementImpl implements ClientManagement {
         assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope);
         assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope.get());
 
-        return clientStorage.registerClient(clientData);
+        return clientStorage.registerClient(contextGroup, clientData);
     }
 
     @Override
     public Client updateClient(String clientId, ClientData clientData) throws ClientManagementException {
-        assertNotNullOrEmpty("Property 'group ID' is mandatory and must be set", clientData.getGroupId());
+        ClientId clientIdObj = ClientId.parse(clientId);
+        if (clientIdObj == null) {
+            throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
+        }
+
         if (clientData.containsName()) {
             assertNotNullOrEmpty("Property 'name' was set to an empty value", clientData.getName());
         }
@@ -146,7 +160,7 @@ public class ClientManagementImpl implements ClientManagement {
             assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope.get());
         }
 
-        return clientStorage.updateClient(clientId, clientData);
+        return clientStorage.updateClient(clientIdObj.getGroupId(), clientId, clientData);
     }
 
     @Override

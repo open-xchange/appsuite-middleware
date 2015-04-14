@@ -67,7 +67,8 @@ import org.junit.runners.Suite.SuiteClasses;
     ProtocolFlowTest.class,
     RevokeTokensTest.class,
     ReadFoldersTest.class,
-    JSONApiTest.class
+    JSONApiTest.class,
+    ClientManagementTest.class
 })
 public class OAuthTests {
 

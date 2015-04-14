@@ -46,6 +46,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ListClientsResponse }
+     * 
+     */
+    public ListClientsResponse createListClientsResponse() {
+        return new ListClientsResponse();
+    }
+
+    /**
+     * Create an instance of {@link ClientListData }
+     * 
+     */
+    public ClientListData createClientListData() {
+        return new ClientListData();
+    }
+
+    /**
      * Create an instance of {@link DisableClient }
      * 
      */
@@ -91,6 +107,14 @@ public class ObjectFactory {
      */
     public RevokeClientSecret createRevokeClientSecret() {
         return new RevokeClientSecret();
+    }
+
+    /**
+     * Create an instance of {@link ListClients }
+     * 
+     */
+    public ListClients createListClients() {
+        return new ListClients();
     }
 
     /**

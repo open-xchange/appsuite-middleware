@@ -19,7 +19,7 @@
             <xs:element name="getClientByIdResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -32,8 +32,8 @@
                     <xs:element minOccurs="1" name="icon" nillable="true" type="ox:Icon"/>
                     <xs:element minOccurs="1" name="id" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="1" name="name" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="1" name="redirectURIs" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="1" name="registrationDate" nillable="true" type="xs:date"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="1" name="redirectURI" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="registrationDate" nillable="true" type="xs:long"/>
                     <xs:element minOccurs="1" name="secret" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="1" name="website" nillable="true" type="xs:string"/>
                 </xs:sequence>
@@ -42,7 +42,6 @@
                 <xs:sequence>
                     <xs:element minOccurs="1" name="data" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="1" name="mimeType" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="size" type="xs:int"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="updateClient">
@@ -60,15 +59,14 @@
                     <xs:element minOccurs="1" name="description" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="1" name="icon" nillable="true" type="ox:Icon"/>
                     <xs:element minOccurs="1" name="name" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="1" name="redirectURIs" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="1" name="redirectURI" nillable="true" type="xs:string"/>
                     <xs:element minOccurs="1" name="website" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="1" name="groupId" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="updateClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -82,7 +80,7 @@
             <xs:element name="unregisterClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="1" name="success" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -96,7 +94,7 @@
             <xs:element name="revokeClientSecretResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -110,7 +108,7 @@
             <xs:element name="enableClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="1" name="success" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -124,13 +122,14 @@
             <xs:element name="disableClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="1" name="success" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="registerClient">
                 <xs:complexType>
                     <xs:sequence>
+                        <xs:element name="contextGroup" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
                         <xs:element minOccurs="1" name="clientData" nillable="true" type="ox:ClientData"/>
                     </xs:sequence>
                 </xs:complexType>
@@ -138,7 +137,27 @@
             <xs:element name="registerClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="1" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="listClients">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="contextGroup" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="ClientListData">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                    <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="listClientsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="client" type="ox:ClientListData" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -189,6 +208,12 @@
     <wsdl:message name="disableClientResponse">
         <wsdl:part name="parameters" element="ox:disableClientResponse"/>
     </wsdl:message>
+    <wsdl:message name="listClientsRequest">
+        <wsdl:part name="parameters" element="ox:listClients"/>
+    </wsdl:message>
+    <wsdl:message name="listClientsResponse">
+        <wsdl:part name="parameters" element="ox:listClientsResponse"/>
+    </wsdl:message>
     <wsdl:portType name="OAuthClientServicePortType">
         <wsdl:operation name="unregisterClient">
             <wsdl:input message="ox:unregisterClientRequest" wsaw:Action="urn:unregisterClient"/>
@@ -224,6 +249,11 @@
             <wsdl:input message="ox:disableClientRequest" wsaw:Action="urn:disableClient"/>
             <wsdl:output message="ox:disableClientResponse" wsaw:Action="urn:disableClientResponse"/>
             <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:disableClientException"/>
+        </wsdl:operation>
+        <wsdl:operation name="listClients">
+            <wsdl:input message="ox:listClientsRequest" wsaw:Action="urn:listClients"/>
+            <wsdl:output message="ox:listClientsResponse" wsaw:Action="urn:listClientsResponse"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:listClientsException"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="OAuthClientServiceSoap11Binding" type="ox:OAuthClientServicePortType">
@@ -302,6 +332,18 @@
         </wsdl:operation>
         <wsdl:operation name="disableClient">
             <soap:operation soapAction="urn:disableClient" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listClients">
+            <soap:operation soapAction="urn:listClients" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
@@ -394,6 +436,18 @@
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listClients">
+            <soap:operation soapAction="urn:listClients" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
             </wsdl:output>
             <wsdl:fault name="Exception">
                 <soap:fault use="literal" name="Exception"/>

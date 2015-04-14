@@ -9,16 +9,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java-Klasse f&uuml;r anonymous complex type.
+ * <p>Java class for anonymous complex type.
  *
- * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ * <p>The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="args0" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="contextGroup" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,36 +29,36 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "clientId"
+    "contextGroup"
 })
-@XmlRootElement(name = "unregisterClient")
-public class UnregisterClient {
+@XmlRootElement(name = "listClients")
+public class ListClients {
 
-    @XmlElement(nillable = true)
-    protected String clientId;
+    @XmlElement(required = true, nillable = true)
+    protected String contextGroup;
 
     /**
-     * Ruft den Wert der args0-Eigenschaft ab.
+     * Gets the value of the groupId property.
      *
      * @return
      *     possible object is
      *     {@link String }
      *
      */
-    public String getClientId() {
-        return clientId;
+    public String getContextGroup() {
+        return contextGroup;
     }
 
     /**
-     * Legt den Wert der args0-Eigenschaft fest.
+     * Sets the value of the groupId property.
      *
      * @param value
      *     allowed object is
      *     {@link String }
      *
      */
-    public void setClientId(String value) {
-        this.clientId = value;
+    public void setContextGroup(String value) {
+        this.contextGroup = value;
     }
 
 }

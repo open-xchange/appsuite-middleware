@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.client;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 
@@ -59,6 +60,20 @@ import com.openexchange.exception.OXException;
  * @since v7.8.0
  */
 public interface ClientManagement {
+
+    /**
+     * The default context group ID.
+     */
+    public static final String DEFAULT_GID = "default";
+
+    /**
+     * Gets all clients for the given context group.
+     *
+     * @param contextGroup The context group to to list the clients for. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
+     * @param groupId The context group ID. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
+     * @return A list of clients
+     */
+    List<Client> getClients(String contextGroup) throws ClientManagementException;
 
     /**
      * Gets the client identified by the given identifier.
@@ -72,11 +87,12 @@ public interface ClientManagement {
     /**
      * Registers (adds) a client according to given client data.
      *
+     * @param contextGroup The context group to create the client in. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
      * @param clientData The client data to create the client from
      * @return The newly created client
      * @throws OXException If create operation fails
      */
-    Client registerClient(ClientData clientData) throws ClientManagementException;
+    Client registerClient(String contextGroup, ClientData clientData) throws ClientManagementException;
 
     /**
      * Updates an existing client's attributes according to given client data.

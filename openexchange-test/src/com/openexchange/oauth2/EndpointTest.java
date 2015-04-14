@@ -84,6 +84,7 @@ import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 
@@ -133,7 +134,7 @@ public abstract class EndpointTest {
         // register client application
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
         OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        oauthClient = clientProvisioning.registerClient(clientData);
+        oauthClient = clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, clientData);
     }
 
     @After
@@ -178,7 +179,6 @@ public abstract class EndpointTest {
     protected static ClientData prepareClient(String name) {
         DefaultIcon icon = new DefaultIcon();
         icon.setData(IconBytes.DATA);
-        icon.setSize(IconBytes.DATA.length);
         icon.setMimeType("image/jpg");
 
         Set<String> redirectURIs = new HashSet<>();
@@ -187,7 +187,6 @@ public abstract class EndpointTest {
 
         ClientData clientData = new ClientData();
         clientData.setName(name);
-        clientData.setGroupId("default");
         clientData.setDescription(name);
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");

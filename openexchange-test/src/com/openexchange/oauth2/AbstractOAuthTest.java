@@ -65,6 +65,7 @@ import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.tasks.json.TaskActionFactory;
 
@@ -76,7 +77,6 @@ import com.openexchange.tasks.json.TaskActionFactory;
  */
 public abstract class AbstractOAuthTest {
 
-//    protected Scopes scopes;
 
     protected Client clientApp;
 
@@ -97,7 +97,7 @@ public abstract class AbstractOAuthTest {
         // register client application
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
         OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        clientApp = clientProvisioning.registerClient(clientData);
+        clientApp = clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, clientData);
         String[] scopes = this.scopes;
         if (scopes == null || scopes.length == 0) {
             scopes = clientApp.getDefaultScope().get().toArray(new String[0]);
@@ -114,10 +114,9 @@ public abstract class AbstractOAuthTest {
         clientProvisioning.unregisterClient(clientApp.getId());
     }
 
-    protected ClientData prepareClient(String name) {
+    public static ClientData prepareClient(String name) {
         DefaultIcon icon = new DefaultIcon();
         icon.setData(IconBytes.DATA);
-        icon.setSize(IconBytes.DATA.length);
         icon.setMimeType("image/jpg");
 
         Set<String> redirectURIs = new HashSet<>();
@@ -125,7 +124,6 @@ public abstract class AbstractOAuthTest {
         redirectURIs.add("http://localhost:8080");
 
         ClientData clientData = new ClientData();
-        clientData.setGroupId("default");
         clientData.setName(name);
         clientData.setDescription(name);
         clientData.setIcon(icon);

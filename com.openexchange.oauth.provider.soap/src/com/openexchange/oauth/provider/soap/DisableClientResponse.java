@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,8 +24,8 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
@@ -34,12 +34,12 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = "disableClientResponse")
 public class DisableClientResponse {
 
-    @XmlElement(name = "return")
+    @XmlElement(name = "success")
     protected boolean _return;
 
     /**
      * Gets the value of the return property.
-     * 
+     *
      */
     public boolean isReturn() {
         return _return;
@@ -47,7 +47,7 @@ public class DisableClientResponse {
 
     /**
      * Sets the value of the return property.
-     * 
+     *
      */
     public void setReturn(boolean value) {
         this._return = value;

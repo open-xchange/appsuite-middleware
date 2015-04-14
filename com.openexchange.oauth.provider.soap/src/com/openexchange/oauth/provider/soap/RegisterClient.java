@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -24,26 +24,53 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "contextGroup",
     "clientData"
 })
 @XmlRootElement(name = "registerClient")
 public class RegisterClient {
 
+    @XmlElement(required = true, nillable = false)
+    protected String contextGroup;
     @XmlElement(required = true, nillable = true)
     protected ClientData clientData;
 
     /**
+     * Gets the value of the groupId property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getContextGroup() {
+        return contextGroup;
+    }
+
+    /**
+     * Sets the value of the groupId property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setContextGroup(String value) {
+        this.contextGroup = value;
+    }
+
+    /**
      * Gets the value of the clientData property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ClientData }
-     *     
+     *
      */
     public ClientData getClientData() {
         return clientData;
@@ -51,11 +78,11 @@ public class RegisterClient {
 
     /**
      * Sets the value of the clientData property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ClientData }
-     *     
+     *
      */
     public void setClientData(ClientData value) {
         this.clientData = value;

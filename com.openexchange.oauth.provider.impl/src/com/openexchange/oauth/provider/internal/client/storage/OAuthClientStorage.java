@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.internal.client.storage;
 
+import java.util.List;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagementException;
@@ -60,6 +61,14 @@ import com.openexchange.oauth.provider.client.ClientManagementException;
  * @since v7.8.0
  */
 public interface OAuthClientStorage {
+
+    /**
+     * Gets all clients for the given context group.
+     *
+     * @param groupId id of the context group to list the clients for
+     * @return A list of clients
+     */
+    List<Client> getClients(String groupId) throws ClientManagementException;
 
     /**
      * Gets the client identified by the given context group and client identifier.
@@ -74,21 +83,23 @@ public interface OAuthClientStorage {
     /**
      * Registers (adds) a client according to given client data.
      *
+     * @param groupId id of the context group the client shall be assigned to
      * @param clientData The client data to create the client from
      * @return The newly created client
      * @throws ClientManagementException If create operation fails
      */
-    Client registerClient(ClientData clientData) throws ClientManagementException;
+    Client registerClient(String groupId, ClientData clientData) throws ClientManagementException;
 
     /**
      * Updates an existing client's attributes according to given client data.
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
      * @param clientData The client data
      * @return The updated client
      * @throws ClientManagementException If update operation fails
      */
-    Client updateClient(String clientId, ClientData clientData) throws ClientManagementException;
+    Client updateClient(String groupId, String clientId, ClientData clientData) throws ClientManagementException;
 
     /**
      * Unregisters an existing client

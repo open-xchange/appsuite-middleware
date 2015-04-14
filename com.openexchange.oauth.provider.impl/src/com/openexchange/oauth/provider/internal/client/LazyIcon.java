@@ -62,7 +62,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.client.Icon;
-import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.osgi.Services;
 
 /**
@@ -82,14 +81,14 @@ public class LazyIcon implements Icon {
     /**
      * Initializes a new {@link LazyIcon}.
      *
+     * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier. Only pass already validated IDs here!
      * @throws OXException
      */
-    public LazyIcon(String clientId) {
+    public LazyIcon(String groupId, String clientId) {
         super();
-        ClientId clientIdObj = ClientId.parse(clientId);
+        this.groupId = groupId;
         this.clientId = clientId;
-        this.groupId = clientIdObj.getGroupId();
     }
 
     @Override
@@ -130,7 +129,6 @@ public class LazyIcon implements Icon {
 
                         Blob blob = rs.getBlob(1);
                         DefaultIcon defaultIcon = new DefaultIcon();
-                        defaultIcon.setSize((int) blob.length());
                         defaultIcon.setMimeType(rs.getString(2));
                         defaultIcon.setData(Streams.stream2bytes(blob.getBinaryStream()));
                         delegate = defaultIcon;

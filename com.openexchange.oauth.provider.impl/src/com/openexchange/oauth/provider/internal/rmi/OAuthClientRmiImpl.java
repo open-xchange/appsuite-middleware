@@ -50,6 +50,7 @@
 package com.openexchange.oauth.provider.internal.rmi;
 
 import java.rmi.RemoteException;
+import java.util.List;
 import org.slf4j.Logger;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
@@ -92,9 +93,9 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws RemoteException, ClientManagementException {
+    public Client registerClient(String contextGroup, ClientData clientData) throws RemoteException, ClientManagementException {
         try {
-            return getClientManagement().registerClient(clientData);
+            return getClientManagement().registerClient(contextGroup, clientData);
         } catch (ClientManagementException e) {
             throw serializableException(e);
         }
@@ -145,6 +146,15 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
         }
     }
 
+    @Override
+    public List<Client> getClients(String groupId) throws ClientManagementException, RemoteException {
+        try {
+            return getClientManagement().getClients(groupId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
+        }
+    }
+
     private static ClientManagementException serializableException(ClientManagementException e) {
         Throwable cause = e.getCause();
         if (cause == null) {
@@ -156,7 +166,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
          * Additionally exceptions with a causes are most likely worth to be logged.
          */
         LOGGER.error("", e);
-        ClientManagementException stripped = new ClientManagementException(e.getReason(), e.getMessage());
+        ClientManagementException stripped = new ClientManagementException(e.getReason(), e.getMessage(), true);
         stripped.setStackTrace(e.getStackTrace());
         return stripped;
     }

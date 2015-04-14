@@ -51,12 +51,10 @@ package com.openexchange.oauth.provider.soap;
 
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.LinkedHashSet;
 import java.util.List;
-import javax.xml.datatype.DatatypeConfigurationException;
-import javax.xml.datatype.DatatypeFactory;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,6 +92,46 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
     }
 
     @Override
+    public List<ClientListData> listClients(String contextGroup) throws OAuthClientServiceException {
+        try {
+            List<com.openexchange.oauth.provider.client.Client> clients = clientManagement.getClients(contextGroup);
+            List<ClientListData> listDatas = new ArrayList<>(clients.size());
+            for (com.openexchange.oauth.provider.client.Client client : clients) {
+                ClientListData listData = new ClientListData();
+                listData.setId(client.getId());
+                listData.setName(client.getName());
+                listDatas.add(listData);
+            }
+            return listDatas;
+        } catch (RemoteException | ClientManagementException e) {
+            throw new OAuthClientServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Client getClientById(String clientId) throws OAuthClientServiceException {
+        try {
+            com.openexchange.oauth.provider.client.Client client = clientManagement.getClientById(clientId);
+            if (client == null) {
+                throw new OAuthClientServiceException("Invalid client identifier: " + clientId);
+            }
+
+            return client2Soap(client);
+        } catch (RemoteException | ClientManagementException e) {
+            throw new OAuthClientServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public Client registerClient(String contextGroup, ClientData clientData) throws OAuthClientServiceException {
+        try {
+            return client2Soap(clientManagement.registerClient(contextGroup, soap2ClientData(clientData)));
+        } catch (RemoteException | ClientManagementException e) {
+            throw new OAuthClientServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Client updateClient(String clientId, ClientData clientData) throws OAuthClientServiceException {
         try {
             return client2Soap(clientManagement.updateClient(clientId, soap2ClientData(clientData)));
@@ -112,36 +150,18 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
     }
 
     @Override
-    public boolean enableClient(String clientId) throws OAuthClientServiceException {
-        try {
-            return clientManagement.enableClient(clientId);
-        } catch (RemoteException | ClientManagementException e) {
-            throw new OAuthClientServiceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Client registerClient(ClientData clientData) throws OAuthClientServiceException {
-        try {
-            return client2Soap(clientManagement.registerClient(soap2ClientData(clientData)));
-        } catch (RemoteException | ClientManagementException e) {
-            throw new OAuthClientServiceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
-    public Client getClientById(String clientId) throws OAuthClientServiceException {
-        try {
-            return client2Soap(clientManagement.getClientById(clientId));
-        } catch (RemoteException | ClientManagementException e) {
-            throw new OAuthClientServiceException(e.getMessage(), e);
-        }
-    }
-
-    @Override
     public Client revokeClientSecret(String clientId) throws OAuthClientServiceException {
         try {
             return client2Soap(clientManagement.revokeClientSecret(clientId));
+        } catch (RemoteException | ClientManagementException e) {
+            throw new OAuthClientServiceException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean enableClient(String clientId) throws OAuthClientServiceException {
+        try {
+            return clientManagement.enableClient(clientId);
         } catch (RemoteException | ClientManagementException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
@@ -189,7 +209,6 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
                     Icon soapIcon = new Icon();
                     soapIcon.setData(Base64.encodeBase64String(Streams.stream2bytes(icon.getInputStream())));
                     soapIcon.setMimeType(icon.getMimeType());
-                    soapIcon.setSize(Integer.valueOf(icon.getSize()));
                     soapClient.setIcon(soapIcon);
                 } catch (IOException e) {
                     LOG.error("Failed to apply icon to client SOAP representation", e);
@@ -226,13 +245,7 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
         {
             Date registrationDate = client.getRegistrationDate();
             if (null != registrationDate) {
-                try {
-                    final GregorianCalendar c = new GregorianCalendar();
-                    c.setTime(registrationDate);
-                    soapClient.setRegistrationDate(DatatypeFactory.newInstance().newXMLGregorianCalendar(c));
-                } catch (final DatatypeConfigurationException e) {
-                    soapClient.setRegistrationDate(null);
-                }
+                soapClient.setRegistrationDate(registrationDate.getTime());
             }
         }
 
@@ -282,7 +295,6 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
             if (null != base64Icon) {
                 DefaultIcon icon = new DefaultIcon();
                 icon.setMimeType(base64Icon.getMimeType());
-                icon.setSize(base64Icon.getSize().intValue());
                 icon.setData(Base64.decodeBase64(base64Icon.getData()));
                 clientData.setIcon(icon);
             }
@@ -297,7 +309,7 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
 
         {
             List<String> redirectURIs = soapClientData.getRedirectURIs();
-            if (null != redirectURIs) {
+            if (null != redirectURIs && redirectURIs.size() > 0) {
                 clientData.setRedirectURIs(new LinkedHashSet<String>(redirectURIs));
             }
         }
@@ -306,15 +318,6 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
             String website = soapClientData.getWebsite();
             if (null != website) {
                 clientData.setWebsite(website);
-            }
-        }
-
-        {
-            String groupId = soapClientData.getGroupId();
-            if (null != groupId) {
-                clientData.setGroupId(groupId);
-            } else {
-                clientData.setGroupId("default");
             }
         }
 

@@ -98,12 +98,17 @@ public class ClientManagementException extends Exception {
     private final Reason reason;
 
     public ClientManagementException(Reason reason, String message) {
-        super(compileMessage(reason, message));
+        super(compileMessage(reason, message, false));
+        this.reason = reason;
+    }
+
+    public ClientManagementException(Reason reason, String message, boolean useRawMessage) {
+        super(compileMessage(reason, message, useRawMessage));
         this.reason = reason;
     }
 
     public ClientManagementException(Reason reason, String message, Throwable cause) {
-        super(compileMessage(reason, message), cause);
+        super(compileMessage(reason, message, false), cause);
         this.reason = reason;
     }
 
@@ -116,7 +121,11 @@ public class ClientManagementException extends Exception {
         return reason;
     }
 
-    private static String compileMessage(Reason reason, String message) {
+    private static String compileMessage(Reason reason, String message, boolean useRawMessage) {
+        if (useRawMessage) {
+            return message;
+        }
+
         return String.format(reason.getBaseMessage(), message);
     }
 

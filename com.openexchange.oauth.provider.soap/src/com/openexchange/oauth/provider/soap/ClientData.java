@@ -11,9 +11,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for ClientData complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType name="ClientData">
  *   &lt;complexContent>
@@ -24,7 +24,7 @@ import javax.xml.bind.annotation.XmlType;
  *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="icon" type="{http://soap.provider.oauth.openexchange.com}Icon"/>
  *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="redirectURIs" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
+ *         &lt;element name="redirectURI" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
  *         &lt;element name="website" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *         &lt;element name="groupId" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
@@ -32,19 +32,18 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "ClientData", propOrder = {
-    "contactAddress",
-    "defaultScope",
-    "description",
-    "icon",
     "name",
-    "redirectURIs",
+    "description",
+    "contactAddress",
     "website",
-    "groupId"
+    "defaultScope",
+    "redirectURIs",
+    "icon"
 })
 public class ClientData {
 
@@ -58,20 +57,18 @@ public class ClientData {
     protected Icon icon;
     @XmlElement(required = true, nillable = true)
     protected String name;
-    @XmlElement(required = true, nillable = true)
+    @XmlElement(name = "redirectURI", required = true, nillable = true)
     protected List<String> redirectURIs;
     @XmlElement(required = true, nillable = true)
     protected String website;
-    @XmlElement(required = true, nillable = true)
-    protected String groupId;
 
     /**
      * Gets the value of the contactAddress property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getContactAddress() {
         return contactAddress;
@@ -79,11 +76,11 @@ public class ClientData {
 
     /**
      * Sets the value of the contactAddress property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setContactAddress(String value) {
         this.contactAddress = value;
@@ -91,11 +88,11 @@ public class ClientData {
 
     /**
      * Gets the value of the defaultScope property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDefaultScope() {
         return defaultScope;
@@ -103,11 +100,11 @@ public class ClientData {
 
     /**
      * Sets the value of the defaultScope property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDefaultScope(String value) {
         this.defaultScope = value;
@@ -115,11 +112,11 @@ public class ClientData {
 
     /**
      * Gets the value of the description property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getDescription() {
         return description;
@@ -127,11 +124,11 @@ public class ClientData {
 
     /**
      * Sets the value of the description property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setDescription(String value) {
         this.description = value;
@@ -139,11 +136,11 @@ public class ClientData {
 
     /**
      * Gets the value of the icon property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link Icon }
-     *     
+     *
      */
     public Icon getIcon() {
         return icon;
@@ -151,11 +148,11 @@ public class ClientData {
 
     /**
      * Sets the value of the icon property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link Icon }
-     *     
+     *
      */
     public void setIcon(Icon value) {
         this.icon = value;
@@ -163,11 +160,11 @@ public class ClientData {
 
     /**
      * Gets the value of the name property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getName() {
         return name;
@@ -175,37 +172,37 @@ public class ClientData {
 
     /**
      * Sets the value of the name property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setName(String value) {
         this.name = value;
     }
 
     /**
-     * Gets the value of the redirectURIs property.
-     * 
+     * Gets the value of the redirectURI property.
+     *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the redirectURIs property.
-     * 
+     * This is why there is not a <CODE>set</CODE> method for the redirectURI property.
+     *
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
      *    getRedirectURIs().add(newItem);
      * </pre>
-     * 
-     * 
+     *
+     *
      * <p>
      * Objects of the following type(s) are allowed in the list
      * {@link String }
-     * 
-     * 
+     *
+     *
      */
     public List<String> getRedirectURIs() {
         if (redirectURIs == null) {
@@ -216,11 +213,11 @@ public class ClientData {
 
     /**
      * Gets the value of the website property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getWebsite() {
         return website;
@@ -228,38 +225,14 @@ public class ClientData {
 
     /**
      * Sets the value of the website property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setWebsite(String value) {
         this.website = value;
-    }
-
-    /**
-     * Gets the value of the groupId property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getGroupId() {
-        return groupId;
-    }
-
-    /**
-     * Sets the value of the groupId property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setGroupId(String value) {
-        this.groupId = value;
     }
 
 }

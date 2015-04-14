@@ -51,8 +51,10 @@ package com.openexchange.oauth.provider.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 
 
@@ -65,9 +67,22 @@ import com.openexchange.oauth.provider.client.ClientManagementException;
 public interface OAuthClientRmi extends Remote {
 
     /**
+     * The default context group ID.
+     */
+    public static final String DEFAULT_GID = ClientManagement.DEFAULT_GID;
+
+    /**
      * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = OAuthClientRmi.class.getSimpleName();
+
+    /**
+     * Gets all clients for the given context group.
+     *
+     * @param contextGroup The context group ID. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
+     * @return A list of clients
+     */
+    List<Client> getClients(String contextGroup) throws ClientManagementException, RemoteException;
 
     /**
      * Gets the client identified by the given identifier.
@@ -81,11 +96,12 @@ public interface OAuthClientRmi extends Remote {
     /**
      * Registers (adds) a client according to given client data.
      *
+     * @param contextGroup The context group ID. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
      * @param clientData The client data to create the client from
      * @return The newly created client
      * @throws ClientManagementException If create operation fails
      */
-    Client registerClient(ClientData clientData) throws ClientManagementException, RemoteException;
+    Client registerClient(String contextGroup, ClientData clientData) throws ClientManagementException, RemoteException;
 
     /**
      * Updates an existing client's attributes according to given client data.

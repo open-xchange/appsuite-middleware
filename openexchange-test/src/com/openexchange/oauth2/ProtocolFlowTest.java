@@ -82,6 +82,7 @@ import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
@@ -313,7 +314,7 @@ public class ProtocolFlowTest extends EndpointTest {
         OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
         List<Client> clients = new ArrayList<>(OAuthProviderService.MAX_CLIENTS_PER_USER);
         for (int i = 0; i < OAuthProviderService.MAX_CLIENTS_PER_USER; i++) {
-            clients.add(clientProvisioning.registerClient(prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis())));
+            clients.add(clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis())));
         }
 
         try {

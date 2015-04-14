@@ -67,12 +67,12 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface OAuthProviderService {
 
+    // -------------------------------------- Client Handling -------------------------------------- \\
+
     /**
      * The max. number of clients that a user is allowed to grant access to
      */
     public static final int MAX_CLIENTS_PER_USER = 50;
-
-    // -------------------------------------- Client Handling -------------------------------------- \\
 
     /**
      * Gets the management instance for clients.
