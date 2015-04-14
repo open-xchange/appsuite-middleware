@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.message.BasicHeaderElementIterator;
@@ -159,6 +160,11 @@ public abstract class AbstractRedirectParser<T extends AbstractAJAXResponse> ext
             parseCookies(resp);
         }
         return EntityUtils.toString(resp.getEntity());
+    }
+
+    @Override
+    public String checkResponse(final HttpResponse resp, final HttpRequest request) throws ParseException, IOException {
+        return this.checkResponse(resp);
     }
 
     protected static final void parseCookies(HttpResponse resp) {
