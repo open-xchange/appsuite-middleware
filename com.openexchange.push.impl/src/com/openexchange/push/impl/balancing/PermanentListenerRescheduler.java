@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.balancing;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -56,6 +57,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
@@ -267,7 +270,32 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                         } else {
                                             LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
                                         }
-                                    } catch (com.hazelcast.core.OperationTimeoutException x) {
+                                    } catch (InterruptedException e) {
+                                        // Interrupted - Keep interrupted state
+                                        Thread.currentThread().interrupt();
+                                        LOG.warn("Interrupted while distributing permanent listeners among cluster nodes", e);
+                                        return null;
+                                    } catch (CancellationException e) {
+                                        // Canceled
+                                        LOG.warn("Canceled while distributing permanent listeners among cluster nodes", e);
+                                        return null;
+                                    } catch (ExecutionException e) {
+                                        Throwable cause = e.getCause();
+
+                                        // Check for Hazelcast timeout
+                                        if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                            if (cause instanceof IOException) {
+                                                throw ((IOException) cause);
+                                            }
+                                            if (cause instanceof RuntimeException) {
+                                                throw ((RuntimeException) cause);
+                                            }
+                                            if (cause instanceof Error) {
+                                                throw (Error) cause;
+                                            }
+                                            throw new IllegalStateException("Not unchecked", cause);
+                                        }
+
                                         // Timeout while awaiting remote result
                                         if (retryCount > 0) {
                                             LOG.info("Timeout while awaiting remote result from cluster member \"{}\". Retry...", member);
