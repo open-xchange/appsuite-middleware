@@ -82,6 +82,7 @@ import com.openexchange.tools.sql.DBUtils;
 public class FilenameReserverImpl implements FilenameReserver {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilenameReserverImpl.class);
+    private static final FilenameReservation PLACEHOLDER_RESERVATION = new FilenameReservationImpl(UUIDs.toByteArray(UUID.randomUUID()), null, false, false);
 
     private final Context context;
     private final DBProvider provider;
@@ -159,6 +160,7 @@ public class FilenameReserverImpl implements FilenameReserver {
                 for (DocumentMetadata document : documentsInFolder) {
                     String fileName = document.getFileName();
                     if (null == fileName) {
+                        reservations.put(document, PLACEHOLDER_RESERVATION);
                         continue;
                     }
                     boolean adjusted = false;
