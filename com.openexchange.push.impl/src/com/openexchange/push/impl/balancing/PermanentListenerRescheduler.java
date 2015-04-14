@@ -252,6 +252,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         // Identify those members having at least one "PushManagerExtendedService" instance
                         List<Member> candidates = new LinkedList<Member>();
                         candidates.add(localMember);
+                        boolean memberAdded = false;
                         {
                             IExecutorService executor = hzInstance.getExecutorService("default");
                             Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableCheckForExtendedServiceCallable(localMember.getUuid()), otherMembers);
@@ -266,9 +267,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                         retryCount = 0;
                                         if (isCapable) {
                                             candidates.add(member);
-                                            LOG.info("Cluster member \"{}\" has a {} running, hence considered for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
+                                            memberAdded = true;
+                                            LOG.info("Allowed {} on cluster member \"{}\", hence considered for rescheduling computation.", PushManagerExtendedService.class.getSimpleName(), member);
                                         } else {
-                                            LOG.info("Cluster member \"{}\" has no {} running, hence ignored for rescheduling computation.", member, PushManagerExtendedService.class.getSimpleName());
+                                            LOG.info("Disallowed {} on cluster member \"{}\", hence ignored for rescheduling computation.", PushManagerExtendedService.class.getSimpleName(), member);
                                         }
                                     } catch (InterruptedException e) {
                                         // Interrupted - Keep interrupted state
@@ -310,7 +312,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         }
 
                         // Check capable members
-                        if (1 == candidates.size()) {
+                        if (!memberAdded) {
                             // No other cluster members - assign all available permanent listeners to this node
                             pushManagerRegistry.applyInitialListeners(allPushUsers);
                             return null;
