@@ -163,7 +163,6 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.index.IndexFacadeService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
@@ -463,7 +462,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
-        
+
         // Delete Context Group Listener Service Tracker
         track(DeleteContextGroupListener.class, new DeleteContextGroupListenerServiceTracker(context));
 
@@ -581,8 +580,6 @@ public final class ServerActivator extends HousekeepingActivator {
          * getNeededServices(), because publishing bundle needs the HttpService which is in turn provided by server
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
-
-        track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
 
         /*
          * Track ManagedFileManagement

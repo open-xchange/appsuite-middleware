@@ -1,3 +1,0 @@
-allowed_index_modules:
-    withTags: index-search
-    com.openexchange.index.allowedModules =
