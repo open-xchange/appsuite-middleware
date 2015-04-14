@@ -49,25 +49,59 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import java.sql.SQLException;
-import com.openexchange.database.provider.DBProvider;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
-import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
+import com.openexchange.groupware.infostore.database.FilenameReservation;
 
 
 /**
- * {@link SelectForUpdateFilenameReserver}
+ * {@link FilenameReservationImpl}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SelectForUpdateFilenameReserver implements InfostoreFilenameReserver {
+public class FilenameReservationImpl implements FilenameReservation {
+
+    private final String fileName;
+    private final boolean wasAdjusted;
+    private final boolean wasSameTitle;
+    private final byte[] reservationID;
+
+    /**
+     * Initializes a new {@link FilenameReservationImpl}.
+     *
+     * @param reservationID The reservation ID
+     * @param fileName the filename
+     * @param wasAdjusted <code>true</code> if the filename has been adjusted to fulfill the reservation, <code>false</code>, otherwise
+     * @param wasSameTitle <code>true</code> if the title in the document is equal to the filename, <code>false</code>, otherwise
+     */
+    public FilenameReservationImpl(byte[] reservationID, String fileName, boolean wasAdjusted, boolean wasSameTitle) {
+        super();
+        this.reservationID = reservationID;
+        this.fileName = fileName;
+        this.wasAdjusted = wasAdjusted;
+        this.wasSameTitle = wasSameTitle;
+    }
+
+    /**
+     * Gets the reservation ID.
+     *
+     * @return The reservation ID
+     */
+    public byte[] getReservationID() {
+        return reservationID;
+    }
 
     @Override
-    public InfostoreFilenameReservation reserveFilename(String fileName, long folderId, int id, Context context, DBProvider provider) throws OXException, SQLException {
-        SelectForUpdateReservation reservation = new SelectForUpdateReservation(fileName, folderId, id, context, provider);
-        return reservation.reserve() ? reservation : null;
+    public String getFilename() {
+        return fileName;
+    }
+
+    @Override
+    public boolean wasAdjusted() {
+        return wasAdjusted;
+    }
+
+    @Override
+    public boolean wasSameTitle() {
+        return wasSameTitle;
     }
 
 }

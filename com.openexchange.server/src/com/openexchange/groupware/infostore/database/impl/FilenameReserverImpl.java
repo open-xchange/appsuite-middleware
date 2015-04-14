@@ -69,35 +69,35 @@ import com.openexchange.file.storage.FileStorageUtility;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
-import com.openexchange.groupware.infostore.database.BatchFilenameReserver;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
+import com.openexchange.groupware.infostore.database.FilenameReserver;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link BatchFilenameReserverImpl}
+ * {@link FilenameReserverImpl}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class BatchFilenameReserverImpl implements BatchFilenameReserver {
+public class FilenameReserverImpl implements FilenameReserver {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BatchFilenameReserverImpl.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FilenameReserverImpl.class);
 
     private final Context context;
     private final DBProvider provider;
-    private final List<BatchFilenameReservation> performedReservations;
+    private final List<FilenameReservationImpl> performedReservations;
 
     /**
-     * Initializes a new {@link BatchFilenameReserverImpl}.
+     * Initializes a new {@link FilenameReserverImpl}.
      *
      * @param context The context to work on
      * @param provider the provider to use
      */
-    public BatchFilenameReserverImpl(Context context, DBProvider provider) {
+    public FilenameReserverImpl(Context context, DBProvider provider) {
         super();
         this.context = context;
         this.provider = provider;
-        performedReservations = new ArrayList<BatchFilenameReservation>();
+        performedReservations = new ArrayList<FilenameReservationImpl>();
     }
 
     /**
@@ -110,6 +110,11 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         }
     }
 
+    @Override
+    public FilenameReservation reserve(DocumentMetadata document, boolean adjustAsNeeded) throws OXException {
+        return reserve(Collections.singletonList(document), adjustAsNeeded).get(document);
+    }
+    
     /**
      * Reserves the filenames of the supplied documents in their target folders.
      *
@@ -139,7 +144,7 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
             for (Map.Entry<Long, List<DocumentMetadata>> entry : documentsPerFolder.entrySet()) {
                 long folderID = entry.getKey().longValue();
                 List<DocumentMetadata> documentsInFolder = entry.getValue();
-                List<BatchFilenameReservation> reservationsInFolder = new ArrayList<BatchFilenameReservation>(documentsInFolder.size());
+                List<FilenameReservationImpl> reservationsInFolder = new ArrayList<FilenameReservationImpl>(documentsInFolder.size());
                 /*
                  * lock target folder
                  */
@@ -167,8 +172,9 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
                             fileName = FileStorageUtility.enhance(fileName, ++count);
                         } while (usedNames.contains(fileName));
                     }
-                    BatchFilenameReservation reservation = new BatchFilenameReservation(
-                        UUIDs.toByteArray(UUID.randomUUID()), fileName, adjusted);
+                    boolean sameTitle = null != document.getTitle() && document.getTitle().equals(document.getFileName());
+                    FilenameReservationImpl reservation = new FilenameReservationImpl(
+                        UUIDs.toByteArray(UUID.randomUUID()), fileName, adjusted, sameTitle);
                     reservations.put(document, reservation);
                     reservationsInFolder.add(reservation);
                     usedNames.add(fileName);
@@ -204,7 +210,7 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         return reservations;
     }
 
-    private int destroySilently(Collection<BatchFilenameReservation> reservations) {
+    private int destroySilently(Collection<FilenameReservationImpl> reservations) {
         int updated = 0;
         try {
             updated = destroy(reservations);
@@ -216,12 +222,12 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         return updated;
     }
 
-    private int destroy(Collection<BatchFilenameReservation> reservations) throws OXException, SQLException {
+    private int destroy(Collection<FilenameReservationImpl> reservations) throws OXException, SQLException {
         if (null == reservations || 0 == reservations.size()) {
             return 0;
         }
         List<byte[]> reservationIDs = new ArrayList<byte[]>(reservations.size());
-        for (BatchFilenameReservation reservation : reservations) {
+        for (FilenameReservationImpl reservation : reservations) {
             reservationIDs.add(reservation.getReservationID());
         }
         int updated = 0;
@@ -272,7 +278,7 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         }
     }
 
-    private static int insertReservations(Connection connection, int contextID, long targetFolderID, List<BatchFilenameReservation> reservations) throws SQLException {
+    private static int insertReservations(Connection connection, int contextID, long targetFolderID, List<FilenameReservationImpl> reservations) throws SQLException {
         if (null == reservations || 0 == reservations.size()) {
             return 0;
         }
@@ -286,7 +292,7 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
         try {
             stmt = connection.prepareStatement(StringBuilder.toString());
             int parameterIndex = 0;
-            for (BatchFilenameReservation reservation : reservations) {
+            for (FilenameReservationImpl reservation : reservations) {
                 stmt.setBytes(++parameterIndex, reservation.getReservationID());
                 stmt.setInt(++parameterIndex, contextID);
                 stmt.setLong(++parameterIndex, targetFolderID);
@@ -303,31 +309,52 @@ public class BatchFilenameReserverImpl implements BatchFilenameReserver {
             return Collections.emptySet();
         }
         Set<String> possibleWildcards = Tools.getEnhancedWildcards(fileNames);
-        StringBuilder StringBuilder = new StringBuilder();
-        StringBuilder.append("SELECT DISTINCT infostore_document.filename FROM infostore JOIN infostore_document ")
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT DISTINCT infostore_document.filename AS name FROM infostore JOIN infostore_document ")
             .append("ON infostore.cid=infostore_document.cid AND infostore.version=infostore_document.version_number ")
             .append("AND infostore.id=infostore_document.infostore_id WHERE infostore.cid=? AND infostore.folder_id=? ")
             .append("AND (infostore_document.filename")
         ;
         if (1 == fileNames.size()) {
-            StringBuilder.append("=?");
+            stringBuilder.append("=?");
         } else {
-            StringBuilder.append(" IN (?");
+            stringBuilder.append(" IN (?");
             for (int i = 1; i < fileNames.size(); i++) {
-                StringBuilder.append(",?");
+                stringBuilder.append(",?");
             }
-            StringBuilder.append(")");
+            stringBuilder.append(")");
         }
         for (int i = 0; i < possibleWildcards.size(); i++) {
-            StringBuilder.append(" OR infostore_document.filename LIKE ?");
+            stringBuilder.append(" OR infostore_document.filename LIKE ?");
         }
-        StringBuilder.append(");");
+        stringBuilder.append(") UNION SELECT DISTINCT name FROM infostoreReservedPaths WHERE cid=? AND folder=? AND (name");
+        if (1 == fileNames.size()) {
+            stringBuilder.append("=?");
+        } else {
+            stringBuilder.append(" IN (?");
+            for (int i = 1; i < fileNames.size(); i++) {
+                stringBuilder.append(",?");
+            }
+            stringBuilder.append(")");
+        }
+        for (int i = 0; i < possibleWildcards.size(); i++) {
+            stringBuilder.append(" OR name LIKE ?");
+        }
+        stringBuilder.append(");");
         Set<String> conflictingFilenames = new HashSet<String>();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = connection.prepareStatement(StringBuilder.toString());
+            stmt = connection.prepareStatement(stringBuilder.toString());
             int parameterIndex = 0;
+            stmt.setInt(++parameterIndex, contextID);
+            stmt.setLong(++parameterIndex, targetFolderID);
+            for (String filename : fileNames) {
+                stmt.setString(++parameterIndex, filename);
+            }
+            for (String possibleWildcard : possibleWildcards) {
+                stmt.setString(++parameterIndex, possibleWildcard);
+            }
             stmt.setInt(++parameterIndex, contextID);
             stmt.setLong(++parameterIndex, targetFolderID);
             for (String filename : fileNames) {

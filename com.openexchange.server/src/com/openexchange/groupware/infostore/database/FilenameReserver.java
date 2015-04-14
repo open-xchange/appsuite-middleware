@@ -55,11 +55,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 
 /**
- * {@link BatchFilenameReserver}
+ * {@link FilenameReserver}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface BatchFilenameReserver {
+public interface FilenameReserver {
 
     /**
      * Silently cleans up any previous reservation held by this filename reserver.
@@ -73,9 +73,18 @@ public interface BatchFilenameReserver {
      * @param adjustAsNeeded <code>true</code> to automatically adjust the filenames in case of conflicts in the target folder,
      *                       <code>false</code>, otherwise
      * @return The reservations, each one mapped to its corresponding document
-     * @throws OXException
      */
     Map<DocumentMetadata, FilenameReservation> reserve(List<DocumentMetadata> documents, boolean adjustAsNeeded) throws OXException;
+
+    /**
+     * Reserves the filename of the supplied documents in their target folders.
+     *
+     * @param document The document to reserve the filenames for
+     * @param adjustAsNeeded <code>true</code> to automatically adjust the filename in case of conflicts in the target folder,
+     *                       <code>false</code>, otherwise
+     * @return The reservation
+     */
+    FilenameReservation reserve(DocumentMetadata document, boolean adjustAsNeeded) throws OXException;
 
 }
 

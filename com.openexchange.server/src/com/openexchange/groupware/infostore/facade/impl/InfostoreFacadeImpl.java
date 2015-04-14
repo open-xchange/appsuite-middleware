@@ -76,7 +76,6 @@ import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
-import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.tx.DBService;
 import com.openexchange.exception.OXException;
@@ -103,12 +102,8 @@ import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.InfostoreTimedResult;
-import com.openexchange.groupware.infostore.database.BatchFilenameReserver;
 import com.openexchange.groupware.infostore.database.FilenameReservation;
-import com.openexchange.groupware.infostore.database.InfostoreFilenameReservation;
-import com.openexchange.groupware.infostore.database.InfostoreFilenameReserver;
-import com.openexchange.groupware.infostore.database.impl.AbstractInfostoreAction;
-import com.openexchange.groupware.infostore.database.impl.BatchFilenameReserverImpl;
+import com.openexchange.groupware.infostore.database.FilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.CheckSizeSwitch;
 import com.openexchange.groupware.infostore.database.impl.CreateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.CreateObjectPermissionAction;
@@ -119,12 +114,12 @@ import com.openexchange.groupware.infostore.database.impl.DeleteObjectPermission
 import com.openexchange.groupware.infostore.database.impl.DeleteVersionAction;
 import com.openexchange.groupware.infostore.database.impl.DocumentCustomizer;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.groupware.infostore.database.impl.FilenameReserverImpl;
 import com.openexchange.groupware.infostore.database.impl.InfostoreIterator;
 import com.openexchange.groupware.infostore.database.impl.InfostoreQueryCatalog;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurity;
 import com.openexchange.groupware.infostore.database.impl.InfostoreSecurityImpl;
 import com.openexchange.groupware.infostore.database.impl.ReplaceDocumentIntoDelTableAction;
-import com.openexchange.groupware.infostore.database.impl.SelectForUpdateFilenameReserver;
 import com.openexchange.groupware.infostore.database.impl.Tools;
 import com.openexchange.groupware.infostore.database.impl.UpdateDocumentAction;
 import com.openexchange.groupware.infostore.database.impl.UpdateObjectPermissionAction;
@@ -188,7 +183,6 @@ import com.openexchange.tx.UndoableAction;
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
     private static final ValidationChain VALIDATION = new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator());
-    private static final InfostoreFilenameReserver filenameReserver = new SelectForUpdateFilenameReserver();
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
     private static final boolean INDEXING_ENABLED = false; //TODO: remove switch once we index infoitems
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
@@ -568,16 +562,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public IDTuple saveDocument(final DocumentMetadata document, final InputStream data, final long sequenceNumber, final ServerSession session) throws OXException {
-        final Context context = session.getContext();
-        security.checkFolderId(document.getFolderId(), context);
-
-        boolean wasCreation = false;
         if (document.getId() != InfostoreFacade.NEW) {
             return saveDocument(document, data, sequenceNumber, nonNull(document), session);
         }
-
+        
         // Insert NEW document
-        wasCreation = true;
+        final Context context = session.getContext();
+        security.checkFolderId(document.getFolderId(), context);
         final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
             document.getFolderId(),
             context,
@@ -603,20 +594,16 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         VALIDATION.validate(document);
         CheckSizeSwitch.checkSizes(document, this, context);
 
-        final boolean titleAlso = document.getFileName() != null && document.getTitle() != null && document.getFileName().equals(document.getTitle());
-
-        final InfostoreFilenameReservation reservation = reserve(
-            document.getFileName(),
-            document.getFolderId(),
-            document.getId(),
-            context, true, session);
-
-        document.setFileName(reservation.getFilename());
-        if(titleAlso) {
-            document.setTitle(reservation.getFilename());
-        }
-
+        FilenameReserver filenameReserver = null;
         try {
+            filenameReserver = new FilenameReserverImpl(context, this);
+            FilenameReservation reservation = filenameReserver.reserve(document, true);
+            if (reservation.wasAdjusted()) {
+                document.setFileName(reservation.getFilename());
+                if (reservation.wasSameTitle()) {
+                    document.setTitle(reservation.getFilename());
+                }
+            }
             Connection writeCon = null;
             try {
                 startDBTransaction();
@@ -670,12 +657,12 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(document), session), true);
             }
 
-            indexDocument(context, session.getUserId(), document.getId(), -1L, wasCreation);
+            indexDocument(context, session.getUserId(), document.getId(), -1L, true);
 
             return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
         } finally {
-            if (reservation != null) {
-                reservation.destroySilently();
+            if (null != filenameReserver) {
+                filenameReserver.cleanUp();
             }
         }
     }
@@ -757,31 +744,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         stmt.close();
 
         return retval + 1;
-    }
-
-    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, final boolean adjust, ServerSession session) throws OXException {
-        return reserve(filename, folderId, id, ctx, adjust ? 0 : -1, session);
-    }
-
-    private InfostoreFilenameReservation reserve(final String filename, final long folderId, final int id, final Context ctx, final int count, ServerSession session) throws OXException {
-        InfostoreFilenameReservation reservation = null;
-        try {
-            reservation = filenameReserver.reserveFilename(filename, folderId, id, ctx, this);
-            if (reservation == null) {
-                if (count == -1) {
-                    throw InfostoreExceptionCodes.FILENAME_NOT_UNIQUE.create(filename, "");
-                }
-                int cnt = count;
-                InfostoreFilenameReservation r = reserve(FileStorageUtility.enhance(filename, ++cnt), folderId, id, ctx, cnt, session);
-                r.setWasAdjusted(true);
-                return r;
-            }
-        } catch (final IncorrectStringSQLException e) {
-            throw AbstractInfostoreAction.handleIncorrectStringError(e, Metadata.FILENAME_LITERAL, session);
-        } catch (final SQLException e) {
-            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, "");
-        }
-        return reservation;
     }
 
     protected QuotaFileStorage getFileStorage(int folderOwner, int contextId) throws OXException {
@@ -924,7 +886,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     private IDTuple saveModifiedDocument(SaveParameters parameters) throws OXException {
-        InfostoreFilenameReservation reservation = null;
+        FilenameReserver filenameReserver = null;
         try {
             Set<Metadata> updatedCols = parameters.getUpdatedCols();
             DocumentMetadata document = parameters.getDocument();
@@ -947,11 +909,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             if (isMove) {
                 // this is a move - reserve in target folder
                 String newFileName = null != document.getFileName() ? document.getFileName() : oldDocument.getFileName();
-                reservation = reserve(
-                    newFileName,
-                    document.getFolderId(),
-                    oldDocument.getId(),
-                    context, true, session);
+                DocumentMetadata placeHolder = new DocumentMetadataImpl(oldDocument.getId());
+                placeHolder.setFolderId(document.getFolderId());
+                placeHolder.setFileName(newFileName);
+                if (null == filenameReserver) {
+                    filenameReserver = new FilenameReserverImpl(context, db);
+                }
+                FilenameReservation reservation = filenameReserver.reserve(placeHolder, true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
 
@@ -962,11 +926,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 perform(new ReplaceDocumentIntoDelTableAction(this, QUERIES, context, tombstoneDocument, session), true);
             } else if (isRename) {
                 // this is a rename - reserve in current folder
-                reservation = reserve(
-                    document.getFileName(),
-                    oldDocument.getFolderId(),
-                    oldDocument.getId(),
-                    context, true, session);
+                DocumentMetadata placeHolder = new DocumentMetadataImpl(oldDocument.getId());
+                placeHolder.setFolderId(oldDocument.getFolderId());
+                placeHolder.setFileName(document.getFileName());
+                if (null == filenameReserver) {
+                    filenameReserver = new FilenameReserverImpl(context, db);
+                }
+                FilenameReservation reservation = filenameReserver.reserve(placeHolder, true);
                 document.setFileName(reservation.getFilename());
                 updatedCols.add(Metadata.FILENAME_LITERAL);
             }
@@ -1018,8 +984,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             }
             return new IDTuple(String.valueOf(document.getFolderId()), String.valueOf(document.getId()));
         } finally {
-            if (reservation != null) {
-                reservation.destroySilently();
+            if (null != filenameReserver) {
+                filenameReserver.cleanUp();
             }
         }
     }
@@ -1291,7 +1257,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
              */
             Date now = new Date();
             Connection readConnection = null;
-            BatchFilenameReserver filenameReserver = new BatchFilenameReserverImpl(session.getContext(), this);
+            FilenameReserver filenameReserver = new FilenameReserverImpl(session.getContext(), this);
             try {
                 readConnection = getReadConnection(context);
                 boolean moveToTrash = FolderObject.TRASH == new OXFolderAccess(readConnection, context).getFolderObject((int) destinationFolderID).getType();
@@ -1338,7 +1304,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         FilenameReservation reservation = entry.getValue();
                         if (reservation.wasAdjusted()) {
                             DocumentMetadata document = entry.getKey();
-                            if (document.getFileName().equals(document.getTitle())) {
+                            if (reservation.wasSameTitle()) {
                                 document.setTitle(reservation.getFilename());
                             }
                             document.setFileName(reservation.getFilename());
@@ -1659,37 +1625,44 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             updatedFields.add(Metadata.VERSION_LITERAL);
         }
 
-
-        if (removeCurrent) {
-            metadata = load(metadata.getId(), update.getVersion(), context);
-            InfostoreFilenameReservation reservation = reserve(metadata.getFileName(), metadata.getFolderId(), metadata.getId(), context, true, session);
-            if (reservation.wasAdjusted()) {
-                update.setFileName(reservation.getFilename());
-                updatedFields.add(Metadata.FILENAME_LITERAL);
+        FilenameReserver filenameReserver = null;
+        try {
+            if (removeCurrent) {
+                filenameReserver = new FilenameReserverImpl(context, db);
+                metadata = load(metadata.getId(), update.getVersion(), context);
+                FilenameReservation reservation = filenameReserver.reserve(metadata, true);
+                if (reservation.wasAdjusted()) {
+                    update.setFileName(reservation.getFilename());
+                    updatedFields.add(Metadata.FILENAME_LITERAL);
+                }
+                if (reservation.wasSameTitle()) {
+                    update.setTitle(reservation.getFilename());
+                    updatedFields.add(Metadata.TITLE_LITERAL);
+                }
             }
-            if (metadata.getTitle().equals(metadata.getFileName())) {
-                update.setTitle(update.getFileName());
-                updatedFields.add(Metadata.TITLE_LITERAL);
+            perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata,
+                updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
+
+            // Remove Versions
+            perform(new DeleteVersionAction(this, QUERIES, context, allVersions, session), true);
+
+            final int[] retval = new int[versionSet.size()];
+            int i = 0;
+            for (final Integer integer : versionSet) {
+                retval[i++] = integer.intValue();
+            }
+
+            if (removeCurrent) {
+                removeFromIndex(context, session.getUserId(), Collections.singletonList(metadata));
+                indexDocument(context, session.getUserId(), id, -1L, true);
+            }
+
+            return retval;
+        } finally {
+            if (null != filenameReserver) {
+                filenameReserver.cleanUp();
             }
         }
-        perform(new UpdateDocumentAction(this, QUERIES, context, update, metadata,
-            updatedFields.toArray(new Metadata[updatedFields.size()]), Long.MAX_VALUE, session), true);
-
-        // Remove Versions
-        perform(new DeleteVersionAction(this, QUERIES, context, allVersions, session), true);
-
-        final int[] retval = new int[versionSet.size()];
-        int i = 0;
-        for (final Integer integer : versionSet) {
-            retval[i++] = integer.intValue();
-        }
-
-        if (removeCurrent) {
-            removeFromIndex(context, session.getUserId(), Collections.singletonList(metadata));
-            indexDocument(context, session.getUserId(), id, -1L, true);
-        }
-
-        return retval;
     }
 
     @Override
