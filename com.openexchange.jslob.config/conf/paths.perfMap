@@ -77,3 +77,6 @@ modules/infostore/folder/documents > io.ox/files//folder/documents
 modules/infostore/folder/templates > io.ox/files//folder/templates
 modules/infostore/folder/music > io.ox/files//folder/music
 modules/infostore/folder/videos > io.ox/files//folder/videos
+
+# Contacts
+modules/contacts/maxImageSize > io.ox/contacts//maxImageSize

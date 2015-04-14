@@ -4,6 +4,7 @@
 
 * 2015-04-14 - tobias.friedrich@open-xchange.com
 
+ - Fix for bug 37083: Make maximum allowed contact image size available via JSlob / config tree  
  - Fix for bug 37619: Use more intelligent filename reservation 
 
 * 2015-04-13 - tobias.friedrich@open-xchange.com
