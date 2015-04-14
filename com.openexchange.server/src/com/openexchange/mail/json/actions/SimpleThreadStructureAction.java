@@ -50,10 +50,11 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.Collections;
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONValue;
 import org.slf4j.Logger;
@@ -67,12 +68,16 @@ import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadedStructure;
+import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
@@ -219,24 +224,24 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
      * Performs the request w/o cache look-up.
      */
     protected AJAXRequestResult perform0(final MailRequest req, final MailServletInterface mailInterface, final boolean cache) throws OXException {
-        final Set<LogProperties.Name> names = EnumSet.noneOf(LogProperties.Name.class);
         try {
-            /*
-             * Read in parameters
-             */
+            // Read parameters
             final String folderId = req.checkParameter(Mail.PARAMETER_MAILFOLDER);
             {
                 final FullnameArgument arg = MailFolderUtility.prepareMailFolderParam(folderId);
                 LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, arg.getFullname());
                 LogProperties.put(LogProperties.Name.MAIL_ACCOUNT_ID, Integer.toString(arg.getAccountId()));
             }
-            int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            final String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
-            final String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            int[] columns = columnCollection.getFields();
+            String[] headers = columnCollection.getHeaders();
+            String sort = req.getParameter(AJAXServlet.PARAMETER_SORT);
+            String order = req.getParameter(AJAXServlet.PARAMETER_ORDER);
             if (sort != null && order == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ORDER);
             }
-            final int[] fromToIndices;
+
+            int[] fromToIndices;
             {
                 final String s = req.getParameter("limit");
                 if (null == s) {
@@ -274,19 +279,35 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     fromToIndices = new int[] { start, end };
                 }
             }
-            final long lookAhead = req.getMax();
-            final boolean includeSent = req.optBool("includeSent", false);
-            final boolean ignoreSeen = req.optBool("unseen", false);
-            final boolean ignoreDeleted = !req.optBool("deleted", true);
-            if (ignoreSeen || ignoreDeleted) {
+
+            long lookAhead = req.getMax();
+            boolean includeSent = req.optBool("includeSent", false);
+            boolean ignoreSeen = req.optBool("unseen", false);
+            boolean ignoreDeleted = !req.optBool("deleted", true);
+            boolean filterApplied = (ignoreSeen || ignoreDeleted);
+            if (filterApplied) {
                 // Ensure flags is contained in provided columns
-                final int fieldFlags = MailListField.FLAGS.getField();
+                int fieldFlags = MailListField.FLAGS.getField();
                 boolean found = false;
                 for (int i = 0; !found && i < columns.length; i++) {
                     found = fieldFlags == columns[i];
                 }
                 if (!found) {
-                    final int[] tmp = columns;
+                    int[] tmp = columns;
+                    columns = new int[columns.length + 1];
+                    System.arraycopy(tmp, 0, columns, 0, tmp.length);
+                    columns[tmp.length] = fieldFlags;
+                }
+            }
+            if (null != headers && headers.length > 0) {
+                // Ensure ID is contained in provided columns
+                int fieldFlags = MailListField.ID.getField();
+                boolean found = false;
+                for (int i = 0; !found && i < columns.length; i++) {
+                    found = fieldFlags == columns[i];
+                }
+                if (!found) {
+                    int[] tmp = columns;
                     columns = new int[columns.length + 1];
                     System.arraycopy(tmp, 0, columns, 0, tmp.length);
                     columns[tmp.length] = fieldFlags;
@@ -308,36 +329,33 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             /*
              * Start response
              */
-            final long start = System.currentTimeMillis();
-            final int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
-            if (!ignoreSeen && !ignoreDeleted) {
-                final List<List<MailMessage>> mails =
-                    mailInterface.getAllSimpleThreadStructuredMessages(
-                        folderId,
-                        includeSent,
-                        cache,
-                        sortCol,
-                        orderDir,
-                        columns,
-                        fromToIndices, lookAhead);
+            long start = System.currentTimeMillis();
+            int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+            if (!filterApplied) {
+                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId,includeSent,cache,sortCol,orderDir,columns,fromToIndices, lookAhead);
+
+                if (null != headers && headers.length > 0) {
+                    enrichWithHeaders(mails, headers, mailInterface.getMailAccess().getMessageStorage());
+                }
+
                 return new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             }
-            List<List<MailMessage>> mails =
-                mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, lookAhead);
+
+            List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, false, sortCol, orderDir, columns, null, lookAhead);
             boolean cached = false;
             int more = -1;
             if (mails instanceof PropertizedList) {
-                final PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
-                final Boolean b = (Boolean) propertizedList.getProperty("cached");
+                PropertizedList<List<MailMessage>> propertizedList = (PropertizedList<List<MailMessage>>) mails;
+                Boolean b = (Boolean) propertizedList.getProperty("cached");
                 cached = null != b && b.booleanValue();
 
-                final Integer i = (Integer) propertizedList.getProperty("more");
+                Integer i = (Integer) propertizedList.getProperty("more");
                 more = null == i ? -1 : i.intValue();
             }
-            boolean foundUnseen;
-            for (final Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
-                final List<MailMessage> list = iterator.next();
-                foundUnseen = false;
+
+            for (Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
+                List<MailMessage> list = iterator.next();
+                boolean foundUnseen = false;
                 for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
                     final MailMessage message = tmp.next();
                     if (discardMail(message, false, ignoreDeleted)) {
@@ -352,8 +370,9 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     iterator.remove();
                 }
             }
+
             if (null != fromToIndices) {
-                final int fromIndex = fromToIndices[0];
+                int fromIndex = fromToIndices[0];
                 int toIndex = fromToIndices[1];
                 final int sz = mails.size();
                 if ((fromIndex) > sz) {
@@ -371,7 +390,12 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     mails = mails.subList(fromIndex, toIndex);
                 }
             }
-            final AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
+
+            if (null != headers && headers.length > 0) {
+                enrichWithHeaders(mails, headers, mailInterface.getMailAccess().getMessageStorage());
+            }
+
+            AJAXRequestResult result = new AJAXRequestResult(ThreadedStructure.valueOf(mails), "mail");
             result.setResponseProperty("cached", Boolean.valueOf(cached));
             if (more > 0) {
                 result.setResponseProperty("more", Integer.valueOf(more));
@@ -379,6 +403,62 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             return result.setDurationByStart(start);
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void enrichWithHeaders(List<List<MailMessage>> conversations, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        Map<String, List<MailMessage>> folders = new HashMap<String, List<MailMessage>>(4);
+
+        for (List<MailMessage> conversation : conversations) {
+            for (MailMessage mail : conversation) {
+                if (null != mail) {
+                    String fullName = mail.getFolder();
+                    List<MailMessage> msgs = folders.get(fullName);
+                    if (null == msgs) {
+                        msgs = new LinkedList<MailMessage>();
+                        folders.put(fullName, msgs);
+                    }
+                    msgs.add(mail);
+                }
+            }
+        }
+
+        for (Map.Entry<String, List<MailMessage>> entry : folders.entrySet()) {
+            enrichWithHeaders(entry.getKey(), entry.getValue(), headerNames, messageStorage);
+        }
+    }
+
+    private void enrichWithHeaders(String fullName, List<MailMessage> mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
+        Map<String, MailMessage> headers;
+        {
+            List<String> ids = new LinkedList<String>();
+            for (MailMessage mail : mails) {
+                if (null != mail) {
+                    ids.add(mail.getMailId());
+                }
+            }
+
+            MailMessage[] ms = messageStorage.getMessages(fullName, ids.toArray(new String[ids.size()]), MailFields.toArray(MailField.ID, MailField.HEADERS));
+            headers = new HashMap<String, MailMessage>(ms.length);
+            for (MailMessage header : ms) {
+                headers.put(header.getMailId(), header);
+            }
+        }
+
+        for (MailMessage mail : mails) {
+            if (null != mail) {
+                MailMessage header = headers.get(mail.getMailId());
+                if (null != header) {
+                    for (String headerName : headerNames) {
+                        String[] values = header.getHeader(headerName);
+                        if (null != values) {
+                            for (String value : values) {
+                                mail.addHeader(headerName, value);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
