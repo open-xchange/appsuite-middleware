@@ -84,11 +84,13 @@ public interface OAuthClientStorage {
      * Registers (adds) a client according to given client data.
      *
      * @param groupId id of the context group the client shall be assigned to
+     * @param clientId The ID for the client
+     * @param secret The client secret
      * @param clientData The client data to create the client from
      * @return The newly created client
      * @throws ClientManagementException If create operation fails
      */
-    Client registerClient(String groupId, ClientData clientData) throws ClientManagementException;
+    Client registerClient(String groupId, String clientId, String secret, ClientData clientData) throws ClientManagementException;
 
     /**
      * Updates an existing client's attributes according to given client data.
@@ -116,10 +118,11 @@ public interface OAuthClientStorage {
      *
      * @param groupId id of the context group the client is assigned to
      * @param clientId The client identifier
+     * @param secret The new client secret
      * @return The client with revoked/new secret
      * @throws ClientManagementException If revoke operation fails
      */
-    Client revokeClientSecret(String groupId, String clientId) throws ClientManagementException;
+    Client revokeClientSecret(String groupId, String clientId, String secret) throws ClientManagementException;
 
     /**
      * Enables denoted client

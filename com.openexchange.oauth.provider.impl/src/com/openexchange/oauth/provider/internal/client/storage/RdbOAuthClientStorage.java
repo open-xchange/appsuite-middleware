@@ -59,7 +59,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.osgi.framework.BundleException;
 import com.google.common.io.ByteStreams;
 import com.openexchange.config.ConfigurationService;
@@ -67,7 +68,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
@@ -78,7 +78,6 @@ import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.client.LazyIcon;
 import com.openexchange.oauth.provider.internal.client.Obfuscator;
-import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelper;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -107,31 +106,6 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         obfuscator = new Obfuscator(key, services);
     }
 
-    private DatabaseService getDbService() throws ClientManagementException {
-        DatabaseService dbService = services.getService(DatabaseService.class);
-        if (dbService == null) {
-            throw new ClientManagementException(Reason.INTERNAL_ERROR, "DatabaseService not available");
-        }
-
-        return dbService;
-    }
-
-    private static Connection getReadCon(DatabaseService dbService, String groupId) throws ClientManagementException {
-        try {
-            return dbService.getReadOnlyForGlobal(groupId);
-        } catch (OXException e) {
-            throw new ClientManagementException(Reason.INTERNAL_ERROR, e.getMessage(), e);
-        }
-    }
-
-    private static Connection getWriteCon(DatabaseService dbService, String groupId) throws ClientManagementException {
-        try {
-            return dbService.getWritableForGlobal(groupId);
-        } catch (OXException e) {
-            throw new ClientManagementException(Reason.INTERNAL_ERROR, e.getMessage(), e);
-        }
-    }
-
     @Override
     public List<Client> getClients(String groupId) throws ClientManagementException {
         DatabaseService dbService = getDbService();
@@ -143,7 +117,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         }
     }
 
-    public List<Client> getClients(String groupId, Connection con) throws ClientManagementException {
+    private List<Client> getClients(String groupId, Connection con) throws ClientManagementException {
         List<Client> clients = new LinkedList<>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -158,116 +132,9 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             return clients;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
-        }
-    }
-
-    @Override
-    public boolean enableClient(String groupId, String clientId) throws ClientManagementException {
-        DatabaseService dbService = getDbService();
-        Connection con = getWriteCon(dbService, groupId);
-        try {
-            return enableClient(clientId, con);
-        } finally {
-            dbService.backWritableForGlobal(groupId, con);
-        }
-    }
-
-    /**
-     * Enables denoted client
-     *
-     * @param clientId The client identifier
-     * @param con The connection to use
-     * @return <code>true</code> if the client was enabled, <code>false</code> if it was not in disabled state before
-     * @throws OXException If client could not be enabled
-     * @throws ClientManagementException
-     */
-    private boolean enableClient(String clientId, Connection con) throws ClientManagementException {
-        PreparedStatement sstmt = null;
-        PreparedStatement ustmt = null;
-        ResultSet rs = null;
-        try {
-            Databases.startTransaction(con);
-            sstmt = con.prepareStatement("SELECT enabled FROM oauth_client WHERE id = ? FOR UPDATE");
-            sstmt.setString(1, clientId);
-            rs = sstmt.executeQuery();
-            if (rs.next()) {
-                if (rs.getBoolean(1)) {
-                    con.commit();
-                    return false;
-                }
-            } else {
-                con.commit();
-                throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
-            }
-
-            ustmt = con.prepareStatement("UPDATE oauth_client SET enabled=1 WHERE id = ?");
-            ustmt.setString(1, clientId);
-            ustmt.executeUpdate();
-            con.commit();
-            return true;
-        } catch (SQLException e) {
-            Databases.rollback(con);
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
-        } finally {
-            Databases.autocommit(con);
-            Databases.closeSQLStuff(sstmt, rs);
-            Databases.closeSQLStuff(ustmt);
-        }
-    }
-
-    @Override
-    public boolean disableClient(String groupId, String clientId) throws ClientManagementException {
-        DatabaseService dbService = getDbService();
-        Connection con = getWriteCon(dbService, groupId);
-        try {
-            return disableClient(clientId, con);
-        } finally {
-            dbService.backWritableForGlobal(groupId, con);
-        }
-    }
-
-    /**
-     * Disables denoted client
-     *
-     * @param clientId The client identifier
-     * @param con The connection to use
-     * @throws OXException If client could not be disabled
-     * @throws ClientManagementException
-     */
-    public boolean disableClient(String clientId, Connection con) throws ClientManagementException {
-        PreparedStatement sstmt = null;
-        PreparedStatement ustmt = null;
-        ResultSet rs = null;
-        try {
-            Databases.startTransaction(con);
-            sstmt = con.prepareStatement("SELECT enabled FROM oauth_client WHERE id = ? FOR UPDATE");
-            sstmt.setString(1, clientId);
-            rs = sstmt.executeQuery();
-            if (rs.next()) {
-                if (!rs.getBoolean(1)) {
-                    con.commit();
-                    return false;
-                }
-            } else {
-                con.commit();
-                throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
-            }
-
-            ustmt = con.prepareStatement("UPDATE oauth_client SET enabled=0 WHERE id = ?");
-            ustmt.setString(1, clientId);
-            ustmt.executeUpdate();
-            con.commit();
-            return true;
-        } catch (SQLException e) {
-            Databases.rollback(con);
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
-        } finally {
-            Databases.autocommit(con);
-            Databases.closeSQLStuff(rs, sstmt);
-            Databases.closeSQLStuff(ustmt);
         }
     }
 
@@ -293,7 +160,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * @throws OXException If operation fails
      * @throws ClientManagementException
      */
-    public DefaultClient getClientById(String groupId, String clientId, Connection con, boolean forUpdate) throws ClientManagementException {
+    private DefaultClient getClientById(String groupId, String clientId, Connection con, boolean forUpdate) throws ClientManagementException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -311,63 +178,14 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             return null;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
-    }
-
-    private DefaultClient fillClient(String groupId, String clientId, ResultSet clientRS, Connection con) throws SQLException {
-        DefaultClient client = new DefaultClient();
-        client.setId(clientId);
-
-        client.setName(clientRS.getString("name"));
-
-        String description = clientRS.getString("description");
-        if (!clientRS.wasNull()) {
-            client.setDescription(description);
-        }
-
-        client.setSecret(obfuscator.unobfuscate(clientRS.getString("secret")));
-
-        String defaultScope = clientRS.getString("default_scope");
-        if (!clientRS.wasNull()) {
-            client.setDefaultScope(DefaultScopes.parseScope(defaultScope));
-        }
-
-        String contactAddress = clientRS.getString("contact_address");
-        if (!clientRS.wasNull()) {
-            client.setContactAddress(contactAddress);
-        }
-
-        String website = clientRS.getString("website");
-        if (!clientRS.wasNull()) {
-            client.setWebsite(website);
-        }
-
-        client.setEnabled(clientRS.getBoolean("enabled"));
-        client.setRegistrationDate(new Date(clientRS.getLong("registration_date")));
-
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT uri FROM oauth_client_uri WHERE client = ?");
-            stmt.setString(1, clientId);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                String uri = rs.getString(1);
-                client.addRedirectURI(uri);
-            }
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
-
-        client.setIcon(new LazyIcon(groupId, clientId));
-        return client;
     }
 
     @Override
-    public Client registerClient(String groupId, ClientData clientData) throws ClientManagementException {
+    public Client registerClient(String groupId, String clientId, String secret, ClientData clientData) throws ClientManagementException {
         DatabaseService dbService = getDbService();
         Connection con = getWriteCon(dbService, groupId);
         boolean rollback = false;
@@ -375,13 +193,13 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             Databases.startTransaction(con);
             rollback = true;
 
-            Client client = registerClient(groupId, clientData, con);
+            Client client = registerClient(groupId, clientId, secret, clientData, con);
 
             con.commit();
             rollback = false;
             return client;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(con);
@@ -395,17 +213,16 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * Registers (adds) a client according to given client data.
      *
      * @param groupId The context group ID
+     * @param clientId The ID for the client
+     * @param secret The client secret
      * @param clientData The client data to create the client from
      * @param con The connection to use
      * @return The newly created client
      * @throws OXException If create operation fails
      */
-    public Client registerClient(String groupId, ClientData clientData, Connection con) throws ClientManagementException {
+    private Client registerClient(String groupId, String clientId, String secret, ClientData clientData, Connection con) throws ClientManagementException {
         PreparedStatement stmt = null;
         try {
-            String clientId = OAuthClientIdHelper.getInstance().generateClientId(groupId);
-            String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
-
             stmt = con.prepareStatement("INSERT INTO oauth_client (id, gid, secret, name, description, icon, icon_mime_type, default_scope, contact_address, website, enabled, registration_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             stmt.setString(1, clientId);
             stmt.setString(2, groupId);
@@ -441,31 +258,11 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             client.setSecret(secret);
             return client;
         } catch (SQLException e) {
-            /*
-             * TODO:
-             * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'Steffens Neuer Client' for key 'name'
-             * SQLState:  23000
-             * vendorCode: 1062
-             */
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            checkForDuplicateName(e, groupId, clientData);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
-    }
-
-    private static DefaultClient toClient(ClientData clientData) {
-        DefaultClient client = new DefaultClient();
-        client.setName(clientData.getName());
-        client.setDescription(clientData.getDescription());
-        client.setDefaultScope(clientData.getDefaultScope());
-        client.setContactAddress(clientData.getContactAddress());
-        client.setWebsite(clientData.getWebsite());
-        for (String uri : clientData.getRedirectURIs()) {
-            client.addRedirectURI(uri);
-        }
-
-        client.setIcon(clientData.getIcon());
-        return client;
     }
 
     @Override
@@ -483,7 +280,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             rollback = false;
             return client;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(con);
@@ -503,7 +300,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * @return The updated client
      * @throws ClientManagementException
      */
-    public Client updateClient(String groupId, String clientId, ClientData clientData, Connection con) throws ClientManagementException {
+    private Client updateClient(String groupId, String clientId, ClientData clientData, Connection con) throws ClientManagementException {
         PreparedStatement stmt = null;
         try {
             class TypedObject {
@@ -606,8 +403,11 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             }
 
             return reloaded;
-        } catch (SQLException | IOException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+        } catch (IOException e) {
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
+        } catch (SQLException e) {
+            checkForDuplicateName(e, groupId, clientData);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -628,7 +428,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             rollback = false;
             return deleted;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(con);
@@ -647,7 +447,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
      * @throws OXException
      */
-    public boolean unregisterClient(String groupId, String clientId, Connection con) throws ClientManagementException {
+    private boolean unregisterClient(String groupId, String clientId, Connection con) throws ClientManagementException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM oauth_client WHERE id = ? AND gid = ?");
@@ -665,14 +465,121 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             return true;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
     }
 
     @Override
-    public Client revokeClientSecret(String groupId, String clientId) throws ClientManagementException {
+    public boolean enableClient(String groupId, String clientId) throws ClientManagementException {
+        DatabaseService dbService = getDbService();
+        Connection con = getWriteCon(dbService, groupId);
+        try {
+            return enableClient(clientId, con);
+        } finally {
+            dbService.backWritableForGlobal(groupId, con);
+        }
+    }
+
+    /**
+     * Enables denoted client
+     *
+     * @param clientId The client identifier
+     * @param con The connection to use
+     * @return <code>true</code> if the client was enabled, <code>false</code> if it was not in disabled state before
+     * @throws OXException If client could not be enabled
+     * @throws ClientManagementException
+     */
+    private boolean enableClient(String clientId, Connection con) throws ClientManagementException {
+        PreparedStatement sstmt = null;
+        PreparedStatement ustmt = null;
+        ResultSet rs = null;
+        try {
+            Databases.startTransaction(con);
+            sstmt = con.prepareStatement("SELECT enabled FROM oauth_client WHERE id = ? FOR UPDATE");
+            sstmt.setString(1, clientId);
+            rs = sstmt.executeQuery();
+            if (rs.next()) {
+                if (rs.getBoolean(1)) {
+                    con.commit();
+                    return false;
+                }
+            } else {
+                con.commit();
+                throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
+            }
+
+            ustmt = con.prepareStatement("UPDATE oauth_client SET enabled=1 WHERE id = ?");
+            ustmt.setString(1, clientId);
+            ustmt.executeUpdate();
+            con.commit();
+            return true;
+        } catch (SQLException e) {
+            Databases.rollback(con);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
+        } finally {
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(sstmt, rs);
+            Databases.closeSQLStuff(ustmt);
+        }
+    }
+
+    @Override
+    public boolean disableClient(String groupId, String clientId) throws ClientManagementException {
+        DatabaseService dbService = getDbService();
+        Connection con = getWriteCon(dbService, groupId);
+        try {
+            return disableClient(clientId, con);
+        } finally {
+            dbService.backWritableForGlobal(groupId, con);
+        }
+    }
+
+    /**
+     * Disables denoted client
+     *
+     * @param clientId The client identifier
+     * @param con The connection to use
+     * @throws OXException If client could not be disabled
+     * @throws ClientManagementException
+     */
+    private boolean disableClient(String clientId, Connection con) throws ClientManagementException {
+        PreparedStatement sstmt = null;
+        PreparedStatement ustmt = null;
+        ResultSet rs = null;
+        try {
+            Databases.startTransaction(con);
+            sstmt = con.prepareStatement("SELECT enabled FROM oauth_client WHERE id = ? FOR UPDATE");
+            sstmt.setString(1, clientId);
+            rs = sstmt.executeQuery();
+            if (rs.next()) {
+                if (!rs.getBoolean(1)) {
+                    con.commit();
+                    return false;
+                }
+            } else {
+                con.commit();
+                throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
+            }
+
+            ustmt = con.prepareStatement("UPDATE oauth_client SET enabled=0 WHERE id = ?");
+            ustmt.setString(1, clientId);
+            ustmt.executeUpdate();
+            con.commit();
+            return true;
+        } catch (SQLException e) {
+            Databases.rollback(con);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
+        } finally {
+            Databases.autocommit(con);
+            Databases.closeSQLStuff(rs, sstmt);
+            Databases.closeSQLStuff(ustmt);
+        }
+    }
+
+    @Override
+    public Client revokeClientSecret(String groupId, String clientId, String secret) throws ClientManagementException {
         DatabaseService dbService = getDbService();
         Connection con = getWriteCon(dbService, groupId);
         boolean rollback = false;
@@ -680,13 +587,13 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             Databases.startTransaction(con);
             rollback = true;
 
-            Client client = revokeClientSecret(groupId, clientId, con);
+            Client client = revokeClientSecret(groupId, clientId, secret, con);
 
             con.commit();
             rollback = false;
             return client;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             if (rollback) {
                 Databases.rollback(con);
@@ -701,11 +608,12 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
      *
      * @param groupId id of the group the client is assigned to
      * @param clientId The client identifier
+     * @param secret The new client secret
      * @param con The connection to use
      * @return The client with revoked/new secret
      * @throws OXException If revoke operation fails
      */
-    public Client revokeClientSecret(String groupId, String clientId, Connection con) throws ClientManagementException {
+    private Client revokeClientSecret(String groupId, String clientId, String secret, Connection con) throws ClientManagementException {
         PreparedStatement stmt = null;
         try {
             DefaultClient client = getClientById(groupId, clientId, con, true);
@@ -713,18 +621,16 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
                 throw new ClientManagementException(Reason.INVALID_CLIENT_ID, clientId);
             }
 
-            String newSecret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
-            String obfuscatedSecret = obfuscator.obfuscate(newSecret);
             stmt = con.prepareStatement("UPDATE oauth_client SET secret = ? WHERE id = ? AND gid = ?");
-            stmt.setString(1, obfuscatedSecret);
+            stmt.setString(1, obfuscator.obfuscate(secret));
             stmt.setString(2, clientId);
             stmt.setString(3, groupId);
             stmt.executeUpdate();
 
-            client.setSecret(newSecret);
+            client.setSecret(secret);
             return client;
         } catch (SQLException e) {
-            throw new ClientManagementException(Reason.STORAGE_ERROR, e.getMessage(), e);
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
         }
@@ -734,4 +640,112 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
     public void invalidateClient(String groupId, String clientId) {
         // Nothing to do
     }
+
+    private DefaultClient fillClient(String groupId, String clientId, ResultSet clientRS, Connection con) throws SQLException {
+        DefaultClient client = new DefaultClient();
+        client.setId(clientId);
+
+        client.setName(clientRS.getString("name"));
+
+        String description = clientRS.getString("description");
+        if (!clientRS.wasNull()) {
+            client.setDescription(description);
+        }
+
+        client.setSecret(obfuscator.unobfuscate(clientRS.getString("secret")));
+
+        String defaultScope = clientRS.getString("default_scope");
+        if (!clientRS.wasNull()) {
+            client.setDefaultScope(DefaultScopes.parseScope(defaultScope));
+        }
+
+        String contactAddress = clientRS.getString("contact_address");
+        if (!clientRS.wasNull()) {
+            client.setContactAddress(contactAddress);
+        }
+
+        String website = clientRS.getString("website");
+        if (!clientRS.wasNull()) {
+            client.setWebsite(website);
+        }
+
+        client.setEnabled(clientRS.getBoolean("enabled"));
+        client.setRegistrationDate(new Date(clientRS.getLong("registration_date")));
+
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT uri FROM oauth_client_uri WHERE client = ?");
+            stmt.setString(1, clientId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                String uri = rs.getString(1);
+                client.addRedirectURI(uri);
+            }
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+
+        client.setIcon(new LazyIcon(groupId, clientId));
+        return client;
+    }
+
+    private DatabaseService getDbService() throws ClientManagementException {
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        if (dbService == null) {
+            throw new ClientManagementException(Reason.INTERNAL_ERROR, "DatabaseService not available");
+        }
+
+        return dbService;
+    }
+
+    private static Connection getReadCon(DatabaseService dbService, String groupId) throws ClientManagementException {
+        try {
+            return dbService.getReadOnlyForGlobal(groupId);
+        } catch (OXException e) {
+            throw new ClientManagementException(e, Reason.INTERNAL_ERROR, e.getMessage());
+        }
+    }
+
+    private static Connection getWriteCon(DatabaseService dbService, String groupId) throws ClientManagementException {
+        try {
+            return dbService.getWritableForGlobal(groupId);
+        } catch (OXException e) {
+            throw new ClientManagementException(e, Reason.INTERNAL_ERROR, e.getMessage());
+        }
+    }
+
+    private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
+
+    private static void checkForDuplicateName(SQLException e, String groupId, ClientData clientData) throws ClientManagementException {
+        /*
+         * SQLState 23000: Integrity Constraint Violation
+         * Error: 1586 SQLSTATE: 23000 (ER_DUP_ENTRY_WITH_KEY_NAME)
+         * Error: 1062 SQLSTATE: 23000 (ER_DUP_ENTRY)
+         * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'Client Name' for key 'gid_name'
+         * Message: Duplicate entry '%s' for key '%s'
+         */
+        if ("23000".equals(e.getSQLState()) && (e.getErrorCode() == 1062 || e.getErrorCode() == 1586)) {
+            Matcher matcher = DUPLICATE_KEY.matcher(e.getMessage());
+            if (matcher.matches() && "gid_name".equals(matcher.group(2))) {
+                throw new ClientManagementException(Reason.DUPLICATE_NAME, clientData.getName(), groupId);
+            }
+        }
+    }
+
+    private static DefaultClient toClient(ClientData clientData) {
+        DefaultClient client = new DefaultClient();
+        client.setName(clientData.getName());
+        client.setDescription(clientData.getDescription());
+        client.setDefaultScope(clientData.getDefaultScope());
+        client.setContactAddress(clientData.getContactAddress());
+        client.setWebsite(clientData.getWebsite());
+        for (String uri : clientData.getRedirectURIs()) {
+            client.addRedirectURI(uri);
+        }
+
+        client.setIcon(clientData.getIcon());
+        return client;
+    }
+
 }

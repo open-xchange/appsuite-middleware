@@ -51,8 +51,10 @@ package com.openexchange.oauth.provider.internal.client;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
@@ -63,6 +65,7 @@ import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.internal.client.storage.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
+import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelper;
 
 
 /**
@@ -114,7 +117,7 @@ public class ClientManagementImpl implements ClientManagement {
         assertNotNullOrEmpty("Property 'description' is mandatory and must be set", clientData.getDescription());
         assertNotNullOrEmpty("Property 'contact address' is mandatory and must be set", clientData.getContactAddress());
         assertNotNullOrEmpty("Property 'website' is mandatory and must be set", clientData.getWebsite());
-        assertNotNullOrEmpty("Property 'redirect URIs' is mandatory and must be set", clientData.getRedirectURIs());
+        assertNotNullOrEmpty("Redirect URIs are mandatory and must be set", clientData.getRedirectURIs());
 
         Icon icon = clientData.getIcon();
         assertNotNullOrEmpty("Property 'icon' is mandatory and must be set", icon);
@@ -124,7 +127,9 @@ public class ClientManagementImpl implements ClientManagement {
         assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope);
         assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope.get());
 
-        return clientStorage.registerClient(contextGroup, clientData);
+        String clientId = OAuthClientIdHelper.getInstance().generateClientId(contextGroup);
+        String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
+        return clientStorage.registerClient(contextGroup, clientId, secret, clientData);
     }
 
     @Override
@@ -147,7 +152,7 @@ public class ClientManagementImpl implements ClientManagement {
             assertNotNullOrEmpty("Property 'website' was set to an empty value", clientData.getWebsite());
         }
         if (clientData.containsRedirectURIs()) {
-            assertNotNullOrEmpty("Property 'redirect URIs' was set to an empty value", clientData.getRedirectURIs());
+            assertNotNullOrEmpty("At least one of the set redirect URIs is invalid", clientData.getRedirectURIs());
         }
         if (clientData.containsIcon()) {
             Icon icon = clientData.getIcon();
@@ -193,7 +198,8 @@ public class ClientManagementImpl implements ClientManagement {
             return handleOXException(e);
         }
 
-        return clientStorage.revokeClientSecret(groupId, clientId);
+        String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
+        return clientStorage.revokeClientSecret(groupId, clientId, secret);
     }
 
     @Override
@@ -230,8 +236,18 @@ public class ClientManagementImpl implements ClientManagement {
             assertionFailed = true;
         } else if (obj instanceof String && ((String)obj).trim().isEmpty()) {
             assertionFailed = true;
-        } else if (obj instanceof Collection<?> && ((Collection<?>)obj).isEmpty()) {
-            assertionFailed = true;
+        } else if (obj instanceof Collection<?>) {
+            Collection<?> collection = (Collection<?>)obj;
+            if (collection.isEmpty()) {
+                assertionFailed = true;
+            } else {
+                for (Object element : collection) {
+                    if (element == null || element instanceof String && ((String)element).trim().isEmpty()) {
+                        assertionFailed = true;
+                        break;
+                    }
+                }
+            }
         }
 
         if (assertionFailed) {
@@ -247,7 +263,7 @@ public class ClientManagementImpl implements ClientManagement {
      * @throws ClientManagementException Will always be thrown
      */
     private <T> T handleOXException(OXException e) throws ClientManagementException {
-        ClientManagementException cme = new ClientManagementException(Reason.INTERNAL_ERROR, e.getMessage(), e);
+        ClientManagementException cme = new ClientManagementException(e, Reason.INTERNAL_ERROR, e.getMessage());
         throw cme;
     }
 

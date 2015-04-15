@@ -166,7 +166,7 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
          * Additionally exceptions with a causes are most likely worth to be logged.
          */
         LOGGER.error("", e);
-        ClientManagementException stripped = new ClientManagementException(e.getReason(), e.getMessage(), true);
+        ClientManagementException stripped = ClientManagementException.forMessage(e.getReason(), e.getMessage());
         stripped.setStackTrace(e.getStackTrace());
         return stripped;
     }

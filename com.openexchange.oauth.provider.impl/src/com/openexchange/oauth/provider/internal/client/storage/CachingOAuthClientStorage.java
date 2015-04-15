@@ -92,7 +92,7 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
         try {
             return null == cacheService ? null : cacheService.getCache(REGION_NAME);
         } catch (OXException e) {
-            throw new ClientManagementException(Reason.INTERNAL_ERROR, "Error while getting JCS cache region", e);
+            throw new ClientManagementException(e, Reason.INTERNAL_ERROR, "Error while getting JCS cache region");
         }
     }
 
@@ -149,8 +149,8 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client registerClient(String groupId, ClientData clientData) throws ClientManagementException {
-        Client newClient = delegate.registerClient(groupId, clientData);
+    public Client registerClient(String groupId, String clientId, String secret, ClientData clientData) throws ClientManagementException {
+        Client newClient = delegate.registerClient(groupId, clientId, secret, clientData);
 
         Cache cache = optCache();
         if (null != cache) {
@@ -218,8 +218,8 @@ public class CachingOAuthClientStorage extends AbstractOAuthClientStorage {
     }
 
     @Override
-    public Client revokeClientSecret(String groupId, String clientId) throws ClientManagementException {
-        Client revokedClient = delegate.revokeClientSecret(groupId, clientId);
+    public Client revokeClientSecret(String groupId, String clientId, String secret) throws ClientManagementException {
+        Client revokedClient = delegate.revokeClientSecret(groupId, clientId, secret);
 
         Cache cache = optCache();
         if (null != cache) {

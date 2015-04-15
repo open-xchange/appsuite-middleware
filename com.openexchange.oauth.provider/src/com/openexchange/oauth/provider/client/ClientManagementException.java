@@ -77,7 +77,7 @@ public class ClientManagementException extends Exception {
         /**
          * A client with name '$1%s' does already exist.
          */
-        DUPLICATE_NAME("A client with name '$1%s' does already exist."),
+        DUPLICATE_NAME("A client with name '%1$s' does already exist in context group '%2$s'."),
         /**
          * The client storage threw an error: %1$s
          */
@@ -97,19 +97,46 @@ public class ClientManagementException extends Exception {
 
     private final Reason reason;
 
-    public ClientManagementException(Reason reason, String message) {
-        super(compileMessage(reason, message, false));
+    /**
+     * Creates a new {@link ClientManagementException}. The message is computed
+     * from the reasons base message and the passed parameters.
+     *
+     * @param reason The reason
+     * @param params The parameters
+     */
+    public ClientManagementException(Reason reason, String... params) {
+        super(compileMessage(reason, (Object[]) params));
         this.reason = reason;
     }
 
-    public ClientManagementException(Reason reason, String message, boolean useRawMessage) {
-        super(compileMessage(reason, message, useRawMessage));
+    /**
+     * Creates a new {@link ClientManagementException}. The message is computed
+     * from the reasons base message and the passed parameters.
+     *
+     * @param cause The cause
+     * @param reason The reason
+     * @param params The parameters
+     */
+    public ClientManagementException(Throwable cause, Reason reason, String... params) {
+        super(compileMessage(reason, (Object[]) params), cause);
         this.reason = reason;
     }
 
-    public ClientManagementException(Reason reason, String message, Throwable cause) {
-        super(compileMessage(reason, message, false), cause);
+    private ClientManagementException(Reason reason, String rawMessage) {
+        super(rawMessage);
         this.reason = reason;
+    }
+
+    /**
+     * Creates an instance of {@link ClientManagementException}. The message is not based on
+     * the reason but will be overridden by the passed one.
+     *
+     * @param reason The reason
+     * @param message The message
+     * @return The exception
+     */
+    public static ClientManagementException forMessage(Reason reason, String message) {
+        return new ClientManagementException(reason, message);
     }
 
     /**
@@ -121,12 +148,8 @@ public class ClientManagementException extends Exception {
         return reason;
     }
 
-    private static String compileMessage(Reason reason, String message, boolean useRawMessage) {
-        if (useRawMessage) {
-            return message;
-        }
-
-        return String.format(reason.getBaseMessage(), message);
+    private static String compileMessage(Reason reason, Object... params) {
+        return String.format(reason.getBaseMessage(), params);
     }
 
 }
