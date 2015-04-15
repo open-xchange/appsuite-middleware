@@ -62,8 +62,8 @@ import org.json.JSONObject;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeEvent;
-import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -127,7 +127,7 @@ public class InitGuestPasswordServlet extends HttpServlet {
                 return;
             }
 
-            PasswordChangeService passwordChangeService = ShareServiceLookup.getService(PasswordChangeService.class);
+            BasicPasswordChangeService passwordChangeService = ShareServiceLookup.getService(BasicPasswordChangeService.class);
             ContextService contextService = ShareServiceLookup.getService(ContextService.class);
 
             Map<String, List<String>> headers = copyHeaders(request);
