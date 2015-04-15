@@ -1973,7 +1973,6 @@ msgstr ""
 
 #. The service you requested is currently not available. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
 msgid ""
 "The service you requested is currently not available. Please try again later."
 msgstr ""
@@ -3052,17 +3051,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.importexport/src/com/openexchange/importexport/exceptions/ImportExportExceptionMessages.java:136
 msgid ""
 "The character encoding \"%1$s\" is not supported. Please choose another one."
-msgstr ""
-
-#. You do not have the appropriate permissions to search within this module.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
-msgid ""
-"You do not have the appropriate permissions to search within this module."
-msgstr ""
-
-#. There is no search handler for field %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
-msgid "There is no search handler for field %1$s."
 msgstr ""
 
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
