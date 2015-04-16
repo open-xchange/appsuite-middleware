@@ -258,21 +258,27 @@ public final class SessionUtility {
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if (cookies != null) {
-            final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
+        if (cookies == null) {
+            // No cookies available - Try to look-up by parameter
+            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+            if (null != publicSessionId) {
+                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth || isChangeable(session, req));
+            }
+        } else {
+            Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
                 return handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
             }
 
             // No such cookie
-            final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
             if (null != publicSessionId) {
                 return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth || isChangeable(session, req));
             }
 
             // No such "public_session" parameter
             if (mayUseFallbackSession && isChangeable(session, req)) {
-                for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
                     if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
                         return handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
                     }
