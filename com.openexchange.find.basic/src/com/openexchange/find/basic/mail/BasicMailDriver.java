@@ -77,9 +77,11 @@ import static com.openexchange.find.mail.MailStrings.FACET_SUBJECT;
 import static com.openexchange.find.mail.MailStrings.FACET_TO;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -254,7 +256,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             mailFields = MailField.getMatchingFields(requestedColumns);
         }
 
-        final MailField[] fetchFields = mailFields;
+        final MailField[] fetchFields = prepareColumns(mailFields);
         List<MailMessage> messages = accessMailStorage(searchRequest, session, new MailAccessClosure<List<MailMessage>>() {
             @Override
             public List<MailMessage> call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
@@ -406,7 +408,7 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .build();
     }
 
-    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, int start, int size) throws OXException {
+    protected static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
         MailMessage[] messages = messageStorage.searchMessages(
             folder.getFullname(),
@@ -437,7 +439,37 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         return null;
     }
 
-    private SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest) throws OXException {
+    /**
+     * Checks given fields.
+     * <ul>
+     * <li>Add MailField.ID if MailField.ORIGINAL_ID is contained
+     * <li>Add MailField.FOLDER_ID if MailField.ORIGINAL_FOLDER_ID is contained
+     * </ul>
+     *
+     * @param mailFields The fields to check
+     * @return The checked fields
+     */
+    protected static MailField[] prepareColumns(MailField[] mailFields) {
+        MailField[] fields = mailFields;
+
+        EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(fields));
+        if (set.contains(MailField.ORIGINAL_FOLDER_ID) && !set.contains(MailField.FOLDER_ID)) {
+            MailField[] tmp = fields;
+            fields = new MailField[tmp.length + 1];
+            fields[0] = MailField.FOLDER_ID;
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+        if (set.contains(MailField.ORIGINAL_ID) && !set.contains(MailField.ID)) {
+            MailField[] tmp = fields;
+            fields = new MailField[tmp.length + 1];
+            fields[0] = MailField.ID;
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+
+        return fields;
+    }
+
+    protected SearchTerm<?> prepareSearchTerm(MailFolder folder, SearchRequest searchRequest) throws OXException {
         List<String> queryFields = searchMailBody ? Constants.QUERY_FIELDS_BODY : Constants.QUERY_FIELDS;
         SearchTerm<?> queryTerm = prepareQueryTerm(folder, queryFields, searchRequest.getQueries());
 

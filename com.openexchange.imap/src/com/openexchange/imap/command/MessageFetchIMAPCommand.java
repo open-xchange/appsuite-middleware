@@ -63,6 +63,7 @@ import javax.mail.UIDFolder;
 import javax.mail.internet.InternetHeaders;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCommandsCollection;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -173,38 +174,40 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      *
      * @param imapFolder - the IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
-     * @param fp - the fetch profile
-     * @param isSequential - whether the source array values are sequential
-     * @param keepOrder - whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
+     * @param arr The source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
+     * @param fp The fetch profile
+     * @param serverInfo The IMAP server information
+     * @param isSequential Whether the source array values are sequential
+     * @param keepOrder Whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
      * @throws MessagingException
      */
-    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder) throws MessagingException {
-        this(imapFolder, isRev1, arr, fp, isSequential, keepOrder, false);
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, Object arr, FetchProfile fp, IMAPServerInfo serverInfo, boolean isSequential, boolean keepOrder) throws MessagingException {
+        this(imapFolder, isRev1, arr, fp, serverInfo, isSequential, keepOrder, false);
     }
 
     /**
      * Initializes a new {@link MessageFetchIMAPCommand}.
      *
-     * @param imapFolder - the IMAP folder
+     * @param imapFolder The IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param arr - the source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
-     * @param fp - the fetch profile
-     * @param isSequential - whether the source array values are sequential
-     * @param keepOrder - whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
+     * @param arr The source array (either <code>long</code> UIDs, <code>int</code> SeqNums or instances of <code>Message</code>)
+     * @param fp The fetch profile
+     * @param serverInfo The IMAP server information
+     * @param isSequential Whether the source array values are sequential
+     * @param keepOrder Whether to keep or to ignore given order through parameter <code>arr</code>; only has effect if parameter
      *            <code>arr</code> is of type <code>Message[]</code> or <code>int[]</code>
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
      * @throws MessagingException
      */
-    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final Object arr, final FetchProfile fp, final boolean isSequential, final boolean keepOrder, final boolean loadBody) throws MessagingException {
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, Object arr, FetchProfile fp, IMAPServerInfo serverInfo, boolean isSequential, boolean keepOrder, boolean loadBody) throws MessagingException {
         super(imapFolder);
         if (imapFolder.getMessageCount() <= 0) {
             returnDefaultValue = true;
         }
         this.loadBody = loadBody;
         separator = imapFolder.getSeparator();
-        command = getFetchCommand(isRev1, fp, loadBody);
+        command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
         set(arr, isSequential, keepOrder);
     }
 
@@ -316,14 +319,15 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * <p>
      * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
      *
-     * @param imapFolder - the IMAP folder
+     * @param imapFolder The IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param fp - the fetch profile
-     * @param fetchLen - the total message count
+     * @param fp The fetch profile
+     * @param serverInfo The IMAP server information
+     * @param fetchLen The total message count
      * @throws MessagingException If a messaging error occurs
      */
-    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen) throws MessagingException {
-        this(imapFolder, isRev1, fp, fetchLen, false);
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, int fetchLen) throws MessagingException {
+        this(imapFolder, isRev1, fp, serverInfo, fetchLen, false);
     }
 
     /**
@@ -331,14 +335,15 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * <p>
      * <b>Note</b>: Ensure that denoted folder is not empty through {@link IMAPFolder#getMessageCount()}.
      *
-     * @param imapFolder - the IMAP folder
+     * @param imapFolder The IMAP folder
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
-     * @param fp - the fetch profile
-     * @param fetchLen - the total message count
+     * @param fp The fetch profile
+     * @param serverInfo The IMAP server information
+     * @param fetchLen The total message count
      * @param loadBody <code>true</code> to load complete messages' bodies; otherwise <code>false</code>
      * @throws MessagingException If a messaging error occurs
      */
-    public MessageFetchIMAPCommand(final IMAPFolder imapFolder, final boolean isRev1, final FetchProfile fp, final int fetchLen, final boolean loadBody) throws MessagingException {
+    public MessageFetchIMAPCommand(IMAPFolder imapFolder, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo, int fetchLen, boolean loadBody) throws MessagingException {
         super(imapFolder);
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
@@ -352,7 +357,7 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
         args = 1 == messageCount ? new String[] { "1" } : ARGS_ALL;
         uid = false;
         length = fetchLen;
-        command = getFetchCommand(isRev1, fp, loadBody);
+        command = getFetchCommand(isRev1, fp, loadBody, serverInfo);
         retval = new ExtendedMimeMessage[length];
         index = 0;
     }
@@ -787,10 +792,11 @@ public final class MessageFetchIMAPCommand extends AbstractIMAPCommand<Message[]
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
+     * @param serverInfo The IMAP server information
      * @return The FETCH items to craft a FETCH command
      */
-    private static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody);
+    private static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo) {
+        return MailMessageFetchIMAPCommand.getFetchCommand(isRev1, fp, loadBody, serverInfo);
     }
 
     /**

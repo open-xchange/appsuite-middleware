@@ -149,6 +149,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String RECIPIENT_CC = MailJSONField.RECIPIENT_CC.getKey();
     private static final String RECIPIENT_BCC = MailJSONField.RECIPIENT_BCC.getKey();
     private static final String HEADERS = MailJSONField.HEADERS.getKey();
+    private static final String ORIGINAL_ID = MailJSONField.ORIGINAL_ID.getKey();
+    private static final String ORIGINAL_FOLDER_ID = MailJSONField.ORIGINAL_FOLDER_ID.getKey();
 
     private static final String TRUNCATED = MailJSONField.TRUNCATED.getKey();
 
@@ -349,6 +351,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
                 jsonObject.put(ACCOUNT_ID, mail.getAccountId());
+                if (mail.containsOriginalId()) {
+                    String originalId = mail.getOriginalId();
+                    if (null != originalId) {
+                        jsonObject.put(ORIGINAL_ID, originalId);
+                    }
+                }
+                if (mail.containsOriginalFolder()) {
+                    String originalFolder = mail.getOriginalFolder();
+                    if (null != originalFolder) {
+                        jsonObject.put(ORIGINAL_FOLDER_ID, originalFolder);
+                    }
+                }
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

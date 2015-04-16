@@ -280,6 +280,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     columns[tmp.length] = fieldFlags;
                 }
             }
+            columns = prepareColumns(columns);
             /*
              * Get mail interface
              */
@@ -304,15 +305,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                  * Check for thread-sort
                  */
                 if (("thread".equalsIgnoreCase(sort))) {
-                    it =
-                        mailInterface.getAllThreadedMessages(
-                            folderId,
-                            MailSortField.RECEIVED_DATE.getField(),
-                            orderDir,
-                            columns,
-                            filterApplied ? null : fromToIndices);
-                    final int size = it.size();
-                    for (int i = 0; i < size; i++) {
+                    it = mailInterface.getAllThreadedMessages(folderId, MailSortField.RECEIVED_DATE.getField(), orderDir, columns, filterApplied ? null : fromToIndices);
+                    for (int i = it.size(); i-- > 0;) {
                         final MailMessage mm = it.next();
                         if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
                             if (!mm.containsAccountId()) {
@@ -342,16 +336,18 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                         MailMessage[] result;
                         IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+
+                        MailField[] fields = MailField.getFields(columns);
                         if (null != headers && 0 < headers.length) {
                             if (messageStorage instanceof IMailMessageStorageExt) {
                                 IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
-                                result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns), headers);
+                                result = ext.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields, headers);
                             } else {
-                                result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+                                result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields);
                                 enrichWithHeaders(fa.getFullname(), result, headers, messageStorage);
                             }
                         } else {
-                            result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, MailField.getFields(columns));
+                            result = messageStorage.searchMessages(fa.getFullname(), indexRange, sortField, orderDirection, searchTerm, fields);
                         }
 
                         for (MailMessage mm : result) {
@@ -365,8 +361,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     } else {
                         // Get iterator
                         it = mailInterface.getAllMessages(folderId, sortCol, orderDir, columns, headers, filterApplied ? null : fromToIndices, AJAXRequestDataTools.parseBoolParameter("continuation", req.getRequest()));
-                        final int size = it.size();
-                        for (int i = 0; i < size; i++) {
+                        for (int i = it.size(); i-- > 0;) {
                             final MailMessage mm = it.next();
                             if (!discardMail(mm, ignoreSeen, ignoreDeleted)) {
                                 if (!mm.containsAccountId()) {

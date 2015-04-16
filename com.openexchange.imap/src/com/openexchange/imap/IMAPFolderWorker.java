@@ -194,6 +194,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     protected final IMAPAccess imapAccess;
     private UserSettingMail userSettingMail;
     protected final IMAPConfig imapConfig;
+    protected final IMAPServerInfo imapServerInfo;
     protected final ACLExtension aclExtension;
     protected IMAPFolder imapFolder;
     protected final Set<IMAPFolder> otherFolders;
@@ -215,7 +216,9 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         accountId = imapAccess.getAccountId();
         this.session = session;
         ctx = session instanceof ServerSession ? ((ServerSession) session).getContext() : ContextStorage.getStorageContext(session.getContextId());
-        imapConfig = imapAccess.getIMAPConfig();
+        IMAPConfig imapConfig = imapAccess.getIMAPConfig();
+        this.imapConfig = imapConfig;
+        imapServerInfo = IMAPServerInfo.instanceFor(imapConfig);
         aclExtension = imapConfig.getACLExtension();
         otherFolders = new HashSet<IMAPFolder>(4);
         ignoreSubscriptions = imapConfig.getIMAPProperties().isIgnoreSubscription();
