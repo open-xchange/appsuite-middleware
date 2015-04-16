@@ -50,10 +50,13 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import static com.openexchange.file.storage.FileStorageUtility.checkUrl;
+import static com.openexchange.file.storage.infostore.internal.FieldMapping.getMatching;
+import static com.openexchange.file.storage.infostore.internal.FieldMapping.getSortDirection;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +68,7 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.FileStorageExtendedMetadata;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
@@ -88,7 +92,6 @@ import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -99,12 +102,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
     FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess,
-    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess {
+    FileStorageEfficientRetrieval, ObjectPermissionAware, FileStorageRangeFileAccess, FileStorageExtendedMetadata {
 
     private final InfostoreSearchEngine search;
     private final Context ctx;
     private final User user;
-    private final UserPermissionBits userPermissions;
     private final ServerSession sessionObj;
     private final FileStorageAccountAccess accountAccess;
     private final int hash;
@@ -121,7 +123,6 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
         this.ctx = sessionObj.getContext();
         this.user = sessionObj.getUser();
-        this.userPermissions = sessionObj.getUserPermissionBits();
 
         this.search = search;
         this.accountAccess = accountAccess;
@@ -568,20 +569,8 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        final int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Integer.parseInt(folderId);
-        final SearchIterator<DocumentMetadata> iterator =
-            search.search(
-                pattern,
-                FieldMapping.getMatching(fields),
-                folder,
-                FieldMapping.getMatching(sort),
-                FieldMapping.getSortDirection(order),
-                start,
-                end,
-                ctx,
-                user,
-                userPermissions);
-        return new InfostoreSearchIterator(iterator);
+        int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Integer.parseInt(folderId);
+        return new InfostoreSearchIterator(search.search(sessionObj, pattern, folder, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override
@@ -598,19 +587,9 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         }
 
         final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
-//        searchTerm.addField(fields);
         searchTerm.visit(visitor);
-        final SearchIterator<DocumentMetadata> iterator =
-            search.search(
-                fids.toArray(),
-                visitor.getInfostoreTerm(),
-                FieldMapping.getMatching(fields),
-                FieldMapping.getMatching(sort),
-                FieldMapping.getSortDirection(order),
-                start,
-                end,
-                ctx, user, userPermissions);
-        return new InfostoreSearchIterator(iterator);
+        return new InfostoreSearchIterator(search.search(
+            sessionObj, visitor.getInfostoreTerm(), fids.toArray(), getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override
@@ -690,6 +669,12 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         update.setId(source.getId());
         this.saveFileMetadata(update, sequenceNumber, modifiedFields);
         return new IDTuple(update.getFolderId(), update.getId());
+    }
+
+    @Override
+    public List<Field> getSupportedFields() {
+        // all supported
+        return Arrays.asList(File.Field.values());
     }
 
     /**

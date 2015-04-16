@@ -216,6 +216,12 @@ public class FileFieldSet extends AbstractFileFieldSwitcher {
         return null;
     }
 
+    @Override
+    public Object shareable(Object... args) {
+        md(args).setShareable(true);
+        return null;
+    }
+
     private Object ret(final Object[] args) {
         if (args.length >= 3 && null != args[2]) {
             return args[2];

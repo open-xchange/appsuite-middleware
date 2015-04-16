@@ -51,6 +51,9 @@ package com.openexchange.file.storage.json.actions.files;
 
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 
@@ -96,6 +99,39 @@ public abstract class AbstractWriteAction extends AbstractFileAction {
             }
         }
         super.after(req);
+    }
+
+    /**
+     * Gets a file's name in a safe way for use in error messages, without throwing exceptions.
+     * 
+     * @param file The file metadata to get the filename for
+     * @param id The file identifier, or <code>null</code> if not available
+     * @param fileAccess A reference to the file access
+     * @return The filename
+     */
+    protected static String getFilenameSave(File file, FileID id, IDBasedFileAccess fileAccess) {
+        String name = file.getFileName();
+        if (null != name) {
+            return name;
+        }
+        name = file.getTitle();
+        if (null != name) {
+            return name;
+        }
+        if (null != id && null != fileAccess) {
+            try {
+                File metadata = fileAccess.getFileMetadata(id.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
+                if (null != metadata) {
+                    name = metadata.getFileName();
+                    if (null == name) {
+                        name = metadata.getTitle();
+                    }
+                }
+            } catch (OXException e) {
+                org.slf4j.LoggerFactory.getLogger(UpdateAction.class).debug("Error getting name for file {}: {}", id, e.getMessage(), e);
+            }
+        }
+        return name;
     }
 
 }

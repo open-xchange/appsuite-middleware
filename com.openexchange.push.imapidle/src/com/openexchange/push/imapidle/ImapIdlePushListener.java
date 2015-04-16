@@ -49,6 +49,8 @@
 
 package com.openexchange.push.imapidle;
 
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -57,8 +59,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
+import javax.mail.FetchProfile;
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.UIDFolder;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -72,10 +77,17 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.IDMailMessage;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeTypes;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
+import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
@@ -89,9 +101,10 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
-import com.sun.mail.iap.ProtocolException;
 import com.openexchange.user.UserService;
+import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 
@@ -517,6 +530,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             if (!capabilities.hasIdle()) {
                 throw PushExceptionCodes.UNEXPECTED_ERROR.create("Primary IMAP account does not support \"IDLE\" capability!");
             }
+        } catch (OXException e) {
+            if (!e.equalsCode(7, "CTX")) {
+                throw e;
+            }
+            // Updating database...
         } finally {
             if (null != access) {
                 access.close(false);
@@ -602,9 +620,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         }
     }
 
-    private long getUIDNext(IMAPFolder imapFolder) {
+    private long getUIDNext(IMAPFolder imapFolder) throws MessagingException {
         try {
             return imapFolder.getUIDNext();
+        } catch (javax.mail.StoreClosedException e) {
+            // Re-throw...
+            throw e;
         } catch (MessagingException e) {
             LOGGER.warn("Could not determine UIDNEXT. Assuming -1 instead.", e);
             return -1L;
@@ -629,6 +650,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     private void setEventProperties(long uidNext, int totalCount, Map<String, Object> props, IMAPFolder imapFolder) {
+        if (false == permanent) {
+            return;
+        }
+
+        // Has new messages?
         if (uidNext > 0 && totalCount >= 0) {
             try {
                 int newTotalCount = imapFolder.getRealMessageCount();
@@ -636,17 +662,28 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     long newUidNext = getUIDNextCustom(imapFolder);
                     if (newUidNext > 0 && uidNext != newUidNext) {
                         StringBuilder buf = new StringBuilder(64);
+                        TLongList uids = new TLongArrayList();
+
                         buf.append(uidNext);
+                        uids.add(uidNext);
                         for (long uid = uidNext + 1; uid < newUidNext; uid++) {
-                            buf.append(", ").append(uid);
+                            buf.append(',').append(uid);
+                            uids.add(uid);
                         }
                         props.put(PushEventConstants.PROPERTY_IDS, buf.toString());
+
+                        Container<MailMessage> container = fetchMessageInfoFor(uids.toArray(), imapFolder);
+                        if (null != container) {
+                            props.put(PushEventConstants.PROPERTY_CONTAINER, container);
+                        }
                     }
                 }
             } catch (MessagingException e) {
                 LOGGER.warn("Could not determine new message count.", e);
             }
         }
+
+        // Has deleted messages?
         if (totalCount > 0) {
             try {
                 int newTotalCount = imapFolder.getRealMessageCount();
@@ -657,6 +694,78 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 LOGGER.warn("Could not determine new message count.", e);
             }
         }
+    }
+
+    private static final FetchProfile FETCH_PROFILE_MSG_INFO = new FetchProfile() {
+        {
+            add(FetchProfile.Item.CONTENT_INFO);
+            add(FetchProfile.Item.ENVELOPE);
+            add(FetchProfile.Item.FLAGS);
+            add(FetchProfile.Item.SIZE);
+            add(UIDFolder.FetchProfileItem.UID);
+        }
+    };
+
+    private Container<MailMessage> fetchMessageInfoFor(long[] uids, IMAPFolder imapFolder) throws MessagingException {
+        try {
+            int unread = imapFolder.getUnreadMessageCount();
+
+            Message[] messages = imapFolder.getMessagesByUID(uids);
+            imapFolder.fetch(messages, FETCH_PROFILE_MSG_INFO);
+
+            String fullName = imapFolder.getFullName();
+            Map<Long, MailMessage> map = new HashMap<Long, MailMessage>(messages.length);
+            for (Message message : messages) {
+                try {
+                    IMAPMessage im = (IMAPMessage) message;
+                    MailMessage mailMessage = convertMessage(im, fullName, unread);
+                    map.put(Long.valueOf(im.getUID()), mailMessage);
+                } catch (Exception e) {
+                    LOGGER.warn("Could not handle message.", e);
+                }
+            }
+
+            Container<MailMessage> container = new Container<MailMessage>();
+            for (long uid : uids) {
+                MailMessage mailMessage = map.get(Long.valueOf(uid));
+                if (null != mailMessage) {
+                    container.add(mailMessage);
+                }
+            }
+            return container;
+        } catch (javax.mail.StoreClosedException e) {
+            // Re-throw...
+            throw e;
+        } catch (MessagingException e) {
+            LOGGER.warn("Could not fetch message info.", e);
+            return null;
+        }
+    }
+
+    private MailMessage convertMessage(IMAPMessage im, String fullName, int unread) throws MessagingException, OXException {
+        MailMessage mailMessage = new IDMailMessage(Long.toString(im.getUID()), fullName);
+        mailMessage.addFrom(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_FROM, im));
+        mailMessage.addTo(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_TO, im));
+        mailMessage.addCc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_CC, im));
+        mailMessage.addBcc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_BCC, im));
+        {
+            String[] tmp = im.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+            if ((tmp != null) && (tmp.length > 0)) {
+                mailMessage.setContentType(MimeMessageUtility.decodeMultiEncodedHeader(tmp[0]));
+            } else {
+                mailMessage.setContentType(MimeTypes.MIME_DEFAULT);
+            }
+        }
+        mailMessage.setSentDate(MimeMessageConverter.getSentDate(im));
+        try {
+            mailMessage.setSize(im.getSize());
+        } catch (final Exception e) {
+            // Size unavailable
+            mailMessage.setSize(-1);
+        }
+        mailMessage.setSubject(MimeMessageConverter.getSubject(im));
+        mailMessage.setUnreadMessages(unread);
+        return mailMessage;
     }
 
     private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {

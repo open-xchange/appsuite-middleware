@@ -65,7 +65,6 @@ import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FileStorageCapability;
@@ -73,9 +72,6 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.file.storage.search.DescriptionTerm;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
 import com.openexchange.find.AbstractFindRequest;
@@ -97,7 +93,6 @@ import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
 import com.openexchange.find.facet.Facets;
 import com.openexchange.find.facet.Filter;
-import com.openexchange.find.facet.SimpleDisplayItem;
 import com.openexchange.find.spi.AbstractModuleSearchDriver;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -163,30 +158,27 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         }
 
         // Search by term only if supported
-        if (null != folderId) {
-            FolderID folderID = new FolderID(folderId);
-            if (fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM)) {
+        if (supportsSearchByTerm(session, fileAccess, searchRequest)) {
 
-                // Yield search term from search request
-                SearchTerm<?> term = prepareSearchTerm(searchRequest);
-                if (term == null) {
-                    term = new TitleTerm("*", true, true);
-                }
+            // Yield search term from search request
+            SearchTerm<?> term = prepareSearchTerm(searchRequest);
+            if (term == null) {
+                term = new TitleTerm("*", true, true);
+            }
 
-                // Search...
-                SearchIterator<File> it = null;
-                try {
-                    it = fileAccess.search(Collections.singletonList(folderId), term, fields, Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
-                    List<Document> results = new LinkedList<Document>();
-                    while (it.hasNext()) {
-                        final File file = it.next();
-                        results.add(new FileDocument(file));
-                    }
-                    return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
-                } finally {
-                    SearchIterators.close(it);
-                    fileAccess.finish();
+            // Search...
+            List<String> folderIds = null != folderId ? Collections.singletonList(folderId) : null;
+            SearchIterator<File> it = null;
+            try {
+                it = fileAccess.search(folderIds, term, fields, Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
+                List<Document> results = new LinkedList<Document>();
+                while (it.hasNext()) {
+                    results.add(new FileDocument(it.next()));
                 }
+                return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
+            } finally {
+                SearchIterators.close(it);
+                fileAccess.finish();
             }
         }
 
@@ -279,22 +271,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return files;
     }
 
-    private static List<File> filter(List<File> files, String regex, boolean negate) {
-        Iterator<File> iterator = files.iterator();
-        while (iterator.hasNext()) {
-            File file = iterator.next();
-            String mimeType = null != file.getFileMIMEType() ? file.getFileMIMEType() : MimeType2ExtMap.getContentType(file.getFileName());
-            if (null == file.getFileName() || false == Pattern.matches(regex, mimeType)) {
-                if (false == negate) {
-                    iterator.remove();
-                }
-            } else if (negate) {
-                iterator.remove();
-            }
-        }
-        return files;
-    }
-
     /**
      * Gets a value indicating whether the supplied file's MIME type matches any of the specified patterns.
      *
@@ -360,7 +336,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
                 .build());
 
             // Add filename/type/content facets if search by term is supported
-            if (supportsSearchByTerm(session, null, autocompleteRequest)) {
+            if (supportsSearchByTerm(session, autocompleteRequest)) {
                 facets.add(newSimpleBuilder(DriveFacetType.FILE_NAME)
                     .withFormattableDisplayItem(DriveStrings.SEARCH_IN_FILE_NAME, prefix)
                     .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
@@ -411,38 +387,23 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         return Module.DRIVE;
     }
 
-    private List<FacetValue> getAutocompleteFiles(ServerSession session, AutocompleteRequest request) throws OXException {
+    /**
+     * Gets a value indicating whether the "search by term" capability is available based on the parameters of the supplied find request.
+     *
+     * @param session The current session
+     * @param findRequest The find request
+     * @return <code>true</code> if searching by term is supported, <code>false</code>, otherwise
+     */
+    private static boolean supportsSearchByTerm(ServerSession session, AbstractFindRequest findRequest) throws OXException {
         IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
-
-        // Create file access
-        IDBasedFileAccess access = fileAccessFactory.createAccess(session);
-
-        // Compose term
-        String prefix = request.getPrefix();
-        List<SearchTerm<?>> terms = new LinkedList<SearchTerm<?>>();
-        terms.add(new TitleTerm(prefix, true, true));
-        terms.add(new FileNameTerm(prefix, true, true));
-        terms.add(new DescriptionTerm(prefix, true, true));
-        SearchTerm<List<SearchTerm<?>>> orTerm = new OrTerm(terms);
-
-        // Fire search
-        SearchIterator<File> it = null;
+        IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
         try {
-            it = access.search(Collections.<String> emptyList(), orTerm, DEFAULT_FIELDS, Field.TITLE, SortDirection.ASC, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
-            List<FacetValue> facets = new LinkedList<FacetValue>();
-            while (it.hasNext()) {
-                File file = it.next();
-                Filter fileName = new Filter(Collections.singletonList("filename"), file.getFileName());
-                String facetValue = prepareFacetValueId(request.getPrefix(), session.getContextId(), file.getId());
-                facets.add(new FacetValue(facetValue, new SimpleDisplayItem(file.getTitle()), FacetValue.UNKNOWN_COUNT, fileName));
-            }
-            return facets;
+            return supportsSearchByTerm(session, fileAccess, findRequest);
         } finally {
-            SearchIterators.close(it);
-            access.finish();
+            fileAccess.finish();
         }
     }
 
@@ -450,7 +411,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * Gets a value indicating whether the "search by term" capability is available based on the parameters of the supplied find request.
      *
      * @param session The current session
-     * @param fileAccess An existing file access reference, or <code>null</code> if not available
+     * @param fileAccess A reference to the ID based file access service
      * @param findRequest The find request
      * @return <code>true</code> if searching by term is supported, <code>false</code>, otherwise
      */
@@ -460,19 +421,7 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
          */
         if (null != findRequest.getFolderId()) {
             FolderID folderID = new FolderID(findRequest.getFolderId());
-            if (null != fileAccess) {
-                return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);
-            }
-            IDBasedFileAccessFactory fileAccessFactory = Services.getIdBasedFileAccessFactory();
-            if (null == fileAccessFactory) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
-            }
-            fileAccess = fileAccessFactory.createAccess(session);
-            try {
-                return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);
-            } finally {
-                fileAccess.finish();
-            }
+            return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);
         }
         /*
          * check capability of all available storages, otherwise

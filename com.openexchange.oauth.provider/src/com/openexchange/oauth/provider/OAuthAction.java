@@ -62,14 +62,14 @@ import java.lang.annotation.Target;
  * <b>Please note:</b>
  * <ul>
  * <li>The according <code>com.openexchange.ajax.requesthandler.AJAXActionServiceFactory</code> must be annotated with {@link OAuthModule}.</li>
- * <li>Allowed characters are %x21 / %x23-5B / %x5D-7E</li>
+ * <li>Allowed scope characters are %x21 / %x23-5B / %x5D-7E</li>
  * </ul>
  * </p>
  * <p>
  * Before an action is called, the used access token is verified in terms of the
  * provided and needed OAuth 2.0 scopes. The required scope to call an action can easily be
  * defined via the annotations {@link OAuthAction#value()} attribute. If no certain scope is required,
- * {@link OAuthAction#GRANT_ALL} can be set. If a simple scope check is not sufficient, a custom check
+ * {@link OAuthAction#GRANT_ALL} must be set. If a simple scope check is not sufficient, a custom check
  * can be implemented. See {@link OAuthScopeCheck} for details.
  * </p>
  *

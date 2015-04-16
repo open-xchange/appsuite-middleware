@@ -51,9 +51,10 @@ package com.openexchange.oauth.provider;
 
 import java.io.InputStream;
 import com.openexchange.java.Streams;
+import com.openexchange.oauth.provider.client.Icon;
 
 /**
- * {@link DefaultIcon}
+ * Default implementation of an {@link Icon}, based on a byte array.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -63,7 +64,6 @@ public class DefaultIcon implements Icon {
     private static final long serialVersionUID = 1951072419974173720L;
 
     private String mimeType = null;
-    private int size = -1;
     private byte[] data;
 
     /**
@@ -73,14 +73,20 @@ public class DefaultIcon implements Icon {
         super();
     }
 
+    /**
+     * Sets the mime type
+     *
+     * @param mimeType
+     */
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    public void setSize(int size) {
-        this.size = size;
-    }
-
+    /**
+     * Sets the icon data and size. The size is obtained via <code>data.length</code>
+     *
+     * @param data
+     */
     public void setData(byte[] data) {
         this.data = data;
     }
@@ -92,7 +98,7 @@ public class DefaultIcon implements Icon {
 
     @Override
     public int getSize() {
-        return size;
+        return data.length;
     }
 
     @Override

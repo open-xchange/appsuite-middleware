@@ -63,55 +63,33 @@ import java.util.Set;
  */
 public class DefaultFile extends AbstractFile {
 
-    private String categories;
-
-    private int colorLabel;
-
-    private String content;
-
-    private Date created;
-
-    private int createdBy;
-
-    private String description;
-
-    private String fileMD5Sum;
-
-    private String fileMIMEType;
-
-    private String fileName;
-
-    private long fileSize;
-
-    private String folderId;
-
-    private String id;
-
-    private Date lastModified;
-
-    private Date lockedUntil;
-
-    private int modifiedBy;
-
-    private int numberOfVersions;
-
-    private final Map<String, String> properties;
-
-    private String title;
-
-    private String url;
-
-    private String version;
-
-    private String versionComment;
-
-    private boolean isCurrentVersion;
-
-    private Map<String, Object> dynamicProperties;
-
-    private List<FileStorageObjectPermission> objectPermissions;
-
     private static final String DEFAULT_TYPE = "application/octet-stream";
+
+    private String categories;
+    private int colorLabel;
+    private String content;
+    private Date created;
+    private int createdBy;
+    private String description;
+    private String fileMD5Sum;
+    private String fileMIMEType;
+    private String fileName;
+    private long fileSize;
+    private String folderId;
+    private String id;
+    private Date lastModified;
+    private Date lockedUntil;
+    private int modifiedBy;
+    private int numberOfVersions;
+    private final Map<String, String> properties;
+    private String title;
+    private String url;
+    private String version;
+    private String versionComment;
+    private boolean isCurrentVersion;
+    private Map<String, Object> dynamicProperties;
+    private List<FileStorageObjectPermission> objectPermissions;
+    private boolean shareable;
 
     /**
      * Initializes a new {@link DefaultFile}.
@@ -283,6 +261,11 @@ public class DefaultFile extends AbstractFile {
     public boolean isCurrentVersion() {
         return isCurrentVersion;
     }
+    
+    @Override
+    public boolean isShareable() {
+        return shareable;
+    }
 
     @Override
     public void setCategories(final String categories) {
@@ -402,6 +385,11 @@ public class DefaultFile extends AbstractFile {
     @Override
     public List<FileStorageObjectPermission> getObjectPermissions() {
         return objectPermissions;
+    }
+    
+    @Override
+    public void setShareable(boolean shareable) {
+        this.shareable = shareable;
     }
 
 }

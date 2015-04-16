@@ -127,6 +127,18 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
      * User %1$d in context %1$d already reached the max. number of possible OAuth grants but tries to acquire another one.
      */
     GRANTS_EXCEEDED("User %1$d in context %1$d already reached the max. number of possible OAuth grants (%3$d) but tries to acquire another one.", OAuthProviderExceptionMessages.GRANTS_EXCEEDED_MSG, Category.CATEGORY_CAPACITY, 16),
+    /**
+     * Thrown when the oauth client id does not contain a valid group id
+     */
+    BAD_CONTEXT_GROUP_IN_CLIENT_ID("Given client id does not contain a base64 encoded context group id. Client id is: %1$s", Category.CATEGORY_ERROR, 17),
+    /**
+     * Thrown when the oauth client id does not contain a valid base token
+     */
+    BAD_BASE_TOKEN_IN_CLIENT_ID("Given client id is not valid as it does not contain a seperator '%1$s' that seperates the encoded context group id from the base token. Client id is: %2$s", Category.CATEGORY_ERROR, 18),
+    /**
+     * Thrown when the oauth client id is not valid.
+     */
+    BAD_CLIENT_ID("Given client id is not valid. Client id is: %1$s", Category.CATEGORY_ERROR, 19),
 
     ;
 

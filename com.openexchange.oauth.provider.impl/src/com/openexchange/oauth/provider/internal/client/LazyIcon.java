@@ -61,7 +61,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
-import com.openexchange.oauth.provider.Icon;
+import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.osgi.Services;
 
 /**
@@ -74,16 +74,20 @@ public class LazyIcon implements Icon {
 
     private static final long serialVersionUID = 4458877977630523049L;
 
+    private final String groupId;
     private final String clientId;
     private volatile Icon delegate;
 
     /**
      * Initializes a new {@link LazyIcon}.
      *
-     * @param clientId The client identifier
+     * @param groupId id of the context group the client is assigned to
+     * @param clientId The client identifier. Only pass already validated IDs here!
+     * @throws OXException
      */
-    public LazyIcon(String clientId) {
+    public LazyIcon(String groupId, String clientId) {
         super();
+        this.groupId = groupId;
         this.clientId = clientId;
     }
 
@@ -114,9 +118,10 @@ public class LazyIcon implements Icon {
                     ResultSet rs = null;
                     try {
                         dbService = Services.requireService(DatabaseService.class);
-                        con = dbService.getReadOnly();
-                        stmt = con.prepareStatement("SELECT icon, icon_mime_type FROM oauth_client WHERE id = ?");
-                        stmt.setString(1, clientId);
+                        con = dbService.getReadOnlyForGlobal(this.groupId);
+                        stmt = con.prepareStatement("SELECT icon, icon_mime_type FROM oauth_client WHERE id = ? AND gid = ?");
+                        stmt.setString(1, this.clientId);
+                        stmt.setString(2, this.groupId);
                         rs = stmt.executeQuery();
                         if (!rs.next()) {
                             throw new IllegalStateException("The client has been removed in the meantime");
@@ -124,7 +129,6 @@ public class LazyIcon implements Icon {
 
                         Blob blob = rs.getBlob(1);
                         DefaultIcon defaultIcon = new DefaultIcon();
-                        defaultIcon.setSize((int) blob.length());
                         defaultIcon.setMimeType(rs.getString(2));
                         defaultIcon.setData(Streams.stream2bytes(blob.getBinaryStream()));
                         delegate = defaultIcon;
@@ -134,7 +138,7 @@ public class LazyIcon implements Icon {
                     } finally {
                         Databases.closeSQLStuff(rs, stmt);
                         if (con != null && null != dbService) {
-                            dbService.backReadOnly(con);
+                            dbService.backReadOnlyForGlobal(this.groupId, con);
                         }
                     }
                 }

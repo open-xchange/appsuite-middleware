@@ -401,13 +401,11 @@ public class RdbGuestStorage extends GuestStorage {
             return 0L;
         }
 
-        String groupIdsAsString = getIdsAsString(groupIds);
-
         PreparedStatement statement = null;
         long affectedRows = NOT_FOUND;
         try {
-            statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS_FOR_GROUP);
-            statement.setString(1, groupIdsAsString);
+            String groupIdsAsString = getIdsAsString(groupIds);
+            statement = connection.prepareStatement(DELETE_GUEST_ASSIGNMENTS_FOR_GROUP.replace("?", groupIdsAsString));
             affectedRows = statement.executeUpdate();
         } catch (final SQLException e) {
             throw GuestExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -431,11 +429,11 @@ public class RdbGuestStorage extends GuestStorage {
             commaSepValueBuilder.append(groupIds.get(i));
 
             if (i != groupIds.size() - 1) {
-                commaSepValueBuilder.append(", ");
+                commaSepValueBuilder.append(",");
             }
         }
 
-        return commaSepValueBuilder.toString();
+        return commaSepValueBuilder.toString().replaceAll("\\s","");
     }
 
     /**

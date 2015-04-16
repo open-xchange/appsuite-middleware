@@ -59,11 +59,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.oauth.provider.DefaultClient;
 import com.openexchange.oauth.provider.DefaultGrantView;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.GrantView;
 import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.client.DefaultClient;
 
 
 /**

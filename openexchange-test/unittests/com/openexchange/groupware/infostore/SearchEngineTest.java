@@ -49,6 +49,7 @@
 package com.openexchange.groupware.infostore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import junit.framework.TestCase;
 import com.openexchange.database.provider.DBPoolProvider;
@@ -76,7 +77,7 @@ import com.openexchange.tools.session.ServerSessionFactory;
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class SearchEngineTest extends TestCase {
-    private InfostoreSearchEngine searchEngine;
+    private SearchEngineImpl searchEngine;
 
     private Context ctx = null;
     private User user = null;
@@ -147,10 +148,10 @@ public class SearchEngineTest extends TestCase {
 
     public void testSearchForPercent() throws OXException, OXException {
         final DocumentMetadata doc1 = createWithTitle("100%");
-                                createWithTitle("Hallo");
-
-
-        final SearchIterator iter = searchEngine.search("%",new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL}, folderId, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC,0,10,ctx, user, permissionBits);
+        createWithTitle("Hallo");
+                                
+        List<Integer> folderIDs = Collections.singletonList(Integer.valueOf(folderId));
+        SearchIterator<?> iter = searchEngine.search(session, "%", folderIDs, null, new Metadata[] { Metadata.ID_LITERAL, Metadata.TITLE_LITERAL }, Metadata.TITLE_LITERAL, InfostoreSearchEngine.ASC, 0, 10);
 
         assertTrue(iter.hasNext());
         final DocumentMetadata gotDoc = (DocumentMetadata) iter.next();
@@ -188,8 +189,9 @@ public class SearchEngineTest extends TestCase {
     }
 
     private void assertSurvivesOrder(final Metadata[] metadata) {
+        List<Integer> folderIDs = Collections.<Integer>singletonList(Integer.valueOf(folderId));
         try {
-           searchEngine.search("*",metadata,folderId,metadata[0],InfostoreSearchEngine.ASC, 0, 10, ctx, user, permissionBits);
+           searchEngine.search(session, "*", folderIDs, null, metadata, metadata[0], InfostoreSearchEngine.ASC, 0, 10);
         } catch (final Exception x) {
             fail(x.getMessage());
             x.printStackTrace();

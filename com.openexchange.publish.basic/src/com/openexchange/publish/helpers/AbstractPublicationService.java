@@ -183,7 +183,7 @@ public abstract class AbstractPublicationService implements PublicationService {
                     returnPublications.add(publication);
                 //}
             } catch (OXException e) {
-                if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
+                if (InfostoreExceptionCodes.NOT_EXIST.equals(e) || InfostoreExceptionCodes.DOCUMENT_NOT_EXIST.equals(e)) {
                     LOG.debug("", e);
                 } else {
                     throw e;

@@ -49,6 +49,14 @@
 
 package com.openexchange.tools.oxfolder;
 
+import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
+import static com.openexchange.server.impl.OCLPermission.ALL_GROUPS_AND_USERS;
+import static com.openexchange.server.impl.OCLPermission.ALL_GUESTS;
+import static com.openexchange.server.impl.OCLPermission.CREATE_SUB_FOLDERS;
+import static com.openexchange.server.impl.OCLPermission.NO_PERMISSIONS;
+import static com.openexchange.server.impl.OCLPermission.READ_ALL_OBJECTS;
+import static com.openexchange.server.impl.OCLPermission.READ_FOLDER;
+import static com.openexchange.server.impl.OCLPermission.WRITE_OWN_OBJECTS;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import gnu.trove.list.TIntList;
@@ -223,11 +231,11 @@ public final class OXFolderAdminHelper {
                     stmt =
                         writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
                     pos = 1;
-                    stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
+                    stmt.setInt(pos++, CREATE_SUB_FOLDERS); // fp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // orp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // owp
                     stmt.setInt(pos++, editable ? 1 : 0); // admin_flag
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // odp
                     stmt.setInt(pos++, cid);
                     stmt.setInt(pos++, id);
                     stmt.setInt(pos++, admin);
@@ -240,10 +248,10 @@ public final class OXFolderAdminHelper {
                     stmt.setInt(pos++, cid); // cid
                     stmt.setInt(pos++, id); // fuid
                     stmt.setInt(pos++, admin); // permission_id
-                    stmt.setInt(pos++, OCLPermission.CREATE_SUB_FOLDERS); // fp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
+                    stmt.setInt(pos++, CREATE_SUB_FOLDERS); // fp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // orp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // owp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // odp
                     stmt.setInt(pos++, editable ? 1 : 0); // admin_flag
                     stmt.setInt(pos++, 0); // group_flag
                     stmt.setInt(pos++, 0); // system
@@ -363,10 +371,10 @@ public final class OXFolderAdminHelper {
          */
         final int globalAddressBookId = FolderObject.SYSTEM_LDAP_FOLDER_ID;
         try {
-            final int[] perms = getPermissionValue(cid, globalAddressBookId, OCLPermission.ALL_GROUPS_AND_USERS, readCon);
+            final int[] perms = getPermissionValue(cid, globalAddressBookId, ALL_GROUPS_AND_USERS, readCon);
             if (null != perms) {
                 LOG.warn("Cannot look-up individual user permission: Global permission is active on global address book folder.\nReturning global permission instead. user={}, context={}", userId, cid);
-                return (perms[0] == OCLPermission.NO_PERMISSIONS);
+                return (perms[0] == NO_PERMISSIONS);
             }
         } catch (final SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -381,7 +389,7 @@ public final class OXFolderAdminHelper {
             stmt.setInt(pos++, userId);
             rs = stmt.executeQuery();
             if (rs.next()) {
-                return rs.getInt(1) == OCLPermission.NO_PERMISSIONS; // && rs.getInt(2) >= OCLPermission.READ_ALL_OBJECTS;
+                return rs.getInt(1) == NO_PERMISSIONS; // && rs.getInt(2) >= READ_FOLDER;
             }
             return true;
         } catch (final SQLException e) {
@@ -465,16 +473,16 @@ public final class OXFolderAdminHelper {
                 stmt = writeCon.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ?, admin_flag = ?, odp = ? WHERE cid = ? AND fuid = ? AND permission_id = ? AND system = ?");
                 pos = 1;
                 if (disable) {
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, NO_PERMISSIONS);
+                    stmt.setInt(pos++, NO_PERMISSIONS);
+                    stmt.setInt(pos++, NO_PERMISSIONS);
                 } else {
-                    stmt.setInt(pos++, OCLPermission.READ_FOLDER);
-                    stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
-                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
+                    stmt.setInt(pos++, READ_FOLDER);
+                    stmt.setInt(pos++, READ_ALL_OBJECTS);
+                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS);
                 }
                 stmt.setInt(pos++, isAdmin ? 1 : 0);
-                stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS);
+                stmt.setInt(pos++, NO_PERMISSIONS);
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, globalAddressBookId);
                 stmt.setInt(pos++, userId);
@@ -487,15 +495,15 @@ public final class OXFolderAdminHelper {
                 stmt.setInt(pos++, globalAddressBookId); // fuid
                 stmt.setInt(pos++, userId); // permission_id
                 if (disable) {
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // fp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // orp
-                    stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // owp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // fp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // orp
+                    stmt.setInt(pos++, NO_PERMISSIONS); // owp
                 } else {
-                    stmt.setInt(pos++, OCLPermission.READ_FOLDER); // fp
-                    stmt.setInt(pos++, OCLPermission.READ_ALL_OBJECTS); // orp
-                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS); // owp
+                    stmt.setInt(pos++, READ_FOLDER); // fp
+                    stmt.setInt(pos++, READ_ALL_OBJECTS); // orp
+                    stmt.setInt(pos++, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS); // owp
                 }
-                stmt.setInt(pos++, OCLPermission.NO_PERMISSIONS); // odp
+                stmt.setInt(pos++, NO_PERMISSIONS); // odp
                 stmt.setInt(pos++, isAdmin ? 1 : 0); // admin_flag
                 stmt.setInt(pos++, 0); // group_flag
                 stmt.setInt(pos++, 0); // system
@@ -583,16 +591,12 @@ public final class OXFolderAdminHelper {
     private void addContextSystemFolders(final int cid, final int mailAdmin, final String mailAdminDisplayName, final String language, final Connection writeCon) throws SQLException, OXException {
         final long creatingTime = System.currentTimeMillis();
         final OCLPermission systemPermission = new OCLPermission();
-        systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        systemPermission.setEntity(ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
         /*
          * Insert system private folder
          */
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(CREATE_SUB_FOLDERS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_PRIVATE_FOLDER_ID,
@@ -607,11 +611,10 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
         final OCLPermission guestPermission = new OCLPermission();
-        guestPermission.setEntity(OCLPermission.ALL_GUESTS);
+        guestPermission.setEntity(ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_PRIVATE_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system public folder
@@ -622,11 +625,7 @@ public final class OXFolderAdminHelper {
         /*
          * Insert system shared folder
          */
-        systemPermission.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_SHARED_FOLDER_ID,
@@ -640,17 +639,12 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_SHARED_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system system folder
          */
-        systemPermission.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_FOLDER_ID,
@@ -673,11 +667,7 @@ public final class OXFolderAdminHelper {
         /*
          * Insert system system_global folder aka 'Shared Address Book'
          */
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION,
-            OCLPermission.ADMIN_PERMISSION);
+        systemPermission.setAllPermission(CREATE_SUB_FOLDERS, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
@@ -712,11 +702,7 @@ public final class OXFolderAdminHelper {
         /*
          * Insert system user folder
          */
-        systemPermission.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_OX_FOLDER_ID,
@@ -733,11 +719,7 @@ public final class OXFolderAdminHelper {
         /*
          * Insert system userstore infostore folder
          */
-        systemPermission.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
@@ -751,8 +733,7 @@ public final class OXFolderAdminHelper {
             true,
             cid,
             writeCon);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
         /*
          * Insert system public infostore folder
@@ -771,8 +752,8 @@ public final class OXFolderAdminHelper {
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
             mailAdmin,
             new int[] {
-                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION },
+                ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION,
+                ADMIN_PERMISSION },
             true,
             cid,
             writeCon);
@@ -783,9 +764,7 @@ public final class OXFolderAdminHelper {
         createSingleUserPermission(
             FolderObject.SYSTEM_GLOBAL_FOLDER_ID,
             mailAdmin,
-            new int[] {
-                OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION },
+            new int[] { ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION },
             true,
             cid,
             writeCon);
@@ -796,9 +775,7 @@ public final class OXFolderAdminHelper {
             createSingleUserPermission(
                 FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
                 mailAdmin,
-                new int[] {
-                    OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS },
+                new int[] { CREATE_SUB_FOLDERS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS },
                 true,
                 cid,
                 writeCon);
@@ -808,8 +785,7 @@ public final class OXFolderAdminHelper {
             createSingleUserPermission(
                 FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID,
                 mailAdmin,
-                new int[] {
-                    OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS },
+                new int[] { READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS },
                 true,
                 cid,
                 writeCon);
@@ -852,11 +828,7 @@ public final class OXFolderAdminHelper {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(CREATE_SUB_FOLDERS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_PUBLIC_FOLDER_ID,
@@ -874,8 +846,7 @@ public final class OXFolderAdminHelper {
         guestPermission.setEntity(OCLPermission.ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_PUBLIC_FOLDER_ID, guestPermission, cid, writeCon);
 
     }
@@ -893,11 +864,7 @@ public final class OXFolderAdminHelper {
         final OCLPermission systemPermission = new OCLPermission();
         systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
-        systemPermission.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_INFOSTORE_FOLDER_ID,
@@ -915,8 +882,7 @@ public final class OXFolderAdminHelper {
         guestPermission.setEntity(OCLPermission.ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
     }
 
@@ -931,13 +897,9 @@ public final class OXFolderAdminHelper {
      */
     private static void createSystemPublicInfostoreFolder(final int cid, final int mailAdmin, final Connection writeCon, final long creatingTime) throws SQLException {
         final OCLPermission systemPermission = new OCLPermission();
-        systemPermission.setEntity(OCLPermission.ALL_GROUPS_AND_USERS);
+        systemPermission.setEntity(ALL_GROUPS_AND_USERS);
         systemPermission.setGroupPermission(true);
-        systemPermission.setAllPermission(
-            OCLPermission.CREATE_SUB_FOLDERS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
+        systemPermission.setAllPermission(CREATE_SUB_FOLDERS, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         systemPermission.setFolderAdmin(false);
         createSystemFolder(
             FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID,
@@ -952,11 +914,10 @@ public final class OXFolderAdminHelper {
             cid,
             writeCon);
         final OCLPermission guestPermission = new OCLPermission();
-        guestPermission.setEntity(OCLPermission.ALL_GUESTS);
+        guestPermission.setEntity(ALL_GUESTS);
         guestPermission.setGroupPermission(true);
         guestPermission.setFolderAdmin(false);
-        guestPermission.setAllPermission(
-            OCLPermission.READ_FOLDER, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.setAllPermission(READ_FOLDER, NO_PERMISSIONS, NO_PERMISSIONS, NO_PERMISSIONS);
         createSinglePermission(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID, guestPermission, cid, writeCon);
     }
 
@@ -1539,11 +1500,7 @@ public final class OXFolderAdminHelper {
             final OCLPermission defaultPerm = new OCLPermission();
             defaultPerm.setEntity(userId);
             defaultPerm.setGroupPermission(false);
-            defaultPerm.setAllPermission(
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION,
-                OCLPermission.ADMIN_PERMISSION);
+            defaultPerm.setAllPermission(ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION, ADMIN_PERMISSION);
             defaultPerm.setFolderAdmin(true);
             final FolderObject fo = new FolderObject();
             fo.setPermissionsAsArray(new OCLPermission[] { defaultPerm });
@@ -1592,41 +1549,7 @@ public final class OXFolderAdminHelper {
      * @param p The permission instance whose permissions shall be set
      */
     private static void setGABPermissions(final OCLPermission p) {
-        p.setAllPermission(
-            OCLPermission.READ_FOLDER,
-            OCLPermission.READ_ALL_OBJECTS,
-            OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS,
-            OCLPermission.NO_PERMISSIONS);
-    }
-
-    // NOTE: This is an update without the full primary key in the where clause, so it may lock too many rows.
-    // Since this is never called, I suppose we might as well remove the method
-    private void updateGABWritePermission(final int contextId, final boolean enable, final Connection con) throws OXException {
-        PreparedStatement ps = null;
-        try {
-            ps =
-                con.prepareStatement("UPDATE oxfolder_permissions SET fp = ?, orp = ?, owp = ? WHERE cid = ? AND fuid = ? AND permission_id = ?");
-            int pos = 1;
-            if (enable) {
-                ps.setInt(pos++, OCLPermission.READ_FOLDER);
-                ps.setInt(pos++, OCLPermission.READ_ALL_OBJECTS);
-                ps.setInt(
-                    pos++,
-                    OXFolderProperties.isEnableInternalUsersEdit() ? OCLPermission.WRITE_OWN_OBJECTS : OCLPermission.NO_PERMISSIONS);
-            } else {
-                ps.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                ps.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-                ps.setInt(pos++, OCLPermission.NO_PERMISSIONS);
-            }
-            ps.setInt(pos++, contextId);
-            ps.setInt(pos++, FolderObject.SYSTEM_LDAP_FOLDER_ID);
-            ps.setInt(pos++, OCLPermission.ALL_GROUPS_AND_USERS);
-            ps.executeUpdate();
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(ps);
-        }
+        p.setAllPermission(READ_FOLDER, READ_ALL_OBJECTS, OXFolderProperties.isEnableInternalUsersEdit() ? WRITE_OWN_OBJECTS : NO_PERMISSIONS, NO_PERMISSIONS);
     }
 
 }

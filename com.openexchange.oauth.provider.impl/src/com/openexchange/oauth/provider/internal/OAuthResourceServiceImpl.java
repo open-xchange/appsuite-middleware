@@ -52,17 +52,18 @@ package com.openexchange.oauth.provider.internal;
 import java.util.Date;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.OAuthGrant;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthResourceService;
 import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.StoredGrant;
 import com.openexchange.oauth.provider.tools.UserizedToken;
-
 
 /**
  * {@link OAuthResourceServiceImpl}
@@ -74,19 +75,19 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
 
     /*
      * From https://tools.ietf.org/html/rfc6750#section-2.1:
-     *   The syntax for Bearer credentials is as follows:
-     *   b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
-     *   credentials = "Bearer" 1*SP b64token
+     * The syntax for Bearer credentials is as follows:
+     * b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
+     * credentials = "Bearer" 1*SP b64token
      */
     private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
 
-    private final OAuthClientStorage clientStorage;
+    private final ClientManagement clientManagement;
 
     private final OAuthGrantStorage grantStorage;
 
-    public OAuthResourceServiceImpl(OAuthClientStorage clientStorage, OAuthGrantStorage grantStorage) {
+    public OAuthResourceServiceImpl(ClientManagement clientManagement, OAuthGrantStorage grantStorage) {
         super();
-        this.clientStorage = clientStorage;
+        this.clientManagement = clientManagement;
         this.grantStorage = grantStorage;
     }
 
@@ -110,12 +111,19 @@ public class OAuthResourceServiceImpl implements OAuthResourceService {
 
     @Override
     public Client getClient(OAuthGrant grant) throws OXException {
-        Client client = clientStorage.getClientById(grant.getClientId());
-        if (client == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+        try {
+            Client client = clientManagement.getClientById(grant.getClientId());
+            if (client == null) {
+                throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+            }
+
+            return client;
+        } catch (ClientManagementException e) {
+            if (e.getReason() == com.openexchange.oauth.provider.client.ClientManagementException.Reason.INVALID_CLIENT_ID) {
+                throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
+            }
+
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-
-        return client;
     }
-
 }

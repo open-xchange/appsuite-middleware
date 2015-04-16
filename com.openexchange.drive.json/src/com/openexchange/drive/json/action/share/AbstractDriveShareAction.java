@@ -52,7 +52,9 @@ package com.openexchange.drive.json.action.share;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.json.action.AbstractDriveAction;
+import com.openexchange.drive.json.internal.Services;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -88,6 +90,15 @@ public abstract class AbstractDriveShareAction extends AbstractDriveAction {
         } else {
             return requestData.getHostname();
         }
+    }
+
+    protected String getServletPrefix() {
+        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
+        if (prefixService == null) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+
+        return prefixService.getPrefix();
     }
 
 }

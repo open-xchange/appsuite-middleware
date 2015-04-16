@@ -56,6 +56,7 @@ package com.openexchange.groupware.infostore.database;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface FilenameReservation {
+    
     /**
      * Gets the filename.
      *
@@ -70,4 +71,10 @@ public interface FilenameReservation {
      */
     boolean wasAdjusted();
 
+    /**
+     * Gets a value indicating whether the document behind this reservation used the same title as the filename.
+     * 
+     * @return <code>true</code> if the title in the document is equal to the filename, <code>false</code>, otherwise
+     */
+    boolean wasSameTitle();
 }

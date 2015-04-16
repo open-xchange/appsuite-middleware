@@ -543,6 +543,7 @@ public class DriveServiceImpl implements DriveService {
         for (DriveShareTarget target : targets) {
             String path = target.getPath();
             ShareTarget shareTarget = new ShareTarget();
+            shareTarget.setExpiryDate(target.getExpiryDate());
             shareTarget.setModule(FolderObject.INFOSTORE);
             if (target.getName() != null && !Strings.isEmpty(target.getName())) {
                 String name = target.getName();

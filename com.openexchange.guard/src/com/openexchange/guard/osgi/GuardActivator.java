@@ -51,6 +51,7 @@ package com.openexchange.guard.osgi;
 
 import java.util.Dictionary;
 import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import com.openexchange.admin.plugins.OXContextPluginInterface;
 import com.openexchange.config.ConfigurationService;
@@ -58,7 +59,9 @@ import com.openexchange.guard.AbstractGuardAccess;
 import com.openexchange.guard.GuardApi;
 import com.openexchange.guard.interceptor.GuardProvisioningContextPlugin;
 import com.openexchange.guard.interceptor.GuardUserServiceInterceptor;
+import com.openexchange.guard.transport.listener.GuardTransportListener;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserServiceInterceptor;
 
@@ -115,6 +118,11 @@ public class GuardActivator extends HousekeepingActivator {
 
             // Register interceptor
             registerService(UserServiceInterceptor.class, new GuardUserServiceInterceptor(this));
+
+            // Register transport listener
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            properties.put(Constants.SERVICE_RANKING, Integer.valueOf(100));
+            registerService(MailTransportListener.class, new GuardTransportListener(), properties);
         } catch (Exception e) {
             logger.error("Failed starting bundle {}", context.getBundle().getSymbolicName(), e);
             throw e;

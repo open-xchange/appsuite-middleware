@@ -114,7 +114,10 @@ import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.MimeSupport;
 import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.transport.listener.Reply;
+import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
 import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.smtp.config.SMTPSessionProperties;
@@ -140,35 +143,6 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      */
     protected static final String SMTP = SMTPProvider.PROTOCOL_SMTP.getName();
 
-    private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
-
-        private final Transport transport;
-
-        private final String server;
-
-        private final int port;
-
-        private final String login;
-
-        private final String pw;
-
-        protected SaslSmtpLoginAction(final Transport transport, final String server, final int port, final String login, final String pw) {
-            super();
-            this.transport = transport;
-            this.server = server;
-            this.port = port;
-            this.login = login;
-            this.pw = pw;
-        }
-
-        @Override
-        public Object run() throws MessagingException {
-            transport.connect(server, port, login, pw);
-            return null;
-        }
-
-    }
-
     private static volatile String staticHostName;
 
     private static volatile UnknownHostException warnSpam;
@@ -182,18 +156,21 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    private final Queue<Runnable> pendingInvocations;
+    // -------------------------------------------------------------------------------------------------------------------------------
 
-    private volatile javax.mail.Session smtpSession;
-
+    /** The account identifier */
     protected final int accountId;
 
+    /** The associated context */
     protected final Context ctx;
 
+    /** The associated session or <code>null</code> */
+    protected final Session session;
+
+    private final Queue<Runnable> pendingInvocations;
+    private volatile javax.mail.Session smtpSession;
     private volatile SMTPConfig cachedSmtpConfig;
-
     private User user;
-
     private transient Subject kerberosSubject;
 
     /**
@@ -203,23 +180,35 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         super();
         accountId = MailAccount.DEFAULT_ID;
         ctx = null;
+        session = null;
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
 
-    protected AbstractSMTPTransport(final int contextId) throws OXException {
-        this(contextId, MailAccount.DEFAULT_ID);
+    /**
+     * Initializes a new {@link AbstractSMTPTransport}.
+     *
+     * @param contextId The context identifier
+     * @throws OXException If initialization fails
+     */
+    protected AbstractSMTPTransport(int contextId) throws OXException {
+        super();
+        this.session = null;
+        this.ctx = Services.getService(ContextService.class).getContext(contextId);
+        this.accountId = MailAccount.DEFAULT_ID;
+        pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
 
     /**
      * Constructor
      *
-     * @param ctx The context
+     * @param session The session
      * @param accountId The account ID
-     * @throws OXException
+     * @throws OXException If initialization fails
      */
-    protected AbstractSMTPTransport(final int contextId, final int accountId) throws OXException {
+    protected AbstractSMTPTransport(Session session, int accountId) throws OXException {
         super();
-        this.ctx = Services.getService(ContextService.class).getContext(contextId);
+        this.session = session;
+        this.ctx = Services.getService(ContextService.class).getContext(session.getContextId());
         this.accountId = accountId;
         pendingInvocations = new ConcurrentLinkedQueue<Runnable>();
     }
@@ -486,10 +475,20 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return smtpSession;
     }
 
+    /**
+     * Sets the user
+     *
+     * @param user The user
+     */
     protected void setUser(User user) {
         this.user = user;
     }
 
+    /**
+     * Sets the Kerberos subject
+     *
+     * @param kerberosSubject The subject
+     */
     protected void setKerberosSubject(Subject kerberosSubject) {
         this.kerberosSubject = kerberosSubject;
     }
@@ -567,11 +566,31 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             transport.addTransportListener(new AddressAddingTransportListener(mtaInfo));
         }
 
+        // Grab listener chain instance
+        ListenerChain listenerChain = ListenerChain.getInstance();
+
         // Try to send the message
+        MimeMessage messageToSend = smtpMessage;
+        Exception exception = null;
         try {
-            transport.sendMessage(smtpMessage, recipients);
-            logMessageTransport(smtpMessage, smtpConfig);
+            // Check listener chain
+            Result result = listenerChain.onBeforeMessageTransport(messageToSend, session);
+            if (Reply.DENY == result.getReply()) {
+                throw MailExceptionCode.SEND_DENIED.create();
+            }
+            MimeMessage resultingMimeMessage = result.getMimeMessage();
+            if (null != resultingMimeMessage) {
+                messageToSend = resultingMimeMessage;
+            }
+
+            // Transport
+            transport.sendMessage(messageToSend, recipients);
+            logMessageTransport(messageToSend, smtpConfig);
+        } catch (OXException e) {
+            exception = e;
+            throw e;
         } catch (SMTPSendFailedException sendFailed) {
+            exception = sendFailed;
             OXException oxe = handleMessagingException(sendFailed, smtpConfig);
             if (null != mtaInfo) {
                 mtaInfo.setReturnCode(sendFailed.getReturnCode());
@@ -579,6 +598,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             }
             throw oxe;
         } catch (final MessagingException e) {
+            exception = e;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
                 final String message = e.getNextException().getMessage();
@@ -586,7 +606,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                    transportAlt(smtpMessage, recipients, transport, smtpConfig);
+                    transportAlt(messageToSend, recipients, transport, smtpConfig);
                     return;
                 }
             } else if (e.getNextException() instanceof IOException) {
@@ -595,6 +615,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
             throw handleMessagingException(e, smtpConfig);
+        } catch (RuntimeException e) {
+            exception = e;
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            listenerChain.onAfterMessageTransport(messageToSend, exception, session);
         }
     }
 
@@ -1065,11 +1090,13 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------------
+
     private static final class MailCleanerTask implements Runnable {
 
         private final ComposedMailMessage composedMail;
 
-        public MailCleanerTask(final ComposedMailMessage composedMail) {
+        MailCleanerTask(ComposedMailMessage composedMail) {
             super();
             this.composedMail = composedMail;
         }
@@ -1079,6 +1106,30 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             composedMail.cleanUp();
         }
 
-    }
+    } // End of class MailCleanerTask
+
+    private static final class SaslSmtpLoginAction implements PrivilegedExceptionAction<Object> {
+
+        private final Transport transport;
+        private final String server;
+        private final int port;
+        private final String login;
+        private final String pw;
+
+        SaslSmtpLoginAction(Transport transport, String server, int port, String login, String pw) {
+            super();
+            this.transport = transport;
+            this.server = server;
+            this.port = port;
+            this.login = login;
+            this.pw = pw;
+        }
+
+        @Override
+        public Object run() throws MessagingException {
+            transport.connect(server, port, login, pw);
+            return null;
+        }
+    } // End of class SaslSmtpLoginAction
 
 }

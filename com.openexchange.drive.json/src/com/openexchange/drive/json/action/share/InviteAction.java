@@ -63,6 +63,7 @@ import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.notification.NotificationSender;
 import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -80,16 +81,23 @@ public class InviteAction extends AbstractDriveShareAction {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
             List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
-            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data);
+            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data, getTimeZone(requestData, session.getServerSession()));
+            String message = data.optString("message", null);
             /*
              * create the shares
              */
             DriveService driveService = Services.getService(DriveService.class, true);
             Map<ShareRecipient, List<ShareInfo>> createdShares = driveService.createShare(session, recipients, targets);
             /*
+             * Send notifications
+             */
+            NotificationSender sender = new NotificationSender(Services.get(), determineProtocol(requestData), determineHostname(requestData), getServletPrefix());
+            List<OXException> warnings = sender.sendNotifications(createdShares, message, session.getServerSession());
+            /*
              * construct & return appropriate json result
              */
             AJAXRequestResult result = new AJAXRequestResult();
+            result.addWarnings(warnings);
             JSONArray jTokens = new JSONArray(recipients.size());
             for (ShareRecipient recipient : recipients) {
                 List<ShareInfo> shares = createdShares.get(recipient);

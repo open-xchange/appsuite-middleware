@@ -50,13 +50,15 @@
 package com.openexchange.startup.impl.osgi;
 
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.migration.DBMigrationMonitorService;
 import com.openexchange.startup.SignalStartedService;
-import com.openexchange.startup.impl.Services;
 import com.openexchange.startup.impl.SignalStartedServiceImpl;
 
 /**
@@ -68,71 +70,74 @@ import com.openexchange.startup.impl.SignalStartedServiceImpl;
  */
 public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMigrationMonitorService, DBMigrationMonitorService> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationMonitorTracker.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DBMigrationMonitorTracker.class);
 
     private final BundleContext context;
-
-    public DBMigrationMonitorTracker(final BundleContext context) {
-        super();
-        this.context = context;
-    }
+    private final AtomicReference<ServiceRegistration<SignalStartedService>> signalStartedRegistrationRef;
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link DBMigrationMonitorTracker}.
+     *
+     * @param context The bundle context
      */
+    public DBMigrationMonitorTracker(BundleContext context) {
+        super();
+        this.context = context;
+        signalStartedRegistrationRef = new AtomicReference<ServiceRegistration<SignalStartedService>>();
+    }
+
     @Override
     public DBMigrationMonitorService addingService(final ServiceReference<DBMigrationMonitorService> reference) {
         final DBMigrationMonitorService migrationMonitor = context.getService(reference);
-        if (migrationMonitor == null) {
-            return null;
+
+        if (migrationMonitor != null) {
+            final BundleContext context = this.context;
+            final AtomicReference<ServiceRegistration<SignalStartedService>> serviceRegistrationRef = this.signalStartedRegistrationRef;
+            Executors.newSingleThreadExecutor().execute(new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        boolean dbUpdateInProgress = !migrationMonitor.getScheduledFiles().isEmpty();;
+                        if (dbUpdateInProgress) {
+                            int countLoops = 0;
+                            long waitNanos = TimeUnit.SECONDS.toNanos(1L); // 1 second
+                            do {
+                                LockSupport.parkNanos(waitNanos);
+                                dbUpdateInProgress = !migrationMonitor.getScheduledFiles().isEmpty();
+                                if (++countLoops % 10 == 0) {
+                                    LOG.info("Still updating configdb.");
+                                }
+                            } while (dbUpdateInProgress);
+                            LOG.info("Finished configdb update. Time elapsed: {}ms", Integer.valueOf(countLoops * 1000));
+                        } else {
+                            LOG.debug("No configdb update in progress.");
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error while waiting for configdb changes.", e);
+                    }
+                    serviceRegistrationRef.set(context.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null));
+                    LOG.info("Open-Xchange Server initialized. The server should be up and running...");
+                }
+            });
+
+            return migrationMonitor;
         }
 
-        final BundleContext lContext = this.context;
-        Executors.newSingleThreadExecutor().execute(new Runnable() {
-
-            @Override
-            public void run() {
-                boolean dbUpdateInProgress = true;
-
-                try {
-                    int countLoops = 0;
-                    while (dbUpdateInProgress) {
-                        dbUpdateInProgress = !migrationMonitor.getScheduledFiles().isEmpty();
-
-                        countLoops++;
-                        Thread.sleep(1000);
-                        if (countLoops % 10 == 0) {
-                            LOG.info("Still updating configdb.");
-                        }
-                    }
-                    LOG.info("Finished update. Time elapsed: {}ms", countLoops * 1000);
-                } catch (InterruptedException e) {
-                    LOG.error("Interrupted while waiting for configdb changes.", e);
-                }
-                Services.addSignalStartedService(lContext.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null));
-                LOG.info("Open-Xchange Server initialized. The server should be up and running...");
-            }
-        });
-
-        return migrationMonitor;
+        context.ungetService(reference);
+        return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removedService(final ServiceReference<DBMigrationMonitorService> reference, final DBMigrationMonitorService service) {
-
-        ServiceRegistration<SignalStartedService> removeSignalStartedService = com.openexchange.startup.impl.Services.removeSignalStartedService();
-        if (removeSignalStartedService != null) {
-            removeSignalStartedService.unregister();
+        ServiceRegistration<SignalStartedService> signalStartedRegistration = signalStartedRegistrationRef.getAndSet(null);
+        if (signalStartedRegistration != null) {
+            signalStartedRegistration.unregister();
         }
         context.ungetService(reference);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void modifiedService(final ServiceReference<DBMigrationMonitorService> reference, final DBMigrationMonitorService service) {
         // Nope

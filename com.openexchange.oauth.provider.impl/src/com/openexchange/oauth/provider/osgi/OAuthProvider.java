@@ -74,13 +74,13 @@ import com.openexchange.oauth.provider.internal.OAuthProviderServiceImpl;
 import com.openexchange.oauth.provider.internal.OAuthResourceServiceImpl;
 import com.openexchange.oauth.provider.internal.authcode.AbstractAuthorizationCodeProvider;
 import com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfoFactory;
-import com.openexchange.oauth.provider.internal.client.CachingOAuthClientStorage;
-import com.openexchange.oauth.provider.internal.client.OAuthClientStorage;
-import com.openexchange.oauth.provider.internal.client.RdbOAuthClientStorage;
+import com.openexchange.oauth.provider.internal.client.ClientManagementImpl;
+import com.openexchange.oauth.provider.internal.client.storage.CachingOAuthClientStorage;
+import com.openexchange.oauth.provider.internal.client.storage.OAuthClientStorage;
+import com.openexchange.oauth.provider.internal.client.storage.RdbOAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.DbGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
-import com.openexchange.oauth.provider.notification.OAuthMailNotificationService;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.servlets.ClientIconEndpoint;
@@ -130,15 +130,16 @@ public class OAuthProvider {
                 OAuthClientStorage clientStorage = initClientStorage();
                 OAuthGrantStorage grantStorage = new DbGrantStorage(activator);
 
-                OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(authCodeProvider, clientStorage, grantStorage, activator);
-                OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(clientStorage, grantStorage);
+                ClientManagementImpl clientManagement = new ClientManagementImpl(clientStorage, grantStorage);
+                OAuthProviderServiceImpl oAuthProvider = new OAuthProviderServiceImpl(authCodeProvider, clientManagement, grantStorage, activator);
+                OAuthResourceServiceImpl resourceService = new OAuthResourceServiceImpl(clientManagement, grantStorage);
                 registeredServices.add(context.registerService(OAuthProviderService.class, oAuthProvider, null));
                 registeredServices.add(context.registerService(OAuthResourceService.class, resourceService, null));
                 registeredServices.add(context.registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory(), null));
 
                 Dictionary<String, Object> props = new Hashtable<String, Object>(2);
                 props.put("RMIName", OAuthClientRmi.RMI_NAME);
-                registeredServices.add(context.registerService(Remote.class, new OAuthClientRmiImpl(oAuthProvider), props));
+                registeredServices.add(context.registerService(Remote.class, new OAuthClientRmiImpl(clientManagement), props));
 
                 registerServlets(oAuthProvider);
                 started = true;

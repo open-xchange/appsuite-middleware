@@ -49,8 +49,11 @@
 
 package com.openexchange.share.servlet.internal;
 
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,10 +62,11 @@ import org.json.JSONObject;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.PasswordChangeEvent;
-import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -123,9 +127,13 @@ public class InitGuestPasswordServlet extends HttpServlet {
                 return;
             }
 
-            PasswordChangeService passwordChangeService = ShareServiceLookup.getService(PasswordChangeService.class);
+            BasicPasswordChangeService passwordChangeService = ShareServiceLookup.getService(BasicPasswordChangeService.class);
             ContextService contextService = ShareServiceLookup.getService(ContextService.class);
-            passwordChangeService.perform(new PasswordChangeEvent(ServerSessionAdapter.valueOf(guestInfo.getGuestID(), guestInfo.getContextID()), contextService.getContext(guestInfo.getContextID()), password, " "));
+
+            Map<String, List<String>> headers = copyHeaders(request);
+            com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(request);
+
+            passwordChangeService.perform(new PasswordChangeEvent(ServerSessionAdapter.valueOf(guestInfo.getGuestID(), guestInfo.getContextID()), contextService.getContext(guestInfo.getContextID()), password, " ", headers, cookies));
 
         } catch (OXException e) {
             LOG.error("", e);

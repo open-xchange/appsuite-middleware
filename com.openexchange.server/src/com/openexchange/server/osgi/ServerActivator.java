@@ -137,8 +137,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageActivator;
 import com.openexchange.group.GroupService;
 import com.openexchange.group.internal.GroupServiceImpl;
 import com.openexchange.groupware.alias.UserAliasStorage;
-import com.openexchange.groupware.alias.UserAliasStorageProvider;
-import com.openexchange.groupware.alias.osgi.OsgiUserAliasStorage;
+import com.openexchange.groupware.alias.impl.RdbAliasStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
@@ -157,7 +156,6 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
-import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
@@ -165,7 +163,6 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
-import com.openexchange.index.IndexFacadeService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
@@ -465,7 +462,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // Folder Delete Listener Service Tracker
         track(FolderDeleteListenerService.class, new FolderDeleteListenerServiceTrackerCustomizer(context));
-        
+
         // Delete Context Group Listener Service Tracker
         track(DeleteContextGroupListener.class, new DeleteContextGroupListenerServiceTracker(context));
 
@@ -584,8 +581,6 @@ public final class ServerActivator extends HousekeepingActivator {
          */
         track(FileMetadataParserService.class, new ServiceAdderTrackerCustomizer(context));
 
-        track(IndexFacadeService.class, new IndexFacadeCustomizer(context));
-
         /*
          * Track ManagedFileManagement
          */
@@ -597,17 +592,10 @@ public final class ServerActivator extends HousekeepingActivator {
         track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
 
         /*
-         * Track UserAliasStorages
+         * User Alias Service
          */
-        final OsgiUserAliasStorage aliasStorage = new OsgiUserAliasStorage(context);
-        rememberTracker(aliasStorage);
-
-        ServerServiceRegistry.getInstance().addService(UserAliasStorageProvider.class, new UserAliasStorageProvider() {
-            @Override
-            public UserAliasStorage getUserAliasStorage() throws OXException {
-                return aliasStorage;
-            }
-        });
+        RdbAliasStorage aliasStorage = new RdbAliasStorage();
+        ServerServiceRegistry.getInstance().addService(UserAliasStorage.class, aliasStorage);
 
         /*
          * User Service
@@ -626,6 +614,7 @@ public final class ServerActivator extends HousekeepingActivator {
         openTrackers();
         // Register server's services
         registerService(UserService.class, userService);
+        registerService(UserAliasStorage.class, aliasStorage);
         registerService(Reloadable.class, ServerConfig.getInstance());
         registerService(Reloadable.class, SystemConfig.getInstance());
         registerService(Reloadable.class, GenericReloadable.getInstance());
@@ -878,20 +867,15 @@ public final class ServerActivator extends HousekeepingActivator {
 
     private void registerInfostore() {
         DBProvider dbProvider = new DatabaseServiceDBProvider(getService(DatabaseService.class));
-        InfostoreFacade infostoreFacade = new InfostoreFacadeImpl(dbProvider);
+        InfostoreFacadeImpl infostoreFacade = new InfostoreFacadeImpl(dbProvider);
         infostoreFacade.setTransactional(true);
         infostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
-
-        InfostoreSearchEngine infostoreSearchEngine = new SearchEngineImpl(dbProvider);
-        infostoreSearchEngine.setTransactional(true);
-
         EventFiringInfostoreFacade eventFiringInfostoreFacade = new EventFiringInfostoreFacadeImpl(dbProvider);
         eventFiringInfostoreFacade.setTransactional(true);
         eventFiringInfostoreFacade.setSessionHolder(ThreadLocalSessionHolder.getInstance());
-
         registerService(InfostoreFacade.class, infostoreFacade);
         registerService(EventFiringInfostoreFacade.class, eventFiringInfostoreFacade);
-        registerService(InfostoreSearchEngine.class, infostoreSearchEngine);
+        registerService(InfostoreSearchEngine.class, infostoreFacade);
     }
 
     private void registerServlets(final HttpService http) throws ServletException, NamespaceException {

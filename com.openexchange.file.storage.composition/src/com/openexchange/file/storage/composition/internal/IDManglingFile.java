@@ -364,7 +364,18 @@ public class IDManglingFile implements File {
     }
 
     @Override
+    public boolean isShareable() {
+        return file.isShareable();
+    }
+
+    @Override
+    public void setShareable(boolean shareable) {
+        file.setShareable(shareable);
+    }
+    
+    @Override
     public String toString() {
         return "IDManglingFile [id=" + id + ", delegateId=" + file.getId() + ", name=" + file.getFileName() + "]";
     }
+
 }

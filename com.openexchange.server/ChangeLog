@@ -1,3 +1,45 @@
+* 2015-04-14 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 34340: Added EXECUTE privilege to avoid user creation
+
+* 2015-04-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37083: Make maximum allowed contact image size available via JSlob / config tree  
+ - Fix for bug 37619: Use more intelligent filename reservation 
+
+* 2015-04-13 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37638: Grant READ_ALL_OBJECTS permissions for global addressbook 
+
+* 2015-04-13 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37636: Handle InterruptedException gracefully
+ - Fix for bug 37637: Proper backend shut-down
+
+* 2015-04-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37595: Be prepared for "folderid/fileid" identifiers when constructing file URLs
+
+* 2015-04-08 - marc.arens@open-xchange.com
+
+ - Fix for bug 37577: Make maximum http header size configurable in grizzly.properties
+
+* 2015-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
+
+* 2015-04-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37572: Restored old behavior for file / document metadata delegates
+
+* 2015-04-07 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37309: Don't ignore entity 0 when calculating permission changes
+
+* 2015-04-02- thorben.betten@open-xchange.com
+
+ - Fix for bug 37527: Pass header/cookie information on password change to AuthenticationService instance
+
 * 2015-03-30 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 37391: Retain the structure of the 'mpasswd' file when updating the password.

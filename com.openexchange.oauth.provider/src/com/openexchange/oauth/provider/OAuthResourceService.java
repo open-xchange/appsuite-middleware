@@ -50,18 +50,37 @@
 package com.openexchange.oauth.provider;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.osgi.annotation.SingletonService;
 
 
 /**
- * {@link OAuthResourceService}
+ * The service to be used by OAuth resources (i.e. HTTP API actions) to interact with the OAuth
+ * provider component.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
+ * @see OAuthProviderService
  */
+@SingletonService
 public interface OAuthResourceService {
 
+    /**
+     * Validates the given access token and returns an according {@link OAuthGrant} instance.
+     *
+     * @param accessToken The access token
+     * @return The grant
+     * @throws OXException If the token is invalid {@link OAuthInvalidTokenException} is thrown
+     */
     OAuthGrant validate(String accessToken) throws OXException;
 
+    /**
+     * Gets the client for a given grant.
+     *
+     * @param grant The grant
+     * @return The client
+     * @throws OXException If no client could be found (e.g. it has been deleted in the meantime) {@link OAuthInvalidTokenException} is thrown
+     */
     Client getClient(OAuthGrant grant) throws OXException;
 
 }

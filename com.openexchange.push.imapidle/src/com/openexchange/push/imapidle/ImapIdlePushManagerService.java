@@ -80,7 +80,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushManagerService.class);
 
     private static enum StopResult {
-        NONE, RECONNECTED, STOPPED;
+        NONE, RECONNECTED, RECONNECTED_AS_PERMANENT, STOPPED;
     }
 
     private static volatile ImapIdlePushManagerService instance;
@@ -173,26 +173,37 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int userId = session.getUserId();
 
         if (clusterLock.acquireLock(session)) {
-            // Locked...
-            boolean unlock = true;
-            try {
-                ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, services);
-                if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
-                    listener.start();
-                    unlock = false;
-                    LOGGER.info("Started permanent IMAP-IDLE listener for user {} in context {}", I(userId), I(contextId));
-                    return listener;
-                }
+            synchronized (this) {
+                // Locked...
+                boolean unlock = true;
+                try {
+                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, services);
+                    ImapIdlePushListener current = listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener);
+                    if (null == current) {
+                        listener.start();
+                        unlock = false;
+                        LOGGER.info("Started permanent IMAP-IDLE listener for user {} in context {}", I(userId), I(contextId));
+                        return listener;
+                    } else if (!current.isPermanent()) {
+                        // Cancel current & replace
+                        current.cancel(false);
+                        listeners.put(SimpleKey.valueOf(userId, contextId), listener);
+                        listener.start();
+                        unlock = false;
+                        LOGGER.info("Started permanent IMAP-IDLE listener for user {} in context {}", I(userId), I(contextId));
+                        return listener;
+                    }
 
-                // Already running for session user
-                LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
-            } finally {
-                if (unlock) {
-                    releaseLock(session);
+                    // Already running for session user
+                    LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                } finally {
+                    if (unlock) {
+                        releaseLock(session);
+                    }
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
@@ -230,26 +241,28 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int contextId = session.getContextId();
         int userId = session.getUserId();
         if (clusterLock.acquireLock(session)) {
-            // Locked...
-            boolean unlock = true;
-            try {
-                ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, services);
-                if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
-                    listener.start();
-                    unlock = false;
-                    LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
-                    return listener;
-                }
+            synchronized (this) {
+                // Locked...
+                boolean unlock = true;
+                try {
+                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, services);
+                    if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
+                        listener.start();
+                        unlock = false;
+                        LOGGER.info("Started IMAP-IDLE listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                        return listener;
+                    }
 
-                // Already running for session user
-                LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
-            } finally {
-                if (unlock) {
-                    releaseLock(session);
+                    // Already running for session user
+                    LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                } finally {
+                    if (unlock) {
+                        releaseLock(session);
+                    }
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already such a listener using another session", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
@@ -266,6 +279,9 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         switch (stopResult) {
         case RECONNECTED:
             LOGGER.info("Reconnected IMAP-IDLE listener for user {} in context {} using another session", I(session.getUserId()), I(session.getContextId()));
+            return true;
+        case RECONNECTED_AS_PERMANENT:
+            LOGGER.info("Reconnected as permanent IMAP-IDLE listener for user {} in context {}", I(session.getUserId()), I(session.getContextId()));
             return true;
         case STOPPED:
             LOGGER.info("Stopped IMAP-IDLE listener for user {} in context {} with session {}", I(session.getUserId()), I(session.getContextId()), session.getSessionID());
@@ -287,20 +303,28 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * @return The stop result
      */
     public StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, int userId, int contextId) {
-        SimpleKey key = SimpleKey.valueOf(userId, contextId);
-        ImapIdlePushListener listener = listeners.remove(key);
-        if (null != listener) {
-            if (!stopIfPermanent && listener.isPermanent()) {
-                listeners.put(key, listener);
-                return StopResult.NONE;
+        synchronized (this) {
+            SimpleKey key = SimpleKey.valueOf(userId, contextId);
+            ImapIdlePushListener listener = listeners.get(key);
+            if (null != listener) {
+                if (!stopIfPermanent && listener.isPermanent()) {
+                    return StopResult.NONE;
+                }
+
+                // Remove from map
+                listeners.remove(key);
+
+                boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
+                boolean reconnected = listener.cancel(tryRecon);
+                if (!reconnected) {
+                    return StopResult.STOPPED;
+                }
+
+                ImapIdlePushListener newListener = listeners.get(key);
+                return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
             }
-
-            boolean tryRecon = tryToReconnect || (!listener.isPermanent() && hasPermanentPush(userId, contextId));
-            boolean reconnected = listener.cancel(tryRecon);
-            return reconnected ? StopResult.RECONNECTED : StopResult.STOPPED;
+            return StopResult.NONE;
         }
-
-        return StopResult.NONE;
     }
 
     /**

@@ -58,6 +58,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
+ * @see OAuthGrant
  */
 public interface Scopes extends Serializable {
 

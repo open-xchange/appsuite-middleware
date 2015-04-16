@@ -1,3 +1,12 @@
+* 2015-04-07 - thorbenb.betten@open-xchange.com
+
+ - Fix for bug 37501: Consider "AUTO_TO_LOWERCASE_UID" setting all over the place
+
+* 2015-04-06 - thorbenb.betten@open-xchange.com
+
+ - Fix for bug 37205: Do not perform checks for mail addresses if not touched/changed on user change operation
+                      (This effectively reverts the changes performed for bug 33626 and solves associated issue in a consistent way)
+
 * 2015-03-25 - thorben.betten@open-xchange.com
 
  - Fix for bug 37324: Removed inappropriate naming from "mpasswd" file

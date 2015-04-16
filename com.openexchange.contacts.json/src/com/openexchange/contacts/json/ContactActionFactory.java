@@ -64,6 +64,7 @@ import com.openexchange.contacts.json.actions.CopyAction;
 import com.openexchange.contacts.json.actions.DeleteAction;
 import com.openexchange.contacts.json.actions.GetAction;
 import com.openexchange.contacts.json.actions.GetUserAction;
+import com.openexchange.contacts.json.actions.GetVCardAction;
 import com.openexchange.contacts.json.actions.ListAction;
 import com.openexchange.contacts.json.actions.ListUserAction;
 import com.openexchange.contacts.json.actions.NewAction;
@@ -116,6 +117,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
         actions.put("birthdays", new BirthdaysAction(serviceLookup));
         actions.put("anniversaries", new AnniversariesAction(serviceLookup));
         actions.put("autocomplete", new AutocompleteAction(serviceLookup));
+        actions.put("getVcard", new GetVCardAction(serviceLookup));
     }
 
     @Override

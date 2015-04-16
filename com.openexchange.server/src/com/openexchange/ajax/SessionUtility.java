@@ -267,7 +267,7 @@ public final class SessionUtility {
             // No such cookie
             final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
             if (null != publicSessionId) {
-                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
+                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth || isChangeable(session, req));
             }
 
             // No such "public_session" parameter
@@ -702,7 +702,11 @@ public final class SessionUtility {
     }
 
     private static String detectClientId(Session session, HttpServletRequest req) {
-        return null == session ? (null == req ? null : req.getParameter("client")) : session.getClient();
+        String clientByRequest = null == req ? null : req.getParameter("client");
+        if (null != clientByRequest) {
+            return clientByRequest;
+        }
+        return null == session ? null : session.getClient();
     }
 
     private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));

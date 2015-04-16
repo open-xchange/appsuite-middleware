@@ -62,9 +62,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.config.IPOP3Properties;
+import com.openexchange.pop3.services.POP3ServiceRegistry;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -79,12 +81,32 @@ public final class POP3CapabilityCache {
      */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(POP3CapabilityCache.class);
 
+    private static volatile Integer capabiltiesCacheIdleTime;
+    private static int capabiltiesCacheIdleTime() {
+        Integer tmp = capabiltiesCacheIdleTime;
+        if (null == tmp) {
+            synchronized (POP3CapabilityCache.class) {
+                tmp = capabiltiesCacheIdleTime;
+                if (null == tmp) {
+                    int defaultValue = 0; // Do not check again
+                    ConfigurationService service = POP3ServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(service.getIntProperty("com.openexchange.pop3.capabiltiesCacheIdleTime", defaultValue));
+                    capabiltiesCacheIdleTime = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
     /**
      * The default capabilities providing only mandatory POP3 commands.
      */
     protected static final String DEFAULT_CAPABILITIES = "USER\r\nPASS\r\nSTAT\r\nLIST\r\nRETR\r\nDELE\r\nNOOP\r\nRSET\r\nQUIT";
 
-    private static volatile ConcurrentMap<InetSocketAddress, Future<String>> MAP;
+    private static volatile ConcurrentMap<InetSocketAddress, Future<Capabilities>> MAP;
 
     /**
      * Initializes a new {@link POP3CapabilityCache}.
@@ -100,7 +122,7 @@ public final class POP3CapabilityCache {
         if (MAP == null) {
             synchronized (POP3CapabilityCache.class) {
                 if (MAP == null) {
-                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<String>>();
+                    MAP = new ConcurrentHashMap<InetSocketAddress, Future<Capabilities>>();
                     // TODO: Probably pre-load CAPABILITY and greeting from common POP3 servers like GMail, etc.
                 }
             }
@@ -211,48 +233,78 @@ public final class POP3CapabilityCache {
     }
 
     private static String getCapability0(final InetSocketAddress address, final boolean isSecure, final IPOP3Properties pop3Properties, final String login) throws IOException, OXException {
+        int idleTime = capabiltiesCacheIdleTime();
+        if (idleTime < 0) {
+            // Never cache
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
+            ft.run();
+            return getFrom(ft, address, login, true).getCapabilities();
+        }
+
         boolean caller = false;
-        Future<String> f = MAP.get(address);
+        ConcurrentMap<InetSocketAddress, Future<Capabilities>> map = MAP;
+
+        Future<Capabilities> f = map.get(address);
         if (null == f) {
-            final FutureTask<String> ft = new FutureTask<String>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
-            f = MAP.putIfAbsent(address, ft);
+            FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
+            f = map.putIfAbsent(address, ft);
             if (null == f) {
                 f = ft;
                 ft.run();
                 caller = true;
             }
         }
-        final String ret = getFrom(f, address, login, caller);
+
+        Capabilities ret = getFrom(f, address, login, caller);
         if (null != ret) {
-            return ret;
+            if (isElapsed(ret, idleTime)) {
+                FutureTask<Capabilities> ft = new FutureTask<Capabilities>(new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)));
+                if (map.replace(address, f, ft)) {
+                    f = ft;
+                    ft.run();
+                } else {
+                    f = map.get(address);
+                }
+                ret = getFrom(f, address, login, caller);
+            }
+
+            if (null != ret) {
+                return ret.getCapabilities();
+            }
         }
-        /*
-         * Not the executing thread which received an exception
-         */
-        MAP.remove(address);
-        /*
-         * Create own callable for this thread
-         */
+
+        // Not the executing thread which received an exception
+        map.remove(address);
+
+        // Create own callable for this thread
         try {
             /*
              * Intended for fast capabilities look-up. Use individual timeout value to ensure fast return from call.
              */
-            return new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)).call();
-        } catch (final java.net.SocketTimeoutException e) {
+            return new CapabilityCallable(address, isSecure, getMaxConnectTimeout(pop3Properties), getMaxTimeout(pop3Properties)).call().getCapabilities();
+        } catch (java.net.SocketTimeoutException e) {
             throw POP3ExceptionCode.CONNECT_ERROR.create(e, address, login);
         }
     }
 
-    private static String getFrom(final Future<String> f, final InetSocketAddress address, final String login, final boolean caller) throws IOException, OXException {
+    private static boolean isElapsed(Capabilities caps, int idleTime) {
+        if (idleTime == 0) {
+            return false; // never
+        }
+        // Check if elapsed
+        return ((System.currentTimeMillis() - caps.getStamp()) > idleTime);
+    }
+
+    private static Capabilities getFrom(final Future<Capabilities> f, final InetSocketAddress address, final String login, final boolean caller) throws IOException, OXException {
         try {
             return f.get();
-        } catch (final InterruptedException e) {
+        } catch (InterruptedException e) {
             // Keep interrupted status
             Thread.currentThread().interrupt();
             throw new IOException(e.getMessage());
-        } catch (final CancellationException e) {
+        } catch (CancellationException e) {
             throw new IOException(e.getMessage());
-        } catch (final ExecutionException e) {
+        } catch (ExecutionException e) {
             if (caller) {
                 return handleExecutionException(e, address, login);
             }
@@ -263,7 +315,7 @@ public final class POP3CapabilityCache {
         }
     }
 
-    private static String handleExecutionException(final ExecutionException e, final InetSocketAddress address, final String login) throws IOException, OXException {
+    private static Capabilities handleExecutionException(final ExecutionException e, final InetSocketAddress address, final String login) throws IOException, OXException {
         final Throwable cause = e.getCause();
         if (cause instanceof OXException) {
             throw ((OXException) cause);
@@ -283,17 +335,14 @@ public final class POP3CapabilityCache {
         throw new IllegalStateException("Not unchecked", cause);
     }
 
-    private static final class CapabilityCallable implements Callable<String> {
+    private static final class CapabilityCallable implements Callable<Capabilities> {
 
         private final InetSocketAddress key;
-
         private final boolean isSecure;
-
         private final int connectionTimeout;
-
         private final int timeout;
 
-        public CapabilityCallable(final InetSocketAddress key, final boolean isSecure, final int connectionTimeout, final int timeout) {
+        CapabilityCallable(InetSocketAddress key, boolean isSecure, int connectionTimeout, int timeout) {
             super();
             this.key = key;
             this.isSecure = isSecure;
@@ -302,9 +351,9 @@ public final class POP3CapabilityCache {
         }
 
         @Override
-        public String call() throws IOException {
+        public Capabilities call() throws IOException {
             Socket s = null;
-            final StringBuilder sb = new StringBuilder(512);
+            StringBuilder sb = new StringBuilder(512);
             try {
                 try {
                     if (isSecure) {
@@ -389,7 +438,7 @@ public final class POP3CapabilityCache {
                             }
                         }
                         LOG.warn(sb.insert(0, "POP3 CAPA command failed: ").toString());
-                        return DEFAULT_CAPABILITIES;
+                        return new Capabilities(DEFAULT_CAPABILITIES);
                     } else if ('+' == pre) {
                         sb.append(pre);
                         eol = false;
@@ -409,7 +458,7 @@ public final class POP3CapabilityCache {
                         final String responseCode = sb.toString();
                         if (!responseCode.toUpperCase().startsWith("+OK")) {
                             LOG.warn("POP3 CAPA command failed: {}", responseCode);
-                            return DEFAULT_CAPABILITIES;
+                            return new Capabilities(DEFAULT_CAPABILITIES);
                         }
                         sb.setLength(0);
                         if (skipLF) {
@@ -452,7 +501,7 @@ public final class POP3CapabilityCache {
                         } else {
                             LOG.warn("Invalid unicode character: {}", ((int) pre));
                         }
-                        return DEFAULT_CAPABILITIES;
+                        return new Capabilities(DEFAULT_CAPABILITIES);
                     }
                 }
                 /*
@@ -470,7 +519,7 @@ public final class POP3CapabilityCache {
                 /*
                  * Create new object
                  */
-                return capabilities;
+                return new Capabilities(capabilities);
             } catch (final IOException e) {
                 LOG.warn("Failed reading capabilities from POP3 server \"{}\". Read so far:{}", key.getHostName(), sb);
                 throw e;
@@ -489,6 +538,57 @@ public final class POP3CapabilityCache {
                 }
             }
         }
+    }
+
+    private static final class Capabilities {
+
+        private final String capabilities;
+        private final long stamp;
+
+        Capabilities(String capabilities) {
+            super();
+            this.capabilities = capabilities;
+            this.stamp = System.currentTimeMillis();
+        }
+
+        long getStamp() {
+            return stamp;
+        }
+
+        String getCapabilities() {
+            return capabilities;
+        }
+
+        @Override
+        public int hashCode() {
+            final int prime = 31;
+            int result = 1;
+            result = prime * result + ((capabilities == null) ? 0 : capabilities.hashCode());
+            return result;
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null) {
+                return false;
+            }
+            if (getClass() != obj.getClass()) {
+                return false;
+            }
+            Capabilities other = (Capabilities) obj;
+            if (capabilities == null) {
+                if (other.capabilities != null) {
+                    return false;
+                }
+            } else if (!capabilities.equals(other.capabilities)) {
+                return false;
+            }
+            return true;
+        }
+
     }
 
 }

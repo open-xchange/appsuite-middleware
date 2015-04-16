@@ -186,4 +186,20 @@ public interface DocumentMetadata extends Serializable {
      */
     void setObjectPermissions(List<ObjectPermission> objectPermissions);
 
+    /**
+     * Gets a value indicating whether the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * the requesting user.
+     * 
+     * @return <code>true</code> if the file is shareable, <code>false</code>, otherwise
+     */
+    boolean isShareable();
+    
+    /**
+     * Sets the flag indicating that the item can be shared to others based on underlying storage's capabilities and the permissions of 
+     * the requesting user.
+     * 
+     * @param shareable <code>true</code> if the file is shareable, <code>false</code>, otherwise
+     */
+    void setShareable(boolean shareable);
+    
 }

@@ -1183,6 +1183,13 @@ fi
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
 
+# SoftwareChange_Request-2464
+ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open-xchange/etc/hazelcast.properties
+
+# SoftwareChange_Request-2470
+ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
+ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-xchange/etc/subscribe.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1223,6 +1230,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Apr 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2013-04-09 (2486)
 * Thu Mar 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-03-30 (2459)
 * Mon Mar 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
@@ -1232,9 +1241,9 @@ Build for patch 2015-03-18
 * Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Eleventh candidate for 7.6.2 release
-* Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-03-16
+* Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Eleventh candidate for 7.6.2 release
 * Wed Mar 04 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Tenth candidate for 7.6.2 release
 * Tue Mar 03 2015 Marcus Klein <marcus.klein@open-xchange.com>

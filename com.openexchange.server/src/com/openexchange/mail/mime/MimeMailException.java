@@ -77,7 +77,7 @@ import com.sun.mail.smtp.SMTPSenderFailedException;
 /**
  * {@link OXException} - For MIME related errors.
  * <p>
- * Taken from {@link OXException}:
+ * Taken from {@link MailExceptionCode}:
  * <p>
  * The detail number range in subclasses generated in mail bundles is supposed to start with 2000 and may go up to 2999.
  * <p>

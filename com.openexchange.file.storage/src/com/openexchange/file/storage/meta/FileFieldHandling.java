@@ -283,5 +283,10 @@ public class FileFieldHandling {
             return handler.handle(Field.OBJECT_PERMISSIONS, args);
         }
 
+        @Override
+        public Object shareable(Object... args) {
+            return handler.handle(Field.SHAREABLE, args);
+        }
+
     }
 }

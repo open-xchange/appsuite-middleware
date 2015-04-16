@@ -6,32 +6,30 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlSchemaType;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.datatype.XMLGregorianCalendar;
 
 
 /**
- * <p>Java-Klasse f&uuml;r Client complex type.
+ * <p>Java class for Client complex type.
  *
- * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ * <p>The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
  * &lt;complexType name="Client">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="contactAddress" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="defaultScope" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="enabled" type="{http://www.w3.org/2001/XMLSchema}boolean" minOccurs="0"/>
- *         &lt;element name="icon" type="{http://soap.provider.oauth.openexchange.com}Icon" minOccurs="0"/>
- *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="redirectURIs" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="registrationDate" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
- *         &lt;element name="secret" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="website" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
+ *         &lt;element name="contactAddress" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="defaultScope" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="description" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="enabled" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         &lt;element name="icon" type="{http://soap.provider.oauth.openexchange.com}Icon"/>
+ *         &lt;element name="id" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="name" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="redirectURI" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded"/>
+ *         &lt;element name="registrationDate" type="{http://www.w3.org/2001/XMLSchema}date"/>
+ *         &lt;element name="secret" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *         &lt;element name="website" type="{http://www.w3.org/2001/XMLSchema}string"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -42,45 +40,44 @@ import javax.xml.datatype.XMLGregorianCalendar;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Client", propOrder = {
-    "contactAddress",
-    "defaultScope",
-    "description",
-    "enabled",
-    "icon",
     "id",
     "name",
+    "description",
+    "contactAddress",
+    "website",
+    "defaultScope",
     "redirectURIs",
-    "registrationDate",
     "secret",
-    "website"
+    "registrationDate",
+    "enabled",
+    "icon"
 })
 public class Client {
 
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
     protected String contactAddress;
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
     protected String defaultScope;
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
     protected String description;
-    protected Boolean enabled;
-    @XmlElement(nillable = true)
+    protected boolean enabled;
+    @XmlElement(required = true, nillable = true)
     protected Icon icon;
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
     protected String id;
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
     protected String name;
-    @XmlElement(nillable = true)
+    @XmlElement(name = "redirectURI", required = true, nillable = true)
     protected List<String> redirectURIs;
-    @XmlElement(nillable = true)
-    @XmlSchemaType(name = "date")
-    protected XMLGregorianCalendar registrationDate;
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
+    protected long registrationDate;
+    @XmlElement(required = true, nillable = true)
     protected String secret;
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = true)
     protected String website;
 
     /**
-     * Ruft den Wert der contactAddress-Eigenschaft ab.
+     * Gets the value of the contactAddress property.
      *
      * @return
      *     possible object is
@@ -92,7 +89,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der contactAddress-Eigenschaft fest.
+     * Sets the value of the contactAddress property.
      *
      * @param value
      *     allowed object is
@@ -104,7 +101,7 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der defaultScope-Eigenschaft ab.
+     * Gets the value of the defaultScope property.
      *
      * @return
      *     possible object is
@@ -116,7 +113,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der defaultScope-Eigenschaft fest.
+     * Sets the value of the defaultScope property.
      *
      * @param value
      *     allowed object is
@@ -128,7 +125,7 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der description-Eigenschaft ab.
+     * Gets the value of the description property.
      *
      * @return
      *     possible object is
@@ -140,7 +137,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der description-Eigenschaft fest.
+     * Sets the value of the description property.
      *
      * @param value
      *     allowed object is
@@ -152,31 +149,23 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der enabled-Eigenschaft ab.
-     *
-     * @return
-     *     possible object is
-     *     {@link Boolean }
+     * Gets the value of the enabled property.
      *
      */
-    public Boolean isEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 
     /**
-     * Legt den Wert der enabled-Eigenschaft fest.
-     *
-     * @param value
-     *     allowed object is
-     *     {@link Boolean }
+     * Sets the value of the enabled property.
      *
      */
-    public void setEnabled(Boolean value) {
+    public void setEnabled(boolean value) {
         this.enabled = value;
     }
 
     /**
-     * Ruft den Wert der icon-Eigenschaft ab.
+     * Gets the value of the icon property.
      *
      * @return
      *     possible object is
@@ -188,7 +177,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der icon-Eigenschaft fest.
+     * Sets the value of the icon property.
      *
      * @param value
      *     allowed object is
@@ -200,7 +189,7 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der id-Eigenschaft ab.
+     * Gets the value of the id property.
      *
      * @return
      *     possible object is
@@ -212,7 +201,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der id-Eigenschaft fest.
+     * Sets the value of the id property.
      *
      * @param value
      *     allowed object is
@@ -224,7 +213,7 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der name-Eigenschaft ab.
+     * Gets the value of the name property.
      *
      * @return
      *     possible object is
@@ -236,7 +225,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der name-Eigenschaft fest.
+     * Sets the value of the name property.
      *
      * @param value
      *     allowed object is
@@ -248,22 +237,13 @@ public class Client {
     }
 
     /**
-     * Sets the redirectURIs
-     *
-     * @param redirectURIs The redirectURIs to set
-     */
-    public void setRedirectURIs(List<String> redirectURIs) {
-        this.redirectURIs = redirectURIs;
-    }
-
-    /**
-     * Gets the value of the redirectURIs property.
+     * Gets the value of the redirectURI property.
      *
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the redirectURIs property.
+     * This is why there is not a <CODE>set</CODE> method for the redirectURI property.
      *
      * <p>
      * For example, to add a new item, do as follows:
@@ -286,31 +266,31 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der registrationDate-Eigenschaft ab.
+     * Gets the value of the registrationDate property.
      *
      * @return
      *     possible object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link Long }
      *
      */
-    public XMLGregorianCalendar getRegistrationDate() {
+    public long getRegistrationDate() {
         return registrationDate;
     }
 
     /**
-     * Legt den Wert der registrationDate-Eigenschaft fest.
+     * Sets the value of the registrationDate property.
      *
      * @param value
      *     allowed object is
-     *     {@link XMLGregorianCalendar }
+     *     {@link Long }
      *
      */
-    public void setRegistrationDate(XMLGregorianCalendar value) {
+    public void setRegistrationDate(long value) {
         this.registrationDate = value;
     }
 
     /**
-     * Ruft den Wert der secret-Eigenschaft ab.
+     * Gets the value of the secret property.
      *
      * @return
      *     possible object is
@@ -322,7 +302,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der secret-Eigenschaft fest.
+     * Sets the value of the secret property.
      *
      * @param value
      *     allowed object is
@@ -334,7 +314,7 @@ public class Client {
     }
 
     /**
-     * Ruft den Wert der website-Eigenschaft ab.
+     * Gets the value of the website property.
      *
      * @return
      *     possible object is
@@ -346,7 +326,7 @@ public class Client {
     }
 
     /**
-     * Legt den Wert der website-Eigenschaft fest.
+     * Sets the value of the website property.
      *
      * @param value
      *     allowed object is

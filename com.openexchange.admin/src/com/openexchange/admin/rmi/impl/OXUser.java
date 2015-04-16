@@ -154,6 +154,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
 
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -200,7 +203,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         if (null == user) {
             throw new InvalidDataException("Missing user.");
         }
+
         Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
 
         LOGGER.debug("{} - {} - {} | {} - {}", ctx, user, (null == capsToAdd ? "" : capsToAdd.toString()), (null == capsToRemove ? "" : capsToRemove.toString()), auth);
 
@@ -856,6 +863,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         Integer userid = null;
@@ -1027,6 +1038,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw invalidDataException;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {} - {} - {}", ctx, user, moduleAccess, auth);
 
         try {
@@ -1111,6 +1126,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final InvalidDataException invalidDataException = new InvalidDataException("User or UserModuleAccess is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         LOGGER.debug("{} - {} - {} - {}", ctx, user, access_combination_name, auth);
@@ -1239,6 +1258,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e3;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         LOGGER.debug("{} - {} - {} - {}", ctx, usrdata, access_combination_name, auth);
 
         basicauth.doAuthentication(auth, ctx);
@@ -1272,6 +1295,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for create is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
             LOGGER.debug("{} - {} - {}", ctx, usrdata, auth);
@@ -1505,6 +1532,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         basicauth.doAuthentication(auth,ctx);
 
             LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
@@ -1641,7 +1672,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public User[] getData(final Context ctx, final User[] users, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
-        final Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck((Object[]) users);
         } catch (final InvalidDataException e1) {
@@ -1657,6 +1688,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", e);
             throw e;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         LOGGER.debug("{} - {} - {}", ctx, Arrays.toString(users), auth);
         try {
             // enable check who wants to get data if authentication is enabled
@@ -1775,6 +1811,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {} - {}", ctx, user, auth);
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -1821,6 +1862,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {} - {}", ctx, user, auth);
         try {
             basicauth.doAuthentication(auth, ctx);
@@ -1875,6 +1921,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             throw e1;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
             LOGGER.debug("{} - {}", ctx, auth);
 
         basicauth.doAuthentication(auth,ctx);
@@ -1899,6 +1949,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final InvalidDataException e1) {
             LOGGER.error("One of the given arguments for list is null", e1);
             throw e1;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
             LOGGER.debug("{} - {}", ctx, auth);
@@ -1953,7 +2007,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (prop.getUserProp(AdminProperties.User.CHECK_NOT_ALLOWED_CHARS, true)) {
                     tool.validateUserName(newuser.getName());
                 }
-                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, true)) {
+                if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
                     newuser.setName(newuser.getName().toLowerCase());
                 }
             }
@@ -1971,13 +2025,20 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        final String lang = newuser.getLanguage();
-        if (lang != null && lang.indexOf('_') < 0) {
-            throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
+        {
+            String lang = newuser.getLanguage();
+            if (lang != null && lang.indexOf('_') < 0) {
+                throw new InvalidDataException("Language must contain an underscore, e.g. en_US.");
+            }
         }
 
+        String newDefaultSenderAddress = newuser.getDefaultSenderAddress();
+        String newPrimaryEmail = newuser.getPrimaryEmail();
+        String newEmail1 = newuser.getEmail1();
+        boolean mailCheckNeeded = (null != newDefaultSenderAddress) || (null != newPrimaryEmail) || (null != newEmail1) || (null != newuser.getAliases());
+
         if (prop.getUserProp(AdminProperties.User.PRIMARY_MAIL_UNCHANGEABLE, true)) {
-            if (newuser.getPrimaryEmail() != null && !newuser.getPrimaryEmail().equalsIgnoreCase(dbuser.getPrimaryEmail())) {
+            if (newPrimaryEmail != null && !newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
                 throw new InvalidDataException("primary mail must not be changed");
             }
         }
@@ -1989,16 +2050,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             newuser.setPasswordMech(dbuser.getPasswordMech());
         }
 
-        if (!tool.isContextAdmin(ctx, newuser.getId().intValue())) {
+        if (mailCheckNeeded && !tool.isContextAdmin(ctx, newuser.getId().intValue())) {
             // checks below throw InvalidDataException
             tool.checkValidEmailsInUserObject(newuser);
-            HashSet<String> useraliases = newuser.getAliases();
+            Set<String> useraliases = newuser.getAliases();
             if (useraliases == null) {
                 useraliases = dbuser.getAliases();
             }
             if (null != useraliases) {
-                final HashSet<String> tmp = new HashSet<String>(useraliases.size());
-                for (final String email : useraliases) {
+                Set<String> tmp = new HashSet<String>(useraliases.size());
+                for (String email : useraliases) {
                     tmp.add(IDNA.toIDN(email));
                 }
                 useraliases = tmp;
@@ -2006,10 +2067,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 useraliases = new HashSet<String>(1);
             }
 
-            final String defaultSenderAddress = newuser.getDefaultSenderAddress();
-            final String primaryEmail = newuser.getPrimaryEmail();
-            final String email1 = newuser.getEmail1();
-            if (primaryEmail != null && email1 != null && !primaryEmail.equalsIgnoreCase(email1)) {
+            if (newPrimaryEmail != null && newEmail1 != null && !newPrimaryEmail.equalsIgnoreCase(newEmail1)) {
                 // primary mail value must be same with email1
                 throw new InvalidDataException("email1 not equal with primarymail!");
             }
@@ -2017,68 +2075,39 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             String check_primary_mail;
             String check_email1;
             String check_default_sender_address;
-            if (primaryEmail != null) {
-                check_primary_mail = IDNA.toIDN(primaryEmail);
-                if (!primaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
-                    tool.primaryMailExists(ctx, primaryEmail);
+            if (newPrimaryEmail != null) {
+                check_primary_mail = IDNA.toIDN(newPrimaryEmail);
+                if (!newPrimaryEmail.equalsIgnoreCase(dbuser.getPrimaryEmail())) {
+                    tool.primaryMailExists(ctx, newPrimaryEmail);
                 }
             } else {
                 final String email = dbuser.getPrimaryEmail();
                 check_primary_mail = email == null ? email : IDNA.toIDN(email);
             }
 
-            if (email1 != null) {
-                check_email1 = IDNA.toIDN(email1);
+            if (newEmail1 != null) {
+                check_email1 = IDNA.toIDN(newEmail1);
             } else {
                 final String s = dbuser.getEmail1();
                 check_email1 = s == null ? s : IDNA.toIDN(s);
             }
-            if (defaultSenderAddress != null) {
-                check_default_sender_address = IDNA.toIDN(defaultSenderAddress);
+            if (newDefaultSenderAddress != null) {
+                check_default_sender_address = IDNA.toIDN(newDefaultSenderAddress);
             } else {
                 final String s = dbuser.getDefaultSenderAddress();
                 check_default_sender_address = s == null ? s : IDNA.toIDN(s);
             }
 
-            boolean found_primary_mail = useraliases.contains(check_primary_mail);
-            boolean found_email1 = useraliases.contains(check_email1);
-            boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
+            final boolean found_primary_mail = useraliases.contains(check_primary_mail);
+            final boolean found_email1 = useraliases.contains(check_email1);
+            final boolean found_default_sender_address = useraliases.contains(check_default_sender_address);
 
             if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                // if any of those is missing, update the alias list like OXToolMySQLStorage.checkCreateUserData does
-                newuser.setAliases(useraliases);
-                newuser.addAlias(check_primary_mail);
-                newuser.addAlias(check_email1);
-                newuser.addAlias(check_default_sender_address);
-
-                // retest to see if the added values are now present inside the aliasList
-                {
-                    HashSet<String> newUseraliases = newuser.getAliases();
-                    found_primary_mail = newUseraliases.contains(check_primary_mail);
-                    found_email1 = newUseraliases.contains(check_email1);
-                    found_default_sender_address = newUseraliases.contains(check_default_sender_address);
-                    if (!found_primary_mail || !found_email1 || !found_default_sender_address) {
-                        StringBuilder sb = new StringBuilder();
-                        sb.append("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.").append("\n");
-                        if (!found_primary_mail) {
-                            sb.append("primaryMail: ").append(check_primary_mail).append(" is missing.").append("\n");
-                        } else if (!found_email1) {
-                            sb.append("Email1: ").append(check_email1).append(" is missing").append("\n");
-                        } else if (!found_default_sender_address) {
-                            sb.append("defaultSenderAddress: ").append(check_default_sender_address).append(" is missing").append("\n");
-                        }
-                        sb.append("Currently provided aliases:").append("\n");
-                        for (String s : newUseraliases) {
-                            sb.append(s).append(" ");
-                        }
-                        throw new InvalidDataException(sb.toString());
-                    }
-                }
-
+                throw new InvalidDataException("primaryMail, Email1 and defaultSenderAddress must be present in set of aliases.");
             }
             // added "usrdata.getPrimaryEmail() != null" for this check, else we cannot update user data without mail data
             // which is not very good when just changing the displayname for example
-            if (primaryEmail != null && email1 == null) {
+            if (newPrimaryEmail != null && newEmail1 == null) {
                 throw new InvalidDataException("email1 not sent but required!");
 
             }
@@ -2130,9 +2159,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         return list.toArray(new User[list.size()]);
     }
 
-    /* (non-Javadoc)
-     * @see com.openexchange.admin.rmi.OXUserInterface#changeModuleAccessGlobal(java.lang.String, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.UserModuleAccess, com.openexchange.admin.rmi.dataobjects.Credentials)
-     */
     @Override
     public void changeModuleAccessGlobal(final String filter, final UserModuleAccess addAccess, final UserModuleAccess removeAccess, final Credentials credentials) throws RemoteException, InvalidCredentialsException, StorageException, InvalidDataException {
         final Credentials auth = credentials == null ? new Credentials("","") : credentials;
@@ -2143,6 +2169,11 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
         }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         try {
             checkForGABRestriction(addAccess);
             checkForGABRestriction(removeAccess);
@@ -2208,6 +2239,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {

@@ -69,6 +69,20 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 public class ValidationChain {
 
     private final List<InfostoreValidator> validators = new ArrayList<InfostoreValidator>();
+    
+    /**
+     * Initializes a new {@link ValidationChain}.
+     * 
+     * @param validators The validators to add to the chain
+     */
+    public ValidationChain(InfostoreValidator...validators) {
+        super();
+        if (null != validators && 0 < validators.length) {
+            for (InfostoreValidator validator : validators) {
+                this.validators.add(validator);    
+            }            
+        }
+    }
 
     public void add(final InfostoreValidator validator) {
         validators.add(validator);

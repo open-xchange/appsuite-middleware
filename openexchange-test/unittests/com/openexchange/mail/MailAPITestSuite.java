@@ -122,6 +122,7 @@ public final class MailAPITestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailNestedMessageStructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailTNEFStructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.MailUUEncodedStructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.MailPlainTextStructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug16174StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18846StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug18981StructureTest.class);
@@ -134,6 +135,11 @@ public final class MailAPITestSuite extends TestSuite {
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug29484_StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.Bug27640_StructureTest.class);
 		mailSuite.addTestSuite(com.openexchange.mail.structure.SMIMEStructureTest.class);
+		mailSuite.addTestSuite(com.openexchange.mail.structure.SMIMEStructureTest2.class);
+		/*
+		 * MimeMessageConverter tests
+		 */
+		mailSuite.addTestSuite(MailConverterTest.class);
 		return mailSuite;
 	}
 }

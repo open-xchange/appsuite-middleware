@@ -52,85 +52,34 @@ package com.openexchange.oauth.provider;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
- * {@link OAuthProviderService}
+ * The management service to be used by the OAuth provider implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
+ * @see OAuthResourceService
  */
+@SingletonService
 public interface OAuthProviderService {
+
+    // -------------------------------------- Client Handling -------------------------------------- \\
 
     /**
      * The max. number of clients that a user is allowed to grant access to
      */
     public static final int MAX_CLIENTS_PER_USER = 50;
 
-    // -------------------------------------- Client Handling -------------------------------------- \\
-
     /**
-     * Gets the client identified by the given identifier.
+     * Gets the management instance for clients.
      *
-     * @param clientId The clients identifier
-     * @return The client or <code>null</code> if there is no such client
-     * @throws OXException If operation fails
+     * @return The management instance
      */
-    Client getClientById(String clientId) throws OXException;
-
-    /**
-     * Registers (adds) a client according to given client data.
-     *
-     * @param clientData The client data to create the client from
-     * @return The newly created client
-     * @throws OXException If create operation fails
-     */
-    Client registerClient(ClientData clientData) throws OXException;
-
-    /**
-     * Updates an existing client's attributes according to given client data.
-     *
-     * @param clientId The client identifier
-     * @param clientData The client data
-     * @return The updated client
-     * @throws OXException If update operation fails
-     */
-    Client updateClient(String clientId, ClientData clientData) throws OXException;
-
-    /**
-     * Unregisters an existing client
-     *
-     * @param clientId The client identifier
-     * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws OXException If un-registration fails
-     */
-    boolean unregisterClient(String clientId) throws OXException;
-
-    /**
-     * Revokes a client's current secret and generates a new one.
-     *
-     * @param clientId The client identifier
-     * @return The client with revoked/new secret
-     * @throws OXException If revoke operation fails
-     */
-    Client revokeClientSecret(String clientId) throws OXException;
-
-    /**
-     * Enables denoted client
-     *
-     * @param clientId The client identifier
-     * @throws OXException If client could not be enabled
-     */
-    void enableClient(String clientId) throws OXException;
-
-    /**
-     * Disables denoted client
-     *
-     * @param clientId The client identifier
-     * @throws OXException If client could not be disabled
-     */
-    void disableClient(String clientId) throws OXException;
-
-
+    ClientManagement getClientManagement();
 
     // -------------------------------- Authorization Code Handling -------------------------------- \\
     //  Manages authorization codes generated for/redeemed by OAuth client applications.

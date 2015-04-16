@@ -74,10 +74,6 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
-        <tagDatabase tag="7.6.2:milestone" />
-    </changeSet>
-    
     <changeSet id="7.6.2:context2push_registration" author="thorben.betten@open-xchange.com">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -96,67 +92,8 @@
         </rollback>
     </changeSet>
 
-    <!-- ******************************************************* -->
-    <!-- ************** Release 7.8.0 starts here ************** -->
-    <!-- ******************************************************* -->
-
-<!--
-
-    <changeSet id="7.8.0:oauth_client:create" author="steffen.templin@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="oauth_client" />
-            </not>
-        </preConditions>
-        <comment>
-            Add table 'oauth_client' to persist OAuth 2.0 client registrations
-        </comment>
-        <sql>
-            CREATE TABLE oauth_client (
-                id VARCHAR(255) NOT NULL,
-                secret VARCHAR(255) NOT NULL,
-                name VARCHAR(255) UNIQUE NOT NULL,
-                description TEXT NOT NULL,
-                icon MEDIUMBLOB NOT NULL,
-                icon_mime_type VARCHAR(32) NOT NULL,
-                default_scope VARCHAR(767) NOT NULL,
-                contact_address VARCHAR(255) NOT NULL,
-                website VARCHAR(255) NOT NULL,
-                enabled TINYINT UNSIGNED NOT NULL,
-                registration_date BIGINT(64) UNSIGNED NOT NULL,
-                PRIMARY KEY (`id`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        </sql>
-        <rollback>
-            <dropTable tableName="oauth_client"/>
-        </rollback>
+    <changeSet id="7.6.2:milestone" author="martin.schneider@open-xchange.com">
+        <tagDatabase tag="7.6.2:milestone" />
     </changeSet>
 
-    <changeSet id="7.8.0:oauth_client_uri:create" author="steffen.templin@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="oauth_client_uri" />
-            </not>
-        </preConditions>
-        <comment>
-            Add table 'oauth_client_uri' to persist OAuth 2.0 client redirect URIs
-        </comment>
-        <sql>
-            CREATE TABLE oauth_client_uri (
-                id INT4 NOT NULL AUTO_INCREMENT,
-                client VARCHAR(255) NOT NULL,
-                uri VARCHAR(767) NOT NULL,
-                PRIMARY KEY (`id`),
-                INDEX `client_index` (`client`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        </sql>
-        <rollback>
-            <dropTable tableName="oauth_client_uri"/>
-        </rollback>
-    </changeSet>
-
-    <changeSet id="7.8.0-milestone" author="martin.schneider@open-xchange.com">
-        <tagDatabase tag="7.8.0-milestone" />
-    </changeSet>
-    -->
 </databaseChangeLog>

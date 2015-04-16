@@ -49,7 +49,9 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.Collection;
 import java.util.Date;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -57,6 +59,7 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.java.Strings;
@@ -92,17 +95,30 @@ public class NewAction extends AbstractWriteAction {
         }
 
         file.setId(FileStorageFileAccess.NEW);
+        boolean ignoreWarnings = AJAXRequestDataTools.parseBoolParameter("ignoreWarnings", request.getRequestData(), false);
 
+        String newId;
         if (request.hasUploads()) {
-            fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+            // Save file metadata with binary payload
+            newId = fileAccess.saveDocument(file, request.getUploadedFileData(), FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), false, ignoreWarnings);
         } else {
-            fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
+            // Save file metadata without binary payload
+            newId = fileAccess.saveFileMetadata(file, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, request.getSentColumns(), ignoreWarnings);
         }
-
-        if (request.extendedResponse()) {
-            return result(fileAccess.getFileMetadata(file.getId(), FileStorageFileAccess.CURRENT_VERSION), request);
+        // Construct detailed response as requested including any warnings, treat as error if not forcibly ignored by client
+        AJAXRequestResult result;
+        if (null != newId && request.extendedResponse()) {
+            result = result(fileAccess.getFileMetadata(newId, FileStorageFileAccess.CURRENT_VERSION), request);
+        } else {
+            result = new AJAXRequestResult(newId, new Date(file.getSequenceNumber()));
         }
-        return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
+        Collection<OXException> warnings = fileAccess.getAndFlushWarnings();
+        result.addWarnings(warnings);
+        if (null == newId && null != warnings && false == warnings.isEmpty() && false == ignoreWarnings) {
+            String name = getFilenameSave(file, null, fileAccess);
+            result.setException(FileStorageExceptionCodes.FILE_SAVE_ABORTED.create(name, name));
+        }
+        return result;
     }
 
 }

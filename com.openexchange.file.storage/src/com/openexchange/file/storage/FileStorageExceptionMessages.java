@@ -142,6 +142,18 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The associated %2$s account does no more exist
     public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
 
+    // Individual permissions are not supported in account \"%1$s\".
+    public static final String NO_PERMISSION_SUPPORT_MSG = "Individual permissions are not supported in account \"%1$s\".";
+
+    // Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+    public static final String NO_NOTES_SUPPORT_MSG = "Saving notes for file \"%1$s\" is not supported in account \"%2$s\".";
+
+    // Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
+    public static final String NO_CATEGORIES_SUPPORT_MSG = "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".";
+
+    // The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
+    public static final String FILE_SAVE_ABORTED_MSG = "The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

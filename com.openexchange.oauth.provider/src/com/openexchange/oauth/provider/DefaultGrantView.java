@@ -50,10 +50,11 @@
 package com.openexchange.oauth.provider;
 
 import java.util.Date;
+import com.openexchange.oauth.provider.client.Client;
 
 
 /**
- * {@link DefaultGrantView}
+ * Default implementation of a {@link GrantView}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider;
 
 
 /**
- * {@link AbstractScopeProvider}
+ * Convenience superclass for scope providers.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0

@@ -52,6 +52,7 @@ package com.openexchange.admin.rmi.impl;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.plugins.BasicAuthenticatorPluginInterface;
+import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
@@ -109,7 +110,15 @@ public class BasicAuthenticator extends OXCommonImpl {
      * @throws InvalidCredentialsException
      */
     public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException{
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+        if (autoLowerCase) {
+            authdata.setLogin(authdata.getLogin().toLowerCase());
+        }
+
         final Credentials master = ClientAdminThread.cache.getMasterCredentials();
+        if (autoLowerCase) {
+            master.setLogin(master.getLogin().toLowerCase());
+        }
 
         boolean doPluginAuth = false;
         if (cache.masterAuthenticationDisabled() || (authdata != null && master != null && !master.getLogin().equals(authdata.getLogin()))) {
@@ -185,6 +194,11 @@ public class BasicAuthenticator extends OXCommonImpl {
     public void doAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
 
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+        if (autoLowerCase) {
+            authdata.setLogin(authdata.getLogin().toLowerCase());
+        }
+
         // only do context check, if we have not already admin creds in our cache for given context
         // ATTENTION: It is correct that we don't throw a now such context exception here because we won't
         // give an opportunity to indirectly check for contexts here
@@ -221,6 +235,11 @@ public class BasicAuthenticator extends OXCommonImpl {
      */
     public void doUserAuthentication(final Credentials authdata,final Context ctx) throws InvalidCredentialsException, StorageException, InvalidDataException{
         contextcheck(ctx);
+
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+        if (autoLowerCase) {
+            authdata.setLogin(authdata.getLogin().toLowerCase());
+        }
 
         if (!OXToolStorageInterface.getInstance().existsContext(ctx)) {
             final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException(

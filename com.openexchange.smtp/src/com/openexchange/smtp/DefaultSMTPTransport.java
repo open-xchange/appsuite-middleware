@@ -119,13 +119,10 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
 
     private static final String KERBEROS_SESSION_SUBJECT = "kerberosSubject";
 
-    private final Session session;
-
     private final UserSettingMail usm;
 
     protected DefaultSMTPTransport() {
         super();
-        session = null;
         usm = null;
     }
 
@@ -147,8 +144,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
      * @throws OXException If initialization fails
      */
     public DefaultSMTPTransport(final Session session, final int accountId) throws OXException {
-        super(session.getContextId(), accountId);
-        this.session = session;
+        super(session, accountId);
         this.usm = UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx);
         setUser(Services.getService(UserService.class).getUser(session.getUserId(), ctx));
         setKerberosSubject((Subject) session.getParameter(KERBEROS_SESSION_SUBJECT));

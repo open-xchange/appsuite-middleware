@@ -30,6 +30,14 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Exception }
+     * 
+     */
+    public Exception createException() {
+        return new Exception();
+    }
+
+    /**
      * Create an instance of {@link GetClientById }
      * 
      */
@@ -38,19 +46,19 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link OAuthClientServiceException }
+     * Create an instance of {@link ListClientsResponse }
      * 
      */
-    public OAuthClientServiceException createOAuthClientServiceException() {
-        return new OAuthClientServiceException();
+    public ListClientsResponse createListClientsResponse() {
+        return new ListClientsResponse();
     }
 
     /**
-     * Create an instance of {@link ServiceException }
+     * Create an instance of {@link ClientListData }
      * 
      */
-    public ServiceException createServiceException() {
-        return new ServiceException();
+    public ClientListData createClientListData() {
+        return new ClientListData();
     }
 
     /**
@@ -99,6 +107,14 @@ public class ObjectFactory {
      */
     public RevokeClientSecret createRevokeClientSecret() {
         return new RevokeClientSecret();
+    }
+
+    /**
+     * Create an instance of {@link ListClients }
+     * 
+     */
+    public ListClients createListClients() {
+        return new ListClients();
     }
 
     /**

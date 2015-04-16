@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilepush.json.actions.AbstractMobilePushAction;
+import com.openexchange.mobilepush.json.actions.PublicInfoAction;
 import com.openexchange.mobilepush.json.actions.SubscribeAction;
 import com.openexchange.mobilepush.json.actions.UnsubscribeAction;
 import com.openexchange.mobilepush.json.actions.UpdateAction;
@@ -81,6 +82,7 @@ public class MobilePushActionFactory implements AJAXActionServiceFactory {
         actions.put("subscribe", new SubscribeAction(serviceLookup));
         actions.put("unsubscribe", new UnsubscribeAction(serviceLookup));
         actions.put("updateToken", new UpdateAction(serviceLookup));
+        actions.put("publicInfo", new PublicInfoAction(serviceLookup));
     }
 
     @Override
@@ -92,4 +94,5 @@ public class MobilePushActionFactory implements AJAXActionServiceFactory {
     public Collection<? extends AJAXActionService> getSupportedServices() {
         return java.util.Collections.unmodifiableCollection(actions.values());
     }
+
 }

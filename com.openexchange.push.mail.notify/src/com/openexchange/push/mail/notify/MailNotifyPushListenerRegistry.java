@@ -51,28 +51,32 @@ package com.openexchange.push.mail.notify;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Strings;
-import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.mail.notify.osgi.Services;
 import com.openexchange.push.mail.notify.util.DelayedNotification;
 import com.openexchange.push.mail.notify.util.MailNotifyDelayQueue;
+import com.openexchange.push.mail.notify.util.SimpleKey;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
  * {@link MailNotifyPushListenerRegistry} - The registry for {@code MailNotifyPushListener}s.
@@ -83,7 +87,7 @@ public final class MailNotifyPushListenerRegistry {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailNotifyPushListenerRegistry.class);
 
     private static enum StopResult {
-        NONE, RECONNECTED, STOPPED;
+        NONE, RECONNECTED, RECONNECTED_AS_PERMANENT, STOPPED;
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
@@ -137,6 +141,31 @@ public final class MailNotifyPushListenerRegistry {
         return pushListenerService.generateSessionFor(new PushUser(userId, contextId));
     }
 
+    private boolean isUserValid(Session session, Map<SimpleKey, Boolean> validityMap) {
+        try {
+            SimpleKey key = SimpleKey.valueOf(session);
+            Boolean validity = validityMap.get(key);
+            if (null != validity) {
+                return validity.booleanValue();
+            }
+
+            ContextService contextService = Services.getService(ContextService.class, true);
+            Context context = contextService.loadContext(session.getContextId());
+            if (!context.isEnabled()) {
+                validityMap.put(key, Boolean.FALSE);
+                return false;
+            }
+
+            UserService userService = Services.getService(UserService.class, true);
+            User user = userService.getUser(session.getUserId(), context);
+            boolean mailEnabled = user.isMailEnabled();
+            validityMap.put(key, Boolean.valueOf(mailEnabled));
+            return mailEnabled;
+        } catch (OXException e) {
+            return false;
+        }
+    }
+
     /**
      * Cancels the timer.
      */
@@ -152,8 +181,12 @@ public final class MailNotifyPushListenerRegistry {
      * @param mboxid The mailbox identifier
      */
     public void scheduleEvent(String mboxid) {
-        notificationsQueue.offerIfAbsent(new DelayedNotification(mboxid, false));
-        triggerDueNotifications();
+        if (mboxId2Listener.containsKey(mboxid)) {
+            notificationsQueue.offerIfAbsent(new DelayedNotification(mboxid, false));
+            triggerDueNotifications();
+        } else {
+            LOG.debug("Denied scheduling an event for mboxid {} as there is no associated listener available.", mboxid);
+        }
     }
 
     /**
@@ -181,9 +214,10 @@ public final class MailNotifyPushListenerRegistry {
      */
     private void notifyNow(Collection<String> mboxIds) {
         if (false == mboxIds.isEmpty()) {
+            Map<SimpleKey, Boolean> validityMap = new HashMap<SimpleKey, Boolean>(mboxIds.size());
             for (String mboxId : mboxIds) {
                 try {
-                    fireEvent(mboxId);
+                    fireEvent(mboxId, validityMap);
                 } catch (Exception e) {
                     LOG.error("Failed firing push event", e);
                 }
@@ -197,12 +231,19 @@ public final class MailNotifyPushListenerRegistry {
      * @param mboxid The mailbox identifier
      * @throws OXException If firing event fails
      */
-    private void fireEvent(String mboxid) throws OXException {
+    private void fireEvent(String mboxid, Map<SimpleKey, Boolean> validityMap) throws OXException {
         LOG.debug("Checking whether to fire event for {}", mboxid);
-        PushListener listener = mboxId2Listener.get(mboxid);
+
+        MailNotifyPushListener listener = mboxId2Listener.get(mboxid);
         if (null != listener) {
-            LOG.debug("fireEvent, mboxid={}", mboxid);
-            listener.notifyNewMail();
+            if (isUserValid(listener.getSession(), validityMap)) {
+                // Valid user
+                LOG.debug("fireEvent, mboxid={}", mboxid);
+                listener.notifyNewMail();
+            } else {
+                // User is invalid/disabled
+                LOG.debug("Denied fireEvent for mboxid {} as associated user and/or context has been disabled.", mboxid);
+            }
         }
     }
 
@@ -232,38 +273,34 @@ public final class MailNotifyPushListenerRegistry {
             return false;
         }
 
-        boolean notYetPushed = true;
-        for (String mboxId : mboxIds) {
-            MailNotifyPushListener current = mboxId2Listener.putIfAbsent(mboxId, pushListener);
-            if (null == current) {
-                LOG.debug("Added UDP-based mail listener {} for user {} in context {}", mboxId, Integer.valueOf(userId), Integer.valueOf(contextId));
-            } else {
-                boolean replaced = false;
-
-                if (pushListener.isPermanent()) {
-                    boolean keepOn;
-                    do {
-                        if (current.isPermanent()) {
-                            keepOn = false;
-                        } else {
-                            replaced = mboxId2Listener.replace(mboxId, current, pushListener);
-                            keepOn = !replaced;
-                        }
-                    } while (keepOn);
-                }
-
-                if (replaced) {
-                    LOG.debug("Replaced UDP-based mail listener {} for user {} in context {}", mboxId, Integer.valueOf(userId), Integer.valueOf(contextId));
+        synchronized (this) {
+            boolean notYetPushed = true;
+            for (String mboxId : mboxIds) {
+                MailNotifyPushListener current = mboxId2Listener.putIfAbsent(mboxId, pushListener);
+                if (null == current) {
+                    LOG.debug("Added UDP-based mail listener {} for user {} in context {}", mboxId, Integer.valueOf(userId), Integer.valueOf(contextId));
                 } else {
-                    // Listener wasn't put into map
-                    LOG.debug("UDP-based mail listener {} was not put into map (as already present) for user {} in context {}", mboxId, Integer.valueOf(userId), Integer.valueOf(contextId));
-                    if (notYetPushed) {
-                        notYetPushed = false;
+                    boolean replaced = false;
+
+                    if (pushListener.isPermanent() && !current.isPermanent()) {
+                        // Replace non-permanent with permanent listener
+                        mboxId2Listener.put(mboxId, pushListener);
+                        replaced = true;
+                    }
+
+                    if (replaced) {
+                        LOG.debug("Replaced UDP-based mail listener {} for user {} in context {}", mboxId, Integer.valueOf(userId), Integer.valueOf(contextId));
+                    } else {
+                        // Listener wasn't put into map
+                        LOG.debug("UDP-based mail listener {} was not put into map (as already present) for user {} in context {}", mboxId, Integer.valueOf(userId), Integer.valueOf(contextId));
+                        if (notYetPushed) {
+                            notYetPushed = false;
+                        }
                     }
                 }
             }
+            return notYetPushed;
         }
-        return notYetPushed;
     }
 
     /**
@@ -283,26 +320,30 @@ public final class MailNotifyPushListenerRegistry {
             return false;
         }
 
-        boolean stopped = false;
-        for (String mboxId : mboxIds) {
-            StopResult stopResult = stopListener(tryToReconnect, stopIfPermanent, mboxId, userId, contextId);
+        synchronized (this) {
+            boolean stopped = false;
+            for (String mboxId : mboxIds) {
+                StopResult stopResult = stopListener(tryToReconnect, stopIfPermanent, mboxId, userId, contextId);
 
-            stopped |= (StopResult.STOPPED == stopResult);
+                stopped |= (StopResult.STOPPED == stopResult);
 
-            switch (stopResult) {
-            case RECONNECTED:
-                LOG.info("Reconnected UDP-based mail listener {} for user {} in context {} using another session", mboxId, I(userId), I(contextId));
-                return true;
-            case STOPPED:
-                LOG.info("Stopped UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
-                return true;
-            default:
-                break;
+                switch (stopResult) {
+                    case RECONNECTED:
+                        LOG.info("Reconnected UDP-based mail listener {} for user {} in context {} using another session", mboxId, I(userId), I(contextId));
+                        return true;
+                    case RECONNECTED_AS_PERMANENT:
+                        LOG.info("Reconnected as permanent UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
+                        return true;
+                    case STOPPED:
+                        LOG.info("Stopped UDP-based mail listener {} for user {} in context {}", mboxId, I(userId), I(contextId));
+                        return true;
+                    default:
+                        break;
+                }
+
             }
-
+            return stopped;
         }
-
-        return stopped;
     }
 
     /**
@@ -316,12 +357,14 @@ public final class MailNotifyPushListenerRegistry {
      * @return The stop result
      */
     private StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, String mboxId, int userId, int contextId) {
-        MailNotifyPushListener listener = mboxId2Listener.remove(mboxId);
+        MailNotifyPushListener listener = mboxId2Listener.get(mboxId);
         if (null != listener) {
             if (!stopIfPermanent && listener.isPermanent()) {
-                mboxId2Listener.put(mboxId, listener);
                 return StopResult.NONE;
             }
+
+            // Remove
+            mboxId2Listener.remove(mboxId);
 
             boolean reconnected;
             {
@@ -334,7 +377,12 @@ public final class MailNotifyPushListenerRegistry {
                 }
             }
 
-            return reconnected ? StopResult.RECONNECTED : StopResult.STOPPED;
+            if (!reconnected) {
+                return StopResult.STOPPED;
+            }
+
+            MailNotifyPushListener newListener = mboxId2Listener.get(mboxId);
+            return (null != newListener && newListener.isPermanent()) ? StopResult.RECONNECTED_AS_PERMANENT : StopResult.RECONNECTED;
         }
 
         MailNotifyPushListener newListener = injectAnotherListenerFor(null, mboxId, userId, contextId);
@@ -351,7 +399,7 @@ public final class MailNotifyPushListenerRegistry {
      * @return The new listener or <code>null</code>
      * @throws OXException If operation fails
      */
-    public MailNotifyPushListener injectAnotherListenerFor(Session optionalOldSession, String mboxId, int userId, int contextId) {
+    private MailNotifyPushListener injectAnotherListenerFor(Session optionalOldSession, String mboxId, int userId, int contextId) {
         // Prefer permanent listener prior to performing look-up for another valid session
         if (hasPermanentPush(userId, contextId)) {
             try {
@@ -397,16 +445,6 @@ public final class MailNotifyPushListenerRegistry {
         return null;
     }
 
-
-
-
-
-
-
-
-
-
-
     /**
      * Purges specified user's push listener and all of user-associated session identifiers from this registry.
      *
@@ -416,31 +454,19 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException
      */
     public boolean purgeUserPushListener(final int contextId, final int userId) throws OXException {
-        return removeListener(getMboxIdsFor(userId, contextId));
-    }
-
-    /**
-     * Removes specified session identifier associated with given user-context-pair and the push listener as well, if no more
-     * user-associated session identifiers are present.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return <code>true</code> if a push listener for given user-context-pair was found and removed; otherwise <code>false</code>
-     * @throws OXException
-     */
-    public boolean removePushListener(final int contextId, final int userId) throws OXException {
-        final SessiondService sessiondService = Services.optService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            return removeListener(getMboxIdsFor(userId, contextId));
+        Set<String> mboxIds = getMboxIdsFor(userId, contextId);
+        if (mboxIds.isEmpty()) {
+            LOG.warn("No resolvable aliases for user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId));
+            return false;
         }
-        return false;
-    }
 
-    private boolean removeListener(final Collection<String> mboxIds) {
-        for(final String id : mboxIds) {
-            LOG.debug("Removing alias {} from map", id);
-            mboxId2Listener.remove(id);
+        synchronized (this) {
+            for (String id : mboxIds) {
+                LOG.debug("Removing alias {} from map", id);
+                mboxId2Listener.remove(id);
+            }
         }
+
         return true;
     }
 
@@ -453,19 +479,26 @@ public final class MailNotifyPushListenerRegistry {
      * @throws OXException If mailbox identifiers cannot be returned
      */
     private Set<String> getMboxIdsFor(int userId, int contextId) throws OXException {
-        User user = UserStorage.getInstance().getUser(userId, contextId);
+        // Get the associated user
+        User user = Services.getService(UserService.class, true).getUser(userId, contextId);
 
+        // Get user aliases
         String[] aliases = user.getAliases();
+
+        // Iterate aliases and fill into set
         Set<String> mboxIds = new LinkedHashSet<String>(aliases.length + 1);
-        for (String alias : aliases) {
-            if (useEmailAddress) {
+        if (useEmailAddress) {
+            for (String alias : aliases) {
                 mboxIds.add(Strings.toLowerCase(alias));
-            } else {
+            }
+        } else {
+            for (String alias : aliases) {
                 int idx = alias.indexOf('@');
                 mboxIds.add(Strings.toLowerCase( (idx > 0) ? alias.substring(0, idx) : alias) );
             }
         }
 
+        // Add login-info as well (if demanded)
         if (useOXLogin) {
             mboxIds.add(user.getLoginInfo().toLowerCase());
         }

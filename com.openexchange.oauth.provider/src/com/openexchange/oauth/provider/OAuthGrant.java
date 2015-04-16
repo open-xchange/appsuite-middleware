@@ -52,25 +52,61 @@ package com.openexchange.oauth.provider;
 import java.util.Date;
 
 /**
- * {@link OAuthGrant}
+ * An {@link OAuthGrant} encapsulates the context information of an access token.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
+ * @see Scopes
  */
 public interface OAuthGrant {
 
+    /**
+     * Gets the ID of the client application.
+     *
+     * @return The client ID
+     */
     String getClientId();
 
+    /**
+     * Gets the ID of the users context.
+     *
+     * @return The context ID
+     */
     int getContextId();
 
+    /**
+     * Gets the ID of the user.
+     *
+     * @return The user ID
+     */
     int getUserId();
 
+    /**
+     * Gets the access token.
+     *
+     * @return The access token
+     */
     String getAccessToken();
 
+    /**
+     * Gets the refresh token.
+     *
+     * @return The refresh token
+     */
     String getRefreshToken();
 
+    /**
+     * Gets the expiration date.
+     *
+     * @return The expiration date
+     */
     Date getExpirationDate();
 
+    /**
+     * Gets the scopes.
+     *
+     * @return The scopes
+     */
     Scopes getScopes();
 
 }

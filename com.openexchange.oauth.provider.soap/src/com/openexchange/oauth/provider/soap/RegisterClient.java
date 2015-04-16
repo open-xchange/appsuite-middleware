@@ -9,16 +9,16 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java-Klasse f&uuml;r anonymous complex type.
+ * <p>Java class for anonymous complex type.
  *
- * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
+ * <p>The following schema fragment specifies the expected content contained within this class.
  *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="args0" type="{http://soap.provider.oauth.openexchange.com}ClientData" minOccurs="0"/>
+ *         &lt;element name="clientData" type="{http://soap.provider.oauth.openexchange.com}ClientData"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -29,16 +29,43 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
+    "contextGroup",
     "clientData"
 })
 @XmlRootElement(name = "registerClient")
 public class RegisterClient {
 
-    @XmlElement(nillable = true)
+    @XmlElement(required = true, nillable = false)
+    protected String contextGroup;
+    @XmlElement(required = true, nillable = true)
     protected ClientData clientData;
 
     /**
-     * Ruft den Wert der args0-Eigenschaft ab.
+     * Gets the value of the groupId property.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getContextGroup() {
+        return contextGroup;
+    }
+
+    /**
+     * Sets the value of the groupId property.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setContextGroup(String value) {
+        this.contextGroup = value;
+    }
+
+    /**
+     * Gets the value of the clientData property.
      *
      * @return
      *     possible object is
@@ -50,7 +77,7 @@ public class RegisterClient {
     }
 
     /**
-     * Legt den Wert der args0-Eigenschaft fest.
+     * Sets the value of the clientData property.
      *
      * @param value
      *     allowed object is

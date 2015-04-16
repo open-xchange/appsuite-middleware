@@ -91,13 +91,14 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.config.MailProperties;
-import com.openexchange.oauth.provider.Client;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.OAuthScopeProvider;
 import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.internal.OAuthProviderProperties;
 import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.oauth.provider.notification.OAuthMailNotificationService;
@@ -135,6 +136,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
+            Tools.disableCaching(response);
             if (!Tools.considerSecure(request)) {
                 response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
                 response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -159,7 +161,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            Client client = oAuthProvider.getClientById(clientId);
+            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null || !client.isEnabled()) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained an invalid value for parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
@@ -273,7 +275,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 String code = oAuthProvider.generateAuthorizationCodeFor(clientId, redirectURI, scope, user.getId(), ctx.getContextId());
                 try {
                     OAuthMailNotificationService notificationService = new OAuthMailNotificationService(oAuthProvider);
-                    notificationService.sendNotification(user.getId(), ctx.getContextId(), clientId);
+                    notificationService.sendNotification(user.getId(), ctx.getContextId(), clientId, request);
                 } catch (OXException e) {
                     LOG.error("Send oauth notification mail for {} to {} failed.", client.getName(), user.getMail(), e);
                 }
@@ -293,7 +295,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "server_error", "internal error", OAuthProviderConstants.PARAM_STATE, state));
                 return;
             }
-        } catch (OXException e) {
+        } catch (OXException | ClientManagementException e) {
             LOG.error("Authorization request failed", e);
             sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
@@ -302,6 +304,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
         try {
+            Tools.disableCaching(response);
             if (!Tools.considerSecure(request)) {
                 response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
                 response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
@@ -327,7 +330,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            Client client = oAuthProvider.getClientById(clientId);
+            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null) {
                 // Send error page
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_CLIENT_ID);
@@ -385,7 +388,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             PrintWriter writer = response.getWriter();
             writer.write(loginPage);
             writer.flush();
-        } catch (OXException e) {
+        } catch (OXException | ClientManagementException e) {
             LOG.error("Login request failed", e);
             sendErrorPage(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "internal error");
         }

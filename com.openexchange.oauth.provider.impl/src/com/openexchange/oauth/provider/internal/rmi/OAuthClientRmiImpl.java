@@ -50,11 +50,12 @@
 package com.openexchange.oauth.provider.internal.rmi;
 
 import java.rmi.RemoteException;
+import java.util.List;
 import org.slf4j.Logger;
-import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.Client;
-import com.openexchange.oauth.provider.ClientData;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 
 
@@ -68,95 +69,106 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
 
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OAuthClientRmiImpl.class);
 
-    private final OAuthProviderService oAuthProvider;
+    private final ClientManagement clientManagement;
 
     /**
      * Initializes a new {@link OAuthClientRmiImpl}.
      */
-    public OAuthClientRmiImpl(OAuthProviderService oAuthProvider) {
+    public OAuthClientRmiImpl(ClientManagement clientManagement) {
         super();
-        this.oAuthProvider = oAuthProvider;
+        this.clientManagement = clientManagement;
     }
 
-    private OAuthProviderService getProviderService() throws OXException {
-        return oAuthProvider;
+    private ClientManagement getClientManagement() {
+        return clientManagement;
     }
 
     @Override
-    public Client getClientById(String clientId) throws RemoteException {
+    public Client getClientById(String clientId) throws RemoteException, ClientManagementException {
         try {
-            return getProviderService().getClientById(clientId);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().getClientById(clientId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
     }
 
     @Override
-    public Client registerClient(ClientData clientData) throws RemoteException {
+    public Client registerClient(String contextGroup, ClientData clientData) throws RemoteException, ClientManagementException {
         try {
-            return getProviderService().registerClient(clientData);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().registerClient(contextGroup, clientData);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
     }
 
     @Override
-    public Client updateClient(String clientId, ClientData clientData) throws RemoteException {
+    public Client updateClient(String clientId, ClientData clientData) throws RemoteException, ClientManagementException {
         try {
-            return getProviderService().updateClient(clientId, clientData);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().updateClient(clientId, clientData);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws RemoteException {
+    public boolean unregisterClient(String clientId) throws RemoteException, ClientManagementException {
         try {
-            return getProviderService().unregisterClient(clientId);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().unregisterClient(clientId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
     }
 
     @Override
-    public Client revokeClientSecret(String clientId) throws RemoteException {
+    public Client revokeClientSecret(String clientId) throws RemoteException, ClientManagementException {
         try {
-            return getProviderService().revokeClientSecret(clientId);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().revokeClientSecret(clientId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
     }
 
     @Override
-    public void enableClient(String clientId) throws RemoteException {
+    public boolean enableClient(String clientId) throws RemoteException, ClientManagementException {
         try {
-            getProviderService().enableClient(clientId);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().enableClient(clientId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
     }
 
     @Override
-    public void disableClient(String clientId) throws RemoteException {
+    public boolean disableClient(String clientId) throws RemoteException, ClientManagementException {
         try {
-            getProviderService().disableClient(clientId);
-        } catch (OXException e) {
-            LOGGER.error("", e);
-            final String message = e.getMessage();
-            throw new RemoteException(message, new Exception(message));
+            return getClientManagement().disableClient(clientId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
         }
+    }
+
+    @Override
+    public List<Client> getClients(String groupId) throws ClientManagementException, RemoteException {
+        try {
+            return getClientManagement().getClients(groupId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
+        }
+    }
+
+    private static ClientManagementException serializableException(ClientManagementException e) {
+        Throwable cause = e.getCause();
+        if (cause == null) {
+            return e;
+        }
+
+        /*
+         * Underlying exceptions are potentially not serializable, we have to strip them.
+         * Additionally exceptions with a causes are most likely worth to be logged.
+         */
+        LOGGER.error("", e);
+        ClientManagementException stripped = ClientManagementException.forMessage(e.getReason(), e.getMessage());
+        stripped.setStackTrace(e.getStackTrace());
+        return stripped;
     }
 
 }

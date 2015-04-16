@@ -57,11 +57,14 @@ import com.openexchange.exception.OXException;
  * Provides information and validation methods for an OAuth scope. Such a scope can be
  * seen as a protection domain that includes a dedicated set of accessible modules and
  * actions. For every scope that is defined on an action to prevent unauthorized access
- * a {@link OAuthScopeProvider} must be registered as OSGi service.
+ * a {@link OAuthScopeProvider} must be registered as OSGi service. For your convenience,
+ * {@link AbstractScopeProvider} allows you to specify ID and description and implement
+ * only the {@link #canBeGranted(CapabilitySet)} method.
  *
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
+ * @see AbstractScopeProvider
  */
 public interface OAuthScopeProvider {
 

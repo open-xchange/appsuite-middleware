@@ -2,145 +2,162 @@
 <wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:ns1="http://org.apache.axis2/xsd" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ox="http://soap.provider.oauth.openexchange.com" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://soap.provider.oauth.openexchange.com">
     <wsdl:types>
         <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified" targetNamespace="http://soap.provider.oauth.openexchange.com">
-            <xs:element name="OAuthClientServiceException">
+            <xs:element name="Exception">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="ServiceException" nillable="true" type="ox:ServiceException"/>
+                        <xs:element name="message" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
-            <xs:complexType name="ServiceException">
-                <xs:sequence/>
-            </xs:complexType>
             <xs:element name="getClientById">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="1" name="clientId" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="getClientByIdResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:complexType name="Client">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="contactAddress" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="defaultScope" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="enabled" type="xs:boolean"/>
-                    <xs:element minOccurs="0" name="icon" nillable="true" type="ox:Icon"/>
-                    <xs:element minOccurs="0" name="id" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="redirectURIs" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="registrationDate" nillable="true" type="xs:date"/>
-                    <xs:element minOccurs="0" name="secret" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="website" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="contactAddress" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="defaultScope" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="description" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="enabled" type="xs:boolean"/>
+                    <xs:element minOccurs="1" name="icon" nillable="true" type="ox:Icon"/>
+                    <xs:element minOccurs="1" name="id" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="name" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="1" name="redirectURI" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="registrationDate" nillable="true" type="xs:long"/>
+                    <xs:element minOccurs="1" name="secret" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="website" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:complexType name="Icon">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="data" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="mimeType" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="size" type="xs:int"/>
+                    <xs:element minOccurs="1" name="data" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="mimeType" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="updateClient">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
-                        <xs:element minOccurs="0" name="args1" nillable="true" type="ox:ClientData"/>
+                        <xs:element minOccurs="1" name="clientId" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="1" name="clientData" nillable="true" type="ox:ClientData"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:complexType name="ClientData">
                 <xs:sequence>
-                    <xs:element minOccurs="0" name="contactAddress" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="defaultScope" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="description" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="icon" nillable="true" type="ox:Icon"/>
-                    <xs:element minOccurs="0" name="name" nillable="true" type="xs:string"/>
-                    <xs:element maxOccurs="unbounded" minOccurs="0" name="redirectURIs" nillable="true" type="xs:string"/>
-                    <xs:element minOccurs="0" name="website" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="contactAddress" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="defaultScope" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="description" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="icon" nillable="true" type="ox:Icon"/>
+                    <xs:element minOccurs="1" name="name" nillable="true" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="1" name="redirectURI" nillable="true" type="xs:string"/>
+                    <xs:element minOccurs="1" name="website" nillable="true" type="xs:string"/>
                 </xs:sequence>
             </xs:complexType>
             <xs:element name="updateClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="unregisterClient">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="1" name="clientId" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="unregisterClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="1" name="success" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="revokeClientSecret">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="1" name="clientId" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="revokeClientSecretResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="enableClient">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="1" name="clientId" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="enableClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="1" name="success" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="disableClient">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="xs:string"/>
+                        <xs:element minOccurs="1" name="clientId" nillable="true" type="xs:string"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="disableClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" type="xs:boolean"/>
+                        <xs:element minOccurs="1" name="success" type="xs:boolean"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="registerClient">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="args0" nillable="true" type="ox:ClientData"/>
+                        <xs:element name="contextGroup" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                        <xs:element minOccurs="1" name="clientData" nillable="true" type="ox:ClientData"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
             <xs:element name="registerClientResponse">
                 <xs:complexType>
                     <xs:sequence>
-                        <xs:element minOccurs="0" name="return" nillable="true" type="ox:Client"/>
+                        <xs:element minOccurs="1" name="client" nillable="true" type="ox:Client"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="listClients">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="contextGroup" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="ClientListData">
+                <xs:sequence>
+                    <xs:element name="id" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                    <xs:element name="name" type="xs:string" minOccurs="1" maxOccurs="1" nillable="false"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="listClientsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="client" type="ox:ClientListData" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
                     </xs:sequence>
                 </xs:complexType>
             </xs:element>
@@ -153,7 +170,7 @@
         <wsdl:part name="parameters" element="ox:unregisterClientResponse"/>
     </wsdl:message>
     <wsdl:message name="OAuthClientServiceException">
-        <wsdl:part name="parameters" element="ox:OAuthClientServiceException"/>
+        <wsdl:part name="parameters" element="ox:Exception"/>
     </wsdl:message>
     <wsdl:message name="revokeClientSecretRequest">
         <wsdl:part name="parameters" element="ox:revokeClientSecret"/>
@@ -191,281 +208,250 @@
     <wsdl:message name="disableClientResponse">
         <wsdl:part name="parameters" element="ox:disableClientResponse"/>
     </wsdl:message>
+    <wsdl:message name="listClientsRequest">
+        <wsdl:part name="parameters" element="ox:listClients"/>
+    </wsdl:message>
+    <wsdl:message name="listClientsResponse">
+        <wsdl:part name="parameters" element="ox:listClientsResponse"/>
+    </wsdl:message>
     <wsdl:portType name="OAuthClientServicePortType">
         <wsdl:operation name="unregisterClient">
             <wsdl:input message="ox:unregisterClientRequest" wsaw:Action="urn:unregisterClient"/>
             <wsdl:output message="ox:unregisterClientResponse" wsaw:Action="urn:unregisterClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:unregisterClientOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:unregisterClientException"/>
         </wsdl:operation>
         <wsdl:operation name="revokeClientSecret">
             <wsdl:input message="ox:revokeClientSecretRequest" wsaw:Action="urn:revokeClientSecret"/>
             <wsdl:output message="ox:revokeClientSecretResponse" wsaw:Action="urn:revokeClientSecretResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:revokeClientSecretOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:revokeClientSecretException"/>
         </wsdl:operation>
         <wsdl:operation name="registerClient">
             <wsdl:input message="ox:registerClientRequest" wsaw:Action="urn:registerClient"/>
             <wsdl:output message="ox:registerClientResponse" wsaw:Action="urn:registerClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:registerClientOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:registerClientException"/>
         </wsdl:operation>
         <wsdl:operation name="enableClient">
             <wsdl:input message="ox:enableClientRequest" wsaw:Action="urn:enableClient"/>
             <wsdl:output message="ox:enableClientResponse" wsaw:Action="urn:enableClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:enableClientOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:enableClientClientException"/>
         </wsdl:operation>
         <wsdl:operation name="getClientById">
             <wsdl:input message="ox:getClientByIdRequest" wsaw:Action="urn:getClientById"/>
             <wsdl:output message="ox:getClientByIdResponse" wsaw:Action="urn:getClientByIdResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:getClientByIdOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:getClientByIdException"/>
         </wsdl:operation>
         <wsdl:operation name="updateClient">
             <wsdl:input message="ox:updateClientRequest" wsaw:Action="urn:updateClient"/>
             <wsdl:output message="ox:updateClientResponse" wsaw:Action="urn:updateClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:updateClientOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:updateClientException"/>
         </wsdl:operation>
         <wsdl:operation name="disableClient">
             <wsdl:input message="ox:disableClientRequest" wsaw:Action="urn:disableClient"/>
             <wsdl:output message="ox:disableClientResponse" wsaw:Action="urn:disableClientResponse"/>
-            <wsdl:fault message="ox:OAuthClientServiceException" name="OAuthClientServiceException" wsaw:Action="urn:disableClientOAuthClientServiceException"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:disableClientException"/>
+        </wsdl:operation>
+        <wsdl:operation name="listClients">
+            <wsdl:input message="ox:listClientsRequest" wsaw:Action="urn:listClients"/>
+            <wsdl:output message="ox:listClientsResponse" wsaw:Action="urn:listClientsResponse"/>
+            <wsdl:fault message="ox:OAuthClientServiceException" name="Exception" wsaw:Action="urn:listClientsException"/>
         </wsdl:operation>
     </wsdl:portType>
     <wsdl:binding name="OAuthClientServiceSoap11Binding" type="ox:OAuthClientServicePortType">
-        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="jaxb"/>
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
         <wsdl:operation name="unregisterClient">
-            <soap:operation soapAction="urn:unregisterClient" style="jaxb"/>
+            <soap:operation soapAction="urn:unregisterClient" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="revokeClientSecret">
-            <soap:operation soapAction="urn:revokeClientSecret" style="jaxb"/>
+            <soap:operation soapAction="urn:revokeClientSecret" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="registerClient">
-            <soap:operation soapAction="urn:registerClient" style="jaxb"/>
+            <soap:operation soapAction="urn:registerClient" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getClientById">
-            <soap:operation soapAction="urn:getClientById" style="jaxb"/>
+            <soap:operation soapAction="urn:getClientById" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="enableClient">
-            <soap:operation soapAction="urn:enableClient" style="jaxb"/>
+            <soap:operation soapAction="urn:enableClient" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="updateClient">
-            <soap:operation soapAction="urn:updateClient" style="jaxb"/>
+            <soap:operation soapAction="urn:updateClient" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="disableClient">
-            <soap:operation soapAction="urn:disableClient" style="jaxb"/>
+            <soap:operation soapAction="urn:disableClient" style="document"/>
             <wsdl:input>
                 <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
+        </wsdl:operation>
+        <wsdl:operation name="listClients">
+            <soap:operation soapAction="urn:listClients" style="document"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:binding name="OAuthClientServiceSoap12Binding" type="ox:OAuthClientServicePortType">
-        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="jaxb"/>
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" style="document"/>
         <wsdl:operation name="unregisterClient">
-            <soap12:operation soapAction="urn:unregisterClient" style="jaxb"/>
+            <soap12:operation soapAction="urn:unregisterClient" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="revokeClientSecret">
-            <soap12:operation soapAction="urn:revokeClientSecret" style="jaxb"/>
+            <soap12:operation soapAction="urn:revokeClientSecret" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="registerClient">
-            <soap12:operation soapAction="urn:registerClient" style="jaxb"/>
+            <soap12:operation soapAction="urn:registerClient" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="getClientById">
-            <soap12:operation soapAction="urn:getClientById" style="jaxb"/>
+            <soap12:operation soapAction="urn:getClientById" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="enableClient">
-            <soap12:operation soapAction="urn:enableClient" style="jaxb"/>
+            <soap12:operation soapAction="urn:enableClient" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="updateClient">
-            <soap12:operation soapAction="urn:updateClient" style="jaxb"/>
+            <soap12:operation soapAction="urn:updateClient" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
         <wsdl:operation name="disableClient">
-            <soap12:operation soapAction="urn:disableClient" style="jaxb"/>
+            <soap12:operation soapAction="urn:disableClient" style="document"/>
             <wsdl:input>
                 <soap12:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
                 <soap12:body use="literal"/>
             </wsdl:output>
-            <wsdl:fault name="OAuthClientServiceException">
-                <soap12:fault use="literal" name="OAuthClientServiceException"/>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
             </wsdl:fault>
         </wsdl:operation>
-    </wsdl:binding>
-    <wsdl:binding name="OAuthClientServiceHttpBinding" type="ox:OAuthClientServicePortType">
-        <http:binding verb="POST"/>
-        <wsdl:operation name="unregisterClient">
-            <http:operation location="unregisterClient"/>
+        <wsdl:operation name="listClients">
+            <soap:operation soapAction="urn:listClients" style="document"/>
             <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
+                <soap:body use="literal"/>
             </wsdl:input>
             <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
+                <soap:body use="literal"/>
             </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="revokeClientSecret">
-            <http:operation location="revokeClientSecret"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="registerClient">
-            <http:operation location="registerClient"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="getClientById">
-            <http:operation location="getClientById"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="enableClient">
-            <http:operation location="enableClient"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="updateClient">
-            <http:operation location="updateClient"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
-        </wsdl:operation>
-        <wsdl:operation name="disableClient">
-            <http:operation location="disableClient"/>
-            <wsdl:input>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:input>
-            <wsdl:output>
-                <mime:content type="application/xml" part="parameters"/>
-            </wsdl:output>
+            <wsdl:fault name="Exception">
+                <soap:fault use="literal" name="Exception"/>
+            </wsdl:fault>
         </wsdl:operation>
     </wsdl:binding>
     <wsdl:service name="OAuthClientService">
@@ -474,9 +460,6 @@
         </wsdl:port>
         <wsdl:port name="OAuthClientServiceHttpSoap12Endpoint" binding="ox:OAuthClientServiceSoap12Binding">
             <soap12:address location="http://localhost:8080/axis2/services/OAuthClientService"/>
-        </wsdl:port>
-        <wsdl:port name="OAuthClientServiceHttpEndpoint" binding="ox:OAuthClientServiceHttpBinding">
-            <http:address location="http://localhost:8080/axis2/services/OAuthClientService"/>
         </wsdl:port>
     </wsdl:service>
 </wsdl:definitions>

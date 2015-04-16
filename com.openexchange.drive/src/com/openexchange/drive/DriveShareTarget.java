@@ -49,6 +49,8 @@
 
 package com.openexchange.drive;
 
+import java.util.Date;
+
 /**
  * {@link DriveShareTarget}
  *
@@ -62,6 +64,8 @@ public class DriveShareTarget {
     private String path;
 
     private String checksum;
+
+    private Date expiryDate;
 
     public String getChecksum() {
         return checksum;
@@ -87,11 +91,20 @@ public class DriveShareTarget {
         this.path = path;
     }
 
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((checksum == null) ? 0 : checksum.hashCode());
+        result = prime * result + ((expiryDate == null) ? 0 : expiryDate.hashCode());
         result = prime * result + ((name == null) ? 0 : name.hashCode());
         result = prime * result + ((path == null) ? 0 : path.hashCode());
         return result;
@@ -110,6 +123,11 @@ public class DriveShareTarget {
             if (other.checksum != null)
                 return false;
         } else if (!checksum.equals(other.checksum))
+            return false;
+        if (expiryDate == null) {
+            if (other.expiryDate != null)
+                return false;
+        } else if (!expiryDate.equals(other.expiryDate))
             return false;
         if (name == null) {
             if (other.name != null)

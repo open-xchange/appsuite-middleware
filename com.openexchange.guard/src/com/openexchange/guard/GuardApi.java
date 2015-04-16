@@ -49,7 +49,9 @@
 
 package com.openexchange.guard;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URI;
@@ -57,6 +59,9 @@ import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import org.apache.http.Header;
 import org.apache.http.HttpException;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
@@ -74,17 +79,23 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.ExecutionContext;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,6 +107,11 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.version.Version;
@@ -240,6 +256,73 @@ public class GuardApi {
         if (null != tmp) {
             HttpClients.shutDown(tmp);
             httpClient = null;
+        }
+    }
+
+    /**
+     * Processes the specified MIME message.
+     *
+     * @param mimeMessage The MIME message to process
+     * @param parameters The request parameters
+     * @return The processed MIME message
+     * @throws OXException If processing the MIME message fails
+     */
+    public MimeMessage processMimeMessage(MimeMessage mimeMessage, Map<String, String> parameters) throws OXException {
+        HttpPost request = null;
+        InputStream msgSrc = null;
+        try {
+            request = new HttpPost(buildUri(toQueryString(parameters)));
+            InputStream data = MimeMessageUtility.getStreamFromPart(mimeMessage);
+
+            final String boundary = UUIDs.getUnformattedStringFromRandom();
+            MultipartEntity multipartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE, boundary, Charsets.UTF_8) {
+
+                @Override
+                public Header getContentType() {
+                    return new BasicHeader(HTTP.CONTENT_TYPE, generateContentType(boundary, null));
+                }
+            };
+            multipartEntity.addPart("file", new InputStreamBody(data, "message/rfc882", "mail.eml"));
+            request.setEntity(multipartEntity);
+
+            msgSrc = handleHttpResponse(execute(request, getHttpClient()), InputStream.class);
+
+            ThresholdFileHolder sink = new ThresholdFileHolder();
+            boolean closeSink = true;
+            try {
+                sink.write(msgSrc);
+                msgSrc = null;
+
+                File tempFile = sink.getTempFile();
+                MimeMessage tmp;
+                if (null == tempFile) {
+                    tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                } else {
+                    FileBackedMimeMessage fbm = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, mimeMessage.getReceivedDate());
+                    tmp = fbm;
+                }
+                closeSink = false;
+                return tmp;
+            } catch (MessagingException e) {
+                throw MimeMailException.handleMessagingException(e);
+            } finally {
+                if (closeSink) {
+                    sink.close();
+                }
+            }
+        } catch (HttpResponseException e) {
+            if (400 == e.getStatusCode() || 401 == e.getStatusCode()) {
+                // Authentication failed -- recreate token
+                throw GuardApiExceptionCodes.AUTH_ERROR.create(e, e.getMessage());
+            }
+            throw handleHttpResponseError(null, e);
+        } catch (IOException e) {
+            throw handleIOError(e);
+        } catch (RuntimeException e) {
+            throw GuardApiExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(msgSrc);
+            reset(request);
         }
     }
 
@@ -432,6 +515,9 @@ public class GuardApi {
         // OK, continue
         if (Void.class.equals(clazz)) {
             return null;
+        }
+        if (InputStream.class.equals(clazz)) {
+            return (R) httpResponse.getEntity().getContent();
         }
         try {
             return (R) new JSONObject(new InputStreamReader(httpResponse.getEntity().getContent(), Charsets.UTF_8));

@@ -65,7 +65,6 @@ import org.apache.commons.cli.PosixParser;
 import com.openexchange.auth.rmi.RemoteAuthenticator;
 import com.openexchange.java.Strings;
 
-
 /**
  * {@link AbstractRmiCLI} - The abstract helper class for RMI-connecting command-line tools.
  *
@@ -83,11 +82,11 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      */
     protected static void setRMI_HOSTNAME(final String rmiHostName) {
         String host = rmiHostName;
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
+        if (!host.startsWith("rmi://")) {
+            host = "rmi://" + host;
         }
-        if(!host.endsWith("/")){
-            host = host+"/";
+        if (!host.endsWith("/")) {
+            host = host + "/";
         }
         RMI_HOSTNAME.set(host);
 
@@ -158,14 +157,14 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
             }
 
             // Check for port/server
-            String optRmiHostName;
+            String optRmiHostName = null;
             {
-                int optPort = parsePort('p', -1, cmd, options);
-                String optServer = cmd.getOptionValue('s');
-                if (optPort > 0 || null != optServer) {
-                    optRmiHostName = "rmi://" + (null == optServer ? "localhost" : optServer) + ":" + (optPort > 0 ? optPort : 1099) + "/";
-                } else {
-                    optRmiHostName = null;
+                if (cmd.hasOption('p')) {
+                    int optPort = parsePort('p', -1, cmd, options);
+                    String optServer = cmd.getOptionValue('s');
+                    if (optPort > 0 || null != optServer) {
+                        optRmiHostName = "rmi://" + (null == optServer ? "localhost" : optServer) + ":" + (optPort > 0 ? optPort : 1099) + "/";
+                    }
                 }
             }
 
@@ -329,11 +328,11 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
         if (null == host) {
             host = RMI_HOSTNAME.get();
         }
-        if(!host.startsWith("rmi://")){
-            host = "rmi://"+host;
+        if (!host.startsWith("rmi://")) {
+            host = "rmi://" + host;
         }
-        if(!host.endsWith("/")){
-            host = host+"/";
+        if (!host.endsWith("/")) {
+            host = host + "/";
         }
 
         Stub stub = (Stub) Naming.lookup(host + name);

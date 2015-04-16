@@ -59,7 +59,12 @@ import com.openexchange.java.Strings;
 
 
 /**
- * {@link DefaultScopes}
+ * The default implementation for scopes, based on the string representation of the RFC,
+ * i.e. whitespace-delimited strings. The according BNF is:
+ * <pre>
+ * scope       = scope-token *( SP scope-token )
+ * scope-token = 1*( %x21 / %x23-5B / %x5D-7E )
+ * </pre>
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>

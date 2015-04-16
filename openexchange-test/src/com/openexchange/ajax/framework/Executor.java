@@ -234,7 +234,7 @@ public class Executor extends Assert {
         } //emulating HttpUnit to avoid the Apache bug that mixes package up
 
         final AbstractAJAXParser<? extends T> parser = request.getParser();
-        final String responseBody = parser.checkResponse(response);
+        final String responseBody = parser.checkResponse(response, httpRequest);
 
         final long startParse = System.currentTimeMillis();
         final T retval = parser.parse(responseBody);

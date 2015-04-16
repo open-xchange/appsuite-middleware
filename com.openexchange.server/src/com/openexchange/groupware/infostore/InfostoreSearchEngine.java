@@ -50,13 +50,11 @@
 package com.openexchange.groupware.infostore;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tx.TransactionAware;
 
 /**
@@ -65,17 +63,33 @@ import com.openexchange.tx.TransactionAware;
 @SingletonService
 public interface InfostoreSearchEngine extends TransactionAware{
 
-	public static final int DESC = -1;
-	public static final int ASC = 1;
-	public static final int UNORDERED = 0;
-	public static final int NO_FOLDER = -10;
-	public static final int NOT_SET = -11;
+    /**
+     * Constant for descending sort order
+     */
+	static final int DESC = -1;
+	
+	/**
+	 * Constant for ascending sort order
+	 */
+	static final int ASC = 1;
+	
+	/**
+	 * Constant for no specified sort order
+	 */
+	static final int UNORDERED = 0;
+	
+	/**
+	 * Indicates no defined folder
+	 */
+	static final int NO_FOLDER = -10;
+	
+	/**
+	 * Indicates a not set parameter
+	 */
+	static final int NOT_SET = -11;
 
-	public SearchIterator<DocumentMetadata> search(String query, Metadata[] cols, int folderId, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+	SearchIterator<DocumentMetadata> search(ServerSession session, String query, int folderId, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException;
 
-	public SearchIterator<DocumentMetadata> search(int[] folderIds, SearchTerm<?> searchTerm, Metadata[] cols, Metadata sortedBy, int dir, int start, int end, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+	SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, int[] folderIds, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException;
 
-	public void index(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws  OXException;
-
-	public void unIndex0r(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 }

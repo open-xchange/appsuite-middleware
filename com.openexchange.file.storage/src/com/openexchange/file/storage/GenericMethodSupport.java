@@ -91,6 +91,23 @@ public class GenericMethodSupport {
         return Integer.parseInt(o.toString());
     }
 
+    /**
+     * Parses a boolean value out of a specific element in the supplied generic parameter list. 
+     * 
+     * @param i The index of the element in the parameter list
+     * @param args The generic parameter list
+     * @return <code>true</code> if the <code>i</code>th element in the supplied parameter list is or can be parsed to {@link Boolean#TRUE}, <code>false</code>, otherwise  
+     */
+    protected boolean bool(final int i, final Object... args) {
+        if (null == args || i >= args.length || null == args[i]) {
+            return false;
+        }
+        if (Boolean.class.isInstance(args[i])) {
+            return ((Boolean) args[i]).booleanValue();
+        }
+        return Boolean.parseBoolean(String.valueOf(args[i]));
+    }
+
     protected Date date(final int i, final Object... args) {
         if (args[i] == null || args.length <= i) {
             return null;

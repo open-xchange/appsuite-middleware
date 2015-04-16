@@ -52,6 +52,7 @@ package com.openexchange.oauth.provider.internal;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelperTest;
 
 
 /**
@@ -62,7 +63,8 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    URIValidatorTest.class
+    URIValidatorTest.class,
+    OAuthClientIdHelperTest.class
 })
 public class UnitTests {
 
