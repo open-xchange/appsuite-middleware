@@ -1,3 +1,7 @@
+* 2015-04-14 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 37668: Appointment series breaks after creating a delete exception in a very special case.
+
 * 2015-04-13 - thorben.betten@open-xchange.com
 
  - Fix for bug 37636: Handle InterruptedException gracefully
