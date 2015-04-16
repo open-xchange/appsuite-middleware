@@ -225,10 +225,6 @@ public final class PushManagerRegistry implements PushListenerService {
      * @param pushUsers The push users
      */
     public void applyInitialListeners(List<PushUser> pushUsers) {
-        if (null == pushUsers || pushUsers.isEmpty()) {
-            return;
-        }
-
         synchronized (this) {
             Collection<PushUser> toStop;
             {
