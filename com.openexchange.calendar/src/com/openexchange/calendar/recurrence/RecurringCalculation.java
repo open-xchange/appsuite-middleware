@@ -56,7 +56,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import com.openexchange.java.Strings;
+import java.util.TimeZone;
 import com.openexchange.calendar.RecurringResults;
 import com.openexchange.calendar.Tools;
 import com.openexchange.calendar.api.CalendarCollection;
@@ -65,6 +65,7 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.java.Strings;
 
 
 /**
@@ -379,8 +380,10 @@ public class RecurringCalculation {
 
     private void checkValues() {
 		if (!contains_until) {
-			end_of_series = (start_of_series + (recurring_type == CalendarObject.YEARLY ? Constants.MILLI_YEAR
-					* CalendarCollectionService.MAX_OCCURRENCESE : Constants.MILLI_YEAR * 99));
+		    Calendar tmp = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+		    tmp.setTimeInMillis(start_of_series);
+		    tmp.add(Calendar.YEAR, recurring_type == CalendarObject.YEARLY ? CalendarCollectionService.MAX_OCCURRENCESE : 99);
+		    end_of_series = tmp.getTimeInMillis();
 			this.until = end_of_series;
 		}
 	}
