@@ -99,6 +99,11 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public Session getSessionByAlternativeId(final String altId) {
+        return getSessionByAlternativeId(altId, false);
+    }
+
+    @Override
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage) {
         return null;
     }
 

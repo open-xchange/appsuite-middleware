@@ -171,6 +171,15 @@ public interface SessiondService {
     public Session getSessionByAlternativeId(String altId);
 
     /**
+     * Get the session object related to the given alternative identifier.
+     *
+     * @param altId The alternative identifier
+     * @param lookupSessionStorage Whether to allow to look-up session storage, too
+     * @return Return the session object or null if no session exists for the given alternative identifier or if the session is expired
+     */
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage);
+
+    /**
      * Get the session object related to the given random token.
      *
      * @param randomToken The random token of the session

@@ -298,7 +298,7 @@ public final class SessionUtility {
         }
 
         // Lookup session by alternative id
-        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
+        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId, publicSessionAuth));
         if (publicSession != null) {
             try {
                 if (false == publicSessionAuth) {
