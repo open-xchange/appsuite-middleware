@@ -197,12 +197,7 @@ public class AutoLoginTools {
         /*
          * lookup matching session
          */
-        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (null == sessiondService) {
-            LOGGER.error("", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
-            return null;
-        }
-        Session session = getSession(sessionID, sessiondService);
+        Session session = getSession(sessionID);
         if (null == session || false == secret.equals(session.getSecret())) {
             /*
              * not found / not matching
@@ -226,20 +221,17 @@ public class AutoLoginTools {
             throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
         }
         /*
-         * store session
-         */
-        try {
-            sessiondService.storeSession(sessionID);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to store session into session storage", e);
-        }
-        /*
          * wrap valid session into login result & return
          */
         return new LoginResultImpl(session, context, user);
     }
 
-    private static Session getSession(String sessionID, SessiondService sessiondService) {
+    private static Session getSession(String sessionID) {
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+        if (null == sessiondService) {
+            LOGGER.error("", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
+            return null;
+        }
         return sessiondService.getSession(sessionID);
     }
 
