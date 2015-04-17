@@ -86,7 +86,6 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -170,6 +169,12 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             }
                         } catch (final UndeclaredThrowableException e) {
                             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+                        }
+
+                        try {
+                            sessiondService.storeSession(sessionId);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to store session into session storage", e);
                         }
 
                         // Trigger client-specific ramp-up
