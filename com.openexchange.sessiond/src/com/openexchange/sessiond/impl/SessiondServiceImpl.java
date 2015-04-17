@@ -102,6 +102,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public boolean storeSession(String sessionId) throws OXException {
+        return SessionHandler.storeSession(sessionId);
+    }
+
+    @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
     }

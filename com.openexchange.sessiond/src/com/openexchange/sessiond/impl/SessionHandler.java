@@ -541,6 +541,32 @@ public final class SessionHandler {
     }
 
     /**
+     * Stores the session (if available) into session storage.
+     *
+     * @param sessionId The session identifier
+     * @return <code>true</code> if stored; otherwise <code>false</code>
+     */
+    protected static boolean storeSession(String sessionId) {
+        if (null == sessionId) {
+            return false;
+        }
+
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return false;
+        }
+        SessionControl sessionControl = sessionData.getSession(sessionId);
+        if (null == sessionControl) {
+            return false;
+        }
+
+        List<String> remotes = getRemoteParameterNames();
+        return putIntoSessionStorage(sessionControl.getSession(), null == remotes || remotes.isEmpty());
+    }
+
+
+    /**
      * Adds a new session containing given attributes to session container(s)
      *
      * @param userId The user ID
