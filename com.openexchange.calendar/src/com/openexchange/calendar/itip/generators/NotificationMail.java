@@ -346,6 +346,18 @@ public class NotificationMail {
         }
     }
     
+    private String getUserDiff() {
+        try {
+            if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
+                FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
+                
+            }
+        } catch (Exception e) {
+            return "Error";
+        }
+        return "";
+    }
+    
     private String diffs() {
         try {
             return getDiff().getDifferingFieldNames().toString();
@@ -509,7 +521,7 @@ public class NotificationMail {
         if (isAttachmentUpdate()) {
         	return false;
         }
-        return diff.isAboutStateChangesOnly();
+        return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
     }
 
 	public boolean isAboutStateChanges() {
