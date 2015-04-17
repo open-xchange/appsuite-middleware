@@ -1,3 +1,7 @@
+* 2015-04-17 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37760: Avoid usage of com.openexchange.exception.OXException.log(Logger), instead do the logging at appropriate location
+
 * 2015-04-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 37668: Appointment series breaks after creating a delete exception in a very special case.
@@ -8,12 +12,12 @@
 
 * 2015-04-14 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 37083: Make maximum allowed contact image size available via JSlob / config tree  
- - Fix for bug 37619: Use more intelligent filename reservation 
+ - Fix for bug 37083: Make maximum allowed contact image size available via JSlob / config tree
+ - Fix for bug 37619: Use more intelligent filename reservation
 
 * 2015-04-13 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 37638: Grant READ_ALL_OBJECTS permissions for global addressbook 
+ - Fix for bug 37638: Grant READ_ALL_OBJECTS permissions for global addressbook
 
 * 2015-04-13 - thorben.betten@open-xchange.com
 

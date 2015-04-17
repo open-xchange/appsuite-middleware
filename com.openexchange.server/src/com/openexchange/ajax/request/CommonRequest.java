@@ -101,9 +101,27 @@ public abstract class CommonRequest {
 	protected void handle(final Throwable t, final Session session) {
 		final Response res = new Response();
 		if(t instanceof OXException) {
-		    final OXException x = (OXException) t;
-		    x.log(LOG);
-		    res.setException(x);
+		    final OXException e = (OXException) t;
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
+		    res.setException(e);
 		} else {
             LOG.error("", t);
             res.setException(new OXException(t));
