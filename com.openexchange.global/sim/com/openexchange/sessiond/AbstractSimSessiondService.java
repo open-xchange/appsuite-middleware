@@ -68,6 +68,11 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public void storeSession(String sessionId) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) {
         // Nothing to do
     }
