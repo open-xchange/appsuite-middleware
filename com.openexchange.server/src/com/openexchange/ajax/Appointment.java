@@ -90,7 +90,25 @@ public class Appointment extends DataServlet {
             response.setTimestamp(appointmentRequest.getTimestamp());
             response.setData(responseObj);
         } catch (final OXException e) {
-            e.log(LOG);
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
             response.setException(e);
         } catch (final JSONException e) {
             final OXException oje = OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e);
@@ -145,7 +163,25 @@ public class Appointment extends DataServlet {
             LOG.error("", oje);
             response.setException(oje);
         } catch (final OXException e) {
-            e.log(LOG);
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
             response.setException(e);
         }
 

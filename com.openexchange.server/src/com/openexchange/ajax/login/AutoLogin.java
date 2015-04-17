@@ -254,7 +254,25 @@ public class AutoLogin extends AbstractLoginRequestHandler {
             if (AjaxExceptionCodes.DISABLED_ACTION.equals(e)) {
                 LOG.debug("", e);
             } else {
-                e.log(LOG);
+                switch (e.getCategories().get(0).getLogLevel()) {
+                    case TRACE:
+                        LOG.trace("", e);
+                        break;
+                    case DEBUG:
+                        LOG.debug("", e);
+                        break;
+                    case INFO:
+                        LOG.info("", e);
+                        break;
+                    case WARNING:
+                        LOG.warn("", e);
+                        break;
+                    case ERROR:
+                        LOG.error("", e);
+                        break;
+                    default:
+                        break;
+                }
             }
             if (SessionUtility.isIpCheckError(e) && null != session) {
                 try {

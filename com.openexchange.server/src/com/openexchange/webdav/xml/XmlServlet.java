@@ -499,12 +499,12 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         return parser.getEventType() == XmlPullParser.END_TAG && (name == null || name.equals(parser.getName()));
     }
 
-    protected void writeResponse(final DataObject dataobject, final int status, final String message,
+    public void writeResponse(final DataObject dataobject, final int status, final String message,
             final String client_id, final OutputStream os, final XMLOutputter xo) throws IOException {
         writeResponse(dataobject, status, message, client_id, os, xo, null);
     }
 
-    protected void writeResponse(final DataObject dataobject, final int status, final String message,
+    public void writeResponse(final DataObject dataobject, final int status, final String message,
             final String client_id, final OutputStream os, final XMLOutputter xo, final Appointment[] conflicts)
             throws IOException {
         LOG.debug("{}:{}", message, status);
@@ -634,7 +634,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
     protected abstract void startWriter(Session sessionObj, Context ctx, int folderId, boolean bModified,
             boolean bDelete, boolean bList, Date lastsync, OutputStream os) throws Exception;
 
-    protected String getErrorMessage(final OXException exc, final String message) {
+    public String getErrorMessage(final OXException exc, final String message) {
         return getErrorMessage(message, exc.getErrorCode());
     }
 
@@ -647,7 +647,7 @@ public abstract class XmlServlet<I> extends PermissionServlet {
         return new StringBuilder(err.length() + excMsg.length() + 2).append(err).append(": ").append(excMsg).toString();
     }
 
-    protected String getErrorMessage(final String message, final String errorCode) {
+    public String getErrorMessage(final String message, final String errorCode) {
         return String.format(message, errorCode);
     }
 }

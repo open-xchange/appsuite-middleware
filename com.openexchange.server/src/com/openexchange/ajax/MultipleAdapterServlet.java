@@ -160,14 +160,32 @@ public abstract class MultipleAdapterServlet extends PermissionServlet {
         }
     }
 
-    private void writeException(final OXException x, final Locale locale, final HttpServletResponse resp, Session session) {
-        x.log(LOG);
+    private void writeException(final OXException e, final Locale locale, final HttpServletResponse resp, Session session) {
+        switch (e.getCategories().get(0).getLogLevel()) {
+            case TRACE:
+                LOG.trace("", e);
+                break;
+            case DEBUG:
+                LOG.debug("", e);
+                break;
+            case INFO:
+                LOG.info("", e);
+                break;
+            case WARNING:
+                LOG.warn("", e);
+                break;
+            case ERROR:
+                LOG.error("", e);
+                break;
+            default:
+                break;
+        }
         final Response response = new Response(locale);
-        response.setException(x);
+        response.setException(e);
         try {
             writeResponse(response, resp, session);
-        } catch (final IOException e) {
-            LOG.error("", e);
+        } catch (final IOException ioe) {
+            LOG.error("", ioe);
         }
     }
 
