@@ -171,12 +171,6 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                         }
 
-                        try {
-                            sessiondService.storeSession(sessionId);
-                        } catch (Exception e) {
-                            LOG.warn("Failed to store session into session storage", e);
-                        }
-
                         // Trigger client-specific ramp-up
                         Future<JSONObject> optRampUp = rampUpAsync(ServerSessionAdapter.valueOf(session), req);
 
