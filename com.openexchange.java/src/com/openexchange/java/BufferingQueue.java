@@ -911,11 +911,7 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
             long now = System.currentTimeMillis();
             stamp = now + delayDuration;
             maxStamp = 0L == maxDelayDuration ? 0L : now + maxDelayDuration;
-
-            int prime = 31;
-            int result = 1;
-            result = prime * result + ((element == null) ? 0 : element.hashCode());
-            hash = result;
+            hash = 31 * 1 + ((element == null) ? 0 : element.hashCode());
         }
 
         @Override
@@ -962,6 +958,9 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
+            }
+            if (null == obj) {
+                return false;
             }
             if (!(obj instanceof BufferedElement)) {
                 return obj.equals(element);
