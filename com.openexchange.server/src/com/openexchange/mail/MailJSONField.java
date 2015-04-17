@@ -214,7 +214,19 @@ public enum MailJSONField {
     /**
      * Account identifier
      */
-    ACCOUNT_ID("account_id");
+    ACCOUNT_ID("account_id"),
+    /**
+     * The original mail ID.
+     * @since v7.8.0
+     */
+    ORIGINAL_ID("original_id"),
+    /**
+     * The original folder ID
+     * @since v7.8.0
+     */
+    ORIGINAL_FOLDER_ID("original_folder_id"),
+    ;
+
 
     private final String key;
 

@@ -481,6 +481,18 @@ public abstract class MailMessage extends MailPart {
     private boolean b_messageId;
 
     /**
+     * The original folder identifier
+     */
+    private String originalFolder;
+    private boolean b_originalFolder;
+
+    /**
+     * The original identifier
+     */
+    private String originalId;
+    private boolean b_originalId;
+
+    /**
      * Default constructor
      */
     protected MailMessage() {
@@ -1474,6 +1486,74 @@ public abstract class MailMessage extends MailPart {
     public void setDispositionNotification(final InternetAddress dispositionNotification) {
         this.dispositionNotification = dispositionNotification;
         b_dispositionNotification = true;
+    }
+
+    /**
+     * Gets the original folder
+     *
+     * @return the original folder
+     */
+    public String getOriginalFolder() {
+        return originalFolder;
+    }
+
+    /**
+     * @return <code>true</code> if original folder is set; otherwise <code>false</code>
+     */
+    public boolean containsOriginalFolder() {
+        return b_originalFolder;
+    }
+
+    /**
+     * Removes the original folder
+     */
+    public void removeOriginalFolder() {
+        originalFolder = null;
+        b_originalFolder = false;
+    }
+
+    /**
+     * Sets the original folder
+     *
+     * @param originalFolder the original folder to set
+     */
+    public void setOriginalFolder(final String originalFolder) {
+        this.originalFolder = originalFolder;
+        b_originalFolder = true;
+    }
+
+    /**
+     * Gets the original identifier
+     *
+     * @return the original identifier
+     */
+    public String getOriginalId() {
+        return originalId;
+    }
+
+    /**
+     * @return <code>true</code> if original identifier is set; otherwise <code>false</code>
+     */
+    public boolean containsOriginalId() {
+        return b_originalId;
+    }
+
+    /**
+     * Removes the original identifier
+     */
+    public void removeOriginalId() {
+        originalId = null;
+        b_originalId = false;
+    }
+
+    /**
+     * Sets the original identifier
+     *
+     * @param originalId the original identifier to set
+     */
+    public void setOriginalId(final String originalId) {
+        this.originalId = originalId;
+        b_originalId = true;
     }
 
     /**

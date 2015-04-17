@@ -170,6 +170,17 @@ public enum MailField {
      * Special field to signal support for continuation.
      */
     SUPPORTS_CONTINUATION(null),
+    /**
+     * The original mail ID.
+     * @since v7.8.0
+     */
+    ORIGINAL_ID(MailListField.ORIGINAL_ID),
+    /**
+     * The original folder ID
+     * @since v7.8.0
+     */
+    ORIGINAL_FOLDER_ID(MailListField.ORIGINAL_FOLDER_ID),
+
     ;
 
     private static final EnumMap<MailListField, MailField> LIST_FIELDS_MAP = new EnumMap<MailListField, MailField>(MailListField.class);

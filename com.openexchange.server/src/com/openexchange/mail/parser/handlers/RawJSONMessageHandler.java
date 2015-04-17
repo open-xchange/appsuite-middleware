@@ -172,6 +172,18 @@ public final class RawJSONMessageHandler implements MailMessageHandler {
                 // jsonObject.put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
                 jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
                 jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
+                if (mail.containsOriginalId()) {
+                    String originalId = mail.getOriginalId();
+                    if (null != originalId) {
+                        jsonObject.put(MailJSONField.ORIGINAL_ID.getKey(), originalId);
+                    }
+                }
+                if (mail.containsOriginalFolder()) {
+                    String originalFolder = mail.getOriginalFolder();
+                    if (null != originalFolder) {
+                        jsonObject.put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder);
+                    }
+                }
             }
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

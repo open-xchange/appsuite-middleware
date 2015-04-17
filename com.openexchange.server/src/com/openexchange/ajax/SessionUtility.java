@@ -258,23 +258,29 @@ public final class SessionUtility {
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
         final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if (cookies != null) {
-            final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
+        if (cookies == null) {
+            // No cookies available - Try to look-up by parameter
+            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+            if (null != publicSessionId) {
+                return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth || isChangeable(session, req));
+            }
+        } else {
+            Cookie cookie = cookies.get(getPublicSessionCookieName(req));
             if (null != cookie) {
-                return handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
+                return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
             }
 
             // No such cookie
-            final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
             if (null != publicSessionId) {
-                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth || isChangeable(session, req));
+                return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth || isChangeable(session, req));
             }
 
             // No such "public_session" parameter
             if (mayUseFallbackSession && isChangeable(session, req)) {
-                for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
                     if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                        return handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
+                        return handlePublicSessionIdentifier(entry.getValue().getValue(), req, session, sessiondService, false);
                     }
                 }
             }
@@ -284,7 +290,7 @@ public final class SessionUtility {
         return false;
     }
 
-    private static boolean handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final String altId, final boolean publicSessionAuth) throws OXException {
+    private static boolean handlePublicSessionIdentifier(String altId, HttpServletRequest req, ServerSession session, SessiondService sessiondService, boolean publicSessionAuth) throws OXException {
         if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
             // same session (thus already verified)
             rememberPublicSession(req, session);
@@ -292,7 +298,7 @@ public final class SessionUtility {
         }
 
         // Lookup session by alternative id
-        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
+        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId, publicSessionAuth));
         if (publicSession != null) {
             try {
                 if (false == publicSessionAuth) {

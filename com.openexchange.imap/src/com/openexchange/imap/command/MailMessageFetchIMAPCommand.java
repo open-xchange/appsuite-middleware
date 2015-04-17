@@ -76,6 +76,7 @@ import javax.mail.internet.InternetHeaders;
 import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.ParameterList;
 import com.openexchange.exception.OXException;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -85,6 +86,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -141,9 +143,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param seqNums The sequence numbers to fetch
      * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -152,7 +155,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false);
+        command = getFetchCommand(isRev1, fp, false, serverInfo);
         uid = false;
         length = seqNums.length;
         seqNum2index = new TIntIntHashMap(length, Constants.DEFAULT_LOAD_FACTOR, 0, -1);
@@ -176,9 +179,10 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param uids The UIDs to fetch
      * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -195,11 +199,11 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         if (length == messageCount) {
             fp.add(UIDFolder.FetchProfileItem.UID);
-            command = getFetchCommand(isRev1, fp, false);
+            command = getFetchCommand(isRev1, fp, false, serverInfo);
             args = (1 == length ? new String[] { "1" } : ARGS_ALL);
             uid = false;
         } else {
-            command = getFetchCommand(isRev1, fp, false);
+            command = getFetchCommand(isRev1, fp, false, serverInfo);
             args = IMAPNumArgSplitter.splitUIDArg(uids, false, LENGTH_WITH_UID + command.length());
             uid = true;
         }
@@ -1094,14 +1098,14 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            final long id = ((UID) item).uid;
+            long id = ((UID) item).uid;
             msg.setMailId(Long.toString(id));
             msg.setUid(id);
         }
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
-            final long id = ((IMAPFolder) message.getFolder()).getUID(message);
+            long id = ((IMAPFolder) message.getFolder()).getUID(message);
             msg.setMailId(Long.toString(id));
             msg.setUid(id);
         }
@@ -1111,7 +1115,8 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            msg.setUid(((X_REAL_UID) item).uid);
+            long originalUid = ((X_REAL_UID) item).uid;
+            msg.setOriginalUid(originalUid);
         }
 
         @Override
@@ -1124,7 +1129,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            msg.setFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
+            msg.setOriginalFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
         }
 
         @Override
@@ -1151,19 +1156,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * ++++++++++++++ End of item handlers ++++++++++++++
      */
 
-    public static final class FetchItem extends FetchProfile.Item {
-
-        /**
-         * Initializes a new {@link FetchItem}.
-         *
-         * @param name The name
-         */
-        protected FetchItem(String name) {
-            super(name);
-        }
-
-    }
-
     /**
      * This is the Envelope item. Despite of JavaMail's ENVELOPE item, this item does not include INTERNALDATE nor RFC822.SIZE; it solely
      * consists of the ENVELOPE.
@@ -1171,17 +1163,17 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * The Envelope is an aggregation of the common attributes of a Message. Implementations should include the following attributes: From,
      * To, Cc, Bcc, ReplyTo, Subject and Date. More items may be included as well.
      */
-    public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
+    public static final FetchProfile.Item ENVELOPE_ONLY = new MimeStorageUtility.FetchItem("ENVELOPE_ONLY");
 
     /**
      * This is the X-MAILBOX item.
      */
-    public static final FetchProfile.Item X_MAILBOX = new FetchItem("X-MAILBOX");
+    public static final FetchProfile.Item ORIGINAL_MAILBOX = MimeStorageUtility.ORIGINAL_MAILBOX;
 
     /**
      * This is the X-REAL-UID item.
      */
-    public static final FetchProfile.Item X_REAL_UID = new FetchItem("X-REAL-UID");
+    public static final FetchProfile.Item ORIGINAL_UID = MimeStorageUtility.ORIGINAL_UID;
 
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
@@ -1189,11 +1181,12 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param isRev1 Whether IMAP protocol is revision 1 or not
      * @param fp The fetch profile to convert
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
+     * @param serverInfo The IMAP server information
      * @return The FETCH items to craft a FETCH command
      */
-    public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringBuilder command = new StringBuilder(128);
-        final boolean sizeIncluded;
+    public static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody, IMAPServerInfo serverInfo) {
+        StringBuilder command = new StringBuilder(128);
+        boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {
                 command.append("INTERNALDATE");
@@ -1219,25 +1212,36 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         if (fp.contains(FetchProfile.Item.CONTENT_INFO)) {
             command.append(" BODYSTRUCTURE");
         }
-        if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
+        boolean uidIncluded = fp.contains(UIDFolder.FetchProfileItem.UID);
+        if (uidIncluded) {
             command.append(" UID");
         }
-        if (fp.contains(X_MAILBOX)) {
-            command.append(" X-MAILBOX");
+
+        // Decide per IMAP server
+        if (fp.contains(ORIGINAL_MAILBOX)) {
+            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+                command.append(" X-MAILBOX");
+            } else if (!uidIncluded) {
+                command.append(" UID");
+            }
         }
-        if (fp.contains(X_REAL_UID)) {
-            command.append(" X-REAL-UID");
+
+        // Decide per IMAP server
+        if (fp.contains(ORIGINAL_UID)) {
+            if (null != serverInfo && serverInfo.getCapabilities().containsKey("XDOVECOT")) {
+                command.append(" X-REAL-UID");
+            }
         }
-        boolean allHeaders = false;
-        if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
-            allHeaders = true;
+
+        boolean allHeaders = (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody);
+        if (allHeaders) {
             if (isRev1) {
                 command.append(" BODY.PEEK[HEADER]");
             } else {
                 command.append(" RFC822.HEADER");
             }
         }
-        if (!sizeIncluded && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
+        if (!sizeIncluded && fp.contains(FetchProfile.Item.SIZE)) {
             command.append(" RFC822.SIZE");
         }
         /*

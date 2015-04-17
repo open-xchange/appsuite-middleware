@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,86 +47,72 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.imap;
 
 import java.io.IOException;
-import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-
+import java.util.Map;
+import javax.mail.internet.idn.IDNA;
+import com.openexchange.exception.OXException;
+import com.openexchange.imap.config.IMAPConfig;
+import com.openexchange.imap.ping.IMAPCapabilityAndGreetingCache;
+import com.openexchange.mail.MailExceptionCode;
 
 /**
- * {@link StartSMTPRequest}
+ * {@link IMAPServerInfo} - IMAP server information.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class StartSMTPRequest implements AJAXRequest<ShareTestResponse> {
+public class IMAPServerInfo {
 
-    private final boolean updateAccount;
-
-    private int updateNoReplyForContext = -1;
-
-    private boolean failOnError = true;
-
-    public StartSMTPRequest() {
-        this(true);
+    /**
+     * Gets the IMAP server information for given configuration
+     *
+     * @param imapConfig The configuration
+     * @return The IMAP server information
+     * @throws OXException If IMAP server information cannot be returned
+     */
+    public static IMAPServerInfo instanceFor(IMAPConfig imapConfig) throws OXException {
+        try {
+            String serverUrl = new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
+            String greeting = IMAPCapabilityAndGreetingCache.getGreeting(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties());
+            Map<String, String> capabilities = imapConfig.asMap();
+            return new IMAPServerInfo(greeting, capabilities);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
-    public StartSMTPRequest(boolean updateAccount) {
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    private final String greeting;
+    private final Map<String, String> capabilities;
+
+    /**
+     * Initializes a new {@link IMAPServerInfo}.
+     */
+    private IMAPServerInfo(String greeting, Map<String, String> capabilities) {
         super();
-        this.updateAccount = updateAccount;
+        this.greeting = greeting;
+        this.capabilities = capabilities;
     }
 
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
+    /**
+     * Gets the greeting
+     *
+     * @return The greeting
+     */
+    public String getGreeting() {
+        return greeting;
     }
 
-    public void setUpdateNoReplyForContext(int updateNoReplyForContext) {
-        this.updateNoReplyForContext = updateNoReplyForContext;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    public String getServletPath() {
-        return "/ajax/smtpserver/test";
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "startSMTP",
-            "updateAccount", Boolean.toString(updateAccount),
-            "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)
-            ).toArray();
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends ShareTestResponse> getParser() {
-        return new AbstractAJAXParser<ShareTestResponse>(failOnError) {
-            @Override
-            protected ShareTestResponse createResponse(Response response) throws JSONException {
-                return new ShareTestResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+    /**
+     * Gets the capabilities
+     *
+     * @return The capabilities
+     */
+    public Map<String, String> getCapabilities() {
+        return capabilities;
     }
 
 }

@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -72,6 +73,8 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -407,4 +410,33 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         return com.openexchange.java.Strings.isEmpty(string);
     }
 
+    /**
+     * Checks given columns.
+     * <ul>
+     * <li>Add MailField.ID if MailField.ORIGINAL_ID is contained
+     * <li>Add MailField.FOLDER_ID if MailField.ORIGINAL_FOLDER_ID is contained
+     * </ul>
+     *
+     * @param columns The columns to check
+     * @return The checked columns in its mail field representation
+     */
+    protected static int[] prepareColumns(int[] columns) {
+        int[] fields = columns;
+
+        EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(MailField.getFields(fields)));
+        if (set.contains(MailField.ORIGINAL_FOLDER_ID) && !set.contains(MailField.FOLDER_ID)) {
+            int[] tmp = fields;
+            fields = new int[tmp.length + 1];
+            fields[0] = MailListField.FOLDER_ID.getField();
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+        if (set.contains(MailField.ORIGINAL_ID) && !set.contains(MailField.ID)) {
+            int[] tmp = fields;
+            fields = new int[tmp.length + 1];
+            fields[0] = MailListField.ID.getField();
+            System.arraycopy(tmp, 0, fields, 1, tmp.length);
+        }
+
+        return fields;
+    }
 }

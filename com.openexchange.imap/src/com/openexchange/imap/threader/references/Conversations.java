@@ -62,6 +62,7 @@ import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
@@ -248,27 +249,14 @@ public final class Conversations {
      * @param imapFolder The IMAP folder
      * @param lookAhead The limit
      * @param order The order direction that controls which chunk (oldest vs. most recent) to select
-     * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
-     * @return The unfolded conversations
-     * @throws MessagingException If a messaging error occurs
-     */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final boolean byEnvelope) throws MessagingException {
-        return conversationsFor(imapFolder, lookAhead, order, null, byEnvelope);
-    }
-
-    /**
-     * Retrieves <b><small>UNFOLDED</small></b> conversations for specified IMAP folder.
-     *
-     * @param imapFolder The IMAP folder
-     * @param lookAhead The limit
-     * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param fetchProfile The fetch profile
+     * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The unfolded conversations
      * @throws MessagingException If a messaging error occurs
      */
-    public static List<Conversation> conversationsFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
-        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, byEnvelope);
+    public static List<Conversation> conversationsFor(IMAPFolder imapFolder, int lookAhead, OrderDirection order, FetchProfile fetchProfile, IMAPServerInfo serverInfo, boolean byEnvelope) throws MessagingException {
+        final List<MailMessage> messages = messagesFor(imapFolder, lookAhead, order, fetchProfile, serverInfo, byEnvelope);
         if (null == messages || messages.isEmpty()) {
             return Collections.<Conversation> emptyList();
         }
@@ -286,12 +274,13 @@ public final class Conversations {
      * @param lookAhead The limit
      * @param order The order direction that controls which chunk (oldest vs. most recent) to select
      * @param fetchProfile The fetch profile
+     * @param serverInfo The IMAP server information
      * @param byEnvelope Whether to build-up using ENVELOPE; otherwise <code>false</code>
      * @return The messages with conversation information (References, In-Reply-To, Message-Id)
      * @throws MessagingException If a messaging error occurs
      */
     @SuppressWarnings("unchecked")
-    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final boolean byEnvelope) throws MessagingException {
+    public static List<MailMessage> messagesFor(final IMAPFolder imapFolder, final int lookAhead, final OrderDirection order, final FetchProfile fetchProfile, final IMAPServerInfo serverInfo, final boolean byEnvelope) throws MessagingException {
         final int messageCount = imapFolder.getMessageCount();
         if (messageCount <= 0) {
             /*
@@ -322,7 +311,7 @@ public final class Conversations {
                         }
                     }
                     final FetchProfile fp = null == fetchProfile ? (byEnvelope ? FETCH_PROFILE_CONVERSATION_BY_ENVELOPE : FETCH_PROFILE_CONVERSATION_BY_HEADERS) : checkFetchProfile(fetchProfile, byEnvelope);
-                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false)).append(')');
+                    sb.append(" (").append(getFetchCommand(protocol.isREV1(), fp, false, serverInfo)).append(')');
                     command = sb.toString();
                     sb = null;
                     // Execute command

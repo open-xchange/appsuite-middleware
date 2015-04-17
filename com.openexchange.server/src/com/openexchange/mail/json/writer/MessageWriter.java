@@ -393,6 +393,62 @@ public final class MessageWriter {
                 }
             }
         });
+        WRITERS.put(MailListField.ORIGINAL_ID, new MailFieldWriter() {
+
+            @Override
+            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+                try {
+                    Object originalId;
+                    if (mail.containsOriginalId() && null != mail.getOriginalId()) {
+                        originalId = mail.getOriginalId();
+                    } else {
+                        // Fall back to regular identifier
+                        String id = mail.getMailId();
+                        originalId = null == id ? JSONObject.NULL : id;
+                    }
+
+                    if (withKey) {
+                        jsonContainer.toObject().put(MailJSONField.ORIGINAL_ID.getKey(), originalId);
+                    } else {
+                        jsonContainer.toArray().put(originalId);
+                    }
+                } catch (final JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        WRITERS.put(MailListField.ORIGINAL_FOLDER_ID, new MailFieldWriter() {
+
+            @Override
+            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+                try {
+                    int accId = accountId;
+                    if (mail instanceof Delegatized) {
+                        final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                        if (undelegatedAccountId >= 0) {
+                            accId = undelegatedAccountId;
+                        }
+                    }
+
+                    Object originalFolder;
+                    if (mail.containsOriginalFolder() && null != mail.getOriginalFolder()) {
+                        originalFolder = prepareFullname(accId, mail.getOriginalFolder());
+                    } else {
+                        // Fall back to regular folder
+                        String folder = mail.getFolder();
+                        originalFolder = null == folder ? JSONObject.NULL : prepareFullname(accId, folder);
+                    }
+
+                    if (withKey) {
+                        jsonContainer.toObject().put(MailJSONField.ORIGINAL_FOLDER_ID.getKey(), originalFolder);
+                    } else {
+                        jsonContainer.toArray().put(originalFolder);
+                    }
+                } catch (final JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
         WRITERS.put(MailListField.ATTACHMENT, new MailFieldWriter() {
 
             @Override
