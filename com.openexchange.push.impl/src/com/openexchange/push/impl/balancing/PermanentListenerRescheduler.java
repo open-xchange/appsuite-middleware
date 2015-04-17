@@ -71,12 +71,16 @@ import com.hazelcast.core.Member;
 import com.hazelcast.core.MemberAttributeEvent;
 import com.hazelcast.core.MembershipEvent;
 import com.hazelcast.core.MembershipListener;
+import com.openexchange.java.BufferingQueue;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUser;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -90,32 +94,57 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     /** The logger constant */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PermanentListenerRescheduler.class);
 
+    protected static final Object RESCHEDULE = new Object();
+
     private final PushManagerRegistry pushManagerRegistry;
     private final BundleContext context;
     private final AtomicReference<String> registrationIdRef;
     private final AtomicReference<HazelcastInstance> hzInstancerRef;
+    private final BufferingQueue<Object> rescheduleQueue;
+    private final ScheduledTimerTask scheduledTimerTask;
 
     /**
      * Initializes a new {@link PermanentListenerRescheduler}.
      */
-    public PermanentListenerRescheduler(PushManagerRegistry pushManagerRegistry, BundleContext context) {
+    public PermanentListenerRescheduler(PushManagerRegistry pushManagerRegistry, TimerService timerService, BundleContext context) {
         super();
+        final BufferingQueue<Object> rescheduleQueue = new BufferingQueue<Object>(7000L, 20000L); // 7sec default delay
+        this.rescheduleQueue = rescheduleQueue;
         hzInstancerRef = new AtomicReference<HazelcastInstance>();
         registrationIdRef = new AtomicReference<String>();
         this.pushManagerRegistry = pushManagerRegistry;
         this.context = context;
+
+        Runnable timerTask = new Runnable() {
+
+            @Override
+            public void run() {
+                Object obj = rescheduleQueue.poll();
+                if (RESCHEDULE == obj) {
+                    doReschedule();
+                }
+            }
+        };
+        scheduledTimerTask = timerService.scheduleWithFixedDelay(timerTask, 3500L, 3500L);
+    }
+
+    /**
+     * Stops this rescheduler.
+     */
+    public void stop() {
+        scheduledTimerTask.cancel();
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
-        reschedule(membershipEvent.getMembers(), hzInstancerRef.get(), this, true);
+        planReschedule();
     }
 
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
-        reschedule(membershipEvent.getMembers(), hzInstancerRef.get(), this, true);
+        planReschedule();
     }
 
     @Override
@@ -125,13 +154,31 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     // -------------------------------------------------------------------------------------------------------------------------------
 
+    /**
+     * Plan to reschedule.
+     */
+    private void planReschedule() {
+        rescheduleQueue.offerIfAbsentElseReset(RESCHEDULE);
+    }
+
+    /**
+     * Reschedules permanent listeners among available cluster members.
+     */
+    protected void doReschedule() {
+        HazelcastInstance hzInstance = hzInstancerRef.get();
+        if (null != hzInstance) {
+            Cluster cluster = hzInstance.getCluster();
+            reschedule(cluster.getMembers(), hzInstance, this, true);
+        }
+    }
+
     private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, Object monitor, boolean async) {
         if (null == hzInstance) {
             LOG.warn("Aborted re-scheduling of permanent listeners as passed HazelcastInstance is null.");
             return;
         }
 
-        // Determine push users
+        // Determine push users to distribute among cluster members
         List<PushUser> allPushUsers;
         try {
             allPushUsers = pushManagerRegistry.getUsersWithPermanentListeners();
@@ -145,30 +192,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
         // Acquire optional thread pool
         ThreadPoolService threadPool = async ? Services.optService(ThreadPoolService.class) : null;
-        if (null != threadPool) {
-            // Submit task
+        if (null == threadPool) {
+            // Perform with current thread
+            ThreadPools.execute(new ReschedulerTask(allMembers, allPushUsers, hzInstance, monitor, pushManagerRegistry));
+        } else {
+            // Submit task to thread pool
             threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, monitor, pushManagerRegistry));
-            return;
-        }
-
-        // Perform with current thread
-        Thread thread = Thread.currentThread();
-        ReschedulerTask task = new ReschedulerTask(allMembers, allPushUsers, hzInstance, monitor, pushManagerRegistry);
-
-        boolean ran = false;
-        task.beforeExecute(thread);
-        try {
-            task.call();
-            ran = true;
-            task.afterExecute(null);
-        } catch (RuntimeException ex) {
-            if (!ran) {
-                task.afterExecute(ex);
-            }
-            // Else the exception occurred within
-            // afterExecute itself in which case we don't
-            // want to call it again.
-            LOG.warn("Failed to distribute permanent listeners among cluster nodes", ex);
         }
     }
 
@@ -184,7 +213,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             hzInstancerRef.set(hzInstance);
 
-            reschedule(cluster.getMembers(), hzInstance, this, false);
+            planReschedule();
 
             return hzInstance;
         } catch (Exception e) {
