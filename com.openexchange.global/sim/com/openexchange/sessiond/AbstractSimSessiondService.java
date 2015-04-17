@@ -68,8 +68,8 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
-    public void storeSession(String sessionId) throws OXException {
-        // Nothing to do
+    public boolean storeSession(String sessionId) throws OXException {
+        return false;
     }
 
     @Override
