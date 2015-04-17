@@ -551,7 +551,7 @@ public final class SessionHandler {
             return false;
         }
 
-        SessionData sessionData = SESSION_DATA_REF.get();
+        SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
             return false;
