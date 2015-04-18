@@ -179,8 +179,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
                 if (hazelcastConfig.isEnabled()) {
                     // Track HazelcastInstance service
-                    TimerService timerService = getService(TimerService.class);
-                    PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, timerService, context);
+                    PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, context);
                     this.rescheduler = rescheduler;
                     track(HazelcastInstance.class, rescheduler);
                 } else {
