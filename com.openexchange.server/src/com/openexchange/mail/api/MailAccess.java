@@ -1128,8 +1128,19 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param waiting <code>true</code> if this mail access is waiting; otherwise <code>false</code>
      */
-    public void setWaiting(final boolean waiting) {
-        this.waiting = waiting;
+    public void setWaiting(boolean waiting) {
+        if (waiting) {
+            this.waiting = waiting;
+        } else {
+            boolean wasWaiting = this.waiting;
+            this.waiting = waiting;
+            if (wasWaiting) {
+                // Switched from waiting to non-waiting mode
+                if (tracked) {
+                    MailAccessWatcher.touchMailAccess(this);
+                }
+            }
+        }
     }
 
     /**
