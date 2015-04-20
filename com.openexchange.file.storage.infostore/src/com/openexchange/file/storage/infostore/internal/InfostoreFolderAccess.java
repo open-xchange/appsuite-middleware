@@ -143,8 +143,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public FileStorageFolder getFolder(final String folderId) throws OXException {
-        FolderServiceDecorator decorator = initDecorator();
-        return FolderWriter.writeFolder(getFolderService().getFolder(TREE_ID, folderId, session, decorator), decorator.getLocale());
+        return FolderWriter.writeFolder(getFolderService().getFolder(TREE_ID, folderId, session, initDecorator()));
     }
 
     @Override
@@ -184,16 +183,14 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public FileStorageFolder[] getPublicFolders() throws OXException {
-        FolderServiceDecorator decorator = initDecorator();
-        UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, "15", true, session, decorator).getResponse();
-        return FolderWriter.writeFolders(subfolders, decorator.getLocale());
+        UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, "15", true, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(subfolders);
     }
 
     @Override
     public FileStorageFolder[] getPath2DefaultFolder(String folderId) throws OXException {
-        FolderServiceDecorator decorator = initDecorator();
-        UserizedFolder[] folders = getFolderService().getPath(TREE_ID, folderId, session, decorator).getResponse();
-        return FolderWriter.writeFolders(folders, decorator.getLocale());
+        UserizedFolder[] folders = getFolderService().getPath(TREE_ID, folderId, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(folders);
     }
 
     @Override
@@ -241,9 +238,8 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     @Override
     public FileStorageFolder[] getSubfolders(String parentIdentifier, boolean all) throws OXException {
-        FolderServiceDecorator decorator = initDecorator();
-        UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, parentIdentifier, all, session, decorator).getResponse();
-        return FolderWriter.writeFolders(subfolders, decorator.getLocale());
+        UserizedFolder[] subfolders = getFolderService().getSubfolders(TREE_ID, parentIdentifier, all, session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(subfolders);
     }
 
     @Override
@@ -294,10 +290,9 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     }
 
     private FileStorageFolder getDefaultFolder(com.openexchange.folderstorage.Type type) throws OXException {
-        FolderServiceDecorator decorator = initDecorator();
         try {
             return FolderWriter.writeFolder(getFolderService().getDefaultFolder(
-                session.getUser(), TREE_ID, InfostoreContentType.getInstance(), type, session, decorator), decorator.getLocale());
+                session.getUser(), TREE_ID, InfostoreContentType.getInstance(), type, session, initDecorator()));
         } catch (OXException e) {
             if (FolderExceptionErrorMessage.NO_DEFAULT_FOLDER.equals(e)) {
                 throw FileStorageExceptionCodes.NO_SUCH_FOLDER.create(e);

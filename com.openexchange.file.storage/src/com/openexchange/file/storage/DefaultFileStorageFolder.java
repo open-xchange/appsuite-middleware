@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -192,6 +193,11 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
      */
     public void setName(final String name) {
         this.name = name;
+    }
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return null;
     }
 
     @Override

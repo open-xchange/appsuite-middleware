@@ -1,3 +1,7 @@
+* 2015-04-20 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37754: Always use non-localized directory names in three-way-comparisons 
+
 * 2015-04-17 - thorben.betten@open-xchange.com
 
  - Fix for bug 37760: Avoid usage of com.openexchange.exception.OXException.log(Logger), instead do the logging at appropriate location

@@ -119,6 +119,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", folder.getId());
             jsonObject.put("name", folder.getName());
+            jsonObject.putOpt("localizedName", folder.getLocalizedName(session.getDriveSession().getLocale()));
             jsonObject.put("path", session.getStorage().getPath(folderID));
             if (null != folder.getCreationDate()) {
                 jsonObject.put("created", folder.getCreationDate().getTime());
