@@ -156,4 +156,46 @@ public class PortableCredentials implements CustomPortable {
         return login;
     }
 
+    @Override
+    public int hashCode() {
+        int prime = 31;
+        int result = prime * 1 + contextId;
+        result = prime * result + ((login == null) ? 0 : login.hashCode());
+        result = prime * result + ((password == null) ? 0 : password.hashCode());
+        result = prime * result + userId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PortableCredentials)) {
+            return false;
+        }
+        PortableCredentials other = (PortableCredentials) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        if (login == null) {
+            if (other.login != null) {
+                return false;
+            }
+        } else if (!login.equals(other.login)) {
+            return false;
+        }
+        if (password == null) {
+            if (other.password != null) {
+                return false;
+            }
+        } else if (!password.equals(other.password)) {
+            return false;
+        }
+        return true;
+    }
+
 }

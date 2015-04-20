@@ -134,45 +134,63 @@ public class RdbCredentialStorage implements CredentialStorage {
         storeCredentials(obfuscatedCredentials, true, connection);
     }
 
-    private void storeCredentials(Credentials obfuscatedCredentials, boolean retry, Connection connection) throws OXException {
+    private boolean storeCredentials(Credentials obfuscatedCredentials, boolean retry, Connection connection) throws OXException {
         int contextId = obfuscatedCredentials.getContextId();
         int userId = obfuscatedCredentials.getUserId();
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = connection.prepareStatement("SELECT 1 FROM credentials WHERE cid=? AND user=?");
+            stmt = connection.prepareStatement("SELECT login, password FROM credentials WHERE cid=? AND user=?");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             rs = stmt.executeQuery();
 
-            boolean exists = rs.next();
+            boolean exists = false;
+            String curLogin = null;
+            String curPassword = null;
+            if (rs.next()) {
+                exists = true;
+                curLogin = rs.getString(1);
+                curPassword = rs.getString(2);
+            }
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
 
             if (exists) {
-                stmt = connection.prepareStatement("UPDATE credentials SET password=?, login=? WHERE cid=? AND user=?");
+                // Check current credentials
+                if (obfuscatedCredentials.getLogin().equals(curLogin) && obfuscatedCredentials.getPassword().equals(curPassword)) {
+                    // Nothing to do
+                    return false;
+                }
+
+                // Perform UPDATE statement
+                stmt = connection.prepareStatement("UPDATE credentials SET password=?, login=? WHERE cid=? AND user=? AND password=? AND login=?");
                 stmt.setString(1, obfuscatedCredentials.getPassword());
                 stmt.setString(2, obfuscatedCredentials.getLogin());
                 stmt.setInt(3, contextId);
                 stmt.setInt(4, userId);
+                stmt.setString(5, curPassword);
+                stmt.setString(6, curLogin);
+                int updatedRows = stmt.executeUpdate();
+                return updatedRows > 0 ? true : storeCredentials(obfuscatedCredentials, false, connection);
+            }
+
+            // Perform INSERT statement
+            stmt = connection.prepareStatement("INSERT INTO credentials (cid, user, password, login) VALUES (?,?,?,?)");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, obfuscatedCredentials.getPassword());
+            stmt.setString(4, obfuscatedCredentials.getLogin());
+            try {
                 stmt.executeUpdate();
-            } else {
-                stmt = connection.prepareStatement("INSERT INTO credentials (cid, user, password, login) VALUES (?,?,?,?)");
-                stmt.setInt(1, contextId);
-                stmt.setInt(2, userId);
-                stmt.setString(3, obfuscatedCredentials.getPassword());
-                stmt.setString(4, obfuscatedCredentials.getLogin());
-                try {
-                    stmt.executeUpdate();
-                } catch (SQLException e) {
-                    // Duplicate write attempt
-                    if (!retry) {
-                        throw e;
-                    }
-                    storeCredentials(obfuscatedCredentials, false, connection);
-                    return;
+                return true;
+            } catch (SQLException e) {
+                // Duplicate write attempt
+                if (!retry) {
+                    throw e;
                 }
+                return storeCredentials(obfuscatedCredentials, false, connection);
             }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());

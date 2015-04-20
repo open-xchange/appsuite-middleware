@@ -141,25 +141,25 @@ public class HazelcastCredentialStorage implements CredentialStorage {
 
     // ---------------------------------------------------------------------------------------------------
 
-    private void putCredentials(PushUser user, Credentials credentials) {
+    private void putCredentials(PushUser user, Credentials newObfuscatedCredentials) {
         blocker.acquire();
         try {
             if (useHzMap) {
-                putCredentialsToHzMap(hzMapName, user, credentials);
+                putCredentialsToHzMap(hzMapName, user, newObfuscatedCredentials);
             } else {
-                sources.put(user, credentials);
+                sources.put(user, newObfuscatedCredentials);
             }
         } finally {
             blocker.release();
         }
     }
 
-    private void putCredentialsToHzMap(String mapIdentifier, PushUser user, Credentials credentials) {
+    private void putCredentialsToHzMap(String mapIdentifier, PushUser user, Credentials newObfuscatedCredentials) {
         IMap<PortablePushUser, PortableCredentials> hzMap = hzMap(mapIdentifier);
         if (null == hzMap) {
             LOG.trace("Hazelcast map for remote credentials is not available.");
         } else {
-            hzMap.put(new PortablePushUser(user), new PortableCredentials(credentials));
+            hzMap.put(new PortablePushUser(user), new PortableCredentials(newObfuscatedCredentials));
         }
     }
 
@@ -183,6 +183,7 @@ public class HazelcastCredentialStorage implements CredentialStorage {
         if (null == portableCredentials) {
             return null;
         }
+
         DefaultCredentials credentials = new DefaultCredentials();
         credentials.setContextId(portableCredentials.getContextId());
         credentials.setUserId(portableCredentials.getUserId());
@@ -228,7 +229,19 @@ public class HazelcastCredentialStorage implements CredentialStorage {
 
     @Override
     public void storeCredentials(Credentials credentials) throws OXException {
-        putCredentials(new PushUser(credentials.getUserId(), credentials.getContextId()), obfuscator.obfuscateCredentials(credentials));
+        PushUser pushUser = new PushUser(credentials.getUserId(), credentials.getContextId());
+        Credentials obfuscatedCredentials = obfuscator.obfuscateCredentials(credentials);
+
+        Credentials curObfuscatedCredentials = peekCredentials(pushUser);
+        if (null == curObfuscatedCredentials) {
+            putCredentials(pushUser, obfuscatedCredentials);
+        } else {
+            if (curObfuscatedCredentials.getLogin().equals(obfuscatedCredentials.getLogin()) && curObfuscatedCredentials.getPassword().equals(obfuscatedCredentials.getPassword())) {
+                return;
+            }
+
+            putCredentials(pushUser, obfuscatedCredentials);
+        }
     }
 
     @Override
