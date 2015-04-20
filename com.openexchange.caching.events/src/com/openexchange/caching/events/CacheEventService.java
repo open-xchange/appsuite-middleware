@@ -60,6 +60,13 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface CacheEventService {
 
     /**
+     * Gets the associated configuration
+     *
+     * @return The configuration
+     */
+    CacheEventConfiguration getConfiguration();
+
+    /**
      * Publishes a cache event to the registered listeners.
      *
      * @param sender The sender of the event

@@ -655,7 +655,7 @@ public class RdbUserStorage extends UserStorage {
     }
 
     /**
-     * Stores a internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
      * <p>
      * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
      * caller can decide to treat as an error or to simply ignore it.
@@ -669,30 +669,55 @@ public class RdbUserStorage extends UserStorage {
      */
     @Override
     public void setAttribute(String name, String value, int userId, Context context) throws OXException {
+        setAttributeAndReturnUser(name, value, userId, context, false);
+    }
+
+    /**
+     * Stores an internal user attribute. Internal user attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param userId Identifier of the user that attribute should be set.
+     * @param context Context the user resides in.
+     * @param returnUser Whether to return updated user instance or not
+     * @throws OXException if writing the attribute fails.
+     * @see UserExceptionCode#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY
+     */
+    public User setAttributeAndReturnUser(String name, String value, int userId, Context context, boolean returnUser) throws OXException {
         if (null == name) {
             throw LdapExceptionCode.UNEXPECTED_ERROR.create("Attribute name is null.").setPrefix("USR");
         }
 
-        Connection con = null;
-        PreparedStatement stmt = null;
+        Connection con = DBPool.pickupWriteable(context);
         try {
-            con = DBPool.pickupWriteable(context);
             if (value == null) {
-                stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
-                stmt.setInt(1, context.getContextId());
-                stmt.setInt(2, userId);
-                stmt.setString(3, name);
-                stmt.executeUpdate();
+                deleteAttribute(name, userId, context, con);
             } else {
                 insertOrUpdateAttribute(name, value, userId, context, con);
             }
+            return returnUser ? getUser(context, con, new int[] { userId })[0] : null;
+        } finally {
+            if (con != null) {
+                DBPool.closeWriterSilent(context, con);
+            }
+        }
+    }
+
+    private static void deleteAttribute(String name, int userId, Context context, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid = ? AND id = ? AND name = ?");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            stmt.setString(3, name);
+            stmt.executeUpdate();
         } catch (SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
         } finally {
             Databases.closeSQLStuff(stmt);
-            if (con != null) {
-                DBPool.closeWriterSilent(context, con);
-            }
         }
     }
 

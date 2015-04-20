@@ -90,7 +90,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final ContactField[] COMPARISON_FIELDS = {
         ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.BIRTHDAY,
-        ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.USERFIELD20 };
+        ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.USERFIELD20, ContactField.CELLULAR_TELEPHONE1 };
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
@@ -122,6 +122,9 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             score += 10;
         }
         if (eq(original.getEmail3(), candidate.getEmail3())) {
+            score += 10;
+        }
+        if (eq(original.getCellularTelephone1(), candidate.getCellularTelephone1())) {
             score += 10;
         }
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {

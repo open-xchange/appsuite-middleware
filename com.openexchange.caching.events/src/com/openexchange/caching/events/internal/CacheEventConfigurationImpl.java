@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,36 @@
  *
  */
 
-package com.openexchange.caching.events.osgi;
+package com.openexchange.caching.events.internal;
 
-import com.openexchange.caching.events.CacheEventService;
-import com.openexchange.caching.events.internal.CacheEventConfigurationImpl;
-import com.openexchange.caching.events.internal.CacheEventServiceImpl;
-import com.openexchange.caching.events.internal.CacheEventServiceLookup;
-import com.openexchange.caching.events.monitoring.ManagementRegisterer;
+import com.openexchange.caching.events.CacheEventConfiguration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
+
 
 /**
- * {@link CacheEventServiceActivator}
+ * {@link CacheEventConfigurationImpl}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheEventServiceActivator extends HousekeepingActivator {
+public class CacheEventConfigurationImpl implements CacheEventConfiguration {
 
-    private volatile CacheEventServiceImpl service;
+    private final boolean remoteInvalidationForPersonalFolders;
 
     /**
-     * Initializes a new {@link CacheEventServiceActivator}.
+     * Initializes a new {@link CacheEventConfigurationImpl}.
+     *
+     * @param configService The configuration service
      */
-    public CacheEventServiceActivator() {
+    public CacheEventConfigurationImpl(ConfigurationService configService) {
         super();
+
+        // Remote invalidation for personal folders
+        remoteInvalidationForPersonalFolders = configService.getBoolProperty("com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders", false);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ThreadPoolService.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
-        logger.info("starting bundle: {}", context.getBundle().getSymbolicName());
-        CacheEventServiceLookup.set(this);
-        CacheEventServiceImpl service = new CacheEventServiceImpl(new CacheEventConfigurationImpl(getService(ConfigurationService.class)));
-        this.service = service;
-        registerService(CacheEventService.class, service);
-        registerService(Reloadable.class, service);
-        try {
-            track(ManagementService.class, new ManagementRegisterer(service, context));
-            openTrackers();
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CacheEventServiceActivator.class);
-        logger.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        CacheEventServiceImpl service = this.service;
-        if (null != service) {
-            service.shutdown();
-            this.service = null;
-        }
-        CacheEventServiceLookup.set(null);
-        super.stopBundle();
+    public boolean remoteInvalidationForPersonalFolders() {
+        return remoteInvalidationForPersonalFolders;
     }
 
 }
