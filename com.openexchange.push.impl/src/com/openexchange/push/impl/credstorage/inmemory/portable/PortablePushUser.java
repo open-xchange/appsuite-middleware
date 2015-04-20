@@ -130,9 +130,8 @@ public class PortablePushUser implements CustomPortable {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + contextId;
+        int prime = 31;
+        int result = prime * 1 + contextId;
         result = prime * result + userId;
         return result;
     }
