@@ -59,15 +59,22 @@ import com.openexchange.ajax.framework.Header;
  */
 public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
-    final boolean locationNeeded;
+    private final boolean cookiesNeeded;
+    private final boolean locationNeeded;
+    private final boolean failOnNonRedirect;
 
-    public EmptyHttpAuthRequest() {
-        this(true);
-    }
-
-    public EmptyHttpAuthRequest(boolean locationNeeded) {
+    /**
+     * Initializes a new {@link EmptyHttpAuthRequest}.
+     *
+     * @param cookiesNeeded <code>true</code> if cookies should be parsed and checked from the response, <code>false</code>, otherwise
+     * @param locationNeeded <code>true</code> to fail if the response contains no <code>Location</code> header, <code>false</code>, otherwise
+     * @param failOnNonRedirect <code>true</code> to fail if the response status code is anything else than <code>HTTP 302</code>, <code>false</code>, otherwise
+     */
+    public EmptyHttpAuthRequest(boolean cookiesNeeded, boolean locationNeeded, boolean failOnNonRedirect) {
         super(null, null);
+        this.cookiesNeeded = cookiesNeeded;
         this.locationNeeded = locationNeeded;
+        this.failOnNonRedirect = failOnNonRedirect;
     }
 
     @Override
@@ -77,6 +84,7 @@ public class EmptyHttpAuthRequest extends HttpAuthRequest {
 
     @Override
     public HttpAuthParser getParser() {
-        return new HttpAuthParser(locationNeeded);
+        return new HttpAuthParser(cookiesNeeded, locationNeeded, failOnNonRedirect);
     }
+    
 }

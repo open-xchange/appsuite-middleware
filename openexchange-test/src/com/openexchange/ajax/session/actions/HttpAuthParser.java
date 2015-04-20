@@ -58,12 +58,15 @@ import com.openexchange.ajax.framework.AbstractRedirectParser;
  */
 public class HttpAuthParser extends AbstractRedirectParser<HttpAuthResponse> {
 
-    public HttpAuthParser() {
-        this(true);
-    }
-
-    public HttpAuthParser(boolean locationNeeded) {
-        super(true, locationNeeded);
+    /**
+     * Initializes a new {@link HttpAuthParser}.
+     *
+     * @param cookiesNeeded <code>true</code> if cookies should be parsed and checked from the response, <code>false</code>, otherwise
+     * @param locationNeeded <code>true</code> to fail if the response contains no <code>Location</code> header, <code>false</code>, otherwise
+     * @param failOnNonRedirect <code>true</code> to fail if the response status code is anything else than <code>HTTP 302</code>, <code>false</code>, otherwise
+     */
+    public HttpAuthParser(boolean cookiesNeeded, boolean locationNeeded, boolean failOnNonRedirect) {
+        super(cookiesNeeded, locationNeeded, failOnNonRedirect);
     }
 
     @Override
