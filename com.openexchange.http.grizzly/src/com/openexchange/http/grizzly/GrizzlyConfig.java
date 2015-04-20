@@ -112,6 +112,9 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
 
+    /** The maximum header size for an HTTP request in bytes. */
+    private int maxHttpHeaderSize = 8192;
+
     /** Do we want to enable the AJP Filter for incoming requests */
     private boolean isAJPEnabled = false;
 
@@ -201,6 +204,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
         this.isAJPEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasAJPEnabled", false);
+        this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -496,6 +500,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public int getMaxNumberOfHttpSessions() {
         return maxNumberOfHttpSessions;
+    }
+    
+    /**
+     * Get the maximum header size for an HTTP request in bytes.
+     * 
+     * @return the maximum header size for an HTTP request in bytes.
+     */
+    public int getMaxHttpHeaderSize() {
+        return maxHttpHeaderSize;
     }
 
     @Override

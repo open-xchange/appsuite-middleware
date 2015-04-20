@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,43 @@
  *
  */
 
-package com.openexchange.grizzly;
+package javax.mail.internet;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.mail.MessagingException;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 /**
- * {@link GrizzlyTestSuite}
+ * {@link MimeUtilityTest}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class GrizzlyTestSuite {
+public class MimeUtilityTest {
 
-    public static Test suite() {
-        final TestSuite suite = new TestSuite("com.openexchange.grizzly.GrizzlyTestSuite");
-        suite.addTestSuite(ProcessingTest.class);
-        suite.addTestSuite(GetWithBodyTest.class);
-        suite.addTestSuite(MaxHttpHeaderSizeTest.class);
-        return suite;
+    /**
+     * Initializes a new {@link MimeUtilityTest}.
+     */
+    public MimeUtilityTest() {
+        super();
+    }
+
+    @Test
+    public void testImprovedDetectionOfTransferEncoding() throws MessagingException, IOException {
+        ByteArrayInputStream in = new ByteArrayInputStream("U29tZSB0ZXN0IHRleHQ=".getBytes());
+        InputStream decodedStream = MimeUtility.decode(in, "base64 ");
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream(64);
+        for (int b; (b = decodedStream.read()) > 0;) {
+            out.write(b);
+        }
+        String test = out.toString("US-ASCII");
+
+        Assert.assertEquals("Base64 decoding failed.", "Some test text", test);
     }
 
 }
