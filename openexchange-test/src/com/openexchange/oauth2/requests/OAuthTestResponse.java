@@ -47,79 +47,32 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.oauth2.requests;
 
-import java.io.IOException;
 import org.json.JSONException;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.writer.ResponseWriter;
 
 
 /**
- * {@link GetMailsRequest}
+ * {@link OAuthTestResponse}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class GetMailsRequest implements AJAXRequest<GetMailsResponse> {
+public class OAuthTestResponse extends AbstractAJAXResponse {
 
-    private final boolean clearMails;
-
-    private boolean failOnError = true;
-
-    public GetMailsRequest() {
-        this(true);
+    /**
+     * Initializes a new {@link OAuthTestResponse}.
+     * @param response
+     */
+    protected OAuthTestResponse(Response response) {
+        super(response);
     }
 
-    public GetMailsRequest(boolean clearMails) {
-        super();
-        this.clearMails = clearMails;
-    }
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    @Override
-    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    public String getServletPath() {
-        return "/ajax/smtpserver/test";
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "getMails",
-            "clearMails", Boolean.toString(clearMails)
-            ).toArray();
-    }
-
-    @Override
-    public AbstractAJAXParser<? extends GetMailsResponse> getParser() {
-        return new AbstractAJAXParser<GetMailsResponse>(failOnError) {
-            @Override
-            protected GetMailsResponse createResponse(Response response) throws JSONException {
-                return new GetMailsResponse(response);
-            }
-        };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+    public boolean ok() throws JSONException {
+        return ResponseWriter.getJSON(getResponse()).getBoolean("ok");
     }
 
 }

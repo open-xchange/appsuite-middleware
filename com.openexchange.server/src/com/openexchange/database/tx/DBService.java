@@ -303,8 +303,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             if(dbTransaction) {
                 try {
                     rollbackDBTransaction();
-                } catch (final OXException x) {
-                    x.log(LOG);
+                } catch (OXException x) {
+                    log(x);
                 }
             }
             throw e;
@@ -312,8 +312,8 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
             if(dbTransaction) {
                 try {
                     finishDBTransaction();
-                } catch (final OXException x) {
-                    x.log(LOG);
+                } catch (final OXException e) {
+                    log(e);
                 }
             }
         }
@@ -327,5 +327,27 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
 
     public boolean inTransaction(){
         return txState.get() != null;
+    }
+
+    private void log(OXException x) {
+        switch (x.getCategories().get(0).getLogLevel()) {
+            case TRACE:
+                LOG.trace("", x);
+                break;
+            case DEBUG:
+                LOG.debug("", x);
+                break;
+            case INFO:
+                LOG.info("", x);
+                break;
+            case WARNING:
+                LOG.warn("", x);
+                break;
+            case ERROR:
+                LOG.error("", x);
+                break;
+            default:
+                break;
+        }
     }
 }

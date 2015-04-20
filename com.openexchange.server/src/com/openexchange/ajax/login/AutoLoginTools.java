@@ -56,6 +56,7 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.authentication.Authenticated;
@@ -83,6 +84,8 @@ import com.openexchange.sessiond.SessiondService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AutoLoginTools {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AutoLoginTools.class);
 
     /**
      * Re-authenticates an auto-login result using the supplied credentials. This includes checking if the user/context information
@@ -158,20 +161,14 @@ public class AutoLoginTools {
                     String name = cookies[i].getName();
                     if (name.startsWith(sessionCookieName)) {
                         sessionID = cookies[i].getValue();
-                        /*
-                         * try to auto-login once matching session- and secret cookies found
-                         */
-                        if (null != secret) {
-                            return tryAutoLogin(loginConfig, request, sessionID, secret);
-                        }
                     } else if (name.startsWith(secretCookieName)) {
                         secret = cookies[i].getValue();
-                        /*
-                         * try to auto-login once matching session- and secret cookies found
-                         */
-                        if (null != sessionID) {
-                            return tryAutoLogin(loginConfig, request, sessionID, secret);
-                        }
+                    }
+                    /*
+                     * try to auto-login once matching session- and secret cookies found
+                     */
+                    if (null != sessionID && null != secret) {
+                        return tryAutoLogin(loginConfig, request, sessionID, secret);
                     }
                 }
             } catch (OXException e) {
@@ -226,8 +223,7 @@ public class AutoLoginTools {
     private static Session getSession(String sessionID) {
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == sessiondService) {
-            org.slf4j.LoggerFactory.getLogger(AutoLoginTools.class).error(
-                "", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
+            LOGGER.error("", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
             return null;
         }
         return sessiondService.getSession(sessionID);

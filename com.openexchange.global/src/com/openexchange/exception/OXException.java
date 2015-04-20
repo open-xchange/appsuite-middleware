@@ -591,19 +591,54 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     /**
      * Logs this exception - if allowed - in best-fitting log level using specified logger.
+     * <p>
+     * This method basically performs:
+     * <pre>
+     *  switch (e.getCategories().get(0).getLogLevel()) {
+     *    case TRACE:
+     *        LOGGER.trace("", e);
+     *        break;
+     *    case DEBUG:
+     *        LOGGER.debug("", e);
+     *        break;
+     *    case INFO:
+     *        LOGGER.info("", e);
+     *        break;
+     *    case WARNING:
+     *        LOGGER.warn("", e);
+     *        break;
+     *    case ERROR:
+     *        LOGGER.error("", e);
+     *        break;
+     *    default:
+     *        break;
+     *  }
+     * </pre>
      *
-     * @param log The logger
+     * @param logger The logger
+     * @deprecated Please perform the actual logging in the class, in which the logger instance is defined
      */
-    public void log(org.slf4j.Logger log) {
-        LogLevel logLevel = getCategories().get(0).getLogLevel();
-        if (!logLevel.appliesTo(log)) {
-            return;
+    @Deprecated
+    public void log(org.slf4j.Logger logger) {
+        switch (getCategories().get(0).getLogLevel()) {
+            case TRACE:
+                logger.trace("", this);
+                break;
+            case DEBUG:
+                logger.debug("", this);
+                break;
+            case INFO:
+                logger.info("", this);
+                break;
+            case WARNING:
+                logger.warn("", this);
+                break;
+            case ERROR:
+                logger.error("", this);
+                break;
+            default:
+                break;
         }
-        String loggable = getLogMessage(logLevel, null);
-        if (null == loggable) {
-            return;
-        }
-        logLevel.log(loggable, this, log);
     }
 
     /**
@@ -614,7 +649,9 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param logLevel The log level
      * @return The log message for specified log level or <code>null</code> if not loggable.
      * @see #getLogMessage(LogLevel, String)
+     * @deprecated Just use {@link #getLogMessage()}
      */
+    @Deprecated
     public String getLogMessage(LogLevel logLevel) {
         return getLogMessage(logLevel, null);
     }
@@ -625,7 +662,9 @@ public class OXException extends Exception implements OXExceptionConstants {
      * @param logLevel The log level
      * @param defaultLog The default logging to return if this exception is not loggable for specified log level
      * @return The log message for specified log level or <code>defaultLog</code> if not loggable.
+     * @deprecated Just use {@link #getLogMessage()}
      */
+    @Deprecated
     public String getLogMessage(LogLevel logLevel, String defaultLog) {
         if (!isLoggable()) {
             return defaultLog;
@@ -634,7 +673,8 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
-     * Gets the composed log message.
+     * Gets the composed log message (also returned by {@link #getMessage()};<br>
+     * e.g. <pre>OX-0001 Categories=ERROR Message="Huston, we have a problem" exceptionID=147</pre>
      *
      * @return The log message
      */
@@ -1304,6 +1344,7 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     private static final Pattern P = Pattern.compile("(\\p{L}) {2,}(\\p{L})");
+
     /** Drops multiple subsequent white-spaces from given message */
     private static String dropSubsequentWhitespaces(String message) {
         if (null == message) {

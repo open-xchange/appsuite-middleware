@@ -47,111 +47,86 @@
  *
  */
 
-package com.openexchange.push.impl.credstorage.inmemory.portable;
+package com.openexchange.oauth2.requests;
 
 import java.io.IOException;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.push.PushUser;
+import org.json.JSONException;
+import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.framework.Params;
+
 
 /**
- * {@link PortablePushUser}
+ * {@link StartSMTPRequest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class PortablePushUser implements CustomPortable {
+public class StartSMTPRequest implements AJAXRequest<OAuthTestResponse> {
 
-    /** The unique portable class ID of the {@link PortableSession} */
-    public static final int CLASS_ID = 102;
+    private final boolean updateAccount;
 
-    public static final String PARAMETER_CONTEXT_ID = "contextId";
-    public static final String PARAMETER_USER_ID = "userId";
+    private int updateNoReplyForContext = -1;
 
-    private int contextId;
-    private int userId;
+    private boolean failOnError = true;
 
-    /**
-     * Initializes a new {@link PortableReservation}.
-     */
-    public PortablePushUser() {
+    public StartSMTPRequest() {
+        this(true);
+    }
+
+    public StartSMTPRequest(boolean updateAccount) {
         super();
+        this.updateAccount = updateAccount;
     }
 
-    /**
-     * Initializes a new {@link PortableReservation}.
-     */
-    public PortablePushUser(PushUser source) {
-        super();
-        contextId = source.getContextId();
-        userId = source.getUserId();
+    public void setFailOnError(boolean failOnError) {
+        this.failOnError = failOnError;
     }
 
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
+    public void setUpdateNoReplyForContext(int updateNoReplyForContext) {
+        this.updateNoReplyForContext = updateNoReplyForContext;
     }
 
     @Override
-    public int getClassId() {
-        return CLASS_ID;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeInt(PARAMETER_CONTEXT_ID, contextId);
-        writer.writeInt(PARAMETER_USER_ID, userId);
+    public String getServletPath() {
+        return "/ajax/smtpserver/test";
     }
 
     @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        contextId = reader.readInt(PARAMETER_CONTEXT_ID);
-        userId = reader.readInt(PARAMETER_USER_ID);
-    }
-
-    /**
-     * Gets the context identifier
-     *
-     * @return The context identifier
-     */
-    public int getContextId() {
-        return contextId;
-    }
-
-    /**
-     * Gets the user identifier
-     *
-     * @return The user identifier
-     */
-    public int getUserId() {
-        return userId;
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Params(
+            AJAXServlet.PARAMETER_ACTION, "startSMTP",
+            "updateAccount", Boolean.toString(updateAccount),
+            "updateNoReplyForContext", Integer.toString(updateNoReplyForContext)
+            ).toArray();
     }
 
     @Override
-    public int hashCode() {
-        int prime = 31;
-        int result = prime * 1 + contextId;
-        result = prime * result + userId;
-        return result;
+    public AbstractAJAXParser<? extends OAuthTestResponse> getParser() {
+        return new AbstractAJAXParser<OAuthTestResponse>(failOnError) {
+            @Override
+            protected OAuthTestResponse createResponse(Response response) throws JSONException {
+                return new OAuthTestResponse(response);
+            }
+        };
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof PortablePushUser)) {
-            return false;
-        }
-        PortablePushUser other = (PortablePushUser) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
-        return true;
+    public Object getBody() throws IOException, JSONException {
+        return null;
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
     }
 
 }

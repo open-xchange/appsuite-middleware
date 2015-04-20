@@ -150,7 +150,7 @@ public class HashCalculator {
             if (null != client) {
                 md.update(client.getBytes(Charsets.UTF_8));
             }
-            if (null != additionals && 0 < additionals.length) {
+            if (null != additionals) {
                 for (String value : additionals) {
                     md.update(value.getBytes(Charsets.UTF_8));
                 }

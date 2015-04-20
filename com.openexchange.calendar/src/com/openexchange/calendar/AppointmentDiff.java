@@ -327,6 +327,22 @@ public class AppointmentDiff {
     }
 
     /**
+     * Checks if the appointment diff contains <b>only</b> state changes beside relevant fields.
+     *
+     * @return <code>true</code> for <b>only</b> state changes; otherwise <code>false</code>
+     */
+    public boolean isAboutStateChangesOnly(Set<String> relevant) {
+        // First, let's see if any fields besides the state tracking fields have changed
+        HashSet<String> differing = new HashSet<String>(differingFieldNames);
+        differing.removeAll(Arrays.asList(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS));
+        if (differing.removeAll(relevant)) {
+            return false; // There is at least one relevant change left.
+        }
+
+        return isAboutStateChanges();
+    }
+
+    /**
      * Checks if the appointment diff contains any state changes
      *
      * @return <code>true</code> for any state changes; otherwise <code>false</code>

@@ -541,6 +541,32 @@ public final class SessionHandler {
     }
 
     /**
+     * Stores the session (if available) into session storage.
+     *
+     * @param sessionId The session identifier
+     * @return <code>true</code> if stored; otherwise <code>false</code>
+     */
+    protected static boolean storeSession(String sessionId) {
+        if (null == sessionId) {
+            return false;
+        }
+
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return false;
+        }
+        SessionControl sessionControl = sessionData.getSession(sessionId);
+        if (null == sessionControl) {
+            return false;
+        }
+
+        List<String> remotes = getRemoteParameterNames();
+        return putIntoSessionStorage(sessionControl.getSession(), true, null == remotes || remotes.isEmpty());
+    }
+
+
+    /**
      * Adds a new session containing given attributes to session container(s)
      *
      * @param userId The user ID
@@ -638,9 +664,22 @@ public final class SessionHandler {
      * Puts the given session into session storage if possible
      *
      * @param session The session
+     * @param asyncPutToSessionStorage Whether to perform put asynchronously or not
      * @return <code>true</code> if put into session storage; otherwise <code>false</code>
      */
     public static boolean putIntoSessionStorage(SessionImpl session, boolean asyncPutToSessionStorage) {
+        return putIntoSessionStorage(session, false, asyncPutToSessionStorage);
+    }
+
+    /**
+     * Puts the given session into session storage if possible
+     *
+     * @param session The session
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
+     * @param asyncPutToSessionStorage Whether to perform put asynchronously or not
+     * @return <code>true</code> if put into session storage; otherwise <code>false</code>
+     */
+    public static boolean putIntoSessionStorage(SessionImpl session, boolean addIfAbsent, boolean asyncPutToSessionStorage) {
         if (useSessionStorage(session)) {
             SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
             if (sessionStorageService != null) {
@@ -649,9 +688,9 @@ public final class SessionHandler {
                 }
                 if (asyncPutToSessionStorage) {
                     // Enforced asynchronous put
-                    storeSessionAsync(session, sessionStorageService, false);
+                    storeSessionAsync(session, sessionStorageService, addIfAbsent);
                 } else {
-                    storeSessionSync(session, sessionStorageService, false);
+                    storeSessionSync(session, sessionStorageService, addIfAbsent);
                 }
                 return true;
             }
@@ -1702,9 +1741,7 @@ public final class SessionHandler {
     private static final class StoreSessionTask extends AbstractTask<Void> {
 
         private final SessionStorageService sessionStorageService;
-
         private final boolean addIfAbsent;
-
         private final SessionImpl session;
 
         protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {
