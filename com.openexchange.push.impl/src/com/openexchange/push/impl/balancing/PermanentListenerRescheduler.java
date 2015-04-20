@@ -150,7 +150,8 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     private final AtomicReference<String> registrationIdRef;
     private final AtomicReference<HazelcastInstance> hzInstancerRef;
     private final BufferingQueue<Object> rescheduleQueue;
-    private volatile ScheduledTimerTask scheduledTimerTask;
+    private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
+    private boolean stopped; // Accessed synchronized
 
     /**
      * Initializes a new {@link PermanentListenerRescheduler}.
@@ -171,7 +172,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * Stops this rescheduler.
      */
     public void stop() {
-        cancelTimerTask();
+        synchronized (RESCHEDULE) {
+            rescheduleQueue.clear();
+            cancelTimerTask();
+            stopped = true;
+        }
     }
 
     /**
@@ -220,6 +225,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      */
     private void planReschedule() throws OXException {
         synchronized (RESCHEDULE) {
+            // Stopped
+            if (stopped) {
+                return;
+            }
+
             // Check time task is alive
             ScheduledTimerTask scheduledTimerTask = this.scheduledTimerTask;
             if (null == scheduledTimerTask) {
@@ -248,6 +258,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      */
     protected void checkReschedule() {
         synchronized (RESCHEDULE) {
+            // Stopped
+            if (stopped) {
+                return;
+            }
+
             Object obj = rescheduleQueue.poll();
             if (RESCHEDULE == obj) {
                 doReschedule();
