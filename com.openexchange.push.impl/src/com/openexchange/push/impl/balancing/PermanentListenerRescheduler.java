@@ -223,7 +223,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      *
      * @throws OXException If timer service is absent
      */
-    private void planReschedule() throws OXException {
+    public void planReschedule() throws OXException {
         synchronized (RESCHEDULE) {
             // Stopped
             if (stopped) {
