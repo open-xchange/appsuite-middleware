@@ -64,24 +64,33 @@ public final class MailAccessDelayElement implements Delayed {
 
     private static final int WATCHER_TIME = MailProperties.getInstance().getWatcherTime();
 
+    /** The associated {@link MailAccess} instance */
     public final MailAccess<?, ?> mailAccess;
+
+    /** The time stamp considered when to rate this element as expired/elapsed */
     public final long stamp;
 
-    public MailAccessDelayElement(final MailAccess<?, ?> mailAccess, final long stamp) {
+    /**
+     * Initializes a new {@link MailAccessDelayElement}.
+     *
+     * @param mailAccess The associated {@link MailAccess} instance
+     * @param stamp The time stamp
+     */
+    public MailAccessDelayElement(MailAccess<?, ?> mailAccess, long stamp) {
         super();
         this.mailAccess = mailAccess;
         this.stamp = stamp;
     }
 
     @Override
-    public int compareTo(final Delayed o) {
-        final long thisStamp = stamp;
-        final long otherStamp = ((MailAccessDelayElement) o).stamp;
+    public int compareTo(Delayed o) {
+        long thisStamp = stamp;
+        long otherStamp = ((MailAccessDelayElement) o).stamp;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
     @Override
-    public long getDelay(final TimeUnit unit) {
+    public long getDelay(TimeUnit unit) {
         return (unit.convert(WATCHER_TIME - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
     }
 
@@ -91,7 +100,7 @@ public final class MailAccessDelayElement implements Delayed {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
