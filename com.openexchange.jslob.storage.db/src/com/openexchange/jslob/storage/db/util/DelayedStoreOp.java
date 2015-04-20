@@ -76,7 +76,7 @@ public final class DelayedStoreOp implements Delayed {
             synchronized (DelayedStoreOp.class) {
                 tmp = delayMsec;
                 if (null == tmp) {
-                    final ConfigurationService cs = Services.getService(ConfigurationService.class);
+                    ConfigurationService cs = Services.getService(ConfigurationService.class);
                     if (null == cs) {
                         return 30000L;
                     }
@@ -90,26 +90,32 @@ public final class DelayedStoreOp implements Delayed {
 
     // --------------------------------------------------------------------------------- //
 
+    /** The identifier */
     public final String id;
+
+    /** The group name */
     public final String group;
+
+    /** The JSlob identifier */
     public final JSlobId jSlobId;
+
     private final boolean poison;
-    private final long stamp;
+    private final long expiryTimeMillis;
     private final int hash;
 
     /**
      * Initializes a new {@link DelayedStoreOp}.
      */
-    public DelayedStoreOp(final String id, final String group, final JSlobId jSlobId) {
+    public DelayedStoreOp(String id, String group, JSlobId jSlobId) {
         this(id, group, jSlobId, false);
     }
 
     /**
      * Initializes a new {@link DelayedStoreOp}.
      */
-    private DelayedStoreOp(final String id, final String group, final JSlobId jSlobId, final boolean poison) {
+    private DelayedStoreOp(String id, String group, JSlobId jSlobId, boolean poison) {
         super();
-        stamp = poison ? 0L : System.currentTimeMillis();
+        expiryTimeMillis = poison ? 0L : (System.currentTimeMillis() + delayMsec());
         this.poison = poison;
         this.id = id;
         this.group = group;
@@ -126,14 +132,14 @@ public final class DelayedStoreOp implements Delayed {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
         if (!(obj instanceof DelayedStoreOp)) {
             return false;
         }
-        final DelayedStoreOp other = (DelayedStoreOp) obj;
+        DelayedStoreOp other = (DelayedStoreOp) obj;
         if (jSlobId == null) {
             if (other.jSlobId != null) {
                 return false;
@@ -145,23 +151,23 @@ public final class DelayedStoreOp implements Delayed {
     }
 
     @Override
-    public int compareTo(final Delayed o) {
+    public int compareTo(Delayed o) {
         if (poison) {
             return -1;
         }
-        final long thisStamp = stamp;
-        final long otherStamp = ((DelayedStoreOp) o).stamp;
+        long thisStamp = expiryTimeMillis;
+        long otherStamp = ((DelayedStoreOp) o).expiryTimeMillis;
         return (thisStamp < otherStamp ? -1 : (thisStamp == otherStamp ? 0 : 1));
     }
 
     @Override
-    public long getDelay(final TimeUnit unit) {
-        return poison ? -1L : (unit.convert(delayMsec() - (System.currentTimeMillis() - stamp), TimeUnit.MILLISECONDS));
+    public long getDelay(TimeUnit unit) {
+        return poison ? -1L : (unit.convert(expiryTimeMillis - System.currentTimeMillis(), TimeUnit.MILLISECONDS));
     }
 
     @Override
     public String toString() {
-        final StringBuilder builder = new StringBuilder(64);
+        StringBuilder builder = new StringBuilder(64);
         builder.append("DelayedStoreOp [");
         if (id != null) {
             builder.append("id=").append(id).append(", ");

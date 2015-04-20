@@ -85,7 +85,7 @@ public class Bug33891Test {
     Cache mockedCache;
     CacheService mockedCacheService;
     ServerServiceRegistry mockedServiceRegistry;
-    private UserStorage mockedUserStorage;
+    private RdbUserStorage mockedUserStorage;
     private CachingUserStorage cachingUserStorage;
     private User mockedUser;
 
@@ -135,7 +135,7 @@ public class Bug33891Test {
                 return mockedCacheService;
             }
         }).when(mockedServiceRegistry).getService(CacheService.class);
-        mockedUserStorage = mock(UserStorage.class);
+        mockedUserStorage = mock(RdbUserStorage.class);
         cachingUserStorage = new CachingUserStorage(mockedUserStorage);
         mockedUser = mock(User.class);
         doAnswer(new Answer<String>() {

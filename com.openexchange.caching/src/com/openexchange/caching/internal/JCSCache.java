@@ -246,6 +246,16 @@ public final class JCSCache extends AbstractCache implements Cache, SupportsLoca
     }
 
     @Override
+    public void localClear() throws OXException {
+        try {
+            cacheControl.localRemoveAll();
+            postClear();
+        } catch (final Exception e) {
+            throw CacheExceptionCode.CACHE_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public Collection<Serializable> values() {
         final MemoryCache memCache = this.memCache;
         if (null == memCache) {

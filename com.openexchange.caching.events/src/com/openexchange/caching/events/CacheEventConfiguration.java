@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,21 @@
  *
  */
 
-package com.openexchange.subscribe;
+package com.openexchange.caching.events;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.subscribe.internal.ContactFolderMultipleUpdaterStrategyTest;
-import com.openexchange.subscribe.internal.ContactFolderUpdaterStrategyTest;
-import com.openexchange.subscribe.internal.SubscriptionExecutionServiceImplTest;
 
 /**
- * {@link UnitTests}
+ * {@link CacheEventConfiguration}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    ContactFolderMultipleUpdaterStrategyTest.class,
-    ContactFolderUpdaterStrategyTest.class,
-    SubscriptionExecutionServiceImplTest.class,
-//    SubscriptionSQLStorageTest.class,
-    CompositeSubscriptionSourceDiscoveryServiceTest.class,
-    MicroformatAppointmentParserTest.class,
-    StrategyFolderUpdaterTest.class,
-    SubscriptionSourceCollectorTest.class
-})
-public final class UnitTests {
+public interface CacheEventConfiguration {
 
-    public UnitTests() {
-        super();
-    }
+    /**
+     * Checks if remote invalidation is enabled for personal (aka user-sensitive) folders.
+     *
+     * @return <code>true</code> if remote invalidation is enabled; otherwise <code>false</code>
+     */
+    boolean remoteInvalidationForPersonalFolders();
+
 }

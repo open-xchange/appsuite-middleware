@@ -785,7 +785,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final Cache optCache = optCache();
             if (null != optCache) {
                 try {
-                    optCache.clear();
+                    optCache.localClear();
                 } catch (final Exception e) {
                     // ignore
                 }
@@ -803,7 +803,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final Cache optCache = optCache();
             if (null != optCache) {
                 try {
-                    optCache.clear();
+                    optCache.localClear();
                 } catch (final Exception e) {
                     // ignore
                 }

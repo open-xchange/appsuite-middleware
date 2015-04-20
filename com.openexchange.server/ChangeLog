@@ -1,6 +1,14 @@
+* 2015-04-02- thorben.betten@open-xchange.com
+
+ - Fix for bug 37527: Pass header/cookie information on password change to AuthenticationService instance
+
 * 2015-03-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available
+
+* 2015-03-09 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37112: Ensure that the complete appointment data is loaded for change exceptions before applying outgoing patches
 
 * 2015-03-07 - thorben.betten@open-xchange.com
 
