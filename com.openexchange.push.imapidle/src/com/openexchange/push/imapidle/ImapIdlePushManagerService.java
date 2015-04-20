@@ -52,6 +52,8 @@ package com.openexchange.push.imapidle;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -161,6 +163,15 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public List<PushUser> getAvailablePushUsers() throws OXException {
+        List<PushUser> l = new LinkedList<PushUser>();
+        for (SimpleKey key : listeners.keySet()) {
+            l.add(new PushUser(key.userId, key.contextId));
+        }
+        return l;
+    }
 
     @Override
     public PushListener startPermanentListener(PushUser pushUser) throws OXException {

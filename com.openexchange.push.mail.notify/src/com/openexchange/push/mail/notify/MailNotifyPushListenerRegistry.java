@@ -52,6 +52,7 @@ package com.openexchange.push.mail.notify;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,7 +104,7 @@ public final class MailNotifyPushListenerRegistry {
      */
     public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) {
         super();
-        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>();
+        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048);
         this.useOXLogin = useOXLogin;
         this.useEmailAddress = useEmailAddress;
         notificationsQueue = new MailNotifyDelayQueue();
@@ -256,6 +257,20 @@ public final class MailNotifyPushListenerRegistry {
      */
     public void clear() {
         mboxId2Listener.clear();
+    }
+
+    /**
+     * Gets the available push users
+     *
+     * @return The push users
+     */
+    public List<PushUser> getAvailablePushUsers() {
+        Set<PushUser> set = new HashSet<PushUser>();
+        for (MailNotifyPushListener listener : mboxId2Listener.values()) {
+            Session ses = listener.getSession();
+            set.add(new PushUser(ses.getUserId(), ses.getContextId()));
+        }
+        return new LinkedList<PushUser>(set);
     }
 
     /**
