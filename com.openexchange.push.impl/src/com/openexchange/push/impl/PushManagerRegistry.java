@@ -124,7 +124,6 @@ public final class PushManagerRegistry implements PushListenerService {
     private final ConcurrentMap<Class<? extends PushManagerService>, PushManagerService> map;
     private final ServiceLookup services;
     private final Set<PushUser> initialPushUsers;
-    private final Set<PushUser> runningPushUsers;
 
     /**
      * Initializes a new {@link PushManagerRegistry}.
@@ -135,7 +134,6 @@ public final class PushManagerRegistry implements PushListenerService {
         super();
         this.services = services;
         initialPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
-        runningPushUsers = new HashSet<PushUser>(256); // Always wrapped by surrounding synchronized block
         map = new ConcurrentHashMap<Class<? extends PushManagerService>, PushManagerService>();
     }
 
@@ -181,9 +179,22 @@ public final class PushManagerRegistry implements PushListenerService {
      * @return The push users
      */
     public List<PushUser> listPermanentPushUsers() {
-        synchronized (this) {
-            return new ArrayList<PushUser>(runningPushUsers);
+        Set<PushUser> pushUsers = new HashSet<PushUser>(256);
+
+        for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
+            PushManagerService pushManager = pushManagersIterator.next();
+            if (pushManager instanceof PushManagerExtendedService) {
+                try {
+                    pushUsers.addAll(((PushManagerExtendedService) pushManager).getAvailablePushUsers());
+                } catch (Exception e) {
+                    LOG.error("Failed to determine available push users from push manager \"{}\".", pushManager, e);
+                }
+            }
         }
+
+        List<PushUser> list = new ArrayList<PushUser>(pushUsers);
+        Collections.sort(list);
+        return list;
     }
 
     // --------------------------------- The central start & stop routines for permanent listeners --------------------------------------
@@ -195,7 +206,6 @@ public final class PushManagerRegistry implements PushListenerService {
                 try {
                     PushListener pl = extendedService.startPermanentListener(pushUser);
                     if (null != pl) {
-                        runningPushUsers.add(pushUser);
                         LOG.debug("Started permanent push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(pushUser.getUserId()), Integer.valueOf(pushUser.getContextId()), extendedService);
                     }
                 } catch (OXException e) {
@@ -210,11 +220,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
     private boolean stopPermanentListenerFor(PushUser pushUser, PushManagerExtendedService extendedService, boolean tryToReconnect) throws OXException {
         // Always called when holding synchronized lock
-        boolean stopped = extendedService.stopPermanentListener(pushUser, tryToReconnect);
-        if (stopped) {
-            runningPushUsers.remove(pushUser);
-        }
-        return stopped;
+        return extendedService.stopPermanentListener(pushUser, tryToReconnect);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
