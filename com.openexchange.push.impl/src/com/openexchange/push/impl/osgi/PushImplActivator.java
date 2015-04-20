@@ -79,6 +79,7 @@ import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallableFactory;
+import com.openexchange.push.impl.balancing.PortableDropPermanentListenerCallableFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -174,6 +175,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
             if (pushManagerRegistry.isPermanentPushAllowed()) {
                 // Register portable
                 registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
+                registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
 
                 // Track HazelcastInstance
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);

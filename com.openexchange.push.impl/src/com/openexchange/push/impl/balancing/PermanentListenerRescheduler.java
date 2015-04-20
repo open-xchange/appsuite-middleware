@@ -498,6 +498,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                         // Apply newly calculated initial permanent listeners
                         pushManagerRegistry.applyInitialListeners(ps);
+
+                        // For safety reason, request explicit drop on other nodes for push users started on this node
+                        new DropPushUserTask(ps, otherMembers, hzInstance, monitor).run();
+
                     }
                 } catch (Exception e) {
                     LOG.warn("Failed to distribute permanent listeners among cluster nodes", e);
@@ -507,18 +511,100 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         }
     } // End of class ReschedulerTask
 
-    static void cancelFutureSafe(Future<Boolean> future) {
-        if (null != future) {
-            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
-        }
-    }
-
     static Set<Member> getOtherMembers(Set<Member> allMembers, Member localMember) {
         Set<Member> otherMembers = new LinkedHashSet<Member>(allMembers);
         if (!otherMembers.remove(localMember)) {
             LOG.warn("Couldn't remove local member from cluster members.");
         }
         return otherMembers;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------------
+
+    private static class DropPushUserTask implements Runnable {
+
+        private final HazelcastInstance hzInstance;
+        private final Object monitor;
+        private final Set<Member> otherMembers;
+        private final List<PushUser> pushUsers;
+
+        DropPushUserTask(List<PushUser> pushUsers, Set<Member> otherMembers, HazelcastInstance hzInstance, Object monitor) {
+            super();
+            this.pushUsers = pushUsers;
+            this.otherMembers = otherMembers;
+            this.hzInstance = hzInstance;
+            this.monitor = monitor;
+        }
+
+        @Override
+        public void run() {
+            synchronized (monitor) {
+                try {
+                    IExecutorService executor = hzInstance.getExecutorService("default");
+                    Map<Member, Future<Boolean>> futureMap = executor.submitToMembers(new PortableDropPermanentListenerCallable(pushUsers), otherMembers);
+                    for (Map.Entry<Member, Future<Boolean>> entry : futureMap.entrySet()) {
+                        Member member = entry.getKey();
+                        Future<Boolean> future = entry.getValue();
+                        // Check Future's return value
+                        int retryCount = 3;
+                        while (retryCount-- > 0) {
+                            try {
+                                boolean dropped = future.get().booleanValue();
+                                retryCount = 0;
+                                if (dropped) {
+                                    LOG.info("Successfully requested to drop locally running push users on cluster member \"{}\".", member);
+                                } else {
+                                    LOG.info("Failed to drop locally running push users on cluster member \"{}\".", member);
+                                }
+                            } catch (InterruptedException e) {
+                                // Interrupted - Keep interrupted state
+                                Thread.currentThread().interrupt();
+                                LOG.warn("Interrupted while dropping locally running push users on cluster nodes", e);
+                                return;
+                            } catch (CancellationException e) {
+                                // Canceled
+                                LOG.warn("Canceled while dropping locally running push users on cluster nodes", e);
+                                return;
+                            } catch (ExecutionException e) {
+                                Throwable cause = e.getCause();
+
+                                // Check for Hazelcast timeout
+                                if (!(cause instanceof com.hazelcast.core.OperationTimeoutException)) {
+                                    if (cause instanceof IOException) {
+                                        throw ((IOException) cause);
+                                    }
+                                    if (cause instanceof RuntimeException) {
+                                        throw ((RuntimeException) cause);
+                                    }
+                                    if (cause instanceof Error) {
+                                        throw (Error) cause;
+                                    }
+                                    throw new IllegalStateException("Not unchecked", cause);
+                                }
+
+                                // Timeout while awaiting remote result
+                                if (retryCount > 0) {
+                                    LOG.info("Timeout while awaiting remote result from cluster member \"{}\". Retry...", member);
+                                } else {
+                                    // No further retry
+                                    LOG.info("Giving up awaiting remote result from cluster member \"{}\".", member);
+                                    cancelFutureSafe(future);
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed to stop permanent listener for locally running push users on other cluster nodes", e);
+                }
+            }
+        } // End of run() method
+
+    } // End of class DropPushUserTask
+
+    static void cancelFutureSafe(Future<Boolean> future) {
+        if (null != future) {
+            try { future.cancel(true); } catch (Exception e) {/*Ignore*/}
+        }
     }
 
 }
