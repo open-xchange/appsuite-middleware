@@ -2761,8 +2761,8 @@ public class CalendarMySQL implements CalendarSqlImp {
                 throw OXCalendarExceptionCodes.INVALID_RECURRENCE_TYPE_CHANGE.create(new Object[0]);
             }
             if (cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) {
-                cdao.setRecurrenceID(0);
-                cdao.setRecurrencePosition(-1);
+                cdao.removeRecurrenceID();
+                cdao.removeRecurrencePosition();
             }
             final List<Integer> exceptions = getExceptionList(null, ctx, edao.getRecurrenceID());
             if (exceptions != null && !exceptions.isEmpty()) {
