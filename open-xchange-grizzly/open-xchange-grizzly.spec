@@ -55,6 +55,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2289
     ox_remove_property com.openexchange.http.grizzly.hasAJPEnabled $PFILE
+
+    # SoftwareChange_Request-2492
+    ox_add_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $PFILE
 fi
 
 %clean
@@ -70,6 +73,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Apr 14 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-04-13 (2473)
 * Tue Apr 07 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-04-09 (2486)
 * Thu Mar 26 2015 Marc Arens <marc.arens@open-xchange.com>

@@ -1,7 +1,7 @@
 * 2015-04-20 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 37754: Always use non-localized directory names in three-way-comparisons 
- - Fix for bug 37814: Use UTC timestamp when updating the color of a calendar collection 
+ - Fix for bug 37754: Always use non-localized directory names in three-way-comparisons
+ - Fix for bug 37814: Use UTC timestamp when updating the color of a calendar collection
 
 * 2015-04-17 - thorben.betten@open-xchange.com
 
