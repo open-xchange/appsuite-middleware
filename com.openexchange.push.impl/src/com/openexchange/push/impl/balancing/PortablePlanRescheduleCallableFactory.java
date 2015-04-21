@@ -70,7 +70,7 @@ public class PortablePlanRescheduleCallableFactory extends AbstractCustomPortabl
 
     @Override
     public Portable create() {
-        return new PortableDropPermanentListenerCallable();
+        return new PortablePlanRescheduleCallable();
     }
 
     @Override
