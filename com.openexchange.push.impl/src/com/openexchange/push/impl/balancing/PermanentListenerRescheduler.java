@@ -140,16 +140,13 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         return tmp.longValue();
     }
 
-    /** The object used to signal planned rescheduling */
-    protected static final Object RESCHEDULE = new Object();
-
     // -------------------------------------------------------------------------------------------------------------------------------
 
     private final PushManagerRegistry pushManagerRegistry;
     private final BundleContext context;
     private final AtomicReference<String> registrationIdRef;
     private final AtomicReference<HazelcastInstance> hzInstancerRef;
-    private final BufferingQueue<Object> rescheduleQueue;
+    private final BufferingQueue<ReschedulePlan> rescheduleQueue;
     private ScheduledTimerTask scheduledTimerTask; // Accessed synchronized
     private boolean stopped; // Accessed synchronized
 
@@ -161,7 +158,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      */
     public PermanentListenerRescheduler(PushManagerRegistry pushManagerRegistry, BundleContext context) {
         super();
-        this.rescheduleQueue = new BufferingQueue<Object>(delayDuration()); // 5sec default delay;
+        this.rescheduleQueue = new BufferingQueue<ReschedulePlan>(delayDuration()); // 5sec default delay;
         this.hzInstancerRef = new AtomicReference<HazelcastInstance>();
         registrationIdRef = new AtomicReference<String>();
         this.pushManagerRegistry = pushManagerRegistry;
@@ -172,7 +169,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * Stops this rescheduler.
      */
     public void stop() {
-        synchronized (RESCHEDULE) {
+        synchronized (this) {
             rescheduleQueue.clear();
             cancelTimerTask();
             stopped = true;
@@ -196,7 +193,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberAdded(MembershipEvent membershipEvent) {
         try {
-            planReschedule();
+            planReschedule(false);
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
@@ -205,7 +202,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     @Override
     public void memberRemoved(MembershipEvent membershipEvent) {
         try {
-            planReschedule();
+            planReschedule(false);
         } catch (Exception e) {
             LOG.error("Failed to plan rescheduling", e);
         }
@@ -221,10 +218,11 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
     /**
      * Plan to reschedule.
      *
+     * @param remotePlan <code>true</code> for remote rescheduling; otherwise <code>false</code>
      * @throws OXException If timer service is absent
      */
-    public void planReschedule() throws OXException {
-        synchronized (RESCHEDULE) {
+    public void planReschedule(boolean remotePlan) throws OXException {
+        synchronized (this) {
             // Stopped
             if (stopped) {
                 return;
@@ -248,8 +246,15 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
             }
 
             // Plan rescheduling
-            rescheduleQueue.offerIfAbsentElseReset(RESCHEDULE);
-            LOG.info("Planned rescheduling");
+            if (remotePlan) {
+                rescheduleQueue.offerOrReplaceAndReset(ReschedulePlan.getInstance(true));
+                LOG.info("Planned rescheduling including remote plan");
+            } else {
+                boolean added = rescheduleQueue.offerIfAbsentElseReset(ReschedulePlan.getInstance(false));
+                if (added) {
+                    LOG.info("Planned rescheduling with local-only plan");
+                }
+            }
         }
     }
 
@@ -257,20 +262,21 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * Checks for an available rescheduling.
      */
     protected void checkReschedule() {
-        synchronized (RESCHEDULE) {
+        synchronized (this) {
             // Stopped
             if (stopped) {
                 return;
             }
 
-            Object obj = rescheduleQueue.poll();
-            if (RESCHEDULE == obj) {
-                doReschedule();
-                LOG.info("Triggered rescheduling of permanent listeners");
+            ReschedulePlan plan = rescheduleQueue.poll();
+            if (null != plan) {
+                boolean remotePlan = plan.isRemotePlan();
+                doReschedule(remotePlan);
+                LOG.info("Triggered rescheduling of permanent listeners {}", remotePlan ? "incl. remote rescheduling" : "local-only");
             }
 
             if (rescheduleQueue.isEmpty()) {
-                // No more planned reschedules
+                // No more planned rescheduling operations
                 cancelTimerTask();
             }
         }
@@ -280,12 +286,14 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
     /**
      * Reschedules permanent listeners among available cluster members.
+     *
+     * @param remotePlan Whether to plan rescheduling on remote members or not
      */
-    public void doReschedule() {
+    private void doReschedule(boolean remotePlan) {
         HazelcastInstance hzInstance = hzInstancerRef.get();
         if (null != hzInstance) {
             Cluster cluster = hzInstance.getCluster();
-            reschedule(cluster.getMembers(), hzInstance, true);
+            reschedule(cluster.getMembers(), hzInstance, true, remotePlan);
         }
     }
 
@@ -294,9 +302,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      *
      * @param allMembers All available cluster members
      * @param hzInstance The associated Hazelcast instance
+     * @param remotePlan Whether to plan rescheduling on remote members or not
      * @param async <code>true</code> for asynchronous execution; otherwise <code>false</code>
      */
-    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, boolean async) {
+    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, boolean remotePlan, boolean async) {
         if (null == hzInstance) {
             LOG.warn("Aborted rescheduling of permanent listeners as passed HazelcastInstance is null.");
             return;
@@ -318,10 +327,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         ThreadPoolService threadPool = async ? Services.optService(ThreadPoolService.class) : null;
         if (null == threadPool) {
             // Perform with current thread
-            ThreadPools.execute(new ReschedulerTask(allMembers, allPushUsers, hzInstance, RESCHEDULE, pushManagerRegistry));
+            ThreadPools.execute(new ReschedulerTask(allMembers, allPushUsers, hzInstance, this, pushManagerRegistry, remotePlan));
         } else {
             // Submit task to thread pool
-            threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, RESCHEDULE, pushManagerRegistry));
+            threadPool.submit(new ReschedulerTask(allMembers, allPushUsers, hzInstance, this, pushManagerRegistry, remotePlan));
         }
     }
 
@@ -337,7 +346,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
             hzInstancerRef.set(hzInstance);
 
-            planReschedule();
+            planReschedule(false);
 
             return hzInstance;
         } catch (Exception e) {
@@ -373,17 +382,19 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         private final HazelcastInstance hzInstance;
         private final Object monitor;
         private final PushManagerRegistry pushManagerRegistry;
+        private final boolean remotePlan;
 
         /**
          * Initializes a new {@link ReschedulerTask}.
          */
-        ReschedulerTask(Set<Member> allMembers, List<PushUser> allPushUsers, HazelcastInstance hzInstance, Object monitor, PushManagerRegistry pushManagerRegistry) {
+        ReschedulerTask(Set<Member> allMembers, List<PushUser> allPushUsers, HazelcastInstance hzInstance, Object monitor, PushManagerRegistry pushManagerRegistry, boolean remotePlan) {
             super();
             this.allMembers = allMembers;
             this.allPushUsers = allPushUsers;
             this.hzInstance = hzInstance;
             this.monitor = monitor;
             this.pushManagerRegistry = pushManagerRegistry;
+            this.remotePlan = remotePlan;
         }
 
         @Override
@@ -471,6 +482,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             return null;
                         }
 
+                        // Check if required to also plan a rescheduling at remote members
+                        if (remotePlan) {
+                            IExecutorService executor = hzInstance.getExecutorService("default");
+                            executor.submitToMembers(new PortablePlanRescheduleCallable(localMember.getUuid()), otherMembers);
+                        }
+
                         // First, sort by UUID
                         Collections.sort(candidates, new Comparator<Member>() {
 
@@ -499,8 +516,10 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                         // Apply newly calculated initial permanent listeners
                         pushManagerRegistry.applyInitialListeners(ps);
 
-                        // For safety reason, request explicit drop on other nodes for push users started on this node
-                        new DropPushUserTask(ps, otherMembers, hzInstance, monitor).run();
+                        if (!remotePlan) {
+                            // For safety reason, request explicit drop on other nodes for push users started on this node
+                            new DropPushUserTask(ps, otherMembers, hzInstance, monitor).run();
+                        }
 
                     }
                 } catch (Exception e) {
