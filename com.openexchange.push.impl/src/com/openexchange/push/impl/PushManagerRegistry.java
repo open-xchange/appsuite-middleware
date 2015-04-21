@@ -152,9 +152,18 @@ public final class PushManagerRegistry implements PushListenerService {
     }
 
     /**
+     * Gets the rescheduler instance
+     *
+     * @return The rescheduler instance or <code>null</code>
+     */
+    public PermanentListenerRescheduler getRescheduler() {
+        return reschedulerRef.get();
+    }
+
+    /**
      * Sets the rescheduler instance
      *
-     * @param rescheduler The rescheduluer instance
+     * @param rescheduler The rescheduler instance
      */
     public void setRescheduler(PermanentListenerRescheduler rescheduler) {
         reschedulerRef.set(rescheduler);
@@ -356,7 +365,7 @@ public final class PushManagerRegistry implements PushListenerService {
                             startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
                         } else {
                             try {
-                                rescheduler.planReschedule();
+                                rescheduler.planReschedule(true);
                             } catch (OXException e) {
                                 LOG.error("Failed to plan rescheduling", e);
                             }
@@ -599,16 +608,7 @@ public final class PushManagerRegistry implements PushListenerService {
 
         if (added && (pushManager instanceof PushManagerExtendedService)) {
             synchronized (this) {
-                PermanentListenerRescheduler rescheduler = reschedulerRef.get();
-                if (null == rescheduler) {
-                    startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
-                } else {
-                    try {
-                        rescheduler.planReschedule();
-                    } catch (OXException e) {
-                        LOG.error("Failed to plan rescheduling", e);
-                    }
-                }
+                startPermanentListenersFor(initialPushUsers, (PushManagerExtendedService) pushManager, isPermanentPushAllowed());
             }
         }
 

@@ -120,6 +120,7 @@ public interface CustomPortable extends Portable {
      * <li><code>  102</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser</li>
      * <li><code>  103</code>: com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallable</li>
      * <li><code>  104</code>: com.openexchange.push.impl.balancing.PortableDropPermanentListenerCallable</li>
+     * <li><code>  105</code>: com.openexchange.push.impl.balancing.PortablePlanRescheduleCallable</li>
      * </ul>
      *
      * @return The class ID
