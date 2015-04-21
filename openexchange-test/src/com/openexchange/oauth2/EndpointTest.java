@@ -85,7 +85,7 @@ import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 
 
 /**
@@ -133,14 +133,14 @@ public abstract class EndpointTest {
 
         // register client application
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        oauthClient = clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, clientData);
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        oauthClient = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
     }
 
     @After
     public void after() throws Exception {
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        clientProvisioning.unregisterClient(oauthClient.getId());
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());
     }
 
     protected void expectSecureRedirect(HttpUriRequest request, HttpResponse response) {

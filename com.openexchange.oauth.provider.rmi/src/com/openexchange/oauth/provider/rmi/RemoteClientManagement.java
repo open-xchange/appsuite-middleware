@@ -52,6 +52,8 @@ package com.openexchange.oauth.provider.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
@@ -59,12 +61,12 @@ import com.openexchange.oauth.provider.client.ClientManagementException;
 
 
 /**
- * {@link OAuthClientRmi} - The RMI stub for OAuth Client management.
+ * {@link RemoteClientManagement} - The RMI stub for OAuth Client management.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface OAuthClientRmi extends Remote {
+public interface RemoteClientManagement extends Remote {
 
     /**
      * The default context group ID.
@@ -74,79 +76,95 @@ public interface OAuthClientRmi extends Remote {
     /**
      * RMI name to be used in the naming lookup.
      */
-    public static final String RMI_NAME = OAuthClientRmi.class.getSimpleName();
+    public static final String RMI_NAME = RemoteClientManagement.class.getSimpleName();
 
     /**
      * Gets all clients for the given context group.
      *
      * @param contextGroup The context group ID. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
+     * @param credentials The master admin credentials
      * @return A list of clients
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    List<Client> getClients(String contextGroup) throws ClientManagementException, RemoteException;
+    List<Client> getClients(String contextGroup, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Gets the client identified by the given identifier.
      *
      * @param clientId The clients identifier
+     * @param credentials The master admin credentials
      * @return The client or <code>null</code> if there is no such client
      * @throws ClientManagementException If operation fails
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client getClientById(String clientId) throws ClientManagementException, RemoteException;
+    Client getClientById(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Registers (adds) a client according to given client data.
      *
      * @param contextGroup The context group ID. Pass {@link #DEFAULT_GID} in deployments without multiple context groups.
      * @param clientData The client data to create the client from
+     * @param credentials The master admin credentials
      * @return The newly created client
      * @throws ClientManagementException If create operation fails
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client registerClient(String contextGroup, ClientData clientData) throws ClientManagementException, RemoteException;
+    Client registerClient(String contextGroup, ClientData clientData, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Updates an existing client's attributes according to given client data.
      *
      * @param clientId The client identifier
      * @param clientData The client data
+     * @param credentials The master admin credentials
      * @return The updated client
      * @throws ClientManagementException If update operation fails
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client updateClient(String clientId, ClientData clientData) throws ClientManagementException, RemoteException;
+    Client updateClient(String clientId, ClientData clientData, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Unregisters an existing client
      *
      * @param clientId The client identifier
+     * @param credentials The master admin credentials
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
      * @throws ClientManagementException If un-registration fails
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    boolean unregisterClient(String clientId) throws ClientManagementException, RemoteException;
+    boolean unregisterClient(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Revokes a client's current secret and generates a new one.
      *
      * @param clientId The client identifier
+     * @param credentials The master admin credentials
      * @return The client with revoked/new secret
      * @throws ClientManagementException If revoke operation fails
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client revokeClientSecret(String clientId) throws ClientManagementException, RemoteException;
+    Client revokeClientSecret(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Enables denoted client
      *
      * @param clientId The client identifier
+     * @param credentials The master admin credentials
      * @return <code>true</code> if enabling was successful, <code>false</code> if the client was already enabled
      * @throws ClientManagementException If client could not be enabled
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    boolean enableClient(String clientId) throws ClientManagementException, RemoteException;
+    boolean enableClient(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Disables denoted client
      *
      * @param clientId The client identifier
+     * @param credentials The master admin credentials
      * @return <code>true</code> if disabling was successful, <code>false</code> if the client was already disabled
      * @throws ClientManagementException If client could not be disabled
+     * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    boolean disableClient(String clientId) throws ClientManagementException, RemoteException;
+    boolean disableClient(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
 
 }

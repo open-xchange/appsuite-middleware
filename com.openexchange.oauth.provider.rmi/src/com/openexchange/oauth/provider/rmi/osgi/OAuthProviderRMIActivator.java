@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,76 @@
  *
  */
 
-package com.openexchange.oauth.provider.soap.osgi;
+package com.openexchange.oauth.provider.rmi.osgi;
 
 import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-import com.openexchange.oauth.provider.soap.OAuthClientServicePortType;
-import com.openexchange.oauth.provider.soap.OAuthClientServicePortTypeImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.oauth.provider.rmi.impl.RemoteClientManagementImpl;
 
 
 /**
- * {@link OAuthClientServiceActivator} - The activator for <i>com.openexchange.oauth.provider.soap</i> bundle
+ * {@link OAuthProviderRMIActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthClientServiceActivator extends HousekeepingActivator {
+public class OAuthProviderRMIActivator implements BundleActivator {
 
-    /**
-     * Initializes a new {@link OAuthClientServiceActivator}.
-     */
-    public OAuthClientServiceActivator() {
-        super();
-    }
+    private ServiceRegistration<Remote> serviceRegistration;
+
+    private ServiceTracker<OAuthProviderService, OAuthProviderService> tracker;
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {};
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        ServiceTrackerCustomizer<Remote, Remote> trackerCustomizer = new ServiceTrackerCustomizer<Remote, Remote>() {
-
+    public void start(BundleContext context) throws Exception {
+        tracker = new ServiceTracker<OAuthProviderService, OAuthProviderService>(context, OAuthProviderService.class, null) {
             @Override
-            public void removedService(final ServiceReference<Remote> reference, final Remote service) {
-                if (service instanceof RemoteClientManagement) {
-                    unregisterServices();
-                    context.ungetService(reference);
+            public OAuthProviderService addingService(ServiceReference<OAuthProviderService> reference) {
+                OAuthProviderService service = super.addingService(reference);
+                if (service != null) {
+                    register(context, service);
                 }
+
+                return service;
             }
 
             @Override
-            public void modifiedService(final ServiceReference<Remote> reference, final Remote service) {
-                // Ignore
-            }
-
-            @Override
-            public Remote addingService(final ServiceReference<Remote> reference) {
-                final Remote service = context.getService(reference);
-                if (service instanceof RemoteClientManagement) {
-                    registerService(OAuthClientServicePortType.class, new OAuthClientServicePortTypeImpl((RemoteClientManagement) service));
-                    return service;
-                }
-                context.ungetService(reference);
-                return null;
+            public void remove(ServiceReference<OAuthProviderService> reference) {
+                unregister();
+                super.remove(reference);
             }
         };
-        track(Remote.class, trackerCustomizer);
-        openTrackers();
+
+        tracker.open();
     }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        unregister();
+        tracker.close();
+        tracker = null;
+    }
+
+    private synchronized void register(BundleContext context, OAuthProviderService service) {
+        if (serviceRegistration == null) {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("RMIName", RemoteClientManagement.RMI_NAME);
+            serviceRegistration = context.registerService(Remote.class, new RemoteClientManagementImpl(service.getClientManagement()), props);
+        }
+    }
+
+    private synchronized void unregister() {
+        if (serviceRegistration != null) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
+    }
+
 }

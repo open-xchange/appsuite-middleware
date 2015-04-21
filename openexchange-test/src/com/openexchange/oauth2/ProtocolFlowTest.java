@@ -77,6 +77,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.junit.Test;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.java.util.UUIDs;
@@ -84,7 +85,7 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 
 
 /**
@@ -311,10 +312,11 @@ public class ProtocolFlowTest extends EndpointTest {
     @Test
     public void testMaxNumberOfDistinctGrants() throws Exception {
         // A user must have at max. OAuthProviderService.MAX_CLIENTS_PER_USER grants for different clients
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
+        Credentials masterAdminCredentials = AbstractOAuthTest.getMasterAdminCredentials();
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         List<Client> clients = new ArrayList<>(OAuthProviderService.MAX_CLIENTS_PER_USER);
         for (int i = 0; i < OAuthProviderService.MAX_CLIENTS_PER_USER; i++) {
-            clients.add(clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis())));
+            clients.add(clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis()), masterAdminCredentials));
         }
 
         try {
@@ -337,7 +339,7 @@ public class ProtocolFlowTest extends EndpointTest {
             // FIXME: don't unregister client but revoke access for one of them as soon as the API call exists
             Iterator<Client> it = clients.iterator();
             Client client2 = it.next();
-            clientProvisioning.unregisterClient(client2.getId());
+            clientManagement.unregisterClient(client2.getId(), masterAdminCredentials);
             it.remove();
 
             OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScopes());
@@ -345,7 +347,7 @@ public class ProtocolFlowTest extends EndpointTest {
         } finally {
             for (Client client : clients) {
                 try {
-                    clientProvisioning.unregisterClient(client.getId());
+                    clientManagement.unregisterClient(client.getId(), masterAdminCredentials);
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }

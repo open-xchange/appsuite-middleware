@@ -58,12 +58,13 @@ import java.util.List;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.DefaultIcon;
 import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 
 
 /**
@@ -84,17 +85,17 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
 
     private static final Logger LOG = LoggerFactory.getLogger(OAuthClientServicePortTypeImpl.class);
 
-    private final OAuthClientRmi clientManagement;
+    private final RemoteClientManagement clientManagement;
 
-    public OAuthClientServicePortTypeImpl(OAuthClientRmi clientManagement) {
+    public OAuthClientServicePortTypeImpl(RemoteClientManagement clientManagement) {
         super();
         this.clientManagement = clientManagement;
     }
 
     @Override
-    public List<ClientListData> listClients(String contextGroup) throws OAuthClientServiceException {
+    public List<ClientListData> listClients(String contextGroup, Credentials credentials) throws OAuthClientServiceException {
         try {
-            List<com.openexchange.oauth.provider.client.Client> clients = clientManagement.getClients(contextGroup);
+            List<com.openexchange.oauth.provider.client.Client> clients = clientManagement.getClients(contextGroup, soap2Credentials(credentials));
             List<ClientListData> listDatas = new ArrayList<>(clients.size());
             for (com.openexchange.oauth.provider.client.Client client : clients) {
                 ClientListData listData = new ClientListData();
@@ -103,82 +104,82 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
                 listDatas.add(listData);
             }
             return listDatas;
-        } catch (RemoteException | ClientManagementException e) {
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Client getClientById(String clientId) throws OAuthClientServiceException {
+    public Client getClientById(String clientId, Credentials credentials) throws OAuthClientServiceException {
         try {
-            com.openexchange.oauth.provider.client.Client client = clientManagement.getClientById(clientId);
+            com.openexchange.oauth.provider.client.Client client = clientManagement.getClientById(clientId, soap2Credentials(credentials));
             if (client == null) {
                 throw new OAuthClientServiceException("Invalid client identifier: " + clientId);
             }
 
             return client2Soap(client);
-        } catch (RemoteException | ClientManagementException e) {
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Client registerClient(String contextGroup, ClientData clientData) throws OAuthClientServiceException {
+    public Client registerClient(String contextGroup, ClientData clientData, Credentials credentials) throws OAuthClientServiceException {
         try {
-            return client2Soap(clientManagement.registerClient(contextGroup, soap2ClientData(clientData)));
-        } catch (RemoteException | ClientManagementException e) {
+            return client2Soap(clientManagement.registerClient(contextGroup, soap2ClientData(clientData), soap2Credentials(credentials)));
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Client updateClient(String clientId, ClientData clientData) throws OAuthClientServiceException {
+    public Client updateClient(String clientId, ClientData clientData, Credentials credentials) throws OAuthClientServiceException {
         try {
-            return client2Soap(clientManagement.updateClient(clientId, soap2ClientData(clientData)));
-        } catch (RemoteException | ClientManagementException e) {
+            return client2Soap(clientManagement.updateClient(clientId, soap2ClientData(clientData), soap2Credentials(credentials)));
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws OAuthClientServiceException {
+    public boolean unregisterClient(String clientId, Credentials credentials) throws OAuthClientServiceException {
         try {
-            return clientManagement.unregisterClient(clientId);
-        } catch (RemoteException | ClientManagementException e) {
+            return clientManagement.unregisterClient(clientId, soap2Credentials(credentials));
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public Client revokeClientSecret(String clientId) throws OAuthClientServiceException {
+    public Client revokeClientSecret(String clientId, Credentials credentials) throws OAuthClientServiceException {
         try {
-            return client2Soap(clientManagement.revokeClientSecret(clientId));
-        } catch (RemoteException | ClientManagementException e) {
+            return client2Soap(clientManagement.revokeClientSecret(clientId, soap2Credentials(credentials)));
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public boolean enableClient(String clientId) throws OAuthClientServiceException {
+    public boolean enableClient(String clientId, Credentials credentials) throws OAuthClientServiceException {
         try {
-            return clientManagement.enableClient(clientId);
-        } catch (RemoteException | ClientManagementException e) {
+            return clientManagement.enableClient(clientId, soap2Credentials(credentials));
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     @Override
-    public boolean disableClient(String clientId) throws OAuthClientServiceException {
+    public boolean disableClient(String clientId, Credentials credentials) throws OAuthClientServiceException {
         try {
-            return clientManagement.disableClient(clientId);
-        } catch (RemoteException | ClientManagementException e) {
+            return clientManagement.disableClient(clientId, soap2Credentials(credentials));
+        } catch (RemoteException | ClientManagementException | InvalidCredentialsException e) {
             throw new OAuthClientServiceException(e.getMessage(), e);
         }
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
 
-    private com.openexchange.oauth.provider.soap.Client client2Soap(com.openexchange.oauth.provider.client.Client client) {
+    private static com.openexchange.oauth.provider.soap.Client client2Soap(com.openexchange.oauth.provider.client.Client client) {
         com.openexchange.oauth.provider.soap.Client soapClient = new com.openexchange.oauth.provider.soap.Client();
 
         {
@@ -266,7 +267,7 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
         return soapClient;
     }
 
-    private com.openexchange.oauth.provider.client.ClientData soap2ClientData(com.openexchange.oauth.provider.soap.ClientData soapClientData) {
+    private static com.openexchange.oauth.provider.client.ClientData soap2ClientData(com.openexchange.oauth.provider.soap.ClientData soapClientData) {
         com.openexchange.oauth.provider.client.ClientData clientData = new com.openexchange.oauth.provider.client.ClientData();
 
         {
@@ -322,6 +323,17 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
         }
 
         return clientData;
+    }
+
+    private static com.openexchange.admin.rmi.dataobjects.Credentials soap2Credentials(Credentials soapCredentials) {
+        if (soapCredentials == null) {
+            return null;
+        }
+
+        com.openexchange.admin.rmi.dataobjects.Credentials credentials = new com.openexchange.admin.rmi.dataobjects.Credentials();
+        credentials.setLogin(soapCredentials.getLogin());
+        credentials.setPassword(soapCredentials.getPassword());
+        return credentials;
     }
 
 }

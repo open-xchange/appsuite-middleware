@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Set;
 import org.junit.After;
 import org.junit.Before;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.calendar.json.AppointmentActionFactory;
@@ -66,7 +67,7 @@ import com.openexchange.oauth.provider.DefaultScopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 import com.openexchange.tasks.json.TaskActionFactory;
 
 /**
@@ -96,8 +97,8 @@ public abstract class AbstractOAuthTest {
     public void before() throws Exception {
         // register client application
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        clientApp = clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, clientData);
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        clientApp = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
         String[] scopes = this.scopes;
         if (scopes == null || scopes.length == 0) {
             scopes = clientApp.getDefaultScope().get().toArray(new String[0]);
@@ -110,8 +111,8 @@ public abstract class AbstractOAuthTest {
     public void after() throws Exception {
         ajaxClient.logout();
         client.logout();
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        clientProvisioning.unregisterClient(clientApp.getId());
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        clientManagement.unregisterClient(clientApp.getId(), getMasterAdminCredentials());
     }
 
     public static ClientData prepareClient(String name) {
@@ -132,6 +133,15 @@ public abstract class AbstractOAuthTest {
         clientData.setDefaultScope(new DefaultScopes(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE));
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
+    }
+
+    public static Credentials getMasterAdminCredentials() {
+        String password = "secret";
+        if (System.getProperty("rmi_test_masterpw") != null){
+            password = System.getProperty("rmi_test_masterpw");
+        }
+
+        return new Credentials("oxadminmaster", password);
     }
 
 }

@@ -27,7 +27,9 @@ public interface OAuthClientServicePortType {
     @ResponseWrapper(localName = "listClientsResponse", targetNamespace = "http://soap.provider.oauth.openexchange.com", className = "com.openexchange.oauth.provider.soap.ListClientsResponse")
     public java.util.List<com.openexchange.oauth.provider.soap.ClientListData> listClients(
         @WebParam(name = "contextGroup", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        java.lang.String contextGroup
+        java.lang.String contextGroup,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -37,7 +39,9 @@ public interface OAuthClientServicePortType {
     @ResponseWrapper(localName = "getClientByIdResponse", targetNamespace = "http://soap.provider.oauth.openexchange.com", className = "com.openexchange.oauth.provider.soap.GetClientByIdResponse")
     public com.openexchange.oauth.provider.soap.Client getClientById(
         @WebParam(name = "clientId", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        java.lang.String clientId
+        java.lang.String clientId,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -49,7 +53,9 @@ public interface OAuthClientServicePortType {
         @WebParam(name = "contextGroup", targetNamespace = "http://soap.provider.oauth.openexchange.com")
         java.lang.String contextGroup,
         @WebParam(name = "clientData", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        com.openexchange.oauth.provider.soap.ClientData clientData
+        com.openexchange.oauth.provider.soap.ClientData clientData,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -61,7 +67,9 @@ public interface OAuthClientServicePortType {
         @WebParam(name = "clientId", targetNamespace = "http://soap.provider.oauth.openexchange.com")
         java.lang.String clientId,
         @WebParam(name = "clientData", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        com.openexchange.oauth.provider.soap.ClientData clientData
+        com.openexchange.oauth.provider.soap.ClientData clientData,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -71,7 +79,9 @@ public interface OAuthClientServicePortType {
     @ResponseWrapper(localName = "unregisterClientResponse", targetNamespace = "http://soap.provider.oauth.openexchange.com", className = "com.openexchange.oauth.provider.soap.UnregisterClientResponse")
     public boolean unregisterClient(
         @WebParam(name = "clientId", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        java.lang.String clientId
+        java.lang.String clientId,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -81,7 +91,9 @@ public interface OAuthClientServicePortType {
     @ResponseWrapper(localName = "revokeClientSecretResponse", targetNamespace = "http://soap.provider.oauth.openexchange.com", className = "com.openexchange.oauth.provider.soap.RevokeClientSecretResponse")
     public com.openexchange.oauth.provider.soap.Client revokeClientSecret(
         @WebParam(name = "clientId", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        java.lang.String clientId
+        java.lang.String clientId,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -91,7 +103,9 @@ public interface OAuthClientServicePortType {
     @ResponseWrapper(localName = "enableClientResponse", targetNamespace = "http://soap.provider.oauth.openexchange.com", className = "com.openexchange.oauth.provider.soap.EnableClientResponse")
     public boolean enableClient(
         @WebParam(name = "clientId", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        java.lang.String clientId
+        java.lang.String clientId,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 
     @WebResult(name = "return", targetNamespace = "http://soap.provider.oauth.openexchange.com")
@@ -101,6 +115,8 @@ public interface OAuthClientServicePortType {
     @ResponseWrapper(localName = "disableClientResponse", targetNamespace = "http://soap.provider.oauth.openexchange.com", className = "com.openexchange.oauth.provider.soap.DisableClientResponse")
     public boolean disableClient(
         @WebParam(name = "clientId", targetNamespace = "http://soap.provider.oauth.openexchange.com")
-        java.lang.String clientId
+        java.lang.String clientId,
+        @WebParam(name = "credentials", targetNamespace = "http://soap.provider.oauth.openexchange.com")
+        Credentials credentials
     ) throws OAuthClientServiceException;
 }

@@ -47,34 +47,39 @@
  *
  */
 
-package com.openexchange.oauth.provider.internal.rmi;
+package com.openexchange.oauth.provider.rmi.impl;
 
 import java.rmi.RemoteException;
 import java.util.List;
 import org.slf4j.Logger;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.rmi.impl.BasicAuthenticator;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 
 
 /**
- * {@link OAuthClientRmiImpl}
+ * {@link RemoteClientManagementImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class OAuthClientRmiImpl implements OAuthClientRmi {
+public class RemoteClientManagementImpl implements RemoteClientManagement {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OAuthClientRmiImpl.class);
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RemoteClientManagementImpl.class);
 
     private final ClientManagement clientManagement;
 
     /**
-     * Initializes a new {@link OAuthClientRmiImpl}.
+     * Initializes a new {@link RemoteClientManagementImpl}.
      */
-    public OAuthClientRmiImpl(ClientManagement clientManagement) {
+    public RemoteClientManagementImpl(ClientManagement clientManagement) {
         super();
         this.clientManagement = clientManagement;
     }
@@ -84,8 +89,19 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public Client getClientById(String clientId) throws RemoteException, ClientManagementException {
+    public List<Client> getClients(String groupId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
+            return getClientManagement().getClients(groupId);
+        } catch (ClientManagementException e) {
+            throw serializableException(e);
+        }
+    }
+
+    @Override
+    public Client getClientById(String clientId, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
+        try {
+            authenticate(credentials);
             return getClientManagement().getClientById(clientId);
         } catch (ClientManagementException e) {
             throw serializableException(e);
@@ -93,8 +109,9 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public Client registerClient(String contextGroup, ClientData clientData) throws RemoteException, ClientManagementException {
+    public Client registerClient(String contextGroup, ClientData clientData, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
             return getClientManagement().registerClient(contextGroup, clientData);
         } catch (ClientManagementException e) {
             throw serializableException(e);
@@ -102,8 +119,9 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public Client updateClient(String clientId, ClientData clientData) throws RemoteException, ClientManagementException {
+    public Client updateClient(String clientId, ClientData clientData, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
             return getClientManagement().updateClient(clientId, clientData);
         } catch (ClientManagementException e) {
             throw serializableException(e);
@@ -111,8 +129,9 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public boolean unregisterClient(String clientId) throws RemoteException, ClientManagementException {
+    public boolean unregisterClient(String clientId, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
             return getClientManagement().unregisterClient(clientId);
         } catch (ClientManagementException e) {
             throw serializableException(e);
@@ -120,8 +139,9 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public Client revokeClientSecret(String clientId) throws RemoteException, ClientManagementException {
+    public Client revokeClientSecret(String clientId, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
             return getClientManagement().revokeClientSecret(clientId);
         } catch (ClientManagementException e) {
             throw serializableException(e);
@@ -129,8 +149,9 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public boolean enableClient(String clientId) throws RemoteException, ClientManagementException {
+    public boolean enableClient(String clientId, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
             return getClientManagement().enableClient(clientId);
         } catch (ClientManagementException e) {
             throw serializableException(e);
@@ -138,18 +159,10 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
     }
 
     @Override
-    public boolean disableClient(String clientId) throws RemoteException, ClientManagementException {
+    public boolean disableClient(String clientId, Credentials credentials) throws RemoteException, ClientManagementException, InvalidCredentialsException {
         try {
+            authenticate(credentials);
             return getClientManagement().disableClient(clientId);
-        } catch (ClientManagementException e) {
-            throw serializableException(e);
-        }
-    }
-
-    @Override
-    public List<Client> getClients(String groupId) throws ClientManagementException, RemoteException {
-        try {
-            return getClientManagement().getClients(groupId);
         } catch (ClientManagementException e) {
             throw serializableException(e);
         }
@@ -169,6 +182,18 @@ public class OAuthClientRmiImpl implements OAuthClientRmi {
         ClientManagementException stripped = ClientManagementException.forMessage(e.getReason(), e.getMessage());
         stripped.setStackTrace(e.getStackTrace());
         return stripped;
+    }
+
+    private void authenticate(Credentials credentials) throws ClientManagementException, InvalidCredentialsException {
+        try {
+            if (credentials == null) {
+                credentials = new Credentials("", "");
+            }
+
+            new BasicAuthenticator().doAuthentication(credentials);
+        } catch (StorageException e) {
+            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
+        }
     }
 
 }

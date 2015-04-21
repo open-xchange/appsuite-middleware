@@ -29,13 +29,35 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
-    "contextGroup"
+    "contextGroup",
+    "credentials"
 })
 @XmlRootElement(name = "listClients")
 public class ListClients {
 
     @XmlElement(required = true, nillable = true)
     protected String contextGroup;
+
+    @XmlElement(required = true, nillable = true)
+    protected Credentials credentials;
+
+    /**
+     * Gets the credentials
+     *
+     * @return The credentials
+     */
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    /**
+     * Sets the credentials
+     *
+     * @param credentials The credentials to set
+     */
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
+    }
 
     /**
      * Gets the value of the groupId property.

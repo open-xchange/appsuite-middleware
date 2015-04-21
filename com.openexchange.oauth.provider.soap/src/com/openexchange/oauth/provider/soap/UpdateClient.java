@@ -10,9 +10,9 @@ import javax.xml.bind.annotation.XmlType;
 
 /**
  * <p>Java class for anonymous complex type.
- * 
+ *
  * <p>The following schema fragment specifies the expected content contained within this class.
- * 
+ *
  * <pre>
  * &lt;complexType>
  *   &lt;complexContent>
@@ -25,13 +25,14 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;/complexContent>
  * &lt;/complexType>
  * </pre>
- * 
- * 
+ *
+ *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "clientId",
-    "clientData"
+    "clientData",
+    "credentials"
 })
 @XmlRootElement(name = "updateClient")
 public class UpdateClient {
@@ -40,14 +41,34 @@ public class UpdateClient {
     protected String clientId;
     @XmlElement(required = true, nillable = true)
     protected ClientData clientData;
+    @XmlElement(required = true, nillable = true)
+    protected Credentials credentials;
+
+    /**
+     * Gets the credentials
+     *
+     * @return The credentials
+     */
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    /**
+     * Sets the credentials
+     *
+     * @param credentials The credentials to set
+     */
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
+    }
 
     /**
      * Gets the value of the clientId property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link String }
-     *     
+     *
      */
     public String getClientId() {
         return clientId;
@@ -55,11 +76,11 @@ public class UpdateClient {
 
     /**
      * Sets the value of the clientId property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link String }
-     *     
+     *
      */
     public void setClientId(String value) {
         this.clientId = value;
@@ -67,11 +88,11 @@ public class UpdateClient {
 
     /**
      * Gets the value of the clientData property.
-     * 
+     *
      * @return
      *     possible object is
      *     {@link ClientData }
-     *     
+     *
      */
     public ClientData getClientData() {
         return clientData;
@@ -79,11 +100,11 @@ public class UpdateClient {
 
     /**
      * Sets the value of the clientData property.
-     * 
+     *
      * @param value
      *     allowed object is
      *     {@link ClientData }
-     *     
+     *
      */
     public void setClientData(ClientData value) {
         this.clientData = value;

@@ -66,6 +66,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import com.google.common.io.ByteStreams;
+import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
@@ -77,7 +78,7 @@ import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 import com.openexchange.tasks.json.TaskActionFactory;
 
 
@@ -89,7 +90,9 @@ import com.openexchange.tasks.json.TaskActionFactory;
  */
 public class ClientManagementTest {
 
-    private OAuthClientRmi clientManagement;
+    private RemoteClientManagement clientManagement;
+
+    private Credentials credentials;
 
     @BeforeClass
     public static void initTestFramework() throws Exception {
@@ -98,7 +101,8 @@ public class ClientManagementTest {
 
     @Before
     public void before() throws Exception {
-        clientManagement = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
+        clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        credentials = AbstractOAuthTest.getMasterAdminCredentials();
     }
 
     @Test
@@ -107,7 +111,7 @@ public class ClientManagementTest {
          * Create client and check data transmission
          */
         ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData);
+        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
         String groupId = ClientId.parse(client.getId()).getGroupId();
         try {
             compare(clientData, client);
@@ -115,7 +119,7 @@ public class ClientManagementTest {
             /*
              * Assure client is listed and can be got
              */
-            List<Client> clients = clientManagement.getClients(groupId);
+            List<Client> clients = clientManagement.getClients(groupId, credentials);
             boolean found = false;
             for (Client c : clients) {
                 if (client.getId().equals(c.getId())) {
@@ -125,27 +129,27 @@ public class ClientManagementTest {
             }
             assertTrue(found);
 
-            Client reloaded = clientManagement.getClientById(client.getId());
+            Client reloaded = clientManagement.getClientById(client.getId(), credentials);
             compare(client, reloaded);
 
             /*
              * Check disabling and enabling
              */
-            assertTrue(clientManagement.disableClient(client.getId()));
-            reloaded = clientManagement.getClientById(client.getId());
+            assertTrue(clientManagement.disableClient(client.getId(), credentials));
+            reloaded = clientManagement.getClientById(client.getId(), credentials);
             assertFalse(reloaded.isEnabled());
-            assertFalse(clientManagement.disableClient(client.getId())); // cannot disable a disabled client
+            assertFalse(clientManagement.disableClient(client.getId(), credentials)); // cannot disable a disabled client
 
-            assertTrue(clientManagement.enableClient(client.getId()));
-            reloaded = clientManagement.getClientById(client.getId());
+            assertTrue(clientManagement.enableClient(client.getId(), credentials));
+            reloaded = clientManagement.getClientById(client.getId(), credentials);
             assertTrue(reloaded.isEnabled());
-            assertFalse(clientManagement.enableClient(client.getId())); // cannot enable an enabled client
+            assertFalse(clientManagement.enableClient(client.getId(), credentials)); // cannot enable an enabled client
 
             /*
              * Revoke secret
              */
             String oldSecret = client.getSecret();
-            client = clientManagement.revokeClientSecret(client.getId());
+            client = clientManagement.revokeClientSecret(client.getId(), credentials);
             assertNotNull(client.getSecret());
             assertNotEquals(oldSecret, client.getSecret());
 
@@ -165,15 +169,15 @@ public class ClientManagementTest {
             updatedClientData.setIcon(updatedIcon);
             updatedClientData.setRedirectURIs(Collections.singleton("http://example.com/oauth/client/endpoint"));
             updatedClientData.setDefaultScope(new DefaultScopes(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE));
-            client = clientManagement.updateClient(client.getId(), updatedClientData);
+            client = clientManagement.updateClient(client.getId(), updatedClientData, credentials);
             compare(updatedClientData, client);
         } finally {
-            assertTrue(clientManagement.unregisterClient(client.getId()));
+            assertTrue(clientManagement.unregisterClient(client.getId(), credentials));
 
             /*
              * Assure client is not listed anymore
              */
-            List<Client> clients = clientManagement.getClients(groupId);
+            List<Client> clients = clientManagement.getClients(groupId, credentials);
             boolean found = false;
             for (Client c : clients) {
                 if (client.getId().equals(c.getId())) {
@@ -186,7 +190,7 @@ public class ClientManagementTest {
             /*
              * Assure client cannot be got anymore
              */
-            Client reloaded = clientManagement.getClientById(client.getId());
+            Client reloaded = clientManagement.getClientById(client.getId(), credentials);
             assertNull(reloaded);
         }
     }
