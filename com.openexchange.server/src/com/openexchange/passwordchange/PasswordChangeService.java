@@ -51,8 +51,9 @@ package com.openexchange.passwordchange;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -160,8 +161,21 @@ public abstract class PasswordChangeService {
              * Loading user also verifies its existence
              */
             final Session session = event.getSession();
+
+            Map<String, Object> properties = new LinkedHashMap<String, Object>(2);
+            {
+                Map<String, List<String>> headers = event.getHeaders();
+                if (headers != null) {
+                    properties.put("headers", headers);
+                }
+                com.openexchange.authentication.Cookie[] cookies = event.getCookies();
+                if (null != cookies) {
+                    properties.put("cookies", cookies);
+                }
+            }
+
             UserStorage.getStorageUser(session);
-            authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword()));
+            authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
         } catch (final OXException e) {
             if ("LGI-0006".equals(e.getErrorCode())) {
                 /*
@@ -329,8 +343,8 @@ public abstract class PasswordChangeService {
     protected static final class _LoginInfo implements LoginInfo {
 
         private final String pw;
-
         private final String loginInfo;
+        private final Map<String, Object> properties;
 
         /**
          * Initializes a new {@link _LoginInfo}
@@ -338,10 +352,11 @@ public abstract class PasswordChangeService {
          * @param loginInfo The login info
          * @param pw The password
          */
-        public _LoginInfo(final String loginInfo, final String pw) {
+        public _LoginInfo(String loginInfo, String pw, Map<String, Object> properties) {
             super();
             this.loginInfo = loginInfo;
             this.pw = pw;
+            this.properties = properties;
         }
 
         @Override
@@ -356,7 +371,7 @@ public abstract class PasswordChangeService {
 
         @Override
         public Map<String, Object> getProperties() {
-            return Collections.emptyMap();
+            return properties;
         }
 
     }
