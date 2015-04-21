@@ -66,6 +66,8 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.exception.OXException;
+import com.openexchange.tools.file.external.QuotaFileStorages;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
 
@@ -120,8 +122,6 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         return retval.toArray(new Context[retval.size()]);
     }
 
-    private static final String SQL = "SELECT cid,used FROM filestore_usage";
-
     private Collection<Context> loadUsage(int poolId, String schema, Map<Integer, Context> contexts) throws StorageException {
         final Connection con;
         try {
@@ -129,10 +129,13 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
         } catch (PoolException e) {
             throw new StorageException(e);
         }
+
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL);
+            boolean hasUserColumn = QuotaFileStorages.hasUserColumn(con, schema);
+
+            stmt = con.prepareStatement(hasUserColumn ? "SELECT cid,used FROM filestore_usage WHERE user=0" : "SELECT cid,used FROM filestore_usage");
             rs = stmt.executeQuery();
             while (rs.next()) {
                 Context context = contexts.get(I(rs.getInt(1)));
@@ -142,6 +145,8 @@ public class FilestoreUsageLoader implements Filter<Context, Context> {
                 }
             }
         } catch (SQLException e) {
+            throw new StorageException(e.getMessage(), e);
+        } catch (OXException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
             closeSQLStuff(rs, stmt);
