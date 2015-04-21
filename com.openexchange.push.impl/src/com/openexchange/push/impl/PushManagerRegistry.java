@@ -548,14 +548,29 @@ public final class PushManagerRegistry implements PushListenerService {
         /*
          * Iterate push managers
          */
+        Set<PushUser> permanentPushUsers = null;
         for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
             try {
                 PushManagerService pushManager = pushManagersIterator.next();
-                // Initialize a new push listener for session
-                PushListener pl = pushManager.startListener(session);
-                if (null != pl) {
-                    LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
-                    return pl;
+
+                // Check if already marked for permanent listeners
+                boolean startListener = true;
+                if ((pushManager instanceof PushManagerExtendedService)) {
+                    if (null == permanentPushUsers) {
+                        permanentPushUsers = new HashSet<PushUser>(getUsersWithPermanentListeners());
+                    }
+                    if (permanentPushUsers.contains(new PushUser(session.getUserId(), session.getContextId()))) {
+                        startListener = false;
+                    }
+                }
+
+                if (startListener) {
+                    // Initialize a new push listener for session
+                    PushListener pl = pushManager.startListener(session);
+                    if (null != pl) {
+                        LOG.debug("Started push listener for user {} in context {} by push manager \"{}\"", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), pushManager);
+                        return pl;
+                    }
                 }
             } catch (OXException e) {
                 LOG.error("Error while starting push listener.", e);
