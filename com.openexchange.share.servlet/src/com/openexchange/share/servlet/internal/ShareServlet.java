@@ -112,7 +112,7 @@ public class ShareServlet extends HttpServlet {
                 Locale locale = request.getLocale();
                 if (paths == null || paths.length == 0) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "error");
+                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                     return;
@@ -121,7 +121,7 @@ public class ShareServlet extends HttpServlet {
                 share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
                 if (null == share) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "error");
+                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                     return;
@@ -132,7 +132,7 @@ public class ShareServlet extends HttpServlet {
                     if (null == target) {
                         //TODO: fallback to share without target?
                         LOG.debug("No share target found at '{}'", pathInfo);
-                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "error");
+                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                         response.setStatus(HttpServletResponse.SC_FOUND);
                         response.sendRedirect(redirectUrl);
                         return;

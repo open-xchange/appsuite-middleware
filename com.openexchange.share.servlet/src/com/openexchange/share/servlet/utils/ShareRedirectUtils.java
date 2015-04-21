@@ -83,7 +83,7 @@ public class ShareRedirectUtils {
      * @throws OXException
      */
     public static String getRedirectUrl(final GuestInfo guestInfo, final ShareTarget target, final LoginConfiguration loginConfiguration, String message, String messageType,
-        String action) throws OXException {
+        String status) throws OXException {
         String loginPageLink = getLoginPageUrl(loginConfiguration);
 
         // Build URL
@@ -102,19 +102,19 @@ public class ShareRedirectUtils {
         if (null != target) {
             url.append('&').append("target=").append(urlEncode(target.getPath()));
         }
-        if (!Strings.isEmpty(message) && !Strings.isEmpty(messageType) && !Strings.isEmpty(action)) {
-            url.append("&message=").append(message).append("&message_type=").append(messageType).append("&action=").append(action);
+        if (!Strings.isEmpty(message) && !Strings.isEmpty(messageType) && !Strings.isEmpty(status)) {
+            url.append("&message=").append(message).append("&message_type=").append(messageType).append("&status=").append(status);
         }
         return url.toString();
     }
 
-    public static String getErrorRedirectUrl(String message, String action) {
+    public static String getErrorRedirectUrl(String message, String status) {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
         String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite");
         StringBuilder url = new StringBuilder(getLoginPageUrl(uiWebPath));
         url.append("#");
-        if (!Strings.isEmpty(message) && !Strings.isEmpty(action)) {
-            url.append("&message=").append(message).append("&message_type=").append("ERROR").append("&action=").append(action);
+        if (!Strings.isEmpty(message) && !Strings.isEmpty(status)) {
+            url.append("&message=").append(message).append("&message_type=").append("ERROR").append("&status=").append(status);
         }
         return url.toString();
     }
