@@ -45,6 +45,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-2492
+    pfile=/opt/open-xchange/etc/grizzly.properties
+    if ! ox_exists_property com.openexchange.http.grizzly.maxHttpHeaderSize $pfile; then
+        ox_set_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $pfile
+    fi
+
     # SoftwareChange_Request-1293
     pfile=/opt/open-xchange/etc/grizzly.properties
     if ! ox_exists_property com.openexchange.http.grizzly.hasAJPEnabled $pfile; then
@@ -65,6 +71,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Apr 14 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-04-13 (2473)
 * Tue Apr 07 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2013-04-09 (2486)
 * Thu Mar 26 2015 Marc Arens <marc.arens@open-xchange.com>
