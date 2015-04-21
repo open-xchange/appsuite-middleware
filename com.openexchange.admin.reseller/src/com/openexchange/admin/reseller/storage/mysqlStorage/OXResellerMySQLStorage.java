@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.reseller.storage.mysqlStorage;
 
+import static com.openexchange.tools.file.external.QuotaFileStorages.hasUserColumn;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -886,9 +887,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             long qused = 0;
             while (rs.next()) {
                 cid = rs.getInt("cid");
+
+                boolean hasUserColumn = hasUserColumn(con, cid);
+
                 oxcon = cache.getConnectionForContext(cid);
-                prep2 = oxcon.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+                prep2 = oxcon.prepareStatement(hasUserColumn ? "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0" : "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
                 prep2.setInt(1, cid);
+
                 rs2 = prep2.executeQuery();
                 if (rs2.next()) {
                     qused += rs2.getLong(1);
@@ -908,6 +913,9 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         } catch (final PoolException e) {
             log.error("", e);
             throw e;
+        } catch (final OXException e) {
+            log.error("", e);
+            throw new StorageException(e);
         } finally {
             cache.closeContextSqlStuff(oxcon, cid, true);
             cache.closeConfigDBSqlStuff(null, prep, rs);

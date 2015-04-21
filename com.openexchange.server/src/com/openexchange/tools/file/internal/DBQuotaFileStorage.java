@@ -51,6 +51,7 @@ package com.openexchange.tools.file.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import static com.openexchange.tools.file.external.QuotaFileStorages.hasUserColumn;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.io.InputStream;
@@ -135,6 +136,9 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     protected boolean incUsage(final long usage) throws OXException {
         final Connection con = db.getWritable(context);
 
+        int contextId = context.getContextId();
+        boolean hasUserColumn = hasUserColumn(con, contextId);
+
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
@@ -142,26 +146,26 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
         try {
             con.setAutoCommit(false);
             rollback = true;
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
-            sstmt.setInt(1, context.getContextId());
+            sstmt = con.prepareStatement(hasUserColumn ? "SELECT used FROM filestore_usage WHERE cid=? AND user=0 FOR UPDATE" : "SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
+            sstmt.setInt(1, contextId);
             rs = sstmt.executeQuery();
             final long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong(1);
             } else {
-                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(context.getContextId()));
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
             final long newUsage = oldUsage + usage;
             final long quota = context.getFileStorageQuota();
             if (quota > 0 && newUsage > quota) {
                 return true;
             }
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            ustmt = con.prepareStatement(hasUserColumn ? "UPDATE filestore_usage SET used=? WHERE cid=? AND user=0" : "UPDATE filestore_usage SET used=? WHERE cid=?");
             ustmt.setLong(1, newUsage);
-            ustmt.setInt(2, context.getContextId());
+            ustmt.setInt(2, contextId);
             final int rows = ustmt.executeUpdate();
             if (rows == 0) {
-                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(context.getContextId()));
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
             con.commit();
             rollback = false;
@@ -189,38 +193,40 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     protected void decUsage(final long usage) throws OXException {
         final Connection con = db.getWritable(context);
 
+        int contextId = context.getContextId();
+        boolean hasUserColumn = hasUserColumn(con, contextId);
+
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
 
         try {
-
             con.setAutoCommit(false);
 
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
-            sstmt.setInt(1, context.getContextId());
+            sstmt = con.prepareStatement(hasUserColumn ? "SELECT used FROM filestore_usage WHERE cid=? AND user=0 FOR UPDATE" : "SELECT used FROM filestore_usage WHERE cid=? FOR UPDATE");
+            sstmt.setInt(1, contextId);
             rs = sstmt.executeQuery();
 
             final long oldUsage;
             if (rs.next()) {
                 oldUsage = rs.getLong("used");
             } else {
-                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(context.getContextId()));
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
             long newUsage = oldUsage - usage;
 
             if (newUsage < 0) {
                 newUsage = 0;
-                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(context.getContextId()));
+                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(contextId));
                 LOG.error("", e);
             }
 
-            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            ustmt = con.prepareStatement(hasUserColumn ? "UPDATE filestore_usage SET used=? WHERE cid=? AND user=0" : "UPDATE filestore_usage SET used=? WHERE cid=?");
             ustmt.setLong(1, newUsage);
-            ustmt.setInt(2, context.getContextId());
+            ustmt.setInt(2, contextId);
             final int rows = ustmt.executeUpdate();
             if (1 != rows) {
-                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(context.getContextId()));
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
 
             con.commit();
@@ -269,17 +275,21 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
     @Override
     public long getUsage() throws OXException {
         final Connection con = db.getReadOnly(context);
+
+        int contextId = context.getContextId();
+        boolean hasUserColumn = hasUserColumn(con, contextId);
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         final long usage;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
-            stmt.setInt(1, context.getContextId());
+            stmt = con.prepareStatement(hasUserColumn ? "SELECT used FROM filestore_usage WHERE cid=? AND user=0" : "SELECT used FROM filestore_usage WHERE cid=?");
+            stmt.setInt(1, contextId);
             result = stmt.executeQuery();
             if (result.next()) {
                 usage = result.getLong(1);
             } else {
-                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(context.getContextId()));
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
             }
         } catch (final SQLException e) {
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
@@ -340,9 +350,10 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
     @Override
     public void recalculateUsage(Set<String> filesToIgnore) throws OXException {
-        LOG.info("Recalculating usage for Context {}", context.getContextId());
+        int contextId = context.getContextId();
         final SortedSet<String> filenames = fileStorage.getFileList();
         long entireFileSize = 0;
+        LOG.info("Recalculating usage for Context {}", contextId);
 
         for (final String filename : filenames) {
             if (!filesToIgnore.contains(filename)) {
@@ -352,16 +363,18 @@ public class DBQuotaFileStorage implements QuotaFileStorage {
 
         final Connection con = db.getWritable(context);
 
+        boolean hasUserColumn = hasUserColumn(con, contextId);
+
         PreparedStatement stmt = null;
         final ResultSet result = null;
 
         try {
-            stmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=?");
+            stmt = con.prepareStatement(hasUserColumn ? "UPDATE filestore_usage SET used=? WHERE cid=? AND user=0" : "UPDATE filestore_usage SET used=? WHERE cid=?");
             stmt.setLong(1, entireFileSize);
-            stmt.setInt(2, context.getContextId());
+            stmt.setInt(2, contextId);
             final int rows = stmt.executeUpdate();
             if (1 != rows) {
-                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(context.getContextId()));
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
         } catch (final SQLException s) {
             DBUtils.rollback(con);
