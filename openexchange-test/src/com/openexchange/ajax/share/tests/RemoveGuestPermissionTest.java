@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -159,7 +158,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
              */
             GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-            assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+            assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         } else {
             /*
              * check share target no longer accessible for non-anonymous guest user
@@ -227,7 +226,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
              */
             GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-            assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+            assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         } else {
             /*
              * check share target no longer accessible for non-anonymous guest user

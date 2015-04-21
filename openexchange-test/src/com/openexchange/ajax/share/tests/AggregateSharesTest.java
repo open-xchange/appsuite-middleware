@@ -352,7 +352,7 @@ public class AggregateSharesTest extends ShareTest {
          * check if share link to folder A still accessible
          */
         ResolveShareResponse shareResolveResponse = new GuestClient(shareA.getShareURL(), guestPermission.getRecipient(), false).getShareResolveResponse();
-        assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+        assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         /*
          * check if share link to folder A still accessible
          */

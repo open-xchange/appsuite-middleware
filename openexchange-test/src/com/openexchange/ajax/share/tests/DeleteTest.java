@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.List;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
@@ -176,7 +175,7 @@ public class DeleteTest extends ShareTest {
              */
             GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-            assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+            assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         } else {
             /*
              * check if share target no longer accessible for non-anonymous guest user, since session may still be alive
@@ -254,7 +253,7 @@ public class DeleteTest extends ShareTest {
              */
             GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-            assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+            assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         } else {
             /*
              * check share target no longer accessible for non-anonymous guest user
