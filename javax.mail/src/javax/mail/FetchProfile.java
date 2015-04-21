@@ -142,7 +142,7 @@ public class FetchProfile {
 	 */
 	public static final Item FLAGS = new Item("FLAGS");
 
-	private String name;
+	private final String name;
 
 	/**
 	 * Constructor for an item.  The name is used only for debugging.
@@ -152,6 +152,15 @@ public class FetchProfile {
 	protected Item(String name) {
 	    this.name = name;
 	}
+
+    /**
+     * Gets the item's name
+     *
+     * @return The item name
+     */
+    public String name() {
+        return name;
+    }
 
 	/**
 	 * Include the name in the toString return value for debugging.

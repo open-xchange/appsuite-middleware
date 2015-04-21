@@ -1207,6 +1207,27 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	    first = false;
 	}
 
+    // Special fetch items
+    boolean xdovecot = ((IMAPStore) store).getCapabilities().containsKey("XDOVECOT");
+    for (FetchProfile.Item item : fp.getItems()) {
+        if ("ORIGINAL-MAILBOX".equals(item.name())) {
+            if (xdovecot) {
+                command.append(first ? "X-MAILBOX" : " X-MAILBOX");
+                first = false;
+            } else {
+                if (command.indexOf("UID") < 0) {
+                    command.append(first ? "UID" : " UID");
+                    first = false;
+                }
+            }
+        } else if ("ORIGINAL-UID".equals(item.name())) {
+            if (xdovecot) {
+                command.append(first ? "X-REAL-UID" : " X-REAL-UID");
+                first = false;
+            }
+        }
+    }
+
 	// if we're not fetching all headers, fetch individual headers
 	String[] hdrs = null;
 	if (!allHeaders) {
