@@ -1,3 +1,7 @@
+* 2015-04-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37866: Fixed possible null dereference on missing request body
+
 * 2015-04-20 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37754: Always use non-localized directory names in three-way-comparisons
