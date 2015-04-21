@@ -482,12 +482,6 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                             return null;
                         }
 
-                        // Check if required to also plan a rescheduling at remote members
-                        if (remotePlan) {
-                            IExecutorService executor = hzInstance.getExecutorService("default");
-                            executor.submitToMembers(new PortablePlanRescheduleCallable(localMember.getUuid()), otherMembers);
-                        }
-
                         // First, sort by UUID
                         Collections.sort(candidates, new Comparator<Member>() {
 
@@ -496,6 +490,14 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
                                 return m1.getUuid().compareTo(m2.getUuid());
                             }
                         });
+
+                        LOG.info("Going to distribute permanent listeners among cluster nodes: {}", candidates);
+
+                        // Check if required to also plan a rescheduling at remote members
+                        if (remotePlan) {
+                            IExecutorService executor = hzInstance.getExecutorService("default");
+                            executor.submitToMembers(new PortablePlanRescheduleCallable(localMember.getUuid()), otherMembers);
+                        }
 
                         // Determine the position of this cluster node
                         int pos = 0;
@@ -515,6 +517,8 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                         // Apply newly calculated initial permanent listeners
                         pushManagerRegistry.applyInitialListeners(ps);
+
+                        LOG.info("{} now runs permanent listeners for: {}", localMember, ps);
 
                         if (!remotePlan) {
                             // For safety reason, request explicit drop on other nodes for push users started on this node
