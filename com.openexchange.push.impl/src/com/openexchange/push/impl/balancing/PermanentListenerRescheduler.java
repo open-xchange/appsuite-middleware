@@ -50,6 +50,7 @@
 package com.openexchange.push.impl.balancing;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
@@ -401,6 +402,8 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         public Void call() {
             synchronized (monitor) {
                 try {
+                    LOG.info("Rescheduling for the following push users: {}", allPushUsers);
+
                     // Get local member
                     Member localMember = hzInstance.getCluster().getLocalMember();
 
@@ -487,7 +490,12 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
 
                             @Override
                             public int compare(Member m1, Member m2) {
-                                return m1.getUuid().compareTo(m2.getUuid());
+                                return toString(m1).compareTo(toString(m2));
+                            }
+
+                            private String toString(Member m) {
+                                InetSocketAddress addr = m.getSocketAddress();
+                                return new StringBuilder(24).append(addr.getHostString()).append(':').append(addr.getPort()).toString();
                             }
                         });
 
