@@ -718,18 +718,16 @@ public class StatisticTools extends AbstractJMXTools {
                 ObjectName objectName = mbean.getObjectName();
                 MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
                 for (MBeanAttributeInfo attributeInfo : beanInfo.getAttributes()) {
-                    sb.append(objectName);
-                    sb.append(',');
-                    sb.append(attributeInfo.getName());
-                    sb.append(" = ");
-                    try {
-                        sb.append(mbc.getAttribute(objectName, attributeInfo.getName()));
-                    } catch (Exception e) {
-                        sb.append('[');
-                        sb.append(e.getMessage());
-                        sb.append(']');
+                    String name = attributeInfo.getName();
+                    if (null != name && ("config".equals(name) || name.startsWith("local"))) {
+                        sb.append(objectName).append(',').append(name).append(" = ");
+                        try {
+                            sb.append(mbc.getAttribute(objectName, name));
+                        } catch (Exception e) {
+                            sb.append('[').append(e.getMessage()).append(']');
+                        }
+                        sb.append(LINE_SEPARATOR);
                     }
-                    sb.append(LINE_SEPARATOR);
                 }
             }
         }
