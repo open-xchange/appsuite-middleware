@@ -294,7 +294,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         HazelcastInstance hzInstance = hzInstancerRef.get();
         if (null != hzInstance) {
             Cluster cluster = hzInstance.getCluster();
-            reschedule(cluster.getMembers(), hzInstance, true, remotePlan);
+            reschedule(cluster.getMembers(), hzInstance, remotePlan);
         }
     }
 
@@ -304,9 +304,8 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
      * @param allMembers All available cluster members
      * @param hzInstance The associated Hazelcast instance
      * @param remotePlan Whether to plan rescheduling on remote members or not
-     * @param async <code>true</code> for asynchronous execution; otherwise <code>false</code>
      */
-    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, boolean remotePlan, boolean async) {
+    private void reschedule(Set<Member> allMembers, HazelcastInstance hzInstance, boolean remotePlan) {
         if (null == hzInstance) {
             LOG.warn("Aborted rescheduling of permanent listeners as passed HazelcastInstance is null.");
             return;
@@ -325,7 +324,7 @@ public class PermanentListenerRescheduler implements ServiceTrackerCustomizer<Ha
         }
 
         // Acquire optional thread pool
-        ThreadPoolService threadPool = async ? Services.optService(ThreadPoolService.class) : null;
+        ThreadPoolService threadPool = Services.optService(ThreadPoolService.class);
         if (null == threadPool) {
             // Perform with current thread
             ThreadPools.execute(new ReschedulerTask(allMembers, allPushUsers, hzInstance, this, pushManagerRegistry, remotePlan));
