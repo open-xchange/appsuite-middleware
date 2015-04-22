@@ -69,6 +69,8 @@ import javax.mail.internet.MimeMultipart;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.writer.ResponseWriter;
@@ -185,6 +187,26 @@ public class GetMailsResponse extends AbstractAJAXResponse {
             }
             br.close();
             return sb.toString();
+        }
+        
+        public Document getHtml() throws IOException, MessagingException {
+            Object content = mimeMessage.getContent();
+            if (content instanceof MimeMultipart) {
+                MimeMultipart multipart = (MimeMultipart) content;
+                for (int i = 0; i < multipart.getCount(); i++) {
+                    BodyPart bodyPart = multipart.getBodyPart(i);
+                    if (bodyPart.getContentType().startsWith("text/html")) {
+                        String readStream = readStream(bodyPart.getInputStream());
+                        Document document = Jsoup.parse(readStream);
+                        return document;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        public MimeMessage getMimeMessage() {
+            return mimeMessage;
         }
 
     }

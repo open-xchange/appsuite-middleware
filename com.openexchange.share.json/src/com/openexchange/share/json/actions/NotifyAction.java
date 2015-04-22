@@ -66,6 +66,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.TokenParser;
 import com.openexchange.share.notification.LinkProvider;
+import com.openexchange.share.notification.ShareCreationDetails;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -123,15 +124,18 @@ public class NotifyAction extends AbstractShareAction {
             throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
         }
 
-        LinkProvider linkProvider = buildLinkProvider(requestData, shareToken);
+        LinkProvider linkProvider = buildLinkProvider(session, requestData, shareToken);
+        //TODO: This should generate another type of notification once it is actively used.
         ShareCreatedBuilder builder = MailNotifications.shareCreated()
             .setTransportInfo(internetAddress)
             .setLinkProvider(linkProvider)
-            .setContext(guest.getContextID())
+            .setGuestContext(guest.getContextID())
+            .setGuestID(guest.getGuestID())
             .setLocale(guest.getLocale())
             .setSession(session)
             .setTargets(targets)
-            .setMessage(message);
+            .setMessage(message)
+            .setCreationDetails(new ShareCreationDetails("", false));
 
         AuthenticationMode authMode = guest.getAuthentication();
         switch (authMode) {

@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
@@ -147,8 +148,8 @@ public abstract class AbstractShareAction implements AJAXActionService {
     }
 
     // FIXME: hostname service or share service or whatever, but we need a single point to generate those URLs
-    protected LinkProvider buildLinkProvider(AJAXRequestData requestData, String shareToken) {
-        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(requestData), getServletPrefix(), shareToken);
+    protected LinkProvider buildLinkProvider(ServerSession session, AJAXRequestData requestData, String shareToken) {
+        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(session, requestData), getServletPrefix(), shareToken);
     }
 
     protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
@@ -169,7 +170,11 @@ public abstract class AbstractShareAction implements AJAXActionService {
         }
     }
 
-    protected static String determineHostname(AJAXRequestData requestData) {
+    protected String determineHostname(ServerSession session, AJAXRequestData requestData) {
+        HostnameService hostNameService = services.getOptionalService(HostnameService.class);
+        if(hostNameService != null) {
+            return hostNameService.getHostname(session.getUserId(), session.getContextId());
+        }
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
         if (null != servletRequest) {
             return servletRequest.getServerName();

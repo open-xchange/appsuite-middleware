@@ -63,8 +63,9 @@ import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.core.notification.NotificationSender;
 import com.openexchange.share.json.actions.ShareJSONParser;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -89,10 +90,10 @@ public class InviteAction extends AbstractDriveShareAction {
             DriveService driveService = Services.getService(DriveService.class, true);
             Map<ShareRecipient, List<ShareInfo>> createdShares = driveService.createShare(session, recipients, targets);
             /*
-             * Send notifications
+             * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
              */
-            NotificationSender sender = new NotificationSender(Services.get(), determineProtocol(requestData), determineHostname(requestData), getServletPrefix());
-            List<OXException> warnings = sender.sendNotifications(createdShares, message, session.getServerSession());
+            ShareNotificationService shareNotificationService = Services.getService(ShareNotificationService.class);
+            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session.getServerSession(), requestData);
             /*
              * construct & return appropriate json result
              */

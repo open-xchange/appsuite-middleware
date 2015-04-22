@@ -56,6 +56,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
@@ -85,7 +86,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ShareService.class, UserService.class, ContextService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class };
+            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class};
     }
 
     @Override
@@ -95,6 +96,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         trackService(FolderService.class);
         trackService(TranslatorFactory.class);
         trackService(DispatcherPrefixService.class);
+        trackService(HostnameService.class);
         openTrackers();
 
         registerModule(new ShareActionFactory(this), "share/management");

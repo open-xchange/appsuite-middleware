@@ -135,5 +135,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.database.migration"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.drive"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.drive.impl"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.json"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.notification"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

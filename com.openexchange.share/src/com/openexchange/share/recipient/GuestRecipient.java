@@ -62,6 +62,7 @@ public class GuestRecipient extends ShareRecipient {
     private String contactID;
     private String contactFolder;
     private String password;
+    private boolean wasCreated;
 
     public GuestRecipient() {
         super();
@@ -160,6 +161,22 @@ public class GuestRecipient extends ShareRecipient {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * Returns if the {@link GuestRecipient} was freshly created.
+     * 
+     * @return if the {@link GuestRecipient} was freshly created.
+     */
+    public boolean wasCreated() {
+        return wasCreated;
+    }
+    
+    /**
+     * Set if the {@link GuestRecipient} was freshly created.
+     */
+    public void setWasCreated(boolean wasCreated) {
+        this.wasCreated = wasCreated;
     }
 
     @Override

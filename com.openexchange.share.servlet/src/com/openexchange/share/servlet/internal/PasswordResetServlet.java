@@ -160,7 +160,8 @@ public class PasswordResetServlet extends HttpServlet {
                 ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
                     .setTransportInfo(new InternetAddress(mailAddress, true))
                     .setLinkProvider(linkProvider)
-                    .setContext(guestInfo.getContextID())
+                    .setGuestContext(guestInfo.getContextID())
+                    .setGuestContext(guestInfo.getGuestID())
                     .setLocale(guest.getLocale())
                     .setShareToken(token)
                     .setConfirm(hash)
@@ -176,18 +177,7 @@ public class PasswordResetServlet extends HttpServlet {
                 if (confirm.equals(hash)) {
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                    ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-                    LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
-                    mailAddress = guestShare.getGuest().getEmailAddress();
-                    ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
-                        .setTransportInfo(new InternetAddress(mailAddress, true))
-                        .setLinkProvider(linkProvider)
-                        .setContext(guestInfo.getContextID())
-                        .setLocale(guest.getLocale())
-                        .setUsername(guestInfo.getEmailAddress())
-                        .build();
-                    notificationService.send(notification);
-
+                    
                     UserImpl user = new UserImpl();
                     user.setId(guestID);
                     user.setPasswordMech(guest.getPasswordMech());
