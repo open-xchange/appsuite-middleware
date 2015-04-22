@@ -136,7 +136,7 @@ public abstract class AbstractOAuthTest {
     }
 
     public static Credentials getMasterAdminCredentials() {
-        String password = "secret";
+        String password = "netline";
         if (System.getProperty("rmi_test_masterpw") != null){
             password = System.getProperty("rmi_test_masterpw");
         }
