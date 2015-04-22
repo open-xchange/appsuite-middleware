@@ -54,6 +54,7 @@ import static com.openexchange.authentication.LoginExceptionMessages.ACCOUNT_NOT
 import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENIED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.NOT_SUPPORTED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.REDIRECT_MSG;
@@ -97,7 +98,7 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_CREDENTIALS_MISSING_USER_MAPPING("Missing user mapping for user \"%1$s\". Login failed.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
-     * Missing context mapping for context "%1$s". Login failed. 
+     * Missing context mapping for context "%1$s". Login failed.
      */
     INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING("Missing context mapping for context \"%1$s\". Login failed.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
@@ -142,6 +143,10 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      * Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.
      */
     DONT_USER_AGENT("Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.", MESSAGE, Category.CATEGORY_USER_INPUT, 21),
+    /**
+     * You exceeded the maximum count of logins without password.
+     */
+    LOGINS_WITHOUT_PASSWORD_EXCEEDED("You exceeded the maximum count of logins without password.", LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 22)
 
     ;
 

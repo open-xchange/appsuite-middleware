@@ -59,7 +59,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -99,6 +101,11 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         try {
             final String login;
             final String pass;
+            ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+            if (null == configService) {
+                throw ServiceExceptionCode.absentService(ConfigurationService.class);
+            }
+            int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
 
             String body = AJAXServlet.getBody(httpRequest);
             if (Strings.isEmpty(body)) {
@@ -109,7 +116,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
 
                 pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
-                if (Strings.isEmpty(pass)) {
+                if (Strings.isEmpty(pass) && emptyGuestPasswords == 0) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
                 }
             } else {
@@ -144,13 +151,31 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     protected User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException {
         // Resolve the user
         UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
+        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (null == userService) {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
+        if (null == configService) {
+            throw ServiceExceptionCode.absentService(ConfigurationService.class);
+        }
+        int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
         User user = userService.getUser(share.getGuest().getGuestID(), context);
+        Set<String> loginsWithoutPassword = user.getAttributes().get("guestLoginWithoutPassword");
+        int loginCount = 0;
+        if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
+            try {
+                loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
+            } catch (RuntimeException e) {
+                throw LoginExceptionCodes.UNKNOWN.create(e);
+            }
+        }
 
         if (!share.getGuest().isPasswordSet()) {
-            return user;
+            if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
+                userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
+                return user;
+            }
+            throw LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.create();
         }
 
         // Authenticate the user
