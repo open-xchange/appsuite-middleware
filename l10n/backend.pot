@@ -2478,6 +2478,11 @@ msgstr ""
 msgid "The user account is not activated."
 msgstr ""
 
+#. You exceeded the maximum count of logins without password.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:104
+msgid "You exceeded the maximum count of logins without password."
+msgstr ""
+
 #. Too few (%d) login attributes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
 msgid "Too few (%d) login attributes."
