@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Hazelcast
 Bundle-SymbolicName: com.hazelcast
-Bundle-Version: 3.2.4
+Bundle-Version: 3.4.2
 Bundle-Vendor: Hazelcast Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .,
- lib/hazelcast-3.2.4.jar
+ lib/hazelcast-3.4.2.jar
 Import-Package: com.openexchange.config,
  javax.crypto,
  javax.crypto.interfaces,
@@ -33,15 +33,31 @@ Import-Package: com.openexchange.config,
  org.w3c.dom.ranges,
  org.w3c.dom.stylesheets,
  org.w3c.dom.traversal
-Export-Package: com.hazelcast.config,
+Export-Package: com.hazelcast.cache,
+ com.hazelcast.cache.impl,
+ com.hazelcast.cluster,
+ com.hazelcast.cluster.impl,
+ com.hazelcast.collection,
+ com.hazelcast.collection.common,
+ com.hazelcast.collection.list,
+ com.hazelcast.collection.set,
+ com.hazelcast.collection.txn,
+ com.hazelcast.concurrent.atomiclong,
+ com.hazelcast.concurrent.atomicreference,
+ com.hazelcast.concurrent.countdownlatch,
+ com.hazelcast.concurrent.idgen,
+ com.hazelcast.concurrent.lock,
+ com.hazelcast.concurrent.semaphore,
+ com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.instance,
+ com.hazelcast.jmx,
  com.hazelcast.logging,
+ com.hazelcast.management,
  com.hazelcast.map,
- com.hazelcast.multimap,
+ com.hazelcast.mapreduce,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
  com.hazelcast.query,
- com.hazelcast.queue,
  com.hazelcast.transaction,
  com.hazelcast.util

@@ -304,7 +304,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 ExceptionUtils.handleOOM(oom);
             }
         };
-        OutOfMemoryErrorDispatcher.setHandler(handler);
+        OutOfMemoryErrorDispatcher.setServerHandler(handler);
         long hzStart = System.currentTimeMillis();
         HazelcastInstance hazelcast = Hazelcast.newHazelcastInstance(config);
         LOG.info("{}Hazelcast:{}    New hazelcast instance successfully created in {} msec.{}", lf, lf, (System.currentTimeMillis() - hzStart), lf);
