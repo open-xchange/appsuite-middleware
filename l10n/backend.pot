@@ -1615,7 +1615,7 @@ msgstr ""
 #. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:73
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -3243,7 +3243,7 @@ msgstr ""
 #. label of password input field
 #. Username
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:76
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:88
 msgid "Username"
 msgstr ""
 
@@ -7627,68 +7627,255 @@ msgid "No session found for identifier: %1$s"
 msgstr ""
 
 #. [John Doe] shared "[holiday pictures]" with you
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:64
 msgid "%1$s shared \"%2$s\" with you"
 msgstr ""
 
 #. Message from [John Doe]
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:67
 msgid "Message from %1$s"
 msgstr ""
 
 #. Click here to view [holiday pictures]
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:70
 msgid "Click here to view %1$s"
 msgstr ""
 
 #. Please use the following credentials if asked for
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:73
 msgid "Please use the following credentials if asked for"
 msgstr ""
 
 #. Please use your existing credentials if asked for
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:76
 msgid "Please use your existing credentials if asked for"
 msgstr ""
 
 #. Your new credentials are
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:79
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:79
 msgid "Your new credentials are"
 msgstr ""
 
 #. Please use the following password if asked for
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:82
 msgid "Please use the following password if asked for"
 msgstr ""
 
 #. Click here to reset your password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:85
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:85
 msgid "Click here to reset your password"
 msgstr ""
 
 #. John Doe shared 7 items with you
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:94
 msgid "%d items"
 msgstr ""
 
 #. Your password has been reset
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:97
 msgid "Your password has been reset"
 msgstr ""
 
 #. Your password for http://ox.io/share/af12cb769 has been reset.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:100
 msgid "Your password for %1$s has been reset."
 msgstr ""
 
 #. You requested to reset your password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:103
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:103
 msgid "You requested to reset your password"
 msgstr ""
 
 #. Click here to confirm to reset your password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.impl/src/com/openexchange/share/impl/notification/NotificationStrings.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:106
 msgid "Click here to confirm to reset your password"
+msgstr ""
+
+#.
+#. * Invite E-Mails
+#.
+#. * $givenname $surname
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:112
+msgid "%1$s %2$s"
+msgstr ""
+
+#. subject
+#. * Welcome! $user_name invited you to $product_name!
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:118
+msgid "Welcome! %1$s invited you to %2$s!"
+msgstr ""
+
+#. * $username has shared file "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:121
+msgid "%1$s has shared file \"%2$s\" with you."
+msgstr ""
+
+#. * $username has shared $number_of_files files with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:124
+msgid "%1$s has shared %2$s files with you."
+msgstr ""
+
+#. * $username has shared photo "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:127
+msgid "%1$s has shared image \"%2$s\" with you."
+msgstr ""
+
+#. * $username has shared $number_of_photos photos with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:130
+msgid "%1$s has shared %2$s images with you."
+msgstr ""
+
+#. * $username has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:133
+msgid "%1$s has shared item \"%2$s\" with you."
+msgstr ""
+
+#. * $username has shared $number items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:136
+msgid "%1$s has shared %2$s items with you."
+msgstr ""
+
+#. * $username has shared folder "$folder" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:139
+msgid "%1$s has shared folder \"%2$s\" with you."
+msgstr ""
+
+#. * $username has shared $number folders with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:142
+msgid "%1$s has shared %2$ folders with you."
+msgstr ""
+
+#. detailed body
+#. * $username ($user_email) has shared file "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:146
+msgid "%1$s (%2$s) has shared file \"%3$s\" with you."
+msgstr ""
+
+#. * $username ($user_email) has shared $number_of_files files with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:149
+msgid "%1$s (%2$s) has shared %3$s files with you."
+msgstr ""
+
+#. * $username ($user_email) has shared photo "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:152
+msgid "%1$s (%2$s) has shared image \"%3$s\" with you."
+msgstr ""
+
+#. * $username ($user_email) has shared $number_of_photos photos with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:155
+msgid "%1$s (%2$s) has shared %3$s images with you."
+msgstr ""
+
+#. * $username ($user_email) has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:158
+msgid "%1$s (%2$s) has shared item \"%3$s\" with you."
+msgstr ""
+
+#. * $username ($user_email) has shared $number items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:161
+msgid "%1$s (%2$s) has shared %3$s items with you."
+msgstr ""
+
+#. * $username ($user_email) has shared folder $folder with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:164
+msgid "%1$s (%2$s) has shared folder \"%3$s\" with you."
+msgstr ""
+
+#. * $username ($user_email) has shared folder $number folders with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:167
+msgid "%1$s (%2$s) has shared %3$ folders with you."
+msgstr ""
+
+#. * $username ($user_email) has shared file "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
+msgid "%1$s (%2$s) has shared file \"%3$s\" with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared $number_of_files files with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+msgid "%1$s (%2$s) has shared %3$s files with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared photo "$filename" with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:177
+msgid "%1$s (%2$s) has shared image \"%3$s\" with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared $number_of_photos photos with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:180
+msgid "%1$s (%2$s) has shared %3$s images with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared a folder with you and left you a message:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
+msgid "%1$s (%2$s) has shared folder \"%1$s\" with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared item "$filename" with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:186
+msgid "%1$s (%2$s) has shared item \"%3$s\" with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared $number_of_items items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:189
+msgid "%1$s (%2$s) has shared %3$d items with you and left you a message:"
+msgstr ""
+
+#. * $username ($user_email) has shared $number_of_folder items with you.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:192
+msgid "%1$s (%2$s) has shared %3$d folders with you and left you a message:"
+msgstr ""
+
+#. button with label
+#. * View photo
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
+msgid "View photo"
+msgstr ""
+
+#. * View photos
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
+msgid "View photos"
+msgstr ""
+
+#. * View file
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:203
+msgid "View file"
+msgstr ""
+
+#. * View files
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:206
+msgid "View files"
+msgstr ""
+
+#. * View folder
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:209
+msgid "View folder"
+msgstr ""
+
+#. * View folders
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:212
+msgid "View folders"
+msgstr ""
+
+#. * View item
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:215
+msgid "View item"
+msgstr ""
+
+#. * View items
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:218
+msgid "View items"
+msgstr ""
+
+#. expires
+#. * The link will expire at $preformatted_date
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:223
+msgid "The link will expire at %1$s"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/ShareNotifyExceptionMessages.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+msgid "\"%1$s\" is not a valid email address."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:63
@@ -7724,10 +7911,6 @@ msgstr ""
 msgid "The link \"%1$s\" is invalid."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
-msgid "\"%1$s\" is not a valid email address."
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
 msgid ""
 "The share has been modified in the meantime. Please refresh or synchronize "
@@ -7756,6 +7939,18 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:84
 msgid "Module %1$s does not support sharing of folders."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
+msgid "image"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:65
+msgid "file"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:67
+msgid "folder"
 msgstr ""
 
 #. *
