@@ -1,3 +1,7 @@
+* 2015-04-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37808: Perform chunk-wise FETCH in case previous FETCH command was quit with a "NO" error response from IMAP server
+
 * 2015-04-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 37866: Fixed possible null dereference on missing request body
