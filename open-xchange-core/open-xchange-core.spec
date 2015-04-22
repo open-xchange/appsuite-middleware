@@ -1190,7 +1190,7 @@ ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open
 ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
 ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-xchange/etc/subscribe.properties
 
-PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
