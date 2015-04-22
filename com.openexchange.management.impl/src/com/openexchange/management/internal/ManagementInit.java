@@ -106,6 +106,8 @@ public final class ManagementInit implements Initialization {
             if (bindAddress == null) {
                 bindAddress = "localhost";
             }
+            final int timeout = c.getIntProperty("JMXTimeout", 0);
+            agent.setTimeout(timeout);
             final int jmxPort = c.getIntProperty("JMXPort", 9999);
             agent.setJmxPort(jmxPort);
             final int jmxServerPort = c.getIntProperty("JMXServerPort", -1);

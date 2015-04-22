@@ -73,11 +73,14 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
      * ------------- Member stuff ----------------
      */
 
+    private final int timeout;
+
     /**
      * Initializes a new {@link CustomSslRMIClientSocketFactory}.
      */
-    public CustomSslRMIClientSocketFactory() {
+    public CustomSslRMIClientSocketFactory(int timeout) {
         super();
+        this.timeout = timeout <= 0 ? 0 : timeout;
     }
 
     @Override
@@ -120,6 +123,10 @@ public final class CustomSslRMIClientSocketFactory extends SslRMIClientSocketFac
                 throw (IOException) new IOException(e.getMessage()).initCause(e);
             }
         }
+        // Return the preconfigured SSLSocket
+        //
+        sslSocket.setSoTimeout(timeout);
+
         // Return the preconfigured SSLSocket
         //
         return sslSocket;
