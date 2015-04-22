@@ -1,6 +1,8 @@
 * 2015-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 37808: Perform chunk-wise FETCH in case previous FETCH command was quit with a "NO" error response from IMAP server
+ - Fix for bug 37641: Drop possible duplicate entries from "genconf_attributes_strings" and "genconf_attributes_bools" tables prior to defining "uuid" column as PRIMARY KEY
+                      Drop orphaned entries from "user_setting_server" and "user_attribute" tables prior to defining "uuid" column as PRIMARY KEY
 
 * 2015-04-21 - thorben.betten@open-xchange.com
 
