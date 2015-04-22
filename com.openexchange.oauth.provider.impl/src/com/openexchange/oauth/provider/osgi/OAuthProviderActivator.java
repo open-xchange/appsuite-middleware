@@ -229,7 +229,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
-            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class };
+            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
+            TranslatorFactory.class };
     }
 
     @Override

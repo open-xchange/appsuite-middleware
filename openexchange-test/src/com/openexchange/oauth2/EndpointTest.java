@@ -53,8 +53,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
@@ -63,6 +67,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -86,7 +91,7 @@ import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-
+import com.openexchange.oauth2.utils.OAuthTestUtils;
 
 /**
  * {@link EndpointTest}
@@ -207,4 +212,42 @@ public abstract class EndpointTest {
         assertTrue("API access was possible although it should not", error);
     }
 
+    protected URIBuilder prepareAuthenticationRequest(String redirectLocation) throws URISyntaxException {
+        return prepareAuthenticationRequest(redirectLocation, false, null);
+    }
+
+    protected URIBuilder prepareAuthenticationRequest(String redirectLocation, boolean omitParam, String param) throws URISyntaxException {
+        Map<String, String> redirectParams = OAuthTestUtils.extractRedirectParamsFromFragment(redirectLocation);
+        redirectParams.put("user_login", login);
+        redirectParams.put("user_password", password);
+        redirectParams.put("access_denied", "false");
+
+        URIBuilder uriBuilder = new URIBuilder().setScheme("https").setHost(hostname).setPath("/ajax/o/oauth2/authorization");
+
+        for (Entry<String, String> entry : redirectParams.entrySet()) {
+            if (entry.getKey().equals(param)) {
+                if (!omitParam) {
+                    uriBuilder.addParameter(entry.getKey(), "invalid");
+                }
+            } else {
+                uriBuilder.addParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        return uriBuilder;
+    }
+
+    protected URI prepareAuthorizationRequest(String csrfState) throws URISyntaxException {
+        URIBuilder getLoginFormBuilder = new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath("/ajax/o/oauth2/authorization")
+            .setParameter("response_type", "code")
+            .setParameter("client_id", getClientId())
+            .setParameter("redirect_uri", getRedirectURI())
+            .setParameter("state", csrfState);
+        if (getScopes() != null) {
+            getLoginFormBuilder.setParameter("scope", new DefaultScopes(getScopes()).scopeString());
+        }
+        return getLoginFormBuilder.build();
+    }
 }
