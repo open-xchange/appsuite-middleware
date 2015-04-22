@@ -79,6 +79,8 @@ import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
 import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallableFactory;
+import com.openexchange.push.impl.balancing.PortableDropPermanentListenerCallableFactory;
+import com.openexchange.push.impl.balancing.PortablePlanRescheduleCallableFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -86,6 +88,7 @@ import com.openexchange.push.impl.mbean.PushMBeanImpl;
 import com.openexchange.push.mbean.PushMBean;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link PushImplActivator} - The activator for push implementation bundle.
@@ -93,6 +96,8 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PushImplActivator extends HousekeepingActivator  {
+
+    private volatile PermanentListenerRescheduler rescheduler;
 
     /**
      * Initializes a new {@link PushImplActivator}.
@@ -103,7 +108,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class };
     }
 
     @Override
@@ -171,12 +176,17 @@ public final class PushImplActivator extends HousekeepingActivator  {
             if (pushManagerRegistry.isPermanentPushAllowed()) {
                 // Register portable
                 registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
+                registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
+                registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
 
                 // Track HazelcastInstance
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
                 if (hazelcastConfig.isEnabled()) {
                     // Track HazelcastInstance service
-                    track(HazelcastInstance.class, new PermanentListenerRescheduler(pushManagerRegistry, context));
+                    PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, context);
+                    this.rescheduler = rescheduler;
+                    pushManagerRegistry.setRescheduler(rescheduler);
+                    track(HazelcastInstance.class, rescheduler);
                 } else {
                     pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());
                 }
@@ -205,6 +215,13 @@ public final class PushImplActivator extends HousekeepingActivator  {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushImplActivator.class);
         try {
             log.info("stopping bundle: com.openexchange.push.impl");
+
+            PermanentListenerRescheduler rescheduler = this.rescheduler;
+            if (null != rescheduler) {
+                rescheduler.stop();
+                this.rescheduler = null;
+            }
+
             Services.setServiceLookup(null);
             removeService(CredentialStorageProvider.class);
             super.stopBundle();

@@ -170,7 +170,16 @@ public final class IMAPCapabilityAndGreetingCache {
         return getCapabilityAndGreeting(address, isSecure, imapProperties).getCapability();
     }
 
-    private static CapabilityAndGreeting getCapabilityAndGreeting(String address, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
+    /**
+     * Gets the cached capabilities & greeting from IMAP server denoted by specified parameters.
+     *
+     * @param address The IMAP server's address
+     * @param isSecure Whether to establish a secure connection
+     * @param imapProperties The IMAP properties
+     * @return The capabilities & greeting
+     * @throws IOException If an I/O error occurs
+     */
+    public static CapabilityAndGreeting getCapabilityAndGreeting(String address, boolean isSecure, IIMAPProperties imapProperties) throws IOException {
         int idleTime = capabiltiesCacheIdleTime();
         if (idleTime < 0) {
             // Never cache
@@ -417,7 +426,10 @@ public final class IMAPCapabilityAndGreetingCache {
         return new InetSocketAddress(serverUrl.substring(0, pos).trim(), port);
     }
 
-    private static final class CapabilityAndGreeting {
+    /**
+     * The capabilities & greeting information for an IMAP server (URL).
+     */
+    public static final class CapabilityAndGreeting {
 
         private static final Pattern SPLIT = Pattern.compile(" +");
 
@@ -446,11 +458,21 @@ public final class IMAPCapabilityAndGreetingCache {
             return stamp;
         }
 
-        Map<String, String> getCapability() {
+        /**
+         * Gets the capabilities
+         *
+         * @return The capabilities
+         */
+        public Map<String, String> getCapability() {
             return capabilities;
         }
 
-        String getGreeting() {
+        /**
+         * Gets the greeting
+         *
+         * @return The greeting
+         */
+        public String getGreeting() {
             return greeting;
         }
 
@@ -468,13 +490,10 @@ public final class IMAPCapabilityAndGreetingCache {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
+            if (!(obj instanceof CapabilityAndGreeting)) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
-                return false;
-            }
-            final CapabilityAndGreeting other = (CapabilityAndGreeting) obj;
+            CapabilityAndGreeting other = (CapabilityAndGreeting) obj;
             if (capabilities == null) {
                 if (other.capabilities != null) {
                     return false;
@@ -491,7 +510,6 @@ public final class IMAPCapabilityAndGreetingCache {
             }
             return true;
         }
-
     }
 
 }

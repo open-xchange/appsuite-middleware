@@ -51,6 +51,7 @@ package com.openexchange.file.storage.composition.internal;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -156,6 +157,11 @@ public class IDManglingFolder implements TypeAware {
     @Override
     public String getName() {
         return delegate.getName();
+    }
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return delegate.getLocalizedName(locale);
     }
 
     @Override

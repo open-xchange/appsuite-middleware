@@ -90,7 +90,6 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.StoreClosedException;
-import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
@@ -808,10 +807,10 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final MailMessageFetchIMAPCommand command;
         if (array instanceof long[]) {
             command =
-                new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+                new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (long[]) array, fetchProfile, imapServerInfo).setDetermineAttachmentByHeader(byContentType);
         } else {
             command =
-                new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile).setDetermineAttachmentByHeader(byContentType);
+                new MailMessageFetchIMAPCommand(imapFolder, getSeparator(imapFolder), isRev1, (int[]) array, fetchProfile, imapServerInfo).setDetermineAttachmentByHeader(byContentType);
         }
         final long start = System.currentTimeMillis();
         final MailMessage[] tmp = command.doCommand();
@@ -1541,15 +1540,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             MailMessage[] mailMessages;
             if (fetchBody) {
-                FetchProfile fetchProfile = new FetchProfile();
-                fetchProfile.add(FetchProfile.Item.ENVELOPE);
-                fetchProfile.add(UIDFolder.FetchProfileItem.UID);
-                if (null != headerNames && headerNames.length > 0) {
-                    for (String headerName : headerNames) {
-                        fetchProfile.add(headerName);
-                    }
-                }
-
+                FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch());
                 List<MailMessage> list = fetchMessages(msgIds, fetchProfile);
                 mailMessages = list.toArray(new MailMessage[list.size()]);
             } else {
@@ -1558,18 +1549,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  */
                 boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
                 FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, getIMAPProperties().isFastFetch());
-                MailMessageFetchIMAPCommand command = new MailMessageFetchIMAPCommand(
-                    imapFolder,
-                    getSeparator(imapFolder),
-                    isRev1,
-                    msgIds,
-                    fetchProfile);
-
-                long start = System.currentTimeMillis();
-                MailMessage[] tmp = command.doCommand();
-                long time = System.currentTimeMillis() - start;
-                mailInterfaceMonitor.addUseTime(time);
-
+                MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, isRev1, getSeparator(imapFolder));
                 mailMessages = setAccountInfo(tmp);
             }
 
@@ -1605,11 +1585,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private MailMessage[] fetchSortAndSlice(int[] msgIds, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames, int messageCount) throws OXException, MessagingException {
         boolean fastFetch = getIMAPProperties().isFastFetch();
+        boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
+        char separator = getSeparator(imapFolder);
 
         if (null != indexRange) {
-            boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
-            char separator = getSeparator(imapFolder);
-
+            // Grab messages only with ID and sort field information
             List<MailMessage> list;
             {
                 int[] seqnums;
@@ -1623,7 +1603,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
 
                 FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
-                MailMessage[] mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, seqnums, fp).doCommand();
+                MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1, separator);
 
                 list = new ArrayList<MailMessage>(mailMessages.length);
                 for (MailMessage mailMessage : mailMessages) {
@@ -1643,36 +1623,166 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             // Apply index range
             list = applyIndexRange(list, indexRange);
 
-            // Fetch with proper attributes by UID
+            // Determine UIDs
             long[] uids = new long[list.size()];
             int i = 0;
             for (MailMessage mailMessage : list) {
                 uids[i++] = ((IDMailMessage) mailMessage).getUid();
             }
+
+            // Fetch with proper attributes by UID
             FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
-            MailMessage[] mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, uids, fetchProfile).doCommand();
+            MailMessage[] mailMessages;
+            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+            if (fetchBody) {
+                List<MailMessage> tmp = fetchMessages(uids, fetchProfile);
+                mailMessages = tmp.toArray(new MailMessage[tmp.size()]);
+            } else {
+                mailMessages = fetchMessages(uids, fetchProfile, hasIMAP4rev1, separator);
+            }
             setAccountInfo(mailMessages);
             return mailMessages;
         }
 
-        /*
-         * Fetch
-         */
-        List<MailMessage> list = fetchMessages(msgIds, getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch));
+        // Fetch
+        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+        List<MailMessage> list;
+        boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+        if (fetchBody) {
+            list = fetchMessages(msgIds, fetchProfile);
+        } else {
+            MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
+            list = new ArrayList<MailMessage>(tmp.length);
+            for (MailMessage mailMessage : tmp) {
+                if (null != mailMessage) {
+                    list.add(mailMessage);
+                }
+            }
+        }
+
         if (list.isEmpty()) {
             return EMPTY_RETVAL;
         }
 
-        /*
-         * Sort
-         */
+        // Sort
         Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
 
-        /*
-         * Return
-         */
+        // Return
         MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
         return mailMessages.length > 0 ? mailMessages : EMPTY_RETVAL;
+    }
+
+    private MailMessage[] fetchMessages(long[] uids, FetchProfile fetchProfile, boolean hasIMAP4rev1, char separator) throws MessagingException {
+        try {
+            long start = System.currentTimeMillis();
+            MailMessage[] mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, uids, fetchProfile, imapServerInfo).doCommand();
+            long time = System.currentTimeMillis() - start;
+            mailInterfaceMonitor.addUseTime(time);
+            LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(uids.length), Long.valueOf(time));
+            return mailMessages;
+        } catch (MessagingException e) {
+            if (!MimeMailException.isCommandFailedException(e)) {
+                throw e;
+            }
+
+            // Chunk-wise
+            List<MailMessage> l = new LinkedList<MailMessage>();
+            int length = uids.length;
+            int chunkSize = 25;
+
+            int off = 0;
+            while (off < length) {
+                int end = off + chunkSize;
+                long[] muids;
+
+                if (end > length) {
+                    end = length;
+                    muids = new long[end - off];
+                } else {
+                    muids = new long[chunkSize];
+                }
+
+                System.arraycopy(uids, off, muids, 0, muids.length);
+
+                long start = System.currentTimeMillis();
+                MailMessage[] mms = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, muids, fetchProfile, imapServerInfo).doCommand();
+                long time = System.currentTimeMillis() - start;
+                mailInterfaceMonitor.addUseTime(time);
+                LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(muids.length), Long.valueOf(time));
+
+                for (MailMessage mail : mms) {
+                    l.add(mail);
+                }
+
+                off = end;
+            }
+
+            return l.toArray(new MailMessage[l.size()]);
+        }
+    }
+
+    private MailMessage[] fetchMessages(int[] seqnums, FetchProfile fetchProfile, boolean hasIMAP4rev1, char separator) throws MessagingException {
+        try {
+            long start = System.currentTimeMillis();
+            MailMessage[] mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, seqnums, fetchProfile, imapServerInfo).doCommand();
+            long time = System.currentTimeMillis() - start;
+            mailInterfaceMonitor.addUseTime(time);
+            LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(seqnums.length), Long.valueOf(time));
+            return mailMessages;
+        } catch (MessagingException e) {
+            if (!MimeMailException.isCommandFailedException(e)) {
+                throw e;
+            }
+
+            // Chunk-wise
+            List<MailMessage> l = new LinkedList<MailMessage>();
+            int length = seqnums.length;
+            int chunkSize = 25;
+
+            int off = 0;
+            while (off < length) {
+                int end = off + chunkSize;
+                int[] mseqnums;
+
+                if (end > length) {
+                    end = length;
+                    mseqnums = new int[end - off];
+                } else {
+                    mseqnums = new int[chunkSize];
+                }
+
+                System.arraycopy(seqnums, off, mseqnums, 0, mseqnums.length);
+
+                long start = System.currentTimeMillis();
+                MailMessage[] mms = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, mseqnums, fetchProfile, imapServerInfo).doCommand();
+                long time = System.currentTimeMillis() - start;
+                mailInterfaceMonitor.addUseTime(time);
+                LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(mseqnums.length), Long.valueOf(time));
+
+                for (MailMessage mail : mms) {
+                    l.add(mail);
+                }
+
+                off = end;
+            }
+
+            return l.toArray(new MailMessage[l.size()]);
+        }
+    }
+
+    /**
+     * Pre-fetches a set of messages based on the given {@link FetchProfile} and
+     * converts them to {@link MailMessage}s which are backed by their original {@link Message}
+     * objects.
+     *
+     * @param uids The UIDs to fetch or <code>null</code> to fetch all mails
+     * @param fetchProfile
+     * @return
+     * @throws MessagingException
+     * @throws OXException
+     */
+    private List<MailMessage> fetchMessages(long[] uids, FetchProfile fetchProfile) throws MessagingException, OXException {
+        return fetchMessages(uids == null ? imapFolder.getMessages() : imapFolder.getMessagesByUID(uids), fetchProfile);
     }
 
     /**
@@ -1687,14 +1797,57 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @throws OXException
      */
     private List<MailMessage> fetchMessages(int[] msgIds, FetchProfile fetchProfile) throws MessagingException, OXException {
-        Message[] msgs = msgIds == null ? imapFolder.getMessages() : imapFolder.getMessages(msgIds);
+        return fetchMessages(msgIds == null ? imapFolder.getMessages() : imapFolder.getMessages(msgIds), fetchProfile);
+    }
 
-        {
+    private List<MailMessage> fetchMessages(Message[] messages, FetchProfile fetchProfile) throws MessagingException, OXException {
+        Message[] msgs = messages;
+        try {
             long start = System.currentTimeMillis();
             imapFolder.fetch(msgs, fetchProfile);
             long time = System.currentTimeMillis() - start;
             mailInterfaceMonitor.addUseTime(time);
             LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(msgs.length), Long.valueOf(time));
+        } catch (MessagingException e) {
+            if (!MimeMailException.isCommandFailedException(e)) {
+                throw e;
+            }
+
+            // Chunk-wise
+            List<Message> l = new LinkedList<Message>();
+            int length = msgs.length;
+            int chunkSize = 25;
+
+            int off = 0;
+            while (off < length) {
+                int end = off + chunkSize;
+                Message[] mmsg;
+
+                if (end > length) {
+                    end = length;
+                    mmsg = new Message[end - off];
+                } else {
+                    mmsg = new Message[chunkSize];
+                }
+
+                System.arraycopy(msgs, off, mmsg, 0, mmsg.length);
+
+                long start = System.currentTimeMillis();
+                imapFolder.fetch(mmsg, fetchProfile);
+                long time = System.currentTimeMillis() - start;
+                mailInterfaceMonitor.addUseTime(time);
+                LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(mmsg.length), Long.valueOf(time));
+
+                for (Message m : mmsg) {
+                    if (null != m) {
+                        l.add(m);
+                    }
+                }
+
+                off = end;
+            }
+
+            msgs = l.toArray(new Message[l.size()]);
         }
 
         if (msgs.length == 0) {
@@ -1960,13 +2113,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         {
             // Retrieve from actual folder
             FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
-            conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fp, byEnvelope);
+            conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
             // Retrieve from sent folder
             if (mergeWithSent) {
                 // Switch folder
                 openReadOnly(sentFullName);
                 // Get sent messages
-                List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, byEnvelope);
+                List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
                 if (false == sentMessages.isEmpty()) {
                     // Filter messages already contained in conversations
                     {
@@ -2048,11 +2201,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                 }
             }
-            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapFolder).doCommand();
+            new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
             if (!sentmsgs.isEmpty()) {
                 // Switch folder
                 openReadOnly(sentFullName);
-                new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapFolder).doCommand();
+                new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
             }
         } else {
             if (body) {
@@ -2070,7 +2223,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 for (List<MailMessage> conversation : list) {
                     msgs.addAll(conversation);
                 }
-                new MailMessageFillerIMAPCommand(msgs, isRev1, getFetchProfile(usedFields.toArray(), true), imapFolder).doCommand();
+                new MailMessageFillerIMAPCommand(msgs, isRev1, getFetchProfile(usedFields.toArray(), true), imapServerInfo, imapFolder).doCommand();
             }
         }
         /*
@@ -2098,12 +2251,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         List<List<MailMessage>> list;
         if (mergeWithSent) {
             FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
-            List<Conversation> conversations = ThreadSorts.getConversationList(imapFolder, getSortRange(lookAhead, messageCount, order), isRev1, fp);
+            List<Conversation> conversations = ThreadSorts.getConversationList(imapFolder, getSortRange(lookAhead, messageCount, order), isRev1, fp, imapServerInfo);
             // Merge with sent folder
             {
                 // Switch folder
                 openReadOnly(sentFullName);
-                final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, byEnvelope);
+                final List<MailMessage> sentMessages = Conversations.messagesFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
                 for (final Conversation conversation : conversations) {
                     for (final MailMessage sentMessage : sentMessages) {
                         if (conversation.referencesOrIsReferencedBy(sentMessage)) {
@@ -2156,15 +2309,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         }
                     }
                 }
-                new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapFolder).doCommand();
+                new MailMessageFillerIMAPCommand(msgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
                 if (!sentmsgs.isEmpty()) {
                     // Switch folder
                     openReadOnly(sentFullName);
-                    new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapFolder).doCommand();
+                    new MailMessageFillerIMAPCommand(sentmsgs, isRev1, fetchProfile, imapServerInfo, imapFolder).doCommand();
                 }
             }
         } else {
-            list = ThreadSorts.getConversations(imapFolder, getSortRange(lookAhead, messageCount, order), isRev1, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            list = ThreadSorts.getConversations(imapFolder, getSortRange(lookAhead, messageCount, order), isRev1, imapServerInfo, null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             // Sort root elements
             {
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
@@ -2207,7 +2360,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 for (List<MailMessage> conversation : list) {
                     msgs.addAll(conversation);
                 }
-                new MailMessageFillerIMAPCommand(msgs, isRev1, getFetchProfile(usedFields.toArray(), true), imapFolder).doCommand();
+                new MailMessageFillerIMAPCommand(msgs, isRev1, getFetchProfile(usedFields.toArray(), true), imapServerInfo, imapFolder).doCommand();
             }
         }
         // Apply account identifier
@@ -2341,13 +2494,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             if (!body) {
                 final Map<MessageInfo, MailMessage> mapping;
                 {
-                    final TLongObjectMap<MailMessage> messages =
-                        new SimpleFetchIMAPCommand(
-                            imapFolder,
-                            getSeparator(imapFolder),
-                            imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                            MessageInfo.toSeqNums(messageIds).toArray(),
-                            fetchProfile).doCommand();
+                    TLongObjectMap<MailMessage> messages = new SimpleFetchIMAPCommand(imapFolder, getSeparator(imapFolder), imapConfig.getImapCapabilities().hasIMAP4rev1(), MessageInfo.toSeqNums(messageIds).toArray(), fetchProfile, imapServerInfo).doCommand();
                     mapping = new HashMap<MessageInfo, MailMessage>(messages.size());
                     messages.forEachEntry(new TLongObjectProcedure<MailMessage>() {
 
@@ -2378,15 +2525,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             /*
              * Include body
              */
-            Message[] msgs =
-                new MessageFetchIMAPCommand(
-                    imapFolder,
-                    imapConfig.getImapCapabilities().hasIMAP4rev1(),
-                    MessageInfo.toSeqNums(messageIds),
-                    fetchProfile,
-                    false,
-                    true,
-                    body).doCommand();
+            Message[] msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), MessageInfo.toSeqNums(messageIds), fetchProfile, imapServerInfo, false, true, body).doCommand();
             /*
              * Apply thread level
              */
@@ -2463,8 +2602,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Get ( & fetch) new messages
                  */
-                final Message[] msgs =
-                    IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit);
+                Message[] msgs = IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit, imapServerInfo);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;
                 }

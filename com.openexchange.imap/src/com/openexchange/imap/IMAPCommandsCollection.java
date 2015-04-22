@@ -2026,11 +2026,12 @@ public final class IMAPCommandsCollection {
      * @param sortField The sort-by field
      * @param fastFetch Whether to perform a fast <code>FETCH</code> or not
      * @param limit The limit
+     * @param serverInfo The IMAP server information
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit) throws MessagingException {
-        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false);
+    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, IMAPServerInfo serverInfo) throws MessagingException {
+        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, serverInfo);
     }
 
     /**
@@ -2041,10 +2042,12 @@ public final class IMAPCommandsCollection {
      * @param sortField The sort-by field
      * @param fastFetch Whether to perform a fast <code>FETCH</code> or not
      * @param limit The limit
+     * @param ignoreDeleted Whether to ignore deleted messages
+     * @param serverInfo The IMAP server information
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final IMAPServerInfo serverInfo) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -2117,7 +2120,7 @@ public final class IMAPCommandsCollection {
                     final boolean body = set.contains(MailField.BODY) || set.contains(MailField.FULL);
                     final MailField sort = MailField.toField((sortField == null ? MailSortField.RECEIVED_DATE : sortField).getListField());
                     final FetchProfile fp = null == sort ? getFetchProfile(fields, fastFetch) : getFetchProfile(fields, sort, fastFetch);
-                    newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, false, false, body).doCommand();
+                    newMsgs = new MessageFetchIMAPCommand(folder, p.isREV1(), newMsgSeqNums, fp, serverInfo, false, false, body).doCommand();
                 } catch (final MessagingException e) {
                     throw wrapException(e, null);
                 }

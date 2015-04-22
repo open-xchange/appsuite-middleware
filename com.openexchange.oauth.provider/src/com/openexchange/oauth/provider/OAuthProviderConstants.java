@@ -126,6 +126,9 @@ public interface OAuthProviderConstants {
     /** Required. The CSRF token */
     public static final String PARAM_CSRF_TOKEN = "csrf_token";
 
+    /** Optional. The language */
+    public static final String PARAM_LANGUAGE = "language";
+
     /** The error */
     public static final String PARAM_ERROR = "error";
 

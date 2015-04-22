@@ -499,7 +499,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             updatedFolder.setParentID(folder.getParentID());
             updatedFolder.setMeta(meta);
             try {
-                factory.getFolderService().updateFolder(updatedFolder, folder.getLastModified(), factory.getSession(), null);
+                factory.getFolderService().updateFolder(updatedFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
             } catch (OXException e) {
                 throw protocolException(e);
             }

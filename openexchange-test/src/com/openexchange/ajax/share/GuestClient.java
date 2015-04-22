@@ -231,9 +231,6 @@ public class GuestClient extends AJAXClient {
         super(ajaxSession, mustLogout);
         prepareClient(getHttpClient(), username, password);
         this.client = client;
-        // DEBUG OUTPUT
-        System.out.println("Debug output for failing GuestAutologinTest");
-        System.out.println("Tried to access " + url);
         shareResponse = Executor.execute(this, new ResolveShareRequest(url, failOnNonRedirect));
         if (null != shareResponse.getLoginType()) {
             loginResponse = login(shareResponse, password, client);

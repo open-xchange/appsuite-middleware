@@ -53,7 +53,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.UUID;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
@@ -105,6 +108,85 @@ public class GenconfAttributesBoolsAddPrimaryKey extends UpdateTaskAdapter {
     @Override
     public String[] getDependencies() {
         return new String[] { GenconfAttributesBoolsAddUuidUpdateTask.class.getName() };
+    }
+
+    private void dropDuplicates(final Connection con) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, id, HEX(uuid) FROM genconf_attributes_bools GROUP BY cid, id, uuid HAVING count(*) > 1");
+            rs = stmt.executeQuery();
+            if (!rs.next()) {
+                return;
+            }
+
+            class Dup {
+                final UUID uuid;
+                final int cid;
+                final int id;
+
+                Dup(int cid, int id, UUID uuid) {
+                    super();
+                    this.cid = cid;
+                    this.id = id;
+                    this.uuid = uuid;
+                }
+            }
+
+            List<Dup> dups = new LinkedList<Dup>();
+            do {
+                dups.add(new Dup(rs.getInt(1), rs.getInt(2), UUIDs.fromUnformattedString(rs.getString(3))));
+            } while (rs.next());
+
+            Databases.closeSQLStuff(rs, stmt);
+            rs = null;
+            stmt = null;
+
+            for (final Dup dup : dups) {
+                stmt = con.prepareStatement("SELECT cid, id, name, value, widget FROM genconf_attributes_bools WHERE cid=? AND id=? AND ?=HEX(uuid)");
+                stmt.setInt(1, dup.cid);
+                stmt.setInt(2, dup.id);
+                stmt.setString(3, UUIDs.getUnformattedString(dup.uuid));
+                rs = stmt.executeQuery();
+
+                if (rs.next()) {
+                    int cid = rs.getInt(1);
+                    int id = rs.getInt(2);
+                    String name = rs.getString(3);
+                    int value = rs.getInt(4);
+                    String widget = rs.getString(5);
+
+                    Databases.closeSQLStuff(rs, stmt);
+                    rs = null;
+                    stmt = null;
+
+                    stmt = con.prepareStatement("DELETE FROM genconf_attributes_bools WHERE cid=? AND id=? AND ?=HEX(uuid)");
+                    stmt.setInt(1, dup.cid);
+                    stmt.setInt(2, dup.id);
+                    stmt.setString(3, UUIDs.getUnformattedString(dup.uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+
+                    stmt = con.prepareStatement("INSERT INTO genconf_attributes_bools (cid,id,name,value,widget,uuid) VALUES (?,?,?,?,?,UNHEX(?))");
+                    stmt.setInt(1, cid);
+                    stmt.setInt(2, id);
+                    stmt.setString(3, name);
+                    stmt.setInt(4, value);
+                    stmt.setString(5, widget);
+                    stmt.setString(6, UUIDs.getUnformattedString(dup.uuid));
+                    stmt.executeUpdate();
+                    Databases.closeSQLStuff(stmt);
+                    stmt = null;
+                }
+
+                Databases.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
+            }
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
     }
 
     private void setUUID(Connection con) throws SQLException {

@@ -536,7 +536,25 @@ public final class LoginPerformer {
                 handler.handleLogout(login);
             }
         } catch (final OXException e) {
-            e.log(LOG);
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
         } catch (final RuntimeException e) {
             LOG.error(e.getMessage(), e);
         }

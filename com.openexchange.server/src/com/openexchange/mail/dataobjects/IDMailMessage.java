@@ -64,6 +64,7 @@ public final class IDMailMessage extends MailMessage {
     private static final long serialVersionUID = -8945006270321242506L;
 
     private long uid;
+    private long originalUid;
     private String mailId;
     private char separator;
     private int seqnum;
@@ -146,6 +147,27 @@ public final class IDMailMessage extends MailMessage {
         this.uid = uid;
         if (uid > 0) {
             mailId = Long.toString(uid);
+        }
+    }
+
+    /**
+     * Gets the original UID
+     *
+     * @return The original UID or <code>-1</code> if absent
+     */
+    public long getOriginalUid() {
+        return originalUid;
+    }
+
+    /**
+     * Sets the original UID
+     *
+     * @param originalUid The original UID to set or <code>-1</code> to indicate absence
+     */
+    public void setOriginalUid(final long originalUid) {
+        this.originalUid = originalUid;
+        if (originalUid > 0) {
+            setOriginalId(Long.toString(originalUid));
         }
     }
 

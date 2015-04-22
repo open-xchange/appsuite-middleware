@@ -51,6 +51,7 @@ package com.openexchange.ajax.infostore.actions;
 
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.json.JSONException;
@@ -129,6 +130,11 @@ public class GetDocumentRequest extends AbstractInfostoreRequest<GetDocumentResp
         @Override
         protected Response getResponse(String body) throws JSONException {
             throw new JSONException("Method not supported when parsing redirect responses.");
+        }
+
+        @Override
+        public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+            return checkResponse(resp);
         }
 
         @Override

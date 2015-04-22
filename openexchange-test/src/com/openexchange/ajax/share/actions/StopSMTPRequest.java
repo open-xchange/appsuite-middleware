@@ -91,7 +91,7 @@ public class StopSMTPRequest implements AJAXRequest<ShareTestResponse> {
 
     @Override
     public String getServletPath() {
-        return "/ajax/share/test";
+        return "/ajax/smtpserver/test";
     }
 
     @Override

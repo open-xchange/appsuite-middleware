@@ -4,6 +4,12 @@ open-xchange-publish (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:10 +0100
 
+open-xchange-publish (7.6.2-14) stable; urgency=medium
+
+  * Build for patch 2015-04-13 (2474)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 08 Apr 2015 15:35:48 +0200
+
 open-xchange-publish (7.6.2-13) stable; urgency=medium
 
   * Build for patch 2013-04-09 (2486)
@@ -87,6 +93,12 @@ open-xchange-publish (7.6.2-0) unstable; urgency=medium
   * prepare for 7.6.2 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:36:27 +0200
+
+open-xchange-publish (7.6.1-26) stable; urgency=medium
+
+  * Build for patch 2015-04-13 (2473)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 14 Apr 2015 18:44:07 +0200
 
 open-xchange-publish (7.6.1-25) stable; urgency=medium
 

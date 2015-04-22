@@ -243,7 +243,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
 
             int[] fromToIndices;
             {
-                final String s = req.getParameter("limit");
+                String s = req.getParameter("limit");
                 if (null == s) {
                     final int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
                     final int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
@@ -313,6 +313,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                     columns[tmp.length] = fieldFlags;
                 }
             }
+            columns = prepareColumns(columns);
             /*
              * Get mail interface
              */
@@ -332,7 +333,7 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
             long start = System.currentTimeMillis();
             int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
             if (!filterApplied) {
-                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId,includeSent,cache,sortCol,orderDir,columns,fromToIndices, lookAhead);
+                List<List<MailMessage>> mails = mailInterface.getAllSimpleThreadStructuredMessages(folderId, includeSent, cache, sortCol, orderDir, columns, fromToIndices, lookAhead);
 
                 if (null != headers && headers.length > 0) {
                     enrichWithHeaders(mails, headers, mailInterface.getMailAccess().getMessageStorage());

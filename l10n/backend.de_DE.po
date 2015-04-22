@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-03-26 13:50+0100\n"
+"PO-Revision-Date: 2015-04-15 14:53+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1661,6 +1661,14 @@ msgstr ""
 "Konflikt für den Pfad  \"%1$s\". Es gibt bereits eine gleichnamige Datei "
 "unter \"%2$s\"."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:91
+msgid ""
+"The directory \"%1$s\" is not synchronizable. Please select another "
+"directory."
+msgstr ""
+"Das Verzeichnis \"%1$s\" kann nicht synchronisiert werden. Bitte wählen Sie "
+"ein anderes Verzeichnis."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1872,6 +1880,39 @@ msgstr "Die Datei %1$s hat keinen Inhalt."
 msgid "The associated %2$s account does no more exist"
 msgstr "Der zugehörige %2$s-Account ist nicht mehr vorhanden."
 
+#. Individual permissions are not supported in account \"%1$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:146
+msgid "Individual permissions are not supported in account \"%1$s\"."
+msgstr ""
+"Für den Account \"%1$s\" werden keine individuellen Benutzerberechtigungen "
+"unterstützt."
+
+#. Saving notes for file \"%1$s\" is not supported in account \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:149
+#, fuzzy
+msgid "Saving notes for file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
+"Das Speichern von Anmerkungen zur Datei \"%1$s\" wird für den Account \"%2$s"
+"\" nicht unterstützt."
+
+#. Assigning categories to file \"%1$s\" is not supported in account \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:152
+#, fuzzy
+msgid ""
+"Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
+msgstr ""
+"Das Zuweisen von Kategorien für die Datei \"%1$s\" wird für den Account "
+"\"%2$s\" nicht unterstützt."
+
+#. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:155
+msgid ""
+"The file \"%1$s\" was not saved due to possible data loss. Please review the "
+"warnings for details."
+msgstr ""
+"Die Datei \"%1$s\" wurde aufgrund möglicher Datenverluste nicht gespeichert. "
+"Bitte lesen Sie die Warnhinweise für weitere Informationen."
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -2063,7 +2104,6 @@ msgstr ""
 
 #. The service you requested is currently not available. Please try again later.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/FindExceptionMessages.java:66
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:73
 msgid ""
 "The service you requested is currently not available. Please try again later."
 msgstr ""
@@ -3238,19 +3278,6 @@ msgstr ""
 "Die Zeichenkodierung \"%1$s\" wird nicht unterstützt. Bitte wählen Sie eine "
 "andere."
 
-#. You do not have the appropriate permissions to search within this module.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.index/src/com/openexchange/index/IndexExceptionMessages.java:70
-msgid ""
-"You do not have the appropriate permissions to search within this module."
-msgstr ""
-"Sie haben nicht die entsprechenden Berechtigungen zum Suchen innerhalb "
-"dieses Moduls."
-
-#. There is no search handler for field %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.indexedSearch.json/src/com/openexchange/indexedSearch/json/IndexedSearchExceptionMessages.java:62
-msgid "There is no search handler for field %1$s."
-msgstr "Fehlender SearchHandler für das Feld %1$s."
-
 #. Referenced JSlob %1$s must not be set for service %2$s. Nothing will be done.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.jslob/src/com/openexchange/jslob/JSlobExceptionMessages.java:62
 msgid ""
@@ -3416,6 +3443,24 @@ msgstr "Nachricht %1$s nicht im Ordner %2$s gefunden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:100
 msgid "Invalid OAuth account specified."
 msgstr "Es wurde ein ungültiger OAuth-Account angegeben."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/notification/NotificationStrings.java:63
+#, fuzzy
+msgid "New external application connected with your %1$s"
+msgstr "Neue externe Applikation ist mit Ihrer %1$s verbunden"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/notification/NotificationStrings.java:65
+msgid "Hello %1$s,"
+msgstr "Hallo %1$s,"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/notification/NotificationStrings.java:67
+#, fuzzy
+msgid ""
+"you have have connected the application %1$s with your %2$s. You can manage "
+"and check the access of external applications in your %3$s."
+msgstr ""
+"Sie haben die Applikation %1$s mit Ihrer %2$s verbunden. Sie können den "
+"Zugriff externer Applikationen in Ihrer %3$s verwalten und prüfen."
 
 #. Application "%1$s" wants to access to your data. It requires the following permissions:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/servlets/OAuthProviderStrings.java:64
@@ -7903,6 +7948,12 @@ msgstr ""
 msgid "The client request is not permitted."
 msgstr "Die Client-Anfrage ist nicht zulässig."
 
+#. Sending the message denied.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
+#, fuzzy
+msgid "Sending the message denied."
+msgstr "Das Versenden der Nachricht wurde verweigert."
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -11358,6 +11409,15 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:522
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "You do not have the appropriate permissions to search within this module."
+#~ msgstr ""
+#~ "Sie haben nicht die entsprechenden Berechtigungen zum Suchen innerhalb "
+#~ "dieses Moduls."
+
+#~ msgid "There is no search handler for field %1$s."
+#~ msgstr "Fehlender SearchHandler für das Feld %1$s."
 
 #~ msgid "A Box error occurred: %1$s"
 #~ msgstr "Es trat ein Box-Fehler auf: %1$s"
@@ -15869,11 +15929,6 @@ msgstr "Zulu"
 
 #~ msgid "Unknown action: %1$s"
 #~ msgstr "Unbekannte Aktion: %1$s"
-
-#~ msgid "Shared folder %1$s must not be updated in context %2$s"
-#~ msgstr ""
-#~ "Der freigegebene Ordner %1$s darf im Kontext %2$s nicht aktualisiert "
-#~ "werden."
 
 #~ msgid "Unable to map OCL permission value %1$s to a JSON permission value"
 #~ msgstr ""

@@ -68,6 +68,11 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public boolean storeSession(String sessionId) throws OXException {
+        return false;
+    }
+
+    @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) {
         // Nothing to do
     }
@@ -99,6 +104,11 @@ public class AbstractSimSessiondService implements SessiondService {
 
     @Override
     public Session getSessionByAlternativeId(final String altId) {
+        return getSessionByAlternativeId(altId, false);
+    }
+
+    @Override
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage) {
         return null;
     }
 

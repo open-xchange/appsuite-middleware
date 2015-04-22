@@ -170,18 +170,40 @@ public class AttachmentCleaner implements AppointmentEventInterface, TaskEventIn
             try {
                 ATTACHMENT_BASE.finish();
             } catch (final OXException e) {
-                e.log(LOG);
+                log(e);
             }
+        }
+    }
+
+    private void log(final OXException e) {
+        switch (e.getCategories().get(0).getLogLevel()) {
+            case TRACE:
+                LOG.trace("", e);
+                break;
+            case DEBUG:
+                LOG.debug("", e);
+                break;
+            case INFO:
+                LOG.info("", e);
+                break;
+            case WARNING:
+                LOG.warn("", e);
+                break;
+            case ERROR:
+                LOG.error("", e);
+                break;
+            default:
+                break;
         }
     }
 
     private void rollback(final OXException x) {
         try {
             ATTACHMENT_BASE.rollback();
-        } catch (final OXException e) {
-            e.log(LOG);
+        } catch (OXException e) {
+            log(e);
         }
-        x.log(LOG);
+        log(x);
     }
 
     @Override

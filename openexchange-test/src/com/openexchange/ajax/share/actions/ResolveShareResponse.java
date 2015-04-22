@@ -63,6 +63,11 @@ import com.openexchange.java.Strings;
  */
 public class ResolveShareResponse extends AbstractAJAXResponse {
 
+    /**
+     * Status for "not found" 
+     */
+    public static final String NOT_FOUND = "not_found";
+    
     private final String path;
     private final Map<String, String> parameters;
     private final int statusCode;
@@ -146,6 +151,10 @@ public class ResolveShareResponse extends AbstractAJAXResponse {
     public String getItem() {
         String id = parameters.get("id");
         return Strings.isEmpty(id) ? parameters.get("i") : id;
+    }
+    
+    public String getStatus() {
+        return parameters.get("status");
     }
 
     /**

@@ -428,6 +428,16 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
      * Inserts the specified element into this delay queue. An already existing element is replaced.
      *
      * @param e The element to add
+     * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     */
+    public E offerOrReplace(E e) {
+        return offerOrReplace(e, defaultDelayDuration, defaultMaxDelayDuration);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue. An already existing element is replaced.
+     *
+     * @param e The element to add
      * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
      * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
      * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
@@ -451,7 +461,54 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
                 leader = null;
                 available.signal();
             }
-            return null != prev ? prev.getElement() : null;
+            return null == prev ? null : prev.getElement();
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    /**
+     * Inserts the specified element into this delay queue.<br>
+     * An already existing element is replaced while transferring its delay arguments to the inserted one and performing a reset.
+     *
+     * @param e The element to add
+     * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     */
+    public E offerOrReplaceAndReset(E e) {
+        return offerOrReplaceAndReset(e, defaultDelayDuration, defaultMaxDelayDuration);
+    }
+
+    /**
+     * Inserts the specified element into this delay queue.<br>
+     * An already existing element is replaced while transferring its delay arguments to the inserted one and performing a reset.
+     *
+     * @param e The element to add
+     * @param delayDuration The delay duration (in milliseconds) to use initially and for reseting due to repeated offer operations
+     * @param maxDelayDuration The the maximum delay duration (in milliseconds) to use, independently of repeated offer operations
+     * @return The previous value if it was replaced, or <code>null</code> if there was no equal element in the queue before
+     */
+    public E offerOrReplaceAndReset(E e, long delayDuration, long maxDelayDuration) {
+        BufferedElement<E> delayedE = new BufferedElement<E>(e, delayDuration, maxDelayDuration);
+        ReentrantLock lock = this.lock;
+        lock.lock();
+        try {
+            // Check if already contained
+            BufferedElement<E> prev = null;
+            for (Iterator<BufferedElement<E>> it = q.iterator(); null == prev && it.hasNext();) {
+                BufferedElement<E> next = it.next();
+                if (delayedE.equals(next)) {
+                    prev = next;
+                    delayedE = new BufferedElement<E>(e, prev);
+                    delayedE.reset(); // Resets to prev
+                    it.remove();
+                }
+            }
+            q.offer(delayedE);
+            if (q.peek() == delayedE) {
+                leader = null;
+                available.signal();
+            }
+            return null == prev ? null : prev.getElement();
         } finally {
             lock.unlock();
         }
@@ -911,11 +968,22 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
             long now = System.currentTimeMillis();
             stamp = now + delayDuration;
             maxStamp = 0L == maxDelayDuration ? 0L : now + maxDelayDuration;
+            hash = 31 * 1 + ((element == null) ? 0 : element.hashCode());
+        }
 
-            int prime = 31;
-            int result = 1;
-            result = prime * result + ((element == null) ? 0 : element.hashCode());
-            hash = result;
+        /**
+         * Initializes a new {@link BufferedElement} from given element.
+         *
+         * @param element The actual payload element
+         * @param source The other element
+         */
+        BufferedElement(T element, BufferedElement<T> source) {
+            super();
+            this.element = element;
+            this.delayDuration = source.delayDuration;
+            stamp = source.stamp;
+            maxStamp = source.maxStamp;
+            hash = source.hash;
         }
 
         @Override
@@ -962,6 +1030,9 @@ public class BufferingQueue<E> extends AbstractQueue<E> implements BlockingQueue
         public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
+            }
+            if (null == obj) {
+                return false;
             }
             if (!(obj instanceof BufferedElement)) {
                 return obj.equals(element);

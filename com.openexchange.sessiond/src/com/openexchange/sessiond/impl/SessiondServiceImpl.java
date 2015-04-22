@@ -102,6 +102,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public boolean storeSession(String sessionId) throws OXException {
+        return SessionHandler.storeSession(sessionId);
+    }
+
+    @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
     }
@@ -207,13 +212,18 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public Session getSessionByAlternativeId(final String altId) {
+    public Session getSessionByAlternativeId(String altId) {
+        return getSessionByAlternativeId(altId, false);
+    }
+
+    @Override
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage) {
         if (null == altId) {
             return null;
         }
-        final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId, false);
+        SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId, lookupSessionStorage);
         if (null == sessionControl) {
-            LOG.info("Session not found by alternative identifier. Alternative ID: {}", altId);
+            LOG.debug("Session not found by alternative identifier. Alternative ID: {}", altId);
             return null;
         }
         return sessionControl.getSession();

@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.IMAPCapabilities;
 import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
+import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.IMAPException.Code;
 import com.openexchange.imap.command.MessageFetchIMAPCommand;
 import com.openexchange.imap.config.IMAPConfig;
@@ -220,10 +221,12 @@ public final class IMAPSort {
      * @param sortField The sort field
      * @param orderDir The order direction
      * @param locale The locale
+     * @param imapConfig The IMAP configuration
      * @return Sorted messages
      * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an Open-Xchange error occurs
      */
-    public static Message[] sortMessages(final IMAPFolder imapFolder, final MailFields usedFields, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final Locale locale, final IMAPConfig imapConfig) throws MessagingException {
+    public static Message[] sortMessages(final IMAPFolder imapFolder, final MailFields usedFields, final int[] filter, final MailSortField sortField, final OrderDirection orderDir, final Locale locale, final IMAPConfig imapConfig) throws MessagingException, OXException {
         Message[] msgs = null;
         final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
         final int messageCount = imapFolder.getMessageCount();
@@ -255,7 +258,7 @@ public final class IMAPSort {
                     final FetchProfile fetchProfile = getFetchProfile(usedFields.toArray(), imapConfig.getIMAPProperties().isFastFetch());
                     final boolean body = usedFields.contains(MailField.BODY) || usedFields.contains(MailField.FULL);
                     final long start = System.currentTimeMillis();
-                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, false, true, body).doCommand();
+                    msgs = new MessageFetchIMAPCommand(imapFolder, imapConfig.getImapCapabilities().hasIMAP4rev1(), seqNums, fetchProfile, IMAPServerInfo.instanceFor(imapConfig), false, true, body).doCommand();
                     mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     LOG.debug("IMAP fetch for {} messages took {}msec", seqNums.length, (System.currentTimeMillis() - start));
                     if ((msgs == null) || (msgs.length == 0)) {

@@ -104,6 +104,9 @@ public class SuiteWatcher extends TestWatcher {
         for (Class<?> clazz : classes.value()) {
             String simpleName = clazz.getSimpleName();
             String assertStatus = AssertationResults.getInstance().get(clazz.getName());
+            if (assertStatus == null) {
+                assertStatus = "failed";
+            }
             index.appendElement("div").attr("class", assertStatus).attr("id", "link").appendElement("a").attr("id", assertStatus).attr("href", simpleName + ".html").attr("target", "display").text(simpleName);
         }
 

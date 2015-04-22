@@ -96,26 +96,21 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
     /*
      * Member fields
      */
+
+    private int timeout;
     private int jmxPort;
-
     private int jmxServerPort;
-
     private boolean jmxSinglePort;
-
     private String jmxBindAddr;
-
     private String jmxLogin;
-
     private String jmxPassword;
-
     private final Stack<ObjectName> objectNames = new Stack<ObjectName>();
-
     private JMXServiceURL jmxURL;
-
     private final AtomicBoolean running = new AtomicBoolean();
 
     private ManagementAgentImpl() {
         super();
+        timeout = 0;
         jmxPort = 9999;
         jmxServerPort = -1;
         jmxSinglePort = false;
@@ -146,7 +141,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 // cannot share the same port.
                 //
                 // // final CustomRMISocketFactory sf = new CustomRMISocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
-                final RMIClientSocketFactory csf = new CustomSslRMIClientSocketFactory();
+                final RMIClientSocketFactory csf = new CustomSslRMIClientSocketFactory(timeout);
                 final RMIServerSocketFactory ssf = new CustomSslRmiServerSocketFactory(jmxBindAddr == null ? "*" : jmxBindAddr.trim());
                 // Create the RMI Registry using the SSL socket factories above.
                 // In order to use a single port, we must use these factories
@@ -433,6 +428,18 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
      */
     public void setJmxPort(final int jmxPort) {
         this.jmxPort = jmxPort;
+    }
+
+    /**
+     * Sets the timeout (in milliseconds) used by RMI client socket factory.
+     * <p>
+     * A <code>read()</code> call on a socket's <code>InputStream</code> will block for only this amount of time.
+     * If the timeout expires, a <code>java.net.SocketTimeoutException</code> is raised
+     *
+     * @param timeout The timeout to set
+     */
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
 
     /**

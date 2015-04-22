@@ -165,7 +165,18 @@ public enum MailListField {
     /**
      * Account identifier
      */
-    ACCOUNT_ID(653, MailJSONField.ACCOUNT_ID.getKey());
+    ACCOUNT_ID(653, MailJSONField.ACCOUNT_ID.getKey()),
+    /**
+     * The original mail ID.
+     * @since v7.8.0
+     */
+    ORIGINAL_ID(654, MailJSONField.ORIGINAL_ID.getKey()),
+    /**
+     * The original folder ID
+     * @since v7.8.0
+     */
+    ORIGINAL_FOLDER_ID(655, MailJSONField.ORIGINAL_FOLDER_ID.getKey()),
+    ;
 
     private final int field;
 

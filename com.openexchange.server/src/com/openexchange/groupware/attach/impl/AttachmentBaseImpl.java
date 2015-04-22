@@ -658,7 +658,25 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
             try {
                 rollbackDBTransaction();
             } catch (final OXException x2) {
-                x2.log(LOG);
+                switch (x2.getCategories().get(0).getLogLevel()) {
+                    case TRACE:
+                        LOG.trace("", x2);
+                        break;
+                    case DEBUG:
+                        LOG.debug("", x2);
+                        break;
+                    case INFO:
+                        LOG.info("", x2);
+                        break;
+                    case WARNING:
+                        LOG.warn("", x2);
+                        break;
+                    case ERROR:
+                        LOG.error("", x2);
+                        break;
+                    default:
+                        break;
+                }
             }
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
@@ -1010,7 +1028,25 @@ public class AttachmentBaseImpl extends DBService implements AttachmentBase {
                 try {
                     rollback();
                 } catch (final OXException txe) {
-                    e.log(LOG);
+                    switch (e.getCategories().get(0).getLogLevel()) {
+                        case TRACE:
+                            LOG.trace("", e);
+                            break;
+                        case DEBUG:
+                            LOG.debug("", e);
+                            break;
+                        case INFO:
+                            LOG.info("", e);
+                            break;
+                        case WARNING:
+                            LOG.warn("", e);
+                            break;
+                        case ERROR:
+                            LOG.error("", e);
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 throw AttachmentExceptionCodes.FILE_DELETE_FAILED.create(e, I(contextHolder.get().getContextId()));
             }

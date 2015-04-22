@@ -77,6 +77,26 @@ public final class OAuthProviderExceptionMessages implements LocalizableStrings 
     // You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.
     public static final String GRANTS_EXCEEDED_MSG = "You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.";
 
+    // ------------------------------------------------------------------------
+    // Messages below are used to be send to the client within redirects
+    // ------------------------------------------------------------------------
+
+    public static final String PARAMETER_MISSING_MSG = "Request was missing a required parameter: '%1$s'";
+
+    public static final String PARAMETER_INVALID_MSG = "Request has an invalid parameter: '%1$s'";
+
+    public static final String NO_SECURE_CONNECTION_MSG = "";
+
+    public static final String WRONG_RESPONSE_TYPE_MSG = "Response type not supported";
+
+    public static final String REQUEST_DENIED_MSG = "The user denied your request";
+
+    public static final String NOT_ALLOWED_MSG = "You are not allowed to grant access via OAuth to 3rd party applications.";
+
+    public static final String INVALID_REFERER_HEADER_MSG = "Request contained no or invalid referer header";
+
+    public static final String INVALID_CSRF_TOKEN_MSG = "Request contained no or invalid CSRF token. Ensure that cookies are allowed";
+
     /**
      * Initializes a new {@link OAuthProviderExceptionMessages}.
      */

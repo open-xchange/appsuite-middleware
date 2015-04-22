@@ -51,9 +51,6 @@ package com.openexchange.oauth.provider.osgi;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.ByteArrayInputStream;
-import java.rmi.Remote;
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Stack;
 import javax.servlet.ServletException;
 import org.osgi.framework.BundleContext;
@@ -80,8 +77,6 @@ import com.openexchange.oauth.provider.internal.client.storage.OAuthClientStorag
 import com.openexchange.oauth.provider.internal.client.storage.RdbOAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.DbGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
-import com.openexchange.oauth.provider.internal.rmi.OAuthClientRmiImpl;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
 import com.openexchange.oauth.provider.servlets.ClientIconEndpoint;
 import com.openexchange.oauth.provider.servlets.RevokeEndpoint;
@@ -136,10 +131,6 @@ public class OAuthProvider {
                 registeredServices.add(context.registerService(OAuthProviderService.class, oAuthProvider, null));
                 registeredServices.add(context.registerService(OAuthResourceService.class, resourceService, null));
                 registeredServices.add(context.registerService(CustomPortableFactory.class, new PortableAuthCodeInfoFactory(), null));
-
-                Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-                props.put("RMIName", OAuthClientRmi.RMI_NAME);
-                registeredServices.add(context.registerService(Remote.class, new OAuthClientRmiImpl(clientManagement), props));
 
                 registerServlets(oAuthProvider);
                 started = true;

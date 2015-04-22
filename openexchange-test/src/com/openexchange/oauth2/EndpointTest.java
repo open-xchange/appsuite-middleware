@@ -53,8 +53,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
@@ -63,6 +67,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -85,8 +90,8 @@ import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
-
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth2.utils.OAuthTestUtils;
 
 /**
  * {@link EndpointTest}
@@ -133,14 +138,14 @@ public abstract class EndpointTest {
 
         // register client application
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        oauthClient = clientProvisioning.registerClient(ClientManagement.DEFAULT_GID, clientData);
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        oauthClient = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
     }
 
     @After
     public void after() throws Exception {
-        OAuthClientRmi clientProvisioning = (OAuthClientRmi) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OAuthClientRmi.RMI_NAME);
-        clientProvisioning.unregisterClient(oauthClient.getId());
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        clientManagement.unregisterClient(oauthClient.getId(), AbstractOAuthTest.getMasterAdminCredentials());
     }
 
     protected void expectSecureRedirect(HttpUriRequest request, HttpResponse response) {
@@ -207,4 +212,42 @@ public abstract class EndpointTest {
         assertTrue("API access was possible although it should not", error);
     }
 
+    protected URIBuilder prepareAuthenticationRequest(String redirectLocation) throws URISyntaxException {
+        return prepareAuthenticationRequest(redirectLocation, false, null);
+    }
+
+    protected URIBuilder prepareAuthenticationRequest(String redirectLocation, boolean omitParam, String param) throws URISyntaxException {
+        Map<String, String> redirectParams = OAuthTestUtils.extractRedirectParamsFromFragment(redirectLocation);
+        redirectParams.put("user_login", login);
+        redirectParams.put("user_password", password);
+        redirectParams.put("access_denied", "false");
+
+        URIBuilder uriBuilder = new URIBuilder().setScheme("https").setHost(hostname).setPath("/ajax/o/oauth2/authorization");
+
+        for (Entry<String, String> entry : redirectParams.entrySet()) {
+            if (entry.getKey().equals(param)) {
+                if (!omitParam) {
+                    uriBuilder.addParameter(entry.getKey(), "invalid");
+                }
+            } else {
+                uriBuilder.addParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        return uriBuilder;
+    }
+
+    protected URI prepareAuthorizationRequest(String csrfState) throws URISyntaxException {
+        URIBuilder getLoginFormBuilder = new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath("/ajax/o/oauth2/authorization")
+            .setParameter("response_type", "code")
+            .setParameter("client_id", getClientId())
+            .setParameter("redirect_uri", getRedirectURI())
+            .setParameter("state", csrfState);
+        if (getScopes() != null) {
+            getLoginFormBuilder.setParameter("scope", new DefaultScopes(getScopes()).scopeString());
+        }
+        return getLoginFormBuilder.build();
+    }
 }

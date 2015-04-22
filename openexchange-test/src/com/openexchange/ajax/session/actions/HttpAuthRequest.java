@@ -97,6 +97,6 @@ public class HttpAuthRequest extends AbstractRequest<HttpAuthResponse> {
 
     @Override
     public HttpAuthParser getParser() {
-        return new HttpAuthParser();
+        return new HttpAuthParser(true, true, true);
     }
 }

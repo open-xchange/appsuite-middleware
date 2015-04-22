@@ -124,7 +124,25 @@ public class SyncServlet extends PermissionServlet {
 		try {
 			actionPut(req, resp);
 		} catch (final OXException e) {
-			e.log(LOG);
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
 			final Writer writer = resp.getWriter();
 			final Response response = new Response();
 			response.setException(e);
@@ -248,12 +266,31 @@ public class SyncServlet extends PermissionServlet {
 					mailInterface = null;
 				}
 			}
-		} catch (final OXException e) {
-			e.log(LOG);
-			if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
-				response.setException(e);
-			}
-		} catch (final Exception e) {
+        } catch (final OXException e) {
+            switch (e.getCategories().get(0).getLogLevel()) {
+                case TRACE:
+                    LOG.trace("", e);
+                    break;
+                case DEBUG:
+                    LOG.debug("", e);
+                    break;
+                case INFO:
+                    LOG.info("", e);
+                    break;
+                case WARNING:
+                    LOG.warn("", e);
+                    break;
+                case ERROR:
+                    LOG.error("", e);
+                    break;
+                default:
+                    break;
+            }
+
+            if (!e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
+                response.setException(e);
+            }
+        } catch (final Exception e) {
 			final OXException wrapper = getWrappingOXException(e);
 			LOG.error("", wrapper);
 			response.setException(wrapper);
