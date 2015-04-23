@@ -91,6 +91,9 @@ public class GenconfAttributesBoolsAddPrimaryKey extends UpdateTaskAdapter {
             con.setAutoCommit(false);
             setUUID(con);
             Tools.modifyColumns(con, "genconf_attributes_bools", column);
+
+            dropDuplicates(con);
+
             Tools.createPrimaryKeyIfAbsent(con, "genconf_attributes_bools", new String[] { "cid", "id", column.name });
             con.commit();
         } catch (SQLException e) {
