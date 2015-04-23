@@ -106,11 +106,12 @@ public interface ModuleSupport {
      * The item is loaded using administrative access to the underlying module services. This method must only
      * be used for administrative tasks when no session object is available.
      *
+     * @param userID The user ID
      * @param contextID The context identifier
      * @param target The target to get the proxy for
      * @return The proxy
      */
-    TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException;
+    TargetProxy loadAsAdmin(int userID, int contextID, ShareTarget target) throws OXException;
 
     /**
      * Optionally adjusts a share target to be used by a specific user. This might be required if the target identifiers are different

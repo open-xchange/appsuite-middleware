@@ -81,6 +81,7 @@ import com.openexchange.i18n.LocaleTools;
  */
 public class UserizedFileStorageFolder extends DefaultFileStorageFolder implements TypeAware {
 
+    private final UserizedFolder folder;
     private FileStorageFolderType type;
 
     /**
@@ -89,23 +90,15 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
      * @param folder The userized folder to construct the file storage folder from
      */
     public UserizedFileStorageFolder(UserizedFolder folder) throws OXException {
-        this(folder, null);
-    }
-
-    /**
-     * Initializes a new {@link UserizedFileStorageFolder} from the supplied userized folder
-     *
-     * @param folder The userized folder to construct the file storage folder from
-     * @param locale The locale to use, or <code>null</code> to fall back to the default locale
-     */
-    public UserizedFileStorageFolder(UserizedFolder folder, Locale locale) throws OXException {
         super();
+        this.folder = folder;
         setCreationDate(folder.getCreationDateUTC());
         setDefaultFolder(folder.isDefault());
         setExists(true);
         setId(folder.getID());
         setLastModifiedDate(folder.getLastModifiedUTC());
-        setName(folder.getLocalizedName(null == locale ? LocaleTools.DEFAULT_LOCALE : locale, folder.isAltNames()));
+        String defaultName = folder.getLocalizedName(LocaleTools.DEFAULT_LOCALE, folder.isAltNames());
+        setName(null != defaultName ? defaultName : folder.getName());
         setParentId(folder.getParentID());
         setPermissions(parsePermission(folder.getPermissions()));
         setOwnPermission(parsePermission(folder.getOwnPermission()));
@@ -135,6 +128,11 @@ public class UserizedFileStorageFolder extends DefaultFileStorageFolder implemen
      */
     public void setType(FileStorageFolderType type) {
         this.type = type;
+    }
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return folder.getLocalizedName(locale, folder.isAltNames());
     }
 
     @Override

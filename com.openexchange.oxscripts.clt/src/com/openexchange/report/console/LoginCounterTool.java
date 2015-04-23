@@ -64,6 +64,7 @@ import javax.management.remote.JMXServiceURL;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -100,6 +101,20 @@ public final class LoginCounterTool {
                 printHelp();
                 System.exit(0);
                 return;
+            }
+
+            int responseTimeout = 0;
+            if (cmd.hasOption("responsetimeout")) {
+                final String val = cmd.getOptionValue('p');
+                if (null != val) {
+                    try {
+                        responseTimeout = Integer.parseInt(val.trim());
+                    } catch (final NumberFormatException e) {
+                        System.err.println("responsetimeout parameter is not a number: " + val);
+                        printHelp();
+                        System.exit(1);
+                    }
+                }
             }
 
             if (!cmd.hasOption('s') || !cmd.hasOption('e')) {
@@ -156,6 +171,20 @@ public final class LoginCounterTool {
                     printHelp();
                     System.exit(1);
                 }
+            }
+
+            if (responseTimeout > 0) {
+                /*
+                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                 *
+                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                 * zero indicates an infinite timeout. The default value is zero (no timeout).
+                 */
+                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
             }
 
             // Invoke MBean
@@ -301,5 +330,6 @@ public final class LoginCounterTool {
         countingOptions.addOption("r", "regex", true, "Optional. Limits the counter to login devices that match regex.");
         countingOptions.addOption("a", "aggregate", false, "Optional. Aggregates the counts by users. " +
         		"Only the total number of logins without duplicate counts (caused by multiple clients per user) is returned.");
+        countingOptions.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
     }
 }

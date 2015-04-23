@@ -59,6 +59,7 @@ import java.rmi.RemoteException;
 import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
@@ -125,7 +126,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @return The return value
      */
     public R execute(final String[] args) {
-        Options options = new ReservedOptions();
+        Options options = newOptions();
         boolean error = true;
         try {
             // Option for help
@@ -134,6 +135,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
             // Option for RMI connect
             options.addOption("s", "server", true, "The optional RMI server (default: localhost)");
             options.addOption("p", "port", true, "The optional RMI port (default:1099)");
+            options.addOption(new Option(null, "responsetimeout", true, "The optional response timeout in seconds when reading data from server (default: 0s; infinite)"));
 
             // Check if administrative permission is required
             final boolean requiresAdministrativePermission = requiresAdministrativePermission();
@@ -168,11 +170,28 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
                 }
             }
 
+            // Check for response timeout
+            if (cmd.hasOption("responsetimeout")) {
+                int responseTimeout = parseInt("responsetimeout", 0, cmd, options);
+                if (responseTimeout > 0) {
+                    /*
+                     * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                     * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                     * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                     * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                     *
+                     * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                     * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                     * zero indicates an infinite timeout. The default value is zero (no timeout).
+                     */
+                    System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeout * 1000));
+                }
+            }
+
             // Check other mandatory options
             checkOptions(cmd, options);
 
             R retval = null;
-
             try {
                 if (requiresAdministrativePermission) {
                     RemoteAuthenticator authenticator = authenticatorStub(optRmiHostName);

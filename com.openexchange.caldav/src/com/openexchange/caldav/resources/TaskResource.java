@@ -173,11 +173,16 @@ public class TaskResource extends CalDAVResource<Task> {
     @Override
     protected boolean trimTruncatedAttribute(final Truncated truncated) {
         if (null != this.taskToSave) {
-            final Object value = this.taskToSave.get(truncated.getId());
+            int field = truncated.getId();
+            if (field <= 0) {
+                return false;
+            }
+
+            Object value = this.taskToSave.get(field);
             if (null != value && String.class.isInstance(value)) {
-                final String stringValue = (String)value;
+                String stringValue = (String)value;
                 if (stringValue.length() > truncated.getMaxSize()) {
-                    taskToSave.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                    taskToSave.set(field, stringValue.substring(0, truncated.getMaxSize()));
                     return true;
                 }
             }

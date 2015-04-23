@@ -170,7 +170,7 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException {
+    public TargetProxy loadAsAdmin(int userID, int contextID, ShareTarget target) throws OXException {
         if (null == target) {
             return null;
         }
@@ -182,8 +182,13 @@ public class ModuleSupportImpl implements ModuleSupport {
             } catch (NumberFormatException e) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
-            return new AdministrativeFolderTargetProxy(folder);
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
+                return new AdministrativeFolderTargetProxy(folder);
+            } else {
+                User user = requireService(UserService.class, services).getUser(userID, context);
+                return new VirtualTargetProxy(user, target);
+            }
         } else {
             return handlers.get(target.getModule()).loadTarget(target, context);
         }

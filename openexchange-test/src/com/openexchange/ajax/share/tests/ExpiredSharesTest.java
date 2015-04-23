@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Date;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -140,7 +139,7 @@ public class ExpiredSharesTest extends ShareTest {
          */
         GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
         ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
-        assertEquals("Status code wrong", HttpServletResponse.SC_NOT_FOUND, shareResolveResponse.getStatusCode());
+        assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         /*
          * check permissions of previously shared folder
          */

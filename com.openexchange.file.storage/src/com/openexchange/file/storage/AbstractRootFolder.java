@@ -53,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -82,6 +83,11 @@ public abstract class AbstractRootFolder implements FileStorageFolder {
 
     @Override
     public abstract String getName();
+
+    @Override
+    public String getLocalizedName(Locale locale) {
+        return null;
+    }
 
     @Override
     public FileStoragePermission getOwnPermission() {

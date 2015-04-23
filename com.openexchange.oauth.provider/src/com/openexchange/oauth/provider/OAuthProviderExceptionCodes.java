@@ -140,6 +140,19 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
      */
     BAD_CLIENT_ID("Given client id is not valid. Client id is: %1$s", Category.CATEGORY_ERROR, 19),
 
+    /**
+     * TODO
+     */
+    PARAMETER_MISSING(OAuthProviderExceptionMessages.PARAMETER_MISSING_MSG, OAuthProviderExceptionMessages.PARAMETER_MISSING_MSG, Category.CATEGORY_ERROR, 20),
+
+    PARAMETER_INVALID(OAuthProviderExceptionMessages.PARAMETER_INVALID_MSG, OAuthProviderExceptionMessages.PARAMETER_INVALID_MSG, Category.CATEGORY_ERROR, 21),
+
+    NO_SECURE_CONNECTION(OAuthProviderExceptionMessages.NO_SECURE_CONNECTION_MSG, OAuthProviderExceptionMessages.NO_SECURE_CONNECTION_MSG, Category.CATEGORY_ERROR, 22),
+
+    WRONG_RESPONSE_TYPE(OAuthProviderExceptionMessages.WRONG_RESPONSE_TYPE_MSG, OAuthProviderExceptionMessages.WRONG_RESPONSE_TYPE_MSG, Category.CATEGORY_ERROR, 23),
+
+    REQUEST_DENIED(OAuthProviderExceptionMessages.REQUEST_DENIED_MSG, OAuthProviderExceptionMessages.REQUEST_DENIED_MSG, Category.CATEGORY_ERROR, 24),
+
     ;
 
     /**
@@ -221,7 +234,9 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
      */
     @Override

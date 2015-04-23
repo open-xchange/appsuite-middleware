@@ -30,7 +30,8 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "", propOrder = {
     "contextGroup",
-    "clientData"
+    "clientData",
+    "credentials"
 })
 @XmlRootElement(name = "registerClient")
 public class RegisterClient {
@@ -39,6 +40,26 @@ public class RegisterClient {
     protected String contextGroup;
     @XmlElement(required = true, nillable = true)
     protected ClientData clientData;
+    @XmlElement(required = true, nillable = true)
+    protected Credentials credentials;
+
+    /**
+     * Gets the credentials
+     *
+     * @return The credentials
+     */
+    public Credentials getCredentials() {
+        return credentials;
+    }
+
+    /**
+     * Sets the credentials
+     *
+     * @param credentials The credentials to set
+     */
+    public void setCredentials(Credentials credentials) {
+        this.credentials = credentials;
+    }
 
     /**
      * Gets the value of the groupId property.

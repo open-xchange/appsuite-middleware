@@ -12,17 +12,19 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "Exception", targetNamespace = "http://soap.provider.oauth.openexchange.com")
 public class OAuthClientServiceException extends java.lang.Exception {
-    
+
+    private static final long serialVersionUID = -481741590153542549L;
+
     private com.openexchange.oauth.provider.soap.Exception exception;
 
     public OAuthClientServiceException() {
         super();
     }
-    
+
     public OAuthClientServiceException(String message) {
         super(message);
     }
-    
+
     public OAuthClientServiceException(String message, Throwable cause) {
         super(message, cause);
     }

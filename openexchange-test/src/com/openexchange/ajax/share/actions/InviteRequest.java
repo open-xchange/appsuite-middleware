@@ -76,6 +76,8 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
     private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
 
     private final List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
+    
+    private String message;
 
     public InviteRequest() {
         this(Collections.<ShareTarget>emptyList(), Collections.<ShareRecipient>emptyList(), true);
@@ -86,10 +88,15 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
     }
 
     public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
+        this(targets, recipients, failOnError, null);
+    }
+    
+    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError, String message) {
         super();
         this.targets.addAll(targets);
         this.recipients.addAll(recipients);
         this.failOnError = failOnError;
+        this.message = message;
     }
 
     public void addTarget(ShareTarget target) {
@@ -98,6 +105,24 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
 
     public void addRecipient(ShareRecipient recipient) {
         recipients.add(recipient);
+    }
+    
+    /**
+     * Gets the message
+     *
+     * @return The message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Sets the message
+     *
+     * @param message The message to set
+     */
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @Override
@@ -130,6 +155,9 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
         JSONObject json = new JSONObject();
         json.put("targets", ShareWriter.writeTargets(targets));
         json.put("recipients", ShareWriter.writeRecipients(recipients));
+        if(message != null) {
+            json.put("message", message);
+        }
         return json;
     }
 

@@ -49,6 +49,7 @@
 
 package com.openexchange.push;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 
@@ -79,5 +80,13 @@ public interface PushManagerExtendedService extends PushManagerService {
      * @throws OXException If permanent listener cannot be stopped due to an error
      */
     boolean stopPermanentListener(PushUser pushUser, boolean tryToReconnect) throws OXException;
+
+    /**
+     * Gets currently available push users
+     *
+     * @return The currently available push users
+     * @throws OXException If push users cannot be returned
+     */
+    List<PushUser> getAvailablePushUsers() throws OXException;
 
 }

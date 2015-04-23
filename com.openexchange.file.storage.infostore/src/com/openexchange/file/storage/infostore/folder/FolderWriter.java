@@ -51,7 +51,6 @@ package com.openexchange.file.storage.infostore.folder;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -77,15 +76,14 @@ public final class FolderWriter {
      * Writes a folder.
      *
      * @param folder The folder
-     * @param locale The locale to use, or <code>null</code> if not available
      * @return The written folder
      */
-    public static FileStorageFolder writeFolder(UserizedFolder folder, Locale locale) throws OXException {
+    public static FileStorageFolder writeFolder(UserizedFolder folder) throws OXException {
         if (null == folder) {
             return null;
         }
         try {
-            return new UserizedFileStorageFolder(folder, locale);
+            return new UserizedFileStorageFolder(folder);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -95,29 +93,27 @@ public final class FolderWriter {
      * Converts an array of userized folders into their file storage folder equivalents.
      *
      * @param folders The userized folders to convert
-     * @param locale The locale to use, or <code>null</code> if not available
      * @return The file storage folders
      */
-    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, Locale locale) throws OXException {
-        return writeFolders(folders, locale, true);
+    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders) throws OXException {
+        return writeFolders(folders, true);
     }
     
     /**
      * Converts an array of userized folders into their file storage folder equivalents.
      *
      * @param folders The userized folders to convert
-     * @param locale The locale to use, or <code>null</code> if not available
      * @param infostoreOnly <code>true</code> to exclude folders from other modules, <code>false</code>, otherwise 
      * @return The file storage folders
      */
-    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, Locale locale, boolean infostoreOnly) throws OXException {
+    public static FileStorageFolder[] writeFolders(UserizedFolder[] folders, boolean infostoreOnly) throws OXException {
         if (null == folders) {
             return null;
         }
         List<FileStorageFolder> fileStorageFolders = new ArrayList<FileStorageFolder>(folders.length);
         for (UserizedFolder folder : folders) {
             if (false == infostoreOnly || false == isNotInfostore(folder)) {
-                fileStorageFolders.add(writeFolder(folder, locale));
+                fileStorageFolders.add(writeFolder(folder));
             }
         }
         return fileStorageFolders.toArray(new FileStorageFolder[fileStorageFolders.size()]);

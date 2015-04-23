@@ -212,6 +212,9 @@ public class ContactResource extends CardDAVResource {
 	@Override
 	protected void applyVersitObject(VersitObject versitObject) throws WebdavProtocolException {
 		try {
+		    if (null == versitObject) {
+                return;
+            }
 			/*
 			 * Deserialize contact
 			 */

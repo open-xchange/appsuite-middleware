@@ -725,11 +725,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     private static boolean trimTruncatedAttribute(final Truncated truncated, final CalendarDataObject calendarObject) {
-        final Object value = calendarObject.get(truncated.getId());
+        int field = truncated.getId();
+        if (field <= 0) {
+            return false;
+        }
+
+        Object value = calendarObject.get(field);
         if (null != value && String.class.isInstance(value)) {
-            final String stringValue = (String)value;
+            String stringValue = (String)value;
             if (stringValue.length() > truncated.getMaxSize()) {
-                calendarObject.set(truncated.getId(), stringValue.substring(0, truncated.getMaxSize()));
+                calendarObject.set(field, stringValue.substring(0, truncated.getMaxSize()));
                 return true;
             }
         }

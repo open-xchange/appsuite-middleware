@@ -118,5 +118,12 @@ public interface TargetProxy {
      *         (e.g. {@link #applyPermissions(List)}), otherwise <code>false</code>.
      */
     boolean wasModified();
+    
+    /**
+     * Returns the type of the {@link TargetProxy} 
+     * 
+     * @return The type of the {@link TargetProxy}
+     */
+    TargetProxyType getProxyType();
 
 }

@@ -156,9 +156,14 @@ public class AllTest extends ShareTest {
 
         AllRequest request = new AllRequest(String.valueOf(module), false);
         AJAXClient client2 = new AJAXClient(User.User2);
+        int userID2 = client2.getValues().getUserId();
         AllResponse response = client2.execute(request);
         List<ParsedShare> shares = response.getParsedShares();
-        assertTrue("Shares created by another user found.", shares.isEmpty());
+        for (ParsedShare share : shares) {
+            if (share.getCreatedBy() != userID2) {
+                fail("Share created by another user found: " + share);
+            }
+        }
     }
 
 }

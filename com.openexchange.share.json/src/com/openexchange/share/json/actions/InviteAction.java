@@ -61,9 +61,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.notification.NotificationSender;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -99,8 +100,11 @@ public class InviteAction extends AbstractShareAction {
              */
             CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
             Map<ShareRecipient, List<ShareInfo>> createdShares = createPerformer.perform();
-            NotificationSender sender = new NotificationSender(services, determineProtocol(requestData), determineHostname(requestData), getServletPrefix());
-            List<OXException> warnings = sender.sendNotifications(createdShares, message, session);
+            /*
+             * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
+             */
+            ShareNotificationService shareNotificationService = services.getService(ShareNotificationService.class);
+            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session, requestData);
             /*
              * construct & return appropriate json result
              */

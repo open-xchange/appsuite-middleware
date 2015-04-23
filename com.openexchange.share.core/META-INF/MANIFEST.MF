@@ -17,12 +17,10 @@ Import-Package: com.openexchange.context,
  com.openexchange.session,
  com.openexchange.share,
  com.openexchange.share.groupware,
- com.openexchange.share.notification,
- com.openexchange.share.notification.mail,
  com.openexchange.share.recipient,
  com.openexchange.tools.session,
  com.openexchange.user,
- javax.mail.internet;version="1.5.0"
-Export-Package: com.openexchange.share.core.notification,
- com.openexchange.share.core.performer,
+ javax.mail.internet,
+ org.json
+Export-Package: com.openexchange.share.core.performer,
  com.openexchange.share.core.tools

@@ -183,7 +183,6 @@ public abstract class PasswordChangeService {
                         properties.put("cookies", cookies);
                     }
                 }
-
                 authenticationService.handleLoginInfo(new _LoginInfo(session.getLogin(), event.getOldPassword(), properties));
             }
         } catch (final OXException e) {

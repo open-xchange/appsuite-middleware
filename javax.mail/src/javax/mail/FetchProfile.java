@@ -40,7 +40,10 @@
 
 package javax.mail;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.LinkedHashSet;
 
 /**
  * Clients use a FetchProfile to list the Message attributes that 
@@ -83,9 +86,6 @@ import java.util.Vector;
 
 public class FetchProfile {
 
-    private Vector specials; // specials
-    private Vector headers; // vector of header names
-
     /**
      * This inner class is the base class of all items that
      * can be requested in a FetchProfile. The items currently
@@ -99,74 +99,88 @@ public class FetchProfile {
      *
      * @see UIDFolder
      */
-
     public static class Item {
-	/**
-	 * This is the Envelope item. <p>
-	 *
-	 * The Envelope is an aggregration of the common attributes
-	 * of a Message. Implementations should include the following
-	 * attributes: From, To, Cc, Bcc, ReplyTo, Subject and Date.
-	 * More items may be included as well. <p>
-	 *
-	 * For implementations of the IMAP4 protocol (RFC 2060), the 
-	 * Envelope should include the ENVELOPE data item. More items
-	 * may be included too.
-	 */
-	public static final Item ENVELOPE = new Item("ENVELOPE");
 
-	/**
-	 * This item is for fetching information about the 
-	 * content of the message. <p>
-	 *
-	 * This includes all the attributes that describe the content
-	 * of the message. Implementations should include the following
-	 * attributes: ContentType, ContentDisposition, 
-	 * ContentDescription, Size and LineCount. Other items may be
-	 * included as well.
-	 */
-	public static final Item CONTENT_INFO = new Item("CONTENT_INFO");
+	    /**
+	     * This is the Envelope item. <p>
+	     *
+	     * The Envelope is an aggregration of the common attributes
+	     * of a Message. Implementations should include the following
+	     * attributes: From, To, Cc, Bcc, ReplyTo, Subject and Date.
+	     * More items may be included as well. <p>
+	     *
+	     * For implementations of the IMAP4 protocol (RFC 2060), the
+	     * Envelope should include the ENVELOPE data item. More items
+	     * may be included too.
+	     */
+	    public static final Item ENVELOPE = new Item("ENVELOPE");
 
-	/**
-	 * SIZE is a fetch profile item that can be included in a
-	 * <code>FetchProfile</code> during a fetch request to a Folder.
-	 * This item indicates that the sizes of the messages in the specified 
-	 * range should be prefetched. <p>
-	 *
-	 * @since	JavaMail 1.5
-	 */
-	public static final Item SIZE = new Item("SIZE");
+	    /**
+	     * This item is for fetching information about the
+	     * content of the message. <p>
+	     *
+	     * This includes all the attributes that describe the content
+	     * of the message. Implementations should include the following
+	     * attributes: ContentType, ContentDisposition,
+	     * ContentDescription, Size and LineCount. Other items may be
+	     * included as well.
+	     */
+	    public static final Item CONTENT_INFO = new Item("CONTENT_INFO");
 
-	/**
-	 * This is the Flags item.
-	 */
-	public static final Item FLAGS = new Item("FLAGS");
+	    /**
+	     * SIZE is a fetch profile item that can be included in a
+	     * <code>FetchProfile</code> during a fetch request to a Folder.
+	     * This item indicates that the sizes of the messages in the specified
+	     * range should be prefetched. <p>
+	     *
+	     * @since	JavaMail 1.5
+	     */
+	    public static final Item SIZE = new Item("SIZE");
 
-	private String name;
+	    /**
+	     * This is the Flags item.
+	     */
+	    public static final Item FLAGS = new Item("FLAGS");
 
-	/**
-	 * Constructor for an item.  The name is used only for debugging.
-	 *
-	 * @param	name	the item name
-	 */
-	protected Item(String name) {
-	    this.name = name;
-	}
+	    private final String name;
 
-	/**
-	 * Include the name in the toString return value for debugging.
-	 */
-	public String toString() {
-	    return getClass().getName() + "[" + name + "]";
-	}
-    }
+	    /**
+	     * Constructor for an item.  The name is used only for debugging.
+	     *
+	     * @param	name	the item name
+	     */
+	    protected Item(String name) {
+	        this.name = name;
+	    }
+
+        /**
+         * Gets the item's name
+         *
+         * @return The item name
+         */
+        public String name() {
+            return name;
+        }
+
+	    /**
+	     * Include the name in the toString return value for debugging.
+	     */
+	    public String toString() {
+	        return getClass().getName() + "[" + name + "]";
+	    }
+    } // End of class Item
+    
+    // -----------------------------------------------------------------------------------
+    
+    private final List<Item> specials; // specials
+    private final Set<String> headers; // set of header names
 
     /**
      * Create an empty FetchProfile.
      */
     public FetchProfile() { 
-	specials = null;
-	headers = null;
+	    specials = new LinkedList<Item>();
+	    headers = new LinkedHashSet<String>();
     }
     
     /**
@@ -178,10 +192,9 @@ public class FetchProfile {
      * @see	FetchProfile.Item#CONTENT_INFO
      * @see	FetchProfile.Item#FLAGS
      */
-    public void add(Item item) { 
-	if (specials == null)
-	    specials = new Vector();
-	specials.addElement(item);
+    public void add(Item item) {
+        if (!specials.contains(item))
+	        specials.add(item);
     }
 
     /**
@@ -190,10 +203,8 @@ public class FetchProfile {
      *
      * @param	headerName	header to be prefetched
      */
-    public void add(String headerName) { 
-   	if (headers == null)
-	    headers = new Vector();
-	headers.addElement(headerName);
+    public void add(String headerName) {
+	    headers.add(headerName);
     }
 
     /**
@@ -203,7 +214,7 @@ public class FetchProfile {
      * @return true if the fetch profile contains the given special item
      */
     public boolean contains(Item item) { 
-   	return specials != null && specials.contains(item);
+   	    return specials.contains(item);
     }
 
     /**
@@ -213,7 +224,7 @@ public class FetchProfile {
      * @return	true if the fetch profile contains the given header name
      */
     public boolean contains(String headerName) { 
-   	return headers != null && headers.contains(headerName);
+   	    return headers.contains(headerName);
     }
 
     /**
@@ -221,13 +232,8 @@ public class FetchProfile {
      *
      * @return		items set in this profile
      */
-    public Item[] getItems() { 
-	if (specials == null)
-	    return new Item[0];
-
-   	Item[] s = new Item[specials.size()];
-	specials.copyInto(s);
-	return s;
+    public Item[] getItems() {
+        return specials.isEmpty() ? new Item[0] : specials.toArray(new Item[specials.size()]);
     }
 
     /**
@@ -235,12 +241,7 @@ public class FetchProfile {
      *
      * @return		headers set in this profile
      */
-    public String[] getHeaderNames() { 
-	if (headers == null)
-	    return new String[0];
-
-   	String[] s = new String[headers.size()];
-	headers.copyInto(s);
-	return s;
+    public String[] getHeaderNames() {
+        return headers.isEmpty() ? new String[0] : headers.toArray(new String[headers.size()]);
     }
 }

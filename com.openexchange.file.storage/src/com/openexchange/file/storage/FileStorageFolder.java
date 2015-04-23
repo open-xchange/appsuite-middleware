@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -112,6 +113,14 @@ public interface FileStorageFolder extends FileStorageConstants {
      * @return The name
      */
     String getName();
+
+    /**
+     * Gets the locale-sensitive display name of folder.
+     *
+     * @param locale The locale
+     * @return The localized name, or <code>null</code> if not available
+     */
+    String getLocalizedName(Locale locale);
 
     /**
      * Gets the permission for currently logged-in user accessing this folder

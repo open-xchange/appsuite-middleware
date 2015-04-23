@@ -126,9 +126,17 @@ public abstract class CardDAVResource extends AbstractResource {
 		return this.cachedVCard;
 	}
 
-    private VersitObject readBody(InputStream body) throws WebdavProtocolException {
+    private VersitObject readBody(InputStream in) throws WebdavProtocolException {
+        InputStream body = null;
         ByteArrayOutputStream outputStream = null;
     	try {
+    	    // Ensure non-empty input stream
+    	    body = Streams.getNonEmpty(in);
+    	    if (null == body) {
+    	        throw this.protocolException(HttpServletResponse.SC_BAD_REQUEST);
+            }
+
+    	    // Read from it
             VersitDefinition def = Versit.getDefinition("text/vcard");
             VersitDefinition.Reader versitReader = null;
             if (LOG.isTraceEnabled()) {
@@ -251,7 +259,11 @@ public abstract class CardDAVResource extends AbstractResource {
 
 	@Override
 	public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-    	this.applyVersitObject(this.readBody(body));
+    	VersitObject versitObject = this.readBody(body);
+    	if (null == versitObject) {
+    	    throw this.protocolException(HttpServletResponse.SC_BAD_REQUEST);
+        }
+        this.applyVersitObject(versitObject);
 	}
 
 	@Override

@@ -77,8 +77,11 @@ import com.openexchange.push.PushManagerService;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.impl.PushEventHandler;
 import com.openexchange.push.impl.PushManagerRegistry;
-import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
-import com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallableFactory;
+import com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwnerFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerRescheduler;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallableFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallableFactory;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallableFactory;
 import com.openexchange.push.impl.groupware.CreatePushTable;
 import com.openexchange.push.impl.groupware.PushCreateTableTask;
 import com.openexchange.push.impl.groupware.PushDeleteListener;
@@ -174,6 +177,9 @@ public final class PushImplActivator extends HousekeepingActivator  {
             if (pushManagerRegistry.isPermanentPushAllowed()) {
                 // Register portable
                 registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
+                registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
+                registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
+                registerService(CustomPortableFactory.class, new PortableOwnerFactory());
 
                 // Track HazelcastInstance
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
@@ -181,6 +187,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
                     // Track HazelcastInstance service
                     PermanentListenerRescheduler rescheduler = new PermanentListenerRescheduler(pushManagerRegistry, context);
                     this.rescheduler = rescheduler;
+                    pushManagerRegistry.setRescheduler(rescheduler);
                     track(HazelcastInstance.class, rescheduler);
                 } else {
                     pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners());

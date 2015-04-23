@@ -1190,7 +1190,7 @@ ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open
 ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
 ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-xchange/etc/subscribe.properties
 
-PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
+PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
     ox_update_permissions "/opt/open-xchange/etc/$FILE" root:open-xchange 640
@@ -1230,6 +1230,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Tue Apr 14 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-04-13 (2473)
+* Wed Apr 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-04-13 (2474)
 * Tue Apr 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-09 (2486)
 * Thu Mar 26 2015 Marcus Klein <marcus.klein@open-xchange.com>

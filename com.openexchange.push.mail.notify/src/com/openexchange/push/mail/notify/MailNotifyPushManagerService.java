@@ -49,6 +49,7 @@
 
 package com.openexchange.push.mail.notify;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -105,6 +106,11 @@ public final class MailNotifyPushManagerService implements PushManagerExtendedSe
     }
 
     // --------------------------------------------------------------------------------------------------------------------------------
+
+    @Override
+    public List<PushUser> getAvailablePushUsers() throws OXException {
+        return registry.getAvailablePushUsers();
+    }
 
     @Override
     public PushListener startPermanentListener(PushUser pushUser) throws OXException {

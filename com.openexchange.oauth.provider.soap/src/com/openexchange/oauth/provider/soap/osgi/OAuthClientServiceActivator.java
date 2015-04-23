@@ -53,7 +53,7 @@ import java.rmi.Remote;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.oauth.provider.rmi.OAuthClientRmi;
+import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
 import com.openexchange.oauth.provider.soap.OAuthClientServicePortType;
 import com.openexchange.oauth.provider.soap.OAuthClientServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,7 +86,7 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
 
             @Override
             public void removedService(final ServiceReference<Remote> reference, final Remote service) {
-                if (service instanceof OAuthClientRmi) {
+                if (service instanceof RemoteClientManagement) {
                     unregisterServices();
                     context.ungetService(reference);
                 }
@@ -100,8 +100,8 @@ public class OAuthClientServiceActivator extends HousekeepingActivator {
             @Override
             public Remote addingService(final ServiceReference<Remote> reference) {
                 final Remote service = context.getService(reference);
-                if (service instanceof OAuthClientRmi) {
-                    registerService(OAuthClientServicePortType.class, new OAuthClientServicePortTypeImpl((OAuthClientRmi) service));
+                if (service instanceof RemoteClientManagement) {
+                    registerService(OAuthClientServicePortType.class, new OAuthClientServicePortTypeImpl((RemoteClientManagement) service));
                     return service;
                 }
                 context.ungetService(reference);

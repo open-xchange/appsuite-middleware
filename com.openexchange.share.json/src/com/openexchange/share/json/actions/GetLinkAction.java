@@ -114,7 +114,7 @@ public class GetLinkAction extends AbstractShareAction {
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getShareURL(determineProtocol(requestData), determineHostname(requestData)));
+            jResult.put("url", share.getShareURL(determineProtocol(requestData), determineHostname(session, requestData)));
             jResult.put("token", share.getGuest().getBaseToken());
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {

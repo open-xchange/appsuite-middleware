@@ -787,6 +787,8 @@ public class DefaultShareService implements ShareService {
                 }
                 return existingUser;
             }
+            // the user didn't exist already and has to be created so we toggle the GuestRecipient flag
+            guestRecipient.setWasCreated(true);
         }
         /*
          * create new guest user & contact
