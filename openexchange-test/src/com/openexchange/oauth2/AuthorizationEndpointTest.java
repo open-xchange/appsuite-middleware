@@ -91,13 +91,12 @@ import com.openexchange.oauth2.utils.OAuthTestUtils;
  */
 public class AuthorizationEndpointTest extends EndpointTest {
 
-    private String csrfState;
     private AJAXClient ajaxClient;
 
-    @Override
+    private String csrfState;
+
     @Before
-    public void before() throws Exception {
-        super.before();
+    public void startSMTP() throws Exception {
         csrfState = UUIDs.getUnformattedStringFromRandom();
         /*
          * start dummy smtp to catch password-reset mail
@@ -108,15 +107,16 @@ public class AuthorizationEndpointTest extends EndpointTest {
             startSMTPReqeuest.setUpdateNoReplyForContext(ajaxClient.getValues().getContextId());
             ajaxClient.execute(startSMTPReqeuest);
         } catch (Exception e) {
-            after();
+            ajaxClient.execute(new StopSMTPRequest());
             throw e;
         }
     }
 
-    @Override
     @After
-    public void after() throws Exception {
-        ajaxClient.execute(new StopSMTPRequest());
+    public void stopSMTP() throws Exception {
+        if (ajaxClient != null) {
+            ajaxClient.execute(new StopSMTPRequest());
+        }
     }
 
     @Test
@@ -205,12 +205,12 @@ public class AuthorizationEndpointTest extends EndpointTest {
         HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
 
         HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
+        authorizationGetRequest.releaseConnection();
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
         assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
 
         String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URIBuilder authenticationRequestURI = prepareAuthenticationRequest(redirectLocation, false, null);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI.build());
+        HttpPost authenticationRequest = prepareAuthenticationRequest(redirectLocation, false, null);
 
         HttpResponse authCodeResponse = client.execute(authenticationRequest);
 
@@ -231,12 +231,12 @@ public class AuthorizationEndpointTest extends EndpointTest {
         HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
 
         HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
+        authorizationGetRequest.releaseConnection();
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
         assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
 
         String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URIBuilder authenticationRequestURI = prepareAuthenticationRequest(redirectLocation, false, null);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI.build());
+        HttpPost authenticationRequest = prepareAuthenticationRequest(redirectLocation, false, null);
         authenticationRequest.setHeader(HttpHeaders.REFERER, "https://potential-csrf.attacker.com");
 
         HttpResponse authCodeResponse = client.execute(authenticationRequest);
@@ -253,44 +253,44 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithInvalidCSRFToken() throws Exception {
-        testPOSTWithMissingAndInvalidParameter("csrf_token", ResponseType.REDIRECT);
+        testPOSTWithMissingAndInvalidParameter("csrf_token", ResponseType.FRONTEND_REDIRECT);
     }
 
     @Test
     public void testPOSTWithInvalidClientId() throws Exception {
-        testPOSTWithMissingAndInvalidParameter("client_id", ResponseType.REDIRECT);
+        testPOSTWithMissingAndInvalidParameter("client_id", ResponseType.FRONTEND_REDIRECT);
     }
 
     @Test
     public void testPOSTWithInvalidScope() throws Exception {
-        testPOSTWithInvalidParameter(OAuthProviderConstants.PARAM_SCOPE, ResponseType.REDIRECT, false, "invalid_scope");
+        testPOSTWithInvalidParameter(OAuthProviderConstants.PARAM_SCOPE, ResponseType.CLIENT_APP_REDIRECT, false, "invalid_scope");
     }
 
     @Test
     public void testPOSTWithInvalidState() throws Exception {
-        testPOSTWithInvalidParameter("state", ResponseType.REDIRECT, true);
+        testPOSTWithInvalidParameter("state", ResponseType.FRONTEND_REDIRECT, true);
     }
 
     @Test
     public void testPOSTWithInvalidResponseType() throws Exception {
-        testPOSTWithMissingAndInvalidParameter("response_type", ResponseType.REDIRECT);
+        testPOSTWithMissingAndInvalidParameter("response_type", ResponseType.FRONTEND_REDIRECT);
     }
 
     @Test
     public void testPOSTWithInvalidRedirectURI() throws Exception {
-        testPOSTWithMissingAndInvalidParameter("redirect_uri", ResponseType.REDIRECT);
+        testPOSTWithMissingAndInvalidParameter("redirect_uri", ResponseType.FRONTEND_REDIRECT);
     }
 
     @Test
     public void testPOSTWithInvalidUserLogin() throws Exception {
-        testPOSTWithInvalidParameter("user_login", ResponseType.REDIRECT, true);
-        testPOSTWithInvalidParameter("user_login", ResponseType.REDIRECT, false, "invalid_grant");
+        testPOSTWithInvalidParameter("user_login", ResponseType.FRONTEND_REDIRECT, true);
+        testPOSTWithInvalidParameter("user_login", ResponseType.CLIENT_APP_REDIRECT, false, "invalid_grant");
     }
 
     @Test
     public void testPOSTWithInvalidUserPassword() throws Exception {
-        testPOSTWithInvalidParameter("user_password", ResponseType.REDIRECT, true);
-        testPOSTWithInvalidParameter("user_password", ResponseType.REDIRECT, false, "invalid_grant");
+        testPOSTWithInvalidParameter("user_password", ResponseType.FRONTEND_REDIRECT, true);
+        testPOSTWithInvalidParameter("user_password", ResponseType.CLIENT_APP_REDIRECT, false, "invalid_grant");
     }
 
     private void testPOSTWithMissingAndInvalidParameter(String param, ResponseType responseType) throws Exception {
@@ -300,8 +300,8 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     private static enum ResponseType {
         JSON,
-        ERROR_PAGE,
-        REDIRECT
+        FRONTEND_REDIRECT,
+        CLIENT_APP_REDIRECT
     }
 
     private void testPOSTWithInvalidParameter(String param, ResponseType responseType, boolean omitParam) throws Exception {
@@ -323,27 +323,34 @@ public class AuthorizationEndpointTest extends EndpointTest {
         HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
 
         HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
+        authorizationGetRequest.releaseConnection();
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
         assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
 
         String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URIBuilder authenticationRequestURI = prepareAuthenticationRequest(redirectLocation, omitParam, param);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI.build());
+        HttpPost authenticationRequest = prepareAuthenticationRequest(redirectLocation, omitParam, param);
         authenticationRequest.setHeader(HttpHeaders.REFERER, authorizationGetRequest.getURI().toString());
 
         HttpResponse response = client.execute(authenticationRequest);
-        if (responseType == ResponseType.REDIRECT) {
-            EntityUtils.consumeQuietly(response.getEntity());
+        if (responseType == ResponseType.CLIENT_APP_REDIRECT || responseType == ResponseType.FRONTEND_REDIRECT) {
+            authenticationRequest.releaseConnection();
             assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, response.getStatusLine().getStatusCode());
             assertTrue("Location header missing in redirect response", response.containsHeader(HttpHeaders.LOCATION));
 
             if (OAuthProviderConstants.PARAM_REDIRECT_URI.equalsIgnoreCase(param)) {
                 return;
             }
+
             String authRedirectLocation = response.getFirstHeader(HttpHeaders.LOCATION).getValue();
             assertTrue("Unexpected redirect location: " + authRedirectLocation, authRedirectLocation.startsWith(getRedirectURI()));
 
-            Map<String, String> redirectParams = OAuthTestUtils.extractRedirectParamsFromFragment(authRedirectLocation);
+            Map<String, String> redirectParams;
+            if (responseType == ResponseType.CLIENT_APP_REDIRECT) {
+                redirectParams = OAuthTestUtils.extractRedirectParamsFromQuery(authRedirectLocation);
+            } else {
+                redirectParams = OAuthTestUtils.extractRedirectParamsFromFragment(authRedirectLocation);
+            }
+
             if (errorCode != null) {
                 assertEquals(errorCode, redirectParams.get("error"));
             }
@@ -374,12 +381,12 @@ public class AuthorizationEndpointTest extends EndpointTest {
         HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
 
         HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
+        authorizationGetRequest.releaseConnection();
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
         assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
 
         String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URIBuilder authenticationRequestURI = prepareAuthenticationRequest(redirectLocation, false, null);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI.build());
+        HttpPost authenticationRequest = prepareAuthenticationRequest(redirectLocation, false, null);
         authenticationRequest.setHeader(HttpHeaders.REFERER, authorizationGetRequest.getURI().toString());
 
         HttpResponse authCodeResponse = client.execute(authenticationRequest);
@@ -390,7 +397,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         String redirectLocationAuth = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
         assertTrue("Unexpected redirect location: " + redirectLocationAuth, redirectLocationAuth.startsWith(getRedirectURI()));
 
-        Map<String, String> redirectParamsAuth = OAuthTestUtils.extractRedirectParamsFromFragment(redirectLocationAuth);
+        Map<String, String> redirectParamsAuth = OAuthTestUtils.extractRedirectParamsFromQuery(redirectLocationAuth);
 
         assertFalse(redirectParamsAuth.get("error_description"), redirectParamsAuth.containsKey("error"));
         assertEquals(csrfState, redirectParamsAuth.get("state"));

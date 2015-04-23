@@ -153,6 +153,7 @@ public class OAuthSession extends AJAXSession {
         HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
 
         HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
+        authorizationGetRequest.releaseConnection();
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
         assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
 

@@ -51,6 +51,7 @@ package com.openexchange.oauth2.utils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,7 @@ import java.util.Map.Entry;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import com.openexchange.java.Charsets;
 
 /**
@@ -123,5 +125,16 @@ public class OAuthTestUtils {
     public static Map<String, String> extractRedirectParamsFromQuery(String redirectLocation) throws URISyntaxException {
         URI uri = new URI(redirectLocation);
         return extractRedirectParams(uri.getQuery());
+    }
+
+    public static List<NameValuePair> fromParamsMap(Map<String, String> params) {
+        List<NameValuePair> pairs = new ArrayList<>(params.size());
+        for (Entry<String, String> entry : params.entrySet()) {
+            String name = entry.getKey();
+            if (name != null) {
+                pairs.add(new BasicNameValuePair(name, entry.getValue()));
+            }
+        }
+        return pairs;
     }
 }
