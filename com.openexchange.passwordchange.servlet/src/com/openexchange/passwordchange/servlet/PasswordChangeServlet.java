@@ -177,7 +177,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         throw PasswordChangeServletExceptionCode.UNSUPPORTED_ACTION.create(actionStr, "GET");
     }
 
-    private void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+    protected void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
         /*
          * Some variables
          */
