@@ -57,9 +57,12 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
@@ -98,21 +101,24 @@ public class LoginShareHandler extends AbstractShareHandler {
             String message = null;
             String messageType = null;
             String action = null;
-            //FIXME: share target may be null (and if not, the identifier's are not something we want to show the users)  
-            String replacement = "";//target.isFolder() ? target.getFolder() : target.getFolder() + "/" + target.getItem();
-            if (!share.getGuest().isPasswordSet()) {
-                message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, share.getGuest().getLocale()), replacement));
+            GuestInfo guestInfo = share.getGuest();
+            ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class);
+            TargetProxy proxy = moduleSupport.loadAsAdmin(share.getGuest().getGuestID(), share.getGuest().getContextID(), target);
+            String replacement = proxy.getTitle();
+            if (!guestInfo.isPasswordSet()) {
+                message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, guestInfo.getLocale()), replacement));
                 messageType = "WARN";
                 action = "askPassword";
             } else {
-                User user = ShareServiceLookup.getService(UserService.class).getUser(target.getOwnedBy(), share.getGuest().getContextID());
-                message = urlEncode(String.format(translate(ShareServletStrings.NEW_SHARE, share.getGuest().getLocale()), user.getDisplayName(), replacement));
+                User user = ShareServiceLookup.getService(UserService.class).getUser(target.getOwnedBy(), guestInfo.getContextID());
+                message = urlEncode(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), user.getDisplayName(), replacement));
                 messageType = "INFO";
                 action = "login";
             }
-            String redirectUrl = ShareRedirectUtils.getRedirectUrl(share.getGuest(), target, getShareLoginConfiguration().getLoginConfig(), message, messageType, action);
+            String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestInfo, target, getShareLoginConfiguration().getLoginConfig(), message, messageType, action);
 
             // Do the redirect
+            response.setStatus(HttpServletResponse.SC_FOUND);
             response.sendRedirect(redirectUrl);
 
             return ShareHandlerReply.ACCEPT;
