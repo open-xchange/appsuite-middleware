@@ -118,18 +118,21 @@ public class GetUserConfigurationSource extends AbstractRmiCLI<Void> {
     protected void checkOptions(CommandLine cmd) {
         if (!cmd.hasOption(OPT_CONTEXT_SHORT)) {
             System.out.println("You must provide a context identifier.");
+            printHelp();
             System.exit(-1);
             return;
         }
 
         if (!cmd.hasOption(OPT_USER_SHORT)) {
             System.out.println("You must provide a user identifier.");
+            printHelp();
             System.exit(-1);
             return;
         }
 
         if (!cmd.hasOption(OPT_CAPABILITIES_SHORT) && !cmd.hasOption(OPT_CONFIGURATION_SHORT)) {
             System.out.println("Either user capabilities ('" + OPT_CAPABILITIES_SHORT + "') or user configuration ('" + OPT_CONFIGURATION_SHORT + "' <arg>) has to be added.");
+            printHelp();
             System.exit(-1);
             return;
         }

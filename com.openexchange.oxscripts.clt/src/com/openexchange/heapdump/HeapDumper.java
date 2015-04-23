@@ -168,11 +168,9 @@ public class HeapDumper extends AbstractMBeanCLI<Void> {
             int c = 21;
             while (false == ft.isDone()) {
                 System.out.print(".");
-                if (c >= 76) {
+                if (c++ >= 76) {
                     c = 0;
                     System.out.println();
-                } else {
-                    c++;
                 }
                 LockSupport.parkNanos(TimeUnit.NANOSECONDS.convert(500L, TimeUnit.MILLISECONDS));
             }
