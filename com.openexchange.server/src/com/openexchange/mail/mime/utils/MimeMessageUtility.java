@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.utils;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -66,6 +67,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -111,6 +113,7 @@ import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -132,11 +135,13 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -204,11 +209,11 @@ public final class MimeMessageUtility {
         }
         if (MailExceptionCode.IO_ERROR.equals(e)) {
             final Throwable cause = e.getCause();
-            return (cause instanceof IOException) && "no content".equals(toLowerCase(cause.getMessage()));
+            return (cause instanceof IOException) && "no content".equals(asciiLowerCase(cause.getMessage()));
         }
         if (MimeMailExceptionCode.MESSAGING_ERROR.equals(e)) {
             final Throwable cause = e.getCause();
-            return (cause instanceof MessagingException) && "failed to fetch headers".equals(toLowerCase(cause.getMessage()));
+            return (cause instanceof MessagingException) && "failed to fetch headers".equals(asciiLowerCase(cause.getMessage()));
         }
         return false;
     }
@@ -547,7 +552,7 @@ public final class MimeMessageUtility {
         if (isEmpty(imageTag)) {
             return false;
         }
-        final String tmp = imageTag.toLowerCase(Locale.US);
+        final String tmp = asciiLowerCase(imageTag);
         final String srcStart = "src=\"";
         final int pos = tmp.indexOf(srcStart);
         int fromIndex = pos + srcStart.length();
@@ -2041,12 +2046,12 @@ public final class MimeMessageUtility {
         if (null == part) {
             return false;
         }
-        final String disposition = toLowerCase(getHeader("Content-Disposition", null, part));
+        final String disposition = asciiLowerCase(getHeader("Content-Disposition", null, part));
         if (null != disposition) {
             return disposition.startsWith("inline") || disposition.indexOf("filename=") < 0;
         }
         // Check name
-        final String type = toLowerCase(getHeader("Content-Type", "", part));
+        final String type = asciiLowerCase(getHeader("Content-Type", "", part));
         return type.indexOf("name=") < 0;
     }
 
@@ -2212,18 +2217,54 @@ public final class MimeMessageUtility {
         }
     }
 
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage parseMimeMessageFrom(InputStream is, Date optReceivedDate) throws OXException {
+        return newMimeMessage(is, optReceivedDate);
+    }
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage newMimeMessage(InputStream is, Date optReceivedDate) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /**
@@ -2320,7 +2361,7 @@ public final class MimeMessageUtility {
             return null;
         }
         final String contentType = getHeader("Content-Type", null, part);
-        if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
+        if (null == contentType || !asciiLowerCase(contentType).startsWith("multipart/")) {
             return null;
         }
         return getMultipartContentFrom(part, contentType);
@@ -2339,7 +2380,7 @@ public final class MimeMessageUtility {
         if (null == part) {
             return null;
         }
-        if (null == contentType || !toLowerCase(contentType).startsWith("multipart/")) {
+        if (null == contentType || !asciiLowerCase(contentType).startsWith("multipart/")) {
             return null;
         }
         return multipartFrom(part, contentType);

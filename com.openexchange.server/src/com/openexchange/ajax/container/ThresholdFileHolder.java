@@ -77,7 +77,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public final class ThresholdFileHolder implements IFileHolder {
 
-    /** The default in-memory threshold of 500KB. */
+    /** The default in-memory threshold of 500 KB. */
     public static final int DEFAULT_IN_MEMORY_THRESHOLD = 500 * 1024; // 500KB
 
     /** The in-memory buffer where data is stored */
@@ -111,14 +111,14 @@ public final class ThresholdFileHolder implements IFileHolder {
     private final List<Runnable> tasks;
 
     /**
-     * Initializes a new {@link ThresholdFileHolder} with default threshold and default initial capacity.
+     * Initializes a new {@link ThresholdFileHolder} with default threshold (500 KB) and default initial capacity (64 KB).
      */
     public ThresholdFileHolder() {
         this(-1, -1);
     }
 
     /**
-     * Initializes a new {@link ThresholdFileHolder} with default initial capacity.
+     * Initializes a new {@link ThresholdFileHolder} with default initial capacity (64 KB).
      *
      * @param threshold The threshold
      */
