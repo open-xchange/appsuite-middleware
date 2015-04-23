@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,21 +47,63 @@
  *
  */
 
-package com.openexchange.push.impl.credstorage.inmemory;
+package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
-import com.hazelcast.core.HazelcastInstanceNotActiveException;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import com.hazelcast.nio.serialization.PortableReader;
+import com.hazelcast.nio.serialization.PortableWriter;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.push.impl.PushManagerRegistry;
 
 
 /**
- * {@link HazelcastInstanceNotActiveExceptionHandler}
+ * {@link PortableCheckForExtendedServiceCallable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-public interface HazelcastInstanceNotActiveExceptionHandler {
+public class PortableCheckForExtendedServiceCallable extends AbstractCustomPortable implements Callable<Boolean> {
+
+    private static final String FIELD_ID = "id";
+
+    private String id;
 
     /**
-     * Propagates not-active exception
+     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
      */
-    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
+    public PortableCheckForExtendedServiceCallable() {
+        super();
+    }
+
+    /**
+     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
+     *
+     * @param id The associated UUID
+     */
+    public PortableCheckForExtendedServiceCallable(String id) {
+        super();
+        this.id = id;
+    }
+
+    @Override
+    public Boolean call() throws Exception {
+        return Boolean.valueOf(PushManagerRegistry.getInstance().isPermanentPushAllowed());
+    }
+
+    @Override
+    public int getClassId() {
+        return 103;
+    }
+
+    @Override
+    public void writePortable(PortableWriter writer) throws IOException {
+        writer.writeUTF(FIELD_ID, id);
+    }
+
+    @Override
+    public void readPortable(PortableReader reader) throws IOException {
+        this.id = reader.readUTF(FIELD_ID);
+    }
 
 }

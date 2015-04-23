@@ -47,67 +47,117 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
+package com.openexchange.push.impl.balancing.registrypolicy.portable;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.push.impl.PushManagerRegistry;
-
+import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.push.impl.balancing.registrypolicy.Owner;
 
 /**
- * {@link PortablePlanRescheduleCallable}
+ * {@link PortableOwner}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
-public class PortablePlanRescheduleCallable extends AbstractCustomPortable implements Callable<Boolean> {
+public class PortableOwner implements CustomPortable {
 
-    private static final String FIELD_ID = "id";
+    /** The unique portable class ID of the {@link PortableOwner} */
+    public static final int CLASS_ID = 106;
 
-    private String id;
-
-    /**
-     * Initializes a new {@link PortablePlanRescheduleCallable}.
-     */
-    public PortablePlanRescheduleCallable() {
-        super();
-    }
+    private String member;
+    private int reason;
 
     /**
-     * Initializes a new {@link PortablePlanRescheduleCallable}.
+     * Initializes a new {@link PortableOwner}.
      *
-     * @param source The push user to drop
+     * @param member The associated member
+     * @param reason The reason code
      */
-    public PortablePlanRescheduleCallable(String id) {
+    public PortableOwner(String member, int reason) {
         super();
-        this.id = id;
+        this.member = member;
+        this.reason = reason;
     }
 
-    @Override
-    public Boolean call() throws Exception {
-        PermanentListenerRescheduler rescheduler = PushManagerRegistry.getInstance().getRescheduler();
-        if (null != rescheduler) {
-            rescheduler.planReschedule(false);
-        }
-        return Boolean.TRUE;
+    /**
+     * Initializes a new {@link PortableOwner}.
+     *
+     * @param owner The owner
+     */
+    public PortableOwner(Owner owner) {
+        super();
+        this.member = owner.getMember();
+        this.reason = owner.getReason().ordinal();
     }
 
-    @Override
-    public int getClassId() {
-        return 105;
+    /**
+     * Initializes a new {@link PortableOwner}.
+     */
+    public PortableOwner() {
+        super();
     }
+
+
+    /**
+     * Gets the member
+     *
+     * @return The member
+     */
+    public String getMember() {
+        return member;
+    }
+
+    /**
+     * Sets the member
+     *
+     * @param member The member to set
+     */
+    public void setMember(String member) {
+        this.member = member;
+    }
+
+    /**
+     * Gets the reason
+     *
+     * @return The reason
+     */
+    public int getReason() {
+        return reason;
+    }
+
+    /**
+     * Sets the reason
+     *
+     * @param reason The reason to set
+     */
+    public void setReason(int reason) {
+        this.reason = reason;
+    }
+
+    // ----------------------------------------------- Portable methods ---------------------------------------------------------------
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(FIELD_ID, id);
+        writer.writeUTF("member", member);
+        writer.writeInt("reason", reason);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        this.id = reader.readUTF(FIELD_ID);
+        member = reader.readUTF("member");
+        reason = reader.readInt("reason");
+    }
+
+    @Override
+    public int getFactoryId() {
+        return FACTORY_ID;
+    }
+
+    @Override
+    public int getClassId() {
+        return CLASS_ID;
     }
 
 }

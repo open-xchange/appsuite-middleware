@@ -47,35 +47,35 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
+package com.openexchange.push.impl.balancing.registrypolicy.portable;
 
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 
 /**
- * {@link PortableCheckForExtendedServiceCallableFactory}
+ * {@link PortableOwnerFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class PortableCheckForExtendedServiceCallableFactory extends AbstractCustomPortableFactory {
+public class PortableOwnerFactory extends AbstractCustomPortableFactory {
 
     /**
-     * Initializes a new {@link PortableCheckForExtendedServiceCallableFactory}.
+     * Initializes a new {@link PortableOwnerFactory}.
      */
-    public PortableCheckForExtendedServiceCallableFactory() {
+    public PortableOwnerFactory() {
         super();
     }
 
     @Override
     public Portable create() {
-        return new PortableCheckForExtendedServiceCallable();
+        return new PortableOwner();
     }
 
     @Override
     public int getClassId() {
-        return 103;
+        return PortableOwner.CLASS_ID;
     }
 
 }

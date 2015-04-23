@@ -47,68 +47,39 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
+package com.openexchange.push.impl.balancing.registrypolicy;
+
 
 /**
- * {@link ReschedulePlan} - A rescheduling plan.
+ * {@link Reason}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
-public class ReschedulePlan {
-
-    private static final ReschedulePlan INSTANCE_W_REMOTE = new ReschedulePlan(true);
-    private static final ReschedulePlan INSTANCE_WO_REMOTE = new ReschedulePlan(false);
+public enum Reason {
 
     /**
-     * Gets the instance w/ or w/o remote plan
+     * The owner was assigned to the push user due to initial start-up and no other member (if at all) felt responsible for that push user.
+     */
+    INITIAL,
+    /**
+     * The owner was dedicatedly assigned to that push user.
+     */
+    DEDICATED,
+    ;
+
+    /**
+     * Gets the reason by ordinal number (its position in its enum declaration, where the initial constant is assigned an ordinal of zero).
      *
-     * @param remotePlan <code>true</code> for remote rescheduling; otherwise <code>false</code>
-     * @return The instance w/ or w/o remote plan
+     * @param ordinal The ordinal number
+     * @return The associated reason or <code>null</code>
      */
-    public static ReschedulePlan getInstance(boolean remotePlan) {
-        return remotePlan ? INSTANCE_W_REMOTE : INSTANCE_WO_REMOTE;
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------
-
-    private final boolean remotePlan;
-    private final int hash;
-
-    /**
-     * Initializes a new {@link ReschedulePlan}.
-     */
-    private ReschedulePlan(boolean remotePlan) {
-        super();
-        this.remotePlan = remotePlan;
-        this.hash = 31; // Always the same hash code
-    }
-
-    /**
-     * Signals if this plan also reschedules on remote nodes.
-     *
-     * @return <code>true</code> for remote rescheduling; otherwise <code>false</code>
-     */
-    public boolean isRemotePlan() {
-        return remotePlan;
-    }
-
-    @Override
-    public int hashCode() {
-        return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
+    public static Reason byOrdinal(int ordinal) {
+        if (ordinal < 0) {
+            return null;
         }
-        if (!(obj instanceof ReschedulePlan)) {
-            return false;
-        }
-
-        // Always equal to other reschedule plans
-        return true;
+        Reason[] reasons = values();
+        return ordinal >= reasons.length ? null : reasons[ordinal];
     }
 
 }

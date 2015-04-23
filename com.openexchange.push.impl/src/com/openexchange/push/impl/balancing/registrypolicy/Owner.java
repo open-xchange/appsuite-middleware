@@ -47,63 +47,47 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
-
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.push.impl.PushManagerRegistry;
-
+package com.openexchange.push.impl.balancing.registrypolicy;
 
 /**
- * {@link PortableCheckForExtendedServiceCallable}
+ * {@link Owner} - Owner for a permanent push listener.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
-public class PortableCheckForExtendedServiceCallable extends AbstractCustomPortable implements Callable<Boolean> {
+public class Owner {
 
-    private static final String FIELD_ID = "id";
-
-    private String id;
-
-    /**
-     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
-     */
-    public PortableCheckForExtendedServiceCallable() {
-        super();
-    }
+    private final String member;
+    private final Reason reason;
 
     /**
-     * Initializes a new {@link PortableCheckForExtendedServiceCallable}.
+     * Initializes a new {@link Owner}.
      *
-     * @param id The associated UUID
+     * @param member The associated member
+     * @param reason The reason code
      */
-    public PortableCheckForExtendedServiceCallable(String id) {
+    public Owner(String member, Reason reason) {
         super();
-        this.id = id;
+        this.member = member;
+        this.reason = reason;
     }
 
-    @Override
-    public Boolean call() throws Exception {
-        return Boolean.valueOf(PushManagerRegistry.getInstance().isPermanentPushAllowed());
+    /**
+     * Gets the member
+     *
+     * @return The member
+     */
+    public String getMember() {
+        return member;
     }
 
-    @Override
-    public int getClassId() {
-        return 103;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(FIELD_ID, id);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        this.id = reader.readUTF(FIELD_ID);
+    /**
+     * Gets the reason
+     *
+     * @return The reason
+     */
+    public Reason getReason() {
+        return reason;
     }
 
 }

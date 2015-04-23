@@ -65,7 +65,8 @@ import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials;
-import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser;
+import com.openexchange.push.impl.portable.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.push.impl.portable.PortablePushUser;
 import com.openexchange.server.ServiceLookup;
 
 

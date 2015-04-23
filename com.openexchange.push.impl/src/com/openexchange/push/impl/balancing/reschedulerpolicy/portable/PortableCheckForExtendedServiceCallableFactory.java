@@ -47,35 +47,35 @@
  *
  */
 
-package com.openexchange.push.impl.credstorage.inmemory.portable;
+package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 
 /**
- * {@link PortablePushUserFactory}
+ * {@link PortableCheckForExtendedServiceCallableFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-public class PortablePushUserFactory extends AbstractCustomPortableFactory {
+public class PortableCheckForExtendedServiceCallableFactory extends AbstractCustomPortableFactory {
 
     /**
-     * Initializes a new {@link PortablePushUserFactory}.
+     * Initializes a new {@link PortableCheckForExtendedServiceCallableFactory}.
      */
-    public PortablePushUserFactory() {
+    public PortableCheckForExtendedServiceCallableFactory() {
         super();
     }
 
     @Override
     public Portable create() {
-        return new PortablePushUser();
+        return new PortableCheckForExtendedServiceCallable();
     }
 
     @Override
     public int getClassId() {
-        return PortablePushUser.CLASS_ID;
+        return 103;
     }
 
 }

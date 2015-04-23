@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,21 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
+package com.openexchange.push.impl.portable;
 
-import com.hazelcast.nio.serialization.Portable;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 
 
 /**
- * {@link PortableDropPermanentListenerCallableFactory}
+ * {@link HazelcastInstanceNotActiveExceptionHandler}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
  */
-public class PortableDropPermanentListenerCallableFactory extends AbstractCustomPortableFactory {
+public interface HazelcastInstanceNotActiveExceptionHandler {
 
     /**
-     * Initializes a new {@link PortableDropPermanentListenerCallableFactory}.
+     * Propagates not-active exception
      */
-    public PortableDropPermanentListenerCallableFactory() {
-        super();
-    }
-
-    @Override
-    public Portable create() {
-        return new PortableDropPermanentListenerCallable();
-    }
-
-    @Override
-    public int getClassId() {
-        return 104;
-    }
+    void propagateNotActive(HazelcastInstanceNotActiveException notActiveException);
 
 }
