@@ -1,3 +1,7 @@
+* 2015-04-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37889: Switch boolean values in post installation script only at a certain version upgrade.
+
 * 2015-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 37808: Perform chunk-wise FETCH in case previous FETCH command was quit with a "NO" error response from IMAP server
