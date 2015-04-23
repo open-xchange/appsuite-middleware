@@ -51,6 +51,7 @@ package com.openexchange.test.resourcecache.actions;
 
 import java.io.IOException;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
@@ -71,6 +72,11 @@ public class DownloadResponseParser extends AbstractAJAXParser<DownloadResponse>
 
     protected DownloadResponseParser(boolean failOnError) {
         super(failOnError);
+    }
+
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
+        return checkResponse(resp);
     }
 
     @Override
