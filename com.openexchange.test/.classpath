@@ -17,10 +17,10 @@
 	</classpathentry>
 	<classpathentry exported="true" kind="lib" path="testlib/powermock-mockito-1.5.4-full.jar"/>
 	<classpathentry kind="lib" path="testlib/cglib-nodep-2.2.jar"/>
-	<classpathentry exported="true" kind="lib" path="testlib/javassist-3.17.1-GA.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/junit-addons-1.4.jar" sourcepath="testlib/source/junit-addons-1.4-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="testlib/dumbster1.6.jar" sourcepath="testlib/source/dumbster1.6-src.zip"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="testlib/javassist-3.19.0.jar" sourcepath="testlib/source/javassist-rel_3_19_0_ga.zip"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
