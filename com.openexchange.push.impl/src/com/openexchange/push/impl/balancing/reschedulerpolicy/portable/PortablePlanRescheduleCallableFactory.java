@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
+package com.openexchange.push.impl.balancing.reschedulerpolicy.portable;
 
 import com.hazelcast.nio.serialization.Portable;
 import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;

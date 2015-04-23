@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,90 +47,111 @@
  *
  */
 
-package com.openexchange.push.impl.balancing;
+package com.openexchange.push.impl.portable;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
+import com.openexchange.hazelcast.serialization.CustomPortable;
 import com.openexchange.push.PushUser;
-import com.openexchange.push.impl.PushManagerRegistry;
-
 
 /**
- * {@link PortableDropPermanentListenerCallable}
+ * {@link PortablePushUser}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @since v7.8.0
  */
-public class PortableDropPermanentListenerCallable extends AbstractCustomPortable implements Callable<Boolean> {
+public class PortablePushUser implements CustomPortable {
 
-    public static final String PARAMETER_CONTEXT_IDS = "contextIds";
-    public static final String PARAMETER_USER_IDS = "userIds";
+    /** The unique portable class ID of the {@link PortableSession} */
+    public static final int CLASS_ID = 102;
 
-    private int[] contextIds;
-    private int[] userIds;
+    public static final String PARAMETER_CONTEXT_ID = "contextId";
+    public static final String PARAMETER_USER_ID = "userId";
+
+    private int contextId;
+    private int userId;
 
     /**
-     * Initializes a new {@link PortableDropPermanentListenerCallable}.
+     * Initializes a new {@link PortableReservation}.
      */
-    public PortableDropPermanentListenerCallable() {
+    public PortablePushUser() {
         super();
     }
 
     /**
-     * Initializes a new {@link PortableDropPermanentListenerCallable}.
-     *
-     * @param source The push user to drop
+     * Initializes a new {@link PortableReservation}.
      */
-    public PortableDropPermanentListenerCallable(List<PushUser> pushUsers) {
+    public PortablePushUser(PushUser source) {
         super();
-
-        int size = pushUsers.size();
-        int[] contextIds = new int[size];
-        int[] userIds = new int[size];
-
-        for (int i = size; i-- > 0;) {
-            PushUser pushUser = pushUsers.get(i);
-            contextIds[i] = pushUser.getContextId();
-            userIds[i] = pushUser.getUserId();
-        }
-
-        this.contextIds = contextIds;
-        this.userIds = userIds;
+        contextId = source.getContextId();
+        userId = source.getUserId();
     }
 
     @Override
-    public Boolean call() throws Exception {
-        List<PushUser> pushUsers = new LinkedList<PushUser>();
-
-        int length = userIds.length;
-        for (int i = 0; i < length; i++) {
-            pushUsers.add(new PushUser(userIds[i], contextIds[i]));
-        }
-
-        PushManagerRegistry.getInstance().stopPermanentListenerFor(pushUsers);
-        return Boolean.TRUE;
+    public int getFactoryId() {
+        return FACTORY_ID;
     }
 
     @Override
     public int getClassId() {
-        return 104;
+        return CLASS_ID;
     }
 
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeIntArray(PARAMETER_CONTEXT_IDS, contextIds);
-        writer.writeIntArray(PARAMETER_USER_IDS, userIds);
+        writer.writeInt(PARAMETER_CONTEXT_ID, contextId);
+        writer.writeInt(PARAMETER_USER_ID, userId);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
-        contextIds = reader.readIntArray(PARAMETER_CONTEXT_IDS);
-        userIds = reader.readIntArray(PARAMETER_USER_IDS);
+        contextId = reader.readInt(PARAMETER_CONTEXT_ID);
+        userId = reader.readInt(PARAMETER_USER_ID);
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
+    }
+
+    @Override
+    public int hashCode() {
+        int prime = 31;
+        int result = prime * 1 + contextId;
+        result = prime * result + userId;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PortablePushUser)) {
+            return false;
+        }
+        PortablePushUser other = (PortablePushUser) obj;
+        if (contextId != other.contextId) {
+            return false;
+        }
+        if (userId != other.userId) {
+            return false;
+        }
+        return true;
     }
 
 }

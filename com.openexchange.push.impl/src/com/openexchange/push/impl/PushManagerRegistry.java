@@ -77,7 +77,7 @@ import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.PushDbUtils.DeleteResult;
-import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerRescheduler;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;

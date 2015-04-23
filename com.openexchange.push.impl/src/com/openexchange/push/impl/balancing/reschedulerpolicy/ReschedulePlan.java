@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,55 @@
  *
  */
 
-package com.openexchange.push.impl.credstorage.inmemory.portable;
-
-import java.io.IOException;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.push.PushUser;
+package com.openexchange.push.impl.balancing.reschedulerpolicy;
 
 /**
- * {@link PortablePushUser}
+ * {@link ReschedulePlan} - A rescheduling plan.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.6.2
  */
-public class PortablePushUser implements CustomPortable {
+public class ReschedulePlan {
 
-    /** The unique portable class ID of the {@link PortableSession} */
-    public static final int CLASS_ID = 102;
-
-    public static final String PARAMETER_CONTEXT_ID = "contextId";
-    public static final String PARAMETER_USER_ID = "userId";
-
-    private int contextId;
-    private int userId;
+    private static final ReschedulePlan INSTANCE_W_REMOTE = new ReschedulePlan(true);
+    private static final ReschedulePlan INSTANCE_WO_REMOTE = new ReschedulePlan(false);
 
     /**
-     * Initializes a new {@link PortableReservation}.
-     */
-    public PortablePushUser() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link PortableReservation}.
-     */
-    public PortablePushUser(PushUser source) {
-        super();
-        contextId = source.getContextId();
-        userId = source.getUserId();
-    }
-
-    @Override
-    public int getFactoryId() {
-        return FACTORY_ID;
-    }
-
-    @Override
-    public int getClassId() {
-        return CLASS_ID;
-    }
-
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeInt(PARAMETER_CONTEXT_ID, contextId);
-        writer.writeInt(PARAMETER_USER_ID, userId);
-    }
-
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        contextId = reader.readInt(PARAMETER_CONTEXT_ID);
-        userId = reader.readInt(PARAMETER_USER_ID);
-    }
-
-    /**
-     * Gets the context identifier
+     * Gets the instance w/ or w/o remote plan
      *
-     * @return The context identifier
+     * @param remotePlan <code>true</code> for remote rescheduling; otherwise <code>false</code>
+     * @return The instance w/ or w/o remote plan
      */
-    public int getContextId() {
-        return contextId;
+    public static ReschedulePlan getInstance(boolean remotePlan) {
+        return remotePlan ? INSTANCE_W_REMOTE : INSTANCE_WO_REMOTE;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------
+
+    private final boolean remotePlan;
+    private final int hash;
+
+    /**
+     * Initializes a new {@link ReschedulePlan}.
+     */
+    private ReschedulePlan(boolean remotePlan) {
+        super();
+        this.remotePlan = remotePlan;
+        this.hash = 31; // Always the same hash code
     }
 
     /**
-     * Gets the user identifier
+     * Signals if this plan also reschedules on remote nodes.
      *
-     * @return The user identifier
+     * @return <code>true</code> for remote rescheduling; otherwise <code>false</code>
      */
-    public int getUserId() {
-        return userId;
+    public boolean isRemotePlan() {
+        return remotePlan;
     }
 
     @Override
     public int hashCode() {
-        int prime = 31;
-        int result = prime * 1 + contextId;
-        result = prime * result + userId;
-        return result;
+        return hash;
     }
 
     @Override
@@ -141,16 +103,11 @@ public class PortablePushUser implements CustomPortable {
         if (this == obj) {
             return true;
         }
-        if (!(obj instanceof PortablePushUser)) {
+        if (!(obj instanceof ReschedulePlan)) {
             return false;
         }
-        PortablePushUser other = (PortablePushUser) obj;
-        if (contextId != other.contextId) {
-            return false;
-        }
-        if (userId != other.userId) {
-            return false;
-        }
+
+        // Always equal to other reschedule plans
         return true;
     }
 
