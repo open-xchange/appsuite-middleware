@@ -212,13 +212,6 @@ public final class PasswordChangeServlet extends SessionServlet {
             com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
 
             passwordChangeService.perform(new PasswordChangeEvent(session, contextService.getContext(session.getContextId()), requestObject.getString(PARAM_NEW_PASSWORD), requestObject.getString(PARAM_OLD_PASSWORD), headers, cookies));
-
-            passwordChangeService.perform(new PasswordChangeEvent(
-                session,
-                contextService.getContext(session.getContextId()),
-                requestObject.getString(PARAM_NEW_PASSWORD),
-                requestObject.getString(PARAM_OLD_PASSWORD)));
-
         } catch (final OXException e) {
             LOG.error("", e);
             response.setException(e);
