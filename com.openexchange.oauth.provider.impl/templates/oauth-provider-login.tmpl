@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="${lang}">
+  <head>
+    <meta charset="utf-8">
+    <title>${title}</title>
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <img src="${iconURL}" alt="${iconAlternative}" height="128" width="128">
+        <span id="intro">${intro}</span>
+        <ul>
+          <#list scopeDescriptions as desc>
+          <li>${desc}</li>
+          </#list>
+        </ul>
+      </div>
+      <div id="login-form">
+        <div id="login-error"></div>
+        <script>
+          if (window.location.hash) {
+              var hash = window.location.hash.substring(1);
+              var parts = hash.split("=", 2);
+              if (parts.length === 2 && parts[0] === "error") {
+                var errorSpan = document.createElement('span');
+                var errorText = document.createTextNode(decodeURIComponent(parts[1]));
+                errorSpan.appendChild(errorText);
+                document.getElementById('login-error').appendChild(errorSpan);
+              }
+          }
+        </script>
+        <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
+          <fieldset>
+            <legend>${formHeading}</legend>
+            <table>
+              <tr>
+                <td><label for="user_login">${usernameLabel}:</label></td>
+                <td><input id="user_login" name="user_login" type="text"></td>
+              </tr>
+              <tr>
+                <td><label for="user_password">${passwordLabel}:</label></td>
+                <td><input id="user_password" name="user_password" type="password"></td>
+              </tr>
+              <tr>
+                <td colspan="2">
+                  <button name="access_denied" type="submit" value="false">${allowLabel}</button>
+                  <button name="access_denied" type="submit" value="true">${denyLabel}</button>
+                </td>
+              </tr>
+            </table>
+            <input name="client_id" type="hidden" value="${clientId}">
+            <input name="redirect_uri" type="hidden" value="${redirectURI}">
+            <input name="scope" type="hidden" value="${scopes}">
+            <input name="state" type="hidden" value="${state}">
+            <input name="csrf_token" type="hidden" value="${csrfToken}">
+            <input name="response_type" type="hidden" value="code">
+          </fieldset>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
