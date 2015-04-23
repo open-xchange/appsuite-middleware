@@ -1,3 +1,7 @@
+* 2015-04-23 - martin.schneider@open-xchange.com
+
+ - Fix for bug 37907: Only call PasswordChangeService once
+
 * 2015-04-14 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37340: Introduced checks for future database table layout
