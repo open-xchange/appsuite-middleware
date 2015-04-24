@@ -1,3 +1,7 @@
+* 2015-04-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 37797: Series gets broken on participant accept request.
+
 * 2015-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 37808: Perform chunk-wise FETCH in case previous FETCH command was quit with a "NO" error response from IMAP server
