@@ -1,0 +1,152 @@
+{
+  "id": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+  "name": "REST Database (Schema Update)",
+  "timestamp": 1426165758510,
+  "order": [
+    "7a789482-7d8d-a971-d718-2aed7b03b919",
+    "4ff99f17-bbe2-b2e0-4ff0-2a56caf26ba1",
+    "9a2565bd-8f9e-05e1-3431-d4ac7843394c",
+    "70454e48-71d3-b033-c73a-a765c2351ed3",
+    "2618f6cb-97b4-ab3d-6bf2-bd18ee0204e1",
+    "e02988f5-14f1-0b3c-418b-2ed155d672d5",
+    "ad2316a1-eed0-8399-a371-44c2c4532094",
+    "ad9b0390-17a3-bb05-c0a6-5ec75882adef",
+    "b3e1d40b-5036-758a-535d-604c3f97b760"
+  ],
+  "requests": [
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "2618f6cb-97b4-ab3d-6bf2-bd18ee0204e1",
+      "name": "Multi #2",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/transaction/{{tx}}?keepOpen=true",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"selectGreetings\": {\n    \"query\": \"SELECT * FROM myModule_greeting ORDER BY cid, uid LIMIT 1000\",\n    \"resultSet\": true\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "4ff99f17-bbe2-b2e0-4ff0-2a56caf26ba1",
+      "name": "Create custom table in OX db #2",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/migration/for/424242669/to/1/forModule/com.openexchange.myModule",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"createGreetingTable\": {\n    \"query\": \"CREATE TABLE myModule_greeting (greeting TEXT, cid int(10), uid int(10), PRIMARY KEY (cid, uid))\"\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426166498868
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "70454e48-71d3-b033-c73a-a765c2351ed3",
+      "name": "Multi #1",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/migration/for/424242669/from/1/to/2/forModule/com.openexchange.myModule?keepOpen=true",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"createGreetingTable\": {\n    \"query\": \"CREATE TABLE myModule_greetingEntries (greeting TEXT, greetingKey VARCHAR(128), PRIMARY KEY (greetingKey))\"\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "7a789482-7d8d-a971-d718-2aed7b03b919",
+      "name": "Insert in custom tables in an OX db #1",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"insertGreeting\": {\n    \"query\": \"INSERT INTO myModule_greeting (cid, uid, greeting) VALUES (?,?,?)\",\n    \"params\": [1, 3, \"Aloha\"] \n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "9a2565bd-8f9e-05e1-3431-d4ac7843394c",
+      "name": "Select from custom table in OX db #3",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"selectGreetings\": {\n    \"query\": \"SELECT * FROM myModule_greeting ORDER BY cid, uid LIMIT 1000\",\n    \"resultSet\": true\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "ad2316a1-eed0-8399-a371-44c2c4532094",
+      "name": "Multi #4",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/transaction/{{tx}}/commit",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"insertGreetingEntry\": {\n    \"query\": \"INSERT INTO myModule_greetingEntries (greetingKey, greeting) VALUES (?, ?)\",\n    \"params\": [\"aloha\", \"Aloha\"]\n  },\n  \"updateGreeting\": {\n  \t\"query\": \"UPDATE myModule_greeting SET greeting = ? WHERE greeting = ?\",\n    \"params\": [\"aloha\", \"Aloha\"]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "ad9b0390-17a3-bb05-c0a6-5ec75882adef",
+      "name": "Multi #5",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"selectGreeting\": {\n    \"query\": \"SELECT entry.greeting FROM myModule_greetingEntries AS entry JOIN myModule_greeting AS greeting ON greeting.greeting = entry.greetingKey WHERE cid = ? AND uid = ?\",\n    \"params\": [1, 3]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "b3e1d40b-5036-758a-535d-604c3f97b760",
+      "name": "Clean up",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"cleanup_sv\": {\n    \"query\": \"DELETE FROM serviceSchemaVersion WHERE module = ?\",\n    \"params\": [\"com.openexchange.myModule\"] \n  },\n  \"cleanup_svl\": {\n    \"query\": \"DELETE FROM serviceSchemaMigrationLock WHERE module = ?\",\n    \"params\": [\"com.openexchange.myModule\"] \n  },\n  \"drop_greeting\": {\n    \"query\": \"DROP TABLE myModule_greeting\",\n    \"params\": [] \n  },\n  \"drop_greetingEntries\": {\n    \"query\": \"DROP TABLE myModule_greetingEntries\",\n    \"params\": [] \n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426167665516
+    },
+    {
+      "collectionId": "5c31348e-8261-9a23-f0e8-1e177a29bbe5",
+      "id": "e02988f5-14f1-0b3c-418b-2ed155d672d5",
+      "name": "Multi #3",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/transaction/{{tx}}?keepOpen=true",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"insertGreetingEntry\": {\n    \"query\": \"INSERT INTO myModule_greetingEntries (greetingKey, greeting) VALUES (?, ?)\",\n    \"params\": [\"aloha\", \"Aloha\"]\n  },\n  \"updateGreeting\": {\n  \t\"query\": \"UPDATE myModule_greeting SET greeting = ? WHERE greeting = ?\",\n    \"params\": [\"aloha\", \"Aloha\"]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    }
+  ]
+}

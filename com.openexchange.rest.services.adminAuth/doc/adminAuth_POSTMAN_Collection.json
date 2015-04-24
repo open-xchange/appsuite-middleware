@@ -1,0 +1,21 @@
+{
+  "id": "c21ffdc9-37c5-1a78-3ee8-7ef86fdee852",
+  "name": "REST Admin Auth",
+  "timestamp": 1425472021740,
+  "requests": [
+    {
+      "collectionId": "c21ffdc9-37c5-1a78-3ee8-7ef86fdee852",
+      "id": "5e0230c6-32f1-d6f9-8301-cb9288c62115",
+      "name": "Admin Auth",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/adminproc/v1/adminAuth",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"login\":\"oxadminmaster\",\n  \"password\":\"secret\"\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1425473211643
+    }
+  ]
+}

@@ -5,26 +5,14 @@ Bundle-SymbolicName: com.openexchange.rest.services.adminAuth
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.fasterxml.jackson.core,
- com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.format,
- com.fasterxml.jackson.core.io,
- com.fasterxml.jackson.core.json,
- com.fasterxml.jackson.core.sym,
- com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
- com.openexchange.ajax.requesthandler,
- com.openexchange.auth,
- com.openexchange.auth.mbean,
+Import-Package: com.openexchange.auth,
  com.openexchange.exception,
- com.openexchange.java.util,
+ com.openexchange.java,
  com.openexchange.osgi,
- com.openexchange.rest.services,
- com.openexchange.rest.services.annotations,
- com.openexchange.rest.services.osgiservice,
  com.openexchange.server,
  com.openexchange.tools.servlet,
+ javax.ws.rs,
+ javax.ws.rs.core,
  org.json,
- org.osgi.framework,
- org.osgi.util.tracker
-Bundle-Activator: com.openexchange.rest.services.html.osgi.AdminAuthRESTActivator
+ org.osgi.framework
+Bundle-Activator: com.openexchange.rest.services.adminAuth.osgi.AdminAuthRESTActivator

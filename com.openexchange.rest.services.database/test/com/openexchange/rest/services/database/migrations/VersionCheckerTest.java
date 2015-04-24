@@ -49,15 +49,23 @@
 
 package com.openexchange.rest.services.database.migrations;
 
+import static com.openexchange.database.DatabaseMocking.connection;
+import static com.openexchange.database.DatabaseMocking.verifyConnection;
+import static com.openexchange.database.DatabaseMocking.whenConnection;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import java.sql.Connection;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static com.openexchange.database.DatabaseMocking.*;
-
+import com.openexchange.rest.services.database.migrations.DBVersionChecker;
+import com.openexchange.rest.services.database.migrations.VersionChecker;
 
 /**
  * {@link VersionCheckerTest}
@@ -65,23 +73,23 @@ import static com.openexchange.database.DatabaseMocking.*;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class VersionCheckerTest {
-    
+
     private VersionChecker checker = null;
-    
+
     @Before
     public void setup() {
         checker = new DBVersionChecker();
     }
-    
+
     @Test
     public void versionMatch() throws OXException {
         Connection con = connection();
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").withParameter("com.openexchange.mySystem")
             .thenReturnColumns("version").withRow("abcdef");
-    
+
         assertNull(checker.isUpToDate(new Object(), con, "com.openexchange.mySystem", "abcdef"));
     }
-    
+
     @Test
     public void versionMismatch() throws OXException {
         Connection con = connection();
@@ -89,63 +97,63 @@ public class VersionCheckerTest {
             .thenReturnColumns("version").withRow("abcdef");
 
         String oldVersion = checker.isUpToDate(new Object(), con, "com.openexchange.mySystem", "ghijkl");
-        
+
         assertEquals("abcdef", oldVersion);
     }
-    
+
     @Test
     public void unknownModule() throws OXException {
         Connection con = connection();
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").withParameter("com.openexchange.mySystem").thenReturnColumns("version");
         assertNotNull(checker.isUpToDate(new Object(), con, "com.openexchange.mySystem", "ghijkl"));
     }
-    
+
     @Test
     public void upgradeVersion() throws OXException {
         Connection con = connection();
-        
+
         whenConnection(con).isQueried("UPDATE serviceSchemaVersion SET version = ? WHERE module = ? AND version = ?")
             .withParameter("ghijkl").andParameter("com.openexchange.mySystem").andParameter("abcdef").thenReturnModifiedRows(1);
         assertNull(checker.updateVersion(con, "com.openexchange.mySystem", "abcdef", "ghijkl"));
     }
-    
+
     @Test
     public void upgradeVersionFails() throws OXException {
         Connection con = connection();
-        
+
         whenConnection(con).isQueried("UPDATE serviceSchemaVersion SET version = ? WHERE module = ? AND version = ?")
             .withParameter("ghijkl").andParameter("com.openexchange.mySystem").andParameter("abcdef").thenReturnModifiedRows(0);
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").thenReturnColumns("ghijkl")
             .withParameter("com.openexchange.mySystem")
             .thenReturnColumns("version").withRow("ghijkl");
-        
+
         assertEquals("ghijkl", checker.updateVersion(con, "com.openexchange.mySystem", "abcdef", "ghijkl"));
     }
-    
+
     @Test
     public void upgradeVersionOfUnknownModule() throws OXException {
         Connection con = connection();
         whenConnection(con).isQueried("INSERT IGNORE INTO serviceSchemaVersion (module, version) VALUES (?, ?)")
             .withParameter("com.openexchange.mySystem").andParameter("ghijkl").thenReturnModifiedRows(1);
-        
+
         assertEquals(null, checker.updateVersion(con, "com.openexchange.mySystem", "", "ghijkl"));
     }
-    
+
     @Test
     public void failWhenVersionShouldBeKnownButIsnt() throws OXException {
         Connection con = connection();
-        
+
         whenConnection(con).isQueried("UPDATE serviceSchemaVersion SET version = ? WHERE module = ? AND version = ?")
             .withParameter("ghijkl").andParameter("com.openexchange.mySystem").andParameter("abcdef").thenReturnModifiedRows(0);
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").thenReturnColumns("ghijkl")
             .withParameter("com.openexchange.mySystem")
             .thenReturnColumns("version").andNoRows();
-        
+
         try {
             checker.updateVersion(con, "com.openexchange.mySystem", "abcdef", "ghijkl");
             fail("Should have exited with exception");
         } catch (OXException x) {
-            
+
         }
     }
 
@@ -154,36 +162,36 @@ public class VersionCheckerTest {
         Connection con = connection();
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").withParameter("com.openexchange.mySystem")
             .thenReturnColumns("version").withRow("abcdef");
-        
+
         Object id = new Object();
-        
+
         checker.isUpToDate(id, con, "com.openexchange.mySystem", "abcdef");
-        
+
         con = connection();
-        
+
         checker.isUpToDate(id, con, "com.openexchange.mySystem", "abcdef");
-        
+
         verifyNoMoreInteractions(con);
     }
-    
+
     @Test
     public void versionMismatchForcesReadthru() throws OXException {
         Connection con = connection();
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").withParameter("com.openexchange.mySystem")
             .thenReturnColumns("version").withRow("abcdef");
-        
+
         Object id = new Object();
-        
+
         checker.isUpToDate(id, con, "com.openexchange.mySystem", "abcdef");
-        
+
         con = connection();
         whenConnection(con).isQueried("SELECT version FROM serviceSchemaVersion WHERE module = ?").withParameter("com.openexchange.mySystem")
             .thenReturnColumns("version").withRow("ghijkl");
-        
+
         assertNull(checker.isUpToDate(id, con, "com.openexchange.mySystem", "ghijkl"));
-        
+
     }
-    
+
     @Test
     public void migrationMutexLock() throws OXException {
         Connection con = connection();
@@ -194,16 +202,16 @@ public class VersionCheckerTest {
 
         // SELECT LOCK, NO LOCK FOUND
         whenConnection(con).isQueried("SELECT 1 FROM serviceSchemaMigrationLock WHERE module = ?").withParameter("com.openexchange.myModule").thenReturnColumns("1").andNoRows();
-    
+
         // CREATE LOCK
         whenConnection(con).isQueried("INSERT IGNORE INTO serviceSchemaMigrationLock (module, expires) VALUES (?, ?)")
             .withParameter("com.openexchange.myModule")
             .withParameter(expires)
             .thenReturnModifiedRows(1);
-        
+
         assertTrue(checker.lock(con, "com.openexchange.myModule", now, expires));
     }
-    
+
     @Test
     public void migrationMutexLockAlreadyLocked() throws OXException {
         Connection con = connection();
@@ -214,11 +222,10 @@ public class VersionCheckerTest {
 
         // SELECT LOCK, LOCK FOUND
         whenConnection(con).isQueried("SELECT 1 FROM serviceSchemaMigrationLock WHERE module = ?").withParameter("com.openexchange.myModule").thenReturnColumns("1").andRow(1);
-    
-        
+
         assertFalse(checker.lock(con, "com.openexchange.myModule", now, expires));
     }
-    
+
     @Test
     public void migrationMutextRaceCondition() throws OXException {
         Connection con = connection();
@@ -229,20 +236,20 @@ public class VersionCheckerTest {
 
         // SELECT LOCK, NO LOCK FOUND
         whenConnection(con).isQueried("SELECT 1 FROM serviceSchemaMigrationLock WHERE module = ?").withParameter("com.openexchange.myModule").thenReturnColumns("1").andNoRows();
-    
+
         // CREATE LOCK
         whenConnection(con).isQueried("INSERT IGNORE INTO serviceSchemaMigrationLock (module, expires) VALUES (?, ?)")
             .withParameter("com.openexchange.myModule")
             .withParameter(expires)
             .thenReturnModifiedRows(0);
-        
+
         assertFalse(checker.lock(con, "com.openexchange.myModule", now, expires));
     }
-    
+
     @Test
     public void migrationMutexUnlock() throws OXException {
         Connection con = connection();
-        
+
         checker.unlock(con, "com.openexchange.myModule");
 
         verifyConnection(con).receivedQuery("DELETE FROM serviceSchemaMigrationLock WHERE module = ?").withParameter("com.openexchange.myModule");
@@ -251,27 +258,26 @@ public class VersionCheckerTest {
     @Test
     public void migrationMutexKeepAlive() throws OXException {
         Connection con = connection();
-        
+
         whenConnection(con).isQueried("UPDATE serviceSchemaMigrationLock SET expires = ? WHERE module = ?")
             .withParameter(12l)
             .withParameter("com.openexchange.myModule")
             .thenReturnModifiedRows(1);
-        
+
         assertTrue(checker.touchLock(con, "com.openexchange.myModule", 12));
     }
-    
+
     @Test
     public void migrationMutexKeepAliveIsGone() throws OXException {
         Connection con = connection();
-        
+
         whenConnection(con).isQueried("UPDATE serviceSchemaMigrationLock SET expires = ? WHERE module = ?")
             .withParameter(12l)
             .withParameter("com.openexchange.myModule")
             .thenReturnModifiedRows(0);
-        
+
         assertFalse(checker.touchLock(con, "com.openexchange.myModule", 12));
-        
+
     }
-    
-    
+
 }

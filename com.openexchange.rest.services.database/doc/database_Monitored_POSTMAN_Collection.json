@@ -1,0 +1,39 @@
+{
+  "id": "79ea6974-2962-b11f-a0b4-7612d3f25e77",
+  "name": "REST Database (Monitored)",
+  "timestamp": 1425473974183,
+  "order": [
+    "5c92f120-7537-a9f8-f8cf-b1b4d7cb6c1d",
+    "723619cf-d05e-437d-6709-ce6f2a0a0517"
+  ],
+  "requests": [
+    {
+      "collectionId": "79ea6974-2962-b11f-a0b4-7612d3f25e77",
+      "id": "5c92f120-7537-a9f8-f8cf-b1b4d7cb6c1d",
+      "name": "Update OX db in Monitored",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/pool/r/1243/w/16/test-ox-dbHEAD_24/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"UPDATE user SET preferredLanguage=? WHERE id = ? AND cid = ?;\",\n    \"params\" : [\"el_GR\", 4126, 424242669]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426162731101
+    },
+    {
+      "collectionId": "79ea6974-2962-b11f-a0b4-7612d3f25e77",
+      "id": "723619cf-d05e-437d-6709-ce6f2a0a0517",
+      "name": "Read from OX db in Monitored",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/pool/r/1243/w/16/test-ox-dbHEAD_24/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"SELECT id, mail, preferredLanguage FROM user WHERE cid = ? AND id = ?\",\n    \"params\" : [424242669, 4126]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426162714445
+    }
+  ]
+}

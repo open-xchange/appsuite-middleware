@@ -1,38 +1,43 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: REST Services
+Bundle-Name: Open-Xchange  REST Services Bundle
 Bundle-SymbolicName: com.openexchange.rest.services
 Bundle-Version: 7.8.0
-Bundle-Activator: com.openexchange.rest.services.osgi.RESTServicesActivator
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.fasterxml.jackson.core,
- com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.format,
- com.fasterxml.jackson.core.io,
- com.fasterxml.jackson.core.json,
- com.fasterxml.jackson.core.sym,
- com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.eclipsesource.jaxrs.publisher,
+ com.openexchange.ajax,
+ com.openexchange.ajax.login,
  com.openexchange.ajax.requesthandler,
- com.openexchange.ajax.tools,
- com.openexchange.annotation,
  com.openexchange.config,
- com.openexchange.conversion.simple,
+ com.openexchange.configuration,
  com.openexchange.exception,
+ com.openexchange.groupware.contexts,
  com.openexchange.java,
+ com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools.servlet,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
+ javax.annotation;version="1.2.0",
+ javax.annotation.security,
  javax.servlet,
  javax.servlet.http,
+ javax.ws.rs,
+ javax.ws.rs.container,
+ javax.ws.rs.core,
+ javax.ws.rs.ext,
+ org.glassfish.jersey.server,
+ org.glassfish.jersey.server.model,
  org.json,
  org.osgi.framework,
+ org.osgi.service.cm,
  org.osgi.service.http,
+ org.osgi.util.tracker,
  org.slf4j
+Bundle-ActivationPolicy: lazy
+Export-Package: com.openexchange.rest.services
+Bundle-Activator: com.openexchange.rest.services.osgi.Activator
 Bundle-ClassPath: .
-Export-Package: com.openexchange.rest.services,
- com.openexchange.rest.services.annotations,
- com.openexchange.rest.services.osgiservice
