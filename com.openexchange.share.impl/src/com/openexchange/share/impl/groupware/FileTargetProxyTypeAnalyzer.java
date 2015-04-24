@@ -50,6 +50,8 @@
 package com.openexchange.share.impl.groupware;
 
 import com.openexchange.file.storage.File;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -63,11 +65,16 @@ import com.openexchange.share.groupware.TargetProxyType;
 public class FileTargetProxyTypeAnalyzer {
 
     public static TargetProxyType analyzeType(File file) {
-
-        String fileMIMEType = file.getFileMIMEType();
-
+        String mimeType = null;
+        if (false == Strings.isEmpty(file.getFileName())) {
+            mimeType = MimeType2ExtMap.getContentType(file.getFileName(), null);
+        }
+        if (null == mimeType) {
+            mimeType = file.getFileMIMEType();
+        }
+        
         //minimalistic distinction between images and other types 
-        if(fileMIMEType.startsWith("image")) {
+        if (null != mimeType && mimeType.startsWith("image")) {
             return DriveTargetProxyType.IMAGE;
         }
         

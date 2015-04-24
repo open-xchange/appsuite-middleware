@@ -27,7 +27,9 @@ postFix() {
     GLOBIGNORE='*'
 
     # SoftwareChange_Request-1992
-    ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
+    if dpkg --compare-versions "7.6.0-0" gt-nl "$1"; then
+        ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
+    fi
 }
 
 case "$1" in

@@ -293,7 +293,7 @@ public class ShareTool {
             return prepareGuestUser(sharingUser, copiedUser);
         }
         /*
-         * prepare new guest user for recipient
+         * prepare new guest user for recipient & set "was created" marker
          */
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName(recipient.getDisplayName());
@@ -301,6 +301,7 @@ public class ShareTool {
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
         guestUser.setUserPassword(ShareTool.INITIAL_GUEST_PASSWORD);
+        recipient.setWasCreated(true);
         return guestUser;
     }
 

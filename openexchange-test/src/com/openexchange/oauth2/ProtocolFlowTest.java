@@ -153,12 +153,13 @@ public class ProtocolFlowTest extends EndpointTest {
             .setParameter("state", csrfState)
             .build());
         HttpResponse authorizationResponse = client.execute(authorizationRequest);
+        authorizationRequest.releaseConnection();
         String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URIBuilder authenticationRequestURI = prepareAuthenticationRequest(redirectLocation);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI.build());
+        HttpPost authenticationRequest = prepareAuthenticationRequest(redirectLocation);
         authenticationRequest.setHeader(HttpHeaders.REFERER, authorizationRequest.getURI().toString());
 
         HttpResponse authCodeResponse = client.execute(authenticationRequest);
+        authenticationRequest.releaseConnection();
 
 
 
@@ -209,12 +210,12 @@ public class ProtocolFlowTest extends EndpointTest {
         HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
 
         HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
+        authorizationGetRequest.releaseConnection();
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
         assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
 
         String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URIBuilder authenticationRequestURI = prepareAuthenticationRequest(redirectLocation);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI.build());
+        HttpPost authenticationRequest = prepareAuthenticationRequest(redirectLocation);
         authenticationRequest.setHeader(HttpHeaders.REFERER, authorizationGetRequest.getURI().toString());
 
         HttpResponse authCodeResponse = client.execute(authenticationRequest);
