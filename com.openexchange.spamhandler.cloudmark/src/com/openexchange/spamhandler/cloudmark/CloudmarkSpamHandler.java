@@ -105,7 +105,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
                     if (isEmpty(targetSpamEmailAddress)) {
-                        LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetHamEmailAddress', cannot process ham reporting to server.");
+                        LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress', cannot process spam reporting to server.");
                     } else {
                         transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetSpamEmailAddress, true) });
                     }
