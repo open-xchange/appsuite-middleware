@@ -754,7 +754,7 @@ public class DefaultShareService implements ShareService {
         UserService userService = services.getService(UserService.class);
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
-             * re-use existing, non-anonymous guest user if possible
+             * re-use existing, non-anonymous guest user from this context if possible
              */
             GuestRecipient guestRecipient = (GuestRecipient) recipient;
             User existingUser = null;
@@ -787,11 +787,9 @@ public class DefaultShareService implements ShareService {
                 }
                 return existingUser;
             }
-            // the user didn't exist already and has to be created so we toggle the GuestRecipient flag
-            guestRecipient.setWasCreated(true);
         }
         /*
-         * create new guest user & contact
+         * create new guest user & contact in this context
          */
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient);

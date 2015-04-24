@@ -161,7 +161,7 @@ public class PasswordResetServlet extends HttpServlet {
                     .setTransportInfo(new InternetAddress(mailAddress, true))
                     .setLinkProvider(linkProvider)
                     .setGuestContext(guestInfo.getContextID())
-                    .setGuestContext(guestInfo.getGuestID())
+                    .setGuestID(guestInfo.getGuestID())
                     .setLocale(guest.getLocale())
                     .setShareToken(token)
                     .setConfirm(hash)
