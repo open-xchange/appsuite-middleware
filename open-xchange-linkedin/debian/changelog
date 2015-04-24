@@ -1,3 +1,9 @@
+open-xchange-linkedin (7.6.2-8) stable; urgency=medium
+
+  * Build for patch 2015-09-09 (2495)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Apr 2015 09:50:46 +0200
+
 open-xchange-linkedin (7.6.2-7) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2474)
