@@ -661,8 +661,24 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return guestPermission;
     }
 
+    protected static OCLGuestPermission createNamedGuestPermission(String emailAddress, String displayName) {
+        OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
+        guestPermission.setAllPermission(
+            OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
+        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
+        return guestPermission;
+    }
+
     protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName, String password) {
         OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName, password);
+        guestPermission.setAllPermission(
+            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createNamedAuthorPermission(String emailAddress, String displayName) {
+        OCLGuestPermission guestPermission = createNamedPermission(emailAddress, displayName);
         guestPermission.setAllPermission(
             OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
@@ -675,6 +691,18 @@ public abstract class ShareTest extends AbstractAJAXSession {
         guestRecipient.setEmailAddress(emailAddress);
         guestRecipient.setDisplayName(displayName);
         guestRecipient.setPassword(password);
+        guestPermission.setRecipient(guestRecipient);
+        guestPermission.setGroupPermission(false);
+        guestPermission.setFolderAdmin(false);
+        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
+        return guestPermission;
+    }
+
+    protected static OCLGuestPermission createNamedPermission(String emailAddress, String displayName) {
+        OCLGuestPermission guestPermission = new OCLGuestPermission();
+        GuestRecipient guestRecipient = new GuestRecipient();
+        guestRecipient.setEmailAddress(emailAddress);
+        guestRecipient.setDisplayName(displayName);
         guestPermission.setRecipient(guestRecipient);
         guestPermission.setGroupPermission(false);
         guestPermission.setFolderAdmin(false);
