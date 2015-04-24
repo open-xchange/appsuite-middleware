@@ -67,6 +67,7 @@ import com.openexchange.ajax.share.tests.GetALinkTest;
 import com.openexchange.ajax.share.tests.GetTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
+import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.InviteTest;
 import com.openexchange.ajax.share.tests.MailNotificationTest;
@@ -114,6 +115,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(GetTest.class);
         tests.addTestSuite(GuestAutologinTest.class);
         tests.addTestSuite(ConvertToInternalPermissionTest.class);
+        tests.addTestSuite(EmptyGuestPasswordTest.class);
         return tests;
     }
 
