@@ -126,7 +126,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @return The return value
      */
     public R execute(final String[] args) {
-        Options options = new ReservedOptions();
+        Options options = newOptions();
         boolean error = true;
         try {
             // Option for help

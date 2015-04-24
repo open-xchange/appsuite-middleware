@@ -61,6 +61,9 @@ import org.apache.commons.cli.Options;
  */
 public abstract class AbstractCLI {
 
+    /** The associated options */
+    protected Options options;
+
     /**
      * Initializes a new {@link AbstractCLI}.
      */
@@ -68,6 +71,16 @@ public abstract class AbstractCLI {
         super();
     }
 
+    /**
+     * Creates an initially empty {@link ReservedOptions} instance.
+     *
+     * @return The new options
+     */
+    protected ReservedOptions newOptions() {
+        ReservedOptions options = new ReservedOptions();
+        this.options = options;
+        return options;
+    }
 
     /**
      * Checks other mandatory options.

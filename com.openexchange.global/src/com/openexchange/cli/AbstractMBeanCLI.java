@@ -92,7 +92,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      * @return The return value
      */
     public R execute(final String[] args) {
-        final Options options = new ReservedOptions();
+        final Options options = newOptions();
         boolean error = true;
         try {
             // Option for help
