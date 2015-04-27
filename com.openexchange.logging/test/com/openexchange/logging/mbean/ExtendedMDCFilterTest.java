@@ -81,6 +81,7 @@ public class ExtendedMDCFilterTest {
         whitelist.add("com.openexchange.b");
         ExtendedMDCFilter filter = new ExtendedMDCFilter(whitelist);
         filter.addTuple("context", "3");
+        filter.addLogger("com.openexchange.b", Level.TRACE);
         Logger logger = mock(Logger.class);
         when(logger.getName()).thenReturn("org.apache.some.Logger", "com.openexchange.a.some.Logger", "com.openexchange.b.some.Logger");
 
@@ -100,8 +101,9 @@ public class ExtendedMDCFilterTest {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
         filter.addTuple("user", "5");
         filter.addTuple("context", "3");
+        filter.addLogger("com.openexchange.b", Level.TRACE);
         Logger logger = mock(Logger.class);
-        when(logger.getName()).thenReturn("com.openexchange");
+        when(logger.getName()).thenReturn("com.openexchange.b.some.Logger");
         Assert.assertEquals(FilterReply.NEUTRAL, filter.decide(null, logger, Level.TRACE, "Some message", null, null));
 
         try {
@@ -117,8 +119,9 @@ public class ExtendedMDCFilterTest {
     public void testSingleTupleBasedFiltering() throws Exception {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
         filter.addTuple("context", "3");
+        filter.addLogger("com.openexchange.a", Level.TRACE);
         Logger logger = mock(Logger.class);
-        when(logger.getName()).thenReturn("com.openexchange");
+        when(logger.getName()).thenReturn("com.openexchange.a.some.logger");
         Assert.assertEquals(FilterReply.NEUTRAL, filter.decide(null, logger, Level.TRACE, "Some message", null, null));
 
         try {
