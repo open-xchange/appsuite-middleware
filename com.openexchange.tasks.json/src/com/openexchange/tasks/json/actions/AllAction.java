@@ -100,7 +100,7 @@ public class AllAction extends TaskAction {
         int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
         int[] columnsToLoad = removeVirtualColumns(columns);
         int folderId = req.checkInt(AJAXServlet.PARAMETER_FOLDERID);
-        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
+        int orderBy = getOrderBy(req);
         Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
         int leftHandLimit = req.optInt(AJAXServlet.LEFT_HAND_LIMIT);
         int rightHandLimit = req.optInt(AJAXServlet.RIGHT_HAND_LIMIT);

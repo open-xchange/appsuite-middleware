@@ -146,6 +146,25 @@ public abstract class TaskAction implements AJAXActionService {
         }
         return tmp.toArray();
     }
+    
+    /**
+     * Gets the column identifier to use for sorting the results if defined. If a virtual identifier is passed from the client, it is
+     * implicitly mapped to the corresponding real column identifier.
+     * 
+     * @param request The task request to get the order by information
+     * @return The column identifier to use for sorting the results, or {@link TaskRequest#NOT_FOUND} if not set
+     */
+    protected int getOrderBy(TaskRequest request) throws OXException {
+        int sort = request.optInt(AJAXServlet.PARAMETER_SORT);
+        if (TaskRequest.NOT_FOUND != sort) {
+            if (Task.START_TIME == sort) {
+                return Task.START_DATE;
+            } else if (Task.END_TIME == sort) {
+                return Task.END_DATE;
+            }
+        }
+        return sort;
+    }
 
     /**
      * Gets the result filled with JSON <code>NULL</code>.

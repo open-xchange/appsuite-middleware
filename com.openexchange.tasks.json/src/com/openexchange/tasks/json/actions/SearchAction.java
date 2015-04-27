@@ -119,7 +119,7 @@ public class SearchAction extends TaskAction {
             searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
         }
 
-        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
+        int orderBy = getOrderBy(req);
         Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
 
         //if (jsonObj.has("limit")) {
