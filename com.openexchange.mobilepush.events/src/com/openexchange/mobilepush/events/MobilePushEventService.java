@@ -49,10 +49,6 @@
 
 package com.openexchange.mobilepush.events;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
-
 /**
  * {@link MobilePushEventService}
  *
@@ -79,13 +75,4 @@ public interface MobilePushEventService {
      * @param publisher
      */
     void notifySubscribers(MobilePushEvent publisher);
-
-    /**
-     * Notifies a list of context users without a valid session to login again.
-     *
-     * @param contextUsers
-     * @return
-     * @throws OXException
-     */
-    void notifyLogin(List<ContextUsers> contextUsers) throws OXException;
 }

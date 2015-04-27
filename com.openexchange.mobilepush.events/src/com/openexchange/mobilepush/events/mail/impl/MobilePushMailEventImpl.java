@@ -73,8 +73,6 @@ import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
 import com.openexchange.mobilepush.events.osgi.Services;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
-import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
@@ -315,30 +313,6 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 publisher.publish(event);
             }
         }
-    }
-
-    @Override
-    public void notifyLogin(final List<ContextUsers> contextUsers) throws OXException {
-        MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
-
-        //Currently blocked for seven days (configurable?)
-        long timeToWait = 1000 * 60 * 60 * 24 * 7;
-        mnss.blockLoginPush(contextUsers, timeToWait);
-
-        Map<String, Object> props = getLoginMessagePayload();
-        MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, props);
-        // GCM specific key
-        loginEvent.setCollapseKey("LOGIN");
-        for (MobilePushPublisher publisher : publishers) {
-            LOG.debug("Publishing new login event: {}", contextUsers);
-            publisher.multiPublish(loginEvent);
-        }
-    }
-
-    private Map<String, Object> getLoginMessagePayload() {
-        Map<String, Object> props = new HashMap<String, Object>(2);
-        props.put("message", "You've received a new login");
-        return props;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------

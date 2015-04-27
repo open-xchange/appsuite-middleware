@@ -61,11 +61,4 @@ public interface MobilePushPublisher {
      * @param event the MobileNotifyEvent
      */
     void publish(MobilePushEvent event);
-
-    /**
-     * Publishes an event to context users
-     *
-     * @param event The event that should be published to the given context users
-     */
-    void multiPublish(MobilePushEvent event);
 }

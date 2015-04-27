@@ -85,18 +85,6 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushGCMPublisherImpl.class);
 
     @Override
-    public void multiPublish(MobilePushEvent event) {
-        List<String> subscriptions = null;
-        try {
-            MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class);
-            subscriptions = mnss.getTokens(event.getContextUsers(), SERVICE_ID, event.getProvider());
-        } catch (OXException e) {
-            LOG.error("Could not get subscription {}", SERVICE_ID, e);
-        }
-        publishByContextUsers(subscriptions, event);
-    }
-
-    @Override
     public void publish(MobilePushEvent event) {
         List<Subscription> subscriptions = null;
         try {
@@ -106,48 +94,6 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
             LOG.error("Could not get subscription {}", SERVICE_ID, e);
         }
         publishBySubscriptions(subscriptions, event);
-    }
-
-    private void publishByContextUsers(List<String> subscriptions, MobilePushEvent loginEvent) {
-        if (subscriptions != null && subscriptions.size() > 0) {
-            Sender sender = null;
-            try {
-                sender = getSender();
-            } catch (OXException e) {
-                LOG.error("Error getting GCM sender", e);
-            }
-            if (null == sender) {
-                return;
-            }
-            for (int i = 0; i < subscriptions.size(); i += MULTICAST_LIMIT) {
-                /*
-                 * prepare chunk
-                 */
-                int length = Math.min(subscriptions.size(), i + MULTICAST_LIMIT) - i;
-                List<String> registrationIDs = new ArrayList<String>(length);
-                for (int j = 0; j < length; j++) {
-                    registrationIDs.add(subscriptions.get(i + j));
-                }
-                /*
-                 * send chunk
-                 */
-                if (0 < registrationIDs.size()) {
-                    MulticastResult result = null;
-                    try {
-                        result = sender.sendNoRetry(getMessage(loginEvent), registrationIDs);
-                    } catch (IOException e) {
-                        LOG.warn("error publishing mobile notification event", e);
-                    }
-                    if (null != result) {
-                        LOG.debug("{}", result);
-                    }
-                    /*
-                     * process results
-                     */
-                    processResult(loginEvent, registrationIDs, result);
-                }
-            }
-        }
     }
 
     private void publishBySubscriptions(List<Subscription> subscriptions, MobilePushEvent event) {
@@ -287,19 +233,10 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
     private static void updateRegistrationIDs(MobilePushEvent event, String oldRegistrationID, String newRegistrationID) {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
-            if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
-                int contextId = MailPushUtility.getContextIdForToken(event.getContextUsers(), oldRegistrationID);
-                if (contextId > -1 && true == mnss.updateToken(contextId, oldRegistrationID, SERVICE_ID, newRegistrationID)) {
-                    LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
-                } else {
-                    LOG.warn("Registration ID {} not updated.", oldRegistrationID);
-                }
+            if (mnss.updateToken(event.getContextId(), oldRegistrationID, SERVICE_ID, newRegistrationID)) {
+                LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
             } else {
-                if (mnss.updateToken(event.getContextId(), oldRegistrationID, SERVICE_ID, newRegistrationID)) {
-                    LOG.info("Successfully updated registration ID from {} to {}", oldRegistrationID, newRegistrationID);
-                } else {
-                    LOG.warn("Registration ID {} not updated.", oldRegistrationID);
-                }
+                LOG.warn("Registration ID {} not updated.", oldRegistrationID);
             }
         } catch (OXException e) {
             LOG.error("Error updating registration IDs", e);
@@ -310,24 +247,12 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
         try {
             MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
             /**
-             * Removes subscriptions for a set of context users, happens if the 'new login' request is fired
+             * Removes subscriptions for a user for the given registration id
              */
-            if (event.getContextUsers() != null && false == event.getContextUsers().isEmpty()) {
-                int contextId = MailPushUtility.getContextIdForToken(event.getContextUsers(), registrationID);
-                if (contextId > -1 && true == mnss.deleteSubscription(contextId, registrationID, SERVICE_ID)) {
-                    LOG.info("Successfully removed registration ID {}.", registrationID);
-                } else {
-                    LOG.warn("Registration ID {} not removed.", registrationID);
-                }
-                /**
-                 * Removes subscriptions for a user for the given registration id
-                 */
+            if (true == mnss.deleteSubscription(event.getContextId(), registrationID, SERVICE_ID)) {
+                LOG.info("Successfully removed registration ID {}.", registrationID);
             } else {
-                if (true == mnss.deleteSubscription(event.getContextId(), registrationID, SERVICE_ID)) {
-                    LOG.info("Successfully removed registration ID {}.", registrationID);
-                } else {
-                    LOG.warn("Registration ID {} not removed.", registrationID);
-                }
+                LOG.warn("Registration ID {} not removed.", registrationID);
             }
         } catch (OXException e) {
             LOG.error("Error removing registrations", e);
