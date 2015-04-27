@@ -1632,7 +1632,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             result = stmt.executeQuery();
             if (result.next()) {
                 int userId = result.getInt(2);
-                throw new InvalidDataException("Primary mail address \"" + mail + "\" already exists in context " + contextId + " (Aready assigned to user " + userId + ").");
+                throw new InvalidDataException("Primary mail address \"" + mail + "\" already exists in context " + contextId + " (Already assigned to user " + userId + ").");
             }
         } catch (SQLException e) {
             log.error("SQL Error", e);
