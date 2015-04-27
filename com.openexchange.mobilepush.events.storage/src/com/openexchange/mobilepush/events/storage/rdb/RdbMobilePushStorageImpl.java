@@ -54,7 +54,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -63,10 +62,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilepush.MobilePushExceptionCodes;
 import com.openexchange.mobilepush.MobilePushProviders;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.events.storage.Subscription;
-import com.openexchange.mobilepush.events.storage.UserToken;
 import com.openexchange.mobilepush.events.storage.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.sql.DBUtils;
@@ -150,102 +147,6 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
             stmt.setString(4, serviceId);
             stmt.setString(5, token);
             return Statements.logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    @Override
-    public boolean blockLoginPush(List<ContextUsers> contextUsers, long blockUntil) throws OXException {
-        for (ContextUsers cu : contextUsers) {
-            int contextId = cu.getContextId();
-            Connection connection = databaseService.getWritable(contextId);
-            try {
-                touchBlockUntilTimestamp(connection, contextId, cu.getUserTokens(), blockUntil);
-            } catch (SQLException e) {
-                throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } finally {
-                databaseService.backWritable(contextId, connection);
-            }
-        }
-        return false;
-    }
-
-    private static int touchBlockUntilTimestamp(Connection connection, int contextId, List<UserToken> userTokens, long blockUntil) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(Statements.UPDATE_LAST_PUSH_LOGIN_TIMESTAMP(userTokens.size()));
-            int index = 0;
-            //UPDATE ... SET:
-            stmt.setLong(++index, System.currentTimeMillis() + blockUntil);
-            //WHERE:
-            stmt.setInt(++index, contextId);
-            //IN(?, ?, ...)
-            for (UserToken userToken : userTokens) {
-                stmt.setInt(++index, userToken.getUserId());
-            }
-            return Statements.logExecuteUpdate(stmt);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    @Override
-    public List<ContextUsers> getSubscriptions(MobilePushProviders provider, boolean isLoginPush) throws OXException {
-        ContextService contextService = Services.getService(ContextService.class);
-        Set<Integer> allContextIDs = new HashSet<Integer>(contextService.getAllContextIds());
-        List<ContextUsers> contextUser = new LinkedList<ContextUsers>();
-        if (false == allContextIDs.isEmpty()) {
-            Set<Integer> alreadyProcessed = new HashSet<Integer>();
-            for (Iterator<Integer> iter = allContextIDs.iterator(); iter.hasNext();) {
-                Integer iContextId = iter.next();
-                if (!alreadyProcessed.contains(iContextId)) {
-                    int contextId = iContextId.intValue();
-                    Connection connection = databaseService.getReadOnly(contextId);
-                    try {
-                        selectAllSubscription(connection, provider, contextId, contextUser, isLoginPush);
-                    } catch (SQLException e) {
-                        if ("42S02".equals(e.getSQLState())) {
-                            // "Table 'mobileEventSubscriptions' doesn't exist" => no update task for tables in this schema yet, so ignore
-                        } else {
-                            throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                        }
-                    } finally {
-                        databaseService.backReadOnly(contextId, connection);
-                    }
-
-                    /*
-                     * Remember processed contexts
-                     */
-                    int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId);
-                    for (int cid : contextsInSameSchema) {
-                        alreadyProcessed.add(Integer.valueOf(cid));
-                    }
-                }
-            }
-        }
-        return contextUser;
-    }
-
-    private void selectAllSubscription(Connection connection, MobilePushProviders provider, int currentCtx, List<ContextUsers> contextUser, boolean rejectLoginPush) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = connection.prepareStatement(Statements.SELECT_SUBSCRIPTIONS(rejectLoginPush));
-            stmt.setString(1, provider.getProviderName());
-
-            ResultSet results = stmt.executeQuery();
-            List<UserToken> userIds = new LinkedList<UserToken>();
-            int contextId = -1;
-
-            while (results.next()) {
-                contextId = results.getInt(1);
-                int userId = results.getInt(2);
-                String token = results.getString(3);
-                userIds.add(new UserToken(userId, token));
-            }
-            if (false == userIds.isEmpty() && contextId != -1) {
-                contextUser.add(new ContextUsers(contextId, userIds));
-            }
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }
@@ -364,50 +265,6 @@ public class RdbMobilePushStorageImpl implements MobilePushStorageService {
                 subscriptions.add(new Subscription(cid, resUserId, resToken, resService, MobilePushProviders.parseProvider(resProvider), resTimestamp));
             }
             return subscriptions;
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-        }
-    }
-
-    @Override
-    public List<String> getTokens(List<ContextUsers> contextUser, String serviceId, MobilePushProviders provider) throws OXException {
-        List<String> subscriptions = new LinkedList<String>();
-        if (false == contextUser.isEmpty()) {
-            for (ContextUsers cu : contextUser) {
-                int contextId = cu.getContextId();
-                Connection connection = databaseService.getReadOnly(contextId);
-                try {
-                    subscriptions.addAll(selectTokensFromContext(connection, contextId, cu.getUserTokens(), serviceId, provider));
-                } catch (SQLException e) {
-                    throw MobilePushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-                } finally {
-                    databaseService.backReadOnly(contextId, connection);
-                }
-            }
-        }
-        return subscriptions;
-    }
-
-    private List<String> selectTokensFromContext(Connection connection, int contextId, List<UserToken> userTokens, String serviceId, MobilePushProviders provider) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            List<String> tokens = new LinkedList<String>();
-
-            stmt = connection.prepareStatement(Statements.SELECT_TOKENS);
-
-            for (UserToken userToken : userTokens) {
-                int index = 0;
-                stmt.setInt(++index, contextId);
-                stmt.setInt(++index, userToken.getUserId());
-                stmt.setString(++index, provider.getProviderName());
-                stmt.setString(++index, serviceId);
-
-                ResultSet results = Statements.logExecuteQuery(stmt);
-                while (results.next()) {
-                    tokens.add(results.getString(1));
-                }
-            }
-            return tokens;
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }

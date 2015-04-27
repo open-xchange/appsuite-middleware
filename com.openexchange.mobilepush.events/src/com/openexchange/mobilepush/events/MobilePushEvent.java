@@ -49,10 +49,8 @@
 
 package com.openexchange.mobilepush.events;
 
-import java.util.List;
 import java.util.Map;
 import com.openexchange.mobilepush.MobilePushProviders;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
 
 /**
  * {@link MobilePushEvent}
@@ -73,14 +71,6 @@ public interface MobilePushEvent {
      * @return the provider of the subscription
      */
     MobilePushProviders getProvider();
-
-    /**
-     * This should be set if the user doesn't have a valid session.
-     *
-     * @return the provider of the subscription
-     */
-    List<ContextUsers> getContextUsers();
-
     /**
      * The context id
      *

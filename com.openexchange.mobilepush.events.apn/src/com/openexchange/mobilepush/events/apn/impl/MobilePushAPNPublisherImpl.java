@@ -70,7 +70,6 @@ import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
 import com.openexchange.mobilepush.events.apn.APNAccess;
 import com.openexchange.mobilepush.events.apn.osgi.Services;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.events.storage.Subscription;
 
@@ -104,34 +103,6 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
 
     private APNAccess getAccess() throws OXException {
         return apnAccess;
-    }
-
-    @Override
-    public void multiPublish(MobilePushEvent loginEvent) {
-        List<String> tokens = null;
-        try {
-            MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class);
-            tokens = mnss.getTokens(loginEvent.getContextUsers(), SERVICE_ID, loginEvent.getProvider());
-        } catch (OXException e) {
-            LOG.debug("Could not get subscription: {}", SERVICE_ID, e);
-        }
-        if (null != tokens && 0 < tokens.size()) {
-            List<PayloadPerDevice> payloads = getPayloadsForLoginRequest(loginEvent, tokens);
-            if (0 < payloads.size()) {
-                PushedNotifications notifications = null;
-                try {
-                    APNAccess access = getAccess();
-                    notifications = Push.payloads(access.getKeystore(), access.getPassword(), access.isProduction(), payloads);
-                } catch (CommunicationException e) {
-                    LOG.warn("error submitting push notifications", e);
-                } catch (KeystoreException e) {
-                    LOG.warn("error submitting push notifications", e);
-                } catch (OXException e) {
-                    LOG.warn("error submitting push notifications", e);
-                }
-                processNotificationResults(loginEvent, notifications);
-            }
-        }
     }
 
     @Override
@@ -214,24 +185,6 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
         LOG.info("Finished processing APN feedback for ''{}'' after {} ms.", "apn", (System.currentTimeMillis() - start));
     }
 
-    private List<PayloadPerDevice> getPayloadsForLoginRequest(MobilePushEvent event, List<String> tokens) {
-        List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(tokens.size());
-        for (String token : tokens) {
-            try {
-                Payload payload = NewsstandNotificationPayload.contentAvailable();
-                payload.addCustomDictionary("message", "You've received a new login");
-                payload.addCustomDictionary("SYNC_EVENT", "LOGIN");
-                payloads.add(new PayloadPerDevice(payload, token));
-            } catch (JSONException e) {
-                LOG.warn("error constructing payload", e);
-            } catch (InvalidDeviceTokenFormatException e) {
-                LOG.warn("Invalid device token: '{}', removing from subscription store.", token, e);
-                removeSubscription(event, token);
-            }
-        }
-        return payloads;
-    }
-
     private List<PayloadPerDevice> getPayloads(MobilePushEvent event, List<Subscription> subscriptions) {
         List<PayloadPerDevice> payloads = new ArrayList<PayloadPerDevice>(subscriptions.size());
         for (Subscription subscription : subscriptions) {
@@ -290,13 +243,7 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
 
     private boolean removeSubscription(MobilePushEvent event, String token) {
         try {
-            List<ContextUsers> contextUsers = event.getContextUsers();
-            if (contextUsers != null && contextUsers.isEmpty()) {
-                int contextId = MailPushUtility.getContextIdForToken(contextUsers, token);
-                return Services.getService(MobilePushStorageService.class, true).deleteSubscription(contextId, token, SERVICE_ID);
-            } else {
-                return Services.getService(MobilePushStorageService.class, true).deleteSubscription(event.getContextId(), token, SERVICE_ID);
-            }
+            return Services.getService(MobilePushStorageService.class, true).deleteSubscription(event.getContextId(), token, SERVICE_ID);
         } catch (OXException e) {
             LOG.error("Error removing subscription", e);
         }

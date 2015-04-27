@@ -122,37 +122,4 @@ public interface MobilePushStorageService {
      * @return a list of subscription
      */
     List<Subscription> getSubscriptions(int contextId, int userId, String serviceId, MobilePushProviders provider) throws OXException;
-
-    /**
-     * Gets all subscriptions for the specified provider
-     *
-     * @param provider - The provider
-     * @param isLoginPush <code>true</code> rejects a new push to if the time in database
-     * field <code>blockLoginPushUntil</code> is not reached; <code>false</code> if field should not be evaluated.
-     * @return list of ContextUsers
-     * @throws OXException
-     */
-    List<ContextUsers> getSubscriptions(MobilePushProviders provider, boolean isLoginPush) throws OXException;
-
-    /**
-     * Updates the blockLoginPushUntil timestamp in the database. The user will get no push notification until the limit is reached.
-     *
-     * @param contextId the context id
-     * @param userId the userId
-     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
-     * @return <code>true</code> if the timestamp is successfully updated; <code>false</code> if not
-     * @throws OXException - If an database error occured
-     */
-    boolean blockLoginPush(List<ContextUsers> contextUser, long blockLoginPushUntil) throws OXException;
-
-    /**
-     * Gets a list of tokens for the specified list of context users, serviceId an provider
-     *
-     * @param contextUser - The contexts and users for which the tokens will be requested
-     * @param serviceId - The serviceId of the push service e.g. <ul><li>gcm</li><li>apn</li><li>apn.macos</li></ul>
-     * @param provider - The provider
-     * @return a list of tokens for the specified list of context users.
-     * @throws OXException
-     */
-    List<String> getTokens(List<ContextUsers> contextUser, String serviceId, MobilePushProviders provider) throws OXException;
 }
