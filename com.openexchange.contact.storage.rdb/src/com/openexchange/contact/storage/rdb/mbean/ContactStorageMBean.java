@@ -49,12 +49,15 @@
 
 package com.openexchange.contact.storage.rdb.mbean;
 
+import java.util.List;
+import javax.management.MBeanException;
 import com.openexchange.exception.OXException;
 
 /**
  * {@link ContactStorageMBean}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public interface ContactStorageMBean {
 
@@ -73,5 +76,15 @@ public interface ContactStorageMBean {
      * @throws OXException
      */
     int[] deduplicateContacts(int contextID, int folderID, long limit, boolean dryRun);
+
+    /**
+     * Checks the user aliases for completeness; e.g. do contain primaryMail, Email1 and defaultSenderAddress.
+     *
+     * @param optContextId The optiona context identifier
+     * @param dryRun <code>true</code> to just check for incomplete aliases, but does not modify anything; otherwise <code>false</code>
+     * @return The context-wise listed identifiers of the users with incomplete aliases; first position of each array is always the context identifier
+     * @throws MBeanException If operation fails for any reason
+     */
+    List<List<Integer>> checkUserAliases(int optContextId, boolean dryRun) throws MBeanException;
 
 }
