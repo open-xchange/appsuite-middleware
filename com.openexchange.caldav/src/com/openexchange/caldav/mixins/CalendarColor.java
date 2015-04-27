@@ -54,6 +54,7 @@ import java.util.regex.Pattern;
 import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -82,9 +83,23 @@ public class CalendarColor extends SingleXMLPropertyMixin {
     }
 
     @Override
+    protected void configureProperty(WebdavProperty property) {
+        property.setXML(true);
+        String value = getValue();
+        property.setValue(value);
+        if (null != value) {
+            property.addAttribute("symbolic-color", getSymbolicColor(value));
+        }
+    }
+
+    @Override
     protected String getValue() {
-        if (null != collection && null != collection.getFolder() && PrivateType.getInstance().equals(collection.getFolder().getType())) {
-            Map<String, Object> meta = collection.getFolder().getMeta();
+        return getValue(collection.getFolder());
+    }
+    
+    private static String getValue(UserizedFolder folder) {
+        if (null != folder && PrivateType.getInstance().equals(folder.getType())) {
+            Map<String, Object> meta = folder.getMeta();
             if (null != meta) {
                 if (meta.containsKey("color")) {
                     Object value = meta.get("color");
@@ -100,9 +115,9 @@ public class CalendarColor extends SingleXMLPropertyMixin {
                 }
             }
         }
-        return null;
+        return "#CEE7FFFF"; // Mac OS client does not like null or empty values
     }
-
+    
     /**
      * Parses the color value from the supplied WebDAV property.
      *
@@ -146,6 +161,12 @@ public class CalendarColor extends SingleXMLPropertyMixin {
         return null;
     }
 
+    /**
+     * Maps the OX color label to its corresponding hex color value.
+     * 
+     * @param colorLabel The color label
+     * @return The hex color, or <code>null</code> if their is no mapping
+     */
     private static String mapColorLabel(int colorLabel) {
         switch (colorLabel) {
             case 1:
@@ -170,6 +191,33 @@ public class CalendarColor extends SingleXMLPropertyMixin {
                 return "#666666FF";
             default:
                 return null;
+        }
+    }
+
+    /**
+     * Gets the symbolic color as used by the Mac OS client.
+     * 
+     * @param hexColor The hexadecimal color value
+     * @return The symbolic color name, or <code>custom</code> if no symbolic color can be matched
+     */
+    private static String getSymbolicColor(String hexColor) {
+        switch (hexColor.toUpperCase()) {
+            case "#FB0055FF":
+                return "red";
+            case "#FD8208FF":
+                return "orange";
+            case "#FEC309FF":
+                return "yellow";
+            case "#56D72BFF":
+                return "green";
+            case "#1D9BF6FF":
+                return "blue";
+            case "#90714CFF":
+                return "brown";
+            case "#BF57DAFF":
+                return "purple";
+            default:
+                return "custom";
         }
     }
 
