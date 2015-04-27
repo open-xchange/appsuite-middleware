@@ -131,7 +131,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             Databases.startTransaction(con);
             rollback = true;
 
-            authCodeInfo = redeemAuthCode(parsedCode, con);
+            authCodeInfo = redeemAuthCode(parsedCode.getContextId(), parsedCode.getUserId(), authCode, con);
 
             con.commit();
             rollback = false;
@@ -152,35 +152,33 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         }
     }
 
-    private AuthCodeInfo redeemAuthCode(UserizedToken authCode, Connection con) throws OXException {
+    private AuthCodeInfo redeemAuthCode(int contextId, int userId, String authCode, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT cid, user, clientId, redirectURI, scope, nanos FROM authCode WHERE cid = ? AND user = ? AND code = ?");
-            stmt.setInt(1, authCode.getContextId());
-            stmt.setInt(2, authCode.getUserId());
-            stmt.setString(3, authCode.getToken());
+            stmt = con.prepareStatement("SELECT clientId, redirectURI, scope, nanos FROM authCode WHERE cid = ? AND user = ? AND code = ?");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            stmt.setString(3, authCode);
             rs = stmt.executeQuery();
             if (false == rs.next()) {
                 return null;
             }
 
             // Read values
-            int contextId = rs.getInt(1);
-            int userId = rs.getInt(2);
-            String clientId = rs.getString(3);
-            String redirectURI = rs.getString(4);
-            String sScope = rs.getString(5);
-            long timestamp = rs.getLong(6);
+            String clientId = rs.getString(1);
+            String redirectURI = rs.getString(2);
+            String sScope = rs.getString(3);
+            long timestamp = rs.getLong(4);
 
             // Delete entry
-            if (false == dropAuthorizationCodeFor(authCode, con)) {
+            if (false == dropAuthorizationCodeFor(contextId, userId, authCode, con)) {
                 // Redeemed by another thread in the meantime
                 return null;
             }
 
             // Perform check
-            AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode.getToken(), clientId, redirectURI, DefaultScopes.parseScope(sScope), userId, contextId, timestamp);
+            AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode, clientId, redirectURI, DefaultScopes.parseScope(sScope), userId, contextId, timestamp);
             return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -195,11 +193,13 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         return token;
     }
 
-    private boolean dropAuthorizationCodeFor(UserizedToken authCode, Connection con) throws OXException {
+    private boolean dropAuthorizationCodeFor(int contextId, int userId, String authCode, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("DELETE FROM authCode WHERE code=?");
-            stmt.setString(1, authCode.toString());
+            stmt = con.prepareStatement("DELETE FROM authCode WHERE code=? AND cid=? AND user=?");
+            stmt.setString(1, authCode);
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());
