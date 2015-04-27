@@ -162,6 +162,7 @@ public class ActionCommand extends ControlOrActionCommand {
              *
              */
             retval.put(":message", Integer.valueOf(1));
+            retval.put(":method", Integer.valueOf(1));
             return retval;
         }
 
