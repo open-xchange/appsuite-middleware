@@ -50,6 +50,8 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
+import java.util.Random;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import org.json.JSONObject;
@@ -62,6 +64,7 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 /**
  * This test case tests the AJAX interface of the config system for the AJAX
  * GUI.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigMenuTest extends AbstractAJAXSession {
@@ -73,6 +76,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
 
     /**
      * Default constructor.
+     *
      * @param name Name of this test.
      */
     public ConfigMenuTest(final String name) {
@@ -107,18 +111,22 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     public void testTimeZone() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
-        final String timeZone = getResponse.getString();
-        final String testTimeZone = "Australia/Hobart";
-        SetRequest setRequest = new SetRequest(Tree.TimeZone, testTimeZone);
-        try {
-            getClient().execute(setRequest);
-            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(2));
-            getResponse = getClient().execute(getRequest);
-            assertEquals("Written timezone isn't returned from server.", testTimeZone, getResponse.getString());
-        } finally {
-            setRequest = new SetRequest(Tree.TimeZone, timeZone);
-            getClient().execute(setRequest);
-        }
+
+        String[] availableIDs = TimeZone.getAvailableIDs();
+        int randomInt = randInt(availableIDs.length - 1);
+        String toSet = availableIDs[randomInt];
+
+        SetRequest setRequest = new SetRequest(Tree.TimeZone, toSet);
+
+        getClient().execute(setRequest);
+        getResponse = getClient().execute(getRequest);
+        assertEquals("Written timezone isn't returned from server.", toSet, getResponse.getString());
+    }
+
+    private static int randInt(int max) {
+        Random rand = new Random();
+        int randomNum = rand.nextInt((max - 0) + 1) + 0;
+        return randomNum;
     }
 
     /**
