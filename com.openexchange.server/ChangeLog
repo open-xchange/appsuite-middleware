@@ -1,11 +1,15 @@
+* 2015-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37978: Cleanse reminders that do miss a folder reference
+
 * 2015-04-28 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 37997: Ensure parent visibility for all folders of module "infostore" 
+ - Fix for bug 37997: Ensure parent visibility for all folders of module "infostore"
 
 * 2015-04-27 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 37887: No longer include 'calendar-color' property on CalDAV collections 
- - Fix for bug 37927: Map virtual columns to their corresponding database columns for sorting  
+ - Fix for bug 37887: No longer include 'calendar-color' property on CalDAV collections
+ - Fix for bug 37927: Map virtual columns to their corresponding database columns for sorting
 
 * 2015-04-23 - marcus.klein@open-xchange.com
 
