@@ -104,7 +104,10 @@ public class LoginShareHandler extends AbstractShareHandler {
             GuestInfo guestInfo = share.getGuest();
             ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class);
             TargetProxy proxy = moduleSupport.loadAsAdmin(share.getGuest().getGuestID(), share.getGuest().getContextID(), target);
-            String replacement = proxy.getTitle();
+            String replacement = "";
+            if (null != proxy) {
+                replacement = proxy.getTitle();
+            }
             if (!guestInfo.isPasswordSet()) {
                 message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, guestInfo.getLocale()), replacement));
                 messageType = "WARN";
