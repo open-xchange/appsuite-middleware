@@ -158,7 +158,7 @@ public class ActionCommand extends ControlOrActionCommand {
              * [":message" string]
              * <method: string>
              *
-             * only :message is supported
+             * only :message and :method are supported
              *
              */
             retval.put(":message", Integer.valueOf(1));
