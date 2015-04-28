@@ -195,6 +195,9 @@ public final class FacebookFQLStreamJsonParser {
 
                 @Override
                 public void handleItem(final JSONObject streamInformation, final FacebookMessagingMessage message) throws OXException, JSONException {
+                    if (streamInformation.isNull("created_time")) {
+                        return;
+                    }
                     long time;
                     try {
                         time = streamInformation.getLong("created_time") * 1000L;
@@ -217,6 +220,9 @@ public final class FacebookFQLStreamJsonParser {
 
                 @Override
                 public void handleItem(final JSONObject streamInformation, final FacebookMessagingMessage message) throws OXException, JSONException {
+                    if (streamInformation.isNull("updated_time")) {
+                        return;
+                    }
                     long time;
                     try {
                         time = streamInformation.getLong("updated_time") * 1000L;
