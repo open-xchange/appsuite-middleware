@@ -276,7 +276,7 @@ public class CachingUserStorage extends UserStorage {
                     RdbUserStorage.calculateDifferences(oldAttributes, attributes, added, removed, changed);
                     doUpdate = !added.isEmpty() || !removed.isEmpty() || !changed.isEmpty();
                 }
-                if (!doUpdate && oldUser.isGuest()) {
+                if (!doUpdate || oldUser.isGuest()) {
                     doUpdate |= null != user.getPasswordMech() && false == user.getPasswordMech().equals(oldUser.getPasswordMech());
                     doUpdate |= null != user.getUserPassword() && false == user.getUserPassword().equals(oldUser.getUserPassword());
                 }
