@@ -746,7 +746,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
-        if (FolderObject.PUBLIC == fo.getType()) {
+        if (FolderObject.PUBLIC == fo.getType() || FolderObject.INFOSTORE == storageObj.getModule()) {
             {
                 final OCLPermission[] removedPerms = OXFolderUtility.getPermissionsWithoutFolderAccess(
                     fo.getNonSystemPermissionsAsArray(),

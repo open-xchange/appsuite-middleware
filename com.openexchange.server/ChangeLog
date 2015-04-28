@@ -1,3 +1,7 @@
+* 2015-04-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37997: Ensure parent visibility for all folders of module "infostore" 
+
 * 2015-04-27 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37887: No longer include 'calendar-color' property on CalDAV collections 
