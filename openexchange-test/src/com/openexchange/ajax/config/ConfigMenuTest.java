@@ -121,7 +121,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         try {
             getClient().execute(setRequest);
             getResponse = getClient().execute(getRequest);
-            assertEquals("Written timezone isn't returned from server.", toSet, getResponse.getString());
+            assertEquals("Written timezone isn't returned from server. Used session id: " + getClient().getSession().getId(), toSet, getResponse.getString());
         } finally {
             setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
             getClient().execute(setRequest);
