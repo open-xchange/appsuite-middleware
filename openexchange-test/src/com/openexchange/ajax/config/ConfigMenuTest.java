@@ -111,16 +111,21 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     public void testTimeZone() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
+        final String origTimeZone = getResponse.getString();
 
         String[] availableIDs = TimeZone.getAvailableIDs();
         int randomInt = randInt(availableIDs.length - 1);
         String toSet = availableIDs[randomInt];
 
         SetRequest setRequest = new SetRequest(Tree.TimeZone, toSet);
-
-        getClient().execute(setRequest);
-        getResponse = getClient().execute(getRequest);
-        assertEquals("Written timezone isn't returned from server.", toSet, getResponse.getString());
+        try {
+            getClient().execute(setRequest);
+            getResponse = getClient().execute(getRequest);
+            assertEquals("Written timezone isn't returned from server.", toSet, getResponse.getString());
+        } finally {
+            setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
+            getClient().execute(setRequest);
+        }
     }
 
     private static int randInt(int max) {
