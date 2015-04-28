@@ -14,8 +14,8 @@ Import-Package: com.openexchange.context,
  com.openexchange.server,
  com.openexchange.tools.servlet,
  com.openexchange.user,
- javax.ws.rs,
- javax.ws.rs.core,
+ javax.ws.rs;version="[2.0.0,3.0.0)",
+ javax.ws.rs.core;version="[2.0.0,3.0.0)",
  org.json,
  org.osgi.framework
 Bundle-Activator: com.openexchange.rest.services.users.mailMapping.osgi.MailMappingActivator
