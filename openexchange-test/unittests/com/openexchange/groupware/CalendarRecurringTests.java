@@ -245,10 +245,11 @@ public class CalendarRecurringTests extends TestCase {
         assertFalse("test if no until is set", cdao.containsUntil());
         assertFalse("test if no Occurrence is set", cdao.containsOccurrence());
 
-        long test_until = cdao.getEndDate().getTime() + (Constants.MILLI_YEAR * new CalendarCollection().getMAX_END_YEARS());
+        int years = new CalendarCollection().getMAX_END_YEARS();
+        long test_until = addYears(cdao.getEndDate().getTime(), years);
         test_until = new CalendarCollection().normalizeLong(test_until);
         final CalendarDataObject clone = cdao.clone();
-        clone.setEndDate(new Date(test_until));
+        //clone.setEndDate(new Date(test_until));
         final RecurringResultsInterface rresults;
         try {
             rresults = new CalendarCollection().calculateRecurring(clone, 0, 0, 0);
@@ -1161,6 +1162,13 @@ public class CalendarRecurringTests extends TestCase {
         c.setTimeInMillis(new Date(m.getRecurringResult(2).getStart()).getTime());
         assertEquals("First day check (FRIDAY)", c.get(Calendar.DAY_OF_WEEK), Calendar.FRIDAY);
     }
+    
+    private long addYears(long base, int years) {
+        Calendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.setTimeInMillis(base);
+        calendar.add(Calendar.YEAR, years);
+        return calendar.getTimeInMillis();
+    }
 
     public void testCorrectUntilCalculation()  throws Throwable {
         final CalendarDataObject cdao = new CalendarDataObject();
@@ -1172,12 +1180,10 @@ public class CalendarRecurringTests extends TestCase {
         cdao.setInterval(1);
         cdao.setDays(Appointment.WEDNESDAY);
         new CalendarCollection().fillDAO(cdao);
-
-        long check_until = new CalendarCollection()
-                .normalizeLong((cdao.getStartDate().getTime() + (Constants.MILLI_YEAR * new CalendarCollection()
-                        .getMAX_END_YEARS())));
+        int years = new CalendarCollection().getMAX_END_YEARS();
+        long check_until = new CalendarCollection().normalizeLong(addYears(cdao.getStartDate().getTime(), years));
         final CalendarDataObject clone = cdao.clone();
-        clone.setEndDate(new Date(check_until));
+        //clone.setEndDate(new Date(check_until));
         final RecurringResultsInterface rresults;
         try {
             rresults = new CalendarCollection().calculateRecurring(clone, 0, 0, 0);
@@ -1218,10 +1224,9 @@ public class CalendarRecurringTests extends TestCase {
         check_until2.setTime(cdao2.getStartDate());
         // No longer any calculation, just say, what is expected...
         // (-1) in years because internal calculation is 1-based.
-        // 21st of August, because we need the 24:00:00 of the day of the last occurrence, which is 00:00:00 of the following day.
         check_until2.add(Calendar.YEAR, CalendarCollectionService.MAX_OCCURRENCESE - 1);
         check_until2.set(Calendar.MONTH, MONTH);
-        check_until2.set(Calendar.DAY_OF_MONTH, DAY + 1);
+        check_until2.set(Calendar.DAY_OF_MONTH, DAY);
 
         Date expected = new Date(coll.normalizeLong(check_until2.getTimeInMillis()));
         Date actual = cdao2.getUntil();
