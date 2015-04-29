@@ -60,6 +60,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 import javax.mail.FetchProfile;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -709,7 +710,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private Container<MailMessage> fetchMessageInfoFor(long[] uids, IMAPFolder imapFolder) throws MessagingException {
         try {
             int unread = imapFolder.getUnreadMessageCount();
-
             Message[] messages = imapFolder.getMessagesByUID(uids);
             imapFolder.fetch(messages, FETCH_PROFILE_MSG_INFO);
 
@@ -747,6 +747,33 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         mailMessage.addFrom(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_FROM, im));
         mailMessage.addTo(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_TO, im));
         mailMessage.addCc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_CC, im));
+
+        final Flags msgFlags = im.getFlags();
+        int flags = 0;
+        if (msgFlags.contains(Flags.Flag.ANSWERED)) {
+            flags |= MailMessage.FLAG_ANSWERED;
+        }
+        if (msgFlags.contains(Flags.Flag.DELETED)) {
+            flags |= MailMessage.FLAG_DELETED;
+        }
+        if (msgFlags.contains(Flags.Flag.DRAFT)) {
+            flags |= MailMessage.FLAG_DRAFT;
+        }
+        if (msgFlags.contains(Flags.Flag.FLAGGED)) {
+            flags |= MailMessage.FLAG_FLAGGED;
+        }
+        if (msgFlags.contains(Flags.Flag.RECENT)) {
+            flags |= MailMessage.FLAG_RECENT;
+        }
+        if (msgFlags.contains(Flags.Flag.SEEN)) {
+            flags |= MailMessage.FLAG_SEEN;
+        }
+        if (msgFlags.contains(Flags.Flag.USER)) {
+            flags |= MailMessage.FLAG_USER;
+        }
+
+        mailMessage.setFlags(flags);
+
         mailMessage.addBcc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_BCC, im));
         {
             String[] tmp = im.getHeader(MessageHeaders.HDR_CONTENT_TYPE);

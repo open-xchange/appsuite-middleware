@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
+import javax.mail.Flags;
+import javax.mail.Flags.Flag;
 import javax.mail.internet.InternetAddress;
 import org.osgi.service.event.Event;
 import com.openexchange.event.CommonEvent;
@@ -66,6 +68,7 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mobilepush.events.MailPushUtility;
@@ -192,15 +195,18 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 @SuppressWarnings("unchecked")
                 Container<MailMessage> messageInfos = (Container<MailMessage>) event.getProperty(PushEventConstants.PROPERTY_CONTAINER);
                 for (MailMessage mm : messageInfos) {
-                    String subject = mm.getSubject();
-                    String[] senderInfo = getSenderInfo(mm);
+                    Flags flags = MimeMessageConverter.convertMailFlags(mm.getFlags());
+                    if(flags.contains(Flag.RECENT) && false == flags.contains(Flag.SEEN)) {
+                        String subject = mm.getSubject();
+                        String[] senderInfo = getSenderInfo(mm);
 
-                    Map<String, Object> map = new HashMap<String, Object>(6);
-                    map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
-                    map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
-                    map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
-                    map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(mm.getUnreadMessages()));
-                    props.add(map);
+                        Map<String, Object> map = new HashMap<String, Object>(6);
+                        map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
+                        map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
+                        map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
+                        map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(mm.getUnreadMessages()));
+                        props.add(map);
+                    }
                 }
             } else if (event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
                 // Check if its a new mail event
@@ -215,15 +221,19 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                         int unread = mailAccess.getUnreadMessagesCount(INBOX);
                         if (mms != null) {
                             for (MailMessage mm : mms) {
-                                String subject = mm.getSubject();
-                                String[] senderInfo = getSenderInfo(mm);
+                                Flags flags = MimeMessageConverter.convertMailFlags(mm.getFlags());
 
-                                Map<String, Object> map = new HashMap<String, Object>(6);
-                                map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
-                                map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
-                                map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
-                                map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread));
-                                props.add(map);
+                                if(flags.contains(Flag.RECENT) && false == flags.contains(Flag.SEEN)) {
+                                    String subject = mm.getSubject();
+                                    String[] senderInfo = getSenderInfo(mm);
+
+                                    Map<String, Object> map = new HashMap<String, Object>(6);
+                                    map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
+                                    map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
+                                    map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
+                                    map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread));
+                                    props.add(map);
+                                }
                             }
                         }
                     } catch (OXException e) {
@@ -269,7 +279,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      * @throws OXException
      */
     private MailMessage[] fetchMessageInformation(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String mailIds) throws OXException {
-        MailField[] fields = new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM };
+        MailField[] fields = new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM, MailField.FLAGS };
         return mailAccess.getMessageStorage().getMessages(INBOX, getMailIds(mailIds), fields);
     }
 
