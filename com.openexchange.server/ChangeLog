@@ -1,3 +1,7 @@
+* 2015-04-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37660: Added package for Norwegian Bokmal translation.
+
 * 2015-04-24 - martin.herfurth@open-xchange.com
 
  - Fix for bug 37797: Series gets broken on participant accept request.
