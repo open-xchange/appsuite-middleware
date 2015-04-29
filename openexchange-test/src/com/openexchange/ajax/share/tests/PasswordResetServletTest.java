@@ -149,7 +149,7 @@ public final class PasswordResetServletTest extends ShareTest {
         super.tearDown();
     }
 
-    public void testResetPassword_retrievedRedirectLocation() throws Exception {
+    public void testResetPassword_confirmPasswordReset() throws Exception {
         String confirm = getConfirmationToken();
         PasswordResetConfirmServletResponse response = Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
         String location = response.getLocation();
@@ -161,7 +161,7 @@ public final class PasswordResetServletTest extends ShareTest {
         Assert.assertTrue("Redirect URL does not contain email address of the guest. Expected: " + encode + " within redirect URL: " + location, location.contains(encode));
     }
 
-    public void testResetPassword_loginNotPossibleAnyMore() throws Exception {
+    public void testResetPassword_passwordReset() throws Exception {
         String confirm = getConfirmationToken();
         Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
 
