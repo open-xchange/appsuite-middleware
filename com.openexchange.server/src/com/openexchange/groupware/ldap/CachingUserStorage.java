@@ -213,8 +213,8 @@ public class CachingUserStorage extends UserStorage {
         }
         if (doUpdate) {
             // Only update the user in the database if it differs from the one in the cache.
-            invalidateUser(context, user.getId());
             delegate.updateUser(user, context);
+            invalidateUser(context, user.getId());
         }
     }
 
