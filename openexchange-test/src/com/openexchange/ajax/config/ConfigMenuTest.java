@@ -147,7 +147,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
             getClient().execute(setRequest);
             LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(2));
             getResponse = getClient().execute(getRequest);
-            assertEquals("Written timezone isn't returned from server.", testBeta, getResponse.getBoolean());
+            assertEquals("Written beta attribute isn't returned from server.", testBeta, getResponse.getBoolean());
         } finally {
             setRequest = new SetRequest(Tree.Beta, B(beta));
             getClient().execute(setRequest);
