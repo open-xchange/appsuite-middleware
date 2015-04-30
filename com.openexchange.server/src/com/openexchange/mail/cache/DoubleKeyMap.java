@@ -236,10 +236,14 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
      * @return The value formerly bound to given key pair or <code>null</code> if none was bound before
      */
     public V putValue(final K1 k1, final K2 k2, final V value) {
-        if ((k1 == null) || (k2 == null) || (value == null)) {
-            throw new IllegalArgumentException("Argument must not be null");
+        if (k1 == null) {
+            throw new IllegalArgumentException("First key must not be null");
+        } else if (k2 == null) {
+            throw new IllegalArgumentException("Second key must not be null");
+        } else if (value == null) {
+            throw new IllegalArgumentException("Value must not be null");
         }
-        final Map<K1, Map<K2, V>> m = getMap();
+        Map<K1, Map<K2, V>> m = getMap();
         Map<K2, V> innerMap = m.get(k1);
         if (innerMap == null) {
             innerMap = new ConcurrentHashMap<K2, V>();
