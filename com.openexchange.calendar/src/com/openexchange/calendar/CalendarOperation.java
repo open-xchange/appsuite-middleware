@@ -746,9 +746,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (cdao.containsFilename() && recColl.check(cdao.getFilename(), edao.getFilename()) && recColl.getFieldName(CommonObject.FILENAME) != null) {
             ucols[uc++] = CommonObject.FILENAME;
         }
-        if (cdao.containsTimezone() && recColl.check(cdao.getTimezone(), edao.getTimezone()) && recColl.getFieldName(CalendarDataObject.TIMEZONE) != null && canChangeTZ(cdao, edao)) {
-            ucols[uc++] = CalendarDataObject.TIMEZONE;
-        }
+// Deactivated, because feature is postponed.
+//        if (cdao.containsTimezone() && recColl.check(cdao.getTimezone(), edao.getTimezone()) && recColl.getFieldName(CalendarDataObject.TIMEZONE) != null && canChangeTZ(cdao, edao)) {
+//            ucols[uc++] = CalendarDataObject.TIMEZONE;
+//        }
         return uc;
     }
 
