@@ -482,7 +482,6 @@ public class NotificationMail {
 	private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
 			AppointmentFields.LOCATION,
 			AppointmentFields.FULL_TIME,
-			AppointmentFields.TIMEZONE,
 			AppointmentFields.RECURRENCE_START,
 			AppointmentFields.TITLE,
 			AppointmentFields.START_DATE,
