@@ -1,3 +1,7 @@
+* 2015-04-30 - ioannis.chouklis@open-xchange.com
+ 
+ - Fix for bug 37664: Set a configurable socket time out for the logstash appender
+
 * 2015-04-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 37978: Cleanse reminders that do miss a folder reference

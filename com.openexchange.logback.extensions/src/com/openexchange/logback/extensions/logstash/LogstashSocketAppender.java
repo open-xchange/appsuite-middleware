@@ -157,6 +157,11 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             queueSize = 2048;
         }
 
+        if (acceptConnectionTimeout <= 0) {
+            logWarn("'acceptConnectionTimeout' is not defined in configuration file. Falling back to default value of '5000'");
+            acceptConnectionTimeout = 5000;
+        }
+
         setOptionalProperties();
 
         if (errorCount == 0) {
@@ -301,7 +306,6 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
             socket.setSoTimeout(acceptConnectionTimeout);
             OutputStream oos = new BufferedOutputStream(socket.getOutputStream());
             encoder.init(oos);
-            socket.setSoTimeout(0);
             logInfo("Dispatching events...");
             while (true) {
                 ILoggingEvent event = queue.take();
@@ -638,7 +642,7 @@ public class LogstashSocketAppender extends AppenderBase<ILoggingEvent> implemen
      */
     private void log(Level level, String message, Throwable... t) {
         StringBuilder builder = new StringBuilder();
-        builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" ").append(message);
+        builder.append(writeCurrentTimestamp()).append(" ").append(level).append(" in ").append(this.getClass().getCanonicalName()).append(" - ").append(message);
         if (t.length >= 1) {
             builder.append(" Reason:");
         }
