@@ -1048,10 +1048,6 @@ ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xc
 
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
-VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.login $PFILE)
-if [ "open-xchange" = "$VALUE" ]; then
-    ox_set_property com.openexchange.rest.services.basic-auth.login "" $PFILE
-fi
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
 if [ "secret" = "$VALUE" ]; then
     ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE

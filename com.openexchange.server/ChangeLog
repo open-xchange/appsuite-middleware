@@ -1,5 +1,9 @@
+* 2015-04-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38015: Do not remove REST API login if it is still configured to the once shipped default one. Only the password is removed.
+
 * 2015-04-30 - ioannis.chouklis@open-xchange.com
- 
+
  - Fix for bug 37664: Set a configurable socket time out for the logstash appender
 
 * 2015-04-28 - thorben.betten@open-xchange.com
