@@ -85,7 +85,7 @@ public class ExceptionUtils {
                     for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
                         Thread thread = mapEntry.getKey();
                         sb.setLength(0);
-                        sb.append("        Thread: ").append(thread).append(ls);
+                        sb.append("        Thread: ").append(thread).append(" java.lang.Thread.State: ").append(thread.getState().name()).append(ls);
                         for (StackTraceElement elem : mapEntry.getValue()) {
                             sb.append(elem).append(ls);
                         }
