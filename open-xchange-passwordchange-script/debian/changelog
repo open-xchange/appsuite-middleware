@@ -1,3 +1,9 @@
+open-xchange-passwordchange-script (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Thu, 30 Apr 2015 10:16:21 +0200
+
 open-xchange-passwordchange-script (7.6.1-27) stable; urgency=medium
 
   * Build for patch 2015-05-04 (2505)
