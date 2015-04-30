@@ -81,6 +81,7 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
@@ -177,11 +178,11 @@ public class PasswordResetServlet extends HttpServlet {
                 if (confirm.equals(hash)) {
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                    
+
                     UserImpl user = new UserImpl();
                     user.setId(guestID);
                     user.setPasswordMech(guest.getPasswordMech());
-                    user.setUserPassword(PasswordMech.BCRYPT.encode(" "));
+                    user.setUserPassword(PasswordMech.valueOf(guest.getPasswordMech()).encode(PasswordUtility.INITIAL_GUEST_PASSWORD));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
 
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),

@@ -58,6 +58,7 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.tools.PasswordUtility;
 
 /**
  * {@link DefaultGuestInfo}
@@ -200,7 +201,7 @@ public class DefaultGuestInfo implements GuestInfo {
     public boolean isPasswordSet() {
         if (AuthenticationMode.GUEST_PASSWORD == getAuthentication()) {
             String userPassword = guestUser.getUserPassword();
-            return !ShareTool.INITIAL_GUEST_PASSWORD.equals(userPassword);
+            return !PasswordUtility.INITIAL_GUEST_PASSWORD.equals(userPassword);
         }
         return AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication();
     }
