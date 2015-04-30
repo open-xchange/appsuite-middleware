@@ -241,22 +241,33 @@ public class MetaContributorReference implements MetaContributor {
             OutOfMemoryError oom = (OutOfMemoryError) t;
             String message = oom.getMessage();
             if ("unable to create new native thread".equalsIgnoreCase(message)) {
-                // Dump all the threads to the log
-                Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
-                String ls = Strings.getLineSeparator();
-                LOG.info("{}Threads: {}", ls, threads.size());
-                StringBuilder sb = new StringBuilder(2048);
-                for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
-                    Thread thread = mapEntry.getKey();
-                    sb.setLength(0);
-                    sb.append("        Thread: ").append(thread).append(ls);
-                    for (StackTraceElement elem : mapEntry.getValue()) {
-                        sb.append(elem).append(ls);
+                if (!Boolean.TRUE.equals(System.getProperties().get("__thread_dump_created"))) {
+                    System.getProperties().put("__thread_dump_created", Boolean.TRUE);
+                    boolean error = true;
+                    try {
+                        // Dump all the threads to the log
+                        Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
+                        String ls = Strings.getLineSeparator();
+                        LOG.info("{}Threads: {}", ls, threads.size());
+                        StringBuilder sb = new StringBuilder(2048);
+                        for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
+                            Thread thread = mapEntry.getKey();
+                            sb.setLength(0);
+                            sb.append("        Thread: ").append(thread).append(ls);
+                            for (StackTraceElement elem : mapEntry.getValue()) {
+                                sb.append(elem).append(ls);
+                            }
+                            LOG.info(sb.toString());
+                        }
+                        sb = null; // Might help GC
+                        LOG.info("{}    Thread dump finished{}", ls, ls);
+                        error = false;
+                    } finally {
+                        if (error) {
+                            System.getProperties().remove("__thread_dump_created");
+                        }
                     }
-                    LOG.info(sb.toString());
                 }
-                sb = null; // Might help GC
-                LOG.info("{}    Thread dump finished{}", ls, ls);
             } else if ("Java heap space".equalsIgnoreCase(message)) {
                 try {
                     MBeanServer server = ManagementFactory.getPlatformMBeanServer();
@@ -265,17 +276,23 @@ public class MetaContributorReference implements MetaContributor {
 
                     // Is HeapDumpOnOutOfMemoryError enabled?
                     if (!heapDumpArgs.getFirst().booleanValue() && !Boolean.TRUE.equals(System.getProperties().get("__heap_dump_created"))) {
-                        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
-                        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-                        // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
-                        String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
-                        String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
-
-                        String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
-                        server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
                         System.getProperties().put("__heap_dump_created", Boolean.TRUE);
-                        LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+                        boolean error = true;
+                        try {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-hh:mm:ss", Locale.US);
+                            dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            // Either "/tmp" or path configured through "-XX:HeapDumpPath" JVM argument
+                            String path = null == heapDumpArgs.getSecond() ? "/tmp" : heapDumpArgs.getSecond();
+                            String fn = path + "/" + dateFormat.format(new Date()) + "-heap.hprof";
+                            String mbeanName = "com.sun.management:type=HotSpotDiagnostic";
+                            server.invoke(new ObjectName(mbeanName), "dumpHeap", new Object[] { fn, Boolean.TRUE }, new String[] { String.class.getCanonicalName(), "boolean" });
+                            LOG.info("{}    Heap snapshot dumped to file {}{}", Strings.getLineSeparator(), fn, Strings.getLineSeparator());
+                            error = false;
+                        } finally {
+                            if (error) {
+                                System.getProperties().remove("__heap_dump_created");
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     // Failed for any reason...
