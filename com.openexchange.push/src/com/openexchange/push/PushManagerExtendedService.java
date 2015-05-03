@@ -87,6 +87,6 @@ public interface PushManagerExtendedService extends PushManagerService {
      * @return The currently available push users
      * @throws OXException If push users cannot be returned
      */
-    List<PushUser> getAvailablePushUsers() throws OXException;
+    List<PushUserInfo> getAvailablePushUsers() throws OXException;
 
 }

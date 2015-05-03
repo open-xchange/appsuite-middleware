@@ -49,41 +49,71 @@
 
 package com.openexchange.push.imapidle.locking;
 
-import com.openexchange.exception.OXException;
-
+import javax.annotation.concurrent.Immutable;
+import com.openexchange.session.Session;
 
 /**
- * {@link NoOpImapIdleClusterLock}
+ * {@link SessionInfo} - The session info.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-public class NoOpImapIdleClusterLock implements ImapIdleClusterLock {
+@Immutable
+public class SessionInfo {
+
+    private final int contextId;
+    private final int userId;
+    private final String sessionId;
+    private final boolean permanent;
 
     /**
-     * Initializes a new {@link NoOpImapIdleClusterLock}.
+     * Initializes a new {@link SessionInfo}.
+     *
+     * @param session The associated session
+     * @param permanent Whether permanent or not
      */
-    public NoOpImapIdleClusterLock() {
+    public SessionInfo(Session session, boolean permanent) {
         super();
+        this.contextId = session.getContextId();
+        this.userId = session.getUserId();
+        this.sessionId = session.getSessionID();
+        this.permanent = permanent;
     }
 
-    @Override
-    public Type getType() {
-        return Type.NONE;
+    /**
+     * Gets the context identifier.
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return contextId;
     }
 
-    @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
-        return true;
+    /**
+     * Gets the user identifier.
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return userId;
     }
 
-    @Override
-    public void refreshLock(SessionInfo sessionInfo) throws OXException {
-        // Empty
+    /**
+     * Gets the session identifier.
+     *
+     * @return The session identifier
+     */
+    public String getSessionId() {
+        return sessionId;
     }
 
-    @Override
-    public void releaseLock(SessionInfo sessionInfo) throws OXException {
-        // Empty
+    /**
+     * Gets the permanent flag.
+     *
+     * @return The permanent flag
+     */
+    public boolean isPermanent() {
+        return permanent;
     }
 
 }

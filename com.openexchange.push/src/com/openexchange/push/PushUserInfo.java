@@ -47,43 +47,108 @@
  *
  */
 
-package com.openexchange.push.imapidle.locking;
-
-import com.openexchange.exception.OXException;
-
+package com.openexchange.push;
 
 /**
- * {@link NoOpImapIdleClusterLock}
+ * {@link PushUserInfo} - The push user information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.6.2
  */
-public class NoOpImapIdleClusterLock implements ImapIdleClusterLock {
+public class PushUserInfo implements Comparable<PushUserInfo> {
+
+    private final PushUser pushUser;
+    private final boolean permanent;
+    private final int hash;
 
     /**
-     * Initializes a new {@link NoOpImapIdleClusterLock}.
+     * Initializes a new {@link PushUserInfo}.
+     *
+     * @param pushUser The associated push user
+     * @param permanent Whether listener is permanent or not
      */
-    public NoOpImapIdleClusterLock() {
+    public PushUserInfo(PushUser pushUser, boolean permanent) {
         super();
+        this.pushUser = pushUser;
+        this.permanent = permanent;
+
+        int prime = 31;
+        int result = prime * 1 + (permanent ? 1231 : 1237);
+        result = prime * result + ((pushUser == null) ? 0 : pushUser.hashCode());
+        hash = result;
+    }
+
+    /**
+     * Gets the push user
+     *
+     * @return The push user
+     */
+    public PushUser getPushUser() {
+        return pushUser;
+    }
+
+    /**
+     * Gets the user identifier
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return pushUser.getUserId();
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return pushUser.getContextId();
+    }
+
+    /**
+     * Gets the permanent flag.
+     *
+     * @return The permanent flag
+     */
+    public boolean isPermanent() {
+        return permanent;
     }
 
     @Override
-    public Type getType() {
-        return Type.NONE;
+    public int compareTo(PushUserInfo o) {
+        return pushUser.compareTo(o.pushUser);
     }
 
     @Override
-    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof PushUserInfo)) {
+            return false;
+        }
+        PushUserInfo other = (PushUserInfo) obj;
+        if (permanent != other.permanent) {
+            return false;
+        }
+        if (pushUser == null) {
+            if (other.pushUser != null) {
+                return false;
+            }
+        } else if (!pushUser.equals(other.pushUser)) {
+            return false;
+        }
         return true;
     }
 
     @Override
-    public void refreshLock(SessionInfo sessionInfo) throws OXException {
-        // Empty
-    }
-
-    @Override
-    public void releaseLock(SessionInfo sessionInfo) throws OXException {
-        // Empty
+    public String toString() {
+        return new StringBuilder(48).append("[userId=").append(pushUser.getUserId()).append(", contextId=").append(pushUser.getContextId()).append(", permanent=").append(permanent).append(']').toString();
     }
 
 }

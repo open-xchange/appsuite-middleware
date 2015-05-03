@@ -71,6 +71,7 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
@@ -200,8 +201,8 @@ public final class PushManagerRegistry implements PushListenerService {
      *
      * @return The push users
      */
-    public List<PushUser> listPermanentPushUsers() {
-        Set<PushUser> pushUsers = new HashSet<PushUser>(256);
+    public List<PushUserInfo> listPermanentPushUsers() {
+        Set<PushUserInfo> pushUsers = new HashSet<PushUserInfo>(256);
 
         for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
             PushManagerService pushManager = pushManagersIterator.next();
@@ -214,7 +215,7 @@ public final class PushManagerRegistry implements PushListenerService {
             }
         }
 
-        List<PushUser> list = new ArrayList<PushUser>(pushUsers);
+        List<PushUserInfo> list = new ArrayList<PushUserInfo>(pushUsers);
         Collections.sort(list);
         return list;
     }

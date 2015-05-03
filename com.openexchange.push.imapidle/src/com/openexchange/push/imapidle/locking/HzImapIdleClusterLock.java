@@ -58,7 +58,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 
 /**
@@ -110,13 +109,17 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
         notActive.set(true);
     }
 
+    private String generateKey(SessionInfo sessionInfo) {
+        return new StringBuilder(16).append(sessionInfo.getUserId()).append('@').append(sessionInfo.getContextId()).toString();
+    }
+
     @Override
     public Type getType() {
         return Type.HAZELCAST;
     }
 
     @Override
-    public boolean acquireLock(Session session) throws OXException {
+    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
         if (notActive.get()) {
             return true;
         }
@@ -125,13 +128,11 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        String key = new StringBuilder(16).append(userId).append('@').append(contextId).toString();
+        String key = generateKey(sessionInfo);
         IMap<String, String> map = map(hzInstance);
 
         long now = System.nanoTime();
-        String previous = map.putIfAbsent(key, generateValue(now, session.getSessionID()));
+        String previous = map.putIfAbsent(key, generateValue(now, sessionInfo));
 
         if (null == previous) {
             // Not present before
@@ -145,11 +146,11 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
         }
 
         // Invalid entry - try to replace it mutually exclusive
-        return map.replace(key, previous, generateValue(now, session.getSessionID()));
+        return map.replace(key, previous, generateValue(now, sessionInfo));
     }
 
     @Override
-    public void refreshLock(Session session) throws OXException {
+    public void refreshLock(SessionInfo sessionInfo) throws OXException {
         if (notActive.get()) {
             return;
         }
@@ -158,14 +159,11 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        String key = new StringBuilder(16).append(userId).append('@').append(contextId).toString();
-        map(hzInstance).put(key, generateValue(System.nanoTime(), session.getSessionID()));
+        map(hzInstance).put(generateKey(sessionInfo), generateValue(System.nanoTime(), sessionInfo));
     }
 
     @Override
-    public void releaseLock(Session session) throws OXException {
+    public void releaseLock(SessionInfo sessionInfo) throws OXException {
         if (notActive.get()) {
             return;
         }
@@ -174,10 +172,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
-        String key = new StringBuilder(16).append(userId).append('@').append(contextId).toString();
-        map(hzInstance).remove(key);
+        map(hzInstance).remove(generateKey(sessionInfo));
     }
 
 }

@@ -94,6 +94,7 @@ import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -310,7 +311,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                     // Refresh lock prior to entering IMAP-IDLE
                     if (doRefreshLock()) {
-                        ImapIdlePushManagerService.getInstance().refreshLock(session);
+                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent));
                     }
 
                     // Are there already new messages?
@@ -582,7 +583,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     // No other listener available
                     // Give up lock and return
                     try {
-                        instance.releaseLock(session);
+                        instance.releaseLock(new SessionInfo(session, permanent));
                     } catch (Exception e) {
                         LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                     }
@@ -594,7 +595,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                         LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                         // Give up lock and return
                         try {
-                            instance.releaseLock(session);
+                            instance.releaseLock(new SessionInfo(session, permanent));
                         } catch (Exception x) {
                             LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
                         }

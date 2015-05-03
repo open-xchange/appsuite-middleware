@@ -55,7 +55,7 @@ import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
-import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.impl.PushManagerRegistry;
 import com.openexchange.push.mbean.PushMBean;
 
@@ -80,13 +80,13 @@ public class PushMBeanImpl extends StandardMBean implements PushMBean {
     @Override
     public String[] listPermanentPushUsers() throws MBeanException {
         try {
-            List<PushUser> pushUsers = PushManagerRegistry.getInstance().listPermanentPushUsers();
+            List<PushUserInfo> pushUsers = PushManagerRegistry.getInstance().listPermanentPushUsers();
             Collections.sort(pushUsers);
 
             int size = pushUsers.size();
             String[] retval = new String[size];
             for (int i = 0; i < size; i++) {
-                PushUser pushUser = pushUsers.get(i);
+                PushUserInfo pushUser = pushUsers.get(i);
                 retval[i] = null == pushUser ? "null" : pushUser.toString();
             }
             return retval;
