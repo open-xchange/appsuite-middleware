@@ -104,15 +104,13 @@ public class NotificationStrings implements LocalizableStrings {
 
     // Click here to confirm to reset your password
     public static final String RESET_PASSWORD_CONFIRM_INTRO = "Click here to confirm to reset your password";
-    
+
     /*
      * Invite E-Mails
      */
     /** $givenname $surname */
     public static final String USER_NAME = "%1$s %2$s";
-    
 
-    
     // subject
     /** Welcome! $user_name invited you to $product_name! */
     public static final String SUBJECT_WELCOME_INVITE_TO_PRODUCT = "Welcome! %1$s invited you to %2$s!";
@@ -149,13 +147,13 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String HAS_SHARED_FILES = "%1$s (%2$s) has shared %3$s files with you.";
     
     /** $username ($user_email) has shared image "$filename" with you. */
-    public static final String HAS_SHARED_IMAGE = "%1$s (%2$s) has shared the image \"%3$s\" with you.  Please click the button below to view it.";
+    public static final String HAS_SHARED_IMAGE = "%1$s (%2$s) has shared the image \"%3$s\" with you.";
     
     /** $username ($user_email) has shared $number_of_images iamges with you. */
-    public static final String HAS_SHARED_IMAGES = "%1$s (%2$s) has shared %3$s images with you. Please click the button below to view it.";
+    public static final String HAS_SHARED_IMAGES = "%1$s (%2$s) has shared %3$s images with you.";
     
     /** $username ($user_email) has shared item "$filename" with you. */
-    public static final String HAS_SHARED_ITEM = "%1$s (%2$s) has shared the item \"%3$s\" with you. Please click the button below to view it.";
+    public static final String HAS_SHARED_ITEM = "%1$s (%2$s) has shared the item \"%3$s\" with you.";
     
     /** $username ($user_email) has shared $number items with you. */
     public static final String HAS_SHARED_ITEMS = "%1$s (%2$s) has shared %3$s items with you.";
