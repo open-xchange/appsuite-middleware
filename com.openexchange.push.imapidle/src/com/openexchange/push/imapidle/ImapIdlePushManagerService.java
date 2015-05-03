@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
@@ -62,9 +63,11 @@ import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -165,10 +168,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     @Override
-    public List<PushUser> getAvailablePushUsers() throws OXException {
-        List<PushUser> l = new LinkedList<PushUser>();
-        for (SimpleKey key : listeners.keySet()) {
-            l.add(new PushUser(key.userId, key.contextId));
+    public List<PushUserInfo> getAvailablePushUsers() throws OXException {
+        List<PushUserInfo> l = new LinkedList<PushUserInfo>();
+        for (Map.Entry<SimpleKey, ImapIdlePushListener> entry : listeners.entrySet()) {
+            SimpleKey key = entry.getKey();
+            l.add(new PushUserInfo(new PushUser(key.userId, key.contextId), entry.getValue().isPermanent()));
         }
         return l;
     }
@@ -183,7 +187,8 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int contextId = session.getContextId();
         int userId = session.getUserId();
 
-        if (clusterLock.acquireLock(session)) {
+        SessionInfo sessionInfo = new SessionInfo(session, true);
+        if (clusterLock.acquireLock(sessionInfo)) {
             synchronized (this) {
                 // Locked...
                 boolean unlock = true;
@@ -209,7 +214,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     LOGGER.info("Did not start permanent IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
                 } finally {
                     if (unlock) {
-                        releaseLock(session);
+                        releaseLock(sessionInfo);
                     }
                 }
             }
@@ -251,7 +256,8 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
         int contextId = session.getContextId();
         int userId = session.getUserId();
-        if (clusterLock.acquireLock(session)) {
+        SessionInfo sessionInfo = new SessionInfo(session, false);
+        if (clusterLock.acquireLock(sessionInfo)) {
             synchronized (this) {
                 // Locked...
                 boolean unlock = true;
@@ -268,7 +274,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                     LOGGER.info("Did not start IMAP-IDLE listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
                 } finally {
                     if (unlock) {
-                        releaseLock(session);
+                        releaseLock(sessionInfo);
                     }
                 }
             }
@@ -333,21 +339,21 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     /**
      * Releases the possibly held lock for given user.
      *
-     * @param session The associated session
+     * @param sessionInfo The associated session
      * @throws OXException If release operation fails
      */
-    public void releaseLock(Session session) throws OXException {
-        clusterLock.releaseLock(session);
+    public void releaseLock(SessionInfo sessionInfo) throws OXException {
+        clusterLock.releaseLock(sessionInfo);
     }
 
     /**
      * Refreshes the lock for given user.
      *
-     * @param session The associated session
+     * @param sessionInfo The associated session
      * @throws OXException If refresh operation fails
      */
-    public void refreshLock(Session session) throws OXException {
-        clusterLock.refreshLock(session);
+    public void refreshLock(SessionInfo sessionInfo) throws OXException {
+        clusterLock.refreshLock(sessionInfo);
     }
 
     /**
