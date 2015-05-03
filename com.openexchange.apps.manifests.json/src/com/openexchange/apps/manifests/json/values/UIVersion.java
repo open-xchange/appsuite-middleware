@@ -49,15 +49,9 @@
 
 package com.openexchange.apps.manifests.json.values;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
-
-
 
 /**
  * {@link UIVersion}
@@ -70,9 +64,9 @@ public class UIVersion implements ComputedServerConfigValueService {
     public static final AtomicReference<String> UIVERSION = new AtomicReference<String>("");
 
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
 
-        if (!serverConfig.has("version")) {
+        if (serverConfig.get("version") != null) {
             serverConfig.put("version", UIVERSION);
         }
     }

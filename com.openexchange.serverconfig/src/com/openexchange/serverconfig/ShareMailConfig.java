@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,109 @@
 
 package com.openexchange.serverconfig;
 
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ServerConfigMatcherService} - Implementations of this interface can decide if a value from the file <code>as-config.yml</code> are
- * applicable for the current request and should be added to the server config that is currently being generated.
+ * {@link ShareMailConfig}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.0
  */
-public interface ServerConfigMatcherService {
+public class ShareMailConfig {
 
+    private String buttoncolor;
+    private String buttonBackgroundColor;
+    private String buttonBorderColor;
+    private String footerText;
+    private String footerImage;
+    
     /**
-     * Checks if given argument look applicable for this matcher service.
+     * Gets the buttoncolor
      *
-     * @param config The configuration
-     * @param request The associated AJAX request
-     * @param session The user session
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * @return The buttoncolor
      */
-    boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) throws OXException;
+    public String getButtonColor() {
+        return buttoncolor;
+    }
+    
+    /**
+     * Sets the buttoncolor
+     *
+     * @param buttoncolor The buttoncolor to set
+     */
+    public void setButtoncolor(String buttoncolor) {
+        this.buttoncolor = buttoncolor;
+    }
+    
+    /**
+     * Gets the buttonBackgroundColor
+     *
+     * @return The buttonBackgroundColor
+     */
+    public String getButtonBackgroundColor() {
+        return buttonBackgroundColor;
+    }
+    
+    /**
+     * Sets the buttonBackgroundColor
+     *
+     * @param buttonBackgroundColor The buttonBackgroundColor to set
+     */
+    public void setButtonBackgroundColor(String buttonBackgroundColor) {
+        this.buttonBackgroundColor = buttonBackgroundColor;
+    }
+    
+    /**
+     * Gets the buttonBorderColor
+     *
+     * @return The buttonBorderColor
+     */
+    public String getButtonBorderColor() {
+        return buttonBorderColor;
+    }
+    
+    /**
+     * Sets the buttonBorderColor
+     *
+     * @param buttonBorderColor The buttonBorderColor to set
+     */
+    public void setButtonBorderColor(String buttonBorderColor) {
+        this.buttonBorderColor = buttonBorderColor;
+    }
+    
+    /**
+     * Gets the footerText
+     *
+     * @return The footerText
+     */
+    public String getFooterText() {
+        return footerText;
+    }
+    
+    /**
+     * Sets the footerText
+     *
+     * @param footerText The footerText to set
+     */
+    public void setFooterText(String footerText) {
+        this.footerText = footerText;
+    }
+    
+    /**
+     * Gets the footer image
+     *
+     * @return The footerImage
+     */
+    public String getFooterImage() {
+        return footerImage;
+    }
+    
+    /**
+     * Sets the footer image
+     *
+     * @param footerImage The footerImage to set
+     */
+    public void setFooterImage(String footerImagePath) {
+        this.footerImage = footerImagePath;
+    }
+    
 }

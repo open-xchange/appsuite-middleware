@@ -298,9 +298,9 @@ public class MailNotificationTest extends ShareTest {
             testFolder1,
             new File[] {image1},
             String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
-            String.format(NotificationStrings.HAS_SHARED_PHOTO, clientFullName, clientEmail, image1.getFileName()),
-            NotificationStrings.VIEW_PHOTO,
-            String.format(NotificationStrings.SUBJECT_SHARED_PHOTO, clientFullName, image1.getFileName()),
+            String.format(NotificationStrings.HAS_SHARED_IMAGE, clientFullName, clientEmail, image1.getFileName()),
+            NotificationStrings.VIEW_IMAGE,
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             null,
             shareExpireDate
             );
@@ -312,8 +312,8 @@ public class MailNotificationTest extends ShareTest {
             new File[] {image1},
             String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
             String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
-            NotificationStrings.VIEW_PHOTO,
-            String.format(NotificationStrings.SUBJECT_SHARED_PHOTO, clientFullName, image1.getFileName()),
+            NotificationStrings.VIEW_IMAGE,
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             clientShareMessage,
             shareExpireDate
             );
@@ -325,9 +325,9 @@ public class MailNotificationTest extends ShareTest {
             testFolder1,
             files,
             String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
-            String.format(NotificationStrings.HAS_SHARED_PHOTOS, clientFullName, clientEmail, files.length),
-            NotificationStrings.VIEW_PHOTOS,
-            String.format(NotificationStrings.SUBJECT_SHARED_PHOTOS, clientFullName, files.length),
+            String.format(NotificationStrings.HAS_SHARED_IMAGES, clientFullName, clientEmail, files.length),
+            NotificationStrings.VIEW_IMAGES,
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGES, clientFullName, files.length),
             null,
             shareExpireDate
             );
@@ -339,9 +339,9 @@ public class MailNotificationTest extends ShareTest {
             testFolder1,
             files,
             String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
-            String.format(NotificationStrings.HAS_SHARED_PHOTOS_AND_MESSAGE, clientFullName, clientEmail, files.length),
-            NotificationStrings.VIEW_PHOTOS,
-            String.format(NotificationStrings.SUBJECT_SHARED_PHOTOS, clientFullName, files.length),
+            String.format(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE, clientFullName, clientEmail, files.length),
+            NotificationStrings.VIEW_IMAGES,
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGES, clientFullName, files.length),
             clientShareMessage,
             shareExpireDate
             );

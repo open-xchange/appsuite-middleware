@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
@@ -81,6 +82,18 @@ public interface ShareNotificationService {
      * @param notification The notification
      */
     <T extends ShareNotification<?>> void send(T notification) throws OXException;
+    
+    /**
+     * 
+     * @param transport
+     * @param guestShare
+     * @param shareToken
+     * @param requestHostname
+     * @param protocol
+     * @param hash
+     * @return
+     */
+    List<OXException> sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash);
     
     /**
      * Sends notifications about one or more created shares to multiple guest user recipients.

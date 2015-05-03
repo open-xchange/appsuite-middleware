@@ -47,75 +47,95 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.serverconfig;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.capabilities.Capability;
+
 
 /**
- * A simple container holding all necessary information to send out a notification about the shares creation.
+ * {@link ServerConfig}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class NotificationInfo {
+public interface ServerConfig {
 
-    private final ShareRecipient recipient;
-    private final GuestInfo guestInfo;
-    private final List<ShareInfo> shareInfos;
-    private final Transport transport;
-    private String message;
-    private ServerSession session;
-    private AJAXRequestData requestData;
-
-    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, ServerSession session, AJAXRequestData requestData) {
-        super();
-        this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-        this.transport = transport;
-        this.message = message;
-        this.session = session;
-        this.requestData = requestData;
-    }
-
-    public ShareRecipient getRecipient() {
-        return recipient;
-    }
-
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
-    }
-
-    public List<ShareInfo> getShareInfos() {
-        return shareInfos;
-    }
+    /**
+     * Get the whole config object as map, might contain more entries than available via documented methods as the object is built
+     * dynamically.
+     *  
+     * @return The whole config object as map
+     */
+    Map<String, Object> asMap();
     
-    public Transport getTransport() {
-        return transport;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public ServerSession getSession() {
-        return session;
-    }
-
-    public AJAXRequestData getRequestData() {
-        return requestData;
-    }
+    /**
+     * Get the set of {@link Capability}s available for the {@link User} you requested the {@link ServerConfig} for
+     * @return the set of {@link Capability}s
+     */
+    Set<Capability> getCapabilities();
     
+    /**
+     * Check if the server is forced to assume https connections
+     * @return true if the server is forced to assume https connections, else false
+     */
+    boolean isForceHttps();
     
+    /**
+     * Get the hosts configuration
+     * @return An array of hosts
+     */
+    String[] getHosts();
+    
+    /**
+     * Get a list of known languages as key -> value pairs e.g. "en_GB" -> "English (UK)"
+     * 
+     * @return The list of languages
+     */
+    List<SimpleEntry<String, String>> getLanguages();
+    
+    /**
+     * Get the server version
+     * 
+     * @return the server version
+     */
+    String getServerVersion();
+    
+    /**
+     * Get the server build date
+     * 
+     * @return the server build date
+     */
+    String getServerBuildDate();
+    
+    /**
+     * Get the ui version
+     * 
+     * @return the ui version
+     */
+    String getUIVersion();
+    
+    /**
+     * Get the product name
+     * 
+     * @return null or the product name
+     */
+    String getProductName();
+    
+    /**
+     * Get a filtered config object as map. Not all ServerConfig entries are needed for the client. 
+     *  
+     * @return The whole config object as map
+     */
+    Map<String, Object> forClient();
 
+    /**
+     * Get the configuration for share mails
+     * 
+     * @return null if the config for share mails can't be read, the read config otherwise
+     */
+    ShareMailConfig getShareMailConfig();
 }

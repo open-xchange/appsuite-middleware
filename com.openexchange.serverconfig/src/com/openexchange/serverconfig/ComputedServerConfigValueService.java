@@ -49,11 +49,8 @@
 
 package com.openexchange.serverconfig;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ComputedServerConfigValueService} - Services implementing this interface are able to add computed values to the server config object that is being generated.
@@ -63,5 +60,5 @@ import com.openexchange.tools.session.ServerSession;
  */
 public interface ComputedServerConfigValueService {
 
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException;
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) throws OXException;
 }

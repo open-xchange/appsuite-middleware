@@ -58,33 +58,35 @@ import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.serverconfig.ShareMailConfig;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.DefaultLinkProvider;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareCreationDetails;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
-import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
+import com.openexchange.share.notification.mail.ShareMailAware;
+import com.openexchange.share.notification.mail.impl.ShareCreatedMailNotification;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -143,13 +145,6 @@ public class DefaultNotificationService implements ShareNotificationService {
     // match enum type from com.openexchange.share.notification.ShareNotification.NotificationType<T>
     public List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> createdShares, String message, ServerSession session, AJAXRequestData requestData) {
         List<OXException> warnings = new ArrayList<OXException>();
-        String productName=null;
-        try {
-            productName = determineProductName(requestData, session);
-        } catch (OXException e) {
-            warnings.add(e);
-            return warnings;
-        }
         
         /*
          * To send the notifications we have to biuld NotificationInfo instances per recipient and share that contain the needed data to
@@ -160,7 +155,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             ShareRecipient recipient = entry.getKey();
             List<ShareInfo> shareInfos = entry.getValue();
             if (shareInfos != null && !shareInfos.isEmpty()) {
-                notificationInfos.add(new NotificationInfo(recipient, shareInfos.get(0).getGuest(), shareInfos, productName, transport,
+                notificationInfos.add(new NotificationInfo(recipient, shareInfos.get(0).getGuest(), shareInfos, transport,
                     message, session, requestData));
             }
         }
@@ -200,51 +195,87 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @throws OXException if the email address needed to build the notification is missing
      */
     private ShareNotification<?> buildShareCreatedMailNotification(NotificationInfo notificationInfo) throws OXException {
-        
-
         if (Strings.isEmpty(notificationInfo.getGuestInfo().getEmailAddress())) {
             GuestInfo guestInfo = notificationInfo.getGuestInfo();
             throw ShareNotifyExceptionCodes.MISSING_MAIL_ADDRESS.create(guestInfo.getGuestID(), guestInfo.getContextID());
         }
 
         ServerSession session = notificationInfo.getSession();
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
         AJAXRequestData requestData = notificationInfo.getRequestData();
         List<ShareInfo> createdShares = notificationInfo.getShareInfos();
         GuestInfo guest = notificationInfo.getGuestInfo();
         ShareRecipient recipient = notificationInfo.getRecipient();
-
         String shareToken = createdShares.size() == 1 ? createdShares.get(0).getToken() : guest.getBaseToken();
+        String protocol = determineProtocol(requestData);
+        
         try {
-            ShareCreatedBuilder builder = MailNotifications.shareCreated()
-                .setTransportInfo(new InternetAddress(guest.getEmailAddress(), true))
-                .setLinkProvider(buildLinkProvider(session, requestData, shareToken))
-                .setGuestContext(guest.getContextID())
-                .setGuestID(guest.getGuestID())
-                .setLocale(guest.getLocale())
-                .setSession(session)
-                .setTargets(getTargets(createdShares))
-                .setMessage(notificationInfo.getMessage())
-                .setCreationDetails(new ShareCreationDetails(notificationInfo.getProductName(), isNewGuest(recipient)));
-
+            ShareCreatedMailNotification scmn = new ShareCreatedMailNotification();
+            
+            scmn.setTransportInfo(new InternetAddress(guest.getEmailAddress(), true));
+            scmn.setLinkProvider(buildLinkProvider(session.getUserId(), session.getContextId(), requestData.getHostname(), shareToken, protocol));
+            scmn.setGuestContextID(guest.getContextID());
+            scmn.setGuestID(guest.getGuestID());
+            scmn.setLocale(guest.getLocale());
+            scmn.setSession(session);
+            scmn.setTargets(getTargets(createdShares));
+            scmn.setMessage(notificationInfo.getMessage());
+            scmn.setCausedGuestCreation(isNewGuest(recipient));
+            
             AuthenticationMode authMode = guest.getAuthentication();
             switch (authMode) {
                 case ANONYMOUS:
-                    builder.setAuthMode(AuthenticationMode.ANONYMOUS);
+                    
+                    scmn.setAuthMode(AuthenticationMode.ANONYMOUS);
                     break;
                 case ANONYMOUS_PASSWORD:
-                    builder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
-                    builder.setPassword(((AnonymousRecipient) recipient).getPassword());
+                    scmn.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
+                    scmn.setPassword(((AnonymousRecipient) recipient).getPassword());
                     break;
                 case GUEST_PASSWORD:
-                    builder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
-                    builder.setUsername(guest.getEmailAddress());
-                    builder.setPassword(((GuestRecipient) recipient).getPassword());
+                    scmn.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
+                    scmn.setUsername(guest.getEmailAddress());
+                    scmn.setPassword(((GuestRecipient) recipient).getPassword());
                     break;
             }
-            return builder.build();
+            
+            makeMailAware(scmn, requestData.getHostname(), userId, contextId);
+            
+            return scmn;
         } catch (AddressException e) {
             throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(guest.getEmailAddress());
         }
+    }
+    
+    @Override
+    public List<OXException> sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) {
+        List<OXException> warnings = new ArrayList<OXException>();
+        try {
+            UserService userService = serviceLookup.getService(UserService.class);
+            GuestInfo guestInfo = guestShare.getGuest();
+            String mailAddress = guestInfo.getEmailAddress();
+            User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+            LinkProvider linkProvider = buildLinkProvider(guestInfo.getGuestID(), guestInfo.getContextID(), requestHostname, shareToken, protocol);
+
+            ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
+                .setTransportInfo(new InternetAddress(mailAddress, true))
+                .setLinkProvider(linkProvider)
+                .setGuestContext(guestInfo.getContextID())
+                .setGuestContext(guestInfo.getGuestID())
+                .setLocale(guest.getLocale())
+                .setShareToken(shareToken)
+                .setConfirm(hash)
+                .setProductName("")
+//                set notificationDetails
+                .build();
+            send(notification);
+        } catch (OXException oxe) {
+            warnings.add(oxe);
+        } catch (Exception e) {
+            warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+        }
+        return warnings;
     }
 
     /**
@@ -281,29 +312,26 @@ public class DefaultNotificationService implements ShareNotificationService {
     /**
      * Get the product name that matches the current session and requestData.
      * 
-     * @param requestData
-     * @param session
+     * @param userID
+     * @param contextID
+     * @param hostname The hostname to use when looking up the product name
      * @return The product name that matches the current session and requestData.
      * @throws OXException If no product name can be found
      */
-    protected String determineProductName(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected String determineProductName(int userID, int contextID, String hostname) throws OXException {
         String productName = null;
-        
-        JSONObject serverConfig = serviceLookup.getService(ServerConfigService.class).getServerConfig(requestData, session);
-        try {
-            productName = serverConfig.getString("productName");
+        String determinedHostname = determineHostname(userID, contextID, hostname);
+        ServerConfig serverConfig = serviceLookup.getService(ServerConfigService.class).getServerConfig(determinedHostname, userID, contextID);
+            productName = serverConfig.getProductName();
             if(Strings.isEmpty(productName)) {
-                throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(session.getUserId(), session.getContextId());
+                throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userID, contextID);
             }
-        } catch (JSONException e) {
-            throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(session.getUserId(), session.getContextId());
-        }
         
         return productName;
     }
 
-    protected LinkProvider buildLinkProvider(ServerSession session, AJAXRequestData requestData, String shareToken) {
-        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(session, requestData), determineServletPrefix(), shareToken);
+    protected LinkProvider buildLinkProvider(int userID, int contextID, String requestHostname, String shareToken, String protocol) {
+        return new DefaultLinkProvider(protocol , determineHostname(userID, contextID, requestHostname), determineServletPrefix(), shareToken);
     }
 
     protected static String determineProtocol(AJAXRequestData requestData) {
@@ -314,16 +342,20 @@ public class DefaultNotificationService implements ShareNotificationService {
         return requestData.isSecure() ? "https://" : "http://";
     }
 
-    protected String determineHostname(ServerSession session, AJAXRequestData requestData) {
+    /**
+     * Determines the hostname by first asking the optional {@link HostnameService} and then falling back to the hostname contained in the request.
+     * 
+     * @param userID The userID to use when querying the {@link HostnameService}
+     * @param contextID The userID to use when querying the {@link HostnameService}
+     * @param requestHostname The hostname as provided by the request
+     * @return the determined hostname
+     */
+    protected String determineHostname(int userID, int contextID, String requestHostname) {
         HostnameService hostNameService = serviceLookup.getOptionalService(HostnameService.class);
         if(hostNameService != null) {
-            return hostNameService.getHostname(session.getUserId(), session.getContextId());
+            return hostNameService.getHostname(userID, contextID);
         }
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return servletRequest.getServerName();
-        }
-        return requestData.getHostname();
+        return requestHostname;
     }
     
     protected String determineServletPrefix() {
@@ -333,5 +365,32 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
         return prefixService.getPrefix();
     }
-
+    
+    /**
+     * Get all mail relevant branding infos from the {@linkServerConfig} and add all the needed infos for the mailcomposer to actually build the mail.
+     * 
+     * @param shareMailAware The {@link ShareMailAware} {@link ShareNotification} to enrich with information.
+     * @param hostname The hostname
+     * @param userId The userId
+     * @param contextId The contextId
+     */
+    private void makeMailAware(ShareMailAware shareMailAware, String hostname, int userId, int contextId) throws OXException {
+        ServerConfig serverConfig = serviceLookup.getService(ServerConfigService.class).getServerConfig(hostname, userId, contextId);
+        String productName = serverConfig.getProductName();
+        if(Strings.isEmpty(productName)) {
+            throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userId, contextId);
+        }
+        shareMailAware.setProductName(productName);
+        
+        ShareMailConfig shareMailConfig = serverConfig.getShareMailConfig();
+        if(shareMailConfig == null) {
+            throw ShareNotifyExceptionCodes.INVALID_SHARE_MAIL_CONFIG.create(userId, contextId);
+        }
+        shareMailAware.setButtonBackgroundColor(shareMailConfig.getButtonBackgroundColor());
+        shareMailAware.setButtonBorderColor(shareMailConfig.getButtonBorderColor());
+        shareMailAware.setButtonColor(shareMailConfig.getButtonColor());
+        shareMailAware.setFooterImage(shareMailConfig.getFooterImage());
+        shareMailAware.setFooterText(shareMailConfig.getFooterText());
+    }
+    
 }

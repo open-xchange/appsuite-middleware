@@ -60,7 +60,6 @@ import com.openexchange.share.notification.DefaultPasswordResetConfirmNotificati
 import com.openexchange.share.notification.DefaultShareCreatedNotification;
 import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
-import com.openexchange.share.notification.ShareCreationDetails;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
@@ -89,6 +88,7 @@ public class MailNotifications {
 
         private String shareToken;
         private String confirm;
+        private String productName;
 
         protected PasswordResetConfirmBuilder() {
             super(NotificationType.CONFIRM_PASSWORD_RESET);
@@ -103,16 +103,23 @@ public class MailNotifications {
             this.confirm = confirm;
             return this;
         }
+        
+        public PasswordResetConfirmBuilder setProductName(String productName) {
+            this.productName = productName;
+            return this;
+        }
 
         @Override
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkNotNull(shareToken, "shareToken");
             checkNotNull(confirm, "config");
+            checkNotNull(productName, "productName");
 
             DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setToken(shareToken);
             notification.setConfirm(confirm);
+            notification.setProductName(productName);
             return notification;
         }
     }
@@ -130,8 +137,6 @@ public class MailNotifications {
         private String message;
 
         private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
-
-        private ShareCreationDetails creationDetails;
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
@@ -212,17 +217,6 @@ public class MailNotifications {
             this.message = message;
             return this;
         }
-        
-        /**
-         * Sets the details of this creation notification
-         * 
-         * @param details
-         * @return
-         */
-        public ShareCreatedBuilder setCreationDetails(ShareCreationDetails notificationDetails) {
-            this.creationDetails = notificationDetails;
-            return this;
-        }
 
         @Override
         protected ShareCreatedNotification<InternetAddress> doBuild() {
@@ -243,7 +237,6 @@ public class MailNotifications {
             notification.setPassword(password);
             notification.setTargets(targets);
             notification.setMessage(message);
-            notification.setCreationDetails(creationDetails);
             return notification;
         }
 

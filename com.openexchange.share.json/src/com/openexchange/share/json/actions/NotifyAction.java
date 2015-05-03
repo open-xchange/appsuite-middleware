@@ -66,7 +66,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.TokenParser;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareCreationDetails;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -135,7 +134,7 @@ public class NotifyAction extends AbstractShareAction {
             .setSession(session)
             .setTargets(targets)
             .setMessage(message)
-            .setCreationDetails(new ShareCreationDetails("", false));
+            ;
 
         AuthenticationMode authMode = guest.getAuthentication();
         switch (authMode) {

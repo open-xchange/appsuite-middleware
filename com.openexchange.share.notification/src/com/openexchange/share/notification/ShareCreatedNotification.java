@@ -127,12 +127,5 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
      * @return
      */
     public int getGuestID();
-    
-    /**
-     * Gets the details of this creation notification
-     *
-     * @return The notification details
-     */
-    ShareCreationDetails getCreationDetails();
 
 }

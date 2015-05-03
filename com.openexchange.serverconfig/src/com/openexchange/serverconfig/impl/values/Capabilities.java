@@ -49,17 +49,13 @@
 
 package com.openexchange.serverconfig.impl.values;
 
+import java.util.Map;
 import java.util.Set;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Capabilities}
@@ -77,10 +73,10 @@ public class Capabilities implements ComputedServerConfigValueService {
 
 
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) throws OXException {
         CapabilityService capabilityService = services.getService(CapabilityService.class);
-        Set<Capability> capabilities = capabilityService.getCapabilities(session.getUserId(), session.getContextId(), true, true).asSet();
-        serverConfig.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, session));
+        Set<Capability> capabilities = capabilityService.getCapabilities(userID, contextID, true, true).asSet();
+        serverConfig.put("capabilities", capabilities);
     }
 
 }

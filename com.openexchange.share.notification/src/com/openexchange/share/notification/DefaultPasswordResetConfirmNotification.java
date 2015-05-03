@@ -56,12 +56,14 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  * {@link DefaultPasswordResetConfirmNotification}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8
  */
 public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
 
     private String token;
     private String confirm;
+    private String productName;
 
     public DefaultPasswordResetConfirmNotification(Transport transport) {
         super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
@@ -84,5 +86,14 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
     public void setConfirm(String confirm) {
         this.confirm = confirm;
     }
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+    
 
 }

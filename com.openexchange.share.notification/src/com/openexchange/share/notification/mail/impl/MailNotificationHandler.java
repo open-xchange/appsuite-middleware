@@ -118,7 +118,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     private void sendShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
+        ShareCreatedMailNotification casted = (ShareCreatedMailNotification) notification;
         ComposedMailMessage mail = composer.buildShareCreatedMail(casted);
         sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
     }

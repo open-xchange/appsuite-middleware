@@ -47,75 +47,68 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.apps.manifests.json;
 
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.exception.OXException;
+import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * A simple container holding all necessary information to send out a notification about the shares creation.
+ * {@link ManifestBuilder}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class NotificationInfo {
+public class ManifestBuilder {
 
-    private final ShareRecipient recipient;
-    private final GuestInfo guestInfo;
-    private final List<ShareInfo> shareInfos;
-    private final Transport transport;
-    private String message;
-    private ServerSession session;
-    private AJAXRequestData requestData;
+    final private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestBuilder.class);
+    
+    private JSONArray manifests;
+    private NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker;
 
-    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, ServerSession session, AJAXRequestData requestData) {
-        super();
-        this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-        this.transport = transport;
-        this.message = message;
-        this.session = session;
-        this.requestData = requestData;
-    }
-
-    public ShareRecipient getRecipient() {
-        return recipient;
-    }
-
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
-    }
-
-    public List<ShareInfo> getShareInfos() {
-        return shareInfos;
+    public ManifestBuilder(JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
+        this.manifests = manifests;
+        this.manifestContributorTracker = manifestContributorTracker;
     }
     
-    public Transport getTransport() {
-        return transport;
-    }
+    /**
+     * Compute the manifests from files and {@link ManifestContributor}s.
+     * 
+     * @param session The {@link ServerSession}
+     * @throws OXException 
+     */
+    public JSONArray buildManifests(ServerSession session) throws OXException {
+        manifests = new JSONArray(manifests);
 
-    public String getMessage() {
-        return message;
-    }
+        JSONArray result = new JSONArray();
+        for(ManifestContributor contributor: manifestContributorTracker.getServiceList()) {
+            try {
+                JSONArray additionalManifests = contributor.getAdditionalManifests(session);
+                if (additionalManifests != null) {
+                    for(int i = 0, size = additionalManifests.length(); i < size; i++) {
+                        manifests.put(additionalManifests.get(i));
+                    }
+                }
+            } catch (OXException|JSONException ex) {
+                LOG.error("Error while trying to get additional manifests from contributor {} ", contributor, ex);
+            }
+        }
 
-    public ServerSession getSession() {
-        return session;
-    }
-
-    public AJAXRequestData getRequestData() {
-        return requestData;
+        try {
+                for (int i = 0, size = manifests.length(); i < size; i++) {
+                    JSONObject definition = manifests.getJSONObject(i);
+                    result.put(new JSONObject(definition));
+                }
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
+        }
+        return result;
     }
     
-    
-
 }

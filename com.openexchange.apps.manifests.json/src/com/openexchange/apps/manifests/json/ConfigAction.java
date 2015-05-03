@@ -49,14 +49,30 @@
 
 package com.openexchange.apps.manifests.json;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.Set;
+import javax.servlet.http.HttpServletRequest;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,17 +86,65 @@ import com.openexchange.tools.session.ServerSession;
 public class ConfigAction implements AJAXActionService {
 
     private final ServiceLookup services;
+    private final ManifestBuilder manifestBuilder;
 
-    public ConfigAction(ServiceLookup services) {
+    public ConfigAction(ServiceLookup services, ManifestBuilder manifestBuilder ) {
         super();
         this.services = services;
+        this.manifestBuilder = manifestBuilder;
     }
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-            ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
-            JSONObject serverConfig = serverConfigService.getServerConfig(requestData, session);
-            return new AJAXRequestResult(serverConfig, "json");
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        
+        ServerConfigService serverConfigService = services.getService(ServerConfigService.class);
+        HostnameService hostNameService = services.getOptionalService(HostnameService.class);
+ 
+        String hostname;
+        
+        if(hostNameService != null) {
+             hostname = hostNameService.getHostname(session.getUserId(), session.getContextId());
+        }
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (null != servletRequest) {
+            hostname = servletRequest.getServerName();
+        } else {
+            hostname = requestData.getHostname();
+        }
+        
+        
+        ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
+        Map<String, Object> filteredConfig = serverConfig.forClient();
+        
+        try {
+            
+            JSONObject jsonConfig = asJSON(filteredConfig);
+            jsonConfig.put("manifests", manifestBuilder.buildManifests(session));
+            return new AJAXRequestResult(jsonConfig, "json");
+        } catch (JSONException je) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(je.getMessage());
+        }
+        
+    }
+    
+    public JSONObject asJSON(Map<String, Object> serverConfig) throws JSONException, OXException {
+        Set<Capability> capabilities = (Set<Capability>) serverConfig.remove("capabilities");
+        List<SimpleEntry<String, String>> languages = (List<SimpleEntry<String, String>>) serverConfig.remove("languages");
+
+        //coerce
+        JSONObject serverConfigurationObject = (JSONObject) JSONCoercion.coerceToJSON(serverConfig);
+
+        //add additional entries that can't simply be coerced 
+        serverConfigurationObject.put("capabilities", services.getService(SimpleConverter.class).convert("capability", "json", capabilities, null));
+
+        final JSONArray allLanguages = new JSONArray(languages.size());
+        for (SimpleEntry<String, String> language : languages) {
+            allLanguages.put(new JSONArray(2).put(language.getKey()).put(language.getValue()));
+        }
+        serverConfigurationObject.put("languages", allLanguages);
+        return serverConfigurationObject;
     }
 
 }

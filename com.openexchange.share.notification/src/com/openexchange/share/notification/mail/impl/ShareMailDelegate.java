@@ -47,33 +47,26 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.mail.impl;
+
+import com.openexchange.share.notification.mail.ShareMailAware;
+
 
 /**
- * {@link ShareCreationDetails} - A simple bean that contains additional notification details that are needed when finally generating/sending the
- * notification instance that should reach the consumer via ShareNotificationService/ShareNotificationHandler.
+ * {@link ShareMailDelegate}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class ShareCreationDetails {
-
+public class ShareMailDelegate implements ShareMailAware {
+    
     private String productName;
-    private boolean causedGuestCreation;
-
-    /**
-     * 
-     * Initializes a new {@link ShareCreationDetails}.
-     * 
-     * @param productName
-     * @param userFullName 
-     */
-    public ShareCreationDetails(String productName, boolean causedGuestCreation) {
-        super();
-        this.productName = productName;
-        this.causedGuestCreation = causedGuestCreation;
-    }
-
+    private String buttoncolor;
+    private String buttonBackgroundColor;
+    private String buttonBorderColor;
+    private String footerText;
+    private String footerImage;
+    
     /**
      * Gets the productName
      *
@@ -82,7 +75,7 @@ public class ShareCreationDetails {
     public String getProductName() {
         return productName;
     }
-
+    
     /**
      * Sets the productName
      *
@@ -93,22 +86,93 @@ public class ShareCreationDetails {
     }
     
     /**
-     * Gets the causedGuestCreation
+     * Gets the buttoncolor
      *
-     * @return The causedGuestCreation
+     * @return The buttoncolor
      */
-    public boolean causedGuestCreation() {
-        return causedGuestCreation;
+    public String getButtonColor() {
+        return buttoncolor;
     }
-
     
     /**
-     * Sets the causedGuestCreation
+     * Sets the buttoncolor
      *
-     * @param causedGuestCreation The causedGuestCreation to set
+     * @param buttoncolor The buttoncolor to set
      */
-    public void setCausedGuestCreation(boolean causedGuestCreation) {
-        this.causedGuestCreation = causedGuestCreation;
+    public void setButtonColor(String buttoncolor) {
+        this.buttoncolor = buttoncolor;
+    }
+    
+    /**
+     * Gets the buttonBackgroundColor
+     *
+     * @return The buttonBackgroundColor
+     */
+    public String getButtonBackgroundColor() {
+        return buttonBackgroundColor;
+    }
+    
+    /**
+     * Sets the buttonBackgroundColor
+     *
+     * @param buttonBackgroundColor The buttonBackgroundColor to set
+     */
+    public void setButtonBackgroundColor(String buttonBackgroundColor) {
+        this.buttonBackgroundColor = buttonBackgroundColor;
+    }
+    
+    /**
+     * Gets the buttonBorderColor
+     *
+     * @return The buttonBorderColor
+     */
+    public String getButtonBorderColor() {
+        return buttonBorderColor;
+    }
+    
+    /**
+     * Sets the buttonBorderColor
+     *
+     * @param buttonBorderColor The buttonBorderColor to set
+     */
+    public void setButtonBorderColor(String buttonBorderColor) {
+        this.buttonBorderColor = buttonBorderColor;
+    }
+    
+    /**
+     * Gets the footerText
+     *
+     * @return The footerText
+     */
+    public String getFooterText() {
+        return footerText;
+    }
+    
+    /**
+     * Sets the footerText
+     *
+     * @param footerText The footerText to set
+     */
+    public void setFooterText(String footerText) {
+        this.footerText = footerText;
+    }
+    
+    /**
+     * Gets the footerImage
+     *
+     * @return The footerImage
+     */
+    public String getFooterImage() {
+        return footerImage;
+    }
+    
+    /**
+     * Sets the footerImage
+     *
+     * @param footerImage The footerImage to set
+     */
+    public void setFooterImage(String footerImage) {
+        this.footerImage = footerImage;
     }
 
 }

@@ -53,14 +53,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import org.json.JSONArray;
-import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
-import com.openexchange.apps.manifests.json.values.Manifests;
+import com.openexchange.apps.manifests.json.ManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
 import com.openexchange.osgi.NearRegistryServiceTracker;
@@ -98,7 +98,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ConfigurationService.class, ServerConfigService.class};
+        return new Class<?>[]{ConfigurationService.class, ServerConfigService.class, SimpleConverter.class };
     }
 
     @Override
@@ -124,14 +124,15 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             ManifestContributor.class
         );
         rememberTracker(manifestContributorTracker);
+        track(HostnameService.class);
         openTrackers();
 
-        //Enhance computed server config by adding UIVersion and Manifests to it
+        //Enhance computed server config by adding UIVersion
         UIVersion.UIVERSION.set(context.getBundle().getVersion().toString());
         registerService(ComputedServerConfigValueService.class, new UIVersion());
-        registerService(ComputedServerConfigValueService.class, new Manifests(readManifests, manifestContributorTracker));
 
-        registerModule(new ManifestActionFactory(this, readManifests, manifestContributorTracker), "apps/manifests");
+        ManifestBuilder manifestBuilder = new ManifestBuilder(readManifests, manifestContributorTracker); 
+        registerModule(new ManifestActionFactory(this, manifestBuilder), "apps/manifests");
     }
     
     private JSONArray readManifests() {

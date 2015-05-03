@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,47 @@
  *
  */
 
-package com.openexchange.apps.manifests.json.values;
+package com.openexchange.share.notification.mail;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.apps.manifests.ManifestContributor;
-import com.openexchange.apps.manifests.json.AllAction;
-import com.openexchange.exception.OXException;
-import com.openexchange.osgi.NearRegistryServiceTracker;
-import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
+import java.util.Map;
+import com.openexchange.serverconfig.ClientServerConfigFilter;
 
 /**
- * {@link Manifests}
+ * {@link MailNotificationClientServerConfigFilter} - Filter out sharing mail related contents from the server config. 
+ * 
+ * The parts that will be filtered correspond to the following brand specific yaml entries from <code>as-config.yml</code> 
+ * <pre>
+ * somebrand:
+ *     sharing:
+           mails:
+ * </pre>
+ * 
+ * The sharing node will be removed completely if it's empty after filtering out the mails subnode.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.0
  */
-public class Manifests implements ComputedServerConfigValueService {
+public class MailNotificationClientServerConfigFilter implements ClientServerConfigFilter {
 
-    private final JSONArray manifests;
-    private NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker;
-
-
-    public Manifests(JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
-        super();
-        this.manifests = manifests;
-        this.manifestContributorTracker = manifestContributorTracker;
-    }
-
+    private final static String SHARING = "sharing";
+    private final static String MAILS= "mails";
+    
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws OXException, JSONException {
-        serverConfig.put("manifests", AllAction.getManifests(session, manifests, manifestContributorTracker));
+    public void apply(Map<String, Object> brandConfig) {
+        if (brandConfig != null) {
+
+            Object sharingObject = brandConfig.get(SHARING);
+            if (sharingObject != null && sharingObject instanceof Map) {
+                Map<String, Object> sharingConfig = (Map<String, Object>) sharingObject;
+                //delete mails subnode
+                sharingConfig.remove(MAILS);
+
+                //check if sharing node is left empty and delete
+                if (sharingConfig.isEmpty()) {
+                    brandConfig.remove(SHARING);
+                }
+            }
+        }
     }
 
 }
