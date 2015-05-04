@@ -146,7 +146,7 @@ public class DovecotPushListener implements PushListener, Runnable {
 
             pushManager.refreshLock(new SessionInfo(session, permanent));
         } catch (Exception e) {
-            LOGGER.warn("Failed to refresh lock for user {} in context {}", session.getUserId(), session.getContextId());
+            LOGGER.warn("Failed to refresh lock for user {} in context {}", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
     }
 
@@ -196,6 +196,7 @@ public class DovecotPushListener implements PushListener, Runnable {
             }
 
             // Connect it
+            final Session session = this.session;
             mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
             mailAccess.connect(false);
 
@@ -276,19 +277,19 @@ public class DovecotPushListener implements PushListener, Runnable {
             try {
                 pushManager.releaseLock(new SessionInfo(session, permanent));
             } catch (Exception e) {
-                LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+                LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
             }
         } else {
             try {
                 // No need to re-execute registration
                 reconnected = true;
             } catch (Exception e) {
-                LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
+                LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                 // Give up lock and return
                 try {
                     pushManager.releaseLock(new SessionInfo(session, permanent));
                 } catch (Exception x) {
-                    LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
+                    LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
                 }
             }
         }
