@@ -1,0 +1,5 @@
+open-xchange-hazelcast-upgrade324 (7.8.0-0) unstable; urgency=low
+
+  * Initial release
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 29 Apr 2015 12:56:27 +0200

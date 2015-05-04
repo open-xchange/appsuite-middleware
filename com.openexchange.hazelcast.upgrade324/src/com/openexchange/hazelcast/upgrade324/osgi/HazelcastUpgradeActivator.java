@@ -94,7 +94,10 @@ public class HazelcastUpgradeActivator extends HousekeepingActivator {
         ClientConfig clientConfig = getConfig(getService(ConfigurationService.class));
         if (null != clientConfig) {
             UpgradedCacheListener cacheListener = new UpgradedCacheListener(clientConfig);
-            getService(com.openexchange.caching.events.CacheEventService.class).addListener(UpgradedCacheListener.CACHE_REGION, cacheListener);
+            String region = UpgradedCacheListener.CACHE_REGION;
+            LOG.warn("Listening to events for cache region \"{}\". " + 
+                "Please remember to uninstall this package once all nodes in the cluster have been upgraded.", region);
+            getService(com.openexchange.caching.events.CacheEventService.class).addListener(region, cacheListener);
             this.cacheListener = cacheListener;                        
         }
     }
