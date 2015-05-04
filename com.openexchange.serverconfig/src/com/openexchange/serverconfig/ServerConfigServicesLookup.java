@@ -64,13 +64,11 @@ public interface ServerConfigServicesLookup {
      * @return A {@link List} of services.
      */
     public List<ComputedServerConfigValueService> getComputed();
-
+    
     /**
-     * Get matchers that can be used to check if parts of a given <code>config-as</code> should be applied to the configuration you are
-     * currently building.
-     * 
-     * @return A {@link List} of services. 
+     * Get services that filter the generated {@link ServerConfig}, removing fields that aren't intended for clients.
+     * @return
      */
-    public List<ServerConfigMatcherService> getMatchers();
+    public List<ClientServerConfigFilter> getClientFilters();
 
 }

@@ -49,28 +49,26 @@
 
 package com.openexchange.serverconfig.impl.values;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.Map;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.version.Version;
 
 /**
  * {@link ServerVersion}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ServerVersion implements ComputedServerConfigValueService {
 
 	@Override
-	public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws JSONException {
+	public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
 
-		if (!serverConfig.has("serverVersion")) {
+		if (!serverConfig.containsKey("serverVersion")) {
 			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
 		}
 		
-		if (!serverConfig.has("buildDate")) {
+		if (!serverConfig.containsKey("buildDate")) {
 		    serverConfig.put("buildDate", Version.getInstance().getBuildDate());
 		}
 

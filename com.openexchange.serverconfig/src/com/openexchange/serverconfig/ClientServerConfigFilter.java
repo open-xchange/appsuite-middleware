@@ -47,68 +47,18 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.serverconfig;
+
+import java.util.Map;
+
 
 /**
- * {@link ShareCreationDetails} - A simple bean that contains additional notification details that are needed when finally generating/sending the
- * notification instance that should reach the consumer via ShareNotificationService/ShareNotificationHandler.
+ * {@link ClientServerConfigFilter} - Filter the map representation of a {@link ServerConfig} before it is delivered to a client.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class ShareCreationDetails {
+public interface ClientServerConfigFilter {
 
-    private String productName;
-    private boolean causedGuestCreation;
-
-    /**
-     * 
-     * Initializes a new {@link ShareCreationDetails}.
-     * 
-     * @param productName
-     * @param userFullName 
-     */
-    public ShareCreationDetails(String productName, boolean causedGuestCreation) {
-        super();
-        this.productName = productName;
-        this.causedGuestCreation = causedGuestCreation;
-    }
-
-    /**
-     * Gets the productName
-     *
-     * @return The productName
-     */
-    public String getProductName() {
-        return productName;
-    }
-
-    /**
-     * Sets the productName
-     *
-     * @param productName The productName to set
-     */
-    public void setProductName(String productName) {
-        this.productName = productName;
-    }
-    
-    /**
-     * Gets the causedGuestCreation
-     *
-     * @return The causedGuestCreation
-     */
-    public boolean causedGuestCreation() {
-        return causedGuestCreation;
-    }
-
-    
-    /**
-     * Sets the causedGuestCreation
-     *
-     * @param causedGuestCreation The causedGuestCreation to set
-     */
-    public void setCausedGuestCreation(boolean causedGuestCreation) {
-        this.causedGuestCreation = causedGuestCreation;
-    }
-
+    public void apply(Map<String, Object> config);
 }

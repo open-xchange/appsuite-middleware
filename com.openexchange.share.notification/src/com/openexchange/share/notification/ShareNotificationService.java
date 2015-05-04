@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
@@ -83,6 +84,19 @@ public interface ShareNotificationService {
     <T extends ShareNotification<?>> void send(T notification) throws OXException;
     
     /**
+     * Send a notification mail that requests a confirmation for a requested password reset from the user. 
+     * 
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param guestShare The guest share
+     * @param shareToken The current share token
+     * @param requestHostname The hostname to use for link generation
+     * @param protocol The protocol to use for link generation
+     * @param hash The password hash
+     * @throws OXException
+     */
+    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) throws OXException;
+    
+    /**
      * Sends notifications about one or more created shares to multiple guest user recipients.
      *
      * @param transport The type of {@link Transport} to use when sending notifications
@@ -91,7 +105,6 @@ public interface ShareNotificationService {
      * @param session The session of the notifying user
      * @param requestData Data of the underlying servlet request
      * @return Any exceptions occurred during notification, or an empty list if all was fine
-     * @throws OXException 
      */
     public List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> shares, String message, ServerSession session, AJAXRequestData requestData);
 

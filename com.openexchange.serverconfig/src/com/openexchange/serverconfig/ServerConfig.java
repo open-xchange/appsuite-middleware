@@ -49,31 +49,95 @@
 
 package com.openexchange.serverconfig;
 
-import com.openexchange.exception.OXException;
+import java.util.AbstractMap.SimpleEntry;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.capabilities.Capability;
+
 
 /**
- * {@link ServerConfigService}
+ * {@link ServerConfig} - A simple ServerConfig Object to ease extraction of well known/most used items of the dynamically generated
+ * ServerConfig Map. You can inspect all items via {@link ServerConfig#asMap()}.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public interface ServerConfigService {
+public interface ServerConfig {
 
     /**
-     * Get the computed server config
-     * 
-     * @param hostname The hostname to use when building the {@link ServerConfig} 
-     * @param userID The userID when building the {@link ServerConfig}
-     * @param contextID The contextID when building the {@link ServerConfig}
-     * @return the computed server config
-     * @throws OXException if computing the server config fails
+     * Get the whole config object as map, might contain more entries than available via documented methods as the object is built
+     * dynamically.
+     *  
+     * @return The whole config object as map
      */
-    public ServerConfig getServerConfig(String hostname, int userID, int contextID) throws OXException;
+    Map<String, Object> asMap();
+    
+    /**
+     * Get the set of {@link Capability}s available for the {@link User} you requested the {@link ServerConfig} for
+     * @return the set of {@link Capability}s
+     */
+    Set<Capability> getCapabilities();
+    
+    /**
+     * Check if the server is forced to assume https connections
+     * @return true if the server is forced to assume https connections, else false
+     */
+    boolean isForceHttps();
+    
+    /**
+     * Get the hosts configuration
+     * @return An array of hosts
+     */
+    String[] getHosts();
+    
+    /**
+     * Get a list of known languages as key -> value pairs e.g. "en_GB" -> "English (UK)"
+     * 
+     * @return The list of languages
+     */
+    List<SimpleEntry<String, String>> getLanguages();
+    
+    /**
+     * Get the server version
+     * 
+     * @return the server version
+     */
+    String getServerVersion();
+    
+    /**
+     * Get the server build date
+     * 
+     * @return the server build date
+     */
+    String getServerBuildDate();
+    
+    /**
+     * Get the ui version
+     * 
+     * @return the ui version
+     */
+    String getUIVersion();
+    
+    /**
+     * Get the product name
+     * 
+     * @return null or the product name
+     */
+    String getProductName();
+    
+    /**
+     * Get a filtered config object as map. Not all ServerConfig entries are needed for the client. {@link ClientServerConfigFilter}s can
+     * be registered to influence the filtering process.
+     *  
+     * @return The filtered config object as map
+     */
+    Map<String, Object> forClient();
 
     /**
-     * Get the {@link ServerConfigServicesLookup} that is used when computing the server config.
+     * Get the configuration for share mails
      * 
-     * @return
+     * @return null if the config for share mails can't be read, the read config otherwise
      */
-    ServerConfigServicesLookup getServerConfigServicesLookup();
+    ShareMailConfig getShareMailConfig();
 }

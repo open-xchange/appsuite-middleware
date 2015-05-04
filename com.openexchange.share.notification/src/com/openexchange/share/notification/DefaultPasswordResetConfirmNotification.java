@@ -56,6 +56,7 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  * {@link DefaultPasswordResetConfirmNotification}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8
  */
 public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {

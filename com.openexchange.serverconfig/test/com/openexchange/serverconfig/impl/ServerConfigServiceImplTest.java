@@ -54,33 +54,28 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.ho.yaml.Yaml;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Matchers;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.ClientServerConfigFilter;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.serverconfig.ServerConfigMatcherService;
+import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.test.mock.MockUtils;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ServerConfigServiceImplTest}
@@ -95,20 +90,19 @@ public class ServerConfigServiceImplTest {
     @Mock
     private ServiceLookup serviceLookup = null;
 
-    private List<ServerConfigMatcherService> matchers = new ArrayList<>();
-
     private List<ComputedServerConfigValueService> values = new ArrayList<>();
+    
+    private List<ClientServerConfigFilter> configFilters = new ArrayList<>();
 
     private ServerConfigServicesLookup serverConfigServicesLookup = new ServerConfigServicesLookup() {
 
         @Override
-        public List<ServerConfigMatcherService> getMatchers() {
-            return getConfigMatchers();
-        }
-
-        @Override
         public List<ComputedServerConfigValueService> getComputed() {
             return getConfigValues();
+        }
+        @Override
+        public List<ClientServerConfigFilter> getClientFilters() {
+            return getConfigFilters();
         }
     };
 
@@ -120,12 +114,6 @@ public class ServerConfigServiceImplTest {
 
     @Mock
     private ConfigView configView;
-
-    @Mock
-    ServerSession serverSession;
-
-    @Mock
-    private AJAXRequestData ajaxRequestData;
 
     private static Map<String, Object> asConfig;
 
@@ -160,21 +148,9 @@ public class ServerConfigServiceImplTest {
         composedConfigPropertyMap.put("com.openexchange.appsuite.serverConfig.pageHeaderPrefix", defaultingProperty);
         composedConfigPropertyMap.put("com.openexchange.appsuite.serverConfig.cascadeProperty", cascadeProperty);
 
-        PowerMockito.when(this.serverSession.isAnonymous()).thenReturn(false);
-        PowerMockito.when(this.serverSession.getUserId()).thenReturn(1);
-        PowerMockito.when(this.serverSession.getContextId()).thenReturn(1);
-
         MockUtils.injectValueIntoPrivateField(serverConfigServiceImpl, "serviceLookup", serviceLookup);
         MockUtils.injectValueIntoPrivateField(serverConfigServiceImpl, "serverConfigServicesLookup", serverConfigServicesLookup);
 
-    }
-
-    public List<ServerConfigMatcherService> getConfigMatchers() {
-        return matchers;
-    }
-
-    public void setConfigMatchers(List<ServerConfigMatcherService> matchers) {
-        this.matchers = matchers;
     }
 
     public List<ComputedServerConfigValueService> getConfigValues() {
@@ -184,123 +160,86 @@ public class ServerConfigServiceImplTest {
     public void setConfigValues(List<ComputedServerConfigValueService> values) {
         this.values = values;
     }
+    
+    public List<ClientServerConfigFilter> getConfigFilters() {
+        return configFilters;
+    }
+    
+    public void setConfigFilters(List<ClientServerConfigFilter> configFilters) {
+        this.configFilters = configFilters;
+    }
 
     @Test
-    public void testGetServerConfig() throws OXException, JSONException {
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("host1.mycloud.net");
-        JSONObject serverConfig = serverConfigServiceImpl.getServerConfig(ajaxRequestData, serverSession);
-        System.out.println(serverConfig);
+    public void testGetServerConfig() throws OXException {
+        ServerConfig serverConfig2 = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", 1, 1);
+        Map<String, Object> configMap = serverConfig2.asMap();
 
         //values that come from config-as-default
-        assertEquals("OX Mail", serverConfig.getString("productNameMail"));
-        assertFalse(serverConfig.getBoolean("forgotPassword"));
-        assertTrue(serverConfig.getBoolean("staySignedIn"));
-        assertEquals("(c) 2015 Open-Xchange.", serverConfig.getString("copyright"));
+        configMap.get("productNameMail");
+        assertEquals("OX Mail", configMap.get("productNameMail"));
+        assertFalse((boolean)configMap.get("forgotPassword"));
+        assertTrue((boolean)configMap.get("staySignedIn"));
+        assertEquals("(c) 2015 Open-Xchange.", configMap.get("copyright"));
 
         //values that come from config-as and are applied because the host1 matches
-        assertEquals("host1.mycloud.net", serverConfig.getString("host"));
-        assertEquals("Professional Webmail OX ", serverConfig.getString("pageTitle"));
-        assertEquals("Professional Webmail OX", serverConfig.getString("productName"));
-        assertEquals("", serverConfig.getString("pageHeader"));
-        assertEquals("", serverConfig.getString("pageHeaderPrefix"));
-        assertEquals("host1.mycloud.net", serverConfig.getString("signinTheme"));
-        assertEquals("E-Mail: cloudservice@host1-support.de", serverConfig.getString("contact"));
+        assertEquals("host1.mycloud.net", configMap.get("host"));
+        assertEquals("Professional Webmail OX ", configMap.get("pageTitle"));
+        assertEquals("Professional Webmail OX", configMap.get("productName"));
+        assertEquals("", configMap.get("pageHeader"));
+        assertEquals("", configMap.get("pageHeaderPrefix"));
+        assertEquals("host1.mycloud.net", configMap.get("signinTheme"));
+        assertEquals("E-Mail: cloudservice@host1-support.de", configMap.get("contact"));
 
         //values that come from config-as and are applied because the hostregex matches
-        assertEquals("host.*\\.mycloud\\.net", serverConfig.getString("hostRegex"));
-        assertEquals("someRegexHostValue", serverConfig.getString("someRegexHostKey"));
+        assertEquals("host.*\\.mycloud\\.net", configMap.get("hostRegex"));
+        assertEquals("someRegexHostValue", configMap.get("someRegexHostKey"));
         
         /* We made sure to include this configvalue in the configcascade but we wanted to explicitely fall back to the value provided after
          * the merge of as-config-defaults and as-config via the <as-config> mechanism. So this is meant more as documentation as the key
          * is already checked above for the proper value configured for host1.
          */
-        assertFalse("<as-config>".equals(serverConfig.getString("pageHeaderPrefix")));
+        assertFalse("<as-config>".equals(configMap.get("pageHeaderPrefix")));
         
         //values from configCascade
-        assertEquals("cascadeValue", serverConfig.getString("Config.cascadeProperty"));
-        assertEquals("cascadeValue", serverConfig.getString("cascadeProperty"));
+        assertEquals("cascadeValue", configMap.get("Config.cascadeProperty"));
+        assertEquals("cascadeValue", configMap.get("cascadeProperty"));
 
     }
 
     @Test
-    public void testLooksApplicable_host_not_matching() throws OXException {
+    public void testLooksApplicable_host_not_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("host4.mycloud.net");
-        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, "host4.mycloud.net"));
     }
 
     @Test
-    public void testLooksApplicable_host_matching() throws OXException {
+    public void testLooksApplicable_host_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("host1.mycloud.net");
-        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
+        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, "host1.mycloud.net"));
     }
 
     @Test
-    public void testLooksApplicable_hostregex_not_matching() throws OXException {
+    public void testLooksApplicable_hostregex_not_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("performance.mycloud.net");
-        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, "performance.mycloud.net"));
     }
 
     @Test
-    public void testLooksApplicable_hostregex_matching() throws OXException {
+    public void testLooksApplicable_hostregex_matching() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("host1.mycloud.net");
-        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
+        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, "host1.mycloud.net"));
     }
 
     @Test
-    public void testLooksApplicable_matcher_not_matching() throws OXException {
-
-        ServerConfigMatcherService noneMatcher = new ServerConfigMatcherService() {
-
-            @Override
-            public boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) {
-                return false;
-            }
-        };
-        setConfigMatchers(Collections.singletonList(noneMatcher));
-
-        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("unknown.mycloud.net");
-        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
-    }
-
-    @Test
-    public void testLooksApplicable_matcher_matching() throws OXException {
-        ServerConfigMatcherService allMatcher = new ServerConfigMatcherService() {
-
-            @Override
-            public boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) {
-                return true;
-            }
-        };
-        setConfigMatchers(Collections.singletonList(allMatcher));
-
-        Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host1.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("unknown.mycloud.net");
-        assertTrue(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
-    }
-
-    @Test
-    public void testLooksApplicable_NoConfig() throws OXException {
+    public void testLooksApplicable_NoConfig() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("host1.mycloud.net");
-        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null, null));
-
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn(null);
-        assertFalse(serverConfigServiceImpl.looksApplicable(null, ajaxRequestData, null));
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null));
     }
 
     @Test
-    public void testLooksApplicable_NoData() throws OXException {
+    public void testLooksApplicable_NoData() {
         Map<String, Object> host1Config = (Map<String, Object>) asConfig.get("host*.mycloud.net");
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn("host1.mycloud.net");
-        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null, null));
-
-        Mockito.when(ajaxRequestData.getHostname()).thenReturn(null);
-        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, ajaxRequestData, null));
+        assertFalse(serverConfigServiceImpl.looksApplicable(host1Config, null));
     }
 
     @Test

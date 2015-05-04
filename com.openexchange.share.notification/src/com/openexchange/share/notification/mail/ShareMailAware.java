@@ -47,75 +47,100 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.share.notification.mail;
 
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * A simple container holding all necessary information to send out a notification about the shares creation.
+ * {@link ShareMailAware}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class NotificationInfo {
-
-    private final ShareRecipient recipient;
-    private final GuestInfo guestInfo;
-    private final List<ShareInfo> shareInfos;
-    private final Transport transport;
-    private String message;
-    private ServerSession session;
-    private AJAXRequestData requestData;
-
-    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, ServerSession session, AJAXRequestData requestData) {
-        super();
-        this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-        this.transport = transport;
-        this.message = message;
-        this.session = session;
-        this.requestData = requestData;
-    }
-
-    public ShareRecipient getRecipient() {
-        return recipient;
-    }
-
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
-    }
-
-    public List<ShareInfo> getShareInfos() {
-        return shareInfos;
-    }
+public interface ShareMailAware {
     
-    public Transport getTransport() {
-        return transport;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public ServerSession getSession() {
-        return session;
-    }
-
-    public AJAXRequestData getRequestData() {
-        return requestData;
-    }
+    /**
+     * Gets the productName
+     *
+     * @return The productName
+     */
+    public String getProductName();
     
+    /**
+     * Sets the productName
+     *
+     * @param productName The productName to set
+     */
+    public void setProductName(String productName);
     
+    /**
+     * Gets the buttoncolor
+     *
+     * @return The buttoncolor
+     */
+    public String getButtonColor();
+    
+    /**
+     * Sets the buttoncolor
+     *
+     * @param buttoncolor The buttoncolor to set
+     */
+    public void setButtonColor(String buttoncolor);
+    
+    /**
+     * Gets the buttonBackgroundColor
+     *
+     * @return The buttonBackgroundColor
+     */
+    public String getButtonBackgroundColor();
+    
+    /**
+     * Sets the buttonBackgroundColor
+     *
+     * @param buttonBackgroundColor The buttonBackgroundColor to set
+     */
+    public void setButtonBackgroundColor(String buttonBackgroundColor);
+    
+    /**
+     * Gets the buttonBorderColor
+     *
+     * @return The buttonBorderColor
+     */
+    public String getButtonBorderColor();
+    
+    /**
+     * Sets the buttonBorderColor
+     *
+     * @param buttonBorderColor The buttonBorderColor to set
+     */
+    public void setButtonBorderColor(String buttonBorderColor);
+    
+    /**
+     * Gets the footerText
+     *
+     * @return The footerText
+     */
+    public String getFooterText();
+    
+    /**
+     * Sets the footerText
+     *
+     * @param footerText The footerText to set
+     */
+    public void setFooterText(String footerText);
+    
+    /**
+     * Gets the footerImage path
+     *
+     * @return The footerImage
+     */
+    public String getFooterImage();
+    
+    /**
+     * Sets the footerImage path
+     *
+     * @param footerImage The footerImage path to set
+     */
+    public void setFooterImage(String footerImagePath);
 
+    
 }

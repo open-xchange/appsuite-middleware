@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
@@ -78,6 +79,7 @@ import com.openexchange.share.notification.DefaultLinkProvider;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
@@ -154,20 +156,17 @@ public class PasswordResetServlet extends HttpServlet {
             if (null == confirm) {
                 // Generate hash and send link to confirm
                 GuestShare guestShare = shareService.resolveToken(token);
-                User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-                LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
-                mailAddress = guestShare.getGuest().getEmailAddress();
-                ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
-                    .setTransportInfo(new InternetAddress(mailAddress, true))
-                    .setLinkProvider(linkProvider)
-                    .setGuestContext(guestInfo.getContextID())
-                    .setGuestID(guestInfo.getGuestID())
-                    .setLocale(guest.getLocale())
-                    .setShareToken(token)
-                    .setConfirm(hash)
-                    .build();
-                notificationService.send(notification);
+
+                /*
+                 * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
+                 */
+                ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
+                String protocol = com.openexchange.tools.servlet.http.Tools.getProtocol(request);
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, token, request.getServerName(), protocol, hash);
+
+                /*
+                 * Redirect after notification was sent.
+                 */
                 String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
                     urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
                     "resetPassword");
@@ -208,10 +207,6 @@ public class PasswordResetServlet extends HttpServlet {
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (AddressException e) {
-            OXException oxe = ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
-            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), oxe.getMessage(), oxe);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, oxe.getMessage());
         }
     }
 

@@ -151,7 +151,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private final Map<String, String> propertiesFiles;
 
     /** Maps objects to yaml filename, with a path */
-    private final Map<String, Object> yamlFiles;
+    private final Map<String, String> yamlFiles;
 
     /** Maps filenames to whole file paths for yaml lookup */
     private final Map<String, String> yamlPaths;
@@ -183,7 +183,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         texts = new ConcurrentHashMap<String, String>(1024);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
-        yamlFiles = new HashMap<String, Object>(64);
+        yamlFiles = new HashMap<String, String>(64);
         yamlPaths = new HashMap<String, String>(64);
         dirs = new File[directories.length];
         xmlFiles = new HashMap<String, byte[]>(2048);
@@ -229,7 +229,8 @@ public final class ConfigurationImpl implements ConfigurationService {
                     log.warn("Could not parse .yml file: {}", file.toString(), x);
                 }
                 yamlPaths.put(file.getName(), file.getPath());
-                yamlFiles.put(file.getPath(), o);
+                //Save as immutable string so configs don't get accidentally modified
+                yamlFiles.put(file.getPath(), Yaml.dump(o));
             }
 
         };
@@ -723,20 +724,20 @@ public final class ConfigurationImpl implements ConfigurationService {
             return null;
         }
 
-        return yamlFiles.get(path);
+        return Yaml.load(yamlFiles.get(path));
     }
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<String, Object>> iter = yamlFiles.entrySet().iterator();
+        final Iterator<Entry<String, String>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<String, Object> entry = iter.next();
+                final Entry<String, String> entry = iter.next();
                 if (entry.getKey().startsWith(fldName)) {
-                    retval.put(entry.getKey(), entry.getValue());
+                    retval.put(entry.getKey(), Yaml.load(entry.getValue()));
                 }
             }
         }

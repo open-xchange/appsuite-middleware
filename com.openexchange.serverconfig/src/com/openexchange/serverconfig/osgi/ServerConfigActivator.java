@@ -8,8 +8,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.serverconfig.ClientServerConfigFilter;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.serverconfig.ServerConfigMatcherService;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.serverconfig.impl.ServerConfigServiceImpl;
@@ -34,31 +34,30 @@ public class ServerConfigActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         
-        final NearRegistryServiceTracker<ServerConfigMatcherService> matcherTracker = new NearRegistryServiceTracker<ServerConfigMatcherService>(
-            context,
-            ServerConfigMatcherService.class);
-        rememberTracker(matcherTracker);
-
-        
         final NearRegistryServiceTracker<ComputedServerConfigValueService> computedValueTracker = new NearRegistryServiceTracker<ComputedServerConfigValueService>(
             context,
             ComputedServerConfigValueService.class);
         rememberTracker(computedValueTracker);
         
+        final NearRegistryServiceTracker<ClientServerConfigFilter> configFilterTracker = new NearRegistryServiceTracker<ClientServerConfigFilter>(
+            context,
+            ClientServerConfigFilter.class
+        );
+        rememberTracker(configFilterTracker);
         openTrackers();
         
         ServerConfigServicesLookup serverConfigServicesLookup = new ServerConfigServicesLookup() {
-
-            @Override
-            public List<ServerConfigMatcherService> getMatchers() {
-                return Collections.unmodifiableList(matcherTracker.getServiceList());
-            }
 
             @Override
             public List<ComputedServerConfigValueService> getComputed() {
                 return Collections.unmodifiableList(computedValueTracker.getServiceList());
             }
 
+            @Override
+            public List<ClientServerConfigFilter> getClientFilters() {
+                return configFilterTracker.getServiceList();
+            }
+            
         };
         
         // Register the services that add computed values during creation of the server config

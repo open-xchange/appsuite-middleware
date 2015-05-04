@@ -76,8 +76,6 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     private String message;
     
-    private ShareCreationDetails creationDetails;
-    
     private int guestContextID;
     
     private int guestID;
@@ -161,15 +159,6 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     
     public void setGuestID(int guestID) {
         this.guestID = guestID;
-    }
-    
-    @Override
-    public ShareCreationDetails getCreationDetails() {
-        return creationDetails;
-    }
-
-    public void setCreationDetails(ShareCreationDetails creationDetails) {
-        this.creationDetails = creationDetails;
     }
 
 }

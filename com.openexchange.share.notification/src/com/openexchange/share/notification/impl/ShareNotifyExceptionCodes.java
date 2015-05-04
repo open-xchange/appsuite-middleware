@@ -75,7 +75,13 @@ public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
     INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 3),
     
     /** The product name is missing for user %1$s in context %2$s. */
-    INVALID_PRODUCT_NAME("The product name is missing for user %1$s in context %2$s.", null, Category.CATEGORY_ERROR, 17),
+    INVALID_PRODUCT_NAME("The product name is missing for user %1$s in context %2$s.", null, Category.CATEGORY_ERROR, 4),
+    
+    /** "The share mail config is missing or malformed for user %1$s in context %2$s." */
+    INVALID_SHARE_MAIL_CONFIG("The share mail config is missing or malformed for user %1$s in context %2$s.", null, Category.CATEGORY_ERROR, 5),
+    
+    /** "The configured mail footer image is missing or malformed: %1$s." */
+    INVALID_FOOTER_IMAGE("The configured mail footer image is missing or malformed: %1$s.", null, Category.CATEGORY_ERROR, 6),
     
     ;
 

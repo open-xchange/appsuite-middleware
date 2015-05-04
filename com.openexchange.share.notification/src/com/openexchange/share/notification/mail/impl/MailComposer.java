@@ -50,9 +50,12 @@
 package com.openexchange.share.notification.mail.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.io.File;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -71,6 +74,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
+import org.apache.commons.io.FileUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -81,11 +85,13 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -104,8 +110,10 @@ import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;
+import com.openexchange.share.notification.impl.ShareNotifyExceptionCodes;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.encoding.Base64;
 import com.openexchange.user.UserService;
 
 
@@ -117,23 +125,34 @@ import com.openexchange.user.UserService;
  */
 public class MailComposer {
 
-    private static final String FIELD_PW_RESET_CONFIRM_INTRO = "pw_reset_confirm_intro";
-
-    private static final String FIELD_PW_RESET_CONFIRM_LINK = "pw_reset_confirm_link";
+    
+    //css
+    private static final String BUTTON_COLOR = "button_color";
+    private static final String BUTTON_BACKGROUNDCOLOR = "button_background_color";
+    private static final String BUTTON_BORDERCOLOR = "button_border_color";
+    private static final String FOOTER_IMAGECONTENTTYPE = "footer_image_content_type";
+    private static final String FOOTER_IMAGE = "footer_image";
+    private static final String FOOTER_TEXT = "footer_text";
+    
     
     // shareCreated
-    
     private static final String SUBJECT = "subject";
-    
     private static final String HAS_SHARED_ITEMS = "has_shared_items";
-    
+    private static final String PLEASE_CLICK = "please_click";
     private static final String USER_MESSAGE = "user_message";
-    
     private static final String VIEW_ITEMS_LINK = "view_items_link";
-    
     private static final String VIEW_ITEMS_LABLE = "view_items_lable";
-    
     private static final String WILL_EXPIRE = "will_expire";
+    
+    // password reset confirmation
+    private static final String PWRC_GREETING = "pwrc_greeting";
+    private static final String PWRC_REQUESTRECEIVED = "pwrc_requestreceived";
+    private static final String PWRC_SET_NEW_PWD = "pwrc_set_new_pwd";
+    private static final String PWRC_LINK = "pw_reset_confirm_link";
+    private static final String PWRC_IGNORE = "pwrc_ignore";
+    private static final String PWRC_AUTOMATED_MAIL = "pwrc_automated_mail";
+    private static final String PWRC_THANKS = "pwrc_thanks";
+    private static final String PWRC_THE_TEAM = "pwrc_the_team";
 
     private final ServiceLookup services;
 
@@ -142,9 +161,9 @@ public class MailComposer {
         this.services = services;
     }
 
-    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmNotification<InternetAddress> notification) throws OXException, MessagingException, UnsupportedEncodingException {
+    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmMailNotification notification) throws OXException, MessagingException, UnsupportedEncodingException {
         Translator translator = getTranslator(notification.getLocale());
-        String subject = translator.translate(NotificationStrings.SUBJECT_RESET_PASSWORD_CONFIRM);
+        String subject = translator.translate(NotificationStrings.PWRC_SUBJECT);
         Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
         MimeMessage mail = prepareEnvelope(subject, null, notification.getTransportInfo());
         mail.setContent(prepareContent( "notify.share.pwreset.confirm.mail.html.tmpl", vars));
@@ -152,48 +171,22 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getContextID());
     }
 
-    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator) {
+    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmMailNotification notification, Translator translator) {
         Map<String, Object> vars = new HashMap<String, Object>();
         LinkProvider linkProvider = notification.getLinkProvider();
         String confirmLink = linkProvider.getPasswordResetConfirmUrl(notification.getConfirm());
-        vars.put(FIELD_PW_RESET_CONFIRM_INTRO, translator.translate(NotificationStrings.RESET_PASSWORD_CONFIRM_INTRO));
-        vars.put(FIELD_PW_RESET_CONFIRM_LINK, confirmLink);
+        String productName = notification.getProductName();
+        
+        vars.put(PWRC_GREETING, translator.translate(NotificationStrings.PWRC_GREETING));
+        vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
+        vars.put(PWRC_SET_NEW_PWD, translator.translate(NotificationStrings.PWRC_SET_NEW_PWD));
+        vars.put(PWRC_LINK, confirmLink);
+        vars.put(PWRC_IGNORE, translator.translate(NotificationStrings.PWRC_IGNORE));
+        vars.put(PWRC_AUTOMATED_MAIL, translator.translate(NotificationStrings.PWRC_AUTOMATED_MAIL));
+        vars.put(PWRC_THANKS, translator.translate(NotificationStrings.PWRC_THANKS));
+        vars.put(PWRC_THE_TEAM, String.format(translator.translate(NotificationStrings.PWRC_THE_TEAM), productName));
+        
         return vars;
-    }
-
-    public static final class PWResetIntro {
-
-        private final String shareUrl;
-        private final String pwResetIntro;
-        private final String[] pwResetIntroSplit;
-
-        public PWResetIntro(String pwResetIntro, String shareUrl) {
-            super();
-            this.shareUrl = shareUrl;
-            this.pwResetIntro = pwResetIntro;
-            this.pwResetIntroSplit = pwResetIntro.split(shareUrl);
-        }
-
-        public String pre() {
-            return pwResetIntroSplit[0];
-        }
-
-        public String in() {
-            return shareUrl;
-        }
-
-        public String post() {
-            if (pwResetIntroSplit.length > 1) {
-                return pwResetIntroSplit[1];
-            }
-
-            return "";
-        }
-
-        @Override
-        public String toString() {
-            return pwResetIntro;
-        }
     }
 
     /**
@@ -204,7 +197,7 @@ public class MailComposer {
      * @throws UnsupportedEncodingException
      * @throws MessagingException
      */
-    public ComposedMailMessage buildShareCreatedMail(ShareCreatedNotification<InternetAddress> notification) throws OXException, UnsupportedEncodingException, MessagingException {
+    public ComposedMailMessage buildShareCreatedMail(ShareCreatedMailNotification notification) throws OXException, UnsupportedEncodingException, MessagingException {
         User user = getUserService().getUser(notification.getSession().getUserId(), notification.getSession().getContextId());
         Map<String, Object> vars = prepareShareCreatedVars(notification, user);
         String subject = (String) vars.get(SUBJECT);
@@ -268,8 +261,9 @@ public class MailComposer {
      * @return A mapping from template keywords to actual textual values
      * @throws OXException
      */
-    private Map<String, Object> prepareShareCreatedVars(ShareCreatedNotification<InternetAddress> notification, User user) throws OXException {
+    private Map<String, Object> prepareShareCreatedVars(ShareCreatedMailNotification notification, User user) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
+        TemplateService templateService = getTemplateService();
         User guest = getUserService().getUser(notification.getGuestID(), notification.getGuestContextID());
         Translator translator = getTranslator(guest.getLocale());
 
@@ -278,8 +272,17 @@ public class MailComposer {
         String email = user.getMail();
         List<ShareTarget> shareTargets = notification.getShareTargets();
         String fullName = FullNameBuilder.buildFullName(user, translator);
-        boolean causedGuestCreation = notification.getCreationDetails().causedGuestCreation();
-        String productName = notification.getCreationDetails().getProductName();
+        boolean causedGuestCreation = notification.getCausedGuestCreation();
+        
+        String productName = notification.getProductName();
+        Pair<String,String> footerImagePair = templateService.encodeTemplateImage(notification.getFooterImage());
+        
+        vars.put(BUTTON_COLOR, notification.getButtonColor());
+        vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
+        vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
+        vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
+        vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+        vars.put(FOOTER_TEXT, notification.getFooterText());
         
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         Map<ShareTarget, TargetProxy> proxyMap = new HashMap<>(shareTargets.size());
@@ -314,6 +317,7 @@ public class MailComposer {
                     vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count));
                 } else {
                     vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count));
+                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
                 }
                 addViewItemsToVars(vars, null, translator, true, shareUrl);
             } else {//multiple shares of single type
@@ -344,9 +348,9 @@ public class MailComposer {
         } else {
             if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
                 if (count == 1) {
-                    vars.put(SUBJECT, String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_PHOTO), fullName, itemName));
+                    vars.put(SUBJECT, String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE), fullName, itemName));
                 } else {
-                    vars.put(SUBJECT, String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_PHOTOS), fullName, count));
+                    vars.put(SUBJECT, String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), fullName, count));
                 }
             } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
                 if (count == 1) {
@@ -372,13 +376,83 @@ public class MailComposer {
         return vars;
     }
 
+    private void addSharedItemToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, String filename) {
+        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE), fullName, email, filename));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGE), fullName, email, filename));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
+            }
+        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE), fullName, email, filename));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE), fullName, email, filename));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
+            }
+        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE), fullName, email, filename));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER), fullName, email, filename));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
+            }
+        } else {
+            //fall back to item for other types
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_AND_MESSAGE), fullName, email, filename));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM), fullName, email, filename));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_IT));
+            }
+        }
+    }
+    
+    private Map<String, Object> addSharedItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, int count) {
+        if(DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                if(hasMessage) {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName , email , count));
+                } else {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES), fullName , email , count));
+                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+                }
+
+        } else if(DriveTargetProxyType.FILE.equals(targetProxyType)) {
+
+                if(hasMessage) {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName , email , count));
+                } else {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES), fullName , email , count));
+                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+                }
+        }  else if(DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                if(hasMessage) {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName , email , count));
+                } else {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName , email , count));
+                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+                }                
+        } else {
+            //fall back to item for other types
+                if(hasMessage) {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName , email , count));
+                } else {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName , email , count));
+                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+                }
+        }
+        return vars;
+    }
+    
     private void addViewItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, Translator translator, boolean multipleShares, String shareLink) {
         vars.put(VIEW_ITEMS_LINK, shareLink);
         if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
             if (multipleShares) {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_PHOTOS));
+                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_IMAGES));
             } else {
-                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_PHOTO));
+                vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_IMAGE));
             }
         } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
             if (multipleShares) {
@@ -400,68 +474,6 @@ public class MailComposer {
                 vars.put(VIEW_ITEMS_LABLE, translator.translate(NotificationStrings.VIEW_ITEM));
             }
         }
-    }
-
-    private void addSharedItemToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, String filename) {
-        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTO), fullName, email, filename));
-            }
-        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILE), fullName, email, filename));
-            }
-        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDER), fullName, email, filename));
-            }
-        } else {
-            //fall back to item for other types
-            if (hasMessage) {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM_AND_MESSAGE), fullName, email, filename));
-            } else {
-                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEM), fullName, email, filename));
-            }
-        }
-    }
-    
-    private Map<String, Object> addSharedItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, int count) {
-        if(DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTOS_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_PHOTOS), fullName , email , count));
-                }
-
-        } else if(DriveTargetProxyType.FILE.equals(targetProxyType)) {
-
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES), fullName , email , count));
-                }
-        }  else if(DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName , email , count));
-                }                
-        } else {
-            //fall back to item for other types
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName , email , count));
-                }
-        }
-        return vars;
     }
 
     private MimeMessage prepareEnvelope(String subject, Address[] senderAddresses, InternetAddress recipient) throws MessagingException {

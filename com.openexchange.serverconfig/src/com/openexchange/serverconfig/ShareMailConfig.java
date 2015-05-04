@@ -47,75 +47,112 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.serverconfig;
 
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * A simple container holding all necessary information to send out a notification about the shares creation.
+ * {@link ShareMailConfig} - Represents the share mail config params that are set via our as-config approach and available as part of the 
+ * {@link ServerConfig}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class NotificationInfo {
+public class ShareMailConfig {
 
-    private final ShareRecipient recipient;
-    private final GuestInfo guestInfo;
-    private final List<ShareInfo> shareInfos;
-    private final Transport transport;
-    private String message;
-    private ServerSession session;
-    private AJAXRequestData requestData;
-
-    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, ServerSession session, AJAXRequestData requestData) {
-        super();
-        this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-        this.transport = transport;
-        this.message = message;
-        this.session = session;
-        this.requestData = requestData;
-    }
-
-    public ShareRecipient getRecipient() {
-        return recipient;
-    }
-
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
-    }
-
-    public List<ShareInfo> getShareInfos() {
-        return shareInfos;
+    private String buttoncolor;
+    private String buttonBackgroundColor;
+    private String buttonBorderColor;
+    private String footerText;
+    private String footerImage;
+    
+    /**
+     * Gets the buttoncolor
+     *
+     * @return The buttoncolor
+     */
+    public String getButtonColor() {
+        return buttoncolor;
     }
     
-    public Transport getTransport() {
-        return transport;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public ServerSession getSession() {
-        return session;
-    }
-
-    public AJAXRequestData getRequestData() {
-        return requestData;
+    /**
+     * Sets the buttoncolor
+     *
+     * @param buttoncolor The buttoncolor to set
+     */
+    public void setButtoncolor(String buttoncolor) {
+        this.buttoncolor = buttoncolor;
     }
     
+    /**
+     * Gets the buttonBackgroundColor
+     *
+     * @return The buttonBackgroundColor
+     */
+    public String getButtonBackgroundColor() {
+        return buttonBackgroundColor;
+    }
     
-
+    /**
+     * Sets the buttonBackgroundColor
+     *
+     * @param buttonBackgroundColor The buttonBackgroundColor to set
+     */
+    public void setButtonBackgroundColor(String buttonBackgroundColor) {
+        this.buttonBackgroundColor = buttonBackgroundColor;
+    }
+    
+    /**
+     * Gets the buttonBorderColor
+     *
+     * @return The buttonBorderColor
+     */
+    public String getButtonBorderColor() {
+        return buttonBorderColor;
+    }
+    
+    /**
+     * Sets the buttonBorderColor
+     *
+     * @param buttonBorderColor The buttonBorderColor to set
+     */
+    public void setButtonBorderColor(String buttonBorderColor) {
+        this.buttonBorderColor = buttonBorderColor;
+    }
+    
+    /**
+     * Gets the footerText
+     *
+     * @return The footerText
+     */
+    public String getFooterText() {
+        return footerText;
+    }
+    
+    /**
+     * Sets the footerText
+     *
+     * @param footerText The footerText to set
+     */
+    public void setFooterText(String footerText) {
+        this.footerText = footerText;
+    }
+    
+    /**
+     * Gets the footer image
+     *
+     * @return The footerImage
+     */
+    public String getFooterImage() {
+        return footerImage;
+    }
+    
+    /**
+     * Sets the footer image
+     *
+     * @param footerImage The footerImage to set
+     */
+    public void setFooterImage(String footerImagePath) {
+        this.footerImage = footerImagePath;
+    }
+    
 }

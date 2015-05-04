@@ -49,19 +49,17 @@
 
 package com.openexchange.serverconfig.impl.values;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ForcedHttpsValue} - Ensured that value of property <code>"com.openexchange.forceHTTPS"</code> is contained in server configuration
  * passed to App Suite UI.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class ForcedHttpsValue implements ComputedServerConfigValueService {
 
@@ -76,8 +74,8 @@ public class ForcedHttpsValue implements ComputedServerConfigValueService {
     }
 
     @Override
-    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws JSONException {
-        if (!serverConfig.has("forceHTTPS")) {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
+        if (!serverConfig.containsKey("forceHTTPS")) {
             final ConfigurationService service = services.getService(ConfigurationService.class);
             final boolean forceHttps = service.getBoolProperty("com.openexchange.forceHTTPS", false);
             serverConfig.put("forceHTTPS", forceHttps);

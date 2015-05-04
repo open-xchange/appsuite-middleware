@@ -73,6 +73,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -92,6 +93,7 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.osgi.Services;
+import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -146,15 +148,22 @@ public class OAuthMailNotificationService {
     private ComposedMailMessage buildNewExternalApplicationMail(User user, int contextId, String clientId, InternetAddress address, HttpServletRequest request) throws OXException, UnsupportedEncodingException, MessagingException, JSONException {
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
-        JSONObject json = serverConfigService.getServerConfig(new AJAXRequestData(), ServerSessionAdapter.valueOf(user.getId(), contextId));
+        String hostname;
+        HostnameService hostnameService = Services.optService(HostnameService.class);
+        if(hostnameService != null) {
+            hostname = hostnameService.getHostname(user.getId(), contextId);
+        } else {
+            hostname = request.getServerName();
+        }
+        ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, user.getId(), contextId);
         Client client = getClient(clientId);
         String title = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_TITLE);
-        title = String.format(title, json.getString("productName"));
+        title = String.format(title, serverConfig.getProductName());
         String intro = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_INTRO);
         intro = String.format(intro, user.getDisplayName());
         String message = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_MESSAGE);
         String settingsUrl = getSettingsUrl(request);
-        message = String.format(message, client.getName(), json.getString("productName"), settingsUrl);
+        message = String.format(message, client.getName(), serverConfig.getProductName(), settingsUrl);
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(INTRO_FIELD, intro);
         vars.put(MESSAGE_FIELD, message);

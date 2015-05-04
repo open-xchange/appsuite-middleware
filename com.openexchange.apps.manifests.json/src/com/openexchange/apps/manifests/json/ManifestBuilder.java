@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,68 @@
  *
  */
 
-package com.openexchange.serverconfig;
+package com.openexchange.apps.manifests.json;
 
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-/**
- * {@link ServerConfigMatcherService} - Implementations of this interface can decide if a value from the file <code>as-config.yml</code> are
- * applicable for the current request and should be added to the server config that is currently being generated.
- *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- */
-public interface ServerConfigMatcherService {
 
+/**
+ * {@link ManifestBuilder} - Build manifests based on manifest files and registered {@link ManifestContributor}s.
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.0
+ */
+public class ManifestBuilder {
+
+    final private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestBuilder.class);
+    
+    private JSONArray manifests;
+    private NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker;
+
+    public ManifestBuilder(JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
+        this.manifests = manifests;
+        this.manifestContributorTracker = manifestContributorTracker;
+    }
+    
     /**
-     * Checks if given argument look applicable for this matcher service.
-     *
-     * @param config The configuration
-     * @param request The associated AJAX request
-     * @param session The user session
-     * @return <code>true</code> if applicable; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * Compute the manifests from files and {@link ManifestContributor}s.
+     * 
+     * @param session The {@link ServerSession}
+     * @throws OXException 
      */
-    boolean looksApplicable(Map<String, Object> config, AJAXRequestData request, ServerSession session) throws OXException;
+    public JSONArray buildManifests(ServerSession session) throws OXException {
+        manifests = new JSONArray(manifests);
+
+        JSONArray result = new JSONArray();
+        for(ManifestContributor contributor: manifestContributorTracker.getServiceList()) {
+            try {
+                JSONArray additionalManifests = contributor.getAdditionalManifests(session);
+                if (additionalManifests != null) {
+                    for(int i = 0, size = additionalManifests.length(); i < size; i++) {
+                        manifests.put(additionalManifests.get(i));
+                    }
+                }
+            } catch (OXException|JSONException ex) {
+                LOG.error("Error while trying to get additional manifests from contributor {} ", contributor, ex);
+            }
+        }
+
+        try {
+                for (int i = 0, size = manifests.length(); i < size; i++) {
+                    JSONObject definition = manifests.getJSONObject(i);
+                    result.put(new JSONObject(definition));
+                }
+        } catch (JSONException x) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
+        }
+        return result;
+    }
+    
 }

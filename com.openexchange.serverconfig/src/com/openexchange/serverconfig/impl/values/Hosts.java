@@ -49,24 +49,22 @@
 
 package com.openexchange.serverconfig.impl.values;
 
-import org.json.JSONArray;
+import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Hosts}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
 public class Hosts implements ComputedServerConfigValueService {
 
     @Override
-    public void addValue(final JSONObject serverConfig, final AJAXRequestData request, final ServerSession session) throws JSONException {
-        if (!serverConfig.has("hosts")) {
-            serverConfig.put("hosts", new JSONArray(1).put(request.getHostname()));
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
+        if (!serverConfig.containsKey("hosts")) {
+            serverConfig.put("hosts", new String[] {hostName});
         }
     }
 

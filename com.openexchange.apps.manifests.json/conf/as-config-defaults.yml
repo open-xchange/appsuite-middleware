@@ -16,3 +16,12 @@ default:
     copyright: '(c) 2015 Open-Xchange.'
 
     staySignedIn: true
+    
+    sharing:
+        mails:
+            button:
+                color: '#ffffff'
+                background-color: '#3c73aa'
+                border-color: '#356697'
+            footer-image: 'ox_logo_claim_blue_small.png'
+            footer-text: >
