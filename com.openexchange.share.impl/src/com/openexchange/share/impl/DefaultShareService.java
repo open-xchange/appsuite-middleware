@@ -173,7 +173,7 @@ public class DefaultShareService implements ShareService {
         shares = removeExpired(contextID, shares);
         if (guest.getId() == session.getUserId()) {
             /*
-             * implicitly adjust share targets if the sesssion's user is the guest himself
+             * implicitly adjust share targets if the session's user is the guest himself
              */
             return ShareTool.toShareInfos(services, contextID, shares, true);
 
@@ -190,8 +190,8 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public ShareInfo getShare(Session session, String token, String path) throws OXException {
-        List<ShareInfo> sharesInfos = getShares(session, token);
-        for (ShareInfo shareInfo : sharesInfos) {
+        List<ShareInfo> shareInfos = getShares(session, token);
+        for (ShareInfo shareInfo : shareInfos) {
             ShareTarget target = shareInfo.getShare().getTarget();
             if (null != target && path.equals(target.getPath())) {
                 return shareInfo;
@@ -651,14 +651,14 @@ public class DefaultShareService implements ShareService {
      * cleaning up guest users as needed.
      *
      * @param contextID The context identifier
-     * @param share The shares
+     * @param shares The shares
      * @return The filtered shares, which may be an empty list if all shares were expired
      * @throws OXException
      */
     private List<Share> removeExpired(int contextID, List<Share> shares) throws OXException {
         List<Share> expiredShares = ShareTool.filterExpiredShares(shares);
         if (null != expiredShares && 0 < expiredShares.size()) {
-            int affectedShares = 0;
+            int affectedShares;
             ShareStorage shareStorage = services.getService(ShareStorage.class);
             ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
             try {
@@ -684,7 +684,7 @@ public class DefaultShareService implements ShareService {
      * cleaning up guest users as needed.
      *
      * @param session The session
-     * @param share The shares
+     * @param shares The shares
      * @return The filtered shares, which may be an empty list if all shares were expired
      */
     private List<Share> removeInaccessible(Session session, List<Share> shares) throws OXException {
@@ -711,7 +711,7 @@ public class DefaultShareService implements ShareService {
      *
      * @param session The session, or <code>null</code> to perform an administrative update
      * @param connectionHelper A (started) connection helper
-     * @param shares The share to remove the associated permissions for
+     * @param shares The shares to remove the associated permissions for
      * @throws OXException
      */
     private void removeTargetPermissions(Session session, ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
