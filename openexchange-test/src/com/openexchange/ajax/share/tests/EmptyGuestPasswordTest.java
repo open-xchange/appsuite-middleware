@@ -116,7 +116,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         assertNotNull(response.getSessionId());
 
         /*
-         * another login without password should not be possible
+         * another login without password should fail with LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED
          */
         GuestClient guestClient2 = resolveShare(share, perm.getRecipient());
         LoginResponse response2 = guestClient2.getLoginResponse();
@@ -124,6 +124,25 @@ public class EmptyGuestPasswordTest extends ShareTest {
         assertTrue(response2.hasError());
         OXException e = response2.getException();
         assertEquals(LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.getNumber(), e.getCode());
+
+        /*
+         * Set password for guest user
+         */
+        GuestClient guestClient3 = resolveShare(share, "testGuestPasswordInit" + now + "@example.org", "secret");
+        LoginResponse response3 = guestClient3.getLoginResponse();
+        assertNotNull(response3);
+        assertFalse(response3.hasError());
+        assertNotNull(response3.getSessionId());
+
+        /*
+         * Empty password should now fail with LoginExceptionCodes.INVALID_CREDENTIALS
+         */
+        GuestClient guestClient4 = resolveShare(share, perm.getRecipient());
+        LoginResponse response4 = guestClient4.getLoginResponse();
+        assertNotNull(response4);
+        assertTrue(response4.hasError());
+        OXException e2 = response4.getException();
+        assertEquals(LoginExceptionCodes.INVALID_CREDENTIALS.getNumber(), e2.getCode());
     }
 
 }
