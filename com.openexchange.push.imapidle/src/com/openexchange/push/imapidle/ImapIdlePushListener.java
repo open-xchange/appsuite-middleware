@@ -569,7 +569,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
             }
 
-            // Cancel time task
+            // Cancel timer task
             ScheduledTimerTask timerTask = this.timerTask;
             if (null != timerTask) {
                 this.timerTask = null;
