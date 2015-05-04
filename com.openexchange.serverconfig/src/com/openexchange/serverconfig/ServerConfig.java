@@ -57,7 +57,8 @@ import com.openexchange.capabilities.Capability;
 
 
 /**
- * {@link ServerConfig}
+ * {@link ServerConfig} - A simple ServerConfig Object to ease extraction of well known/most used items of the dynamically generated
+ * ServerConfig Map. You can inspect all items via {@link ServerConfig#asMap()}.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
@@ -126,9 +127,10 @@ public interface ServerConfig {
     String getProductName();
     
     /**
-     * Get a filtered config object as map. Not all ServerConfig entries are needed for the client. 
+     * Get a filtered config object as map. Not all ServerConfig entries are needed for the client. {@link ClientServerConfigFilter}s can
+     * be registered to influence the filtering process.
      *  
-     * @return The whole config object as map
+     * @return The filtered config object as map
      */
     Map<String, Object> forClient();
 

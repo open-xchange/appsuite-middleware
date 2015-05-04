@@ -49,10 +49,9 @@
 
 package com.openexchange.apps.manifests.json;
 
-import java.util.HashMap;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.List;
 import java.util.Map;
-import java.util.AbstractMap.SimpleEntry;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
@@ -63,12 +62,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -113,7 +110,6 @@ public class ConfigAction implements AJAXActionService {
         } else {
             hostname = requestData.getHostname();
         }
-        
         
         ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, userId, contextId);
         Map<String, Object> filteredConfig = serverConfig.forClient();

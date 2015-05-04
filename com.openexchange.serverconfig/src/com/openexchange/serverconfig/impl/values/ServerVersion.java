@@ -64,11 +64,11 @@ public class ServerVersion implements ComputedServerConfigValueService {
 	@Override
 	public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
 
-		if (serverConfig.get("serverVersion") != null) {
+		if (!serverConfig.containsKey("serverVersion")) {
 			serverConfig.put("serverVersion", Version.getInstance().getVersionString());
 		}
 		
-		if (serverConfig.get("buildDate") != null) {
+		if (!serverConfig.containsKey("buildDate")) {
 		    serverConfig.put("buildDate", Version.getInstance().getBuildDate());
 		}
 

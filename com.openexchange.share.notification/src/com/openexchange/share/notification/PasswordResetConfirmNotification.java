@@ -73,12 +73,5 @@ public interface PasswordResetConfirmNotification<T> extends ShareNotification<T
      * @return The uuid to confirm the password reset
      */
     String getConfirm();
-    
-    /**
-     * Get the product name to use for this notification
-     * 
-     * @return the product name to use for this notification
-     */
-    String getProductName();
 
 }

@@ -161,7 +161,7 @@ public class MailComposer {
         this.services = services;
     }
 
-    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmNotification<InternetAddress> notification) throws OXException, MessagingException, UnsupportedEncodingException {
+    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmMailNotification notification) throws OXException, MessagingException, UnsupportedEncodingException {
         Translator translator = getTranslator(notification.getLocale());
         String subject = translator.translate(NotificationStrings.PWRC_SUBJECT);
         Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
@@ -171,7 +171,7 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getContextID());
     }
 
-    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator) {
+    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmMailNotification notification, Translator translator) {
         Map<String, Object> vars = new HashMap<String, Object>();
         LinkProvider linkProvider = notification.getLinkProvider();
         String confirmLink = linkProvider.getPasswordResetConfirmUrl(notification.getConfirm());
@@ -275,7 +275,7 @@ public class MailComposer {
         boolean causedGuestCreation = notification.getCausedGuestCreation();
         
         String productName = notification.getProductName();
-        Pair<String,String> footerImagePair = templateService.encodedTemplateImage(notification.getFooterImage());
+        Pair<String,String> footerImagePair = templateService.encodeTemplateImage(notification.getFooterImage());
         
         vars.put(BUTTON_COLOR, notification.getButtonColor());
         vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());

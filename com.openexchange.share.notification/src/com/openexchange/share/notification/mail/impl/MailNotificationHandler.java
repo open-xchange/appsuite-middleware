@@ -124,7 +124,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     private void sendPasswordResetConfirm(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        PasswordResetConfirmNotification<InternetAddress> casted = (PasswordResetConfirmNotification<InternetAddress>) notification;
+        PasswordResetConfirmMailNotification casted = (PasswordResetConfirmMailNotification) notification;
         ComposedMailMessage mail = composer.buildPasswordResetConfirmMail(casted);
         sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
     }

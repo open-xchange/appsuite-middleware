@@ -60,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link ManifestBuilder}
+ * {@link ManifestBuilder} - Build manifests based on manifest files and registered {@link ManifestContributor}s.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0

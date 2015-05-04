@@ -70,8 +70,6 @@ import com.openexchange.serverconfig.ComputedServerConfigValueService;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Languages.class);
-
     List<SimpleEntry<String, String>> languages;
 
     /**

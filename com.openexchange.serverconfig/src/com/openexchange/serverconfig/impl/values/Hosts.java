@@ -63,7 +63,7 @@ public class Hosts implements ComputedServerConfigValueService {
 
     @Override
     public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
-        if (serverConfig.get("hosts") != null) {
+        if (!serverConfig.containsKey("hosts")) {
             serverConfig.put("hosts", new String[] {hostName});
         }
     }

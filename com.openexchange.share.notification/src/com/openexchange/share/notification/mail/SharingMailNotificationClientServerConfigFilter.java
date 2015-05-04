@@ -53,7 +53,7 @@ import java.util.Map;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
 
 /**
- * {@link MailNotificationClientServerConfigFilter} - Filter out sharing mail related contents from the server config. 
+ * {@link SharingMailNotificationClientServerConfigFilter} - Filter out sharing mail related contents from the server config. 
  * 
  * The parts that will be filtered correspond to the following brand specific yaml entries from <code>as-config.yml</code> 
  * <pre>
@@ -67,7 +67,7 @@ import com.openexchange.serverconfig.ClientServerConfigFilter;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class MailNotificationClientServerConfigFilter implements ClientServerConfigFilter {
+public class SharingMailNotificationClientServerConfigFilter implements ClientServerConfigFilter {
 
     private final static String SHARING = "sharing";
     private final static String MAILS= "mails";

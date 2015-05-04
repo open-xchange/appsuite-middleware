@@ -88,7 +88,6 @@ public class MailNotifications {
 
         private String shareToken;
         private String confirm;
-        private String productName;
 
         protected PasswordResetConfirmBuilder() {
             super(NotificationType.CONFIRM_PASSWORD_RESET);
@@ -103,23 +102,16 @@ public class MailNotifications {
             this.confirm = confirm;
             return this;
         }
-        
-        public PasswordResetConfirmBuilder setProductName(String productName) {
-            this.productName = productName;
-            return this;
-        }
 
         @Override
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkNotNull(shareToken, "shareToken");
             checkNotNull(confirm, "config");
-            checkNotNull(productName, "productName");
 
             DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setToken(shareToken);
             notification.setConfirm(confirm);
-            notification.setProductName(productName);
             return notification;
         }
     }

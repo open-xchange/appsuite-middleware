@@ -51,7 +51,8 @@ package com.openexchange.serverconfig;
 
 
 /**
- * {@link ShareMailConfig}
+ * {@link ShareMailConfig} - Represents the share mail config params that are set via our as-config approach and available as part of the 
+ * {@link ServerConfig}.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0

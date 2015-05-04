@@ -249,8 +249,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
     
     @Override
-    public List<OXException> sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) {
-        List<OXException> warnings = new ArrayList<OXException>();
+    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) throws OXException {
         try {
             UserService userService = serviceLookup.getService(UserService.class);
             GuestInfo guestInfo = guestShare.getGuest();
@@ -266,16 +265,13 @@ public class DefaultNotificationService implements ShareNotificationService {
                 .setLocale(guest.getLocale())
                 .setShareToken(shareToken)
                 .setConfirm(hash)
-                .setProductName("")
-//                set notificationDetails
                 .build();
+            
+            //TODO: make mailAware
             send(notification);
-        } catch (OXException oxe) {
-            warnings.add(oxe);
         } catch (Exception e) {
-            warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
+            throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        return warnings;
     }
 
     /**

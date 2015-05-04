@@ -146,12 +146,12 @@ public interface TemplateService {
     
     /**
      * Loads an image from the configured template path, encodes the image to base64 and returns a {@link Pair} consisting of 
-     * (contentType, base64Representation) of the image for use within data-url in templates
+     * (contentType, base64Representation) of the image for use within data-urls in templates
      * 
      * @param imageName The name of the image within the templates path
      * @return a {@link Pair} consisting of (contentType, base64Representation) of the image at footerImagePath
      * @throws OXException if loading/encoding fails
      */
-    public Pair<String, String> encodedTemplateImage(String imageName) throws OXException;
+    public Pair<String, String> encodeTemplateImage(String imageName) throws OXException;
 
 }

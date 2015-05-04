@@ -53,7 +53,7 @@ import java.util.Map;
 
 
 /**
- * {@link ClientServerConfigFilter}
+ * {@link ClientServerConfigFilter} - Filter the map representation of a {@link ServerConfig} before it is delivered to a client.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0

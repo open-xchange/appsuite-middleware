@@ -49,10 +49,7 @@
 
 package com.openexchange.serverconfig;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ServerConfigService}

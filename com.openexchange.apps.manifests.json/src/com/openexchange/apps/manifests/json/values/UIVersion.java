@@ -66,8 +66,8 @@ public class UIVersion implements ComputedServerConfigValueService {
     @Override
     public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
 
-        if (serverConfig.get("version") != null) {
-            serverConfig.put("version", UIVERSION);
+        if (!serverConfig.containsKey("version")) {
+            serverConfig.put("version", UIVERSION.get());
         }
     }
 

@@ -15,7 +15,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.impl.DefaultNotificationService;
-import com.openexchange.share.notification.mail.MailNotificationClientServerConfigFilter;
+import com.openexchange.share.notification.mail.SharingMailNotificationClientServerConfigFilter;
 import com.openexchange.share.notification.mail.impl.MailNotificationHandler;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -78,7 +78,7 @@ public class ShareNotificationActivator extends HousekeepingActivator {
         });
         
         registerService(ShareNotificationService.class, defaultNotificationService);
-        registerService(ClientServerConfigFilter.class, new MailNotificationClientServerConfigFilter());
+        registerService(ClientServerConfigFilter.class, new SharingMailNotificationClientServerConfigFilter());
         openTrackers();
     }
 

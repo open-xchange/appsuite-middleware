@@ -161,10 +161,7 @@ public class PasswordResetServlet extends HttpServlet {
                  */
                 ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
                 String protocol = com.openexchange.tools.servlet.http.Tools.getProtocol(request);
-                List<OXException> warnings = shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, token, request.getServerName(), protocol, hash);
-                if(warnings.size()>0) {
-                    throw warnings.get(0);
-                }
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, token, request.getServerName(), protocol, hash);
 
                 /*
                  * Redirect after notification was sent.

@@ -576,7 +576,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
     
     @Override
-    public Pair<String, String> encodedTemplateImage(String imageName) throws OXException {
+    public Pair<String, String> encodeTemplateImage(String imageName) throws OXException {
         try {
             File imageFile = new File(defaultTemplatePath, imageName);
             String contentType = MimeType2ExtMap.getContentType(imageFile);
