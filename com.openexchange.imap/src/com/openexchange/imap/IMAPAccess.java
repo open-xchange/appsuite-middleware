@@ -583,7 +583,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                 /*
                  * Get connected store
                  */
-                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, preAuthStartTlsCap);
+                imapStore = newConnectedImapStore(imapSession, IDNA.toASCII(config.getServer()), config.getPort(), config.getLogin(), tmpPass, -1, preAuthStartTlsCap);
                 /*
                  * Add warning if non-secure
                  */
@@ -901,7 +901,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         int retryCount = 0;
         while (retryCount++ < maxRetryCount) {
             try {
-                return newConnectedImapStore(imapSession, server, port, login, pw);
+                return newConnectedImapStore(imapSession, server, port, login, pw, accountId);
             } catch (final MessagingException e) {
                 if (!(e.getNextException() instanceof ConnectQuotaExceededException)) {
                     throw e;
@@ -914,16 +914,16 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
         throw new MessagingException("Unable to connect to IMAP store: " + new URLName("imap", server, port, null, login, "xxxx"));
     }
 
-    private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw) throws MessagingException {
-        return newConnectedImapStore(imapSession, server, port, login, pw, null);
+    private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId) throws MessagingException {
+        return newConnectedImapStore(imapSession, server, port, login, pw, accountId, null);
     }
 
-    private IMAPStore newConnectedImapStore(final javax.mail.Session imapSession, final String server, final int port, final String login, final String pw, final boolean[] preAuthStartTlsCap) throws MessagingException {
+    private IMAPStore newConnectedImapStore(javax.mail.Session imapSession, String server, int port, String login, String pw, int accountId, boolean[] preAuthStartTlsCap) throws MessagingException {
         /*
          * Establish a new one...
          */
         IMAPStore imapStore = (IMAPStore) imapSession.getStore(PROTOCOL);
-        {
+        if (MailAccount.DEFAULT_ID == accountId) {
             Map<String, String> clientParams = new LinkedHashMap<String, String>(6);
             clientParams.put(IMAPClientParameters.ORIGINATING_IP.getParamName(), session.getLocalIp());
             clientParams.put(IMAPClientParameters.SESSION_ID.getParamName(), IMAPClientParameters.generateSessionInformation(session, imapStore));
