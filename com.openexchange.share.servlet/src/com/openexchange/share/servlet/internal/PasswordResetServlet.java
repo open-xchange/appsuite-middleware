@@ -147,7 +147,7 @@ public class PasswordResetServlet extends HttpServlet {
 
             GuestService guestService = ShareServiceLookup.getService(GuestService.class);
             if ((guestService != null) && (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) && (storageUser.isGuest()) && (guestService.isCrossContextGuestHandlingEnabled())) {
-                guestService.alignUserWithGuest(storageUser, context.getContextId());
+                storageUser = guestService.alignUserWithGuest(storageUser, context.getContextId());
             }
 
             String hash = getHash(storageUser.getUserPassword());
