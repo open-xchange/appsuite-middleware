@@ -50,6 +50,7 @@
 package com.openexchange.mail.dataobjects;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -503,6 +504,23 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Removes the personal parts from given addresses
+     *
+     * @param addrs The addresses to remove the personals from
+     */
+    protected void removePersonalsFrom(Set<InternetAddress> addrs) {
+        if (null != addrs) {
+            for (InternetAddress addr : addrs) {
+                try {
+                    addr.setPersonal(null);
+                } catch (UnsupportedEncodingException e) {
+                    // Cannot occur
+                }
+            }
+        }
+    }
+
+    /**
      * Adds an email address to <i>From</i>.
      *
      * @param addr The address
@@ -583,6 +601,13 @@ public abstract class MailMessage extends MailPart {
             }
         }
         return from == null ? EMPTY_ADDRS : from.toArray(new InternetAddress[from.size()]);
+    }
+
+    /**
+     * Removes the personal parts from the <i>From</i> addresses.
+     */
+    public void removeFromPersonals() {
+        removePersonalsFrom(this.from);
     }
 
     /**
@@ -669,6 +694,13 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Removes the personal parts from the <i>To</i> addresses.
+     */
+    public void removeToPersonals() {
+        removePersonalsFrom(this.to);
+    }
+
+    /**
      * Adds an email address to <i>Cc</i>
      *
      * @param addr The address
@@ -752,6 +784,13 @@ public abstract class MailMessage extends MailPart {
     }
 
     /**
+     * Removes the personal parts from the <i>Cc</i> addresses.
+     */
+    public void removeCcPersonals() {
+        removePersonalsFrom(this.cc);
+    }
+
+    /**
      * Adds an email address to <i>Bcc</i>
      *
      * @param addr The address
@@ -832,6 +871,13 @@ public abstract class MailMessage extends MailPart {
             }
         }
         return bcc == null ? EMPTY_ADDRS : bcc.toArray(new InternetAddress[bcc.size()]);
+    }
+
+    /**
+     * Removes the personal parts from the <i>Bcc</i> addresses.
+     */
+    public void removeBccPersonals() {
+        removePersonalsFrom(this.bcc);
     }
 
     /**
