@@ -41,7 +41,7 @@
 package com.sun.mail.iap;
 
 import java.util.List;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.io.*;
 import java.nio.charset.Charset;
 import com.sun.mail.util.*;
@@ -52,13 +52,13 @@ import com.sun.mail.util.*;
  */
 
 public class Argument {
-    protected List<Object> items;
+    protected final List<Object> items;
 
     /**
      * Constructor
      */
     public Argument() {
-	items = new ArrayList<Object>(1);
+	items = new LinkedList<Object>();
     }
 
     /**
