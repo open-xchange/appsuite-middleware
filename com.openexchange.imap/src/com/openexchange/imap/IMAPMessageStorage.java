@@ -323,6 +323,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 byEnvelope = null;
                 useImapThreaderIfSupported = null;
                 allowESORT = null;
+                allowSORTDISPLAY = null;
             }
 
             @Override
