@@ -86,7 +86,17 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
      * @param target The target
      */
     public VirtualTargetProxy(ShareTarget target) {
-        this(target.getOwnedBy(), target.getFolder(), target.getItem(), getTitle(target));
+        this(target.getOwnedBy(), target);
+    }
+
+    /**
+     * Initializes a new {@link VirtualTargetProxy}.
+     *
+     * @param ownedBy The identifier of the user that is considered as owner of the target
+     * @param target The target
+     */
+    public VirtualTargetProxy(int ownedBy, ShareTarget target) {
+        this(ownedBy, target.getFolder(), target.getItem(), getTitle(target));
     }
 
     @Override

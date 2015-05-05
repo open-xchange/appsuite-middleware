@@ -50,10 +50,10 @@
 package com.openexchange.share.servlet.handler;
 
 import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
@@ -109,12 +109,12 @@ public class LoginShareHandler extends AbstractShareHandler {
                 replacement = proxy.getTitle();
             }
             if (!guestInfo.isPasswordSet()) {
-                message = urlEncode(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, guestInfo.getLocale()), replacement));
+                message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, guestInfo.getLocale()), replacement));
                 messageType = "WARN";
-                action = "askPassword";
+                action = "ask_password";
             } else {
                 User user = ShareServiceLookup.getService(UserService.class).getUser(target.getOwnedBy(), guestInfo.getContextID());
-                message = urlEncode(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), user.getDisplayName(), replacement));
+                message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), user.getDisplayName(), replacement));
                 messageType = "INFO";
                 action = "login";
             }
