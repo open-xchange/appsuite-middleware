@@ -155,6 +155,17 @@ public final class IMAPSort {
             throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
         }
 
+        boolean sortedByLocalPart = false;
+        for (SortTerm sortTerm : sortTerms) {
+            if (SortTerm.FROM == sortTerm) {
+                sortedByLocalPart = true;
+            } else if (SortTerm.TO == sortTerm) {
+                sortedByLocalPart = true;
+            } else if (SortTerm.CC == sortTerm) {
+                sortedByLocalPart = true;
+            }
+        }
+
         javax.mail.search.SearchTerm jmsSearchTerm;
         if (searchTerm == null) {
             jmsSearchTerm = null;
@@ -193,7 +204,7 @@ public final class IMAPSort {
             seqNums = IMAPSearch.searchWithUmlautSupport(searchTerm, seqNums, imapFolder);
         }
 
-        return new ImapSortResult(seqNums, rangeApplied);
+        return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
     }
 
     private static int[] sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
@@ -483,10 +494,14 @@ public final class IMAPSort {
         /** Whether index range has already been applied */
         public final boolean rangeApplied;
 
-        ImapSortResult(int[] msgIds, boolean rangeApplied) {
+        /** Whether sort by local-part was performed, rather than using DISPLAY sort value */
+        public final boolean sortedByLocalPart;
+
+        ImapSortResult(int[] msgIds, boolean rangeApplied, boolean sortedByLocalPart) {
             super();
             this.msgIds = msgIds;
             this.rangeApplied = rangeApplied;
+            this.sortedByLocalPart = sortedByLocalPart;
         }
     }
 
