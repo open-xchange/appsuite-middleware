@@ -51,7 +51,6 @@ package com.openexchange.share.notification.mail.impl;
 
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
-import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -60,12 +59,10 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.notification.PasswordResetConfirmNotification;
-import com.openexchange.share.notification.PasswordResetNotification;
-import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -120,7 +117,11 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     private void sendShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
         ShareCreatedMailNotification casted = (ShareCreatedMailNotification) notification;
         ComposedMailMessage mail = composer.buildShareCreatedMail(casted);
-        sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
+        if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
+            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);    
+        } else {
+            sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+        }
     }
 
     private void sendPasswordResetConfirm(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
