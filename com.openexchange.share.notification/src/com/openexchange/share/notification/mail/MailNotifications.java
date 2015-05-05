@@ -56,12 +56,12 @@ import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.AbstractNotificationBuilder;
-import com.openexchange.share.notification.DefaultPasswordResetConfirmNotification;
 import com.openexchange.share.notification.DefaultShareCreatedNotification;
 import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.mail.impl.PasswordResetConfirmMailNotification;
 
 /**
  * {@link MailNotifications}
@@ -88,6 +88,7 @@ public class MailNotifications {
 
         private String shareToken;
         private String confirm;
+        private String account;
 
         protected PasswordResetConfirmBuilder() {
             super(NotificationType.CONFIRM_PASSWORD_RESET);
@@ -103,15 +104,22 @@ public class MailNotifications {
             return this;
         }
 
+        public PasswordResetConfirmBuilder setAccount(String account) {
+            this.account = account;
+            return this;
+        }
+
         @Override
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkNotNull(shareToken, "shareToken");
             checkNotNull(confirm, "config");
 
-            DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<InternetAddress>(Transport.MAIL);
+            PasswordResetConfirmMailNotification notification = new PasswordResetConfirmMailNotification(Transport.MAIL);
             notification.apply(this);
             notification.setToken(shareToken);
             notification.setConfirm(confirm);
+            notification.setAccount(account);
+
             return notification;
         }
     }

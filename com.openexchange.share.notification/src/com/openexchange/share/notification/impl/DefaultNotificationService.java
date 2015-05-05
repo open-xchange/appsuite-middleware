@@ -80,6 +80,7 @@ import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.notification.mail.ShareMailAware;
+import com.openexchange.share.notification.mail.impl.PasswordResetConfirmMailNotification;
 import com.openexchange.share.notification.mail.impl.ShareCreatedMailNotification;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -100,7 +101,7 @@ import com.openexchange.user.UserService;
 public class DefaultNotificationService implements ShareNotificationService {
 
     private ServiceLookup serviceLookup;
-    
+
     /** The queue for additional handlers */
     private final ConcurrentMap<Transport, ShareNotificationHandler> handlers;
 
@@ -140,12 +141,12 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         handler.send(notification);
     }
-    
+
     @Override
     // match enum type from com.openexchange.share.notification.ShareNotification.NotificationType<T>
     public List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> createdShares, String message, ServerSession session, AJAXRequestData requestData) {
         List<OXException> warnings = new ArrayList<OXException>();
-        
+
         /*
          * To send the notifications we have to biuld NotificationInfo instances per recipient and share that contain the needed data to
          * build the actual notification instance.
@@ -159,7 +160,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                     message, session, requestData));
             }
         }
-        
+
         for (NotificationInfo notificationInfo : notificationInfos) {
             try {
                 ShareNotification<?> shareNotification = buildShareCreatedNotification(notificationInfo);
@@ -170,7 +171,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
             }
         }
-        
+
         return warnings;
     }
 
@@ -189,8 +190,8 @@ public class DefaultNotificationService implements ShareNotificationService {
 
     /**
      * Builds a {@link ShareNotification} ready to be sent out to a recipent via mail.
-     * 
-     * @param notificationInfo The needed infos to build the {@link ShareNotification}  
+     *
+     * @param notificationInfo The needed infos to build the {@link ShareNotification}
      * @return the built ShareNotification
      * @throws OXException if the email address needed to build the notification is missing
      */
@@ -209,10 +210,10 @@ public class DefaultNotificationService implements ShareNotificationService {
         ShareRecipient recipient = notificationInfo.getRecipient();
         String shareToken = createdShares.size() == 1 ? createdShares.get(0).getToken() : guest.getBaseToken();
         String protocol = determineProtocol(requestData);
-        
+
         try {
             ShareCreatedMailNotification scmn = new ShareCreatedMailNotification();
-            
+
             scmn.setTransportInfo(new InternetAddress(guest.getEmailAddress(), true));
             scmn.setLinkProvider(buildLinkProvider(session.getUserId(), session.getContextId(), requestData.getHostname(), shareToken, protocol));
             scmn.setGuestContextID(guest.getContextID());
@@ -222,11 +223,11 @@ public class DefaultNotificationService implements ShareNotificationService {
             scmn.setTargets(getTargets(createdShares));
             scmn.setMessage(notificationInfo.getMessage());
             scmn.setCausedGuestCreation(isNewGuest(recipient));
-            
+
             AuthenticationMode authMode = guest.getAuthentication();
             switch (authMode) {
                 case ANONYMOUS:
-                    
+
                     scmn.setAuthMode(AuthenticationMode.ANONYMOUS);
                     break;
                 case ANONYMOUS_PASSWORD:
@@ -239,15 +240,15 @@ public class DefaultNotificationService implements ShareNotificationService {
                     scmn.setPassword(((GuestRecipient) recipient).getPassword());
                     break;
             }
-            
+
             makeMailAware(scmn, requestData.getHostname(), userId, contextId);
-            
+
             return scmn;
         } catch (AddressException e) {
             throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(guest.getEmailAddress());
         }
     }
-    
+
     @Override
     public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) throws OXException {
         try {
@@ -261,14 +262,17 @@ public class DefaultNotificationService implements ShareNotificationService {
                 .setTransportInfo(new InternetAddress(mailAddress, true))
                 .setLinkProvider(linkProvider)
                 .setGuestContext(guestInfo.getContextID())
-                .setGuestContext(guestInfo.getGuestID())
+                .setGuestID(guestInfo.getGuestID())
                 .setLocale(guest.getLocale())
                 .setShareToken(shareToken)
                 .setConfirm(hash)
+                .setAccount(mailAddress)
                 .build();
-            
-            //TODO: make mailAware
-            send(notification);
+
+            PasswordResetConfirmMailNotification n = (PasswordResetConfirmMailNotification) notification;
+
+            makeMailAware(n, requestHostname, guestInfo.getGuestID(), guestInfo.getContextID());
+            send(n);
         } catch (Exception e) {
             throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -290,10 +294,10 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
         return targets;
     }
-    
+
     /**
      * Determines if a {@link ShareRecipient} is a newly created {link GuestRecipient}.
-     * 
+     *
      * @param recipient The {@link ShareRecipient}
      * @return true if the recipient is a {link GuestRecipient} that had to be created.
      */
@@ -304,10 +308,10 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
         return false;
     }
-    
+
     /**
      * Get the product name that matches the current session and requestData.
-     * 
+     *
      * @param userID
      * @param contextID
      * @param hostname The hostname to use when looking up the product name
@@ -322,7 +326,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             if(Strings.isEmpty(productName)) {
                 throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userID, contextID);
             }
-        
+
         return productName;
     }
 
@@ -340,7 +344,7 @@ public class DefaultNotificationService implements ShareNotificationService {
 
     /**
      * Determines the hostname by first asking the optional {@link HostnameService} and then falling back to the hostname contained in the request.
-     * 
+     *
      * @param userID The userID to use when querying the {@link HostnameService}
      * @param contextID The userID to use when querying the {@link HostnameService}
      * @param requestHostname The hostname as provided by the request
@@ -353,7 +357,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
         return requestHostname;
     }
-    
+
     protected String determineServletPrefix() {
         DispatcherPrefixService prefixService = serviceLookup.getService(DispatcherPrefixService.class);
         if (prefixService == null) {
@@ -361,10 +365,10 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
         return prefixService.getPrefix();
     }
-    
+
     /**
      * Get all mail relevant branding infos from the {@linkServerConfig} and add all the needed infos for the mailcomposer to actually build the mail.
-     * 
+     *
      * @param shareMailAware The {@link ShareMailAware} {@link ShareNotification} to enrich with information.
      * @param hostname The hostname
      * @param userId The userId
@@ -377,7 +381,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userId, contextId);
         }
         shareMailAware.setProductName(productName);
-        
+
         ShareMailConfig shareMailConfig = serverConfig.getShareMailConfig();
         if(shareMailConfig == null) {
             throw ShareNotifyExceptionCodes.INVALID_SHARE_MAIL_CONFIG.create(userId, contextId);
@@ -388,5 +392,5 @@ public class DefaultNotificationService implements ShareNotificationService {
         shareMailAware.setFooterImage(shareMailConfig.getFooterImage());
         shareMailAware.setFooterText(shareMailConfig.getFooterText());
     }
-    
+
 }

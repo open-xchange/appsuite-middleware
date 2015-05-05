@@ -50,12 +50,9 @@
 package com.openexchange.share.notification.mail.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
-import java.io.File;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.nio.file.Files;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -74,7 +71,6 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
 import javax.mail.internet.MimeMultipart;
-import org.apache.commons.io.FileUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -91,12 +87,10 @@ import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
-import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
@@ -107,13 +101,10 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
 import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;
-import com.openexchange.share.notification.impl.ShareNotifyExceptionCodes;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.encoding.Base64;
 import com.openexchange.user.UserService;
 
 
@@ -125,7 +116,7 @@ import com.openexchange.user.UserService;
  */
 public class MailComposer {
 
-    
+
     //css
     private static final String BUTTON_COLOR = "button_color";
     private static final String BUTTON_BACKGROUNDCOLOR = "button_background_color";
@@ -133,8 +124,8 @@ public class MailComposer {
     private static final String FOOTER_IMAGECONTENTTYPE = "footer_image_content_type";
     private static final String FOOTER_IMAGE = "footer_image";
     private static final String FOOTER_TEXT = "footer_text";
-    
-    
+
+
     // shareCreated
     private static final String SUBJECT = "subject";
     private static final String HAS_SHARED_ITEMS = "has_shared_items";
@@ -143,12 +134,14 @@ public class MailComposer {
     private static final String VIEW_ITEMS_LINK = "view_items_link";
     private static final String VIEW_ITEMS_LABLE = "view_items_lable";
     private static final String WILL_EXPIRE = "will_expire";
-    
+
     // password reset confirmation
     private static final String PWRC_GREETING = "pwrc_greeting";
     private static final String PWRC_REQUESTRECEIVED = "pwrc_requestreceived";
+    private static final String PWRC_ACCOUNT = "pwrc_account";
     private static final String PWRC_SET_NEW_PWD = "pwrc_set_new_pwd";
     private static final String PWRC_LINK = "pw_reset_confirm_link";
+    private static final String PWRC_LINK_LABEL = "pw_reset_confirm_link_label";
     private static final String PWRC_IGNORE = "pwrc_ignore";
     private static final String PWRC_AUTOMATED_MAIL = "pwrc_automated_mail";
     private static final String PWRC_THANKS = "pwrc_thanks";
@@ -166,26 +159,39 @@ public class MailComposer {
         String subject = translator.translate(NotificationStrings.PWRC_SUBJECT);
         Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
         MimeMessage mail = prepareEnvelope(subject, null, notification.getTransportInfo());
-        mail.setContent(prepareContent( "notify.share.pwreset.confirm.mail.html.tmpl", vars));
+        mail.setContent(prepareContent("notify.share.pwreset.confirm.mail.html.tmpl", vars));
         mail.saveChanges();
         return new ContentAwareComposedMailMessage(mail, notification.getContextID());
     }
 
-    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmMailNotification notification, Translator translator) {
+    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmMailNotification notification, Translator translator) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
         LinkProvider linkProvider = notification.getLinkProvider();
         String confirmLink = linkProvider.getPasswordResetConfirmUrl(notification.getConfirm());
         String productName = notification.getProductName();
-        
+        String email = notification.getAccount();
+
         vars.put(PWRC_GREETING, translator.translate(NotificationStrings.PWRC_GREETING));
         vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
+        vars.put(PWRC_ACCOUNT, email);
         vars.put(PWRC_SET_NEW_PWD, translator.translate(NotificationStrings.PWRC_SET_NEW_PWD));
         vars.put(PWRC_LINK, confirmLink);
+        vars.put(PWRC_LINK_LABEL, translator.translate(NotificationStrings.PWRC_LINK_LABEL));
         vars.put(PWRC_IGNORE, translator.translate(NotificationStrings.PWRC_IGNORE));
         vars.put(PWRC_AUTOMATED_MAIL, translator.translate(NotificationStrings.PWRC_AUTOMATED_MAIL));
         vars.put(PWRC_THANKS, translator.translate(NotificationStrings.PWRC_THANKS));
         vars.put(PWRC_THE_TEAM, String.format(translator.translate(NotificationStrings.PWRC_THE_TEAM), productName));
-        
+        vars.put(BUTTON_COLOR, notification.getButtonColor());
+        vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
+        vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
+        String footerImageName = notification.getFooterImage();
+        if (!Strings.isEmpty(footerImageName)) {
+            Pair<String, String> footerImagePair = getTemplateService().encodeTemplateImage(footerImageName);
+            vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
+            vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+        }
+        vars.put(FOOTER_TEXT, notification.getFooterText());
+
         return vars;
     }
 
@@ -205,30 +211,30 @@ public class MailComposer {
         mail.addHeader("X-Open-Xchange-Share-Type", "share-created");
         mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
         mail.addHeader("X-Open-Xchange-Share-Access", buildAccessHeader(notification.getAuthMode(), notification.getUsername(), notification.getPassword()));
-        
-        // Select the com.openexchange.share.create.mail.tmpl template configured for the current user and render it based on current share 
+
+        // Select the com.openexchange.share.create.mail.tmpl template configured for the current user and render it based on current share
         String templateName = getShareCreatedTemplate(services, notification);
         mail.setContent(prepareContent(templateName, vars));
         mail.saveChanges();
-        
+
         return new ContentAwareComposedMailMessage(mail, notification.getSession(), notification.getSession().getContextId());
     }
-    
+
     public String prepareSubject() {
         return null;
     }
 
     /**
      * Gets the name of the template that should be used when rendering notification mails for created shares.
-     *   
+     *
      * @param lookup The {@link ServiceLookup} to use
-     * @param notification The 
+     * @param notification The
      * @return The name of the template that should be used when rendering notification mails
      * @throws OXException
      */
     private String getShareCreatedTemplate(ServiceLookup lookup, ShareCreatedNotification<InternetAddress> notification) throws OXException {
         String templateName = null;
-        
+
         final ConfigViewFactory configviews = services.getService(ConfigViewFactory.class);
         ConfigView configView = configviews.getView(notification.getSession().getUserId(), notification.getSession().getContextId());
         ComposedConfigProperty<String> templateNameProperty = configView.property("com.openexchange.share.create.mail.tmpl", String.class);
@@ -237,10 +243,10 @@ public class MailComposer {
         } else {
             templateName = services.getService(ConfigurationService.class).getProperty("com.openexchange.share.create.mail.tmpl", "notify.share.create.mail.html.tmpl");
         }
-        
-        return templateName;    
+
+        return templateName;
     }
-    
+
     private static String buildAccessHeader(AuthenticationMode authMode, String username, String password) {
         String accessHeader = null;
         if (authMode == AuthenticationMode.GUEST_PASSWORD && !Strings.isEmpty(username)) {
@@ -254,10 +260,10 @@ public class MailComposer {
 
     /**
      * Prepares a mapping from template keywords to actual textual values that will be used during template rendering.
-     * 
+     *
      * @param notification The {@link ShareCreatedNotification} containing infos about the created share
      * @param user The {@link User} that created a new share
-     * @param translator The {@link Translator} used for adapting the textual template values to the recipients locale 
+     * @param translator The {@link Translator} used for adapting the textual template values to the recipients locale
      * @return A mapping from template keywords to actual textual values
      * @throws OXException
      */
@@ -273,9 +279,9 @@ public class MailComposer {
         List<ShareTarget> shareTargets = notification.getShareTargets();
         String fullName = FullNameBuilder.buildFullName(user, translator);
         boolean causedGuestCreation = notification.getCausedGuestCreation();
-        
+
         String productName = notification.getProductName();
-        
+
         vars.put(BUTTON_COLOR, notification.getButtonColor());
         vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
         vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
@@ -286,7 +292,7 @@ public class MailComposer {
             vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
         }
         vars.put(FOOTER_TEXT, notification.getFooterText());
-        
+
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         Map<ShareTarget, TargetProxy> proxyMap = new HashMap<>(shareTargets.size());
         Set<TargetProxyType> targetTypes = new HashSet<>(shareTargets.size());
@@ -296,9 +302,9 @@ public class MailComposer {
             proxyMap.put(target, targetProxy);
             targetTypes.add(proxyType);
         }
-        
+
         boolean hasMultipleTargets = shareTargets.size() > 1;
-        
+
         if(!hasMultipleTargets) {
             ShareTarget shareTarget = shareTargets.get(0);
             TargetProxy targetProxy = proxyMap.get(shareTarget);
@@ -309,7 +315,7 @@ public class MailComposer {
             addViewItemsToVars(vars, targetProxyType, translator, false, shareUrl);
         } else {//multiple shares
             int count = shareTargets.size();
-            
+
             if(targetTypes.size() > 1) {//multiple shares of different types
                 if(causedGuestCreation) {
                     vars.put(SUBJECT,String.format(translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName));
@@ -330,21 +336,21 @@ public class MailComposer {
                 addViewItemsToVars(vars, targetProxyType, translator, true, shareUrl);
             }
         }
-        
+
         if(hasMessage) {
             vars.put(USER_MESSAGE, notification.getMessage());
         }
-        
+
         Date expiryDate = notification.getShareTargets().iterator().next().getExpiryDate();
         if(expiryDate != null) {
             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, guest.getLocale());
             Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(guest.getTimeZone()).getOffset(expiryDate.getTime()));
             vars.put(WILL_EXPIRE, String.format(translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
         }
-        
+
         return vars;
     }
-    
+
     private Map<String, Object> addSubjectToVars(Map<String, Object> vars, boolean causedGuestCreation, String productName, TargetProxyType targetProxyType, Translator translator, String fullName, int count, String itemName) {
         if(causedGuestCreation) {
             vars.put(SUBJECT,String.format(translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName));
@@ -412,7 +418,7 @@ public class MailComposer {
             }
         }
     }
-    
+
     private Map<String, Object> addSharedItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, int count) {
         if(DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
                 if(hasMessage) {
@@ -436,7 +442,7 @@ public class MailComposer {
                 } else {
                     vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName , email , count));
                     vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-                }                
+                }
         } else {
             //fall back to item for other types
                 if(hasMessage) {
@@ -448,7 +454,7 @@ public class MailComposer {
         }
         return vars;
     }
-    
+
     private void addViewItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, Translator translator, boolean multipleShares, String shareLink) {
         vars.put(VIEW_ITEMS_LINK, shareLink);
         if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
@@ -489,7 +495,7 @@ public class MailComposer {
 
     /**
      * Prepares the mail parts by taking the text and html templates provided as parameters.
-     * 
+     *
      * @param htmlTemplate The text/html template name
      * @param htmlVars The variables used when rendering the text/html template
      * @return A {@link MimeMultipart} containing the rendered plain and html parts

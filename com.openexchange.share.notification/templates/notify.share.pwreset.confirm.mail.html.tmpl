@@ -1,15 +1,27 @@
-<#assign sig_img1 = "iVBORw0KGgoAAAANSUhEUgAAAGUAAAAjCAYAAACNfcS+AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAF1gAABdYBrZNmQwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAbMSURBVGiB7ZtrcJxVGYCf93ybtLZUBQZpEItFQ3a3HcAGGP84TWwxNLubemsZFVHwT/2BI9ndMI7jVGYcR7NJqvzAC6hFhosVoeSyaptJMoOIWNNic9mE0EKRKkxLLVSqbfKd1x8mmbBdkj2bTaLE5+c57232mbM73+5ZUVX+z8IRqqtfr1Y+blTEIkcDy0//IJArUEQkWFtfLmLWKVQq+iGB8+ZlSkFFeRGhV9De0oDtPfDYjpPZYeW1X7moxCu9T5UL3BromLHcNpBuPjCbMUOR+BcR2eaaJ8j+zLIjt+muXf5VNcnlBLw6gy4Fzohol3966TbJPinhSOIyFXYCVbMZuoicUZVvDF93XrNu326nboTrGtaptZ3A+Y41T3hqNvR3ND5TyEDjQn4CGKdE4YA3ajf2/6blBEA4Fr9ZRHtVTUqR02O++WqJ+Ik3FQ1G47eq0Md/jxCAJSLaGNx36olwrKF86sZga+N+4Hrg7441L/DFdlbE4le5DlMsIQC+SMb3vTWovKpqn2OJLrGiOnlSQtFEHGhyHXI+UTipYtcOt7UcnboeiiYqFToF3u1Y8rh6smHo8dTBfIJD0cQXgJ/iKEThmcCY3TBVyAThaPJuqzpsPPOEWn8bYh4UVeWK6O0hD28/sNSl2UKgSHqoPRXJXg9G6q9BzN5CxAhSPdie6p8uKByL36wqP6OIQiZr18Y/rEauHLNnHx5J3/W6sGWLF3xj1VMI17o0W1BUb8l0NO/MXq6oS1xrLHuBd7kVlGPG+NUDrS0DuXbDkcTnxz9niy4kF6bijcuieQo561J4FszcR+SbuZaHW5v2WcP1wGtuLfUiq6ZrbW0inL0TjMZvKkQI8GcpLd3oKgRAQpHEtxT9+syRUie+PebawAU1MqpKUoQbZ4oNeGMr+x7/3iu59ipi9dcZNXtwPjG84uNXP9u+IwP/ESLIfRQghNLSDZlHv/2qYx4AAYXKfAJFWT6Ybm4rpIkLoWji/fnE+X7JNUBHrr3htpY/rokka6zoHuCdDu0v9vC6g5vuWC/GVorITuZZCIBBdF2hyQuJzvCWO9CRetqofAx43bH0xWLsjxC9G/Acc2ctBMCgvGc2BRYMZeVMIQMdqafFag2uYkTX4/rWpxwshhBwP5r/cwymm/+AyA3AqTlrohy0HkURAotACkCmLfUUIjXMhZhxIcOtTceLVXJRSIFxMWixT0xfsYXAIpICkGlv/r1aswn4RxHK9VnDR4stBBaZFIChdOOT1jBbMXMmBBahFIDh1qbfKXor6OkC0p+3hq1zJQQWqZRQJPlZQR4CWVZA+mpj6a6oSwSLPtg4i05KKJL4DKI/x/3BcCorjaUruOmOimLNNZVFJSUci9+IcD+zEzJBmXh+dygSv6IItd7EopESjCS3qsoDFEfIBGWI9BRbzKKQEozGt4hosYVMUIZId/ZP1bPhbS8lGEt8WpAHgZw3d4rEJaq2p1hi3tZSQpH4p0R5CEchquwGXnZsd4mq7V67uf6DjnnnYJjLL+rmEBGd9pvfUDTxSUQexvWECMMBzJfVyueAfzqO9V7fNz2zFWMULeju08KjvW+1E44lPwG4C4FnZdSv7u9ofHkonepSK1EKE9NdXtvwAce8SQJAL/CRmQKt+idXV985p7ddLjz1V1/KVpzI5yatr7ov13owktwsor8AShzbj6jnVWfam/42sTCUTnWticVjVqUNeIdDrUsDxvaU1zZUjaQbDznOgVRE6m8S5P48Yg8Dl7s2cMQHPQqyaoa4E5n2pguzF4PReJ0gj+Au5Dkrtir7PtkE4Whyo6KtuIkBeMli1w+3txx2STKjZ0ragJzDZDHXQgC8PIQA/DB7IRRLxgT5JY5CBA5NJwRgsD3VKUgd8C+X2sCloqanIlrv9NqZQ3u/8xrwJcdmC0m/t2zFnVMXQpF4FNVHgFKXQgKHRq03rZAJBttTnaI4ixHhfa5iDECmvem3wI9dmi0QY6r2lv5d2yfvhoWjyQgiv8JRCHDYC2j1SPq7L+WbMNjRtBdjNlOAGIN0B+uSq/OJn3xOWW5W3A56j0uz+UWOiWHLUEfLnyZWwrF4raKFCHneM4Hqvt3Nf3GdItPauKcQMSCrxNqefMSc+1eIWLxWVe4FytyazimPjtmz20bSd01eBqyoTWwyhseAJY61XhClarCj6chsBgpFEzXAbtzvXx/B96syv97xwlsFnCMF4Mro184fk7MxrKxDqFS4mvn60xAA+iLQq9ArYp7MtKV6pu4GI/U3iJjduAk5jnCvZ833+zsaXZ/Wc7I20nD1mLH1omx1nGVaMf8GWMC8qsEsUMkAAAAASUVORK5CYII=">
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
   <meta charset="UTF-8"></meta>
   <style type="text/css">
-    #view_items a.btn {
-      color: #ffffff;
-      background-color: #3c73aa;
-      border-color: #356697;
+    #pwrc_set_new_pwd a.btn {
+      <#if button_color?has_content>
+  	    color: ${button_color};
+  	  <#else>
+  	    color: #ffffff;
+      </#if>
+      
+      <#if button_background_color?has_content>
+  	    background-color: ${button_background_color};
+  	  <#else>
+  	    background-color: #3c73aa;
+      </#if>
+      
+      <#if button_border_color?has_content>
+  	    border-color: ${button_border_color};
+  	  <#else>
+  	    border-color: #356697;
+      </#if>
 
       padding: 5px 10px;
       font-size: 12px;
@@ -30,30 +42,46 @@
 </head>
 <body>
  <#escape x as x?html>
+ 
+  <p id="pwrc_greeting">
+    ${pwrc_greeting}
+  </p>
   
-  <#-- user (email) has shared item "foo" with you (and left you a message:) -->
-  <p id="has_shared_items">${has_shared_items}</p>
+  <p id="pwrc_requestreceived">
+    ${pwrc_requestreceived} ${pwrc_account}
+  </p>
   
-  <#if user_message?has_content>
-  	<p id="user_message"><cite>${user_message}</cite></p>
-  </#if>
+  <p id="pwrc_set_new_pwd">
+    ${pwrc_set_new_pwd}
+    <a class="btn" href="${pw_reset_confirm_link}"><span>${pw_reset_confirm_link_label}</span></a></p>
+  </p>
   
-  <#-- view item_type button -->
-  <p id="view_items"><a class="btn" href="${view_items_link}"><span>${view_items_lable}</span></a></p>
+  <p id="pwrc_ignore">
+    ${pwrc_ignore}
+  </p>
   
-  <#-- if the sharing user specified an expiration date -->
-  <#if will_expire?has_content>
-  	<p id="will_expire">${will_expire}</p>
-  </#if>
+  <p id="pwrc_automated_mail">
+    ${pwrc_automated_mail}
+  </p>
   
+  <p id="pwrc_thanks">
+    ${pwrc_thanks}
+    ${pwrc_the_team}
+  </p>  
   
+  <#if footer_text?has_content || footer_image?has_content>
   <hr />
-  <div id="signature">
-    <p id="signature_text">
-      <img class="logo" id="signature_image" src="data:image/png;base64,${sig_img1}">
-      OX App Suite is the secure, one-stop, centralized hub for all your customers’ online requirements. Uniting email, calendar, contacts, file storage, office productivity, social media and more, it is the digital place to be – today and tomorrow.
-    </p>
-  </div>
+    <div id="signature">
+      <p id="signature_text">
+        <#if footer_image_content_type?has_content && footer_image?has_content>
+          <img class="logo" id="signature_image" src="data:${footer_image_content_type};base64,${footer_image}">
+        </#if>
+        <#if footer_text?has_content>
+          ${footer_text}
+        </#if>
+      </p>
+    </div>
+  </#if>
 
  </#escape>
 </body>
