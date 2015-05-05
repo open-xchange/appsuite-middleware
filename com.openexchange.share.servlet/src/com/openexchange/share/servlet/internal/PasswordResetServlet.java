@@ -50,19 +50,15 @@
 package com.openexchange.share.servlet.internal;
 
 import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -73,18 +69,12 @@ import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.notification.DefaultLinkProvider;
-import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.notification.mail.MailNotifications;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.share.tools.PasswordUtility;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -168,8 +158,8 @@ public class PasswordResetServlet extends HttpServlet {
                  * Redirect after notification was sent.
                  */
                 String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                    urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                    "resetPassword");
+                    URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                    "reset_password");
                 response.setStatus(HttpServletResponse.SC_FOUND);
                 response.sendRedirect(redirectUrl);
             } else {
@@ -185,7 +175,7 @@ public class PasswordResetServlet extends HttpServlet {
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
 
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                        urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                        URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
                         "resetPassword");
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
