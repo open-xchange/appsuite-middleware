@@ -54,7 +54,10 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -109,9 +112,19 @@ public class LoginShareHandler extends AbstractShareHandler {
                 replacement = proxy.getTitle();
             }
             if (!guestInfo.isPasswordSet()) {
-                message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, guestInfo.getLocale()), replacement));
-                messageType = "WARN";
-                action = "ask_password";
+                Context ctx = ShareServiceLookup.getService(ContextService.class).getContext(guestInfo.getContextID());
+                String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), ctx);
+                int loginCount = null != count ? Integer.parseInt(count) : 0;
+                int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
+                if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
+                    message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), replacement));
+                    messageType = "WARN";
+                    action = "ask_password";
+                } else {
+                    message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.SET_NEW_PASSWORD, guestInfo.getLocale()), replacement));
+                    messageType = "ERROR";
+                    action = "require_password";
+                }
             } else {
                 User user = ShareServiceLookup.getService(UserService.class).getUser(target.getOwnedBy(), guestInfo.getContextID());
                 message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), user.getDisplayName(), replacement));
