@@ -2062,9 +2062,10 @@ public final class IMAPCommandsCollection {
                             /*
                              * Sort exceeding list on server
                              */
-                            if (((IMAPStore) folder.getStore()).hasCapability("SORT")) {
+                            IMAPStore imapStore = (IMAPStore) folder.getStore();
+                            if (imapStore.hasCapability("SORT")) {
                                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY() && imapStore.hasCapability("SORT=DISPLAY"));
                                 if (tmp.length > 256) {
                                     /*
                                      * Sort all

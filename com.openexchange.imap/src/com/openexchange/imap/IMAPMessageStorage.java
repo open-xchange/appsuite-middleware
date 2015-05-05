@@ -297,6 +297,23 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
+    private static volatile Boolean allowSORTDISPLAY;
+    /** Whether SORT=DISPLAY is allowed to be utilized */
+    static boolean allowSORTDISPLAY() {
+        Boolean b = allowSORTDISPLAY;
+        if (null == b) {
+            synchronized (IMAPMessageStorage.class) {
+                b = allowSORTDISPLAY;
+                if (null == b) {
+                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.allowSORTDISPLAY", true));
+                    allowSORTDISPLAY = b;
+                }
+            }
+        }
+        return b.booleanValue();
+    }
+
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
 
@@ -306,6 +323,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 byEnvelope = null;
                 useImapThreaderIfSupported = null;
                 allowESORT = null;
+                allowSORTDISPLAY = null;
             }
 
             @Override
@@ -1477,7 +1495,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             MailFields effectiveFields = prepareMailFieldsForSearch(mailFields, effectiveSortField);
             MailMessage[] mailMessages;
             if (searchViaIMAP(searchTerm == null ? new MailFields() : new MailFields(MailField.getMailFieldsFromSearchTerm(searchTerm)))) {
-                mailMessages = performIMAPSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
+                try {
+                    mailMessages = performIMAPSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
+                } catch (OXException e) {
+                    if (false == IMAPException.Code.UNSUPPORTED_SORT_FIELD.equals(e)) {
+                        throw e;
+                    }
+                    // Fall back to in-app search&sort
+                    mailMessages = performInAppSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
+                }
             } else {
                 mailMessages = performInAppSearch(effectiveSortField, order, searchTerm, effectiveFields, indexRange, headerNames, messageCount);
             }
@@ -1519,7 +1545,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             int[] msgIds;
             {
-                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), imapConfig);
+                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), allowSORTDISPLAY(), imapConfig);
                 msgIds = result.msgIds;
                 if (false == result.rangeApplied) {
                     msgIds = applyIndexRange(msgIds, indexRange);
