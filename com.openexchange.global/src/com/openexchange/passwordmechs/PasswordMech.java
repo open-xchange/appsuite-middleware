@@ -170,7 +170,7 @@ public enum PasswordMech {
         if (false == id.startsWith("{")) {
             id = new StringBuilder(id.length() + 1).append('{').append(id).toString();
         }
-        if (false == id.endsWith("{")) {
+        if (false == id.endsWith("}")) {
             id = new StringBuilder(id.length() + 1).append(id).append('}').toString();
         }
 
@@ -179,7 +179,7 @@ public enum PasswordMech {
                 return pm;
             }
         }
-        
+
         throw new IllegalArgumentException("Unsupported password mechanism '" + identifier + "'");
     }
 
