@@ -59,8 +59,11 @@ import com.openexchange.share.ShareTarget;
  */
 public class AdjustedShareTarget extends ShareTarget {
 
+    private static final long serialVersionUID = -3613658055542304716L;
+    
     private String adjustedFolder;
     private String adjustedItem;
+    private ShareTarget originalTarget;
 
     /**
      * Initializes a new {@link AdjustedShareTarget}, pretending the adjusted folder- and item identifiers, yet preserving the parent
@@ -72,8 +75,18 @@ public class AdjustedShareTarget extends ShareTarget {
      */
     public AdjustedShareTarget(ShareTarget target, String adjustedFolder, String adjustedItem) {
         super(target);
+        this.originalTarget = target;
         this.adjustedFolder = adjustedFolder;
         this.adjustedItem = adjustedItem;
+    }
+    
+    /**
+     * Gets the underlying original target with no adjustments.
+     * 
+     * @return The original target
+     */
+    public ShareTarget getOriginalTarget() {
+        return originalTarget;
     }
 
     @Override

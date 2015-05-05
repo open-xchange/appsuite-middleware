@@ -103,7 +103,7 @@ public class LoginShareHandler extends AbstractShareHandler {
             String action = null;
             GuestInfo guestInfo = share.getGuest();
             ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class);
-            TargetProxy proxy = moduleSupport.loadAsAdmin(share.getGuest().getGuestID(), share.getGuest().getContextID(), target);
+            TargetProxy proxy = moduleSupport.loadAsAdmin(target, share.getGuest().getContextID());
             String replacement = "";
             if (null != proxy) {
                 replacement = proxy.getTitle();

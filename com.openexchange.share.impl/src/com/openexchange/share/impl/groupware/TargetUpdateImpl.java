@@ -170,8 +170,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 foldersById.put(folder.getID(), folder);
                 proxies.put(folderTarget, proxy);
             } else {
-                VirtualTargetProxy proxy = new VirtualTargetProxy(parameters.getUser(), folderTarget);
-                proxies.put(folderTarget, proxy);
+                proxies.put(folderTarget, new VirtualTargetProxy(folderTarget));
             }
         }
 
