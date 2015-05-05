@@ -38,6 +38,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-eas-provisioning-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-eas-provisioning-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-filestore-s3"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-filestore-sproxyd"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-file-distribution"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-freebusy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-gui-help-plugin"/>
