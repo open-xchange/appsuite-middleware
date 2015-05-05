@@ -82,7 +82,7 @@
     <logger name="com.sun" level="INFO"/>
     <logger name="javax.management" level="INFO"/>
     <logger name="javax.jmdns" level="WARN"/>
-    <logger name="com.hazelcast" level="WARN"/>
+    <logger name="com.hazelcast" level="ALL"/>
     <logger name="org.glassfish.grizzly" level="WARN"/>
 
     <logger name="org.jaudiotagger" level="ERROR"/>
@@ -101,5 +101,8 @@
 
     <!-- Set this to DEBUG to log spreadsheet operations more in detail -->
     <!-- <logger name="com.openexchange.office.calcengine.client.impl.CalcEngineJob" level="DEBUG"/> -->
+
+    <logger name="com.openexchange.drive" level="ALL"/>
+    <logger name="com.openexchange.caching" level="ALL"/>
 
 </configuration>
