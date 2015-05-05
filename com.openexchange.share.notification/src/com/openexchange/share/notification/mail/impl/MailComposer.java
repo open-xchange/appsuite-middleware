@@ -275,13 +275,16 @@ public class MailComposer {
         boolean causedGuestCreation = notification.getCausedGuestCreation();
         
         String productName = notification.getProductName();
-        Pair<String,String> footerImagePair = templateService.encodeTemplateImage(notification.getFooterImage());
         
         vars.put(BUTTON_COLOR, notification.getButtonColor());
         vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
         vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
-        vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
-        vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+        String footerImageName = notification.getFooterImage();
+        if(!Strings.isEmpty(footerImageName)) {
+            Pair<String,String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
+            vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
+            vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+        }
         vars.put(FOOTER_TEXT, notification.getFooterText());
         
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
