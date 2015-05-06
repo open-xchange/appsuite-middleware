@@ -129,12 +129,12 @@ public class ExceptionUtils {
                 if (!Boolean.TRUE.equals(System.getProperties().get("__thread_dump_created"))) {
                     System.getProperties().put("__thread_dump_created", Boolean.TRUE);
                     boolean error = true;
+                    StringBuilder sb = new StringBuilder(2048);
                     try {
                         // Dump all the threads to the log
                         Map<Thread, StackTraceElement[]> threads = Thread.getAllStackTraces();
                         String ls = Strings.getLineSeparator();
                         LOG.info("{}Threads: {}", ls, threads.size());
-                        StringBuilder sb = new StringBuilder(2048);
                         for (Map.Entry<Thread, StackTraceElement[]> mapEntry : threads.entrySet()) {
                             Thread thread = mapEntry.getKey();
                             sb.setLength(0);

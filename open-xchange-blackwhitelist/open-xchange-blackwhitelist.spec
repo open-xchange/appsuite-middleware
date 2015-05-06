@@ -55,6 +55,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.blackwhitelist/ChangeLog
 
 %changelog
+* Thu Apr 30 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-05-04 (2496)
 * Fri Apr 24 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Carsten Hoeger <choeger@open-xchange.com>

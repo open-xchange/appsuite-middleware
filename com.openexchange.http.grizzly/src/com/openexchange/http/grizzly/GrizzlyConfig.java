@@ -501,10 +501,10 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     public int getMaxNumberOfHttpSessions() {
         return maxNumberOfHttpSessions;
     }
-    
+
     /**
      * Get the maximum header size for an HTTP request in bytes.
-     * 
+     *
      * @return the maximum header size for an HTTP request in bytes.
      */
     public int getMaxHttpHeaderSize() {

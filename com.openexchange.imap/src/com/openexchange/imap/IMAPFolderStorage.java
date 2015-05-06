@@ -403,14 +403,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
             }
+
             // ... and check existence
-            if (!f.exists()) {
-                f = checkForNamespaceFolder(fn);
-                if (null == f) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+            boolean exists = f.exists();
+            if (!exists) {
+
+                try {
+                    f.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        f.close(false);
+                    }
+                }
+
+                if (!exists) {
+                    f = checkForNamespaceFolder(fn);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
                 }
             }
-
 
             ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session);
             return null == listEntry ? IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId) : toFolderInfo(listEntry);
@@ -703,8 +718,24 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (checkForNamespaceFolder(fullName) != null) {
                 return true;
             }
+
             // The hard way...
-            final boolean exists = imapStore.getFolder(fullName).exists();
+            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
+            boolean exists = imapFolder.exists();
+
+            if (!exists) {
+                try {
+                    imapFolder.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        imapFolder.close(false);
+                    }
+                }
+            }
+
             if (exists) {
                 // IMAP does signal folder existence, but not reflected in caches
                 FolderCache.removeCachedFolders(session, accountId);
@@ -1035,9 +1066,28 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      *
      * @param fullName The folder's full name
      * @return The corresponding namespace folder or <code>null</code>
-     * @throws MessagingException
+     * @throws MessagingException If operation fails
      */
     public IMAPFolder checkForNamespaceFolder(final String fullName) throws MessagingException {
+        return checkForNamespaceFolder0(fullName, null);
+    }
+
+    /**
+     * Checks if given full name matches a namespace folder or one of its subfolders.
+     *
+     * @param fullName The folder's full name
+     * @param folder The folder associated with the full name
+     * @return The corresponding namespace folder or <code>null</code>
+     * @throws MessagingException If operation fails
+     */
+    public IMAPFolder checkForNamespaceFolder(final String fullName, IMAPFolder folder) throws MessagingException {
+        if (null == folder) {
+            throw new MessagingException("IMAP folder must not be null");
+        }
+        return checkForNamespaceFolder0(fullName, folder);
+    }
+
+    private IMAPFolder checkForNamespaceFolder0(final String fullName, IMAPFolder folder) throws MessagingException {
         if (NamespaceFoldersCache.containedInPersonalNamespaces(fullName, imapStore, true, session, accountId)) {
             return new NamespaceFolder(imapStore, fullName, getSeparator());
         }
@@ -1047,7 +1097,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (NamespaceFoldersCache.containedInSharedNamespaces(fullName, imapStore, true, session, accountId)) {
             return new NamespaceFolder(imapStore, fullName, getSeparator());
         }
-        return null;
+        return null == folder ? null : startsWithNamespaceFolder(fullName, getSeparator()) ? folder : null;
     }
 
     @Override
@@ -1114,7 +1164,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (parent) {
-                if (!parent.exists()) {
+                if (!doesExist(parent, false)) {
                     parent = checkForNamespaceFolder(parentFullname);
                     if (null == parent) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
@@ -3224,22 +3274,34 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private IMAPFolder getIMAPFolder(final String fullName) throws MessagingException {
+    private IMAPFolder getIMAPFolder(String fullName) throws MessagingException {
         return DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
     }
 
-    private IMAPFolder getIMAPFolderWithRecentListener(final String fullName) throws MessagingException {
-        final IMAPFolder ret =
-            DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
+    private IMAPFolder getIMAPFolderWithRecentListener(String fullName) throws MessagingException {
+        IMAPFolder ret = DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
         if (MailAccount.DEFAULT_ID == accountId && imapConfig.getIMAPProperties().notifyRecent()) {
             IMAPNotifierMessageRecentListener.addNotifierFor(ret, fullName, accountId, session, true);
         }
         return ret;
     }
 
-    private boolean doesExist(final IMAPFolder imapFolder, final boolean readOnly) throws OXException, MessagingException {
+    private boolean doesExist(IMAPFolder imapFolder, boolean readOnly) throws OXException, MessagingException {
         final String fullName = imapFolder.getFullName();
-        return STR_INBOX.equals(fullName) || (readOnly ? getLISTEntry(fullName, imapFolder).exists() : imapFolder.exists());
+        boolean exists = STR_INBOX.equals(fullName) || (readOnly ? getLISTEntry(fullName, imapFolder).exists() : imapFolder.exists());
+        if (!exists) {
+            try {
+                imapFolder.open(IMAPFolder.READ_ONLY);
+                exists = true;
+            } catch (javax.mail.FolderNotFoundException e) {
+                exists = false;
+            } finally {
+                if (exists) {
+                    imapFolder.close(false);
+                }
+            }
+        }
+        return exists;
     }
 
     private static boolean doesExist(final ListLsubEntry entry) {
@@ -3320,7 +3382,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return fullName.charAt(length) == separator;
     }
 
-    private boolean startsWithNamespaceFolder(final String fullName, final char separator) throws MessagingException {
+    /**
+     * Checks if specified full name starts with either a user or a shared namespace path prefix.
+     *
+     * @param fullName The full name to check
+     * @return <code>true</code> if denoted full name is a namespace subfolder; otherwise <code>false</code>
+     * @throws MessagingException If operation fails
+     */
+    public boolean startsWithNamespaceFolder(String fullName) throws MessagingException {
+        return startsWithNamespaceFolder(fullName, getSeparator());
+    }
+
+    private boolean startsWithNamespaceFolder(String fullName, char separator) throws MessagingException {
         for (final String nsFullName : NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId)) {
             if (isSubfolderOf(fullName, nsFullName, separator)) {
                 return true;

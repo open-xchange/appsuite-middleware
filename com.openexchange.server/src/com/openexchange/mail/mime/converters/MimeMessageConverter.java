@@ -113,7 +113,6 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.mail.mime.FullnameFolder;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -217,17 +216,6 @@ public final class MimeMessageConverter {
             for (final String value : header) {
                 mailMessage.addHeader(headerName, checkNonAscii(value));
             }
-        }
-
-    }
-
-    private static abstract class ExtendedMailMessageFieldFiller implements MailMessageFieldFiller {
-
-        final Folder folder;
-
-        public ExtendedMailMessageFieldFiller(final Folder folder) {
-            super();
-            this.folder = folder;
         }
 
     }
@@ -962,7 +950,7 @@ public final class MimeMessageConverter {
      */
     public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields, final boolean includeBody) throws OXException {
         try {
-            final MailMessageFieldFiller[] fillers = createFieldFillers(folder, fields);
+            final MailMessageFieldFiller[] fillers = createFieldFillers(new DefaultFolderInfo(folder), fields);
             final MailMessage[] mails = new MimeMailMessage[msgs.length];
             for (int i = 0; i < mails.length; i++) {
                 if (null != msgs[i]) {
@@ -1726,15 +1714,18 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
-                if (val != null && (val.length > 0)) {
-                    parseImportance(val[0], mailMessage);
-                } else {
-                    val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
-                    if ((val != null) && (val.length > 0)) {
-                        parsePriority(val[0], mailMessage);
+                if (msg instanceof ExtendedMimeMessage) {
+                    ExtendedMimeMessage extended = (ExtendedMimeMessage) msg;
+                    String[] val = extended.getHeader(MessageHeaders.HDR_IMPORTANCE);
+                    if (val != null && (val.length > 0)) {
+                        parseImportance(val[0], mailMessage);
                     } else {
-                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                        val = extended.getHeader(MessageHeaders.HDR_X_PRIORITY);
+                        if ((val != null) && (val.length > 0)) {
+                            parsePriority(val[0], mailMessage);
+                        } else {
+                            mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                        }
                     }
                 }
             }
@@ -1769,15 +1760,90 @@ public final class MimeMessageConverter {
         }
     }
 
+    private static interface FolderInfo {
+
+        /**
+         * Gets the full name of the mail folder.
+         * @return The full name
+         */
+        String getFullName();
+
+        /**
+         * Gets the UID of the given message within the
+         * according folder.
+         *
+         * @param msg The message
+         * @return The UID
+         * @throws MessagingException
+         */
+        String getUid(Message msg) throws MessagingException;
+
+    }
+
+    private static final class DefaultFolderInfo implements FolderInfo {
+
+        private final Folder folder;
+
+        public DefaultFolderInfo(Folder folder) {
+            super();
+            this.folder = folder;
+        }
+
+        @Override
+        public String getFullName() {
+            return folder.getFullName();
+        }
+
+        @Override
+        public String getUid(Message msg) throws MessagingException {
+            if (folder instanceof UIDFolder) {
+                return Long.toString(((UIDFolder) folder).getUID(msg));
+            } else if (folder instanceof POP3Folder) {
+              return ((POP3Folder) folder).getUID(msg);
+            }
+
+            return null;
+        }
+
+    }
+
+    private static final class StaticFolderInfo implements FolderInfo {
+
+        private final String fullName;
+
+        private final String uid;
+
+        /**
+         * @param fullName Full name of the mails folder
+         * @param uid UID of the mail within the given folder
+         */
+        public StaticFolderInfo(String fullName, String uid) {
+            super();
+            this.fullName = fullName;
+            this.uid = uid;
+        }
+
+        @Override
+        public String getFullName() {
+            return fullName;
+        }
+
+        @Override
+        public String getUid(Message msg) {
+            return uid;
+        }
+
+    }
+
     /**
      * Creates the field fillers and expects the messages to be common instances of {@link Message}.
      *
-     * @param folder The folder containing the messages
+     * @param folderInfo The folder info
      * @param fields The fields to fill
      * @return An array of appropriate {@link MailMessageFieldFiller} implementations
      * @throws OXException If field fillers cannot be created
      */
-    private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailField[] fields) throws OXException {
+    private static MailMessageFieldFiller[] createFieldFillers(final FolderInfo folderInfo, final MailField[] fields) throws OXException {
         final MailField[] arr;
         {
             final List<MailField> list = Arrays.asList(fields);
@@ -1794,25 +1860,17 @@ public final class MimeMessageConverter {
             final MailMessageFieldFiller filler = FILLER_MAP.get(field);
             if (filler == null) {
                 if (MailField.ID.equals(field)) {
-                    fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
-
+                    fillers[i] = new MailMessageFieldFiller() {
                         @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                            if (folder instanceof UIDFolder) {
-                                mailMessage.setMailId(Long.toString(((UIDFolder) folder).getUID(msg)));
-                            } else if (folder instanceof FullnameFolder) {
-                                mailMessage.setMailId(((FullnameFolder) folder).getUID(msg));
-                            } else if (folder instanceof POP3Folder) {
-                                mailMessage.setMailId(((POP3Folder) folder).getUID(msg));
-                            }
+                            mailMessage.setMailId(folderInfo.getUid(msg));
                         }
                     };
                 } else if (MailField.FOLDER_ID.equals(field)) {
-                    fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
-
+                    fillers[i] = new MailMessageFieldFiller() {
                         @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                            mailMessage.setFolder(folder.getFullName());
+                            mailMessage.setFolder(folderInfo.getFullName());
                         }
                     };
                 } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
@@ -1925,8 +1983,6 @@ public final class MimeMessageConverter {
                     try {
                         if (f instanceof UIDFolder) {
                             mail.setMailId(Long.toString(((UIDFolder) f).getUID(msg)));
-                        } else if (f instanceof FullnameFolder) {
-                            mail.setMailId(((FullnameFolder) f).getUID(msg));
                         } else if (f instanceof POP3Folder) {
                             mail.setMailId(((POP3Folder) f).getUID(msg));
                         }
@@ -2143,8 +2199,6 @@ public final class MimeMessageConverter {
                 try {
                     if (f instanceof UIDFolder) {
                         ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
-                    } else if (f instanceof FullnameFolder) {
-                        ret[1] = ((FullnameFolder) f).getUID(msg);
                     } else if (f instanceof POP3Folder) {
                         ret[1] = ((POP3Folder) f).getUID(msg);
                     }
@@ -2201,7 +2255,7 @@ public final class MimeMessageConverter {
             return mail;
         }
         try {
-            final MailMessageFieldFiller[] fillers = createFieldFillers(new FullnameFolder(fullname, separator, uid), fields);
+            final MailMessageFieldFiller[] fillers = createFieldFillers(new StaticFolderInfo(fullname, uid), fields);
             final MailMessage mail = (set.contains(MailField.BODY)) ? new MimeMailMessage(msg) : new MimeMailMessage();
             fillMessage(fillers, mail, msg);
             return mail;

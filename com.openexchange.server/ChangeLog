@@ -1,6 +1,10 @@
 * 2015-04-30 - ioannis.chouklis@open-xchange.com
- 
+
  - Fix for bug 37664: Set a configurable socket time out for the logstash appender
+
+* 2015-04-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37660: Added package for Norwegian Bokmal translation.
 
 * 2015-04-28 - thorben.betten@open-xchange.com
 
@@ -31,6 +35,10 @@
 
  - Fix for bug 37760: Avoid usage of com.openexchange.exception.OXException.log(Logger), instead do the logging at appropriate location
 
+* 2015-04-14 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37340: Introduced checks for future database table layout
+
 * 2015-04-14 - martin.herfurth@open-xchange.com
 
  - Fix for bug 37668: Appointment series breaks after creating a delete exception in a very special case.
@@ -47,7 +55,12 @@
 * 2015-04-02 - thorben.betten@open-xchange.com
 
  - Fix for bug 37527: Pass header/cookie information on password change to AuthenticationService instance
- 
+
+* 2015-03-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37102: Improved handling for special "FLS-0017" error code
+                      (in addition to changes performed with commit 0aa8866b944c35dbec6c4b9d5ecd1c66ede08057)
+
 * 2015-03-18 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 37249: Ignore already processed images when updating a snippet.
@@ -56,9 +69,17 @@
 
  - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
 
+* 2015-03-18 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 37249: Ignore already processed images when updating a snippet.
+
 * 2015-03-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 37200: Do only advertise "edit_group"/"edit_resource" capability if both - backend service and permission bit are available
+
+* 2015-03-11 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 37172: Assume voice in VCard import if parameter is missing and tag types 'home', 'work' or 'other' are set
 
 * 2015-03-09 - tobias.friedrich@open-xchange.com
 

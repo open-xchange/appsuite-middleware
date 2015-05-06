@@ -82,6 +82,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -132,11 +135,14 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
+    private final ConcurrentMap<String, Boolean> v780Schemas;
+
     /**
      * Default constructor.
      */
     public RdbUserStorage() {
         super();
+        v780Schemas = new ConcurrentHashMap<String, Boolean>();
     }
 
     @Override
@@ -1152,6 +1158,29 @@ public class RdbUserStorage extends UserStorage {
                     }
                 }
             }
+            if (0 < userIds.size() && hasGuestCreatedBy(con, context.getContextId())) {
+                String sql = getIN("SELECT guestCreatedBy FROM user WHERE cid=? AND userId IN (", userIds.size());
+                int parameterIndex = 0;
+            	try {
+            		stmt = con.prepareStatement(sql);
+            		stmt.setInt(++parameterIndex, contextId);
+                    TIntIterator iterator = userIds.iterator();
+                	while (iterator.hasNext()) {
+                		stmt.setInt(++parameterIndex, iterator.next());
+                	}
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                    	int guestCreatedBy = result.getInt(1);
+                    	if (0 < guestCreatedBy) {
+                    		userIds.remove(guestCreatedBy);
+                    	}
+                    }
+            	} catch (SQLException e) {
+                    throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+				} finally {
+                    closeSQLStuff(result, stmt);
+            	}
+            }
             return getUser(context, userIds.toArray());
         } finally {
             DBPool.closeReaderSilent(context, con);
@@ -1165,9 +1194,12 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User searchUser(final String email, final Context context, boolean considerAliases) throws OXException {
-        String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
         final Connection con = DBPool.pickup(context);
         try {
+            String sql = "SELECT id FROM user WHERE cid=? AND mail LIKE ?";
+        	if (hasGuestCreatedBy(con, context.getContextId())) {
+        		sql += " AND guestCreatedBy<1";
+        	}
             final String pattern = StringCollection.prepareForSearch(email, false, true);
             PreparedStatement stmt = null;
             ResultSet result = null;
@@ -1207,11 +1239,14 @@ public class RdbUserStorage extends UserStorage {
 
     @Override
     public User[] searchUserByMailLogin(final String login, final Context context) throws OXException {
-        String sql = "SELECT id FROM user WHERE cid=? AND imapLogin LIKE ?";
         final Connection con = DBPool.pickup(context);
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            String sql = "SELECT id FROM user WHERE cid=? AND imapLogin LIKE ?";
+        	if (hasGuestCreatedBy(con, context.getContextId())) {
+        		sql += " AND guestCreatedBy<1";
+        	}
             final String pattern = StringCollection.prepareForSearch(login, false, true);
             stmt = con.prepareStatement(sql);
             stmt.setInt(1, context.getContextId());
@@ -1239,11 +1274,14 @@ public class RdbUserStorage extends UserStorage {
         } catch (final Exception e) {
             throw LdapExceptionCode.NO_CONNECTION.create(e).setPrefix("USR");
         }
-        final String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.contactId=prg_contacts.intfield01) WHERE cid=? AND changing_date>=?";
         int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
+            String sql = "SELECT id FROM user LEFT JOIN prg_contacts ON (user.cid=prg_contacts.cid AND user.contactId=prg_contacts.intfield01) WHERE cid=? AND changing_date>=?";
+        	if (hasGuestCreatedBy(con, context.getContextId())) {
+        		sql += " AND user.guestCreatedBy<1";
+        	}
             stmt = con.prepareStatement(sql);
             stmt.setInt(1, context.getContextId());
             stmt.setTimestamp(2, new Timestamp(modifiedSince.getTime()));
@@ -1280,12 +1318,16 @@ public class RdbUserStorage extends UserStorage {
         }
     }
 
-    private static int[] listAllUser(Context ctx, Connection con) throws OXException {
+    private int[] listAllUser(Context ctx, Connection con) throws OXException {
         final int[] users;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM user WHERE user.cid=?");
+        	String sql = "SELECT id FROM user WHERE user.cid=?";
+        	if (hasGuestCreatedBy(con, ctx.getContextId())) {
+        		sql += " AND guestCreatedBy<1";
+        	}
+            stmt = con.prepareStatement(sql);
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
             final TIntList tmp = new TIntArrayList();
@@ -1351,4 +1393,39 @@ public class RdbUserStorage extends UserStorage {
     protected void stopInternal() {
         // Nothing to tear down.
     }
+
+    /**
+     * Gets a value indicating whether the supplied database connection points to a database schema that already contains changes
+     * introduced with version <code>7.8.0</code>, i.e. if the <code>user</code> table already has the <code>guestCreatedBy</code> column.
+     *
+     * @param connection The connection to check
+     * @param contextID The context identifier
+     * @return <code>true</code> if the <code>user</code> table has the <code>guestCreatedBy</code> column, <code>false</code>, otherwise
+     */
+    private boolean hasGuestCreatedBy(Connection connection, int contextID) throws OXException {
+    	try {
+        	String schemaName = connection.getCatalog();
+        	if (null == schemaName) {
+        		schemaName = ServerServiceRegistry.getServize(DatabaseService.class).getSchemaName(contextID);
+        		if (null == schemaName) {
+        			throw LdapExceptionCode.UNEXPECTED_ERROR.create("No schema name for connection");
+        		}
+        	}
+        	Boolean value = v780Schemas.get(schemaName);
+        	if (null == value) {
+        		ResultSet result = null;
+        		try {
+            		result = connection.getMetaData().getColumns(null, schemaName, "user", "guestCreatedBy");
+            		value = Boolean.valueOf(result.next());
+    			} finally {
+    				DBUtils.closeSQLStuff(result);
+        		}
+        		v780Schemas.putIfAbsent(schemaName, value);
+        	}
+        	return value.booleanValue();
+		} catch (SQLException e) {
+			throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+		}
+    }
+
 }
