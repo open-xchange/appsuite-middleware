@@ -846,6 +846,20 @@ final class SessionData {
         return retval;
     }
 
+    List<String> getShortTermSessionIDs() {
+        // A read.only access
+        List<String> retval = new LinkedList<String>();
+        rlock.lock();
+        try {
+            for (SessionContainer container : sessionList) {
+                retval.addAll(container.getSessionIDs());
+            }
+        } finally {
+            rlock.unlock();
+        }
+        return retval;
+    }
+
     List<SessionControl> getLongTermSessions() {
         final List<SessionControl> retval = new LinkedList<SessionControl>();
         rlongTermLock.lock();

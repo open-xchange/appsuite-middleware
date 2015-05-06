@@ -725,28 +725,34 @@ public class HazelcastSessionStorageService implements SessionStorageService {
     }
 
     /**
-     * 'Touches' a session in the storage causing the map entry's idle time being reseted.
+     * 'Touches' multiple sessions in the storage causing the map entry's idle time being reseted.
      *
-     * @param sessionID The session ID
-     * @throws OXException
+     * @param sessionIDs The session ID to touch
+     * @return The number of successfully touched sessions
      */
-    public void touch(String sessionID) throws OXException {
+    public int touch(List<String> sessionIDs) throws OXException {
+        int touched = 0;
         ensureActive();
         try {
             /*
              * calling containsKey resets map entries idle-time
              */
-            if (false == sessions().containsKey(sessionID)) {
-                LOG.debug("Ignoring keep-alive even for not found session ID: {}", sessionID);
-            } else {
-                LOG.debug("Received keep-alive for '{}'.", sessionID);
+            IMap<String, PortableSession> sessions = sessions();
+            for (String sessionID : sessionIDs) {
+                if (false == sessions.containsKey(sessionID)) {
+                    LOG.debug("Ignoring keep-alive even for not found session ID: {}", sessionID);
+                } else {
+                    touched++;
+                    LOG.debug("Received keep-alive for '{}'.", sessionID);
+                }
             }
         } catch (HazelcastInstanceNotActiveException e) {
             throw handleNotActiveException(e);
-        } catch (final HazelcastException e) {
+        } catch (HazelcastException e) {
             LOG.debug("", e);
             throw handleHazelcastException(e, SessionStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()));
         }
+        return touched;
     }
 
     /**

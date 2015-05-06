@@ -1254,6 +1254,15 @@ public final class SessionHandler {
         }
         return null != sessionData.optShortTermSession(sessionId);
     }
+    
+    protected static List<String> getActiveSessionIDs() {
+        SessionData sessionData = SESSION_DATA_REF.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return Collections.emptyList();
+        }
+        return sessionData.getShortTermSessionIDs();
+    }
 
     /**
      * Gets the session associated with given alternative identifier
