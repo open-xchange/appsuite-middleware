@@ -275,6 +275,26 @@ public abstract class MailServletInterface implements Closeable {
     public abstract SearchIterator<MailMessage> getMessages(String folder, int[] fromToIndices, int sortCol, int order, int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR, int[] fields, String[] headerFields, boolean supportsContinuation) throws OXException;
 
     /**
+     * Creates a search term from given arguments.
+     *
+     * @param searchCols The search fields
+     * @param searchPatterns The associated patterns
+     * @param linkSearchTermsWithOR Wehther to link with OR
+     * @return The resulting search term
+     * @throws OXException If search term cannot be created
+     */
+    public abstract com.openexchange.mail.search.SearchTerm<?> createSearchTermFrom(int[] searchCols, String[] searchPatterns, boolean linkSearchTermsWithOR) throws OXException;
+
+    /**
+     * Maps given search term to a mail search term
+     *
+     * @param searchTerm The search term
+     * @return The mail search term
+     * @throws OXException If mail search term cannot be returned
+     */
+    public abstract com.openexchange.mail.search.SearchTerm<?> createSearchTermFrom(com.openexchange.search.SearchTerm<?> searchTerm) throws OXException;
+
+    /**
      * Returns an instance of <code>SearchIterator</code> containing a selection of messages located in given folder.
      * <code>fromToIndices</code> can define a range of messages that should be returned. Moreover <code>searchCols</code> and
      * <code>searchPatterns</code> defines a search pattern to further confine returned messages.
