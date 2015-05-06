@@ -1965,6 +1965,21 @@ msgstr ""
 msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
 
+#. No such document: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
+msgid "No such document: %1$s"
+msgstr ""
+
+#. No such chunk: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:66
+msgid "No such chunk: %1$s"
+msgstr ""
+
+#. No next chunk for chunk: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:69
+msgid "No next chunk for chunk: %1$s"
+msgstr ""
+
 #. * The allowed Quota is reached.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
 msgid ""
@@ -7909,25 +7924,30 @@ msgstr ""
 msgid "You can set a new password here:"
 msgstr ""
 
-#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and create a new one.
+#. * Reset password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:244
+msgid "Reset password"
+msgstr ""
+
+#. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and create a new one.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:247
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and create a new one."
 msgstr ""
 
 #. * This is an automated email, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:247
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
 msgid "This is an automated email, please do not reply."
 msgstr ""
 
 #. * Thanks,
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:250
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
 msgid "Thanks,"
 msgstr ""
 
 #. * The $product Team
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:256
 msgid "The %1$s Team"
 msgstr ""
 
