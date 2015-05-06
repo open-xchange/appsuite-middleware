@@ -114,7 +114,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.impl"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.storage"/>
 	<classpathentry kind="src" path="/com.openexchange.subscribe.google"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="/com.openexchange.oauth.google"/>
 	<classpathentry kind="src" path="/com.openexchange.oauth"/>
 	<classpathentry kind="src" path="/com.openexchange.google.api.client"/>
