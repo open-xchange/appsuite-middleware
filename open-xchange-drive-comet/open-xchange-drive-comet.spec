@@ -1,31 +1,31 @@
 
-Name:           open-xchange-drive-comet
-BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
+Name:          open-xchange-drive-comet
+BuildArch:     noarch
+#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:  ant
+BuildRequires: ant
 %else
-BuildRequires:  ant-nodeps
+BuildRequires: ant-nodeps
 %endif
-BuildRequires:  open-xchange-drive
-BuildRequires:  open-xchange-grizzly
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:        @OXVERSION@
-%define         ox_release 0
-Release:        %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Drive push implementation using Comet and using less system resources
-Autoreqprov:    no
-Requires:       open-xchange-drive >= @OXVERSION@
-Requires:       open-xchange-grizzly >= @OXVERSION@
+BuildRequires: open-xchange-drive
+BuildRequires: open-xchange-grizzly
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Drive push implementation using Comet and using less system resources
+Autoreqprov:   no
+Requires:      open-xchange-drive >= @OXVERSION@
+Requires:      open-xchange-grizzly >= @OXVERSION@
 
 %description
 This package should be installed if a real push implementation for the drive synchronization is wanted. This push implementation uses less
