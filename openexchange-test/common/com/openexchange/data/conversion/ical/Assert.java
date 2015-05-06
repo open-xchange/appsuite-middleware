@@ -86,11 +86,20 @@ public class Assert extends org.junit.Assert {
     }
 
     public static void assertProperty(final ICalFile ical, final String name, final String value) {
-        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsPair(name, value));
+        String prop = name + (null == value ? "" : ":" + value);
+        assertTrue("\""+prop+"\" missing in: \n"+ical.toString(), ical.containsPair(name, value));
     }
 
     public static void assertProperty(ICalFile ical, String name, String parameter, String value) {
-        assertTrue(name+" missing in: \n"+ical.toString(), ical.containsEntry(name, parameter, value));
+        StringBuilder prop = new StringBuilder(24);
+        prop.append(name);
+        if (null != parameter) {
+            prop.append(';').append(parameter);
+        }
+        if (null != value) {
+            prop.append(':').append(value);
+        }
+        assertTrue("\""+prop.toString()+"\" missing in: \n"+ical.toString(), ical.containsEntry(name, parameter, value));
     }
 
     public static void assertNoProperty(final ICalFile ical, final String name) {

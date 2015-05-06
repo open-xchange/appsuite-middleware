@@ -49,6 +49,7 @@
 
 package com.openexchange.imap;
 
+import static com.openexchange.java.Strings.toUpperCase;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -401,26 +402,20 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         }
         if (imapFolder != null) {
             final String imapFolderFullname = imapFolder.getFullName();
-            /*
-             * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
-             */
+
+            // Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
             synchronized (imapFolder) {
                 IMAPCommandsCollection.forceNoopCommand(imapFolder);
                 clearCache(imapFolder);
                 try {
-                    /*
-                     * This call also checks if folder is opened
-                     */
+                    // This call also checks if folder is opened
                     final int mode = imapFolder.getMode();
                     if (isIdenticalFolder && (mode >= desiredMode)) {
-                        /*
-                         * Identical folder is already opened in an appropriate mode.
-                         */
+                        // Identical folder is already opened in an appropriate mode.
                         return imapFolder;
                     }
-                    /*
-                     * Folder is open, so close folder
-                     */
+
+                    // Folder is open, so close folder
                     try {
                         imapFolder.close(false/*Folder.READ_WRITE == mode*/);
                     } finally {
@@ -429,27 +424,16 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                         }
                     }
                 } catch (final IllegalStateException e) {
-                    /*
-                     * Folder not open
-                     */
+                    // Folder not open
                     LOG.debug("IMAP folder's mode could not be checked, because folder is closed. Going to open folder.", e);
                 }
-                /*
-                 * Folder is closed here
-                 */
+
+                // Folder is closed here
                 if (isIdenticalFolder) {
                     try {
                         if ((imapFolder.getType() & Folder.HOLDS_MESSAGES) == 0) { // NoSelect
-                            throw IMAPException.create(
-                                IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
-                                imapConfig,
-                                session,
-                                imapFolderFullname);
-                        } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(
-                            imapFolder,
-                            true,
-                            session,
-                            accountId))) {
+                            throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolderFullname);
+                        } else if (imapConfig.isSupportsACLs() && !aclExtension.canRead(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
                             throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapFolderFullname);
                         }
                     } catch (final MessagingException e) { // No access
@@ -463,9 +447,8 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
                     if (imapAccess.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
                         IMAPNotifierMessageRecentListener.addNotifierFor(imapFolder, fullName, accountId, session, true);
                     }
-                    /*
-                     * Open identical folder in right mode
-                     */
+
+                    // Open identical folder in right mode
                     openFolder(desiredMode, imapFolder);
                     return imapFolder;
                 }
@@ -475,19 +458,23 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (imapAccess.notifyRecent() && (desiredMode == Folder.READ_WRITE)) {
             IMAPNotifierMessageRecentListener.addNotifierFor(retval, fullName, accountId, session, true);
         }
-        /*
-         * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
-         */
+
+        // Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
         synchronized (retval) {
-            final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session);
-            if (!isDefaultFolder && !STR_INBOX.equals(fullName) && (!listEntry.exists())) {
-                ListLsubCache.clearCache(accountId, session);
-                throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
-            }
             if ((desiredMode != Folder.READ_ONLY) && (desiredMode != Folder.READ_WRITE)) {
                 throw IMAPException.create(IMAPException.Code.UNKNOWN_FOLDER_MODE, imapConfig, session, Integer.valueOf(desiredMode));
             }
-            final boolean selectable = listEntry.canOpen();
+            boolean openIt = true;
+            ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, retval, session);
+            if (!isDefaultFolder && !STR_INBOX.equals(fullName) && (!listEntry.exists())) {
+                // Try to open the folder although not LISTed to check existence
+                if (!tryOpen(retval, desiredMode)) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+                openIt = false;
+                listEntry = ListLsubCache.addSingleByFolder(accountId, retval, session);
+            }
+            boolean selectable = listEntry.canOpen();
             if (!selectable) { // NoSelect
                 throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
@@ -498,12 +485,26 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             } catch (final MessagingException e) {
                 throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
             }
-            if ((Folder.READ_WRITE == desiredMode) && (!selectable) && STR_FALSE.equalsIgnoreCase(imapAccess.getMailProperties().getProperty(MimeSessionPropertyNames.PROP_ALLOWREADONLYSELECT, STR_FALSE)) && IMAPCommandsCollection.isReadOnly(retval)) {
-                throw IMAPException.create(IMAPException.Code.READ_ONLY_FOLDER, imapConfig, session, isDefaultFolder ? MailFolder.DEFAULT_FOLDER_NAME : fullName);
+            if (openIt) {
+                openFolder(desiredMode, retval);
             }
-            openFolder(desiredMode, retval);
         }
         return retval;
+    }
+
+    private boolean tryOpen(IMAPFolder imapFolder, int desiredMode) throws MessagingException {
+        boolean close = true;
+        try {
+            imapFolder.open(desiredMode);
+            close = false;
+            return true;
+        } catch (javax.mail.FolderNotFoundException e) {
+            return false;
+        } finally {
+            if (close) {
+                try { imapFolder.close(false); } catch (Exception e) {/* Ignore */}
+            }
+        }
     }
 
     /**
@@ -540,19 +541,4 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
             // Ignore
         }
     }
-
-    /** ASCII-wise upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
-
 }

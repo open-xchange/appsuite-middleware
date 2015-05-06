@@ -326,6 +326,23 @@ public final class ListLsubCache {
     }
 
     /**
+     * Adds single entry to cache. Replaces any existing entry.
+     *
+     * @param accountId The account ID
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @param session The session
+     * @throws OXException If entry could not be added
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static ListLsubEntry addSingleByFolder(int accountId, IMAPFolder imapFolder, Session session) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session);
+        synchronized (collection) {
+            boolean addIt = !checkTimeStamp(imapFolder, collection);
+            return collection.addSingleByFolder(imapFolder, addIt);
+        }
+    }
+
+    /**
      * Gets the separator character.
      *
      * @param accountId The account ID

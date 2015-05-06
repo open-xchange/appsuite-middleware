@@ -1555,7 +1555,6 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
          * Create a clone for calculation purpose
          */
         final CalendarDataObject clone = cdao.clone();
-        clone.setEndDate(new Date(maxEnd));
         final RecurringResultsInterface rresults;
         try {
             rresults = calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);

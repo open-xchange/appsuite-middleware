@@ -357,8 +357,20 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 rs = null;
                 stmt = null;
             }
-            final QuotaFileStorage fileStorage = getFileStorage(getContext(session));
-            final MimeMessage mimeMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(file));
+            MimeMessage mimeMessage;
+            try {
+                QuotaFileStorage fileStorage = getFileStorage(getContext(session));
+                InputStream in = fileStorage.getFile(file);
+                mimeMessage = new MimeMessage(getDefaultSession(), in);
+            } catch (OXException e) {
+                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+
+                // Obviously associated file does no more exist
+                deleteSnippetSafe(identifier, userId, contextId);
+                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+            }
             com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
             final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
             final String lcct;
@@ -622,7 +634,18 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 }
             }
             // Create MIME message from existing file
-            final MimeMessage storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(oldFile));
+            MimeMessage storageMessage;
+            try {
+                storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(oldFile));
+            } catch (OXException e) {
+                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                    throw e;
+                }
+
+                // Obviously associated file does no more exist
+                deleteSnippetSafe(identifier, userId, contextId);
+                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+            }
             final ContentType storageContentType;
             {
                 final String header = storageMessage.getHeader(MessageHeaders.HDR_CONTENT_TYPE, null);
@@ -929,9 +952,12 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
         Set<String> set = new HashSet<String>(2);
         do {
-            String imageId = ImageUtility.parseImageLocationFrom(matcher.group(1)).getImageId();
-            if (null != imageId) {
-                set.add(imageId);
+            String imageUri = matcher.group(1);
+            if (!imageUri.startsWith("cid:")) {
+                String imageId = ImageUtility.parseImageLocationFrom(imageUri).getImageId();
+                if (null != imageId) {
+                    set.add(imageId);
+                }
             }
         } while (matcher.find());
         return set;
