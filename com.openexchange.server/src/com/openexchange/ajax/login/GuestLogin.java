@@ -109,7 +109,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
             if (null == configService) {
                 throw ServiceExceptionCode.absentService(ConfigurationService.class);
             }
-            int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
+            int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
 
             String body = AJAXServlet.getBody(httpRequest);
             if (Strings.isEmpty(body)) {
@@ -162,20 +162,21 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         if (null == configService) {
             throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
-        int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
+        int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
         User user = userService.getUser(share.getGuest().getGuestID(), context);
-        Set<String> loginsWithoutPassword = user.getAttributes().get("guestLoginWithoutPassword");
         int loginCount = 0;
-        if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
-            try {
-                loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
-            } catch (RuntimeException e) {
-                throw LoginExceptionCodes.UNKNOWN.create(e);
+        if (emptyGuestPasswords > 0) {
+            Set<String> loginsWithoutPassword = user.getAttributes().get("guestLoginWithoutPassword");
+            if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
+                try {
+                    loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
+                } catch (RuntimeException e) {
+                    throw LoginExceptionCodes.UNKNOWN.create(e);
+                }
             }
         }
-
         if (!share.getGuest().isPasswordSet()) {
-            if (Strings.isEmpty(loginInfo.getPassword()) && (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount)) {
+            if (Strings.isEmpty(loginInfo.getPassword()) && emptyGuestPasswords > 0 && emptyGuestPasswords > loginCount) {
                 userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
                 return user;
             }

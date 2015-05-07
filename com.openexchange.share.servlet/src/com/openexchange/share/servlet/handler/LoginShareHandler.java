@@ -105,8 +105,9 @@ public class LoginShareHandler extends AbstractShareHandler {
             String messageType = null;
             String action = null;
             GuestInfo guestInfo = share.getGuest();
+            User sharingUser = ShareServiceLookup.getService(UserService.class).getUser(guestInfo.getCreatedBy(), guestInfo.getContextID());
             ModuleSupport moduleSupport = ShareServiceLookup.getService(ModuleSupport.class);
-            TargetProxy proxy = moduleSupport.loadAsAdmin(target, share.getGuest().getContextID());
+            TargetProxy proxy = moduleSupport.loadAsAdmin(target, guestInfo.getContextID());
             String replacement = "";
             if (null != proxy) {
                 replacement = proxy.getTitle();
@@ -115,9 +116,9 @@ public class LoginShareHandler extends AbstractShareHandler {
                 Context ctx = ShareServiceLookup.getService(ContextService.class).getContext(guestInfo.getContextID());
                 String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), ctx);
                 int loginCount = null != count ? Integer.parseInt(count) : 0;
-                int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
+                int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
                 if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
-                    message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), replacement));
+                    message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), sharingUser.getDisplayName(), replacement));
                     messageType = "WARN";
                     action = "ask_password";
                 } else {

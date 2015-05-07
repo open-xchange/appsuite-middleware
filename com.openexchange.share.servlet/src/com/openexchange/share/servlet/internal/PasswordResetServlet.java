@@ -175,14 +175,14 @@ public class PasswordResetServlet extends HttpServlet {
                     PasswordMech passwordMech = PasswordMech.getPasswordMechFor(guest.getPasswordMech());
                     user.setUserPassword(passwordMech.encode(PasswordUtility.INITIAL_GUEST_PASSWORD));
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
-                    String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
-                    int loginCount = null != count ? Integer.parseInt(count) : 0;
-                    int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", 0);
-                    String status;
-                    if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
-                        status = "ask_password";
-                    } else {
-                        status = "require_password";
+                    String status = "require_password";
+                    int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
+                    if (emptyGuestPasswords > 0) {
+                        String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
+                        int loginCount = null != count ? Integer.parseInt(count) : 0;
+                        if (emptyGuestPasswords > loginCount) {
+                            status = "ask_password";
+                        }
                     }
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
                         URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
