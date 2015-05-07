@@ -127,9 +127,7 @@ public class TaskWriter extends CalendarWriter {
         if (task.containsPercentComplete()) {
             writeParameter(TaskFields.PERCENT_COMPLETED, task.getPercentComplete(), json);
         }
-        if (task.containsPriority()) {
-            writeParameter(TaskFields.PRIORITY, task.getPriority(), json, task.containsPriority());
-        }
+        writeParameter(TaskFields.PRIORITY, task.getPriority(), json, task.containsPriority() && null != task.getPriority());
         if (task.containsStatus()) {
             writeParameter(TaskFields.STATUS, task.getStatus(), json);
         }
@@ -294,7 +292,7 @@ public class TaskWriter extends CalendarWriter {
         m.put(Task.PRIORITY, new TaskFieldWriter() {
             @Override
             public void write(final Task taskObject, final JSONArray jsonArray) {
-                writeValue(taskObject.getPriority(), jsonArray, taskObject.containsPriority());
+                writeValue(taskObject.getPriority(), jsonArray, taskObject.containsPriority() && null != taskObject.getPriority());
             }
         });
         m.put(Task.STATUS, new TaskFieldWriter() {

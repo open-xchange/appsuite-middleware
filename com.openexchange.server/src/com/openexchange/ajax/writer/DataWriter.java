@@ -235,8 +235,10 @@ public class DataWriter {
     }
 
     public static void writeParameter(String name, Integer value, JSONObject json, boolean condition) throws JSONException {
-        if (null != value) {
-            writeParameter(name, Integer.toString(value.intValue()), json, condition);
+        if (null == value) {
+            writeNull(name, json, condition);
+        } else {
+            writeParameter(name, value.intValue(), json, condition);
         }
     }
 
@@ -448,7 +450,7 @@ public class DataWriter {
 
     public static void writeValue(Integer value, JSONArray json, boolean condition) {
         if (condition) {
-            writeValue(Integer.toString(value.intValue()), json);
+            writeValue(value.intValue(), json);
         } else {
             writeNull(json);
         }
