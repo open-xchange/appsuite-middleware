@@ -1,3 +1,7 @@
+* 2015-05-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38178: Added json itip capability.
+
 * 2015-04-30 - marcus.klein@open-xchange.com
 
  - Fix for bug 38015: Do not remove REST API login if it is still configured to the once shipped default one. Only the password is removed.
