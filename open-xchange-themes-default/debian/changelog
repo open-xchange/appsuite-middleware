@@ -106,6 +106,18 @@ open-xchange-themes-default (7.6.2-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:36:41 +0200
 
+open-xchange-themes-default (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Apr 2015 10:16:37 +0200
+
+open-xchange-themes-default (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Apr 2015 12:15:06 +0200
+
 open-xchange-themes-default (7.6.1-26) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2473)

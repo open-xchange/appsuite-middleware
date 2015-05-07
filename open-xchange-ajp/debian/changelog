@@ -106,6 +106,18 @@ open-xchange-ajp (7.6.2-0) unstable; urgency=medium
 
  -- Marc Arens <marc.arens@open-xchange.com>  Wed, 17 Sep 2014 13:35:54 +0200
 
+open-xchange-ajp (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Thu, 30 Apr 2015 10:15:50 +0200
+
+open-xchange-ajp (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Tue, 28 Apr 2015 12:13:54 +0200
+
 open-xchange-ajp (7.6.1-26) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2473)

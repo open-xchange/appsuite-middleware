@@ -58,6 +58,10 @@ ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/dr
 %changelog
 * Thu Apr 30 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2015-05-04 (2505)
 * Fri Apr 24 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>

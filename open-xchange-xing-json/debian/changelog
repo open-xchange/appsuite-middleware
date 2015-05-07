@@ -106,6 +106,18 @@ open-xchange-xing-json (7.6.2-0) unstable; urgency=medium
 
  -- Steffen Templin <steffen.templin@open-xchange.com>  Wed, 17 Sep 2014 12:36:43 +0200
 
+open-xchange-xing-json (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Thu, 30 Apr 2015 10:16:39 +0200
+
+open-xchange-xing-json (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 28 Apr 2015 12:15:08 +0200
+
 open-xchange-xing-json (7.6.1-26) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2473)
