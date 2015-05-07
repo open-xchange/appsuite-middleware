@@ -53,8 +53,6 @@ import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import java.util.Random;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
 import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
@@ -139,7 +137,6 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         SetRequest setRequest = new SetRequest(Tree.Beta, B(testBeta));
         try {
             getClient().execute(setRequest);
-            LockSupport.parkNanos(TimeUnit.SECONDS.toNanos(2));
             getResponse = getClient().execute(getRequest);
             assertEquals("Written beta attribute isn't returned from server.", testBeta, getResponse.getBoolean());
         } finally {

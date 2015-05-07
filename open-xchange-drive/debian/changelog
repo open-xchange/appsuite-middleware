@@ -106,6 +106,18 @@ open-xchange-drive (7.6.2-0) unstable; urgency=medium
 
  -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Wed, 17 Sep 2014 12:36:06 +0200
 
+open-xchange-drive (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Thu, 30 Apr 2015 10:16:03 +0200
+
+open-xchange-drive (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Tue, 28 Apr 2015 12:14:10 +0200
+
 open-xchange-drive (7.6.1-26) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2473)
