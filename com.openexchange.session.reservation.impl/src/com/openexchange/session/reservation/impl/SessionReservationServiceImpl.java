@@ -181,6 +181,7 @@ public class SessionReservationServiceImpl implements SessionReservationService 
         reservation.setTimeoutMillis(portableReservation.getTimeout());
         reservation.setCreationStamp(portableReservation.getCreationStamp());
         reservation.setToken(token);
+        reservation.setState(portableReservation.getState());
         return reservation;
     }
 
