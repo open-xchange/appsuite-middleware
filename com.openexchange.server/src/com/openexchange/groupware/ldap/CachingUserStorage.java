@@ -254,7 +254,7 @@ public class CachingUserStorage extends UserStorage {
     }
 
     @Override
-    public void updateUserInternal(final Connection con, final User user, final Context context) throws OXException {
+    protected void updateUserInternal(final Connection con, final User user, final Context context) throws OXException {
         // First try to detect some lousy client writing the same values all the time.
         boolean doUpdate = false;
         final CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);

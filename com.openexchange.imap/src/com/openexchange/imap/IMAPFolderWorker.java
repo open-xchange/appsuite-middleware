@@ -407,7 +407,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         if (imapFolder != null) {
             // Obtain folder lock once to avoid repetitive acquires/releases when invoking folder's getXXX() methods
             synchronized (imapFolder) {
-                String imapFolderFullname = imapFolder.getFullName();
+                final String imapFolderFullname = imapFolder.getFullName();
 
                 // Check for equal folder
                 boolean isEqualFolder = isDefaultFolder ? ( 0 == imapFolder.getFullName().length()) : fullName.equals(imapFolder.getFullName());

@@ -6,6 +6,10 @@
 
  - Fix for bug 37664: Set a configurable socket time out for the logstash appender
 
+* 2015-04-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37660: Added package for Norwegian Bokmal translation.
+
 * 2015-04-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 37978: Cleanse reminders that do miss a folder reference
@@ -18,6 +22,14 @@
 
  - Fix for bug 37887: No longer include 'calendar-color' property on CalDAV collections
  - Fix for bug 37927: Map virtual columns to their corresponding database columns for sorting
+
+* 2015-04-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 37797: Series gets broken on participant accept request.
+
+* 2015-04-23 - martin.schneider@open-xchange.com
+
+ - Fix for bug 37907: Only call PasswordChangeService once
 
 * 2015-04-23 - marcus.klein@open-xchange.com
 
@@ -55,6 +67,7 @@
 
  - Fix for bug 37083: Make maximum allowed contact image size available via JSlob / config tree
  - Fix for bug 37619: Use more intelligent filename reservation
+ - Fix for bug 37340: Introduced checks for future database table layout
 
 * 2015-04-13 - tobias.friedrich@open-xchange.com
 

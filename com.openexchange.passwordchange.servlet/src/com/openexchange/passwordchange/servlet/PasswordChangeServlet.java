@@ -179,9 +179,9 @@ public final class PasswordChangeServlet extends SessionServlet {
         throw PasswordChangeServletExceptionCode.UNSUPPORTED_ACTION.create(actionStr, "GET");
     }
 
-    private void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
-        Response response = new Response();
-        Session session = getSessionObject(req);
+    protected void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+        final Response response = new Response();
+        final Session session = getSessionObject(req);
         try {
             // Construct JSON object from request's body data and check mandatory fields
             String oldPw;

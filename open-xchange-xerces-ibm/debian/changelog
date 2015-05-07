@@ -4,6 +4,12 @@ open-xchange-xerces-ibm (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:40:29 +0100
 
+open-xchange-xerces-ibm (7.6.2-16) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2496)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Apr 2015 12:28:38 +0200
+
 open-xchange-xerces-ibm (7.6.2-15) stable; urgency=medium
 
   * Build for patch 2015-09-09 (2495)
