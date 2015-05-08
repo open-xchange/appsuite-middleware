@@ -66,7 +66,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -169,11 +168,11 @@ public class PasswordResetServlet extends HttpServlet {
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
 
-                    UserImpl user = new UserImpl();
-                    user.setId(guestID);
+                    UserImpl user = new UserImpl(guest);
                     user.setPasswordMech(guest.getPasswordMech());
-                    PasswordMech passwordMech = PasswordMech.getPasswordMechFor(guest.getPasswordMech());
-                    user.setUserPassword(passwordMech.encode(PasswordUtility.INITIAL_GUEST_PASSWORD));
+                    user.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
+                    userService.updateUser(user, context);
+                    userService.invalidateUser(context, guestID);
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
                     String status = "require_password";
                     int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
