@@ -94,7 +94,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
 
     Appointment secondAppointment;
 
-    TimeZone tz;
+    TimeZone tz, tz2;
 
     public SharedFolderTest(final String name) {
         super(name);
@@ -107,6 +107,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         client = getClient();
         tz = client.getValues().getTimeZone();
         client2 = new AJAXClient(User.User2);
+        tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
@@ -179,7 +180,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         // Create appointment
         secondAppointment = createAppointment();
         secondAppointment.setAlarm(15);
-        final AppointmentInsertResponse appointmentInsertResponse = client2.execute(new InsertRequest(secondAppointment, tz, true));
+        final AppointmentInsertResponse appointmentInsertResponse = client2.execute(new InsertRequest(secondAppointment, tz2, true));
         appointmentInsertResponse.fillAppointment(secondAppointment);
 
         // Get Appointment and Reminder to check reminder and alarm field
@@ -202,7 +203,7 @@ public class SharedFolderTest extends AbstractAJAXSession {
         // Update appointment and check again
         {
             secondAppointment.setAlarm(30);
-            final UpdateResponse updateResponse = client2.execute(new UpdateRequest(secondAppointment, tz));
+            final UpdateResponse updateResponse = client2.execute(new UpdateRequest(secondAppointment, tz2));
             secondAppointment.setLastModified(updateResponse.getTimestamp());
 
             final GetResponse getResponse = client.execute(new GetRequest(secondAppointment));

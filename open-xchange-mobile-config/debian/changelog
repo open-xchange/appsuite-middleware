@@ -1,8 +1,20 @@
+open-xchange-mobile-config (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Thu, 30 Apr 2015 10:16:18 +0200
+
+open-xchange-mobile-config (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 28 Apr 2015 12:14:36 +0200
+
 open-xchange-mobile-config (7.6.1-26) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2473)
 
- -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Wed, 08 Apr 2015 14:44:13 +0200
+ -- Marcus Klein <jenkins@hudson-slave-1.netline.de>  Tue, 14 Apr 2015 18:44:02 +0200
 
 open-xchange-mobile-config (7.6.1-25) stable; urgency=medium
 

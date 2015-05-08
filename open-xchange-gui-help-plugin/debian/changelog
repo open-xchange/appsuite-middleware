@@ -1,8 +1,20 @@
+open-xchange-gui-help-plugin (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Apr 2015 10:16:09 +0200
+
+open-xchange-gui-help-plugin (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Apr 2015 12:14:18 +0200
+
 open-xchange-gui-help-plugin (7.6.1-26) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2473)
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 08 Apr 2015 14:44:01 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 14 Apr 2015 18:43:52 +0200
 
 open-xchange-gui-help-plugin (7.6.1-25) stable; urgency=medium
 

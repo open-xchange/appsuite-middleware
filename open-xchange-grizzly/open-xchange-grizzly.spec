@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 28
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -45,6 +45,12 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
+    # SoftwareChange_Request-2492
+    pfile=/opt/open-xchange/etc/grizzly.properties
+    if ! ox_exists_property com.openexchange.http.grizzly.maxHttpHeaderSize $pfile; then
+        ox_set_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $pfile
+    fi
+
     # SoftwareChange_Request-1293
     pfile=/opt/open-xchange/etc/grizzly.properties
     if ! ox_exists_property com.openexchange.http.grizzly.hasAJPEnabled $pfile; then
@@ -65,7 +71,11 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Wed Apr 08 2015 Marc Arens <marc.arens@open-xchange.com>
+* Thu Apr 30 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-05-04 (2505)
+* Tue Apr 14 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-04-13 (2473)
 * Thu Mar 26 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-03-30 (2459)

@@ -64,6 +64,7 @@ public class GrizzlyTestSuite {
         final TestSuite suite = new TestSuite("com.openexchange.grizzly.GrizzlyTestSuite");
         suite.addTestSuite(ProcessingTest.class);
         suite.addTestSuite(GetWithBodyTest.class);
+        suite.addTestSuite(MaxHttpHeaderSizeTest.class);
         return suite;
     }
 

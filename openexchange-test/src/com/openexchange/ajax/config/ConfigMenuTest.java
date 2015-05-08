@@ -50,16 +50,21 @@
 package com.openexchange.ajax.config;
 
 import static com.openexchange.java.Autoboxing.B;
+import static com.openexchange.java.Autoboxing.I;
+import java.util.Random;
+import java.util.TimeZone;
 import org.json.JSONObject;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.GetResponse;
 import com.openexchange.ajax.config.actions.SetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * This test case tests the AJAX interface of the config system for the AJAX
  * GUI.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class ConfigMenuTest extends AbstractAJAXSession {
@@ -68,9 +73,11 @@ public class ConfigMenuTest extends AbstractAJAXSession {
      * Logger.
      */
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigMenuTest.class);
+    private static final Random RAND = new Random(System.currentTimeMillis());
 
     /**
      * Default constructor.
+     *
      * @param name Name of this test.
      */
     public ConfigMenuTest(final String name) {
@@ -95,7 +102,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(Tree.SpamButton);
         final GetResponse response = getClient().execute(request);
         final boolean spamButtonEnabled = response.getBoolean();
-        LOG.trace("Spam Button enabled: {}", spamButtonEnabled);
+        LOG.trace("Spam Button enabled: {}", B(spamButtonEnabled));
         assertTrue("Got no spam-button-enabled flag from server.", response.hasValue());
     }
 
@@ -105,15 +112,16 @@ public class ConfigMenuTest extends AbstractAJAXSession {
     public void testTimeZone() throws Throwable {
         final GetRequest getRequest = new GetRequest(Tree.TimeZone);
         GetResponse getResponse = getClient().execute(getRequest);
-        final String timeZone = getResponse.getString();
-        final String testTimeZone = "Australia/Hobart";
+        final String origTimeZone = getResponse.getString();
+        String[] zones = Arrays.remove(TimeZone.getAvailableIDs());
+        final String testTimeZone = zones[RAND.nextInt(zones.length)];
         SetRequest setRequest = new SetRequest(Tree.TimeZone, testTimeZone);
         try {
             getClient().execute(setRequest);
             getResponse = getClient().execute(getRequest);
-            assertEquals("Written timezone isn't returned from server.", testTimeZone, getResponse.getString());
+            assertEquals("Written timezone isn't returned from server. Used session id: " + getClient().getSession().getId(), testTimeZone, getResponse.getString());
         } finally {
-            setRequest = new SetRequest(Tree.TimeZone, timeZone);
+            setRequest = new SetRequest(Tree.TimeZone, origTimeZone);
             getClient().execute(setRequest);
         }
     }
@@ -144,7 +152,7 @@ public class ConfigMenuTest extends AbstractAJAXSession {
         final GetRequest request = new GetRequest(Tree.Identifier);
         final GetResponse response = getClient().execute(request);
         final int userId = response.getInteger();
-        LOG.trace("UserId: {}", userId);
+        LOG.trace("UserId: {}", I(userId));
         assertTrue("No valid user identifier", userId > 0);
     }
 }

@@ -83,7 +83,7 @@ public class Bug17327Test extends AbstractAJAXSession {
     AJAXClient client2;
     FolderObject sharedFolder;
     Appointment appointment;
-    TimeZone tz;
+    TimeZone tz, tz2;
     Calendar cal;
 
     public Bug17327Test(String name) {
@@ -96,7 +96,9 @@ public class Bug17327Test extends AbstractAJAXSession {
 
         client = getClient();
         tz = client.getValues().getTimeZone();
+        System.out.println(tz);
         client2 = new AJAXClient(User.User2);
+        tz2 = client2.getValues().getTimeZone();
 
         // Create shared folder
         sharedFolder = Create.createPrivateFolder("Bug 17327 shared folder", FolderObject.CALENDAR, client.getValues().getUserId());
@@ -118,7 +120,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         insertResponse.fillAppointment(appointment);
 
         // Get appointment via AllRequest
-        CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz));
+        CommonAllResponse allResponseBeforeUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz2));
 //        CommonListResponse listResponseBeforeUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
         GetResponse getResponseBeforeUpdate = client2.execute(new GetRequest(appointment));
         Object alarmValue = allResponseBeforeUpdate.getValue(0, Appointment.ALARM);
@@ -137,7 +139,7 @@ public class Bug17327Test extends AbstractAJAXSession {
         appointment.setLastModified(updateResponse.getTimestamp());
 
         // Get appointment via AllRequest
-        CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz));
+        CommonAllResponse allResponseAfterUpdate = client2.execute(new AllRequest(sharedFolder.getObjectID(), new int[] {Appointment.ALARM}, appointment.getStartDate(), appointment.getEndDate(), tz2));
 //        CommonListResponse listResponseAfterUpdate = client2.execute(new ListRequest(new ListIDs(appointment.getParentFolderID(), appointment.getObjectID()), new int[] {Appointment.ALARM}));
         GetResponse getResponseAfterUpdate = client2.execute(new GetRequest(appointment));
         alarmValue = allResponseAfterUpdate.getValue(0, Appointment.ALARM);
