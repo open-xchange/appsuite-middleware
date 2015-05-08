@@ -3139,7 +3139,7 @@ public class Contact extends CommonObject {
             setYomiLastName((String) value);
             break;
         case YOMI_COMPANY:
-            setCompany((String) value);
+            setYomiCompany((String) value);
             break;
         case ADDRESS_BUSINESS:
             setAddressBusiness((String) value);
