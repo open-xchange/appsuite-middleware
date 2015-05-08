@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 2
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,8 +65,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 
 %changelog
-* Fri May 08 2015 Steffen Templin <steffen.templin@open-xchange.com>
-Build for patch 2015-05-12 (2478)
 * Thu Apr 09 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-04-08
 * Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
