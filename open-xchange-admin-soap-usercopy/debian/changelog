@@ -1,3 +1,9 @@
+open-xchange-admin-soap-usercopy (7.6.1-29) stable; urgency=medium
+
+  * Build for patch 2015-05-12 (2478)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 08 May 2015 14:21:12 +0200
+
 open-xchange-admin-soap-usercopy (7.6.1-28) stable; urgency=medium
 
   * Build for patch 2015-05-04 (2497)
