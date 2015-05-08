@@ -1,3 +1,7 @@
+* 2015-05-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38187: Also consider infostore folders when checking if a folder can be shared
+
 * 2015-05-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38178: Added json itip capability.
