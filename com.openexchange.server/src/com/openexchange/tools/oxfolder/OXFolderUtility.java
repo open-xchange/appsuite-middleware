@@ -343,26 +343,26 @@ public final class OXFolderUtility {
     /**
      * Ensures that an user who does not hold full shared folder access cannot share one of his private folders
      *
-     * @param folderObj The folder object
-     * @param sessionUserPerms The session user's permissions
-     * @param ctx The context
+     * @param folder The folder object
+     * @param permissionBits The session user's permissions
+     * @param context The context
      * @throws OXException If an user tries to share a folder although he is not allowed to
      */
-    public static void checkPermissionsAgainstSessionUserConfig(final FolderObject folderObj, final UserPermissionBits sessionUserPerms, final Context ctx) throws OXException {
-        final List<OCLPermission> perms = folderObj.getPermissions();
-        final int size = perms.size();
-        final Iterator<OCLPermission> iter = perms.iterator();
-        final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE);
-        final boolean hasFullSharedFolderAccess = sessionUserPerms.hasFullSharedFolderAccess();
-        for (int i = 0; i < size; i++) {
-            final OCLPermission oclPerm = iter.next();
-            if (!hasFullSharedFolderAccess && isPrivate && i > 0 && !isEmptyPermission(oclPerm)) {
-                /*
-                 * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
-                 */
-                throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(getUserName(sessionUserPerms.getUserId(), ctx),
-                    getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()));
+    public static void checkPermissionsAgainstSessionUserConfig(FolderObject folder, UserPermissionBits permissionBits, Context context) throws OXException {
+        List<OCLPermission> permissions = folder.getPermissions();
+        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() &&
+            (FolderObject.PRIVATE == folder.getType() || FolderObject.PUBLIC == folder.getType() && FolderObject.INFOSTORE == folder.getModule())) {
+            /*
+             * forbid any non-empty additional permission
+             */
+            for (int i = 1; i < permissions.size(); i++) {
+                if (false == isEmptyPermission(permissions.get(i))) {
+                    /*
+                     * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
+                     */
+                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(
+                        getUserName(permissionBits.getUserId(), context), getFolderName(folder, context), I(context.getContextId()));
+                }
             }
         }
     }
@@ -860,6 +860,21 @@ public final class OXFolderUtility {
         } else {
             retval.add(permission.getEntity());
         }
+    }
+
+    /**
+     * Gets the folder name for logging/messaging purpose
+     *
+     * @param folder The folder
+     * @param context The context
+     * @return The folder name for logging/messaging purpose
+     */
+    public static String getFolderName(FolderObject folder, Context context) {
+        final String folderName = folder.getFolderName();
+        if (null == folderName) {
+            return getFolderName(folder.getObjectID(), context);
+        }
+        return new StringBuilder().append(folderName).append(" (").append(folder.getObjectID()).append(')').toString();
     }
 
     /**
