@@ -55,14 +55,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Map.Entry;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -86,9 +86,11 @@ import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.configuration.AJAXConfig;
+import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.DefaultScopes;
-import com.openexchange.oauth2.utils.OAuthTestUtils;
+
 
 /**
  * {@link OAuthSession}
@@ -148,33 +150,63 @@ public class OAuthSession extends AJAXSession {
         String password = AJAXConfig.getProperty(user.getPassword());
 
         String csrfState = UUIDs.getUnformattedStringFromRandom();
+        URIBuilder getLoginRedirectBuilder = new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
+            .setParameter("response_type", "code")
+            .setParameter("client_id", clientId)
+            .setParameter("redirect_uri", redirectURI)
+            .setParameter("state", csrfState);
+        if (scopes != null && scopes.length > 0) {
+            getLoginRedirectBuilder.setParameter("scope", new DefaultScopes(scopes).scopeString());
+        }
 
-        URI authorizationRequest = prepareAuthorizationRequest(csrfState, hostname);
-        HttpGet authorizationGetRequest = new HttpGet(authorizationRequest);
+        HttpGet getLoginRedirect = new HttpGet(getLoginRedirectBuilder.build());
+        HttpResponse loginRedirectResponse = client.execute(getLoginRedirect);
+        getLoginRedirect.reset();
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
+        URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+        Map<String, String> parameters = parseFragment(location.getFragment());
 
-        HttpResponse authorizationResponse = client.execute(authorizationGetRequest);
-        authorizationGetRequest.releaseConnection();
-        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, authorizationResponse.getStatusLine().getStatusCode());
-        assertTrue(authorizationResponse.containsHeader(HttpHeaders.LOCATION));
+        LinkedList<NameValuePair> authFormParams = new LinkedList<>();
+        authFormParams.add(new BasicNameValuePair("user_login", login));
+        authFormParams.add(new BasicNameValuePair("user_password", password));
+        authFormParams.add(new BasicNameValuePair("access_denied", "false"));
+        authFormParams.add(new BasicNameValuePair("client_id", clientId));
+        authFormParams.add(new BasicNameValuePair("state", csrfState));
+        authFormParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
+        authFormParams.add(new BasicNameValuePair("response_type", "code"));
+        authFormParams.add(new BasicNameValuePair("csrf_token", parameters.get("csrf_token")));
+        authFormParams.add(new BasicNameValuePair("scope", parameters.get("scope")));
 
-        String redirectLocation = authorizationResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        URI authenticationRequestURI = prepareAuthenticationRequest(redirectLocation, hostname, login, password);
-        HttpPost authenticationRequest = new HttpPost(authenticationRequestURI);
-        authenticationRequest.setHeader(HttpHeaders.REFERER, authorizationGetRequest.getURI().toString());
+        HttpPost submitLoginForm = new HttpPost(new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
+            .build());
+        submitLoginForm.setHeader(HttpHeaders.REFERER, getLoginRedirect.getURI().toString());
+        submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
 
-        HttpResponse authCodeResponse = client.execute(authenticationRequest);
-
+        HttpResponse authCodeResponse = client.execute(submitLoginForm);
         String authCodeResponseBody = EntityUtils.toString(authCodeResponse.getEntity());
         assertEquals(authCodeResponseBody, HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
         assertTrue("Location header missing in redirect response", authCodeResponse.containsHeader(HttpHeaders.LOCATION));
-        String redirectLocationAuth = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        assertTrue("Unexpected redirect location: " + redirectLocationAuth, redirectLocationAuth.startsWith(redirectURI));
+        String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
+        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(redirectURI));
 
-        Map<String, String> redirectParamsAuth = OAuthTestUtils.extractRedirectParamsFromQuery(redirectLocationAuth);
+        Map<String, String> redirectParams = new HashMap<>();
+        String[] redirectParamPairs = URLDecoder.decode(new URI(redirectLocation).getRawQuery(), "UTF-8").split("&");
+        for (String pair : redirectParamPairs) {
+            String[] split = pair.split("=");
+            redirectParams.put(split[0], split[1]);
+        }
 
-        assertFalse(redirectParamsAuth.get("error_description"), redirectParamsAuth.containsKey("error"));
-        assertEquals(csrfState, redirectParamsAuth.get("state"));
-        String code = redirectParamsAuth.get("code");
+        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
+
+        String state = redirectParams.get("state");
+        assertEquals(csrfState, state);
+        String code = redirectParams.get("code");
         assertNotNull(code);
 
         LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
@@ -187,7 +219,7 @@ public class OAuthSession extends AJAXSession {
         HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(EndpointTest.TOKEN_ENDPOINT)
             .build());
         redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
 
@@ -204,31 +236,6 @@ public class OAuthSession extends AJAXSession {
         refreshToken = jAccessTokenResponse.getString("refresh_token");
     }
 
-    public static URI prepareAuthenticationRequest(String redirectLocation, String hostname, String login, String password) throws URISyntaxException {
-        Map<String, String> redirectParams = OAuthTestUtils.extractRedirectParamsFromFragment(redirectLocation);
-
-        URIBuilder uriBuilder = new URIBuilder().setScheme("https").setHost(hostname).setPath("/ajax/o/oauth2/authorization");
-        uriBuilder.addParameter("user_login", login).addParameter("user_password", password).addParameter("access_denied", "false");
-        for (Entry<String, String> s : redirectParams.entrySet()) {
-            uriBuilder.addParameter(s.getKey(), s.getValue());
-        }
-        return uriBuilder.build();
-    }
-
-    private URI prepareAuthorizationRequest(String csrfState, String hostname) throws URISyntaxException {
-        URIBuilder getLoginFormBuilder = new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath("/ajax/o/oauth2/authorization")
-            .setParameter("response_type", "code")
-            .setParameter("client_id", clientId)
-            .setParameter("redirect_uri", redirectURI)
-            .setParameter("state", csrfState);
-        if (scopes != null && scopes.length > 0) {
-            getLoginFormBuilder.setParameter("scope", new DefaultScopes(scopes).scopeString());
-        }
-        return getLoginFormBuilder.build();
-    }
 
     /**
      * Gets the accessToken
@@ -239,6 +246,7 @@ public class OAuthSession extends AJAXSession {
         return accessToken;
     }
 
+
     /**
      * Gets the refreshToken
      *
@@ -247,5 +255,95 @@ public class OAuthSession extends AJAXSession {
     public String getRefreshToken() {
         return refreshToken;
     }
-}
 
+    /**
+     * Parses parameters out of an URI fragment
+     * @param fragment The decoded URI fragment
+     * @return A map of parameters
+     */
+    public static Map<String, String> parseFragment(String fragment) {
+        Map<String, String> parameters = new HashMap<>();
+        String[] kvPairs = fragment.split("&");
+        for (String kvPair : kvPairs) {
+            int idx = kvPair.indexOf('=');
+            if (idx < 0) {
+                continue;
+            }
+
+            String key = kvPair.substring(0, idx);
+            String value = kvPair.substring(idx + 1);
+            parameters.put(key, value);
+        }
+
+        return parameters;
+    }
+
+    /**
+     * Returns all hidden form fields from an HTML form as name-value pairs.
+     *
+     * @param form The HTML form as String
+     * @return A map of fields
+     */
+    public static Map<String, String> getHiddenFormFields(String form) {
+        final Map<String, String> params = new HashMap<>();
+        HtmlParser.parse(form, new HtmlHandler() {
+
+            @Override
+            public void handleXMLDeclaration(String version, Boolean standalone, String encoding) {
+
+            }
+
+            @Override
+            public void handleText(String text, boolean ignorable) {
+
+            }
+
+            @Override
+            public void handleStartTag(String tag, Map<String, String> attributes) {
+                handleTag(tag, attributes);
+            }
+
+            @Override
+            public void handleSimpleTag(String tag, Map<String, String> attributes) {
+                handleTag(tag, attributes);
+            }
+
+            private void handleTag(String tag, Map<String, String> attributes) {
+                if ("input".equals(tag) && "hidden".equals(attributes.get("type"))) {
+                    String name = attributes.get("name");
+                    String value = attributes.get("value");
+                    if (name != null && value != null) {
+                        params.put(name, value);
+                    }
+                }
+            }
+
+            @Override
+            public void handleError(String errorMsg) {
+
+            }
+
+            @Override
+            public void handleEndTag(String tag) {
+
+            }
+
+            @Override
+            public void handleDocDeclaration(String docDecl) {
+
+            }
+
+            @Override
+            public void handleComment(String comment) {
+
+            }
+
+            @Override
+            public void handleCDATA(String text) {
+
+            }
+        });
+
+        return params;
+    }
+}

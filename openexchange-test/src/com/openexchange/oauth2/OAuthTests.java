@@ -68,7 +68,8 @@ import org.junit.runners.Suite.SuiteClasses;
     RevokeTokensTest.class,
     ReadFoldersTest.class,
     JSONApiTest.class,
-    ClientManagementTest.class
+    ClientManagementTest.class,
+    AuthInfoEndpointTest.class
 })
 public class OAuthTests {
 

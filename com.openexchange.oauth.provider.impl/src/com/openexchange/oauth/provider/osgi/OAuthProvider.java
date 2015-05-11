@@ -78,7 +78,7 @@ import com.openexchange.oauth.provider.internal.client.storage.RdbOAuthClientSto
 import com.openexchange.oauth.provider.internal.grant.DbGrantStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.servlets.AuthorizationEndpoint;
-import com.openexchange.oauth.provider.servlets.ClientIconEndpoint;
+import com.openexchange.oauth.provider.servlets.AuthInfoEndpoint;
 import com.openexchange.oauth.provider.servlets.RevokeEndpoint;
 import com.openexchange.oauth.provider.servlets.TokenEndpoint;
 
@@ -177,7 +177,7 @@ public class OAuthProvider {
         AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider, activator);
         TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider);
         RevokeEndpoint revokeEndpoint = new RevokeEndpoint(oAuthProvider);
-        ClientIconEndpoint clientIconEndpoint = new ClientIconEndpoint(oAuthProvider);
+        AuthInfoEndpoint authInfoEndpoint = new AuthInfoEndpoint(oAuthProvider, activator);
 
         HttpService httpService = requireService(HttpService.class, activator);
         DispatcherPrefixService dispatcherPrefixService = requireService(DispatcherPrefixService.class, activator);
@@ -191,9 +191,9 @@ public class OAuthProvider {
         String revokeEndpointAlias = prefix + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
         httpService.registerServlet(revokeEndpointAlias, revokeEndpoint, null, httpService.createDefaultHttpContext());
         registeredServlets.add(revokeEndpointAlias);
-        String clientIconEndpointAlias = prefix + OAuthProviderConstants.CLIENT_ICON_SERVLET_ALIAS;
-        httpService.registerServlet(clientIconEndpointAlias, clientIconEndpoint, null, httpService.createDefaultHttpContext());
-        registeredServlets.add(clientIconEndpointAlias);
+        String authInfoEndpointAlias = prefix + OAuthProviderConstants.AUTH_INFO_SERVLET_ALIAS;
+        httpService.registerServlet(authInfoEndpointAlias, authInfoEndpoint, null, httpService.createDefaultHttpContext());
+        registeredServlets.add(authInfoEndpointAlias);
     }
 
     private void unregisterServlets() {

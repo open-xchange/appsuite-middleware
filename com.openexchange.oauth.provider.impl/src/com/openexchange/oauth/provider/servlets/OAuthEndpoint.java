@@ -52,13 +52,27 @@ package com.openexchange.oauth.provider.servlets;
 import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Locale;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.net.HttpHeaders;
+import com.openexchange.exception.OXException;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Strings;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.internal.URLHelper;
 
 
 /**
@@ -71,6 +85,8 @@ public abstract class OAuthEndpoint extends HttpServlet {
     private static final Logger LOG = LoggerFactory.getLogger(OAuthEndpoint.class);
 
     private static final long serialVersionUID = 6538319126816587520L;
+
+    protected static final String ATTR_OAUTH_CSRF_TOKEN = "oauth-csrf-token";
 
     protected final OAuthProviderService oAuthProvider;
 
@@ -100,6 +116,77 @@ public abstract class OAuthEndpoint extends HttpServlet {
             LOG.error("Could not compile error response object", e);
             sendEmptyErrorResponse(httpResponse, statusCode);
         }
+    }
+
+    protected static Locale determineLocale(HttpServletRequest request) {
+        Locale locale = LocaleTools.DEFAULT_LOCALE;
+        String language = request.getParameter("language");
+        if (language != null) {
+            locale = LocaleTools.getSaneLocale(LocaleTools.getLocale(language));
+        }
+        return locale;
+    }
+
+    protected static String icon2HTMLDataSource(Icon icon) throws IOException {
+        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(IOUtils.toByteArray(icon.getInputStream()));
+    }
+
+    protected static boolean isInvalidCSRFToken(HttpServletRequest request, boolean remove) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return true;
+        }
+
+        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
+        if (remove) {
+            session.removeAttribute(ATTR_OAUTH_CSRF_TOKEN);
+        }
+
+        if (csrfToken == null) {
+            return true;
+        }
+
+        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
+        if (actualToken == null) {
+            return true;
+        }
+
+        if (!csrfToken.equals(actualToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected static boolean isInvalidReferer(HttpServletRequest request) throws OXException {
+        String referer = request.getHeader(HttpHeaders.REFERER);
+        if (Strings.isEmpty(referer)) {
+            return true;
+        }
+
+        try {
+            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI actualReferer = new URI(referer);
+            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
+                return true;
+            }
+
+            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
+                return true;
+            }
+
+            if (expectedReferer.getPort() != actualReferer.getPort()) {
+                return true;
+            }
+
+            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
+                return true;
+            }
+        } catch (URISyntaxException e) {
+            return true;
+        }
+
+        return false;
     }
 
 }

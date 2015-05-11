@@ -76,7 +76,7 @@ public interface OAuthProviderConstants {
     /**
      * Servlet alias of the endpoint for client icons
      */
-    public static final String CLIENT_ICON_SERVLET_ALIAS = "o/oauth2/icon";
+    public static final String AUTH_INFO_SERVLET_ALIAS = "o/oauth2/authinfo";
 
     // -------------------------------------------------------------------------------------------------------
 
@@ -125,9 +125,6 @@ public interface OAuthProviderConstants {
 
     /** Required. The CSRF token */
     public static final String PARAM_CSRF_TOKEN = "csrf_token";
-
-    /** Optional. The language */
-    public static final String PARAM_LANGUAGE = "language";
 
     /** The error */
     public static final String PARAM_ERROR = "error";

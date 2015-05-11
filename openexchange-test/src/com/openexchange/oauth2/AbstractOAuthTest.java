@@ -78,7 +78,6 @@ import com.openexchange.tasks.json.TaskActionFactory;
  */
 public abstract class AbstractOAuthTest {
 
-
     protected Client clientApp;
 
     protected OAuthClient client;

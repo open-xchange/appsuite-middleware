@@ -67,7 +67,7 @@ import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.utils.OAuthRedirectUtils;
+import com.openexchange.oauth.provider.internal.URLHelper;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -95,7 +95,7 @@ public class TokenEndpoint extends OAuthEndpoint {
         try {
             Tools.disableCaching(response);
             if (!Tools.considerSecure(request)) {
-                response.setHeader(HttpHeaders.LOCATION, OAuthRedirectUtils.getSecureLocation(request));
+                response.setHeader(HttpHeaders.LOCATION, URLHelper.getSecureLocation(request));
                 response.sendError(HttpServletResponse.SC_MOVED_PERMANENTLY);
                 return;
             }

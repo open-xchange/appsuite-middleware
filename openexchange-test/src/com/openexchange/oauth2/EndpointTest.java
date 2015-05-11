@@ -53,22 +53,18 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.utils.URIBuilder;
@@ -78,7 +74,6 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.BasicClientConnectionManager;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
@@ -97,7 +92,7 @@ import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-import com.openexchange.oauth2.utils.OAuthTestUtils;
+
 
 /**
  * {@link EndpointTest}
@@ -113,6 +108,8 @@ public abstract class EndpointTest {
 
     protected static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
 
+    protected static final String AUTH_INFO_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTH_INFO_SERVLET_ALIAS;
+
     protected static String hostname;
     protected static String login;
     protected static String password;
@@ -120,6 +117,8 @@ public abstract class EndpointTest {
     protected DefaultHttpClient client;
 
     protected Client oauthClient;
+
+    protected String csrfState;
 
     @BeforeClass
     public static void beforeClass() throws OXException {
@@ -146,6 +145,8 @@ public abstract class EndpointTest {
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         oauthClient = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
+
+        csrfState = UUIDs.getUnformattedStringFromRandom();
     }
 
     @After
@@ -162,9 +163,45 @@ public abstract class EndpointTest {
         assertEquals("https://" + request.getURI().toString().substring(7), location.getValue());
     }
 
-    protected HttpResponse executeAndConsume(HttpUriRequest request) throws ClientProtocolException, IOException {
+    protected HttpGet prepareLoginRequest(boolean formResponse, String... additionalParams) throws URISyntaxException {
+        URIBuilder uriBuilder = new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath(AUTHORIZATION_ENDPOINT)
+            .setParameter("response_type", "code")
+            .setParameter("client_id", getClientId())
+            .setParameter("redirect_uri", getRedirectURI())
+            .setParameter("scope", getScopes())
+            .setParameter("state", csrfState);
+
+        if (formResponse) {
+            uriBuilder.setParameter("respond_with", "form");
+        }
+
+        if (additionalParams != null && additionalParams.length > 0) {
+            if (additionalParams.length % 2 != 0) {
+                throw new IllegalArgumentException("The number of additional arguments must be even!");
+            }
+
+            for (int i = 0; i < additionalParams.length; i++) {
+                String name = additionalParams[i++];
+                String value = additionalParams[i];
+                uriBuilder.setParameter(name, value);
+            }
+        }
+
+        HttpGet getLoginRedirect = new HttpGet(uriBuilder.build());
+        return getLoginRedirect;
+    }
+
+    protected HttpResponse executeAndConsume(HttpRequestBase request) throws ClientProtocolException, IOException {
         HttpResponse response = client.execute(request);
-        EntityUtils.consumeQuietly(response.getEntity());
+        HttpEntity entity = response.getEntity();
+        if (entity == null) {
+            request.reset();
+        } else {
+            EntityUtils.consumeQuietly(entity);
+        }
         return response;
     }
 
@@ -219,40 +256,4 @@ public abstract class EndpointTest {
         assertTrue("API access was possible although it should not", error);
     }
 
-    protected HttpPost prepareAuthenticationRequest(String redirectLocation) throws URISyntaxException, UnsupportedEncodingException {
-        return prepareAuthenticationRequest(redirectLocation, false, null);
-    }
-
-    protected HttpPost prepareAuthenticationRequest(String redirectLocation, boolean omitParam, String param) throws URISyntaxException, UnsupportedEncodingException {
-        Map<String, String> paramMap = OAuthTestUtils.extractRedirectParamsFromFragment(redirectLocation);
-        paramMap.remove(param);
-        if (!omitParam) {
-            paramMap.put(param, UUIDs.getUnformattedStringFromRandom());
-        }
-
-        List<NameValuePair> params = OAuthTestUtils.fromParamsMap(paramMap);
-        params.add(new BasicNameValuePair("user_login", login));
-        params.add(new BasicNameValuePair("user_password", password));
-        params.add(new BasicNameValuePair("access_denied", "false"));
-
-        URIBuilder uriBuilder = new URIBuilder().setScheme("https").setHost(hostname).setPath("/ajax/o/oauth2/authorization");
-        HttpPost request = new HttpPost(uriBuilder.build());
-        request.setEntity(new UrlEncodedFormEntity(params));
-        return request;
-    }
-
-    protected URI prepareAuthorizationRequest(String csrfState) throws URISyntaxException {
-        URIBuilder getLoginFormBuilder = new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath("/ajax/o/oauth2/authorization")
-            .setParameter("response_type", "code")
-            .setParameter("client_id", getClientId())
-            .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("state", csrfState);
-        if (getScopes() != null) {
-            getLoginFormBuilder.setParameter("scope", new DefaultScopes(getScopes()).scopeString());
-        }
-        return getLoginFormBuilder.build();
-    }
 }
