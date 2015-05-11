@@ -652,6 +652,7 @@ for argument in ${@}; do
         ;;
         --${CREATE_THREAD_DUMP_LONG})
             CREATE_THREAD_DUMP=$(check_argument ${1} ${2})
+            SKIP_RUN_COMMANDS="true"
             NEEDED_TOOLS="kill top ${NEEDED_TOOLS}"
             shift 2
             if [ 'false' == "$(is_ox_running)" ]; then
@@ -660,6 +661,7 @@ for argument in ${@}; do
         ;;
         --${CREATE_HEAP_DUMP_LONG})
             CREATE_HEAP_DUMP=$(check_argument ${1} ${2})
+            SKIP_RUN_COMMANDS="true"
             if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
                 NEEDED_TOOLS="heapdump tee ${NEEDED_TOOLS}"
             elif [ 'ibm' == "${JAVA_VM_TYPE}" ]; then
