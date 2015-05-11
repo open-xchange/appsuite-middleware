@@ -3,6 +3,8 @@
  - Fix for bug 38207: Accept new URL parameter "new" that signals that a new "Message-ID" header is supposed to be generated for incoming message
  - Fix for bug 38067: Use proper quoting routine when passing a string literal to "java.lang.String.replaceFirst(String, String)" method
  - Fix for bug 38068: Fold value for "References" header at linear whitespace so that each line is no longer than 76 characters
+ - Fix for bug 38118: Disabled failure cache in IMAP authentication bundle
+                      (configurable through "com.openexchange.authentication.imap.failureCacheExpirySeconds"; default is off)
 
 * 2015-05-08 - tobias.friedrich@open-xchange.com
 
