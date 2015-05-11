@@ -184,6 +184,7 @@ public class WrappingFilter implements Filter {
                 String queryString = httpRequest.getQueryString();
                 LogProperties.put(LogProperties.Name.GRIZZLY_QUERY_STRING, null == queryString ? "<none>" : LogProperties.getSanitizedQueryString(queryString));
             }
+            LogProperties.put(LogProperties.Name.GRIZZLY_METHOD, httpRequest.getMethod());
 
             // Remote infos
             LogProperties.put(LogProperties.Name.GRIZZLY_REMOTE_PORT, Integer.toString(httpRequestWrapper.getRemotePort()));

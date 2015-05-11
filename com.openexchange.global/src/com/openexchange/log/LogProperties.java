@@ -187,6 +187,10 @@ public final class LogProperties {
          */
         GRIZZLY_QUERY_STRING("com.openexchange.grizzly.queryString"),
         /**
+         * com.openexchange.grizzly.method
+         */
+        GRIZZLY_METHOD("com.openexchange.grizzly.method"),
+        /**
          * com.openexchange.grizzly.servletPath
          */
         GRIZZLY_SERVLET_PATH("com.openexchange.grizzly.servletPath"),
@@ -521,8 +525,9 @@ public final class LogProperties {
         if (null == tempFilePath) {
             return;
         }
-        String prev = MDC.get(Name.TEMP_FILE.getName());
-        MDC.put(Name.TEMP_FILE.getName(), null == prev ? tempFilePath : new StringBuffer(prev).append(',').append(tempFilePath).toString());
+        String sName = Name.TEMP_FILE.getName();
+        String prev = MDC.get(sName);
+        MDC.put(sName, null == prev ? tempFilePath : new StringBuilder(prev).append(',').append(tempFilePath).toString());
     }
 
     /**
@@ -534,8 +539,9 @@ public final class LogProperties {
         if (null == name || null == value) {
             return;
         }
-        String prev = MDC.get(name.getName());
-        MDC.put(name.getName(), null == prev ? value : new StringBuffer(prev).append(',').append(value).toString());
+        String sName = name.getName();
+        String prev = MDC.get(sName);
+        MDC.put(sName, null == prev ? value : new StringBuilder(prev).append(',').append(value).toString());
     }
 
     /**
