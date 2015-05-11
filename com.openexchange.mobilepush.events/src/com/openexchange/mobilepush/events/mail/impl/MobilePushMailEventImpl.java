@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
 import org.osgi.service.event.Event;
 import com.openexchange.event.CommonEvent;
@@ -269,13 +268,8 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
         return mailAccess.getMessageStorage().getMessages(INBOX, getMailIds(mailIds), fields);
     }
 
-    private final static Pattern COMMA_SEPERATED_PATTERN = Pattern.compile("\\s*,\\s*");
-
     private String[] getMailIds(String mailId) {
-        if (mailId != null) {
-            return COMMA_SEPERATED_PATTERN.split(mailId);
-        }
-        return null;
+        return mailId == null ? null : Strings.splitByComma(mailId);
     }
 
     private List<Map<String, Object>> getDeleteMailPayload() {
