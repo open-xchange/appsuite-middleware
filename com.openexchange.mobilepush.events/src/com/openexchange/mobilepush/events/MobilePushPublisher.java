@@ -50,15 +50,17 @@
 package com.openexchange.mobilepush.events;
 
 /**
- * {@link MobilePushPublisher}
+ * {@link MobilePushPublisher} - Called on an incoming mobile push event.
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public interface MobilePushPublisher {
+
     /**
      * Publishes an event to the service provider
      *
      * @param event the MobileNotifyEvent
      */
     void publish(MobilePushEvent event);
+
 }
