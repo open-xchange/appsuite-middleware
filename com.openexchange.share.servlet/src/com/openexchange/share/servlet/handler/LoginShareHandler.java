@@ -51,13 +51,13 @@ package com.openexchange.share.servlet.handler;
 
 import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
 import java.io.IOException;
+import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -113,9 +113,16 @@ public class LoginShareHandler extends AbstractShareHandler {
                 replacement = proxy.getTitle();
             }
             if (!guestInfo.isPasswordSet()) {
-                Context ctx = ShareServiceLookup.getService(ContextService.class).getContext(guestInfo.getContextID());
-                String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), ctx);
-                int loginCount = null != count ? Integer.parseInt(count) : 0;
+                User guest = ShareServiceLookup.getService(UserService.class).getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+                Set<String> loginsWithoutPassword = guest.getAttributes().get("guestLoginWithoutPassword");
+                int loginCount = -1;
+                if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
+                    try {
+                        loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
+                    } catch (RuntimeException e) {
+                        throw LoginExceptionCodes.UNKNOWN.create(e);
+                    }
+                }
                 int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
                 if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
                     message = URIUtil.encodeQuery(String.format(translate(ShareServletStrings.NEW_SHARE, guestInfo.getLocale()), sharingUser.getDisplayName(), replacement));
