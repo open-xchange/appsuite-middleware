@@ -50,6 +50,7 @@
 package com.openexchange.mobilepush.events.mail.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -273,12 +274,10 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
     }
 
     private List<Map<String, Object>> getDeleteMailPayload() {
-        List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(1);
         Map<String, Object> map = new HashMap<String, Object>(4);
         map.put("SYNC_EVENT", "MAIL");
         map.put("message", "refresh");
-        props.add(map);
-        return props;
+        return Collections.singletonList(map);
     }
 
     @Override
