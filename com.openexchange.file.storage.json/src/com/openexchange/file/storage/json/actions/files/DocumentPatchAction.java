@@ -165,8 +165,8 @@ public class DocumentPatchAction extends AbstractFileAction {
      */
     private static java.io.File newTempFile() throws OXException {
         try {
-            final java.io.File directory = new java.io.File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
-            final java.io.File tmpFile = java.io.File.createTempFile("open-xchange-", ".tmp", directory);
+            java.io.File directory = new java.io.File(ServerConfig.getProperty(ServerConfig.Property.UploadDirectory));
+            java.io.File tmpFile = java.io.File.createTempFile("open-xchange-dpa-", ".tmp", directory);
             tmpFile.deleteOnExit();
             return tmpFile;
         } catch (final IOException e) {

@@ -233,7 +233,7 @@ public final class TmpFileFileHolder implements IFileHolder {
      */
     public static File newTempFile() throws OXException {
         try {
-            final File tmpFile = File.createTempFile("open-xchange-", ".tmp", uploadDirectory());
+            final File tmpFile = File.createTempFile("open-xchange-tmpfile-", ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
             LogProperties.appendTempFileProperty(tmpFile);
             return tmpFile;
