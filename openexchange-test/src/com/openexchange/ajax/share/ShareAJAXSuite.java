@@ -76,6 +76,7 @@ import com.openexchange.ajax.share.tests.PasswordResetServletTest;
 import com.openexchange.ajax.share.tests.QuotaTest;
 import com.openexchange.ajax.share.tests.RemoveGuestPermissionTest;
 import com.openexchange.ajax.share.tests.StoreMetaInformationTest;
+import com.openexchange.ajax.share.tests.SystemMessagesTest;
 
 /**
  * {@link ShareAJAXSuite}
@@ -116,6 +117,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(GuestAutologinTest.class);
         tests.addTestSuite(ConvertToInternalPermissionTest.class);
         tests.addTestSuite(EmptyGuestPasswordTest.class);
+        tests.addTestSuite(SystemMessagesTest.class);
         return tests;
     }
 
