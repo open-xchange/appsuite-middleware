@@ -1,3 +1,7 @@
+* 2015-05-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38207: Accept new URL parameter "new" that signals that a new "Message-ID" header is supposed to be generated for incoming message
+
 * 2015-05-08 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38187: Also consider infostore folders when checking if a folder can be shared

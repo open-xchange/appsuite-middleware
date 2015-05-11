@@ -306,7 +306,7 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
             final Transport transport = getSMTPSession().getTransport(SMTP);
             try {
                 connectTransport(transport, smtpConfig);
-                saveChangesSafe(smtpMessage);
+                saveChangesSafe(smtpMessage, true);
                 transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } catch (final javax.mail.AuthenticationFailedException e) {

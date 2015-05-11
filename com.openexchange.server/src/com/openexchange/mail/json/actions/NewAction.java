@@ -164,10 +164,10 @@ public final class NewAction extends AbstractMailAction {
                         maxSize = -1L;
                     } else {
                         LOG.debug("Upload quota is less than zero. Using global server property \"MAX_UPLOAD_SIZE\" instead.");
-                        Long globalQuota;
+                        long globalQuota;
                         try {
-                            globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE);
-                        } catch (final OXException e) {
+                            globalQuota = ServerConfig.getLong(Property.MAX_UPLOAD_SIZE).longValue();
+                        } catch (OXException e) {
                             LOG.error("", e);
                             globalQuota = 0L;
                         }
@@ -188,16 +188,16 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private AJAXRequestResult performWithUploads(final MailRequest req, final AJAXRequestData request, final List<OXException> warnings) throws OXException, JSONException {
+    private AJAXRequestResult performWithUploads(MailRequest req, AJAXRequestData request, List<OXException> warnings) throws OXException, JSONException {
         ServerSession session = req.getSession();
         String csid = req.getParameter(AJAXServlet.PARAMETER_CSID);
         UploadEvent uploadEvent = request.getUploadEvent();
         String msgIdentifier = null;
         UserSettingMail userSettingMail = null;
         {
-            final JSONObject jMail;
+            JSONObject jMail;
             {
-                final String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
+                String json0 = uploadEvent.getFormField(UPLOAD_FORMFIELD_MAIL);
                 if (json0 == null || json0.trim().length() == 0) {
                     throw MailExceptionCode.PROCESSING_ERROR.create(MailExceptionCode.MISSING_PARAM.create(UPLOAD_FORMFIELD_MAIL), new Object[0]);
                 }
@@ -231,6 +231,7 @@ public final class NewAction extends AbstractMailAction {
                 // Send with default account's transport provider
                 accountId = MailAccount.DEFAULT_ID;
             }
+            boolean newMessageId = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.ACTION_NEW, request);
             final MailServletInterface mailInterface = getMailInterface(req);
             if ((jMail.optInt(FLAGS, 0) & MailMessage.FLAG_DRAFT) > 0) {
                 /*
@@ -241,6 +242,10 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
                     composedMail.setSendType(sendType);
+                }
+                if (newMessageId) {
+                    composedMail.removeHeader("Message-ID");
+                    composedMail.removeMessageId();
                 }
                 msgIdentifier = mailInterface.saveDraft(composedMail, false, accountId).toString();
                 if (msgIdentifier == null) {
@@ -261,8 +266,17 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and send message
                  */
-                final String protocol = request.isSecure() ? "https://" : "http://";
-                final ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
+                String protocol = request.isSecure() ? "https://" : "http://";
+                ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
+                if (newMessageId) {
+                    for (ComposedMailMessage composedMail : composedMails) {
+                        if (null != composedMail) {
+                            composedMail.removeHeader("Message-ID");
+                            composedMail.removeMessageId();
+                        }
+                    }
+                }
+
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
                 final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
@@ -288,7 +302,7 @@ public final class NewAction extends AbstractMailAction {
                     return result;
                 }
                 // Normal transport
-                if (draftTypes.contains(sendType)) {
+                if (!newMessageId && draftTypes.contains(sendType)) {
                     for (final ComposedMailMessage cm : composedMails) {
                         if (null != cm) {
                             cm.removeHeader("Message-ID");
@@ -362,7 +376,7 @@ public final class NewAction extends AbstractMailAction {
                  */
                 msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo());
                 for (int i = 1; i < composedMails.length; i++) {
-                    final ComposedMailMessage cm = composedMails[i];
+                    ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
                         mailInterface.sendMessage(cm, sendType, accountId, usm);
                     }
@@ -379,10 +393,8 @@ public final class NewAction extends AbstractMailAction {
                  * Trigger contact collector
                  */
                 try {
-                    final ServerUserSetting setting = ServerUserSetting.getInstance();
-                    final int contextId = session.getContextId();
-                    final int userId = session.getUserId();
-                    if (setting.isContactCollectOnMailTransport(contextId, userId).booleanValue()) {
+                    ServerUserSetting setting = ServerUserSetting.getInstance();
+                    if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
                         triggerContactCollector(session, composedMails[0]);
                     }
                 } catch (final Exception e) {
@@ -419,13 +431,14 @@ public final class NewAction extends AbstractMailAction {
         /*
          * Read in parameters
          */
-        final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
-        final int flags;
+        boolean newMessageId = AJAXRequestDataTools.parseBoolParameter(AJAXServlet.ACTION_NEW, req.getRequest());
+        String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+        int flags;
         {
             final int i = req.optInt(Mail.PARAMETER_FLAGS);
             flags = MailRequest.NOT_FOUND == i ? 0 : i;
         }
-        final boolean force;
+        boolean force;
         {
             final String tmp = req.getParameter("force");
             if (null == tmp) {
@@ -434,44 +447,34 @@ public final class NewAction extends AbstractMailAction {
                 force = AJAXRequestDataTools.parseBoolParameter(tmp);
             }
         }
+
         // Get rfc822 bytes and create corresponding mail message
-        final QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
-        final PutNewMailData data;
+        QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
+        PutNewMailData data;
         {
-            final MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())));
+            MimeMessage message = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())));
             message.removeHeader("x-original-headers");
-            final String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-            final InternetAddress fromAddress;
-            final MailMessage mail;
+            if (newMessageId) {
+                message.removeHeader("Message-ID");
+            }
+            String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
             if (isEmpty(fromAddr)) {
                 // Add from address
-                fromAddress = defaultSendAddr;
+                InternetAddress fromAddress = defaultSendAddr;
                 message.setFrom(fromAddress);
-                mail = MimeMessageConverter.convertMessage(message);
+                data = new PutNewMailDataImpl(MimeMessageConverter.convertMessage(message), fromAddress);
             } else {
-                fromAddress = new QuotedInternetAddress(fromAddr, true);
-                mail = MimeMessageConverter.convertMessage(message);
+                data = new PutNewMailDataImpl(MimeMessageConverter.convertMessage(message), new QuotedInternetAddress(fromAddr, true));
             }
-            data = new PutNewMailData() {
-
-                @Override
-                public MailMessage getMail() {
-                    return mail;
-                }
-
-                @Override
-                public InternetAddress getFromAddress() {
-                    return fromAddress;
-                }
-            };
         }
+
         // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
         final JSONValue responseData;
         if (folder == null) {
             responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail());
         } else {
-            final String[] ids;
-            final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            String[] ids;
+            MailServletInterface mailInterface = MailServletInterface.getInstance(session);
             try {
                 ids = mailInterface.appendMessages(folder, new MailMessage[] { data.getMail() }, force);
                 if (flags > 0) {
@@ -480,12 +483,13 @@ public final class NewAction extends AbstractMailAction {
             } finally {
                 mailInterface.close(true);
             }
-            final JSONObject responseObj = new JSONObject();
+            JSONObject responseObj = new JSONObject(3);
             responseObj.put(FolderChildFields.FOLDER_ID, folder);
             responseObj.put(DataFields.ID, ids[0]);
             responseData = responseObj;
         }
-        final AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
+
+        AJAXRequestResult result = new AJAXRequestResult(responseData, "json");
         result.addWarnings(warnings);
         return result;
     }
@@ -495,6 +499,28 @@ public final class NewAction extends AbstractMailAction {
         InternetAddress getFromAddress();
 
         MailMessage getMail();
+    }
+
+    private class PutNewMailDataImpl implements PutNewMailData {
+
+        private final MailMessage mail;
+        private final InternetAddress fromAddress;
+
+        PutNewMailDataImpl(MailMessage mail, InternetAddress fromAddress) {
+            super();
+            this.mail = mail;
+            this.fromAddress = fromAddress;
+        }
+
+        @Override
+        public MailMessage getMail() {
+            return mail;
+        }
+
+        @Override
+        public InternetAddress getFromAddress() {
+            return fromAddress;
+        }
     }
 
     private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
