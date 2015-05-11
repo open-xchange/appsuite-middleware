@@ -1563,13 +1563,32 @@ public final class MimeMessageUtility {
     }
 
     /**
+     * Set the folded value for given header name. Replaces all existing header values with this new value.<br>
+     * The header value gets folded at linear whitespace so that each line is no longer than 76 characters.
+     * <p>
+     * Note that RFC 822 headers must contain only US-ASCII characters, so a header that
+     * contains non US-ASCII characters must have been encoded by the
+     * caller as per the rules of RFC 2047.
+     *
+     * @param headerName The header name
+     * @param headerValue The header value to set
+     * @param mimeMessage The MIME message
+     * @throws MessagingException If setting the header fails
+     */
+    public static void setFoldedHeader(String headerName, String headerValue, MimeMessage mimeMessage) throws MessagingException {
+        if (null != headerName && null != headerValue && null != mimeMessage) {
+            mimeMessage.setHeader(headerName, fold(headerName.length() + 1, headerValue));
+        }
+    }
+
+    /**
      * Folds a string at linear whitespace so that each line is no longer than 76 characters, if possible. If there are more than 76
      * non-whitespace characters consecutively, the string is folded at the first whitespace after that sequence. The parameter
      * <tt>used</tt> indicates how many characters have been used in the current line; it is usually the length of the header name.
      * <p>
      * Note that line breaks in the string aren't escaped; they probably should be.
      *
-     * @param used The characters used in line so far
+     * @param used The characters used in line so far; typically the length of the header name plus 2 (for <code>": "</code> part)
      * @param foldMe The string to fold
      * @return The folded string
      */
