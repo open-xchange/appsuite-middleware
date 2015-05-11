@@ -149,7 +149,7 @@ collect_httpd_configs() {
             mkdir -p $(dirname ${_httpd_config_copy})
             cp -a ${dir} ${_httpd_config_copy}
             # Drop dangling links
-            find ${_httpd_config_copy} -type l -xtype l | xargs rm
+            find ${_httpd_config_copy} -type l -xtype l | xargs -r rm
             # Drop all files without name schema '.conf' or which are stored outside
             # <name>-enabled or <name>-available directories
             find ${_httpd_config_copy} -type f | \
