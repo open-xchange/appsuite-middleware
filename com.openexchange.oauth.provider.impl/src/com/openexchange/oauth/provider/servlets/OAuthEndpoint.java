@@ -66,7 +66,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
-import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
@@ -131,17 +130,13 @@ public abstract class OAuthEndpoint extends HttpServlet {
         return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(IOUtils.toByteArray(icon.getInputStream()));
     }
 
-    protected static boolean isInvalidCSRFToken(HttpServletRequest request, boolean remove) {
+    protected static boolean isInvalidCSRFToken(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             return true;
         }
 
         String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
-        if (remove) {
-            session.removeAttribute(ATTR_OAUTH_CSRF_TOKEN);
-        }
-
         if (csrfToken == null) {
             return true;
         }
@@ -158,7 +153,7 @@ public abstract class OAuthEndpoint extends HttpServlet {
         return false;
     }
 
-    protected static boolean isInvalidReferer(HttpServletRequest request) throws OXException {
+    protected static boolean isInvalidReferer(HttpServletRequest request) {
         String referer = request.getHeader(HttpHeaders.REFERER);
         if (Strings.isEmpty(referer)) {
             return true;

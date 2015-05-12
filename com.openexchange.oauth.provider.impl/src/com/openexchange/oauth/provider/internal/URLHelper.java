@@ -79,9 +79,8 @@ public class URLHelper {
      *
      * @param request The servlet request
      * @return The absolute location
-     * @throws OXException If determining the host name fails
      */
-    public static String getSecureLocation(HttpServletRequest request) throws OXException {
+    public static String getSecureLocation(HttpServletRequest request) {
         String hostname = getHostname(request);
         StringBuilder requestURL = new StringBuilder("https://").append(hostname).append(request.getServletPath());
         String pathInfo = request.getPathInfo();

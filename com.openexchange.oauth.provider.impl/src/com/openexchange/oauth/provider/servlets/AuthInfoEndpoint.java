@@ -128,7 +128,7 @@ public class AuthInfoEndpoint extends OAuthEndpoint {
                 }
             }
 
-            if (isInvalidCSRFToken(request, false)) {
+            if (isInvalidCSRFToken(request)) {
                 sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid CSRF token. Ensure that cookies are allowed.");
                 return;
             }

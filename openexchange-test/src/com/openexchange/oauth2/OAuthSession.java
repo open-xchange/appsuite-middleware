@@ -53,8 +53,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -67,11 +70,12 @@ import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
@@ -81,6 +85,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient.User;
@@ -139,17 +144,12 @@ public class OAuthSession extends AJAXSession {
         }
 
         HttpParams params = client.getParams();
-        params.setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, false);
-        params.setBooleanParameter(ClientPNames.HANDLE_REDIRECTS, false);
+        HttpClientParams.setRedirecting(params, false);
+        HttpClientParams.setAuthenticating(params, false);
         return client;
     }
 
-    private void obtainAccess(User user, HttpClient client) throws Exception {
-        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
-        String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
-        String password = AJAXConfig.getProperty(user.getPassword());
-
-        String csrfState = UUIDs.getUnformattedStringFromRandom();
+    public static HttpResponse requestAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, String scope, String... queryParams) throws Exception {
         URIBuilder getLoginRedirectBuilder = new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
@@ -157,64 +157,69 @@ public class OAuthSession extends AJAXSession {
             .setParameter("response_type", "code")
             .setParameter("client_id", clientId)
             .setParameter("redirect_uri", redirectURI)
-            .setParameter("state", csrfState);
-        if (scopes != null && scopes.length > 0) {
-            getLoginRedirectBuilder.setParameter("scope", new DefaultScopes(scopes).scopeString());
+            .setParameter("state", state);
+        if (scope != null) {
+            getLoginRedirectBuilder.setParameter("scope", scope);
+        }
+
+        if (queryParams != null && queryParams.length > 0) {
+            for (int i = 0; i < queryParams.length;) {
+                getLoginRedirectBuilder.setParameter(queryParams[i++], queryParams[i++]);
+            }
         }
 
         HttpGet getLoginRedirect = new HttpGet(getLoginRedirectBuilder.build());
         HttpResponse loginRedirectResponse = client.execute(getLoginRedirect);
-        getLoginRedirect.reset();
-        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
-        URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
-        Map<String, String> parameters = parseFragment(location.getFragment());
+        releaseConnectionOnRedirect(loginRedirectResponse);
+        return loginRedirectResponse;
+    }
 
+    public static HttpResponse performAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, String scope, String csrfToken, String login, String password, String... formParams) throws Exception {
         LinkedList<NameValuePair> authFormParams = new LinkedList<>();
         authFormParams.add(new BasicNameValuePair("user_login", login));
         authFormParams.add(new BasicNameValuePair("user_password", password));
         authFormParams.add(new BasicNameValuePair("access_denied", "false"));
         authFormParams.add(new BasicNameValuePair("client_id", clientId));
-        authFormParams.add(new BasicNameValuePair("state", csrfState));
+        authFormParams.add(new BasicNameValuePair("state", state));
         authFormParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
         authFormParams.add(new BasicNameValuePair("response_type", "code"));
-        authFormParams.add(new BasicNameValuePair("csrf_token", parameters.get("csrf_token")));
-        authFormParams.add(new BasicNameValuePair("scope", parameters.get("scope")));
+        authFormParams.add(new BasicNameValuePair("csrf_token", csrfToken));
+        if (scope != null) {
+            authFormParams.add(new BasicNameValuePair("scope", scope));
+        }
+
+        if (formParams != null && formParams.length > 0) {
+            for (int i = 0; i < formParams.length;) {
+                authFormParams.add(new BasicNameValuePair(formParams[i++], formParams[i++]));
+            }
+        }
 
         HttpPost submitLoginForm = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
             .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
             .build());
-        submitLoginForm.setHeader(HttpHeaders.REFERER, getLoginRedirect.getURI().toString());
+        submitLoginForm.setHeader(HttpHeaders.REFERER, "https://" + hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
         submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
 
         HttpResponse authCodeResponse = client.execute(submitLoginForm);
-        String authCodeResponseBody = EntityUtils.toString(authCodeResponse.getEntity());
-        assertEquals(authCodeResponseBody, HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
-        assertTrue("Location header missing in redirect response", authCodeResponse.containsHeader(HttpHeaders.LOCATION));
-        String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(redirectURI));
+        releaseConnectionOnRedirect(authCodeResponse);
+        return authCodeResponse;
+    }
 
-        Map<String, String> redirectParams = new HashMap<>();
-        String[] redirectParamPairs = URLDecoder.decode(new URI(redirectLocation).getRawQuery(), "UTF-8").split("&");
-        for (String pair : redirectParamPairs) {
-            String[] split = pair.split("=");
-            redirectParams.put(split[0], split[1]);
-        }
-
-        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
-
-        String state = redirectParams.get("state");
-        assertEquals(csrfState, state);
-        String code = redirectParams.get("code");
-        assertNotNull(code);
-
+    public static HttpResponse redeemAuthCode(HttpClient client, String hostname, String clientId, String clientSecret, String code, String redirectURI, String... formParams) throws Exception {
         LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
         redeemAuthCodeParams.add(new BasicNameValuePair("client_id", clientId));
         redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", clientSecret));
         redeemAuthCodeParams.add(new BasicNameValuePair("grant_type", "authorization_code"));
         redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
         redeemAuthCodeParams.add(new BasicNameValuePair("code", code));
+
+        if (formParams != null && formParams.length > 0) {
+            for (int i = 0; i < formParams.length;) {
+                redeemAuthCodeParams.add(new BasicNameValuePair(formParams[i++], formParams[i++]));
+            }
+        }
 
         HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
             .setScheme("https")
@@ -224,6 +229,51 @@ public class OAuthSession extends AJAXSession {
         redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
 
         HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
+        releaseConnectionOnRedirect(accessTokenResponse);
+        return accessTokenResponse;
+    }
+
+    public static JSONObject extractJSON(HttpResponse response) throws JSONException, ParseException, IOException {
+        return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONObject("data");
+    }
+
+    public static Map<String, String> extractQueryParams(String uri) throws UnsupportedEncodingException, URISyntaxException {
+        Map<String, String> params = new HashMap<>();
+        String[] redirectParamPairs = URLDecoder.decode(new URI(uri).getRawQuery(), "UTF-8").split("&");
+        for (String pair : redirectParamPairs) {
+            String[] split = pair.split("=");
+            params.put(split[0], split[1]);
+        }
+
+        return params;
+    }
+
+    private void obtainAccess(User user, HttpClient client) throws Exception {
+        String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
+        String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
+        String password = AJAXConfig.getProperty(user.getPassword());
+        String state = UUIDs.getUnformattedStringFromRandom();
+        String scope = new DefaultScopes(scopes).scopeString();
+        HttpResponse loginRedirectResponse = requestAuthorization(client, hostname, clientId, redirectURI, state, scope);
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
+        URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+        Map<String, String> parameters = extractFragmentParams(location.getFragment());
+
+        HttpResponse authCodeResponse = performAuthorization(client, hostname, clientId, redirectURI, state, scope, parameters.get("csrf_token"), login, password);
+        assertEquals("Unexpected status code", HttpStatus.SC_OK, authCodeResponse.getStatusLine().getStatusCode());
+        JSONObject authCodeJSON = extractJSON(authCodeResponse);
+        assertFalse(authCodeJSON.toString(), authCodeJSON.has("error"));
+        String redirectLocation = authCodeJSON.getString("redirect_uri");
+        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(redirectURI));
+
+        Map<String, String> redirectParams = extractQueryParams(redirectLocation);
+        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
+        String returnedState = redirectParams.get("state");
+        assertEquals(state, returnedState);
+        String code = redirectParams.get("code");
+        assertNotNull(code);
+
+        HttpResponse accessTokenResponse = redeemAuthCode(client, hostname, clientId, clientSecret, code, redirectURI);
         assertEquals(HttpStatus.SC_OK, accessTokenResponse.getStatusLine().getStatusCode());
         JSONObject jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
         assertTrue("bearer".equalsIgnoreCase(jAccessTokenResponse.getString("token_type")));
@@ -261,7 +311,7 @@ public class OAuthSession extends AJAXSession {
      * @param fragment The decoded URI fragment
      * @return A map of parameters
      */
-    public static Map<String, String> parseFragment(String fragment) {
+    public static Map<String, String> extractFragmentParams(String fragment) {
         Map<String, String> parameters = new HashMap<>();
         String[] kvPairs = fragment.split("&");
         for (String kvPair : kvPairs) {
@@ -345,5 +395,16 @@ public class OAuthSession extends AJAXSession {
         });
 
         return params;
+    }
+
+    public static void releaseConnectionOnRedirect(HttpResponse response) {
+        /*
+         * A custom grizzly extension always produces HTML output on redirects.
+         * We need to consume this entity or the connection cannot be re-used.
+         */
+        int statusCode = response.getStatusLine().getStatusCode();
+        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
+            EntityUtils.consumeQuietly(response.getEntity());
+        }
     }
 }

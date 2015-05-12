@@ -85,9 +85,9 @@ public interface OAuthProviderConstants {
      */
     public static final long DEFAULT_EXPIRATION = TimeUnit.HOURS.toMillis(1L);
 
-    // -------------------------------------------------------------------------------------------------------
+    // ---------------- Parameters ---------------------------------------------------------------------------
 
-    /** Required. Value is always <b><code>code</code></b> */
+    /** Required. See {@link #RESPONSE_TYPE_AUTH_CODE} */
     public static final String PARAM_RESPONSE_TYPE = "response_type";
 
     /** Required. Value of your <b>API Key</b> given when you registered your application */
@@ -132,5 +132,15 @@ public interface OAuthProviderConstants {
     /** The error description */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
 
+    // ---------------- Common parameter values --------------------------------------------------------------
+
+    /** Response type <b><code>code</code></b> */
+    public static final String RESPONSE_TYPE_AUTH_CODE = "code";
+
+    /** Grant type <b><code>refresh_token</code></b> */
+    public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+
+    /** Grant type <b><code>authorization_code</code></b> */
+    public static final String GRANT_TYPE_AUTH_CODE = "authorization_code";
 
 }

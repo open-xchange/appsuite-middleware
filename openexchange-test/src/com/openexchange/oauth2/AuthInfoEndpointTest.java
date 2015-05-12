@@ -76,12 +76,10 @@ public class AuthInfoEndpointTest extends EndpointTest {
 
     @Test
     public void testGetAuthInfo() throws Exception {
-        HttpGet getLoginRedirect = prepareLoginRequest(false);
-        HttpResponse loginRedirectResponse = client.execute(getLoginRedirect);
-        getLoginRedirect.reset();
+        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
         URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
-        Map<String, String> parameters = OAuthSession.parseFragment(location.getFragment());
+        Map<String, String> parameters = OAuthSession.extractFragmentParams(location.getFragment());
 
         HttpGet getAuthInfo = new HttpGet(new URIBuilder()
             .setScheme("https")

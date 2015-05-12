@@ -96,7 +96,6 @@ public class RevokeTokensTest extends EndpointTest {
             .setParameter("refresh_token", ((OAuthSession) oauthClient.getSession()).getRefreshToken())
             .build());
         HttpResponse revokeResponse = client.execute(revoke);
-        revoke.reset();
         assertEquals(HttpStatus.SC_OK, revokeResponse.getStatusLine().getStatusCode());
         assertNoAccess(oauthClient);
     }

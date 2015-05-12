@@ -134,9 +134,9 @@ public class TokenEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            if ("authorization_code".equals(grantType)) {
+            if (OAuthProviderConstants.GRANT_TYPE_AUTH_CODE.equals(grantType)) {
                 handleAuthorizationCode(client, request, response);
-            } else if ("refresh_token".equals(grantType)) {
+            } else if (OAuthProviderConstants.GRANT_TYPE_REFRESH_TOKEN.equals(grantType)) {
                 handleRefreshToken(client, request, response);
             } else {
                 failWithInvalidParameter(response, OAuthProviderConstants.PARAM_GRANT_TYPE);

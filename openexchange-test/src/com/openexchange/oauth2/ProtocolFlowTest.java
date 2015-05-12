@@ -55,22 +55,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.rmi.Naming;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.locks.LockSupport;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicNameValuePair;
@@ -80,7 +76,6 @@ import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagement;
@@ -114,7 +109,7 @@ public class ProtocolFlowTest extends EndpointTest {
         HttpPost redeemRefreshToken = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
+            .setPath(EndpointTest.TOKEN_ENDPOINT)
             .build());
         redeemRefreshToken.setEntity(new UrlEncodedFormEntity(redeemRefreshTokenParams));
 
@@ -143,159 +138,76 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testRedeemIsDeniedWhenRedirectURIChanges() throws Exception {
-        String csrfState = UUIDs.getUnformattedStringFromRandom();
-        HttpGet getLoginForm = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .setParameter("response_type", "code")
-            .setParameter("client_id", getClientId())
-            .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScopes())
-            .setParameter("state", csrfState)
-            .setParameter("respond_with", "form")
-            .build());
-        HttpResponse loginFormResponse = client.execute(getLoginForm);
-        String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
+        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
+        URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+        Map<String, String> parameters = OAuthSession.extractFragmentParams(location.getFragment());
 
-        LinkedList<NameValuePair> authFormParams = new LinkedList<>();
-        authFormParams.add(new BasicNameValuePair("user_login", login));
-        authFormParams.add(new BasicNameValuePair("user_password", password));
-        authFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        Map<String, String> additionalParams = OAuthSession.getHiddenFormFields(loginForm);
-        for (Entry<String, String> entry : additionalParams.entrySet()) {
-            authFormParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-        }
+        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), parameters.get("csrf_token"), login, password);
+        assertEquals("Unexpected status code", HttpStatus.SC_OK, authCodeResponse.getStatusLine().getStatusCode());
+        JSONObject authCodeJSON = OAuthSession.extractJSON(authCodeResponse);
+        assertFalse(authCodeJSON.toString(), authCodeJSON.has("error"));
+        String redirectLocation = authCodeJSON.getString("redirect_uri");
 
-        HttpPost submitLoginForm = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .build());
-        submitLoginForm.setHeader(HttpHeaders.REFERER, getLoginForm.getURI().toString());
-        submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
-
-        HttpResponse authCodeResponse = executeAndConsume(submitLoginForm);
-        String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        Map<String, String> redirectParams = new HashMap<>();
-        String[] redirectParamPairs = URLDecoder.decode(new URI(redirectLocation).getRawQuery(), "UTF-8").split("&");
-        for (String pair : redirectParamPairs) {
-            String[] split = pair.split("=");
-            redirectParams.put(split[0], split[1]);
-        }
-
-        LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_id", getClientId()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", getClientSecret()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", getSecondRedirectURI()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("code", redirectParams.get("code")));
-
-        HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(TOKEN_ENDPOINT)
-            .build());
-        redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
-
-        HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
+        Map<String, String> redirectParams = OAuthSession.extractQueryParams(redirectLocation);
+        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
+        String code = redirectParams.get("code");
+        assertNotNull(code);
+        HttpResponse accessTokenResponse = OAuthSession.redeemAuthCode(client, hostname, getClientId(), getClientSecret(), code, getSecondRedirectURI()); // <- wrong redirect URI
         assertEquals(HttpStatus.SC_BAD_REQUEST, accessTokenResponse.getStatusLine().getStatusCode());
         JSONObject jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
         assertEquals("invalid_request", jAccessTokenResponse.get("error"));
 
         // Test replay with correct URI (auth code must have been invalidated anyway for security reasons)
-        redeemAuthCodeParams = new LinkedList<>();
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_id", getClientId()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", getClientSecret()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", getRedirectURI()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("code", redirectParams.get("code")));
-
-        redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(TOKEN_ENDPOINT)
-            .build());
-        redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
-        accessTokenResponse = client.execute(redeemAuthCode);
+        accessTokenResponse = OAuthSession.redeemAuthCode(client, hostname, getClientId(), getClientSecret(), code, getRedirectURI());
         assertEquals(HttpStatus.SC_BAD_REQUEST, accessTokenResponse.getStatusLine().getStatusCode());
         jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
         assertEquals("invalid_request", jAccessTokenResponse.get("error"));
     }
 
     @Test
-    public void testAuthCodeReplay() throws Exception {
-        /*
-         * Obtain an access token as always
-         */
-        String csrfState = UUIDs.getUnformattedStringFromRandom();
-        HttpGet getLoginForm = new HttpGet(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .setParameter("response_type", "code")
-            .setParameter("client_id", getClientId())
-            .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScopes())
-            .setParameter("state", csrfState)
-            .setParameter("respond_with", "form")
-            .build());
-        HttpResponse loginFormResponse = client.execute(getLoginForm);
+    public void testFormAndRedirect() throws Exception {
+        HttpResponse loginFormResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), "respond_with", "form"); // &respond_with=form
+        assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
         String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
+        Map<String, String> hiddenFormFields = OAuthSession.getHiddenFormFields(loginForm);
 
-        LinkedList<NameValuePair> authFormParams = new LinkedList<>();
-        authFormParams.add(new BasicNameValuePair("user_login", login));
-        authFormParams.add(new BasicNameValuePair("user_password", password));
-        authFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        Map<String, String> additionalParams = OAuthSession.getHiddenFormFields(loginForm);
-        for (Entry<String, String> entry : additionalParams.entrySet()) {
-            authFormParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-        }
-
-        HttpPost submitLoginForm = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .build());
-        submitLoginForm.setHeader(HttpHeaders.REFERER, getLoginForm.getURI().toString());
-        submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
-
-        HttpResponse authCodeResponse = client.execute(submitLoginForm);
-        String authCodeResponseBody = EntityUtils.toString(authCodeResponse.getEntity());
-        assertEquals(authCodeResponseBody, HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
-        assertTrue("Location header missing in redirect response", authCodeResponse.containsHeader(HttpHeaders.LOCATION));
+        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), hiddenFormFields.get("csrf_token"), login, password, "redirect", "true"); // &redirect=true
+        assertEquals("Unexpected status code", HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
         String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(getRedirectURI()));
 
-        Map<String, String> redirectParams = new HashMap<>();
-        String[] redirectParamPairs = URLDecoder.decode(new URI(redirectLocation).getRawQuery(), "UTF-8").split("&");
-        for (String pair : redirectParamPairs) {
-            String[] split = pair.split("=");
-            redirectParams.put(split[0], split[1]);
-        }
-
+        Map<String, String> redirectParams = OAuthSession.extractQueryParams(redirectLocation);
         assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
-
-        String state = redirectParams.get("state");
-        assertEquals(csrfState, state);
         String code = redirectParams.get("code");
         assertNotNull(code);
+        HttpResponse accessTokenResponse = OAuthSession.redeemAuthCode(client, hostname, getClientId(), getClientSecret(), code, getRedirectURI());
+        assertEquals(HttpStatus.SC_OK, accessTokenResponse.getStatusLine().getStatusCode());
+        JSONObject jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
+        assertNotNull(jAccessTokenResponse.get("token_type"));
+        assertNotNull(jAccessTokenResponse.get("access_token"));
+        assertNotNull(jAccessTokenResponse.get("refresh_token"));
+        assertNotNull(jAccessTokenResponse.get("scope"));
+        assertNotNull(jAccessTokenResponse.get("expires_in"));
+    }
 
-        LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_id", getClientId()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", getClientSecret()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", getRedirectURI()));
-        redeemAuthCodeParams.add(new BasicNameValuePair("code", code));
+    @Test
+    public void testAuthCodeReplay() throws Exception {
+        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
+        URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+        Map<String, String> parameters = OAuthSession.extractFragmentParams(location.getFragment());
 
-        HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath("/ajax/o/oauth2/accessToken")
-            .build());
-        redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
+        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), parameters.get("csrf_token"), login, password);
+        assertEquals("Unexpected status code", HttpStatus.SC_OK, authCodeResponse.getStatusLine().getStatusCode());
+        JSONObject authCodeJSON = OAuthSession.extractJSON(authCodeResponse);
+        assertFalse(authCodeJSON.toString(), authCodeJSON.has("error"));
+        String redirectLocation = authCodeJSON.getString("redirect_uri");
 
-        HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
+        Map<String, String> redirectParams = OAuthSession.extractQueryParams(redirectLocation);
+        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
+        String code = redirectParams.get("code");
+        assertNotNull(code);
+        HttpResponse accessTokenResponse = OAuthSession.redeemAuthCode(client, hostname, getClientId(), getClientSecret(), code, getRedirectURI());
         assertEquals(HttpStatus.SC_OK, accessTokenResponse.getStatusLine().getStatusCode());
         JSONObject jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
         assertNotNull(jAccessTokenResponse.get("token_type"));
@@ -307,7 +219,7 @@ public class ProtocolFlowTest extends EndpointTest {
         /*
          * Try to obtain another token with the same auth code
          */
-        HttpResponse replayResponse = client.execute(redeemAuthCode);
+        HttpResponse replayResponse = OAuthSession.redeemAuthCode(client, hostname, getClientId(), getClientSecret(), code, getRedirectURI());
         assertEquals(HttpStatus.SC_BAD_REQUEST, replayResponse.getStatusLine().getStatusCode());
     }
 

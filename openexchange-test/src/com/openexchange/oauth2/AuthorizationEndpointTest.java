@@ -149,64 +149,43 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testGETWithWrongResponseType() throws Exception {
-        testGETWithMissingAndInvalidParameter("response_type");
+        testGETWithMissingParameter("response_type", "invalid_request");
+        testGETWithInvalidParameter("response_type", "unsupported_response_type");
     }
 
     @Test
     public void testGETWithWrongClientId() throws Exception {
-        testGETWithMissingAndInvalidParameter("client_id");
+        testGETWithMissingParameter("client_id", null);
+        testGETWithInvalidParameter("client_id", null);
     }
 
     @Test
     public void testGETWithWrongRedirectURI() throws Exception {
-        testGETWithMissingAndInvalidParameter("redirect_uri");
+        testGETWithMissingParameter("redirect_uri", null);
+        testGETWithInvalidParameter("redirect_uri", null);
     }
 
     @Test
     public void testGETWithWrongScope() throws Exception {
-        testGETWithInvalidParameter("scope");
+        testGETWithInvalidParameter("scope", "invalid_scope");
     }
 
     @Test
     public void testGETWithWrongState() throws Exception {
-        Map<String, String> params = new HashMap<>();
-        params.put("response_type", "code");
-        params.put("client_id", getClientId());
-        params.put("redirect_uri", getRedirectURI());
-        params.put("scope", getScopes());
-        params.put("state", csrfState);
-
-        URI baseUri = new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .build();
-
-        // 1. missing param
-        URIBuilder uriBuilder = new URIBuilder(baseUri);
-        for (Entry<String, String> p : params.entrySet()) {
-            if (!p.getKey().equals("state")) {
-                uriBuilder.setParameter(p.getKey(), p.getValue());
-            }
-        }
-        HttpGet getLoginForm = new HttpGet(uriBuilder.build());
-        HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
-        assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
+        testGETWithMissingParameter("state", "invalid_request");
     }
 
     @Test
     public void testPOSTWithMissingReferer() throws Exception {
-        // Send a valid POST request with missing referer header
-        HttpGet getLoginForm = prepareLoginRequest(true);
-        HttpResponse loginFormResponse = client.execute(getLoginForm);
-        assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
-        String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
+        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, redirectResponse.getStatusLine().getStatusCode());
 
+        // Send a valid POST request with missing referer header
         LinkedList<NameValuePair> authFormParams = new LinkedList<>();
         authFormParams.add(new BasicNameValuePair("user_login", login));
         authFormParams.add(new BasicNameValuePair("user_password", password));
         authFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        Map<String, String> additionalParams = OAuthSession.getHiddenFormFields(loginForm);
+        Map<String, String> additionalParams = OAuthSession.extractFragmentParams(new URI(getRedirectLocation(redirectResponse)).getFragment());
         for (Entry<String, String> entry : additionalParams.entrySet()) {
             authFormParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
@@ -229,17 +208,15 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithInvalidReferer() throws Exception {
-        // Send a valid POST request with wrong referer header
-        HttpGet getLoginForm = prepareLoginRequest(true);
-        HttpResponse loginFormResponse = client.execute(getLoginForm);
-        assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
-        String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
+        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, redirectResponse.getStatusLine().getStatusCode());
 
+        // Send a valid POST request with wrong referer header
         LinkedList<NameValuePair> authFormParams = new LinkedList<>();
         authFormParams.add(new BasicNameValuePair("user_login", login));
         authFormParams.add(new BasicNameValuePair("user_password", password));
         authFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        Map<String, String> additionalParams = OAuthSession.getHiddenFormFields(loginForm);
+        Map<String, String> additionalParams = OAuthSession.extractFragmentParams(new URI(getRedirectLocation(redirectResponse)).getFragment());
         for (Entry<String, String> entry : additionalParams.entrySet()) {
             authFormParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
         }
@@ -277,13 +254,14 @@ public class AuthorizationEndpointTest extends EndpointTest {
     }
 
     @Test
-    public void testPOSTWithInvalidState() throws Exception {
-        testPOSTWithInvalidParameter("state", ResponseType.ERROR_PAGE, true);
+    public void testPOSTWithoutState() throws Exception {
+        testPOSTWithInvalidParameter("state", ResponseType.REDIRECT, true);
     }
 
     @Test
     public void testPOSTWithInvalidResponseType() throws Exception {
-        testPOSTWithMissingAndInvalidParameter("response_type", ResponseType.ERROR_PAGE);
+        testPOSTWithInvalidParameter("response_type", ResponseType.REDIRECT, true, "invalid_request");
+        testPOSTWithInvalidParameter("response_type", ResponseType.REDIRECT, false, "unsupported_response_type");
     }
 
     @Test
@@ -293,14 +271,14 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithInvalidUserLogin() throws Exception {
-        testPOSTWithInvalidParameter("user_login", ResponseType.ERROR_PAGE, true);
-        testPOSTWithInvalidParameter("user_login", ResponseType.REDIRECT, false, "invalid_grant");
+        testPOSTWithInvalidParameter("user_login", ResponseType.ERROR_JSON, true, "LGI-0006");
+        testPOSTWithInvalidParameter("user_login", ResponseType.ERROR_JSON, false, "LGI-0006");
     }
 
     @Test
     public void testPOSTWithInvalidUserPassword() throws Exception {
-        testPOSTWithInvalidParameter("user_password", ResponseType.ERROR_PAGE, true);
-        testPOSTWithInvalidParameter("user_password", ResponseType.REDIRECT, false, "invalid_grant");
+        testPOSTWithInvalidParameter("user_password", ResponseType.ERROR_JSON, true, "LGI-0006");
+        testPOSTWithInvalidParameter("user_password", ResponseType.ERROR_JSON, false, "LGI-0006");
     }
 
     private void testPOSTWithMissingAndInvalidParameter(String param, ResponseType responseType) throws Exception {
@@ -309,7 +287,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
     }
 
     private static enum ResponseType {
-        JSON,
+        ERROR_JSON,
         ERROR_PAGE,
         REDIRECT
     }
@@ -327,15 +305,21 @@ public class AuthorizationEndpointTest extends EndpointTest {
      * @throws Exception
      */
     private void testPOSTWithInvalidParameter(String param, ResponseType responseType, boolean omitParam, String errorCode) throws Exception {
-        HttpGet getLoginForm = prepareLoginRequest(true);
-        HttpResponse loginFormResponse = client.execute(getLoginForm);
-        assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
-        String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
+        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, redirectResponse.getStatusLine().getStatusCode());
 
-        Map<String, String> postParams = new HashMap<>(OAuthSession.getHiddenFormFields(loginForm));
+        String loginRedirectLocation = getRedirectLocation(redirectResponse);
+        Map<String, String> fragmentParams = OAuthSession.extractFragmentParams(new URI(loginRedirectLocation).getFragment());
+        Map<String, String> postParams = new HashMap<>(fragmentParams);
+        postParams.put("response_type", "code");
+        postParams.put("client_id", getClientId());
+        postParams.put("redirect_uri", getRedirectURI());
+        postParams.put("scope", getScopes());
+        postParams.put("state", csrfState);
         postParams.put("user_login", login);
         postParams.put("user_password", password);
         postParams.put("access_denied", "false");
+        postParams.put("csrf_token", postParams.get("csrf_token"));
 
         LinkedList<NameValuePair> authFormParams = new LinkedList<>();
         for (Entry<String, String> entry : postParams.entrySet()) {
@@ -353,15 +337,15 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setHost(hostname)
             .setPath(AUTHORIZATION_ENDPOINT)
             .build());
-        submitLoginForm.setHeader(HttpHeaders.REFERER, getLoginForm.getURI().toString());
+        submitLoginForm.setHeader(HttpHeaders.REFERER, "https://" + hostname + AUTHORIZATION_ENDPOINT);
         submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
 
         HttpResponse response = client.execute(submitLoginForm);
         if (responseType == ResponseType.REDIRECT) {
-            submitLoginForm.reset();
+            OAuthSession.releaseConnectionOnRedirect(response);
             assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, response.getStatusLine().getStatusCode());
             assertTrue("Location header missing in redirect response", response.containsHeader(HttpHeaders.LOCATION));
-            String redirectLocation = response.getFirstHeader(HttpHeaders.LOCATION).getValue();
+            String redirectLocation = getRedirectLocation(response);
             assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(getRedirectURI()));
 
             Map<String, String> redirectParams = new HashMap<>();
@@ -375,8 +359,10 @@ public class AuthorizationEndpointTest extends EndpointTest {
                 assertEquals(errorCode, redirectParams.get("error"));
             }
             assertFalse(redirectParams.containsKey("code"));
-            String state = redirectParams.get("state");
-            assertEquals(csrfState, state);
+            if (!"state".equals(param)) {
+                String state = redirectParams.get("state");
+                assertEquals(csrfState, state);
+            }
         } else if (responseType == ResponseType.ERROR_PAGE) {
             EntityUtils.consume(response.getEntity());
             assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
@@ -387,61 +373,22 @@ public class AuthorizationEndpointTest extends EndpointTest {
             // TODO: validate page content?
         } else {
             String responseBody = EntityUtils.toString(response.getEntity());
-            assertEquals(HttpStatus.SC_BAD_REQUEST, response.getStatusLine().getStatusCode());
+            assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             assertTrue(response.containsHeader(HttpHeaders.CONTENT_TYPE));
             String contentType = response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
             assertNotNull(contentType);
             assertTrue(contentType.startsWith("application/json"));
             JSONObject jError = new JSONObject(responseBody);
             if (errorCode != null) {
-                assertEquals(errorCode, jError.getString("error"));
+                assertEquals(errorCode, jError.getString("code"));
             }
         }
     }
 
     @Test
-    public void testPOSTReturnsCodeAndState() throws Exception {
-        HttpGet getLoginForm = prepareLoginRequest(true);
-        HttpResponse loginFormResponse = client.execute(getLoginForm);
-        assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
-        String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
-
-        LinkedList<NameValuePair> authFormParams = new LinkedList<>();
-        authFormParams.add(new BasicNameValuePair("user_login", login));
-        authFormParams.add(new BasicNameValuePair("user_password", password));
-        authFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        Map<String, String> additionalParams = OAuthSession.getHiddenFormFields(loginForm);
-        for (Entry<String, String> entry : additionalParams.entrySet()) {
-            authFormParams.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-        }
-
-        HttpPost submitLoginForm = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .build());
-        submitLoginForm.setHeader(HttpHeaders.REFERER, getLoginForm.getURI().toString());
-        submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
-
-        HttpResponse authCodeResponse = executeAndConsume(submitLoginForm);
-        assertEquals("Wrong status code", HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
-        assertTrue("Location header missing in redirect response", authCodeResponse.containsHeader(HttpHeaders.LOCATION));
-        String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
-        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(getRedirectURI()));
-
-        Map<String, String> redirectParams = new HashMap<>();
-        String[] redirectParamPairs = URLDecoder.decode(new URI(redirectLocation).getRawQuery(), "UTF-8").split("&");
-        for (String pair : redirectParamPairs) {
-            String[] split = pair.split("=");
-            redirectParams.put(split[0], split[1]);
-        }
-
-        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
-
-        String state = redirectParams.get("state");
-        assertEquals(csrfState, state);
-        String code = redirectParams.get("code");
-        assertNotNull(code);
+    public void testPOSTTriggersMail() throws Exception {
+        // Obtain access
+        new OAuthSession(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScopes());
 
         // Test notification mail
         List<Message> messages = ajaxClient.execute(new GetMailsRequest()).getMessages();
@@ -458,12 +405,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         assertTrue("External application expected in subject.", subject.contains("application"));
     }
 
-    private void testGETWithMissingAndInvalidParameter(String param) throws Exception {
-        testGETWithMissingParameter(param);
-        testGETWithInvalidParameter(param);
-    }
-
-    private void testGETWithMissingParameter(String param) throws Exception {
+    private void testGETWithMissingParameter(String param, String error) throws Exception {
         Map<String, String> params = new HashMap<>();
         params.put("response_type", "code");
         params.put("client_id", getClientId());
@@ -485,10 +427,17 @@ public class AuthorizationEndpointTest extends EndpointTest {
         }
         HttpGet getLoginForm = new HttpGet(uriBuilder.build());
         HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
-        assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
+
+        if ("client_id".equals(param) || "redirect_uri".equals(param)) {
+            assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
+        } else {
+            assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginFormResponse.getStatusLine().getStatusCode());
+            Map<String, String> queryParams = OAuthSession.extractQueryParams(getRedirectLocation(loginFormResponse));
+            assertEquals(error, queryParams.get("error"));
+        }
     }
 
-    private void testGETWithInvalidParameter(String param) throws Exception {
+    private void testGETWithInvalidParameter(String param, String error) throws Exception {
         Map<String, String> params = new HashMap<>();
         params.put("response_type", "code");
         params.put("client_id", getClientId());
@@ -512,7 +461,18 @@ public class AuthorizationEndpointTest extends EndpointTest {
         }
         HttpGet getLoginForm = new HttpGet(uriBuilder.build());
         HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
-        assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
+
+        if ("client_id".equals(param) || "redirect_uri".equals(param)) {
+            assertEquals(HttpStatus.SC_BAD_REQUEST, loginFormResponse.getStatusLine().getStatusCode());
+        } else {
+            assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginFormResponse.getStatusLine().getStatusCode());
+            Map<String, String> queryParams = OAuthSession.extractQueryParams(getRedirectLocation(loginFormResponse));
+            assertEquals(error, queryParams.get("error"));
+        }
+    }
+
+    private static String getRedirectLocation(HttpResponse response) {
+        return response.getFirstHeader(HttpHeaders.LOCATION).getValue();
     }
 
 }

@@ -53,7 +53,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.rmi.Naming;
 import java.util.HashSet;
 import java.util.Set;
@@ -63,11 +62,9 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
@@ -163,43 +160,10 @@ public abstract class EndpointTest {
         assertEquals("https://" + request.getURI().toString().substring(7), location.getValue());
     }
 
-    protected HttpGet prepareLoginRequest(boolean formResponse, String... additionalParams) throws URISyntaxException {
-        URIBuilder uriBuilder = new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(AUTHORIZATION_ENDPOINT)
-            .setParameter("response_type", "code")
-            .setParameter("client_id", getClientId())
-            .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScopes())
-            .setParameter("state", csrfState);
-
-        if (formResponse) {
-            uriBuilder.setParameter("respond_with", "form");
-        }
-
-        if (additionalParams != null && additionalParams.length > 0) {
-            if (additionalParams.length % 2 != 0) {
-                throw new IllegalArgumentException("The number of additional arguments must be even!");
-            }
-
-            for (int i = 0; i < additionalParams.length; i++) {
-                String name = additionalParams[i++];
-                String value = additionalParams[i];
-                uriBuilder.setParameter(name, value);
-            }
-        }
-
-        HttpGet getLoginRedirect = new HttpGet(uriBuilder.build());
-        return getLoginRedirect;
-    }
-
     protected HttpResponse executeAndConsume(HttpRequestBase request) throws ClientProtocolException, IOException {
         HttpResponse response = client.execute(request);
         HttpEntity entity = response.getEntity();
-        if (entity == null) {
-            request.reset();
-        } else {
+        if (entity != null) {
             EntityUtils.consumeQuietly(entity);
         }
         return response;
