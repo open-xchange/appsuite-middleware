@@ -234,7 +234,12 @@ public class OAuthSession extends AJAXSession {
     }
 
     public static JSONObject extractJSON(HttpResponse response) throws JSONException, ParseException, IOException {
-        return new JSONObject(EntityUtils.toString(response.getEntity())).getJSONObject("data");
+        JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
+        if (jsonObject.has("data")) {
+            return jsonObject.getJSONObject("data");
+        }
+
+        return jsonObject;
     }
 
     public static Map<String, String> extractQueryParams(String uri) throws UnsupportedEncodingException, URISyntaxException {
