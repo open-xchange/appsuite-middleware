@@ -16,7 +16,11 @@ default:
     copyright: '(c) 2015 Open-Xchange.'
 
     staySignedIn: true
-    
+
+    # Optional custom locations
+    # logoutLocation: 'http://my.landing-page.tld'
+    # loginLocation: 'http://my.login-page.tld'
+
     sharing:
         mails:
             button:
