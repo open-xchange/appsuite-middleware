@@ -1,3 +1,7 @@
+* 2015-05-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38097: Store contact with invalid/non-supported E-Mail addresses with affected address fields set to empty string
+
 * 2015-05-11 - thorben.betten@open-xchange.com
 
  - Fix for bug 38207: Accept new URL parameter "new" that signals that a new "Message-ID" header is supposed to be generated for incoming message

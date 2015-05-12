@@ -53,6 +53,7 @@ import static com.openexchange.subscribe.SubscriptionErrorMessage.INACTIVE_SOURC
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.context.ContextService;
@@ -61,6 +62,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
+import com.openexchange.groupware.generic.FolderUpdaterServiceV2;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
 import com.openexchange.session.Session;
 import com.openexchange.subscribe.SubscribeService;
@@ -70,6 +72,8 @@ import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
 
@@ -146,7 +150,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             }
             subscribeService.touch(session.getContext(), subscriptionId);
             final SearchIterator<?> data = subscribeService.loadContent(subscription);
-            storeData(data, subscription);
+            storeData(data, subscription, null);
             return data.size();
         } finally {
             unlock(subscriptionId, session);
@@ -158,8 +162,13 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * @param subscription
      * @throws OXException
      */
-    protected void storeData(final SearchIterator<?> data, final Subscription subscription) throws OXException {
-        getFolderUpdater(subscription).save(data, subscription);
+    protected void storeData(final SearchIterator<?> data, final Subscription subscription, Collection<OXException> optErrors) throws OXException {
+        FolderUpdaterService folderUpdater = getFolderUpdater(subscription);
+        if (folderUpdater instanceof FolderUpdaterServiceV2) {
+            ((FolderUpdaterServiceV2) folderUpdater).save(data, subscription, optErrors);
+        } else {
+            folderUpdater.save(data, subscription);
+        }
     }
 
     /**
@@ -167,11 +176,10 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      */
     @Override
     public FolderUpdaterService getFolderUpdater(final TargetFolderDefinition target) throws OXException {
-        final FolderObject folder =
-            getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
+        final FolderObject folder = getFolder(new TargetFolderSession(target), target.getContext().getContextId(), target.getFolderIdAsInt());
+
         //
-        final boolean moreThanOneSubscriptionOnThisFolder =
-            isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
+        final boolean moreThanOneSubscriptionOnThisFolder = isThereMoreThanOneSubscriptionOnThisFolder(target.getContext(), target.getFolderId(), null);
         for (final FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
                 // if there are 2 or more subscriptions on the folder: use the multiple-variant of the strategy if it exists
@@ -184,6 +192,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
             }
         }
+
         // if there are 2 or more subscriptions on a folder but no multiple-variant Strategy is available use a single one
         for (final FolderUpdaterService updater : folderUpdaters) {
             if (updater.handles(folder)) {
@@ -221,7 +230,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             }
             subscribeService.touch(session.getContext(), subscriptionId);
             final SearchIterator<?> data = subscribeService.loadContent(subscription);
-            storeData(data, subscription);
+            storeData(data, subscription, null);
             return data.size();
         } finally {
             unlock(subscriptionId, session);
@@ -229,7 +238,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     }
 
     @Override
-    public int executeSubscriptions(final List<Subscription> subscriptionsToRefresh, final ServerSession session) throws OXException {
+    public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session, Collection<OXException> optErrors) throws OXException {
         int sum = 0;
         for (final Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
@@ -239,15 +248,53 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                 final int subscriptionId = subscription.getId();
                 if (tryLock(subscriptionId, session)) {
                     try {
-                        final SubscriptionSource source = subscription.getSource();
+                        // Get subscription source
+                        SubscriptionSource source = subscription.getSource();
                         if (source == null) {
                             throw INACTIVE_SOURCE.create();
                         }
-                        final SubscribeService subscribeService = source.getSubscribeService();
+
+                        // Get associated subscription service
+                        SubscribeService subscribeService = source.getSubscribeService();
                         subscribeService.touch(session.getContext(), subscriptionId);
-                        final SearchIterator<?> data = subscribeService.loadContent(subscription);
-                        storeData(data, subscription);
-                        sum += data.size();
+
+                        // Fetch data elements & store them batch-wise
+                        SearchIterator<?> data = subscribeService.loadContent(subscription);
+                        try {
+                            storeData(data, subscription, optErrors);
+                            sum += data.size();
+                        } catch (OXException e) {
+                            // Failed batch storing - fall back to one-by-one if optional "error collecting" is enabled
+                            if (null == optErrors) {
+                                throw e;
+                            }
+
+                            // Re-fetch data elements & close remaining resources
+                            SearchIterator<?> newData;
+                            if (data instanceof SearchIteratorDelegator) {
+                                newData = ((SearchIteratorDelegator<?>) data).newSearchIterator();
+                            } else {
+                                newData = subscribeService.loadContent(subscription);
+                            }
+                            SearchIterators.close(data);
+                            data = null;
+
+                            // Store them one-by-one
+                            sum = 0;
+                            while (newData.hasNext()) {
+                                Object element = newData.next();
+
+                                try {
+                                    data = new SingleSearchIterator<Object>(element);
+                                    storeData(data, subscription, null);
+                                    sum++;
+                                } catch (OXException x) {
+                                    optErrors.add(x);
+                                }
+                            }
+                        } finally {
+                            SearchIterators.close(data);
+                        }
                     } finally {
                         unlock(subscriptionId, session);
                     }
@@ -331,5 +378,57 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         }
 
     } // End of class SubscriptionKey
+
+    private static class SingleSearchIterator<E> implements SearchIterator<E> {
+
+        private E value;
+
+        SingleSearchIterator(E value) {
+            super();
+            this.value = value;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return null != value;
+        }
+
+        @Override
+        public E next() {
+            if (null == value) {
+                throw new NoSuchElementException();
+            }
+            E retval = value;
+            value = null;
+            return retval;
+        }
+
+        @Override
+        public void close() {
+            // Nothing to do
+        }
+
+        @Override
+        public int size() {
+            return 1;
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            // TODO Auto-generated method stub
+            return false;
+        }
+
+        @Override
+        public void addWarning(OXException warning) {
+            // Nothing to do
+        }
+
+        @Override
+        public OXException[] getWarnings() {
+            return null;
+        }
+
+    } // End of class SingleSearchIterator
 
 }

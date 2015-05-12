@@ -158,7 +158,7 @@ public class CalendarFolderUpdaterStrategy implements FolderUpdaterStrategy<Cale
     }
 
     @Override
-    public void save(final CalendarDataObject newElement, final Object session) throws OXException {
+    public void save(final CalendarDataObject newElement, final Object session, Collection<OXException> errors) throws OXException {
         final CalendarSql calendarSql = (CalendarSql) getFromSession(SQL_INTERFACE, session);
         final TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
         newElement.setParentFolderID(target.getFolderIdAsInt());
