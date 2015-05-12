@@ -52,6 +52,7 @@ package com.openexchange.spamhandler.spamexperts;
 import java.io.ByteArrayInputStream;
 import java.util.Properties;
 import javax.mail.MessagingException;
+import javax.mail.URLName;
 import javax.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,7 @@ import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.spamexperts.exceptions.SpamExpertsExceptionCode;
 import com.openexchange.spamhandler.spamexperts.management.SpamExpertsConfig;
 import com.openexchange.spamhandler.spamexperts.osgi.SpamExpertsServiceRegistry;
+import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -99,15 +101,29 @@ public class SpamExpertsSpamHandler extends SpamHandler {
     }
 
     private void copyToSpamexpertsFolder(final String folder, final MailMessage []messages) throws OXException {
+
+        final String socketFactoryClass = TrustAllSSLSocketFactory.class.getName();
+        final URLName imapUrl = SpamExpertsConfig.getInstance().getImapUrl();
         final Properties props = new Properties();
-        final javax.mail.Session imapSession = javax.mail.Session.getInstance(props);
-        final IMAPStore imapStore = new IMAPStore(imapSession, SpamExpertsConfig.getInstance().getImapUrl());
-        
+        if( "imaps".equals(imapUrl.getProtocol())) {
+            props.put("mail.imap.socketFactory.class", socketFactoryClass);
+        } else {
+            props.put("mail.imap.ssl.socketFactory.class", socketFactoryClass);
+            props.put("mail.imap.starttls.enable", "true");
+        }
+
+        props.put("mail.imap.socketFactory.port", imapUrl.getPort());
+        props.put("mail.imap.socketFactory.fallback", "false");
+
+        javax.mail.Session imapSession = javax.mail.Session.getInstance(props, null);
+
+        IMAPStore imapStore = null;
         try {
+            imapStore = (IMAPStore) imapSession.getStore("imap");
             if( null == messages ) {
                 throw SpamExpertsExceptionCode.UNABLE_TO_GET_MAILS.create();
             }
-            imapStore.connect(SpamExpertsConfig.getInstance().getImapUser(), SpamExpertsConfig.getInstance().getImappassword());
+            imapStore.connect(imapUrl.getHost(), imapUrl.getPort(), SpamExpertsConfig.getInstance().getImapUser(), SpamExpertsConfig.getInstance().getImappassword());
             IMAPFolder sf = (IMAPFolder)imapStore.getFolder(folder);
             if( ! sf.exists() ) {
                 throw SpamExpertsExceptionCode.FOLDER_DOES_NOT_EXIST.create(folder);
