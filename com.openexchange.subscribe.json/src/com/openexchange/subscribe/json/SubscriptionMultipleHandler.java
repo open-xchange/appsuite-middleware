@@ -172,7 +172,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
     private Object fetchSubscription(JSONObject request, ServerSession session) throws JSONException, OXException {
         final Subscription subscription = getSubscription(request, session, secretService.getSecret(session));
         subscription.setId(-1);
-        return Integer.valueOf(executor.executeSubscriptions(Arrays.asList(subscription), session));
+        return Integer.valueOf(executor.executeSubscriptions(Arrays.asList(subscription), session, null));
     }
 
 
@@ -207,7 +207,7 @@ public class SubscriptionMultipleHandler implements MultipleHandler {
             }
         }
 
-        return Integer.valueOf(executor.executeSubscriptions(subscriptionsToRefresh, session));
+        return Integer.valueOf(executor.executeSubscriptions(subscriptionsToRefresh, session, null));
     }
 
 
