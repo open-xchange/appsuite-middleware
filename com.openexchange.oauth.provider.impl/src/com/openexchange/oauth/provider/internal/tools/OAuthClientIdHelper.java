@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider.internal.tools;
 
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-import org.apache.commons.codec.binary.Base64;
+import java.util.regex.Pattern;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -76,7 +76,9 @@ public class OAuthClientIdHelper {
         return INSTANCE;
     }
 
-    protected static final String SEPERATOR = "_";
+    protected static final String SEPERATOR = "/";
+
+    private static final Pattern ENCODED_GID = Pattern.compile("[A-Za-z0-9-_]+");
 
     /*-
      * ----------------------------------------------------------------------------------
@@ -142,7 +144,7 @@ public class OAuthClientIdHelper {
         }
 
         String groupId = clientId.substring(0, lastIndexOfSeperator);
-        if (!Base64.isBase64(groupId)) {
+        if (!ENCODED_GID.matcher(groupId).matches()) {
             throw OAuthProviderExceptionCodes.BAD_CONTEXT_GROUP_IN_CLIENT_ID.create(clientId);
         }
 
@@ -165,7 +167,7 @@ public class OAuthClientIdHelper {
      * @return encoded context group
      */
     protected final String encode(final String groupId) {
-        return BaseEncoding.base64().encode(groupId.getBytes(StandardCharsets.US_ASCII));
+        return BaseEncoding.base64Url().omitPadding().encode(groupId.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
@@ -175,6 +177,6 @@ public class OAuthClientIdHelper {
      * @return decoded context group
      */
     protected final String decode(final String groupId) {
-        return new String(Base64.decodeBase64(groupId.getBytes(StandardCharsets.US_ASCII)));
+        return new String(BaseEncoding.base64Url().omitPadding().decode(groupId), StandardCharsets.UTF_8);
     }
 }

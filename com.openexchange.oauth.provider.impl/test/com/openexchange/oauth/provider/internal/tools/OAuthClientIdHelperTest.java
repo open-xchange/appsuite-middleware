@@ -52,6 +52,8 @@ package com.openexchange.oauth.provider.internal.tools;
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.OAuthProviderExceptionCodes;
 
 /**
  * {@link OAuthClientIdHelperTest}
@@ -63,13 +65,13 @@ public class OAuthClientIdHelperTest {
 
     private final static String GROUP_ID = "default";
 
-    private final static String ENCODED_GROUP_ID = "dGhpc1Nob3VsZEJlTWF4aW11bTMyQ2hhcmFjdGVyc3M=";
+    private final static String ENCODED_GROUP_ID = "dGhpc1Nob3VsZEJlTWF4aW11bTMyQ2hhcmFjdGVyc3M";
 
     private final static String GROUP_ID_MAX_SIZE = "thisShouldBeMaximum32Characterss";
 
-    private final static String TYPICAL_CLIENT_ID = "dGhpc1Nob3VsZEJlTWF4aW11bTMyQ2hhcmFjdGVyc3M=_d48ce8ec590c461f992158508d9ac99b04b5988d5ff14586bfe34209c22b8a67";
+    private final static String TYPICAL_CLIENT_ID = "dGhpc1Nob3VsZEJlTWF4aW11bTMyQ2hhcmFjdGVyc3M/d48ce8ec590c461f992158508d9ac99b04b5988d5ff14586bfe34209c22b8a67";
 
-    private final static String BROKEN_CLIENT_ID = "dGhpc1Nob3V_sZEJlTWF4aW_11bTMyQ2hhcmFjdGVyc3M=_d48ce8ec590c461f992158508d9ac99b04b5988d5ff14586bfe34209c22b8a67";
+    private final static String BROKEN_CLIENT_ID = "dGhpc1Nob3V/sZEJlTWF4aW/11bTMyQ2hhcmFjdGVyc3M/d48ce8ec590c461f992158508d9ac99b04b5988d5ff14586bfe34209c22b8a67";
 
     @Test
     public void testGenerateClientId_defaultGroup_validClientId() throws Exception {
@@ -99,10 +101,16 @@ public class OAuthClientIdHelperTest {
     }
 
     @Test
-    public void testExtractGroupId_curiousGroupId_correctExtracted() throws Exception {
-        String extractedGroupId = OAuthClientIdHelper.getInstance().extractEncodedGroupId(BROKEN_CLIENT_ID);
+    public void testExtractGroupId_curiousGroupId_fails() throws Exception {
+        boolean failed = false;
+        try {
+            OAuthClientIdHelper.getInstance().extractEncodedGroupId(BROKEN_CLIENT_ID);
+        } catch (OXException e) {
+            Assert.assertTrue(OAuthProviderExceptionCodes.BAD_CONTEXT_GROUP_IN_CLIENT_ID.equals(e));
+            failed = true;
+        }
 
-        Assert.assertTrue("Extracted group id not correct", BROKEN_CLIENT_ID.substring(0, extractedGroupId.length()).equals(extractedGroupId));
+        Assert.assertTrue(failed);
     }
 
     @Test
@@ -137,6 +145,6 @@ public class OAuthClientIdHelperTest {
     public void testGetClientFrom_valid_noSeperatorIncluded() throws Exception {
         String extractedClientCode = OAuthClientIdHelper.getInstance().getBaseTokenFrom(TYPICAL_CLIENT_ID);
 
-        Assert.assertTrue("Extracted client code not correct", !extractedClientCode.contains(OAuthClientIdHelper.SEPERATOR));
+        Assert.assertFalse("Extracted client code not correct", extractedClientCode.contains(OAuthClientIdHelper.SEPERATOR));
     }
 }
