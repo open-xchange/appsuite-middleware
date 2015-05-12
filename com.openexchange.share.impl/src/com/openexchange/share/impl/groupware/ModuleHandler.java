@@ -71,7 +71,7 @@ public interface ModuleHandler {
 
     TargetProxy loadTarget(ShareTarget target, Context context) throws OXException;
 
-    boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters);
+    boolean canShare(TargetProxy proxy, HandlerParameters parameters);
 
     void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException;
 

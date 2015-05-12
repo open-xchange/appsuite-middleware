@@ -183,7 +183,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
     }
 
     private boolean canShareObject(UserizedFolder folder, TargetProxy proxy, ModuleHandler handler) {
-        return handler.canShare(canShareFolder(folder), proxy, parameters);
+        return canShareFolder(folder) ? true : handler.canShare(proxy, parameters);
     }
 
     private UserService getUserService() throws OXException {
