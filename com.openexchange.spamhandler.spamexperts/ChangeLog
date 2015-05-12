@@ -1,3 +1,7 @@
+* 2015-05-12 - choeger@open-xchange.com
+
+  - Bugfix ID#38230 - [L3] SpamExperts integration seems not to support IMAPS 
+
 * 2012-01-19 - karsten.will@open-xchange.com
   - moved to CVS_HEAD as it will be generally available from now on
 
