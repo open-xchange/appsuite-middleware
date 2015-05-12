@@ -470,7 +470,7 @@ public final class NewAction extends AbstractMailAction {
         // Check if "folder" element is present which indicates to save given message as a draft or append to denoted folder
         final JSONValue responseData;
         if (folder == null) {
-            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail());
+            responseData = transportMessage(session, flags, force, data.getFromAddress(), data.getMail(), req.getRequest());
         } else {
             String[] ids;
             MailServletInterface mailInterface = MailServletInterface.getInstance(session);
@@ -522,7 +522,7 @@ public final class NewAction extends AbstractMailAction {
         }
     }
 
-    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m) throws OXException, JSONException {
+    private JSONObject transportMessage(final ServerSession session, final int flags, final boolean force, final InternetAddress from, final MailMessage m, AJAXRequestData request) throws OXException, JSONException {
         /*
          * Determine the account to transport with
          */
@@ -559,8 +559,27 @@ public final class NewAction extends AbstractMailAction {
             } else {
                 sentMail = transport.sendRawMessage(m.getSourceBytes());
             }
+            /*
+             * User settings
+             */
+            final UserSettingMail usm = session.getUserSettingMail();
+            usm.setNoSave(true);
+            {
+                String paramName = "copy2Sent";
+                if (request.containsParameter(paramName)) { // Provided as URL parameter
+                    String sCopy2Sent = request.getParameter(paramName);
+                    if (null != sCopy2Sent) {
+                        if (AJAXRequestDataTools.parseBoolParameter(sCopy2Sent)) {
+                            usm.setNoCopyIntoStandardSentFolder(false);
+                        } else if (Boolean.FALSE.equals(AJAXRequestDataTools.parseFalseBoolParameter(sCopy2Sent))) {
+                            // Explicitly deny copy to sent folder
+                            usm.setNoCopyIntoStandardSentFolder(true);
+                        }
+                    }
+                }
+            }
             JSONObject responseData = null;
-            if (!session.getUserSettingMail().isNoCopyIntoStandardSentFolder()) {
+            if (!usm.isNoCopyIntoStandardSentFolder()) {
                 /*
                  * Copy in sent folder allowed
                  */
