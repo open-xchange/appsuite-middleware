@@ -50,7 +50,9 @@
 package com.openexchange.oauth.provider.internal.client;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -62,10 +64,12 @@ import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.internal.ScopeRegistry;
 import com.openexchange.oauth.provider.internal.client.storage.OAuthClientStorage;
 import com.openexchange.oauth.provider.internal.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.internal.tools.ClientId;
 import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelper;
+import com.openexchange.oauth.provider.tools.URIValidator;
 
 
 /**
@@ -75,6 +79,15 @@ import com.openexchange.oauth.provider.internal.tools.OAuthClientIdHelper;
  * @since v7.8.0
  */
 public class ClientManagementImpl implements ClientManagement {
+
+    private static final int MAX_ICON_SIZE = 0xFFFF - 1;
+
+    private static final Set<String> SUPPORTED_ICON_MIME_TYPES = new HashSet<>(2, 1.0f);
+    static {
+        SUPPORTED_ICON_MIME_TYPES.add("image/png");
+        SUPPORTED_ICON_MIME_TYPES.add("image/jpg");
+        SUPPORTED_ICON_MIME_TYPES.add("image/jpeg");
+    }
 
     private final OAuthClientStorage clientStorage;
 
@@ -117,15 +130,22 @@ public class ClientManagementImpl implements ClientManagement {
         assertNotNullOrEmpty("Property 'description' is mandatory and must be set", clientData.getDescription());
         assertNotNullOrEmpty("Property 'contact address' is mandatory and must be set", clientData.getContactAddress());
         assertNotNullOrEmpty("Property 'website' is mandatory and must be set", clientData.getWebsite());
-        assertNotNullOrEmpty("Redirect URIs are mandatory and must be set", clientData.getRedirectURIs());
 
+        // check redirect URIs
+        Set<String> redirectURIs = clientData.getRedirectURIs();
+        assertNotNullOrEmpty("Redirect URIs are mandatory and must be set", redirectURIs);
+        checkRedirectURIs(redirectURIs);
+
+        // check icon
         Icon icon = clientData.getIcon();
         assertNotNullOrEmpty("Property 'icon' is mandatory and must be set", icon);
-        assertNotNullOrEmpty("The icons mime type is mandatory and must be set", icon.getMimeType());
+        checkIcon(icon);
 
+        // check scope
         Scopes scope = clientData.getDefaultScope();
         assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope);
         assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope.get());
+        checkScopes(scope);
 
         String clientId = OAuthClientIdHelper.getInstance().generateClientId(contextGroup);
         String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
@@ -152,17 +172,20 @@ public class ClientManagementImpl implements ClientManagement {
             assertNotNullOrEmpty("Property 'website' was set to an empty value", clientData.getWebsite());
         }
         if (clientData.containsRedirectURIs()) {
-            assertNotNullOrEmpty("At least one of the set redirect URIs is invalid", clientData.getRedirectURIs());
+            Set<String> redirectURIs = clientData.getRedirectURIs();
+            assertNotNullOrEmpty("At least one of the set redirect URIs is invalid", redirectURIs);
+            checkRedirectURIs(redirectURIs);
         }
         if (clientData.containsIcon()) {
             Icon icon = clientData.getIcon();
             assertNotNullOrEmpty("Property 'icon' was set to an empty value", icon);
-            assertNotNullOrEmpty("The icons mime type was set to an empty value", icon.getMimeType());
+            checkIcon(icon);
         }
         if (clientData.containsDefaultScope()) {
             Scopes scope = clientData.getDefaultScope();
             assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope);
             assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope.get());
+            checkScopes(scope);
         }
 
         return clientStorage.updateClient(clientIdObj.getGroupId(), clientId, clientData);
@@ -265,6 +288,37 @@ public class ClientManagementImpl implements ClientManagement {
     private <T> T handleOXException(OXException e) throws ClientManagementException {
         ClientManagementException cme = new ClientManagementException(e, Reason.INTERNAL_ERROR, e.getMessage());
         throw cme;
+    }
+
+    private void checkRedirectURIs(Set<String> redirectURIs) throws ClientManagementException {
+        for (String uri : redirectURIs) {
+            if (!URIValidator.isValidRedirectURI(uri)) {
+                throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, uri + " is not a valid redirect URI.");
+            }
+        }
+    }
+
+    private void checkIcon(Icon icon) throws ClientManagementException {
+        String iconMimeType = icon.getMimeType();
+        assertNotNullOrEmpty("The icons mime type is mandatory and must be set", iconMimeType);
+        if (!SUPPORTED_ICON_MIME_TYPES.contains(iconMimeType)) {
+            StringBuilder msg = new StringBuilder("Icon mime type ").append(iconMimeType).append(" is not supported, allowed types are [");
+            Strings.join(SUPPORTED_ICON_MIME_TYPES, ", ", msg);
+            msg.append("].");
+            throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, msg.toString());
+        }
+
+        if (icon.getSize() > MAX_ICON_SIZE) {
+            throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, "Icon is too large, it must not exceed " + MAX_ICON_SIZE + " bytes.");
+        }
+    }
+
+    private void checkScopes(Scopes scopes) throws ClientManagementException {
+        for (String scope : scopes.get()) {
+            if (!ScopeRegistry.getInstance().hasScopeProvider(scope)) {
+                throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, scope + " is not a valid scope.");
+            }
+        }
     }
 
 }
