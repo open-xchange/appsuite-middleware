@@ -135,12 +135,9 @@ public abstract class AbstractOAuthTest {
     }
 
     public static Credentials getMasterAdminCredentials() {
-        String password = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER_PWD);;
-        if (System.getProperty("rmi_test_masterpw") != null){
-            password = System.getProperty("rmi_test_masterpw");
-        }
-
-        return new Credentials(AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER), password);
+        String username = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER);
+        String password = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER_PWD);
+        return new Credentials(username, password);
     }
 
 }
