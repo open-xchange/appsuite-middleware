@@ -144,7 +144,7 @@ public class TokenEndpoint extends OAuthEndpoint {
             }
         } catch (OXException | JSONException | ClientManagementException e) {
             LOG.error("Token request failed", e);
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
+            sendErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
         }
     }
 
