@@ -1771,10 +1771,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
 
                 // add user to login2user table with the internal id
+                boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
                 stmt = con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setString(3, usrdata.getName());
+                stmt.setString(3, autoLowerCase ? usrdata.getName().toLowerCase() : usrdata.getName());
                 stmt.executeUpdate();
                 stmt.close();
 
