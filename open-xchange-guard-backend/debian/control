@@ -1,0 +1,15 @@
+Source: open-xchange-guard-backend
+Section: web
+Priority: optional
+Maintainer: Thorben Betten <thorben.betten@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@), open-xchange-admin (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-guard-backend
+Architecture: all
+Pre-Depends: open-xchange-admin (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: OX Guard backend component
+ This package adds the bundles to the backend needed to operate the OX
+ Guard product.

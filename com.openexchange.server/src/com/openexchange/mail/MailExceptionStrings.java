@@ -184,4 +184,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // The client request is not permitted.
     public static final String REQUEST_NOT_PERMITTED_MSG = "The client request is not permitted.";
 
+    public static final String SEND_DENIED = "Sending the message denied.";
+
 }

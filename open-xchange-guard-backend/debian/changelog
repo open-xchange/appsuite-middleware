@@ -1,0 +1,5 @@
+open-xchange-guard-backend (7.6.2-0) unstable; urgency=low
+
+  * initial packaging for OX Guard backend component
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 20 Feb 2015 09:11:39 +0100
