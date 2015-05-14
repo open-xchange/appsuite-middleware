@@ -52,6 +52,7 @@ package com.openexchange.java;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * {@link ExceptionAwarePipedInputStream} - Extends {@link PipedInputStream} class by {@link #setException(Exception)} that gets re-thrown
@@ -62,13 +63,14 @@ import java.io.PipedOutputStream;
 public class ExceptionAwarePipedInputStream extends PipedInputStream {
 
     /** The (wrapping) I/O exception */
-    private IOException exception = null;
+    private final AtomicReference<IOException> exception;
 
     /**
      * Initializes a new {@link ExceptionAwarePipedInputStream}.
      */
     public ExceptionAwarePipedInputStream() {
         super();
+        exception = new AtomicReference<IOException>();
     }
 
     /**
@@ -78,6 +80,7 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
      */
     public ExceptionAwarePipedInputStream(final int pipeSize) {
         super(pipeSize);
+        exception = new AtomicReference<IOException>();
     }
 
     /**
@@ -89,6 +92,7 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
      */
     public ExceptionAwarePipedInputStream(final PipedOutputStream src, final int pipeSize) throws IOException {
         super(src, pipeSize);
+        exception = new AtomicReference<IOException>();
     }
 
     /**
@@ -99,11 +103,12 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
      */
     public ExceptionAwarePipedInputStream(final PipedOutputStream src) throws IOException {
         super(src);
+        exception = new AtomicReference<IOException>();
     }
 
     @Override
     public synchronized int available() throws IOException {
-        final IOException exception = this.exception;
+        final IOException exception = this.exception.get();
         if (exception != null) {
             throw exception;
         }
@@ -112,7 +117,7 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
 
     @Override
     public synchronized int read() throws IOException {
-        final IOException exception = this.exception;
+        final IOException exception = this.exception.get();
         if (exception != null) {
             throw exception;
         }
@@ -121,7 +126,7 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
 
     @Override
     public synchronized int read(final byte[] b, final int off, final int len) throws IOException {
-        final IOException exception = this.exception;
+        final IOException exception = this.exception.get();
         if (exception != null) {
             throw exception;
         }
@@ -130,7 +135,7 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
 
     @Override
     public void close() throws IOException {
-        final IOException exception = this.exception;
+        final IOException exception = this.exception.get();
         if (exception != null) {
             throw exception;
         }
@@ -143,7 +148,7 @@ public class ExceptionAwarePipedInputStream extends PipedInputStream {
      * @param e The exception to set
      */
     public void setException(final Exception e) {
-        exception = (e instanceof IOException) ? (IOException) e : new IOException("Error while writing to connected OutputStream", e);
+        exception.set((e instanceof IOException) ? (IOException) e : new IOException("Error while writing to connected OutputStream", e));
     }
 
 }
