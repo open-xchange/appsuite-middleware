@@ -114,6 +114,11 @@ public class IMAPCapabilities extends MailCapabilities {
      */
     public static final String CAP_CHILDREN = "CHILDREN";
 
+    /**
+     * SORTY BY DISPLAYNAME
+     */
+    public static final String CAP_SORT_DISPLAY = "SORT=DISPLAY";
+
     /*-
      * IMAP bit constants
      */
@@ -132,33 +137,25 @@ public class IMAPCapabilities extends MailCapabilities {
 
     private static final int BIT_CHILDREN = 1 << (NEXT_SHIFT_OPERAND + 6);
 
+    private static final int BIT_SORT_DISPLAY = 1 << (NEXT_SHIFT_OPERAND + 7);
+
     /*-
      * Members
      */
 
     private boolean hasACL;
-
     private boolean hasQuota;
-
     private boolean hasThreadReferences;
-
     private boolean hasThreadOrderedSubject;
-
     private boolean hasSort;
-
     private boolean hasIMAP4;
-
     private boolean hasIMAP4rev1;
-
     private boolean hasUIDPlus;
-
     private boolean hasSubscription;
-
     private boolean hasNamespace;
-
     private boolean hasIdle;
-
     private boolean hasChildren;
+    private boolean hasSortDisplay;
 
     /**
      * Initializes a new {@link IMAPCapabilities}
@@ -268,6 +265,14 @@ public class IMAPCapabilities extends MailCapabilities {
         this.hasChildren = hasChildren;
     }
 
+    public boolean hasSortDisplay() {
+        return hasSortDisplay;
+    }
+
+    public void setSortDisplay(final boolean hasSortDisplay) {
+        this.hasSortDisplay = hasSortDisplay;
+    }
+
     @Override
     public final int getCapabilities() {
         int retval = 0;
@@ -283,6 +288,7 @@ public class IMAPCapabilities extends MailCapabilities {
         retval |= hasNamespace ? BIT_NAMESPACE : 0;
         retval |= hasIdle ? BIT_IDLE : 0;
         retval |= hasChildren ? BIT_CHILDREN : 0;
+        retval |= hasSortDisplay ? BIT_SORT_DISPLAY : 0;
         return retval;
     }
 
@@ -292,7 +298,8 @@ public class IMAPCapabilities extends MailCapabilities {
             ", hasQuota=").append(hasQuota()).append(", hasSort=").append(hasSort()).append(", hasSubscription=").append(hasSubscription()).append(
             ", hasThreadReferences=").append(hasThreadReferences()).append(", hasChildren=").append(hasChildren()).append(", hasIMAP4=").append(
             hasIMAP4()).append(", hasIMAP4rev1=").append(hasIMAP4rev1()).append(", hasNamespace=").append(hasNamespace()).append(
-            ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).toString();
+            ", hasThreadOrderedSubject=").append(hasThreadOrderedSubject()).append(", hasUIDPlus=").append(hasUIDPlus()).append(
+            ", hasSortDisplay=").append(hasSortDisplay()).toString();
     }
 
 }

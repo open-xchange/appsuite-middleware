@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.cache;
 
+import static com.openexchange.imap.IMAPMessageStorage.allowSORTDISPLAY;
 import java.util.Map;
 import javax.mail.MessagingException;
 import com.openexchange.caching.CacheKey;
@@ -202,6 +203,7 @@ public final class CapabilitiesCache {
             imapCaps.setIdle(map.containsKey(IMAPCapabilities.CAP_IDLE));
             imapCaps.setChildren(map.containsKey(IMAPCapabilities.CAP_CHILDREN));
             imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
+            imapCaps.setSortDisplay(allowSORTDISPLAY() && map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY));
             /*
              * ACL extension
              */
