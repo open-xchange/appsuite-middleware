@@ -296,7 +296,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static volatile Boolean allowSORTDISPLAY;
     /** Whether SORT=DISPLAY is allowed to be utilized */
-    static boolean allowSORTDISPLAY() {
+    public static boolean allowSORTDISPLAY() {
         Boolean b = allowSORTDISPLAY;
         if (null == b) {
             synchronized (IMAPMessageStorage.class) {
