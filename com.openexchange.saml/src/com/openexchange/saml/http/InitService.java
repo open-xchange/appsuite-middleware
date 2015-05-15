@@ -116,7 +116,7 @@ public class InitService extends SAMLServlet {
 
                 Session session = sessiondService.getSession(sessionId);
                 if (session == null) {
-                    LOG.debug("Received SAML init request without invalid session parameter '{}'", sessionId);
+                    LOG.debug("Received SAML init request with invalid session parameter '{}'", sessionId);
                     httpResponse.sendError(HttpServletResponse.SC_BAD_REQUEST);
                     return;
                 }
