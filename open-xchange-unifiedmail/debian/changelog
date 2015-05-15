@@ -1,3 +1,9 @@
+open-xchange-unifiedmail (7.6.2-17) stable; urgency=medium
+
+  * Build for patch 2015-05-15 (2529)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 May 2015 10:19:24 +0200
+
 open-xchange-unifiedmail (7.6.2-16) stable; urgency=medium
 
   * Build for patch 2015-05-04 (2496)
