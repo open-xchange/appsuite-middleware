@@ -56,6 +56,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
@@ -64,6 +65,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.provider.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -83,6 +85,7 @@ import com.openexchange.server.ServiceLookup;
     @Parameter(name = "ignore", description = "(mandatory - should be set to \"deleted\") (deprecated) - Which kinds of updates should be ignored. Currently, the only valid value - \"deleted\" - causes deleted object IDs not to be returned."),
     @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "(preliminary, since 7.4.2) - whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
 }, responseDescription = "Response with timestamp: An array with new, modified and deleted contacts. New and modified contacts are represented by arrays. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter. Deleted contacts (should the ignore parameter be ever implemented) would be identified by their object IDs as plain strings, without being part of a nested array.")
+@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
 public class UpdatesAction extends ContactAction {
 
     /**
