@@ -92,6 +92,15 @@ public class Version {
         return versionString;
     }
 
+    /**
+     * Optionally gets the version string.
+     *
+     * @return The version string, or <code>null</code> if it is not yet initialized
+     */
+    public String optVersionString() {
+        return versionString;
+    }
+
     public int getMajor() {
         if (null == numbers) {
             IllegalStateException e = new IllegalStateException("Central backend version not initialized yet.");
