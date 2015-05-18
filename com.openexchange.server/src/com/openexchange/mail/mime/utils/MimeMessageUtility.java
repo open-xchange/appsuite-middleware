@@ -85,6 +85,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -141,6 +142,7 @@ import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.DataHandlerWrapper;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
@@ -2503,5 +2505,185 @@ public final class MimeMessageUtility {
             return (this == address);
         }
     };
+
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
+     * <p>
+     * Aligns <i>Message-Id</i> header to given host name.
+     *
+     * @param mimeMessage The MIME message
+     * @param hostName The host name
+     * @param keepMessageIdIfPresent Whether to keep a possibly available <i>Message-ID</i> header or to generate a new (unique) one
+     * @throws OXException If operation fails
+     */
+    public static void saveChanges(MimeMessage mimeMessage, String hostName, boolean keepMessageIdIfPresent) throws OXException {
+        try {
+            String name = "Message-ID";
+            String prevMessageId = keepMessageIdIfPresent ? mimeMessage.getHeader(name, null) : null;
+            saveChanges(mimeMessage);
+            if (null != prevMessageId) {
+                mimeMessage.setHeader(name, prevMessageId);
+            } else if (null != hostName) {
+                // Change Message-Id header appropriately
+                String messageId = mimeMessage.getHeader(name, null);
+                if (null != messageId) {
+                    /*
+                     * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
+                     */
+                    int pos = messageId.indexOf('@');
+                    if (pos > 0) {
+                        StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
+                        if (messageId.charAt(0) == '<') {
+                            mid.append('>');
+                        }
+                        mimeMessage.setHeader(name, mid.toString());
+                    } else {
+                        mimeMessage.setHeader(name, messageId + hostName);
+                    }
+                }
+            }
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong
+     * Content-Type header.
+     *
+     * @param mimeMessage The message
+     * @throws OXException If an error occurs
+     */
+    public static void saveChanges(MimeMessage mimeMessage) throws OXException {
+        saveChanges(mimeMessage, true);
+    }
+
+    private static void saveChanges(MimeMessage mimeMessage, final boolean trySanitizeMultipart) throws OXException {
+        if (null == mimeMessage) {
+            return;
+        }
+        try {
+            try {
+                mimeMessage.saveChanges();
+            } catch (javax.mail.internet.ParseException e) {
+                /*-
+                 * Probably parsing of a Content-Type header failed.
+                 *
+                 * Try to sanitize parameter list headers
+                 */
+                sanitizeContentTypeHeaders(mimeMessage, new ContentType());
+                /*
+                 * ... and retry
+                 */
+                mimeMessage.saveChanges();
+            } catch (javax.mail.MessagingException e) {
+                if (!trySanitizeMultipart) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+                // Check for DCH error
+                final String msg = asciiLowerCase(e.getMessage());
+                if (null != msg && msg.startsWith("mime part of type \"multipart/")) {
+                    sanitizeMultipartContent(mimeMessage);
+                    saveChanges(mimeMessage, false);
+                } else {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            }
+        } catch (MessagingException e) {
+            throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static boolean sanitizeMultipartContent(MimePart part) throws OXException {
+        try {
+            final String sContentType = asciiLowerCase(part.getHeader("Content-Type", null));
+            if (null != sContentType && sContentType.startsWith("multipart/")) {
+                final Object o = part.getContent();
+                if (o instanceof MimeMultipart) {
+                    final MimeMultipart multipart = (MimeMultipart) o;
+                    final int count = multipart.getCount();
+                    for (int i = 0; i < count; i++) {
+                        if (!sanitizeMultipartContent((MimePart) multipart.getBodyPart(i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                // Not an instance of MimeMultipart.
+                // Try to sanitize
+                if (o instanceof InputStream) {
+                    final MimeMultipart multipart = new MimeMultipart(new MessageDataSource((InputStream) o, sContentType));
+                    part.setContent(multipart);
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
+        final DataHandler dh;
+        try {
+            dh = part.getDataHandler();
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+        if (dh == null) {
+            return;
+        }
+        try {
+            final String type = dh.getContentType();
+            sanitizer.setContentType(type);
+            try {
+                /*
+                 * Try to parse with JavaMail Content-Type implementation
+                 */
+                new javax.mail.internet.ContentType(type);
+            } catch (final javax.mail.internet.ParseException e) {
+                /*
+                 * Sanitize Content-Type header
+                 */
+                final String cts = sanitizer.toString(true);
+                try {
+                    new javax.mail.internet.ContentType(cts);
+                } catch (final javax.mail.internet.ParseException pe) {
+                    /*
+                     * Still not parseable
+                     */
+                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, type);
+                }
+                part.setDataHandler(new DataHandlerWrapper(dh, cts));
+                part.setHeader("Content-Type", cts);
+            }
+            /*
+             * Check for recursive invocation
+             */
+            if (sanitizer.startsWith("multipart/")) {
+                final Object o = dh.getContent();
+                if (o instanceof MimeMultipart) {
+                    final MimeMultipart mm = (MimeMultipart) o;
+                    final int count = mm.getCount();
+                    for (int i = 0; i < count; i++) {
+                        sanitizeContentTypeHeaders(mm.getBodyPart(i), sanitizer);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 
 }
