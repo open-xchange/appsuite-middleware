@@ -641,7 +641,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             Transport transport = getSMTPSession().getTransport(SMTP);
             try {
                 connectTransport(transport, smtpConfig);
-                saveChangesSafe(smtpMessage);
+                saveChangesSafe(smtpMessage, true);
                 transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
             } catch (javax.mail.AuthenticationFailedException e) {
@@ -678,14 +678,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             processAddressHeader(smtpMessage);
             final boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
-                saveChangesSafe(smtpMessage);
+                saveChangesSafe(smtpMessage, true);
             } else {
                 try {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
                     try {
                         connectTransport(transport, smtpConfig);
-                        saveChangesSafe(smtpMessage);
+                        saveChangesSafe(smtpMessage, true);
                         transport(smtpMessage, recipients, transport, smtpConfig);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
@@ -717,14 +717,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             processAddressHeader(mimeMessage);
             final boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
-                saveChangesSafe(mimeMessage);
+                saveChangesSafe(mimeMessage, true);
             } else {
                 try {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
                     try {
                         connectTransport(transport, smtpConfig);
-                        saveChangesSafe(mimeMessage);
+                        saveChangesSafe(mimeMessage, true);
                         transport(mimeMessage, recipients, transport, smtpConfig);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
@@ -821,14 +821,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                 processAddressHeader(mimeMessage);
                 final boolean poisoned = checkRecipients(recipients);
                 if (poisoned) {
-                    saveChangesSafe(mimeMessage);
+                    saveChangesSafe(mimeMessage, true);
                 } else {
                     try {
                         final long start = System.currentTimeMillis();
                         final Transport transport = getSMTPSession().getTransport(SMTP);
                         try {
                             connectTransport(transport, smtpConfig);
-                            saveChangesSafe(mimeMessage);
+                            saveChangesSafe(mimeMessage, true);
                             transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         } catch (final javax.mail.AuthenticationFailedException e) {
@@ -875,7 +875,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                  */
                 smtpMessage.removeHeader("x-original-headers");
                 if (poisoned) {
-                    saveChangesSafe(smtpMessage);
+                    saveChangesSafe(smtpMessage, true);
                 } else {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
@@ -884,7 +884,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         /*
                          * Save changes
                          */
-                        saveChangesSafe(smtpMessage);
+                        saveChangesSafe(smtpMessage, true);
                         /*
                          * TODO: Do encryption here
                          */
@@ -1227,7 +1227,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         }
     }
 
-    private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+    private void saveChangesSafe(final MimeMessage mimeMessage, boolean keepMessageIdIfPresent) throws OXException {
         final HostnameService hostnameService = Services.getService(HostnameService.class);
         String hostName;
         if (null == hostnameService) {
@@ -1238,7 +1238,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         if (null == hostName) {
             hostName = getHostName();
         }
-        MimeMessageConverter.saveChanges(mimeMessage, hostName);
+        MimeMessageConverter.saveChanges(mimeMessage, hostName, keepMessageIdIfPresent);
         // Check whether to remove MIME-Version headers from sub-parts
         if (TransportProperties.getInstance().isRemoveMimeVersionInSubParts()) {
             /*-

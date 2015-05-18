@@ -604,7 +604,7 @@ public class MailObject {
         if (null == hostName) {
             hostName = getHostName();
         }
-        MimeMessageConverter.saveChanges(mimeMessage, hostName);
+        MimeMessageConverter.saveChanges(mimeMessage, hostName, false);
     }
 
     private static String getHostName() {
