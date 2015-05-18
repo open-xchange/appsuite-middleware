@@ -76,6 +76,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
@@ -325,17 +326,30 @@ public class DispatcherServlet extends SessionServlet {
     private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
 
     /**
+     * A set of those {@link Category categories} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     */
+    private static final Set<Category> CAT_IGNOREES = Collections.unmodifiableSet(new HashSet<Category>(Arrays.<Category> asList(Category.CATEGORY_PERMISSION_DENIED)));
+
+    /**
      * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      *
      * @param e The {@code OXException} instance to check
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
     private static boolean ignore(OXException e) {
+        Category category = e.getCategory();
+        for (Category cat : CAT_IGNOREES) {
+            if (cat == category) {
+                return true;
+            }
+        }
+
         for (OXExceptionCode code : IGNOREES) {
             if (code.equals(e)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -472,7 +486,7 @@ public class DispatcherServlet extends SessionServlet {
             Throwable cause = e.getCause();
             LOG.error("Unexpected error", null == cause ? e : cause);
         } else {
-            // Ignore special "folder not found" error
+            // Ignore special errors
             if (ignore(e)) {
                 logException(e, LogLevel.DEBUG, -1);
             } else {
