@@ -94,7 +94,7 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.html.internal.parser.HtmlHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -111,7 +111,7 @@ public class OAuthSession extends AJAXSession {
 
     private final String redirectURI;
 
-    private final String[] scopes;
+    private final Scope scope;
 
     private String accessToken;
 
@@ -120,12 +120,12 @@ public class OAuthSession extends AJAXSession {
     /**
      * Initializes a new {@link OAuthSession}.
      */
-    public OAuthSession(User user, String clientId, String clientSecret, String redirectURI, String... scopes) {
+    public OAuthSession(User user, String clientId, String clientSecret, String redirectURI, Scope scope) {
         super(newWebConversation(), newOAuthHttpClient(), null);
         this.clientId = clientId;
         this.clientSecret = clientSecret;
         this.redirectURI = redirectURI;
-        this.scopes = scopes;
+        this.scope = scope;
         try {
             AJAXConfig.init();
             obtainAccess(user, getHttpClient());
@@ -149,7 +149,7 @@ public class OAuthSession extends AJAXSession {
         return client;
     }
 
-    public static HttpResponse requestAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, String scope, String... queryParams) throws Exception {
+    public static HttpResponse requestAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, Scope scope, String... queryParams) throws Exception {
         URIBuilder getLoginRedirectBuilder = new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
@@ -159,7 +159,7 @@ public class OAuthSession extends AJAXSession {
             .setParameter("redirect_uri", redirectURI)
             .setParameter("state", state);
         if (scope != null) {
-            getLoginRedirectBuilder.setParameter("scope", scope);
+            getLoginRedirectBuilder.setParameter("scope", scope.toString());
         }
 
         if (queryParams != null && queryParams.length > 0) {
@@ -174,7 +174,7 @@ public class OAuthSession extends AJAXSession {
         return loginRedirectResponse;
     }
 
-    public static HttpResponse performAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, String scope, String csrfToken, String login, String password, String... formParams) throws Exception {
+    public static HttpResponse performAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, Scope scope, String csrfToken, String login, String password, String... formParams) throws Exception {
         LinkedList<NameValuePair> authFormParams = new LinkedList<>();
         authFormParams.add(new BasicNameValuePair("user_login", login));
         authFormParams.add(new BasicNameValuePair("user_password", password));
@@ -185,7 +185,7 @@ public class OAuthSession extends AJAXSession {
         authFormParams.add(new BasicNameValuePair("response_type", "code"));
         authFormParams.add(new BasicNameValuePair("csrf_token", csrfToken));
         if (scope != null) {
-            authFormParams.add(new BasicNameValuePair("scope", scope));
+            authFormParams.add(new BasicNameValuePair("scope", scope.toString()));
         }
 
         if (formParams != null && formParams.length > 0) {
@@ -258,7 +258,6 @@ public class OAuthSession extends AJAXSession {
         String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
         String password = AJAXConfig.getProperty(user.getPassword());
         String state = UUIDs.getUnformattedStringFromRandom();
-        String scope = new DefaultScopes(scopes).scopeString();
         HttpResponse loginRedirectResponse = requestAuthorization(client, hostname, clientId, redirectURI, state, scope);
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
         URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());

@@ -76,6 +76,7 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.scope.Scope;
 
 /**
  * {@link OAuthClient}
@@ -85,12 +86,12 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Rea
  */
 public class OAuthClient extends AJAXClient {
 
-    public OAuthClient(String clientId, String clientSecret, String redirectURI, String... scopes) throws Exception {
-        this(User.User1, clientId, clientSecret, redirectURI, scopes);
+    public OAuthClient(String clientId, String clientSecret, String redirectURI, Scope scope) throws Exception {
+        this(User.User1, clientId, clientSecret, redirectURI, scope);
     }
 
-    public OAuthClient(User user, String clientId, String clientSecret, String redirectURI, String... scopes) throws Exception {
-        super(new OAuthSession(user, clientId, clientSecret, redirectURI, scopes), false);
+    public OAuthClient(User user, String clientId, String clientSecret, String redirectURI, Scope scope) throws Exception {
+        super(new OAuthSession(user, clientId, clientSecret, redirectURI, scope), false);
     }
 
     @Override

@@ -400,7 +400,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      */
     protected static boolean mayWriteViaOAuthRequest(ContentType contentType, OAuthGrant grant) {
         String scope = OAuthContentTypes.writeScopeForContentType(contentType);
-        if (scope != null && grant.getScopes().has(scope)) {
+        if (scope != null && grant.getScope().has(scope)) {
             return true;
         }
 
@@ -420,7 +420,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         String scope = OAuthContentTypes.readScopeForContentType(contentType);
-        if (scope != null && grant.getScopes().has(scope)) {
+        if (scope != null && grant.getScope().has(scope)) {
             return true;
         }
 
@@ -436,7 +436,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     protected static Set<ContentType> getReadableContentTypesForOAuthRequest(OAuthGrant grant) {
         Set<ContentType> contentTypes = new HashSet<>();
         contentTypes.add(SystemContentType.getInstance());
-        for (String scope : grant.getScopes().get()) {
+        for (String scope : grant.getScope().get()) {
             ContentType contentType = OAuthContentTypes.contentTypeForReadScope(scope);
             if (contentType != null) {
                 contentTypes.add(contentType);

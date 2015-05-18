@@ -58,24 +58,24 @@ package com.openexchange.oauth.provider.scope;
  */
 public abstract class AbstractScopeProvider implements OAuthScopeProvider {
 
-    private final String scopeId;
+    private final String token;
     private final String description;
 
     /**
      * Initializes a new {@link AbstractScopeProvider}.
      *
-     * @param scopeId The scopes unique ID
-     * @param description The scopes description as localizable string
+     * @param token The scope token
+     * @param description The tokens description as localizable string
      */
-    public AbstractScopeProvider(String scopeId, String description) {
+    public AbstractScopeProvider(String token, String description) {
         super();
-        this.scopeId = scopeId;
+        this.token = token;
         this.description = description;
     }
 
     @Override
-    public String getId() {
-        return scopeId;
+    public String getToken() {
+        return token;
     }
 
     @Override

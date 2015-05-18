@@ -50,10 +50,8 @@
 package com.openexchange.ajax.oauth.provider.actions;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,8 +60,6 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.oauth.provider.client.DefaultClient;
 import com.openexchange.oauth.provider.grant.DefaultGrantView;
 import com.openexchange.oauth.provider.grant.GrantView;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
-import com.openexchange.oauth.provider.scope.Scopes;
 
 
 /**
@@ -93,18 +89,10 @@ public class AllResponse extends AbstractAJAXResponse {
             client.setName(jClient.getString("name"));
             client.setDescription(jClient.getString("description"));
             client.setWebsite(jClient.getString("website"));
-
-            Set<String> scopeSet = new HashSet<>();
-            JSONArray jScopes = jGrant.getJSONArray("scopes");
-            for (int j = 0; j < jScopes.length(); j++) {
-                scopeSet.add(jScopes.getString(j));
-            }
-            Scopes scopes = new DefaultScopes(scopeSet);
             Date latestGrantDate = new Date(jGrant.getLong("date"));
 
             DefaultGrantView grant = new DefaultGrantView();
             grant.setClient(client);
-            grant.setScopes(scopes);
             grant.setLatestGrantDate(latestGrantDate);
             grants.add(grant);
 

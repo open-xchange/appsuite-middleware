@@ -63,8 +63,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.client.DefaultIcon;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -190,9 +189,9 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
         }
 
         {
-            Scopes defaultScope = client.getDefaultScope();
+            Scope defaultScope = client.getDefaultScope();
             if (null != defaultScope) {
-                soapClient.setDefaultScope(defaultScope.scopeString());
+                soapClient.setDefaultScope(defaultScope.toString());
             }
         }
 
@@ -280,7 +279,7 @@ public class OAuthClientServicePortTypeImpl implements OAuthClientServicePortTyp
         {
             String defaultScope = soapClientData.getDefaultScope();
             if (null != defaultScope) {
-                clientData.setDefaultScope(DefaultScopes.parseScope(defaultScope));
+                clientData.setDefaultScope(defaultScope);
             }
         }
 

@@ -124,7 +124,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
             .setParameter("response_type", "code")
             .setParameter("client_id", getClientId())
             .setParameter("redirect_uri", getRedirectURI())
-            .setParameter("scope", getScopes())
+            .setParameter("scope", getScope().toString())
             .setParameter("state", csrfState)
             .build());
         HttpResponse loginFormResponse = executeAndConsume(getLoginForm);
@@ -177,7 +177,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithMissingReferer() throws Exception {
-        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, redirectResponse.getStatusLine().getStatusCode());
 
         // Send a valid POST request with missing referer header
@@ -208,7 +208,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
 
     @Test
     public void testPOSTWithInvalidReferer() throws Exception {
-        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, redirectResponse.getStatusLine().getStatusCode());
 
         // Send a valid POST request with wrong referer header
@@ -305,7 +305,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
      * @throws Exception
      */
     private void testPOSTWithInvalidParameter(String param, ResponseType responseType, boolean omitParam, String errorCode) throws Exception {
-        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        HttpResponse redirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, redirectResponse.getStatusLine().getStatusCode());
 
         String loginRedirectLocation = getRedirectLocation(redirectResponse);
@@ -314,7 +314,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         postParams.put("response_type", "code");
         postParams.put("client_id", getClientId());
         postParams.put("redirect_uri", getRedirectURI());
-        postParams.put("scope", getScopes());
+        postParams.put("scope", getScope().toString());
         postParams.put("state", csrfState);
         postParams.put("user_login", login);
         postParams.put("user_password", password);
@@ -388,7 +388,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
     @Test
     public void testPOSTTriggersMail() throws Exception {
         // Obtain access
-        new OAuthSession(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScopes());
+        new OAuthSession(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
 
         // Test notification mail
         List<Message> messages = ajaxClient.execute(new GetMailsRequest()).getMessages();
@@ -410,7 +410,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         params.put("response_type", "code");
         params.put("client_id", getClientId());
         params.put("redirect_uri", getRedirectURI());
-        params.put("scope", getScopes());
+        params.put("scope", getScope().toString());
         params.put("state", csrfState);
 
         URI baseUri = new URIBuilder()
@@ -442,7 +442,7 @@ public class AuthorizationEndpointTest extends EndpointTest {
         params.put("response_type", "code");
         params.put("client_id", getClientId());
         params.put("redirect_uri", getRedirectURI());
-        params.put("scope", getScopes());
+        params.put("scope", getScope().toString());
         params.put("state", csrfState);
 
         URI baseUri = new URIBuilder()

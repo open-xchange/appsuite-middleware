@@ -50,14 +50,14 @@
 package com.openexchange.oauth.provider.grant;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 /**
  * An {@link OAuthGrant} encapsulates the context information of an access token.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
- * @see Scopes
+ * @see Scope
  */
 public interface OAuthGrant {
 
@@ -108,6 +108,6 @@ public interface OAuthGrant {
      *
      * @return The scopes
      */
-    Scopes getScopes();
+    Scope getScope();
 
 }

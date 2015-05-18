@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.authcode;
 
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 /**
  * {@link AuthCodeInfo}
@@ -62,7 +62,7 @@ public class AuthCodeInfo {
     private String authCode;
     private String clientId;
     private String redirectURI;
-    private Scopes scopes;
+    private Scope scope;
     private int userId;
     private int contextId;
     private long timestamp;
@@ -80,17 +80,17 @@ public class AuthCodeInfo {
      * @param authCode The authorization code
      * @param clientId The client identifier
      * @param redirectURI The redirect URI
-     * @param scopes The scopes
+     * @param scope The scope
      * @param userId The user identifier
      * @param contextId The context identifier
      * @param nanos The nanos
      */
-    public AuthCodeInfo(String authCode, String clientId, String redirectURI, Scopes scopes, int userId, int contextId, long timestamp) {
+    public AuthCodeInfo(String authCode, String clientId, String redirectURI, Scope scope, int userId, int contextId, long timestamp) {
         super();
         this.authCode = authCode;
         this.clientId = clientId;
         this.redirectURI = redirectURI;
-        this.scopes = scopes;
+        this.scope = scope;
         this.userId = userId;
         this.contextId = contextId;
         this.timestamp = timestamp;
@@ -151,21 +151,21 @@ public class AuthCodeInfo {
     }
 
     /**
-     * Gets the scopes
+     * Gets the scope
      *
-     * @return The scopes
+     * @return The scope
      */
-    public Scopes getScopes() {
-        return scopes;
+    public Scope getScope() {
+        return scope;
     }
 
     /**
-     * Sets the scopes
+     * Sets the scope
      *
-     * @param scopes The scope to set
+     * @param scope The scope to set
      */
-    public void setScopes(Scopes scopes) {
-        this.scopes = scopes;
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     /**

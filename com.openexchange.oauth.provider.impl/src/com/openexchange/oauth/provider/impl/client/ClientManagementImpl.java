@@ -63,12 +63,12 @@ import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.client.Icon;
-import com.openexchange.oauth.provider.impl.ScopeRegistry;
+import com.openexchange.oauth.provider.impl.ScopeProviderRegistry;
 import com.openexchange.oauth.provider.impl.client.storage.OAuthClientStorage;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.impl.tools.ClientId;
 import com.openexchange.oauth.provider.impl.tools.OAuthClientIdHelper;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.URIValidator;
 
 
@@ -142,10 +142,9 @@ public class ClientManagementImpl implements ClientManagement {
         checkIcon(icon);
 
         // check scope
-        Scopes scope = clientData.getDefaultScope();
-        assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope);
-        assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scope.get());
-        checkScopes(scope);
+        String scopeStr = clientData.getDefaultScope();
+        assertNotNullOrEmpty("Property 'default scope' is mandatory and must be set", scopeStr);
+        checkScope(scopeStr);
 
         String clientId = OAuthClientIdHelper.getInstance().generateClientId(contextGroup);
         String secret = UUIDs.getUnformattedString(UUID.randomUUID()) + UUIDs.getUnformattedString(UUID.randomUUID());
@@ -182,10 +181,9 @@ public class ClientManagementImpl implements ClientManagement {
             checkIcon(icon);
         }
         if (clientData.containsDefaultScope()) {
-            Scopes scope = clientData.getDefaultScope();
-            assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope);
-            assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scope.get());
-            checkScopes(scope);
+            String scopeStr = clientData.getDefaultScope();
+            assertNotNullOrEmpty("Property 'default scope' was set to an empty value", scopeStr);
+            checkScope(scopeStr);
         }
 
         return clientStorage.updateClient(clientIdObj.getGroupId(), clientId, clientData);
@@ -313,11 +311,16 @@ public class ClientManagementImpl implements ClientManagement {
         }
     }
 
-    private void checkScopes(Scopes scopes) throws ClientManagementException {
-        for (String scope : scopes.get()) {
-            if (!ScopeRegistry.getInstance().hasScopeProvider(scope)) {
-                throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, scope + " is not a valid scope.");
+    private void checkScope(String scopeStr) throws ClientManagementException {
+        if (Scope.isValidScopeString(scopeStr)) {
+            Scope scope = Scope.parseScope(scopeStr);
+            for (String token : scope.get()) {
+                if (!ScopeProviderRegistry.getInstance().hasScopeProvider(token)) {
+                    throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, token + " is not a valid scope token.");
+                }
             }
+        } else {
+            throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, scopeStr + " is not a valid scope.");
         }
     }
 

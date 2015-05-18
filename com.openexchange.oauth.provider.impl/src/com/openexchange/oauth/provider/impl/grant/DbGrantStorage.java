@@ -66,7 +66,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.update.Tools;
@@ -127,7 +127,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             stmt.setString(4, grant.getAccessToken().getBaseToken());
             stmt.setString(5, grant.getClientId());
             stmt.setLong(6, grant.getExpirationDate().getTime());
-            stmt.setString(7, grant.getScopes().scopeString());
+            stmt.setString(7, grant.getScope().toString());
             stmt.setLong(8, now);
             stmt.setLong(9, now);
             stmt.executeUpdate();
@@ -149,7 +149,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
             stmt.setString(1, grant.getRefreshToken().getBaseToken());
             stmt.setString(2, grant.getAccessToken().getBaseToken());
             stmt.setLong(3, grant.getExpirationDate().getTime());
-            stmt.setString(4, grant.getScopes().scopeString());
+            stmt.setString(4, grant.getScope().toString());
             stmt.setLong(5, System.currentTimeMillis());
             stmt.setString(6, refreshToken.getBaseToken());
             stmt.setString(7, grant.getClientId());
@@ -254,7 +254,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 grant.setAccessToken(accessToken);
                 grant.setRefreshToken(new UserizedToken(userId, contextId, rs.getString(2)));
                 grant.setExpirationDate(new Date(rs.getLong(3)));
-                grant.setScopes(DefaultScopes.parseScope(rs.getString(4)));
+                grant.setScope(Scope.parseScope(rs.getString(4)));
                 grant.setCreationDate(new Date(rs.getLong(5)));
                 return grant;
             }
@@ -290,7 +290,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 grant.setAccessToken(new UserizedToken(userId, contextId, rs.getString(2)));
                 grant.setRefreshToken(refreshToken);
                 grant.setExpirationDate(new Date(rs.getLong(3)));
-                grant.setScopes(DefaultScopes.parseScope(rs.getString(4)));
+                grant.setScope(Scope.parseScope(rs.getString(4)));
                 grant.setCreationDate(new Date(rs.getLong(5)));
                 return grant;
             }
@@ -348,7 +348,7 @@ public class DbGrantStorage implements OAuthGrantStorage {
                 grant.setAccessToken(new UserizedToken(userId, contextId, rs.getString(2)));
                 grant.setRefreshToken(new UserizedToken(userId, contextId, rs.getString(3)));
                 grant.setExpirationDate(new Date(rs.getLong(4)));
-                grant.setScopes(DefaultScopes.parseScope(rs.getString(5)));
+                grant.setScope(Scope.parseScope(rs.getString(5)));
                 grant.setCreationDate(new Date(rs.getLong(6)));
                 grants.add(grant);
             }

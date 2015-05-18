@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.impl.osgi;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.oauth.provider.impl.ScopeRegistry;
+import com.openexchange.oauth.provider.impl.ScopeProviderRegistry;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 
 
@@ -75,7 +75,7 @@ public class OAuthScopeProviderTracker implements ServiceTrackerCustomizer<OAuth
     public OAuthScopeProvider addingService(ServiceReference<OAuthScopeProvider> reference) {
         OAuthScopeProvider service = context.getService(reference);
         if (service != null) {
-            ScopeRegistry.getInstance().addScopeProvider(service);
+            ScopeProviderRegistry.getInstance().addScopeProvider(service);
         }
 
         return service;
@@ -88,7 +88,7 @@ public class OAuthScopeProviderTracker implements ServiceTrackerCustomizer<OAuth
 
     @Override
     public void removedService(ServiceReference<OAuthScopeProvider> reference, OAuthScopeProvider service) {
-        ScopeRegistry.getInstance().removeScopeProvider(service);
+        ScopeProviderRegistry.getInstance().removeScopeProvider(service);
     }
 
 }

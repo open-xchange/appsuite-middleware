@@ -60,7 +60,7 @@ import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -165,7 +165,7 @@ public class SimOAuthResourceService implements OAuthResourceService {
             }
 
             @Override
-            public Scopes getDefaultScope() {
+            public Scope getDefaultScope() {
                 // TODO Auto-generated method stub
                 return null;
             }

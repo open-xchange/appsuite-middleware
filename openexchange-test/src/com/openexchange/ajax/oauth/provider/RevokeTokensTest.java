@@ -69,7 +69,7 @@ public class RevokeTokensTest extends EndpointTest {
 
     @Test
     public void testRevokeAccessToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI());
+        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
 
         HttpGet revoke = new HttpGet(new URIBuilder()
@@ -86,7 +86,7 @@ public class RevokeTokensTest extends EndpointTest {
 
     @Test
     public void testRevokeRefreshToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI());
+        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
 
         HttpGet revoke = new HttpGet(new URIBuilder()

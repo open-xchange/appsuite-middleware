@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.impl.grant;
 import java.util.Date;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.oauth.provider.impl.authcode.AuthCodeInfo;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -75,7 +75,7 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     private Date expirationDate;
 
-    private Scopes scopes;
+    private Scope scope;
 
 
     public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
@@ -86,7 +86,7 @@ public class OAuthGrantImpl implements OAuthGrant {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.expirationDate = expirationDate;
-        scopes = authCodeInfo.getScopes();
+        scope = authCodeInfo.getScope();
     }
 
     public OAuthGrantImpl(StoredGrant storedGrant) {
@@ -97,7 +97,7 @@ public class OAuthGrantImpl implements OAuthGrant {
         accessToken = storedGrant.getAccessToken().getToken();
         refreshToken = storedGrant.getRefreshToken().getToken();
         expirationDate = storedGrant.getExpirationDate();
-        scopes = storedGrant.getScopes();
+        scope = storedGrant.getScope();
     }
 
     /**
@@ -111,7 +111,7 @@ public class OAuthGrantImpl implements OAuthGrant {
         accessToken = grant.getAccessToken();
         refreshToken = grant.getRefreshToken();
         expirationDate = grant.getExpirationDate();
-        scopes = grant.getScopes();
+        scope = grant.getScope();
     }
 
 
@@ -146,8 +146,8 @@ public class OAuthGrantImpl implements OAuthGrant {
     }
 
     @Override
-    public Scopes getScopes() {
-        return scopes;
+    public Scope getScope() {
+        return scope;
     }
 
     public void setAccessToken(String accessToken) {
@@ -162,8 +162,8 @@ public class OAuthGrantImpl implements OAuthGrant {
         this.expirationDate = expirationDate;
     }
 
-    public void setScopes(Scopes scopes) {
-        this.scopes = scopes;
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
 }

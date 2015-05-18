@@ -55,39 +55,39 @@ import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 
 
 /**
- * {@link ScopeRegistry}
+ * {@link ScopeProviderRegistry}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ScopeRegistry {
+public class ScopeProviderRegistry {
 
-    private static final ScopeRegistry INSTANCE = new ScopeRegistry();
+    private static final ScopeProviderRegistry INSTANCE = new ScopeProviderRegistry();
 
     private final ConcurrentMap<String, OAuthScopeProvider> providers = new ConcurrentHashMap<>();
 
-    private ScopeRegistry() {
+    private ScopeProviderRegistry() {
         super();
     }
 
-    public static ScopeRegistry getInstance() {
+    public static ScopeProviderRegistry getInstance() {
         return INSTANCE;
     }
 
     public void addScopeProvider(OAuthScopeProvider provider) {
-        providers.put(provider.getId(), provider);
+        providers.put(provider.getToken(), provider);
     }
 
     public void removeScopeProvider(OAuthScopeProvider provider) {
-        providers.remove(provider.getId(), provider);
+        providers.remove(provider.getToken(), provider);
     }
 
-    public OAuthScopeProvider getProvider(String scope) {
-        return providers.get(scope);
+    public OAuthScopeProvider getProvider(String token) {
+        return providers.get(token);
     }
 
-    public boolean hasScopeProvider(String scope) {
-        return providers.containsKey(scope);
+    public boolean hasScopeProvider(String token) {
+        return providers.containsKey(token);
     }
 
 }

@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider.impl.authcode;
 
 import org.apache.commons.lang.RandomStringUtils;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -74,7 +74,7 @@ public abstract class AbstractAuthorizationCodeProvider {
         this.services = services;
     }
 
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scopes scope, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
         String authCode = generateAuthCode(userId, contextId);
         put(new AuthCodeInfo(authCode, clientId, redirectURI, scope, userId, contextId, System.currentTimeMillis()));
         return authCode;

@@ -98,6 +98,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;
@@ -120,8 +121,6 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private FolderTestManager ftm2;
 
-    private final String scope;
-
     private final ContentType contentType;
 
     private FolderObject privateSubfolder;
@@ -136,25 +135,24 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private Set<Integer> groups;
 
-    private static final Map<String, ContentType> S2CT = new HashMap<>();
+    private static final Map<Scope, ContentType> S2CT = new HashMap<>();
     static {
-        S2CT.put(ContactActionFactory.OAUTH_READ_SCOPE, ContactContentType.getInstance());
-        S2CT.put(AppointmentActionFactory.OAUTH_READ_SCOPE, CalendarContentType.getInstance());
-        S2CT.put(TaskActionFactory.OAUTH_READ_SCOPE, TaskContentType.getInstance());
+        S2CT.put(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE), ContactContentType.getInstance());
+        S2CT.put(Scope.newInstance(AppointmentActionFactory.OAUTH_READ_SCOPE), CalendarContentType.getInstance());
+        S2CT.put(Scope.newInstance(TaskActionFactory.OAUTH_READ_SCOPE), TaskContentType.getInstance());
     }
 
     @Parameters(name = "{1}")
     public static Collection<Object[]> generateData() {
         List<Object[]> params = new ArrayList<>(S2CT.size());
-        for (String scope : S2CT.keySet()) {
+        for (Scope scope : S2CT.keySet()) {
             params.add(new Object[] { scope, S2CT.get(scope) });
         }
         return params;
     }
 
-    public ReadFoldersTest(String scope, ContentType contentType) throws OXException {
-        super();
-        this.scope = scope;
+    public ReadFoldersTest(Scope scope, ContentType contentType) throws OXException {
+        super(scope);
         this.contentType = contentType;
     }
 
@@ -331,9 +329,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Test
     public void testInsufficientScopeOnAllVisibleFolders() throws Exception {
-        HashSet<String> invalidScopes = new HashSet<>(S2CT.keySet());
+        HashSet<Scope> invalidScopes = new HashSet<>(S2CT.keySet());
         invalidScopes.remove(scope);
-        for (String invalidScope : invalidScopes) {
+        for (Scope invalidScope : invalidScopes) {
             ContentType invalidContentType = S2CT.get(invalidScope);
             VisibleFoldersResponse response = client.execute(new VisibleFoldersRequest(EnumAPI.OX_NEW, invalidContentType.toString(), VisibleFoldersRequest.DEFAULT_COLUMNS, false));
             assertFolderNotVisibleError(response, invalidScope);
@@ -342,9 +340,9 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Test
     public void testInsufficientScopeOnGet() throws Exception {
-        HashSet<String> invalidScopes = new HashSet<>(S2CT.keySet());
+        HashSet<Scope> invalidScopes = new HashSet<>(S2CT.keySet());
         invalidScopes.remove(scope);
-        for (String invalidScope : invalidScopes) {
+        for (Scope invalidScope : invalidScopes) {
             ContentType invalidContentType = S2CT.get(invalidScope);
             // get folders via ajax client and verify that every single get-request for those folders fails
             // for the according OAuth client because of insufficient scope
@@ -367,11 +365,11 @@ public class ReadFoldersTest extends AbstractOAuthTest {
         }
     }
 
-    private void assertFolderNotVisibleError(AbstractAJAXResponse response, String requiredScope) {
+    private void assertFolderNotVisibleError(AbstractAJAXResponse response, Scope requiredScope) {
         OXException e = response.getException();
         Assert.assertTrue(e instanceof OAuthInsufficientScopeException || FolderExceptionErrorMessage.FOLDER_NOT_VISIBLE.equals(e));
         if (e instanceof OAuthInsufficientScopeException) {
-            Assert.assertEquals(requiredScope, ((OAuthInsufficientScopeException)e).getScope());
+            Assert.assertEquals(requiredScope.toString(), ((OAuthInsufficientScopeException)e).getScope());
         }
     }
 

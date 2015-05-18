@@ -118,7 +118,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
 
             throw new OAuthInsufficientScopeException();
         } else {
-            if (!grant.getScopes().has(requiredScope)) {
+            if (!grant.getScope().has(requiredScope)) {
                 throw new OAuthInsufficientScopeException(requiredScope);
             }
         }

@@ -57,7 +57,7 @@ import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.authcode.portable.PortableAuthCodeInfo;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 
@@ -123,7 +123,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         }
 
         // Continue...
-        map.put(authCodeInfo.getAuthCode(), new PortableAuthCodeInfo(authCodeInfo.getClientId(), authCodeInfo.getRedirectURI(), authCodeInfo.getScopes(), authCodeInfo.getUserId(), authCodeInfo.getContextId(), authCodeInfo.getTimestamp()));
+        map.put(authCodeInfo.getAuthCode(), new PortableAuthCodeInfo(authCodeInfo.getClientId(), authCodeInfo.getRedirectURI(), authCodeInfo.getScope(), authCodeInfo.getUserId(), authCodeInfo.getContextId(), authCodeInfo.getTimestamp()));
     }
 
     @Override
@@ -146,8 +146,7 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
         // Check if valid
         int contextId = value.getContextId();
         int userId = value.getUserId();
-        String sScope = value.getScope();
-        AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode, value.getClientId(), value.getRedirectURI(), DefaultScopes.parseScope(sScope), userId, contextId, value.getNanos());
+        AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode, value.getClientId(), value.getRedirectURI(), Scope.parseScope(value.getScope()), userId, contextId, value.getNanos());
         return authCodeInfo;
     }
 

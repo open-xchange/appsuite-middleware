@@ -50,7 +50,7 @@
 package com.openexchange.oauth.provider.impl.grant;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 
 /**
@@ -71,7 +71,7 @@ public class StoredGrant {
 
     private UserizedToken refreshToken;
 
-    private Scopes scopes;
+    private Scope scope;
 
     private Date expirationDate;
 
@@ -117,12 +117,12 @@ public class StoredGrant {
         this.refreshToken = refreshToken;
     }
 
-    public Scopes getScopes() {
-        return scopes;
+    public Scope getScope() {
+        return scope;
     }
 
-    public void setScopes(Scopes scopes) {
-        this.scopes = scopes;
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     public Date getExpirationDate() {

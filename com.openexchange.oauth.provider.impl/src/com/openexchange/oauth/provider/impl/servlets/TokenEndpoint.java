@@ -197,7 +197,7 @@ public class TokenEndpoint extends OAuthEndpoint {
         result.put("refresh_token", grant.getRefreshToken());
         result.put("token_type", "Bearer");
         result.put("expires_in", TimeUnit.SECONDS.convert(grant.getExpirationDate().getTime(), TimeUnit.MILLISECONDS) - TimeUnit.SECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS));
-        result.put("scope", grant.getScopes().scopeString());
+        result.put("scope", grant.getScope().toString());
 
         resp.setContentType("application/json;charset=UTF-8");
         resp.setStatus(HttpServletResponse.SC_OK);

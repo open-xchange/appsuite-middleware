@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.client;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.URIValidator;
 
 /**
@@ -73,7 +73,7 @@ public class DefaultClient implements Client {
     private String website;
     private String contactAddress;
     private final List<String> redirectURIs;
-    private Scopes defaultScope;
+    private Scope defaultScope;
     private Date registrationDate;
     private boolean enabled;
 
@@ -141,7 +141,7 @@ public class DefaultClient implements Client {
     }
 
     @Override
-    public Scopes getDefaultScope() {
+    public Scope getDefaultScope() {
         return defaultScope;
     }
 
@@ -187,7 +187,7 @@ public class DefaultClient implements Client {
         redirectURIs.add(uri);
     }
 
-    public void setDefaultScope(Scopes defaultScope) {
+    public void setDefaultScope(Scope defaultScope) {
         this.defaultScope = defaultScope;
     }
 

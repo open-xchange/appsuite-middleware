@@ -54,13 +54,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
@@ -78,9 +76,8 @@ import com.openexchange.oauth.provider.impl.authcode.AuthCodeInfo;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantImpl;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.impl.grant.StoredGrant;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.URIValidator;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
@@ -115,7 +112,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException {
+    public String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException {
         // Check if user is allowed to create more grants
         int distinctGrants = grantStorage.countDistinctGrants(contextId, userId);
         if (distinctGrants >= MAX_CLIENTS_PER_USER) {
@@ -126,16 +123,15 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         CapabilityService capabilityService = requireService(CapabilityService.class, services);
         CapabilitySet capabilities = capabilityService.getCapabilities(userId, contextId);
 
-        Set<String> grantedScopes = new HashSet<>();
-        Scopes scopes = DefaultScopes.parseScope(scopeString);
-        for (String scope : scopes.get()) {
-            OAuthScopeProvider provider = ScopeRegistry.getInstance().getProvider(scope);
+        List<String> grantedTokens = new LinkedList<>();
+        for (String token : scope.get()) {
+            OAuthScopeProvider provider = ScopeProviderRegistry.getInstance().getProvider(token);
             if (provider != null && provider.canBeGranted(capabilities)) {
-                grantedScopes.add(scope);
+                grantedTokens.add(token);
             }
         }
 
-        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, new DefaultScopes(grantedScopes.toArray(new String[0])), userId, contextId);
+        return authCodeProvider.generateAuthorizationCodeFor(clientId, redirectURI, Scope.newInstance(grantedTokens), userId, contextId);
     }
 
     @Override
@@ -158,7 +154,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
         storedGrant.setAccessToken(accessToken);
         storedGrant.setRefreshToken(refreshToken);
         storedGrant.setExpirationDate(expirationDate);
-        storedGrant.setScopes(authCodeInfo.getScopes());
+        storedGrant.setScope(authCodeInfo.getScope());
         grantStorage.saveGrant(storedGrant);
         return new OAuthGrantImpl(storedGrant);
     }
@@ -231,15 +227,15 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
     }
 
     @Override
-    public boolean isValidScopeString(String scopeString) {
-        if (DefaultScopes.isValidScopeString(scopeString)) {
-            Scopes scopes = DefaultScopes.parseScope(scopeString);
-            if (scopes.size() == 0) {
+    public boolean isValidScope(String scopeString) {
+        if (Scope.isValidScopeString(scopeString)) {
+            Scope scope = Scope.parseScope(scopeString);
+            if (scope.size() == 0) {
                 return false;
             }
 
-            for (String scope : scopes.get()) {
-                if (!ScopeRegistry.getInstance().hasScopeProvider(scope)) {
+            for (String token : scope.get()) {
+                if (!ScopeProviderRegistry.getInstance().hasScopeProvider(token)) {
                     return false;
                 }
             }
@@ -282,10 +278,10 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
                 throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
 
-            Set<String> scopes = new HashSet<>();
+            List<String> scopeTokens = new LinkedList<>();
             Date latestGrantDate = new Date(0);
             for (StoredGrant grant : entry.getValue()) {
-                scopes.addAll(grant.getScopes().get());
+                scopeTokens.addAll(grant.getScope().get());
                 Date creationDate = grant.getCreationDate();
                 if (creationDate.after(latestGrantDate)) {
                     latestGrantDate = creationDate;
@@ -294,7 +290,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
             DefaultGrantView view = new DefaultGrantView();
             view.setClient(client);
-            view.setScopes(new DefaultScopes(scopes));
+            view.setScope(Scope.newInstance(scopeTokens));
             view.setLatestGrantDate(latestGrantDate);
             grantViews.add(view);
         }
@@ -309,7 +305,7 @@ public class OAuthProviderServiceImpl implements OAuthProviderService {
 
     @Override
     public OAuthScopeProvider getScopeProvider(String scopeId) {
-        return ScopeRegistry.getInstance().getProvider(scopeId);
+        return ScopeProviderRegistry.getInstance().getProvider(scopeId);
     }
 
 }

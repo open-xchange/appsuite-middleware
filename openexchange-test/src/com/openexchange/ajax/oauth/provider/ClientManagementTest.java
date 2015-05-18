@@ -84,7 +84,7 @@ import com.openexchange.oauth.provider.client.DefaultIcon;
 import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.impl.tools.ClientId;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tasks.json.TaskActionFactory;
 
 
@@ -177,7 +177,7 @@ public class ClientManagementTest {
             updatedIcon.setData(updatedIconBytes);
             updatedClientData.setIcon(updatedIcon);
             updatedClientData.setRedirectURIs(Collections.singleton("https://example.com/oauth/client/endpoint"));
-            updatedClientData.setDefaultScope(new DefaultScopes(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE));
+            updatedClientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE).toString());
             client = clientManagement.updateClient(client.getId(), updatedClientData, credentials);
             compare(updatedClientData, client);
         } finally {
@@ -286,7 +286,7 @@ public class ClientManagementTest {
         String invalidScope = "doSomething";
         thrown.expect(new CMEMatcher(invalidScope));
         ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        clientData.setDefaultScope(DefaultScopes.parseScope(invalidScope));
+        clientData.setDefaultScope(invalidScope);
         clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
     }
 
@@ -296,7 +296,7 @@ public class ClientManagementTest {
         String invalidScope = "doSomething";
         thrown.expect(new CMEMatcher(invalidScope));
         ClientData clientData = new ClientData();
-        clientData.setDefaultScope(DefaultScopes.parseScope(invalidScope));
+        clientData.setDefaultScope(invalidScope);
         clientManagement.updateClient(client.getId(), clientData, credentials);
     }
 
@@ -320,7 +320,7 @@ public class ClientManagementTest {
         assertEquals(clientData.getContactAddress(), client.getContactAddress());
         assertEquals(clientData.getDescription(), client.getDescription());
         assertEquals(clientData.getWebsite(), client.getWebsite());
-        assertEquals(clientData.getDefaultScope(), client.getDefaultScope());
+        assertEquals(clientData.getDefaultScope(), client.getDefaultScope().toString());
         assertEquals(new HashSet<>(clientData.getRedirectURIs()), new HashSet<>(client.getRedirectURIs()));
         assertArrayEquals(ByteStreams.toByteArray(clientData.getIcon().getInputStream()), ByteStreams.toByteArray(client.getIcon().getInputStream()));
         assertTrue(client.getRegistrationDate().getTime() > 0);
@@ -368,7 +368,7 @@ public class ClientManagementTest {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(new DefaultScopes(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE));
+        clientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE).toString());
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }

@@ -58,8 +58,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
@@ -105,11 +105,11 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             stmt.setInt(pos++, authCodeInfo.getUserId());
             stmt.setString(pos++, authCodeInfo.getClientId());
             stmt.setString(pos++, authCodeInfo.getRedirectURI());
-            Scopes scopes = authCodeInfo.getScopes();
-            if (null == scopes) {
+            Scope scope = authCodeInfo.getScope();
+            if (null == scope) {
                 stmt.setNull(pos++, java.sql.Types.VARCHAR);
             } else {
-                stmt.setString(pos++, scopes.scopeString());
+                stmt.setString(pos++, scope.toString());
             }
             stmt.setLong(pos, authCodeInfo.getTimestamp());
             stmt.executeUpdate();
@@ -168,7 +168,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             // Read values
             String clientId = rs.getString(1);
             String redirectURI = rs.getString(2);
-            String sScope = rs.getString(3);
+            String scopeStr = rs.getString(3);
             long timestamp = rs.getLong(4);
 
             // Delete entry
@@ -178,7 +178,7 @@ public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
             }
 
             // Perform check
-            AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode, clientId, redirectURI, DefaultScopes.parseScope(sScope), userId, contextId, timestamp);
+            AuthCodeInfo authCodeInfo = new AuthCodeInfo(authCode, clientId, redirectURI, Scope.parseScope(scopeStr), userId, contextId, timestamp);
             return authCodeInfo;
         } catch (SQLException e) {
             throw OAuthProviderExceptionCodes.SQL_ERROR.create(e, e.getMessage());

@@ -99,9 +99,8 @@ import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.notification.OAuthMailNotificationService;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
-import com.openexchange.oauth.provider.scope.Scopes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.configuration.ServerConfig;
@@ -156,7 +155,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             try {
                 if (respondWithForm(request)) {
                     // Send login form
-                    String loginPage = compileLoginPage(request, authRequest.getRedirectURI(), authRequest.getState(), csrfToken, authRequest.getClient(), DefaultScopes.parseScope(authRequest.getScope()), determineLocale(request));
+                    String loginPage = compileLoginPage(request, authRequest.getRedirectURI(), authRequest.getState(), csrfToken, authRequest.getClient(), authRequest.getScope(), determineLocale(request));
                     response.setContentType("text/html; charset=UTF-8");
                     response.setHeader("Content-Disposition", "inline");
                     response.setStatus(200);
@@ -367,9 +366,9 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
 
         private final String state;
 
-        private final String scope;
+        private final Scope scope;
 
-        protected AuthorizationRequest(Client client, String redirectURI, String state, String scope) {
+        protected AuthorizationRequest(Client client, String redirectURI, String state, Scope scope) {
             super();
             this.client = client;
             this.redirectURI = redirectURI;
@@ -393,7 +392,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
 
-        public String getScope() {
+        public Scope getScope() {
             return scope;
         }
 
@@ -420,7 +419,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return null;
             }
 
-            String scope = checkScope(request, response, client, redirectURI, state);
+            Scope scope = checkScope(request, response, client, redirectURI, state);
             if (scope == null) {
                 return null;
             }
@@ -576,22 +575,22 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      * @throws IOException
      * @throws OXException If constructing the error redirect fails
      */
-    private String checkScope(HttpServletRequest request, HttpServletResponse response, Client client, String redirectURI, String state) throws IOException, OXException {
-        String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
-        if (Strings.isEmpty(scope)) {
-            scope = client.getDefaultScope().scopeString();
+    private Scope checkScope(HttpServletRequest request, HttpServletResponse response, Client client, String redirectURI, String state) throws IOException, OXException {
+        Scope scope;
+        String scopeStr = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
+        if (Strings.isEmpty(scopeStr)) {
+            scope = client.getDefaultScope();
+        } else if (oAuthProvider.isValidScope(scopeStr)) {
+            scope = Scope.parseScope(scopeStr);
         } else {
-            // Validate scope
-            if (!oAuthProvider.isValidScopeString(scope)) {
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "Invalid scope: " + scope, OAuthProviderConstants.PARAM_STATE, state));
-                return null;
-            }
+            response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "Invalid scope: " + scopeStr, OAuthProviderConstants.PARAM_STATE, state));
+            return null;
         }
 
         return scope;
     }
 
-    private String compileLoginPage(HttpServletRequest request, String redirectURI, String state, String csrfToken, Client client, Scopes scopes, Locale locale) throws OXException, IOException {
+    private String compileLoginPage(HttpServletRequest request, String redirectURI, String state, String csrfToken, Client client, Scope scope, Locale locale) throws OXException, IOException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         TemplateService templateService = requireService(TemplateService.class, services);
         HtmlService htmlService = requireService(HtmlService.class, services);
@@ -607,11 +606,12 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         String clientName = htmlService.htmlFormat(client.getName());
         vars.put("iconAlternative", clientName);
         vars.put("intro", translator.translate(String.format(OAuthProviderStrings.OAUTH_INTRO, clientName)));
-        List<String> descriptions = new ArrayList<>(scopes.size());
-        for (String scope : scopes.get()) {
-            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(scope);
+        List<String> descriptions = new ArrayList<>(scope.size());
+        for (String token : scope.get()) {
+            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
             if (scopeProvider == null) {
-                descriptions.add(scope);
+                LOG.warn("No scope provider available for token {}", token);
+                descriptions.add(token);
             } else {
                 descriptions.add(translator.translate(scopeProvider.getDescription()));
             }
@@ -625,7 +625,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
         vars.put("clientId", client.getId());
         vars.put("redirectURI", redirectURI);
-        vars.put("scopes", scopes.scopeString());
+        vars.put("scopes", scope.toString());
         vars.put("state", state);
         vars.put("csrfToken", csrfToken);
 

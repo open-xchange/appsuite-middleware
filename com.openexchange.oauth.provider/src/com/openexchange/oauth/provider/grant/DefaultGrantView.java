@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider.grant;
 
 import java.util.Date;
 import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -64,7 +64,7 @@ public class DefaultGrantView implements GrantView {
 
     private Client client;
 
-    private Scopes scopes;
+    private Scope scope;
 
     private Date grantDate;
 
@@ -74,8 +74,8 @@ public class DefaultGrantView implements GrantView {
     }
 
     @Override
-    public Scopes getScopes() {
-        return scopes;
+    public Scope getScope() {
+        return scope;
     }
 
     @Override
@@ -87,8 +87,8 @@ public class DefaultGrantView implements GrantView {
         this.client = client;
     }
 
-    public void setScopes(Scopes scopes) {
-        this.scopes = scopes;
+    public void setScope(Scope scope) {
+        this.scope = scope;
     }
 
     public void setLatestGrantDate(Date grantDate) {
@@ -101,7 +101,7 @@ public class DefaultGrantView implements GrantView {
         int result = 1;
         result = prime * result + ((client == null) ? 0 : client.hashCode());
         result = prime * result + ((grantDate == null) ? 0 : grantDate.hashCode());
-        result = prime * result + ((scopes == null) ? 0 : scopes.hashCode());
+        result = prime * result + ((scope == null) ? 0 : scope.hashCode());
         return result;
     }
 
@@ -131,11 +131,11 @@ public class DefaultGrantView implements GrantView {
         } else if (!grantDate.equals(other.grantDate)) {
             return false;
         }
-        if (scopes == null) {
-            if (other.scopes != null) {
+        if (scope == null) {
+            if (other.scope != null) {
                 return false;
             }
-        } else if (!scopes.equals(other.scopes)) {
+        } else if (!scope.equals(other.scope)) {
             return false;
         }
         return true;
@@ -143,7 +143,7 @@ public class DefaultGrantView implements GrantView {
 
     @Override
     public String toString() {
-        return "DefaultGrantView [client=" + client + ", scopes=" + scopes + ", grantDate=" + grantDate + "]";
+        return "DefaultGrantView [client=" + client + ", scope=" + scope + ", grantDate=" + grantDate + "]";
     }
 
 }

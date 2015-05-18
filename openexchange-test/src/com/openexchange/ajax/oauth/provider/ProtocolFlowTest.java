@@ -93,7 +93,7 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testRedeemRefreshToken() throws Exception {
-        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScopes());
+        OAuthClient oauthClient = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
         oauthClient.assertAccess();
         OAuthSession session = (OAuthSession) oauthClient.getSession();
         String accessToken = session.getAccessToken();
@@ -138,12 +138,12 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testRedeemIsDeniedWhenRedirectURIChanges() throws Exception {
-        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
         URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
         Map<String, String> parameters = OAuthSession.extractFragmentParams(location.getFragment());
 
-        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), parameters.get("csrf_token"), login, password);
+        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope(), parameters.get("csrf_token"), login, password);
         assertEquals("Unexpected status code", HttpStatus.SC_OK, authCodeResponse.getStatusLine().getStatusCode());
         JSONObject authCodeJSON = OAuthSession.extractJSON(authCodeResponse);
         assertFalse(authCodeJSON.toString(), authCodeJSON.has("error"));
@@ -167,12 +167,12 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testFormAndRedirect() throws Exception {
-        HttpResponse loginFormResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), "respond_with", "form"); // &respond_with=form
+        HttpResponse loginFormResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope(), "respond_with", "form"); // &respond_with=form
         assertEquals(HttpStatus.SC_OK, loginFormResponse.getStatusLine().getStatusCode());
         String loginForm = EntityUtils.toString(loginFormResponse.getEntity());
         Map<String, String> hiddenFormFields = OAuthSession.getHiddenFormFields(loginForm);
 
-        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), hiddenFormFields.get("csrf_token"), login, password, "redirect", "true"); // &redirect=true
+        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope(), hiddenFormFields.get("csrf_token"), login, password, "redirect", "true"); // &redirect=true
         assertEquals("Unexpected status code", HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
         String redirectLocation = authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue();
 
@@ -192,12 +192,12 @@ public class ProtocolFlowTest extends EndpointTest {
 
     @Test
     public void testAuthCodeReplay() throws Exception {
-        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
         URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
         Map<String, String> parameters = OAuthSession.extractFragmentParams(location.getFragment());
 
-        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes(), parameters.get("csrf_token"), login, password);
+        HttpResponse authCodeResponse = OAuthSession.performAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope(), parameters.get("csrf_token"), login, password);
         assertEquals("Unexpected status code", HttpStatus.SC_OK, authCodeResponse.getStatusLine().getStatusCode());
         JSONObject authCodeJSON = OAuthSession.extractJSON(authCodeResponse);
         assertFalse(authCodeJSON.toString(), authCodeJSON.has("error"));
@@ -236,14 +236,14 @@ public class ProtocolFlowTest extends EndpointTest {
         try {
             // acquire one token per client
             for (Client client : clients) {
-                OAuthClient c = new OAuthClient(client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScopes());
+                OAuthClient c = new OAuthClient(client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScope());
                 c.assertAccess();
             }
 
             // now the max + 1 try with the default client
             boolean error = false;
             try {
-                OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScopes());
+                OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
                 c.assertAccess();
             } catch (AssertionError e) {
                 error = true;
@@ -256,7 +256,7 @@ public class ProtocolFlowTest extends EndpointTest {
             clientManagement.unregisterClient(client2.getId(), masterAdminCredentials);
             it.remove();
 
-            OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScopes());
+            OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
             c.assertAccess();
         } finally {
             for (Client client : clients) {
@@ -275,7 +275,7 @@ public class ProtocolFlowTest extends EndpointTest {
         List<OAuthClient> clients = new ArrayList<>();
         for (int i = 0; i < OAuthGrantStorage.MAX_GRANTS_PER_CLIENT; i++) {
             // obtains a fresh access token
-            clients.add(new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScopes()));
+            clients.add(new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope()));
             LockSupport.parkNanos(1000000);  // last modified is used to delete old entries and has milliseconds granularity
         }
 
@@ -284,7 +284,7 @@ public class ProtocolFlowTest extends EndpointTest {
         }
 
         // max + 1 should replace the oldest one
-        clients.add(new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScopes()));
+        clients.add(new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope()));
         boolean error = false;
         try {
             clients.get(0).assertAccess();

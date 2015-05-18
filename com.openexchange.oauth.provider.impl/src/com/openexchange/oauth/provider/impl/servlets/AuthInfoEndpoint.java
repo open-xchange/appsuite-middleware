@@ -72,7 +72,8 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.client.Icon;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -119,10 +120,10 @@ public class AuthInfoEndpoint extends OAuthEndpoint {
 
             String scope = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
             if (Strings.isEmpty(scope)) {
-                scope = client.getDefaultScope().scopeString();
+                scope = client.getDefaultScope().toString();
             } else {
                 // Validate scope
-                if (!oAuthProvider.isValidScopeString(scope)) {
+                if (!oAuthProvider.isValidScope(scope)) {
                     sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "invalid parameter value: "+OAuthProviderConstants.PARAM_SCOPE);
                     return;
                 }
@@ -143,11 +144,18 @@ public class AuthInfoEndpoint extends OAuthEndpoint {
             jClient.put("icon", icon2HTMLDataSource(icon));
 
             JSONObject jScopes = new JSONObject();
-            Set<String> scopes = DefaultScopes.parseScope(scope).get();
+            Set<String> scopeTokens = Scope.parseScope(scope).get();
             Translator translator = requireService(TranslatorFactory.class, services).translatorFor(locale);
-            for (String s : scopes) {
-                String description = translator.translate(oAuthProvider.getScopeProvider(s).getDescription());
-                jScopes.put(s, description);
+            for (String token : scopeTokens) {
+                OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
+                String description;
+                if (scopeProvider == null) {
+                    LOG.warn("No scope provider available for token {}", token);
+                    description = token;
+                } else {
+                    description = translator.translate(scopeProvider.getDescription());
+                }
+                jScopes.put(token, description);
             }
 
             JSONObject jResult = new JSONObject();

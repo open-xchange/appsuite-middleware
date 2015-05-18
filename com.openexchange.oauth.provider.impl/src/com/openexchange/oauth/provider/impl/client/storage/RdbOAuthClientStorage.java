@@ -77,7 +77,7 @@ import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.client.LazyIcon;
 import com.openexchange.oauth.provider.impl.client.Obfuscator;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -233,7 +233,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             Icon icon = clientData.getIcon();
             stmt.setBlob(6, icon.getInputStream());
             stmt.setString(7, icon.getMimeType());
-            stmt.setString(8, clientData.getDefaultScope().scopeString());
+            stmt.setString(8, clientData.getDefaultScope());
             stmt.setString(9, clientData.getContactAddress());
             stmt.setString(10, clientData.getWebsite());
             stmt.setBoolean(11, true);
@@ -351,7 +351,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             if (clientData.containsDefaultScope()) {
                 sql.append(" default_scope = ?,");
-                values.add(new TypedObject(clientData.getDefaultScope().scopeString(), Types.VARCHAR));
+                values.add(new TypedObject(clientData.getDefaultScope(), Types.VARCHAR));
             }
 
             if (!values.isEmpty()) {
@@ -656,7 +656,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
         String defaultScope = clientRS.getString("default_scope");
         if (!clientRS.wasNull()) {
-            client.setDefaultScope(DefaultScopes.parseScope(defaultScope));
+            client.setDefaultScope(Scope.parseScope(defaultScope));
         }
 
         String contactAddress = clientRS.getString("contact_address");
@@ -737,7 +737,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
         DefaultClient client = new DefaultClient();
         client.setName(clientData.getName());
         client.setDescription(clientData.getDescription());
-        client.setDefaultScope(clientData.getDefaultScope());
+        client.setDefaultScope(Scope.parseScope(clientData.getDefaultScope()));
         client.setContactAddress(clientData.getContactAddress());
         client.setWebsite(clientData.getWebsite());
         for (String uri : clientData.getRedirectURIs()) {

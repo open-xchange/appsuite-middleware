@@ -64,7 +64,6 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
 
 
 /**
@@ -76,7 +75,7 @@ public class AuthInfoEndpointTest extends EndpointTest {
 
     @Test
     public void testGetAuthInfo() throws Exception {
-        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScopes());
+        HttpResponse loginRedirectResponse = OAuthSession.requestAuthorization(client, hostname, getClientId(), getRedirectURI(), csrfState, getScope());
         assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
         URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
         Map<String, String> parameters = OAuthSession.extractFragmentParams(location.getFragment());
@@ -102,9 +101,9 @@ public class AuthInfoEndpointTest extends EndpointTest {
         assertEquals(Base64.encodeBase64String(IOUtils.toByteArray(oauthClient.getIcon().getInputStream())), iconString.substring(iconString.indexOf(',') + 1));
 
         JSONObject jScopes = jAuthInfo.getJSONObject("scopes");
-        Set<String> scopeSet = DefaultScopes.parseScope(getScopes()).get();
-        assertEquals(jScopes.length(), scopeSet.size());
-        for (String s : scopeSet) {
+        Set<String> scopeTokens = getScope().get();
+        assertEquals(jScopes.length(), scopeTokens.size());
+        for (String s : scopeTokens) {
             assertTrue(jScopes.hasAndNotNull(s));
         }
     }

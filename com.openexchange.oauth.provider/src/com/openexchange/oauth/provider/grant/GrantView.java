@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider.grant;
 
 import java.util.Date;
 import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -72,12 +72,12 @@ public interface GrantView {
     Client getClient();
 
     /**
-     * Gets the super-set of all scopes the client has access to. The individual scopes
-     * might belong to multiple different grants.
+     * Gets a scope constructed of the super-set of all scope tokens the client has access to.
+     * The individual tokens might belong to multiple different grants.
      *
      * @return The scopes
      */
-    Scopes getScopes();
+    Scope getScope();
 
     /**
      * Gets the most recent date when a user granted access for this client.

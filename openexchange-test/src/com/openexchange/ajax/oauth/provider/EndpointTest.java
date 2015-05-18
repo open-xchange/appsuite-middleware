@@ -88,7 +88,7 @@ import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.client.DefaultIcon;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -169,8 +169,8 @@ public abstract class EndpointTest {
         return response;
     }
 
-    protected String getScopes() {
-        return oauthClient.getDefaultScope().scopeString();
+    protected Scope getScope() {
+        return oauthClient.getDefaultScope();
     }
 
     protected String getClientId() {
@@ -204,7 +204,7 @@ public abstract class EndpointTest {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(new DefaultScopes("read_contacts"));
+        clientData.setDefaultScope("read_contacts");
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }

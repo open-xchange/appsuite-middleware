@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.client;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.oauth.provider.scope.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -119,7 +119,7 @@ public interface Client extends Serializable {
      *
      * @return The default scope
      */
-    Scopes getDefaultScope();
+    Scope getDefaultScope();
 
     /**
      * Gets the client's secret identifier

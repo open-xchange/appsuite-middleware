@@ -67,7 +67,7 @@ import com.openexchange.oauth.provider.client.ClientData;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.client.DefaultIcon;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tasks.json.TaskActionFactory;
 
 /**
@@ -84,12 +84,12 @@ public abstract class AbstractOAuthTest {
 
     protected AJAXClient ajaxClient;
 
-    private final String[] scopes;
+    protected Scope scope;
 
-    protected AbstractOAuthTest(String... scopes) throws OXException {
+    protected AbstractOAuthTest(Scope scope) throws OXException {
         super();
         AJAXConfig.init();
-        this.scopes =  scopes;
+        this.scope = scope;
     }
 
     @Before
@@ -98,11 +98,10 @@ public abstract class AbstractOAuthTest {
         ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
         clientApp = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
-        String[] scopes = this.scopes;
-        if (scopes == null || scopes.length == 0) {
-            scopes = clientApp.getDefaultScope().get().toArray(new String[0]);
+        if (scope == null) {
+            scope = clientApp.getDefaultScope();
         }
-        client = new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scopes);
+        client = new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
         ajaxClient = new AJAXClient(User.User1);
     }
 
@@ -129,7 +128,7 @@ public abstract class AbstractOAuthTest {
         clientData.setIcon(icon);
         clientData.setContactAddress("webmaster@example.com");
         clientData.setWebsite("http://www.example.com");
-        clientData.setDefaultScope(new DefaultScopes(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE));
+        clientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE, AppointmentActionFactory.OAUTH_READ_SCOPE, AppointmentActionFactory.OAUTH_WRITE_SCOPE, TaskActionFactory.OAUTH_READ_SCOPE, TaskActionFactory.OAUTH_WRITE_SCOPE).toString());
         clientData.setRedirectURIs(redirectURIs);
         return clientData;
     }
