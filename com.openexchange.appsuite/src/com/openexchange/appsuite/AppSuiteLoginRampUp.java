@@ -230,7 +230,7 @@ public class AppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Void call() throws Exception {
                 try {
-                    rampUp.put(RampUpKey.USER.key, ox.perform(request().module("user").action("get").params("timezone", "utc", "id", "" + session.getUserId()).format("json").build(), null, session).getResultObject());
+                    rampUp.put(RampUpKey.USER.key, ox.perform(request().module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }
