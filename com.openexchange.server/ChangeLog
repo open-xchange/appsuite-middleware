@@ -1,3 +1,7 @@
+* 2015-05-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38296: Added null guard and throwing an appropriate error message once required arguments are missing
+
 * 2015-05-12 - thorben.betten@open-xchange.com
 
  - Fix for bug 38097: Store contact with invalid/non-supported E-Mail addresses with affected address fields set to empty string
