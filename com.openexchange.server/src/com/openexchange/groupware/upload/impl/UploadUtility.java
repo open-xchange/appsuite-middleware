@@ -413,12 +413,13 @@ public final class UploadUtility {
         }
 
         // Create temporary file
-        File tmpFile = File.createTempFile("openexchange", null, new File(uploadDir));
+        File tmpFile = File.createTempFile("openexchange-upload-", null, new File(uploadDir));
         tmpFile.deleteOnExit();
 
         // Write to temporary file
         InputStream in = null;
         OutputStream out = null;
+        boolean error = true;
         try {
             in = Streams.getNonEmpty(item.openStream());
             // Check if readable...
@@ -455,8 +456,12 @@ public final class UploadUtility {
                 }
                 out.flush();
             }
+            error = false;
         } finally {
             Streams.close(in, out);
+            if (error) {
+                tmpFile.delete();
+            }
         }
 
         // Apply temporary file and its size

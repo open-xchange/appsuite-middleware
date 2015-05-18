@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Streams;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 
 /**
@@ -409,8 +410,9 @@ public final class ThresholdInputStreamProvider implements Closeable, InputStrea
      * @throws IOException If a file could not be created
      */
     private static File newTempFile() throws IOException {
-        final File tmpFile = File.createTempFile("open-xchange-", ".tmp", uploadDirectory());
+        final File tmpFile = File.createTempFile("open-xchange-imappart-", ".tmp", uploadDirectory());
         tmpFile.deleteOnExit();
+        LogProperties.appendTempFileProperty(tmpFile);
         return tmpFile;
     }
 
