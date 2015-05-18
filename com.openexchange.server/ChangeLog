@@ -1,6 +1,7 @@
 * 2015-05-18 - thorben.betten@open-xchange.com
 
  - Fix for bug 38296: Added null guard and throwing an appropriate error message once required arguments are missing
+ - Fix for bug 38293: Proper extraction of IDs from a MailMessage array with attention to possible null references
 
 * 2015-05-11 - thorben.betten@open-xchange.com
 
