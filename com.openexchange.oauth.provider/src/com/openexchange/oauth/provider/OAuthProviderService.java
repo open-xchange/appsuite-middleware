@@ -54,6 +54,9 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.grant.GrantView;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**

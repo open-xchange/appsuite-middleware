@@ -62,7 +62,7 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountRequest;
 import com.openexchange.ajax.oauth.actions.AllOAuthAccountResponse;
 import com.openexchange.ajax.oauth.actions.DeleteOAuthAccountRequest;
-import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
+import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionRequest;
 import com.openexchange.ajax.subscribe.actions.NewSubscriptionResponse;
 import com.openexchange.ajax.subscribe.actions.RefreshSubscriptionRequest;

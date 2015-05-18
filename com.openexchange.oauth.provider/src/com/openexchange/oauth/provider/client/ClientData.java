@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider.client;
 
 import java.io.Serializable;
 import java.util.Set;
-import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.scope.Scopes;
 
 /**
  * DTO class for the client management API.

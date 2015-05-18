@@ -65,7 +65,11 @@ Import-Package: com.google.common.base,
  com.openexchange.mail.utils,
  com.openexchange.multiple,
  com.openexchange.oauth.provider,
+ com.openexchange.oauth.provider.annotations,
  com.openexchange.oauth.provider.client,
+ com.openexchange.oauth.provider.exceptions,
+ com.openexchange.oauth.provider.grant,
+ com.openexchange.oauth.provider.scope,
  com.openexchange.oauth.provider.tools,
  com.openexchange.osgi,
  com.openexchange.osgi.util,
@@ -108,4 +112,4 @@ Import-Package: com.google.common.base,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ClassPath: .
-Bundle-Activator: com.openexchange.oauth.provider.osgi.OAuthProviderActivator
+Bundle-Activator: com.openexchange.oauth.provider.impl.osgi.OAuthProviderActivator

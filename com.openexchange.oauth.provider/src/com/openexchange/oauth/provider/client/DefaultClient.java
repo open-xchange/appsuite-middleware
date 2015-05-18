@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.client;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.scope.Scopes;
 import com.openexchange.oauth.provider.tools.URIValidator;
 
 /**

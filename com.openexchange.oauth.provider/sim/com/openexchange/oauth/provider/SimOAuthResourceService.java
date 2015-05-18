@@ -55,9 +55,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.Scopes;
 
 
 /**

@@ -61,22 +61,22 @@ public interface OAuthProviderConstants {
     /**
      * Servlet alias of the authorization endpoint without leading and trailing slashes
      */
-    public static final String AUTHORIZATION_SERVLET_ALIAS = "o/oauth2/authorization";
+    public static final String AUTHORIZATION_SERVLET_ALIAS = "oauth/provider/authorization";
 
     /**
      * Servlet alias of the access token endpoint without leading and trailing slashes
      */
-    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "o/oauth2/accessToken";
+    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "oauth/provider/accessToken";
 
     /**
      * Servlet alias of the endpoint for grant revocation by client applications
      */
-    public static final String REVOKE_SERVLET_ALIAS = "o/oauth2/revoke";
+    public static final String REVOKE_SERVLET_ALIAS = "oauth/provider/revoke";
 
     /**
      * Servlet alias of the endpoint for client icons
      */
-    public static final String AUTH_INFO_SERVLET_ALIAS = "o/oauth2/authinfo";
+    public static final String AUTH_INFO_SERVLET_ALIAS = "oauth/provider/authinfo";
 
     // -------------------------------------------------------------------------------------------------------
 

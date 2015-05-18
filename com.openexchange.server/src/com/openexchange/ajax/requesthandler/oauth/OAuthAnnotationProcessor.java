@@ -58,10 +58,10 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthAction;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthScopeCheck;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.session.ServerSession;
 
 

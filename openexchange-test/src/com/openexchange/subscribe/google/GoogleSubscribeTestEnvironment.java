@@ -49,8 +49,8 @@
 
 package com.openexchange.subscribe.google;
 
-import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
-import com.openexchange.ajax.oauth.provider.actions.InitOAuthAccountRequest;
+import com.openexchange.ajax.oauth.client.actions.OAuthService;
+import com.openexchange.ajax.oauth.client.actions.InitOAuthAccountRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.subscribe.AbstractSubscribeTestEnvironment;
 
@@ -93,7 +93,7 @@ public class GoogleSubscribeTestEnvironment extends AbstractSubscribeTestEnviron
      */
     @Override
     protected void initEnvironment() throws Exception {
-        InitOAuthAccountRequest req = new InitOAuthAccountRequest(AuthenticationProvider.GOOGLE);
+        InitOAuthAccountRequest req = new InitOAuthAccountRequest(OAuthService.GOOGLE);
         ajaxClient.execute(req);
     }
 

@@ -60,11 +60,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.java.Streams;
-import com.openexchange.oauth.provider.DefaultIcon;
-import com.openexchange.oauth.provider.DefaultScopes;
-import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.client.DefaultIcon;
 import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.scope.DefaultScopes;
+import com.openexchange.oauth.provider.scope.Scopes;
 
 
 /**

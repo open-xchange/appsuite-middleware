@@ -51,7 +51,7 @@ package com.openexchange.ajax.requesthandler.oauth;
 
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 
