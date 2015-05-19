@@ -74,6 +74,9 @@ import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXClient.User;
+import com.openexchange.ajax.oauth.provider.actions.RevokeRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.oauth.provider.OAuthProviderService;
@@ -236,27 +239,27 @@ public class ProtocolFlowTest extends EndpointTest {
         try {
             // acquire one token per client
             for (Client client : clients) {
-                OAuthClient c = new OAuthClient(client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScope());
+                OAuthClient c = new OAuthClient(User.User1, client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScope());
                 c.assertAccess();
             }
 
             // now the max + 1 try with the default client
             boolean error = false;
             try {
-                OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+                OAuthClient c = new OAuthClient(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
                 c.assertAccess();
             } catch (AssertionError e) {
                 error = true;
             }
             assertTrue(error);
 
-            // FIXME: don't unregister client but revoke access for one of them as soon as the API call exists
+            // revoke access for one client and assure we can now grant access to another one
             Iterator<Client> it = clients.iterator();
             Client client2 = it.next();
-            clientManagement.unregisterClient(client2.getId(), masterAdminCredentials);
-            it.remove();
+            AJAXClient ajaxClient = new AJAXClient(User.User1);
+            ajaxClient.execute(new RevokeRequest(client2.getId()));
 
-            OAuthClient c = new OAuthClient(getClientId(), getClientSecret(), getRedirectURI(), getScope());
+            OAuthClient c = new OAuthClient(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
             c.assertAccess();
         } finally {
             for (Client client : clients) {
