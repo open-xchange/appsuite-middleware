@@ -125,7 +125,9 @@ public class AutocompleteAction extends ContactAction {
          */
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        request.sortInternalIfNeeded(contacts);
+        if (request.sortInternalIfNeeded(contacts)) {
+            contacts = request.slice(contacts);
+        }
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

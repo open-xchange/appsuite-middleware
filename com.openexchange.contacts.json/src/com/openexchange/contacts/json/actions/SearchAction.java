@@ -110,7 +110,9 @@ public class SearchAction extends ContactAction {
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, getContactService().searchContacts(
             request.getSession(), contactSearch, fields, request.getSortOptions()), excludedAdminID);
-        request.sortInternalIfNeeded(contacts);
+        if (request.sortInternalIfNeeded(contacts)) {
+            contacts = request.slice(contacts);
+        }
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

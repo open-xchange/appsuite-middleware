@@ -112,7 +112,10 @@ public class BirthdaysAction extends ContactAction {
         }
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        request.sortInternalIfNeeded(contacts, ContactField.BIRTHDAY, request.getStart());
+        if (request.sortInternalIfNeeded(contacts, ContactField.BIRTHDAY, request.getStart())) {
+            // Slice...
+            contacts = request.slice(contacts);
+        }
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 
