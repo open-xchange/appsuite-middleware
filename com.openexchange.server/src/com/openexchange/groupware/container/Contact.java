@@ -1763,25 +1763,12 @@ public class Contact extends CommonObject {
     public void setNumberOfDistributionLists(final int listsize) {
         number_of_dlists = listsize;
         b_number_of_dlists = true;
-        markAsDistributionlist();
-    }
-
-    public void setNumberOfDistributionLists(final DistributionListEntryObject[] dleos) {
-        dlists = dleos;
-        if (dleos != null) {
-            number_of_dlists = dleos.length;
-        }
-        b_number_of_dlists = true;
-        markAsDistributionlist();
+        setMarkAsDistributionlist(0 < listsize);
     }
 
     public void setDistributionList(final DistributionListEntryObject[] dleo) {
         dlists = dleo;
-        if (dleo != null) {
-            number_of_dlists = dleo.length;
-        }
-        b_number_of_dlists = true;
-        markAsDistributionlist();
+        setNumberOfDistributionLists(null == dleo ? 0 : dleo.length);
     }
 
     public void setContextId(final int cid) {
@@ -1807,10 +1794,6 @@ public class Contact extends CommonObject {
     public void setMarkAsDistributionlist(final boolean mark_as_disitributionlist) {
         mark_as_distributionlist = mark_as_disitributionlist;
         b_mark_as_distributionlist = true;
-    }
-
-    public void markAsDistributionlist() {
-        setMarkAsDistributionlist(true);
     }
 
     public void setUseCount(final int useCount) {
