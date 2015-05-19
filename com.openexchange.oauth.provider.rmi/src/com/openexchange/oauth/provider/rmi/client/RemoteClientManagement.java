@@ -47,17 +47,13 @@
  *
  */
 
-package com.openexchange.oauth.provider.rmi;
+package com.openexchange.oauth.provider.rmi.client;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.List;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.client.ClientManagementException;
 
 
 /**
@@ -71,7 +67,7 @@ public interface RemoteClientManagement extends Remote {
     /**
      * The default context group ID.
      */
-    public static final String DEFAULT_GID = ClientManagement.DEFAULT_GID;
+    public static final String DEFAULT_GID = "default";
 
     /**
      * RMI name to be used in the naming lookup.
@@ -86,7 +82,7 @@ public interface RemoteClientManagement extends Remote {
      * @return A list of clients
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    List<Client> getClients(String contextGroup, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    List<ClientDto> getClients(String contextGroup, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Gets the client identified by the given identifier.
@@ -94,10 +90,10 @@ public interface RemoteClientManagement extends Remote {
      * @param clientId The clients identifier
      * @param credentials The master admin credentials
      * @return The client or <code>null</code> if there is no such client
-     * @throws ClientManagementException If operation fails
+     * @throws RemoteClientManagementException If operation fails
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client getClientById(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    ClientDto getClientById(String clientId, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Registers (adds) a client according to given client data.
@@ -106,10 +102,10 @@ public interface RemoteClientManagement extends Remote {
      * @param clientData The client data to create the client from
      * @param credentials The master admin credentials
      * @return The newly created client
-     * @throws ClientManagementException If create operation fails
+     * @throws RemoteClientManagementException If create operation fails
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client registerClient(String contextGroup, ClientData clientData, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    ClientDto registerClient(String contextGroup, ClientDataDto clientData, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Updates an existing client's attributes according to given client data.
@@ -118,10 +114,10 @@ public interface RemoteClientManagement extends Remote {
      * @param clientData The client data
      * @param credentials The master admin credentials
      * @return The updated client
-     * @throws ClientManagementException If update operation fails
+     * @throws RemoteClientManagementException If update operation fails
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client updateClient(String clientId, ClientData clientData, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    ClientDto updateClient(String clientId, ClientDataDto clientData, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Unregisters an existing client
@@ -129,10 +125,10 @@ public interface RemoteClientManagement extends Remote {
      * @param clientId The client identifier
      * @param credentials The master admin credentials
      * @return <code>true</code> if and only if such a client existed and has been successfully deleted; otherwise <code>false</code>
-     * @throws ClientManagementException If un-registration fails
+     * @throws RemoteClientManagementException If un-registration fails
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    boolean unregisterClient(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    boolean unregisterClient(String clientId, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Revokes a client's current secret and generates a new one.
@@ -140,10 +136,10 @@ public interface RemoteClientManagement extends Remote {
      * @param clientId The client identifier
      * @param credentials The master admin credentials
      * @return The client with revoked/new secret
-     * @throws ClientManagementException If revoke operation fails
+     * @throws RemoteClientManagementException If revoke operation fails
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    Client revokeClientSecret(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    ClientDto revokeClientSecret(String clientId, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Enables denoted client
@@ -151,10 +147,10 @@ public interface RemoteClientManagement extends Remote {
      * @param clientId The client identifier
      * @param credentials The master admin credentials
      * @return <code>true</code> if enabling was successful, <code>false</code> if the client was already enabled
-     * @throws ClientManagementException If client could not be enabled
+     * @throws RemoteClientManagementException If client could not be enabled
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    boolean enableClient(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    boolean enableClient(String clientId, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
     /**
      * Disables denoted client
@@ -162,9 +158,9 @@ public interface RemoteClientManagement extends Remote {
      * @param clientId The client identifier
      * @param credentials The master admin credentials
      * @return <code>true</code> if disabling was successful, <code>false</code> if the client was already disabled
-     * @throws ClientManagementException If client could not be disabled
+     * @throws RemoteClientManagementException If client could not be disabled
      * @throws InvalidCredentialsException If the passed credentials are invalid
      */
-    boolean disableClient(String clientId, Credentials credentials) throws ClientManagementException, RemoteException, InvalidCredentialsException;
+    boolean disableClient(String clientId, Credentials credentials) throws RemoteClientManagementException, RemoteException, InvalidCredentialsException;
 
 }

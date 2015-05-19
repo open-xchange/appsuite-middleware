@@ -80,10 +80,10 @@ import com.openexchange.ajax.oauth.provider.actions.RevokeRequest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
-import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 
 
 /**
@@ -231,14 +231,14 @@ public class ProtocolFlowTest extends EndpointTest {
         // A user must have at max. OAuthProviderService.MAX_CLIENTS_PER_USER grants for different clients
         Credentials masterAdminCredentials = AbstractOAuthTest.getMasterAdminCredentials();
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        List<Client> clients = new ArrayList<>(OAuthProviderService.MAX_CLIENTS_PER_USER);
+        List<ClientDto> clients = new ArrayList<>(OAuthProviderService.MAX_CLIENTS_PER_USER);
         for (int i = 0; i < OAuthProviderService.MAX_CLIENTS_PER_USER; i++) {
             clients.add(clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis()), masterAdminCredentials));
         }
 
         try {
             // acquire one token per client
-            for (Client client : clients) {
+            for (ClientDto client : clients) {
                 OAuthClient c = new OAuthClient(User.User1, client.getId(), client.getSecret(), client.getRedirectURIs().get(0), getScope());
                 c.assertAccess();
             }
@@ -254,15 +254,15 @@ public class ProtocolFlowTest extends EndpointTest {
             assertTrue(error);
 
             // revoke access for one client and assure we can now grant access to another one
-            Iterator<Client> it = clients.iterator();
-            Client client2 = it.next();
+            Iterator<ClientDto> it = clients.iterator();
+            ClientDto client2 = it.next();
             AJAXClient ajaxClient = new AJAXClient(User.User1);
             ajaxClient.execute(new RevokeRequest(client2.getId()));
 
             OAuthClient c = new OAuthClient(User.User1, getClientId(), getClientSecret(), getRedirectURI(), getScope());
             c.assertAccess();
         } finally {
-            for (Client client : clients) {
+            for (ClientDto client : clients) {
                 try {
                     clientManagement.unregisterClient(client.getId(), masterAdminCredentials);
                 } catch (Throwable t) {

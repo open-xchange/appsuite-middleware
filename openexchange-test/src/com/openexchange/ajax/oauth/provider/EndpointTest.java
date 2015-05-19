@@ -54,8 +54,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 import java.rmi.Naming;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -83,11 +83,10 @@ import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.client.DefaultIcon;
-import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
+import com.openexchange.oauth.provider.rmi.client.IconDto;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.scope.Scope;
 
 
@@ -113,7 +112,7 @@ public abstract class EndpointTest {
 
     protected DefaultHttpClient client;
 
-    protected Client oauthClient;
+    protected ClientDto oauthClient;
 
     protected String csrfState;
 
@@ -139,9 +138,9 @@ public abstract class EndpointTest {
         client.getConnectionManager().getSchemeRegistry().register(new Scheme("https", 443, ssf));
 
         // register client application
-        ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
+        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        oauthClient = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
+        oauthClient = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, AbstractOAuthTest.getMasterAdminCredentials());
 
         csrfState = UUIDs.getUnformattedStringFromRandom();
     }
@@ -170,7 +169,7 @@ public abstract class EndpointTest {
     }
 
     protected Scope getScope() {
-        return oauthClient.getDefaultScope();
+        return Scope.parseScope(oauthClient.getDefaultScope());
     }
 
     protected String getClientId() {
@@ -189,16 +188,16 @@ public abstract class EndpointTest {
         return oauthClient.getRedirectURIs().get(1);
     }
 
-    protected static ClientData prepareClient(String name) {
-        DefaultIcon icon = new DefaultIcon();
+    protected static ClientDataDto prepareClient(String name) {
+        IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);
         icon.setMimeType("image/jpg");
 
-        Set<String> redirectURIs = new HashSet<>();
+        List<String> redirectURIs = new ArrayList<>(2);
         redirectURIs.add("http://localhost");
         redirectURIs.add("http://localhost:8080");
 
-        ClientData clientData = new ClientData();
+        ClientDataDto clientData = new ClientDataDto();
         clientData.setName(name);
         clientData.setDescription(name);
         clientData.setIcon(icon);

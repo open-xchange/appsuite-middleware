@@ -57,7 +57,6 @@ import java.util.Map;
 import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.HttpStatus;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -101,7 +100,7 @@ public class AuthInfoEndpointTest extends EndpointTest {
         assertEquals(oauthClient.getWebsite(), jClient.get("website"));
         String iconString = jClient.getString("icon");
         // data:image/jpg;charset=UTF-8;base64,<b64-string>
-        assertEquals(Base64.encodeBase64String(IOUtils.toByteArray(oauthClient.getIcon().getInputStream())), iconString.substring(iconString.indexOf(',') + 1));
+        assertEquals(Base64.encodeBase64String(oauthClient.getIcon().getData()), iconString.substring(iconString.indexOf(',') + 1));
 
         JSONObject jScopes = jAuthInfo.getJSONObject("scopes");
         Set<String> scopeTokens = getScope().get();

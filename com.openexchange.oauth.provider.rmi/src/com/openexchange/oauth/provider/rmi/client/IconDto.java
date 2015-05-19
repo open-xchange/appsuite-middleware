@@ -47,107 +47,67 @@
  *
  */
 
-package com.openexchange.oauth.provider.client;
+package com.openexchange.oauth.provider.rmi.client;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import com.openexchange.oauth.provider.scope.Scope;
-
 
 /**
- * {@link Client} - Represents an OAuth client.
+ * DTO class for icon objects.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface Client extends Serializable {
+public class IconDto implements Serializable {
+
+    private static final long serialVersionUID = 1308641904934372441L;
+
+    private String mimeType;
+
+    private byte[] data;
 
     /**
-     * Gets the clients public identifier
-     *
-     * @return The public identifier
+     * Initializes a new {@link IconDto}.
      */
-    String getId();
+    public IconDto() {
+        super();
+    }
 
     /**
-     * Gets the clients name
+     * Sets the mimeType. Allowed types are <code>image/png</code>, <code>image/jpg</code>
+     * and <code>image/jpeg</code>.
      *
-     * @return The name
+     * @param mimeType The mimeType
      */
-    String getName();
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
 
     /**
-     * Gets the clients description
+     * Gets the mimeType.
      *
-     * @return The description
+     * @return The mimeType
      */
-    String getDescription();
+    public String getMimeType() {
+        return mimeType;
+    }
 
     /**
-     * Gets the icon
+     * Sets the icon data as raw bytes. Icons should be <code>128x128 px</code> in size
+     * and must not exceed 256kb.
      *
-     * @return The icon
+     * @param data The data to set
      */
-    Icon getIcon();
+    public void setData(byte[] data) {
+        this.data = data;
+    }
 
     /**
-     * Gets the date of this clients registration.
+     * Gets the icon data as raw bytes.
      *
-     * @return The date
+     * @return The data
      */
-    Date getRegistrationDate();
-
-    /**
-     * Gets the contact address
-     *
-     * @return The address
-     */
-    String getContactAddress();
-
-    /**
-     * Gets the website
-     *
-     * @return The website
-     */
-    String getWebsite();
-
-    /**
-     * Gets the default scope that should be applied when an authorization request does not
-     * specify a certain scope.
-     *
-     * @return The default scope
-     */
-    Scope getDefaultScope();
-
-    /**
-     * Gets the clients secret identifier
-     *
-     * @return The secret identifier
-     */
-    String getSecret();
-
-    /**
-     * Gets the redirect URIs
-     *
-     * @return The URIs
-     */
-    List<String> getRedirectURIs();
-
-    /**
-     * Checks if given redirect URI is contained in registered redirect URIs for this client
-     *
-     * @param uri The URI to check
-     * @return <code>true</code> if contained; otherwise <code>false</code>
-     */
-    boolean hasRedirectURI(String uri);
-
-    /**
-     * Returns whether this client is enabled or not.
-     *
-     * @return <code>true</code> if the client is enabled
-     */
-    boolean isEnabled();
+    public byte[] getData() {
+        return data;
+    }
 
 }

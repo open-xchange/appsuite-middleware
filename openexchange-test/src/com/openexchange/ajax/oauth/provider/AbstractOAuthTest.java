@@ -50,8 +50,8 @@
 package com.openexchange.ajax.oauth.provider;
 
 import java.rmi.Naming;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -62,11 +62,10 @@ import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.client.DefaultIcon;
-import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
+import com.openexchange.oauth.provider.rmi.client.IconDto;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tasks.json.TaskActionFactory;
 
@@ -78,7 +77,7 @@ import com.openexchange.tasks.json.TaskActionFactory;
  */
 public abstract class AbstractOAuthTest {
 
-    protected Client clientApp;
+    protected ClientDto clientApp;
 
     protected OAuthClient client;
 
@@ -95,11 +94,11 @@ public abstract class AbstractOAuthTest {
     @Before
     public void before() throws Exception {
         // register client application
-        ClientData clientData = prepareClient("Test App " + System.currentTimeMillis());
+        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        clientApp = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
+        clientApp = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
         if (scope == null) {
-            scope = clientApp.getDefaultScope();
+            scope = Scope.parseScope(clientApp.getDefaultScope());
         }
         client = new OAuthClient(User.User1, clientApp.getId(), clientApp.getSecret(), clientApp.getRedirectURIs().get(0), scope);
         ajaxClient = new AJAXClient(User.User1);
@@ -113,16 +112,16 @@ public abstract class AbstractOAuthTest {
         clientManagement.unregisterClient(clientApp.getId(), getMasterAdminCredentials());
     }
 
-    public static ClientData prepareClient(String name) {
-        DefaultIcon icon = new DefaultIcon();
+    public static ClientDataDto prepareClient(String name) {
+        IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);
         icon.setMimeType("image/jpg");
 
-        Set<String> redirectURIs = new HashSet<>();
+        List<String> redirectURIs = new ArrayList<>(2);
         redirectURIs.add("http://localhost");
         redirectURIs.add("http://localhost:8080");
 
-        ClientData clientData = new ClientData();
+        ClientDataDto clientData = new ClientDataDto();
         clientData.setName(name);
         clientData.setDescription(name);
         clientData.setIcon(icon);

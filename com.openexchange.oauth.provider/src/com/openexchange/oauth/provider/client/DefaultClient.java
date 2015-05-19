@@ -237,6 +237,4 @@ public class DefaultClient implements Client {
         return builder.toString();
     }
 
-
-
 }

@@ -5,18 +5,6 @@ Bundle-SymbolicName: com.openexchange.oauth.provider.rmi
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: com.openexchange.oauth.provider.rmi
+Export-Package: com.openexchange.oauth.provider.rmi.client
 Import-Package: com.openexchange.admin.rmi.dataobjects,
- com.openexchange.admin.rmi.exceptions,
- com.openexchange.admin.rmi.impl,
- com.openexchange.oauth.provider,
- com.openexchange.oauth.provider.annotations,
- com.openexchange.oauth.provider.client,
- com.openexchange.oauth.provider.exceptions,
- com.openexchange.oauth.provider.grant,
- com.openexchange.oauth.provider.scope,
- com.openexchange.oauth.provider.tools,
- org.osgi.framework,
- org.osgi.util.tracker;version="1.5.1",
- org.slf4j;version="1.7.5"
-Bundle-Activator: com.openexchange.oauth.provider.rmi.osgi.OAuthProviderRMIActivator
+ com.openexchange.admin.rmi.exceptions

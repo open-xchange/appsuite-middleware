@@ -80,7 +80,7 @@ import com.openexchange.oauth.provider.tools.URIValidator;
  */
 public class ClientManagementImpl implements ClientManagement {
 
-    private static final int MAX_ICON_SIZE = 0xFFFF - 1;
+    private static final int MAX_ICON_SIZE = 0x40000;
 
     private static final Set<String> SUPPORTED_ICON_MIME_TYPES = new HashSet<>(2, 1.0f);
     static {

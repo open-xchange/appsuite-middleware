@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.oauth.provider.rmi.osgi;
+package com.openexchange.oauth.provider.rmi.impl.osgi;
 
 import java.rmi.Remote;
 import java.util.Dictionary;
@@ -58,7 +58,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.rmi.impl.RemoteClientManagementImpl;
 
 

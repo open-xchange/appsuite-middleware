@@ -57,11 +57,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.rmi.Naming;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Before;
@@ -69,21 +69,20 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import com.google.common.io.ByteStreams;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.client.DefaultIcon;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
+import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.impl.tools.ClientId;
-import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tasks.json.TaskActionFactory;
 
@@ -119,8 +118,8 @@ public class ClientManagementTest {
         /*
          * Create client and check data transmission
          */
-        ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
+        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
         String groupId = ClientId.parse(client.getId()).getGroupId();
         try {
             compare(clientData, client);
@@ -128,9 +127,9 @@ public class ClientManagementTest {
             /*
              * Assure client is listed and can be got
              */
-            List<Client> clients = clientManagement.getClients(groupId, credentials);
+            List<ClientDto> clients = clientManagement.getClients(groupId, credentials);
             boolean found = false;
-            for (Client c : clients) {
+            for (ClientDto c : clients) {
                 if (client.getId().equals(c.getId())) {
                     found = true;
                     break;
@@ -138,7 +137,7 @@ public class ClientManagementTest {
             }
             assertTrue(found);
 
-            Client reloaded = clientManagement.getClientById(client.getId(), credentials);
+            ClientDto reloaded = clientManagement.getClientById(client.getId(), credentials);
             compare(client, reloaded);
 
             /*
@@ -165,18 +164,18 @@ public class ClientManagementTest {
             /*
              * Update
              */
-            ClientData updatedClientData = new ClientData();
+            ClientDataDto updatedClientData = new ClientDataDto();
             updatedClientData.setName(Strings.reverse(client.getName()));
             updatedClientData.setContactAddress(Strings.reverse(client.getContactAddress()));
             updatedClientData.setDescription(Strings.reverse(client.getDescription()));
             updatedClientData.setWebsite(Strings.reverse(client.getWebsite()));
-            DefaultIcon updatedIcon = new DefaultIcon();
+            IconDto updatedIcon = new IconDto();
             updatedIcon.setMimeType("image/png");
-            byte[] updatedIconBytes = ByteStreams.toByteArray(client.getIcon().getInputStream());
+            byte[] updatedIconBytes = client.getIcon().getData();
             Arrays.sort(updatedIconBytes);
             updatedIcon.setData(updatedIconBytes);
             updatedClientData.setIcon(updatedIcon);
-            updatedClientData.setRedirectURIs(Collections.singleton("https://example.com/oauth/client/endpoint"));
+            updatedClientData.setRedirectURIs(Collections.singletonList("https://example.com/oauth/client/endpoint"));
             updatedClientData.setDefaultScope(Scope.newInstance(ContactActionFactory.OAUTH_READ_SCOPE, ContactActionFactory.OAUTH_WRITE_SCOPE).toString());
             client = clientManagement.updateClient(client.getId(), updatedClientData, credentials);
             compare(updatedClientData, client);
@@ -186,9 +185,9 @@ public class ClientManagementTest {
             /*
              * Assure client is not listed anymore
              */
-            List<Client> clients = clientManagement.getClients(groupId, credentials);
+            List<ClientDto> clients = clientManagement.getClients(groupId, credentials);
             boolean found = false;
-            for (Client c : clients) {
+            for (ClientDto c : clients) {
                 if (client.getId().equals(c.getId())) {
                     found = true;
                     break;
@@ -199,27 +198,76 @@ public class ClientManagementTest {
             /*
              * Assure client cannot be got anymore
              */
-            Client reloaded = clientManagement.getClientById(client.getId(), credentials);
+            ClientDto reloaded = clientManagement.getClientById(client.getId(), credentials);
             assertNull(reloaded);
         }
+    }
+
+    @Test
+    public void testUpdatePermutations() throws Exception {
+        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
+        compare(clientData, client);
+
+        // name
+        clientData = new ClientDataDto();
+        clientData.setName(Strings.reverse(client.getName()));
+        assertTrue(clientData.containsName());
+        client = clientManagement.updateClient(client.getId(), clientData, credentials);
+        assertEquals(clientData.getName(), client.getName());
+
+        // description
+        clientData = new ClientDataDto();
+        clientData.setDescription(Strings.reverse(client.getDescription()));
+        assertTrue(clientData.containsDescription());
+        client = clientManagement.updateClient(client.getId(), clientData, credentials);
+        assertEquals(clientData.getDescription(), client.getDescription());
+
+        // website
+        clientData = new ClientDataDto();
+        clientData.setWebsite(Strings.reverse(client.getWebsite()));
+        assertTrue(clientData.containsWebsite());
+        client = clientManagement.updateClient(client.getId(), clientData, credentials);
+        assertEquals(clientData.getWebsite(), client.getWebsite());
+
+        // contact address
+        clientData = new ClientDataDto();
+        clientData.setContactAddress(Strings.reverse(client.getContactAddress()));
+        assertTrue(clientData.containsContactAddress());
+        client = clientManagement.updateClient(client.getId(), clientData, credentials);
+        assertEquals(clientData.getContactAddress(), client.getContactAddress());
+
+        // default scope
+        clientData = new ClientDataDto();
+        clientData.setDefaultScope(TaskActionFactory.OAUTH_READ_SCOPE + " " + TaskActionFactory.OAUTH_WRITE_SCOPE);
+        assertTrue(clientData.containsDefaultScope());
+        client = clientManagement.updateClient(client.getId(), clientData, credentials);
+        assertEquals(clientData.getDefaultScope(), client.getDefaultScope());
+
+        // redirect URIs
+        clientData = new ClientDataDto();
+        clientData.setRedirectURIs(Collections.singletonList("http://[::1]/some/where"));
+        assertTrue(clientData.containsRedirectURIs());
+        client = clientManagement.updateClient(client.getId(), clientData, credentials);
+        assertEquals(clientData.getRedirectURIs(), client.getRedirectURIs());
     }
 
     @Test
     public void testInvalidRedirectURIOnRegister() throws Exception {
         String invalidURI = "http://oauth.example.com/api/callback"; // HTTPS must be enforced for non-localhost URIs
         thrown.expect(new CMEMatcher(invalidURI));
-        ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        clientData.setRedirectURIs(Collections.singleton(invalidURI));
+        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        clientData.setRedirectURIs(Collections.singletonList(invalidURI));
         clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
     }
 
     @Test
     public void testInvalidRedirectURIOnUpdate() throws Exception {
-        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
+        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
         String invalidURI = "http://oauth.example.com/api/callback"; // HTTPS must be enforced for non-localhost URIs
         thrown.expect(new CMEMatcher(invalidURI));
-        ClientData clientData = new ClientData();
-        clientData.setRedirectURIs(Collections.singleton(invalidURI));
+        ClientDataDto clientData = new ClientDataDto();
+        clientData.setRedirectURIs(Collections.singletonList(invalidURI));
         clientManagement.updateClient(client.getId(), clientData, credentials);
     }
 
@@ -227,8 +275,8 @@ public class ClientManagementTest {
     public void testInvalidIconMimeTypeOnRegister() throws Exception {
         String invalidMimeType = "image/gif"; // Only png and jpg are allowed
         thrown.expect(new CMEMatcher(invalidMimeType));
-        ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        DefaultIcon icon = new DefaultIcon();
+        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);
         icon.setMimeType(invalidMimeType);
         clientData.setIcon(icon);
@@ -237,11 +285,11 @@ public class ClientManagementTest {
 
     @Test
     public void testInvalidIconMimeTypeOnUpdate() throws Exception {
-        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
+        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
         String invalidMimeType = "image/gif"; // Only png and jpg are allowed
         thrown.expect(new CMEMatcher(invalidMimeType));
-        ClientData clientData = new ClientData();
-        DefaultIcon icon = new DefaultIcon();
+        ClientDataDto clientData = new ClientDataDto();
+        IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);
         icon.setMimeType(invalidMimeType);
         clientData.setIcon(icon);
@@ -250,10 +298,10 @@ public class ClientManagementTest {
 
     @Test
     public void testIconTooLargeOnRegister() throws Exception {
-        int maxSize = 0xFFFF - 1; // Max 65kb
+        int maxSize = 0x40000; // Max 256kb
         thrown.expect(new CMEMatcher(Integer.toString(maxSize)));
-        ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
-        DefaultIcon icon = new DefaultIcon();
+        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        IconDto icon = new IconDto();
         byte[] data = new byte[maxSize + 1];
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) (i % 255);
@@ -266,11 +314,11 @@ public class ClientManagementTest {
 
     @Test
     public void testIconTooLargeOnUpdate() throws Exception {
-        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
-        int maxSize = 0xFFFF - 1; // Max 65kb
+        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
+        int maxSize = 0x40000; // Max 256kb
         thrown.expect(new CMEMatcher(Integer.toString(maxSize)));
-        ClientData clientData = new ClientData();
-        DefaultIcon icon = new DefaultIcon();
+        ClientDataDto clientData = new ClientDataDto();
+        IconDto icon = new IconDto();
         byte[] data = new byte[maxSize + 1];
         for (int i = 0; i < data.length; i++) {
             data[i] = (byte) (i % 255);
@@ -285,22 +333,22 @@ public class ClientManagementTest {
     public void testInvalidScopeOnRegister() throws Exception {
         String invalidScope = "doSomething";
         thrown.expect(new CMEMatcher(invalidScope));
-        ClientData clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
+        ClientDataDto clientData = prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis());
         clientData.setDefaultScope(invalidScope);
         clientManagement.registerClient(ClientManagement.DEFAULT_GID, clientData, credentials);
     }
 
     @Test
     public void testInvalidScopeOnUpdate() throws Exception {
-        Client client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
+        ClientDto client = clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient(ClientManagementTest.class.getSimpleName() + "_" + System.currentTimeMillis()), credentials);
         String invalidScope = "doSomething";
         thrown.expect(new CMEMatcher(invalidScope));
-        ClientData clientData = new ClientData();
+        ClientDataDto clientData = new ClientDataDto();
         clientData.setDefaultScope(invalidScope);
         clientManagement.updateClient(client.getId(), clientData, credentials);
     }
 
-    private static void compare(Client client1, Client client2) throws Exception {
+    private static void compare(ClientDto client1, ClientDto client2) throws Exception {
         assertEquals(client1.getId(), client2.getId());
         assertEquals(client1.getName(), client2.getName());
         assertEquals(client1.getContactAddress(), client2.getContactAddress());
@@ -308,13 +356,13 @@ public class ClientManagementTest {
         assertEquals(client1.getWebsite(), client2.getWebsite());
         assertEquals(client1.getDefaultScope(), client2.getDefaultScope());
         assertEquals(new HashSet<>(client1.getRedirectURIs()), new HashSet<>(client2.getRedirectURIs()));
-        assertArrayEquals(ByteStreams.toByteArray(client1.getIcon().getInputStream()), ByteStreams.toByteArray(client2.getIcon().getInputStream()));
-        assertEquals(client1.getRegistrationDate().getTime(), client2.getRegistrationDate().getTime());
+        assertArrayEquals(client1.getIcon().getData(), client2.getIcon().getData());
+        assertEquals(client1.getRegistrationDate(), client2.getRegistrationDate());
         assertEquals(client1.getSecret(), client2.getSecret());
         assertEquals(client1.isEnabled(), client2.isEnabled());
     }
 
-    private static void compare(ClientData clientData, Client client) throws Exception {
+    private static void compare(ClientDataDto clientData, ClientDto client) throws Exception {
         assertNotNull(client.getId());
         assertEquals(clientData.getName(), client.getName());
         assertEquals(clientData.getContactAddress(), client.getContactAddress());
@@ -322,13 +370,13 @@ public class ClientManagementTest {
         assertEquals(clientData.getWebsite(), client.getWebsite());
         assertEquals(clientData.getDefaultScope(), client.getDefaultScope().toString());
         assertEquals(new HashSet<>(clientData.getRedirectURIs()), new HashSet<>(client.getRedirectURIs()));
-        assertArrayEquals(ByteStreams.toByteArray(clientData.getIcon().getInputStream()), ByteStreams.toByteArray(client.getIcon().getInputStream()));
-        assertTrue(client.getRegistrationDate().getTime() > 0);
+        assertArrayEquals(clientData.getIcon().getData(), client.getIcon().getData());
+        assertTrue(client.getRegistrationDate() > 0);
         assertNotNull(client.getSecret());
         assertTrue(client.isEnabled());
     }
 
-    private static final class CMEMatcher extends TypeSafeMatcher<ClientManagementException> {
+    private static final class CMEMatcher extends TypeSafeMatcher<RemoteClientManagementException> {
 
         private final String invalidValue;
 
@@ -338,31 +386,28 @@ public class ClientManagementTest {
         }
 
         @Override
-        protected boolean matchesSafely(ClientManagementException e) {
-            if (e.getReason() == Reason.INVALID_CLIENT_DATA) {
-                return e.getMessage().contains(invalidValue);
-            }
-
-            return false;
+        protected boolean matchesSafely(RemoteClientManagementException e) {
+            String message = e.getMessage();
+            return message.contains("Invalid client data") && message.contains(invalidValue);
         }
 
         @Override
         public void describeTo(Description d) {
-            d.appendText(new ClientManagementException(Reason.INVALID_CLIENT_DATA, invalidValue).getMessage());
+            d.appendText(new com.openexchange.oauth.provider.client.ClientManagementException(Reason.INVALID_CLIENT_DATA, invalidValue).getMessage());
         }
 
     }
 
-    public static ClientData prepareClient(String name) {
-        DefaultIcon icon = new DefaultIcon();
+    public static ClientDataDto prepareClient(String name) {
+        IconDto icon = new IconDto();
         icon.setData(IconBytes.DATA);
         icon.setMimeType("image/jpg");
 
-        Set<String> redirectURIs = new HashSet<>();
+        List<String> redirectURIs = new ArrayList<>(2);
         redirectURIs.add("http://localhost");
         redirectURIs.add("http://localhost:8080");
 
-        ClientData clientData = new ClientData();
+        ClientDataDto clientData = new ClientDataDto();
         clientData.setName(name);
         clientData.setDescription(name);
         clientData.setIcon(icon);
