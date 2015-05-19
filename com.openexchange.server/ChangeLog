@@ -2,6 +2,7 @@
 
  - Fix for bug 38201: Fixed parsing HTML content for possible referenced/inlined images
  - Fix for bug 38291: Proper precondition check for participant state changes
+ - Fix for bug 38295: Only check for delete exceptions if available in calendar object
 
 * 2015-05-18 - thorben.betten@open-xchange.com
 
