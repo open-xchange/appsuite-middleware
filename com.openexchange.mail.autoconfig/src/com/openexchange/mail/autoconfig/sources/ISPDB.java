@@ -199,8 +199,10 @@ public class ISPDB extends AbstractConfigSource {
         try {
             URL proxyUrl;
             {
-                String sProxyUrl = proxy.trim();
-                if (false == Strings.asciiLowerCase(sProxyUrl).startsWith("http")) {
+                String sProxyUrl = Strings.asciiLowerCase(proxy.trim());
+                if (sProxyUrl.startsWith("://")) {
+                    sProxyUrl = new StringBuilder(sProxyUrl.length() + 4).append("http").append(sProxyUrl).toString();
+                } else if (false == sProxyUrl.startsWith("http://") && false == sProxyUrl.startsWith("https://")) {
                     sProxyUrl = new StringBuilder(sProxyUrl.length() + 7).append("http://").append(sProxyUrl).toString();
                 }
                 proxyUrl = new URL(sProxyUrl);
@@ -237,7 +239,7 @@ public class ISPDB extends AbstractConfigSource {
         } catch (NumberFormatException e) {
             LOG.warn("Invalid proxy setting: {}", proxy, e);
             return null;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOG.warn("Could not apply proxy: {}", proxy, e);
             return null;
         }
