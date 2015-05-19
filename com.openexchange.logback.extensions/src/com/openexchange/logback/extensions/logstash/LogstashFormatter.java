@@ -49,10 +49,12 @@
 
 package com.openexchange.logback.extensions.logstash;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import org.apache.commons.lang.time.FastDateFormat;
+import ch.qos.logback.classic.spi.CallerData;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.ThrowableProxyUtil;
 import ch.qos.logback.core.spi.LifeCycle;
@@ -71,28 +73,16 @@ public class LogstashFormatter implements LifeCycle {
 
     public static final FastDateFormat LOGSTASH_TIMEFORMAT = FastDateFormat.getInstance("yyyy-MM-dd'T'HH:mm:ss.SSSZZ");
 
-    /*
-     * (non-Javadoc)
-     * @see ch.qos.logback.core.spi.LifeCycle#start()
-     */
     @Override
     public void start() {
         isStarted = true;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see ch.qos.logback.core.spi.LifeCycle#stop()
-     */
     @Override
     public void stop() {
         isStarted = false;
     }
 
-    /*
-     * (non-Javadoc)
-     * @see ch.qos.logback.core.spi.LifeCycle#isStarted()
-     */
     @Override
     public boolean isStarted() {
         return isStarted;
@@ -106,39 +96,65 @@ public class LogstashFormatter implements LifeCycle {
      * @throws IOException
      */
     public void writeToStream(ILoggingEvent event, OutputStream outputStream) throws IOException {
-        JsonGenerator generator = new JsonFactory().createGenerator(outputStream);
-        generator.configure(Feature.FLUSH_PASSED_TO_STREAM, false);
-        generator.writeStartObject();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        JsonGenerator generator = new JsonFactory().createGenerator(baos);
+        try {
+            generator.configure(Feature.FLUSH_PASSED_TO_STREAM, false);
+            generator.writeStartObject();
 
-        generator.writeStringField(LogstashFieldName.timestamp.getLogstashName(), LOGSTASH_TIMEFORMAT.format(event.getTimeStamp()));
-        generator.writeNumberField(LogstashFieldName.version.getLogstashName(), 1);
+            generator.writeStringField(LogstashFieldName.timestamp.getLogstashName(), LOGSTASH_TIMEFORMAT.format(event.getTimeStamp()));
+            generator.writeNumberField(LogstashFieldName.version.getLogstashName(), 1);
 
-        // Logger
-        generator.writeStringField(LogstashFieldName.level.getLogstashName(), event.getLevel().levelStr);
-        generator.writeStringField(LogstashFieldName.loggerName.getLogstashName(), event.getLoggerName());
+            // Logger
+            generator.writeStringField(LogstashFieldName.level.getLogstashName(), event.getLevel().levelStr);
+            generator.writeStringField(LogstashFieldName.logger.getLogstashName(), event.getLoggerName());
 
-        // App specific
-        generator.writeStringField(LogstashFieldName.threadName.getLogstashName(), event.getThreadName());
-        generator.writeStringField(LogstashFieldName.message.getLogstashName(), event.getFormattedMessage());
-        if (event.getMarker() != null) {
-            generator.writeStringField(LogstashFieldName.marker.getLogstashName(), event.getMarker().getName());
+            // App specific
+            generator.writeStringField(LogstashFieldName.thread.getLogstashName(), event.getThreadName());
+            generator.writeStringField(LogstashFieldName.message.getLogstashName(), event.getFormattedMessage());
+
+            generator.writeNumberField(LogstashFieldName.line.getLogstashName(), getLineNumber(event));
+            generator.writeStringField(LogstashFieldName.clazz.getLogstashName(), getFullyQualifiedName(event));
+
+            if (event.getMarker() != null) {
+                generator.writeStringField(LogstashFieldName.marker.getLogstashName(), event.getMarker().getName());
+            }
+
+            // Stacktraces
+            if (event.getThrowableProxy() != null) {
+                generator.writeStringField(
+                    LogstashFieldName.stacktrace.getLogstashName(),
+                    ThrowableProxyUtil.asString(event.getThrowableProxy()));
+            }
+
+            // MDC
+            Map<String, String> mdc = event.getMDCPropertyMap();
+            for (String key : mdc.keySet()) {
+                generator.writeFieldName(key);
+                generator.writeObject(mdc.get(key));
+            }
+
+            generator.writeEndObject();
+            generator.flush();
+        } finally {
+            generator.close();
         }
+        outputStream.write(baos.toByteArray());
+    }
 
-        // Stacktraces
-        if (event.getThrowableProxy() != null) {
-            generator.writeStringField(
-                LogstashFieldName.stacktrace.getLogstashName(),
-                ThrowableProxyUtil.asString(event.getThrowableProxy()));
+    private static int getLineNumber(ILoggingEvent event) {
+        StackTraceElement[] cda = event.getCallerData();
+        if (cda != null && cda.length > 0) {
+            return cda[0].getLineNumber();
         }
+        return CallerData.LINE_NA;
+    }
 
-        // MDC
-        Map<String, String> mdc = event.getMDCPropertyMap();
-        for (String key : mdc.keySet()) {
-            generator.writeFieldName(key);
-            generator.writeObject(mdc.get(key));
+    private static String getFullyQualifiedName(ILoggingEvent event) {
+        StackTraceElement[] cda = event.getCallerData();
+        if (cda != null && cda.length > 0) {
+            return cda[0].getClassName();
         }
-
-        generator.writeEndObject();
-        generator.flush();
+        return CallerData.NA;
     }
 }
