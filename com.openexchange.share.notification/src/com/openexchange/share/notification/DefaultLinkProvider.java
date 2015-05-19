@@ -50,7 +50,6 @@
 package com.openexchange.share.notification;
 
 
-
 /**
  * A default implementation of {@link LinkProvider}. All necessary data has to be
  * set via the constructor.
@@ -68,6 +67,8 @@ public class DefaultLinkProvider implements LinkProvider {
 
     private final String shareToken;
 
+    private final String internalLink;
+
     /**
      * Initializes a new {@link DefaultLinkProvider}.
      *
@@ -77,11 +78,16 @@ public class DefaultLinkProvider implements LinkProvider {
      * @param shareToken The share token, can be a base token or a concrete one
      */
     public DefaultLinkProvider(String protocol, String domain, String servletPrefix, String shareToken) {
+        this(protocol, domain, servletPrefix, shareToken, null);
+    }
+
+    public DefaultLinkProvider(String protocol, String domain, String servletPrefix, String shareToken, String internalLink) {
         super();
         this.protocol = protocol;
         this.domain = domain;
         this.servletPrefix = servletPrefix;
         this.shareToken = shareToken;
+        this.internalLink = internalLink;
     }
 
     @Override
@@ -101,6 +107,11 @@ public class DefaultLinkProvider implements LinkProvider {
 
     private String baseUrl() {
         return protocol + domain + servletPrefix;
+    }
+
+    @Override
+    public String getInternalLink() {
+        return protocol + domain + internalLink;
     }
 
 }

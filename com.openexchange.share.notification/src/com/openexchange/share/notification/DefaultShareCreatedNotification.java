@@ -75,9 +75,9 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     private List<ShareTarget> targets;
 
     private String message;
-    
+
     private int guestContextID;
-    
+
     private int guestID;
 
     /**
@@ -85,6 +85,10 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
      */
     public DefaultShareCreatedNotification(Transport transport) {
         super(transport, NotificationType.SHARE_CREATED);
+    }
+
+    public DefaultShareCreatedNotification(Transport transport, NotificationType type) {
+        super(transport, type);
     }
 
     @Override
@@ -116,15 +120,17 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     public String getMessage() {
         return message;
     }
-    
+
     public List<ShareTarget> getTargets() {
         return targets;
     }
-    
+
+    @Override
     public int getGuestContextID() {
         return guestContextID;
     }
-    
+
+    @Override
     public int getGuestID() {
         return guestID;
     }
@@ -152,11 +158,11 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
     public void setGuestContextID(int guestContextID) {
         this.guestContextID = guestContextID;
     }
-    
+
     public void setGuestID(int guestID) {
         this.guestID = guestID;
     }

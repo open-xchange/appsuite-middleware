@@ -220,6 +220,22 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getSession(), notification.getSession().getContextId());
     }
 
+    public ComposedMailMessage buildInternalShareCreatedMail(ShareCreatedMailNotification notification) throws OXException, UnsupportedEncodingException, MessagingException {
+        User user = getUserService().getUser(notification.getSession().getUserId(), notification.getSession().getContextId());
+        Map<String, Object> vars = prepareInternalShareCreatedVars(notification, user);
+        String subject = (String) vars.get(SUBJECT);
+        MimeMessage mail = prepareEnvelope(subject, new Address[] { getSenderAddress(notification.getSession(), user) }, notification.getTransportInfo());
+        mail.addHeader("X-Open-Xchange-Share-Type", "share-created");
+        mail.addHeader("X-Open-Xchange-Share-URL", notification.getLinkProvider().getInternalLink());
+
+        // Select the com.openexchange.share.create.mail.tmpl template configured for the current user and render it based on current share
+        String templateName = getShareCreatedTemplate(services, notification);
+        mail.setContent(prepareContent(templateName, vars));
+        mail.saveChanges();
+
+        return new ContentAwareComposedMailMessage(mail, notification.getSession(), notification.getSession().getContextId());
+    }
+
     public String prepareSubject() {
         return null;
     }
@@ -343,6 +359,90 @@ public class MailComposer {
 
         Date expiryDate = notification.getShareTargets().iterator().next().getExpiryDate();
         if(expiryDate != null) {
+            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, guest.getLocale());
+            Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(guest.getTimeZone()).getOffset(expiryDate.getTime()));
+            vars.put(WILL_EXPIRE, String.format(translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
+        }
+
+        return vars;
+    }
+
+    private Map<String, Object> prepareInternalShareCreatedVars(ShareCreatedMailNotification notification, User user) throws OXException {
+        Map<String, Object> vars = new HashMap<String, Object>();
+        TemplateService templateService = getTemplateService();
+        User guest = getUserService().getUser(notification.getGuestID(), notification.getGuestContextID());
+        Translator translator = getTranslator(guest.getLocale());
+
+        boolean hasMessage = !Strings.isEmpty(notification.getMessage());
+        String shareUrl = notification.getLinkProvider().getInternalLink();
+        String email = user.getMail();
+        List<ShareTarget> shareTargets = notification.getShareTargets();
+        String fullName = FullNameBuilder.buildFullName(user, translator);
+        boolean causedGuestCreation = notification.getCausedGuestCreation();
+
+        String productName = notification.getProductName();
+
+        vars.put(BUTTON_COLOR, notification.getButtonColor());
+        vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
+        vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
+        String footerImageName = notification.getFooterImage();
+        if (!Strings.isEmpty(footerImageName)) {
+            Pair<String, String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
+            vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
+            vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+        }
+        vars.put(FOOTER_TEXT, notification.getFooterText());
+
+        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        Map<ShareTarget, TargetProxy> proxyMap = new HashMap<>(shareTargets.size());
+        Set<TargetProxyType> targetTypes = new HashSet<>(shareTargets.size());
+        for (ShareTarget target : shareTargets) {
+            TargetProxy targetProxy = moduleSupport.load(target, notification.getSession());
+            TargetProxyType proxyType = targetProxy.getProxyType();
+            proxyMap.put(target, targetProxy);
+            targetTypes.add(proxyType);
+        }
+
+        boolean hasMultipleTargets = shareTargets.size() > 1;
+
+        if (!hasMultipleTargets) {
+            ShareTarget shareTarget = shareTargets.get(0);
+            TargetProxy targetProxy = proxyMap.get(shareTarget);
+            TargetProxyType targetProxyType = targetProxy.getProxyType();
+            String proxyTitle = targetProxy.getTitle();
+            addSubjectToVars(vars, causedGuestCreation, productName, targetProxyType, translator, fullName, 1, proxyTitle);
+            addSharedItemToVars(vars, targetProxyType, hasMessage, translator, fullName, email, proxyTitle);
+            addViewItemsToVars(vars, targetProxyType, translator, false, shareUrl);
+        } else {//multiple shares
+            int count = shareTargets.size();
+
+            if (targetTypes.size() > 1) {//multiple shares of different types
+                if (causedGuestCreation) {
+                    vars.put(SUBJECT, String.format(translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName));
+                } else {
+                    vars.put(SUBJECT, String.format(translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName, count));
+                }
+                if (hasMessage) {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count));
+                } else {
+                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count));
+                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+                }
+                addViewItemsToVars(vars, null, translator, true, shareUrl);
+            } else {//multiple shares of single type
+                TargetProxyType targetProxyType = targetTypes.iterator().next();
+                addSubjectToVars(vars, causedGuestCreation, productName, targetProxyType, translator, fullName, count, null);
+                addSharedItemsToVars(vars, targetProxyType, hasMessage, translator, fullName, email, count);
+                addViewItemsToVars(vars, targetProxyType, translator, true, shareUrl);
+            }
+        }
+
+        if (hasMessage) {
+            vars.put(USER_MESSAGE, notification.getMessage());
+        }
+
+        Date expiryDate = notification.getShareTargets().iterator().next().getExpiryDate();
+        if (expiryDate != null) {
             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, guest.getLocale());
             Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(guest.getTimeZone()).getOffset(expiryDate.getTime()));
             vars.put(WILL_EXPIRE, String.format(translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));

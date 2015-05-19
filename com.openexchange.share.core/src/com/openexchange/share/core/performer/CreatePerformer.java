@@ -162,9 +162,7 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
             /*
              * add internal users (not affected by sharing) to the resulting list for completeness
              */
-            for (ShareRecipient recipient : internalRecipients) {
-                sharesPerRecipient.put(recipient, null);
-            }
+            sharesPerRecipient.putAll(getShareService().addTargets(session, targets, internalRecipients));
             return sharesPerRecipient;
         } catch (OXException e) {
             Databases.rollback(writeCon);

@@ -61,7 +61,7 @@ import com.openexchange.share.notification.mail.ShareMailAware;
  * @since v7.8.0
  */
 public class ShareCreatedMailNotification extends DefaultShareCreatedNotification<InternetAddress> implements ShareMailAware {
-    
+
     ShareMailDelegate shareMailDelegate;
     private boolean causedGuestCreation;
 
@@ -74,6 +74,11 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
         shareMailDelegate = new ShareMailDelegate();
     }
 
+    public ShareCreatedMailNotification(NotificationType type) {
+        super(Transport.MAIL, type);
+        shareMailDelegate = new ShareMailDelegate();
+    }
+
     @Override
     public String getProductName() {
         return shareMailDelegate.getProductName();
@@ -82,6 +87,7 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     /**
      * @see com.openexchange.share.notification.mail.impl.ShareMailDelegate#setProductName(java.lang.String)
      */
+    @Override
     public void setProductName(String productName) {
         shareMailDelegate.setProductName(productName);
     }
@@ -94,6 +100,7 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     /**
      * @see com.openexchange.share.notification.mail.impl.ShareMailDelegate#setButtonColor(java.lang.String)
      */
+    @Override
     public void setButtonColor(String buttonColor) {
         shareMailDelegate.setButtonColor(buttonColor);
     }
@@ -106,6 +113,7 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     /**
      * @see com.openexchange.share.notification.mail.impl.ShareMailDelegate#setButtonBackgroundColor(java.lang.String)
      */
+    @Override
     public void setButtonBackgroundColor(String buttonBackgroundColor) {
         shareMailDelegate.setButtonBackgroundColor(buttonBackgroundColor);
     }
@@ -118,6 +126,7 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     /**
      * @see com.openexchange.share.notification.mail.impl.ShareMailDelegate#setButtonBorderColor(java.lang.String)
      */
+    @Override
     public void setButtonBorderColor(String buttonBorderColor) {
         shareMailDelegate.setButtonBorderColor(buttonBorderColor);
     }
@@ -130,6 +139,7 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     /**
      * @see com.openexchange.share.notification.mail.impl.ShareMailDelegate#setFooterText(java.lang.String)
      */
+    @Override
     public void setFooterText(String footerText) {
         shareMailDelegate.setFooterText(footerText);
     }
@@ -142,13 +152,14 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     /**
      * @see com.openexchange.share.notification.mail.impl.ShareMailDelegate#setFooterImage(java.lang.String)
      */
+    @Override
     public void setFooterImage(String footerImage) {
         shareMailDelegate.setFooterImage(footerImage);
     }
 
     /**
      * Set the causedGuestCreation flag to indicate if a new guest was created for this share and the mail to be phrased differently.
-     * 
+     *
      * @param true if a new guest was created, else false
      */
     public boolean getCausedGuestCreation() {
@@ -156,14 +167,14 @@ public class ShareCreatedMailNotification extends DefaultShareCreatedNotificatio
     }
     /**
      * Set the causedGuestCreation flag to indicate if a new guest was created for this share and the mail to be phrased differently.
-     * 
+     *
      * @param causedGuestCreation the flag
      */
     public void setCausedGuestCreation(boolean causedGuestCreation) {
         this.causedGuestCreation = causedGuestCreation;
     }
 
-    
-    
-    
+
+
+
 }

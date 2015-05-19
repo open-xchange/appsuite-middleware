@@ -104,6 +104,10 @@ public class MailNotificationHandler implements ShareNotificationHandler {
                     sendPasswordResetConfirm(notification);
                     break;
 
+                case INTERNAL_SHARE_CREATED:
+                    sendInternalShareCreated(notification);
+                    break;
+
                 default:
                     throw new OXException(new IllegalArgumentException("MailNotificationHandler cannot handle notifications of type " + notification.getType().toString()));
             }
@@ -118,7 +122,17 @@ public class MailNotificationHandler implements ShareNotificationHandler {
         ShareCreatedMailNotification casted = (ShareCreatedMailNotification) notification;
         ComposedMailMessage mail = composer.buildShareCreatedMail(casted);
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
-            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);    
+            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
+        } else {
+            sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+        }
+    }
+
+    private void sendInternalShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        ShareCreatedMailNotification casted = (ShareCreatedMailNotification) notification;
+        ComposedMailMessage mail = composer.buildInternalShareCreatedMail(casted);
+        if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
+            sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
             sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
         }
