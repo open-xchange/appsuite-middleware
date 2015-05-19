@@ -59,6 +59,7 @@ import com.openexchange.session.Session;
  * {@link VCardParameters}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public class VCardParameters {
 

@@ -51,19 +51,26 @@ package com.openexchange.contact.vcard;
 
 
 /**
- * {@link VCardVersion}
+ * {@link VCardVersion} - An enumeration of VCard versions.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public enum VCardVersion {
 
+    /**
+     * VCard v2.1
+     */
     VERSION_2_1("2.1"),
-
+    /**
+     * VCard v3.0
+     */
     VERSION_3_0("3.0"),
-
+    /**
+     * VCard v4.0
+     */
     VERSION_V4_0("4.0"),
     ;
-
 
     private final String version;
 

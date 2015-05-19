@@ -54,9 +54,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
 /**
- * {@link VCardService}
+ * {@link VCardService} - The VCard merge service for VCards and contacts.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public interface VCardService {
 

@@ -71,6 +71,7 @@ import ezvcard.VCard;
  * {@link DefaultVCardService}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
 public class DefaultVCardService implements VCardService {
 
