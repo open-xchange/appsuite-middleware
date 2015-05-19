@@ -160,7 +160,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             ShareRecipient recipient = entry.getKey();
             List<ShareInfo> shareInfos = entry.getValue();
             if (shareInfos != null && !shareInfos.isEmpty()) {
-                if (!InternalRecipient.class.isInstance(recipient) || serviceLookup.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.notifyInternal", false)) {
+                if (!InternalRecipient.class.isInstance(recipient) || serviceLookup.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.notifyInternal", true)) {
                     notificationInfos.add(new NotificationInfo(recipient, shareInfos.get(0).getGuest(), shareInfos, transport, message, session, requestData));
                 }
             }
