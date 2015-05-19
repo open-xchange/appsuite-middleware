@@ -50,6 +50,7 @@
 package com.openexchange.ajax.oauth.provider;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.util.Map;
@@ -90,7 +91,9 @@ public class AuthInfoEndpointTest extends EndpointTest {
             .build());
         HttpResponse authInfoResponse = client.execute(getAuthInfo);
         assertEquals(HttpStatus.SC_OK, authInfoResponse.getStatusLine().getStatusCode());
-        JSONObject jAuthInfo = new JSONObject(EntityUtils.toString(authInfoResponse.getEntity()));
+        JSONObject jResponse = new JSONObject(EntityUtils.toString(authInfoResponse.getEntity()));
+        assertFalse(jResponse.hasAndNotNull("error"));
+        JSONObject jAuthInfo = jResponse.getJSONObject("data");
         JSONObject jClient = jAuthInfo.getJSONObject("client");
         assertEquals(oauthClient.getName(), jClient.get("name"));
         assertEquals(oauthClient.getDescription(), jClient.get("description"));

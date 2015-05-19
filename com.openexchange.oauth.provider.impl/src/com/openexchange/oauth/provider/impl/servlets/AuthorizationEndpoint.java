@@ -70,8 +70,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.google.common.net.HttpHeaders;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.service.Authentication;
@@ -310,41 +308,11 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         return false;
     }
 
-    /**
-     * @param request
-     * @param response
-     * @param e
-     * @throws IOException
-     */
-    private void sendJSONError(HttpServletRequest request, HttpServletResponse response, OXException e) throws IOException {
-        Response errorResponse = new Response();
-        errorResponse.setLocale(determineLocale(request));
-        errorResponse.setException(e);
-        try {
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            ResponseWriter.write(errorResponse, response.getWriter());
-        } catch (JSONException je) {
-            LOG.error("Could not send error response", je);
-            response.reset();
-            Tools.disableCaching(response);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
-    }
-
     private void sendJSONRedirect(HttpServletRequest request, HttpServletResponse response, String redirectLocation) throws IOException {
         try {
             JSONObject data = new JSONObject();
             data.put("redirect_uri", redirectLocation);
-
-            Response redirectResponse = new Response();
-            redirectResponse.setData(data);
-            redirectResponse.setLocale(determineLocale(request));
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            ResponseWriter.write(redirectResponse, response.getWriter());
+            sendJSONResponse(request, response, data);
         } catch (JSONException je) {
             LOG.error("Could not send redirect response", je);
             response.reset();

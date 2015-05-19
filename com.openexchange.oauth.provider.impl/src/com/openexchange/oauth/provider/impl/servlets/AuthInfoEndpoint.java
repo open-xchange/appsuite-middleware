@@ -51,12 +51,10 @@ package com.openexchange.oauth.provider.impl.servlets;
 
 import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
-import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Set;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -72,9 +70,11 @@ import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -99,6 +99,15 @@ public class AuthInfoEndpoint extends OAuthEndpoint {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            handle(request, response);
+        } catch (OXException e) {
+            LOG.error("AuthInfo request failed", e);
+            sendJSONError(request, response, e);
+        }
+    }
+
+    private void handle(HttpServletRequest request, HttpServletResponse response) throws IOException, OXException {
         try {
             Tools.disableCaching(response);
             String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
@@ -161,19 +170,11 @@ public class AuthInfoEndpoint extends OAuthEndpoint {
             JSONObject jResult = new JSONObject();
             jResult.put("client", jClient);
             jResult.put("scopes", jScopes);
-            byte[] result = jResult.toString().getBytes("UTF-8");
-
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.setContentLength(result.length);
-            ServletOutputStream os = response.getOutputStream();
-            os.write(result, 0, result.length);
-            os.flush();
-            response.setStatus(HttpServletResponse.SC_OK);
-        } catch (OXException | JSONException | ClientManagementException e) {
-            LOG.error("AuthInfo request failed", e);
-            // TODO
-            sendErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "{\"error_description\":\"internal error\",\"error\":\"server_error\"}");
+            sendJSONResponse(request, response, jResult);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (ClientManagementException e) {
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
