@@ -129,8 +129,6 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     private FolderObject sharedSubfolder;
 
-    private long startTime;
-
     private int userId;
 
     private Set<Integer> groups;
@@ -185,7 +183,6 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Before
     public void setUp() throws Exception {
-        startTime = System.currentTimeMillis();
         ftm = new FolderTestManager(ajaxClient);
         values = ajaxClient.getValues();
         userId = values.getUserId();
@@ -282,7 +279,7 @@ public class ReadFoldersTest extends AbstractOAuthTest {
 
     @Test
     public void testUpdates() throws Exception {
-        FolderUpdatesResponse updatesResponse = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(startTime - 1000), Ignore.NONE));
+        FolderUpdatesResponse updatesResponse = client.execute(new UpdatesRequest(EnumAPI.OX_NEW, ListRequest.DEFAULT_COLUMNS, -1, null, new Date(privateSubfolder.getLastModified().getTime() - 1000), Ignore.NONE));
         assertNoErrorsAndWarnings(updatesResponse);
         List<FolderObject> folders = updatesResponse.getFolders();
         assertContentTypeAndPermissions(folders);
