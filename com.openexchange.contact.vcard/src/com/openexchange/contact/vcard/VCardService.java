@@ -68,6 +68,7 @@ public interface VCardService {
      * @param originalVCard The vCard to merge the contact into, or <code>null</code> to export to a new vCard
      * @param parameters Further parameters for vCard export, or <code>null</code> if not used
      * @return The exported contact as vCard
+     * @throws OXException If exporting given contact to a VCard fails
      */
     InputStream exportContact(Contact contact, InputStream originalVCard, VCardParameters parameters) throws OXException;
 
@@ -79,7 +80,7 @@ public interface VCardService {
      * @param parameters Further parameters for vCard import, or <code>null</code> if not used
      * @return The imported vCard as contact, which is a new instance if passed contact reference is <code>null</code>, or the passed
      *         contact itself, otherwise
-     * @throws OXException
+     * @throws OXException If importing VCard into an existing contact fails
      */
     Contact importVCard(InputStream vCard, Contact contact, VCardParameters parameters) throws OXException;
 
