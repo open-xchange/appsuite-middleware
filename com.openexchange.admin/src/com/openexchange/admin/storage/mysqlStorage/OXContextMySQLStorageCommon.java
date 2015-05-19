@@ -440,7 +440,12 @@ public class OXContextMySQLStorageCommon {
                 }
                 @Override
                 public int getReadPoolId() {
-                    return i(db.getRead_id());
+                    Integer readId = db.getRead_id();
+                    if (null == readId) {
+                        // Hints to a pool w/o a slave; return write-pool identifier instead
+                        return getWritePoolId();
+                    }
+                    return i(readId);
                 }
                 @Override
                 public int getWritePoolId() {

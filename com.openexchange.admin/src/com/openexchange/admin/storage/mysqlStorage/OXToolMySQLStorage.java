@@ -2541,29 +2541,29 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final Database retval;
         try {
             stmt = con.prepareStatement("SELECT url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                retval = new Database();
-                int pos = 1;
-                retval.setId(I(id));
-                retval.setUrl(rs.getString(pos++));
-                retval.setDriver(rs.getString(pos++));
-                retval.setLogin(rs.getString(pos++));
-                retval.setPassword(rs.getString(pos++));
-                retval.setName(rs.getString(pos++));
-                final int slaveId = rs.getInt(pos++);
-                if (slaveId > 0) {
-                    retval.setRead_id(I(slaveId));
-                }
-                retval.setClusterWeight(I(rs.getInt(pos++)));
-                retval.setMaxUnits(I(rs.getInt(pos++)));
-            } else {
+            if (!rs.next()) {
                 throw new StorageException("Database with identifer " + id + " does not exist.");
             }
+
+            Database retval = new Database();
+            int pos = 1;
+            retval.setId(I(id));
+            retval.setUrl(rs.getString(pos++));
+            retval.setDriver(rs.getString(pos++));
+            retval.setLogin(rs.getString(pos++));
+            retval.setPassword(rs.getString(pos++));
+            retval.setName(rs.getString(pos++));
+            final int slaveId = rs.getInt(pos++);
+            if (slaveId > 0) {
+                retval.setRead_id(I(slaveId));
+            }
+            retval.setClusterWeight(I(rs.getInt(pos++)));
+            retval.setMaxUnits(I(rs.getInt(pos++)));
+            return retval;
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -2574,6 +2574,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.error("Error pushing connection to pool!", e);
             }
         }
-        return retval;
     }
+
 }
