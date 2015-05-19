@@ -1896,19 +1896,21 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             stmt = con.prepareStatement("SELECT cid, id, filestore_id FROM user WHERE filestore_id > 0");
                             result = stmt.executeQuery();
 
-                            FilestoreInfo temp = new FilestoreInfo(result.getInt(1), result.getInt(2), poolAndSchema.poolId, poolAndSchema.dbSchema, result.getInt(3));
-                            MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
+                            while (result.next()) {
+                                FilestoreInfo temp = new FilestoreInfo(result.getInt(1), result.getInt(2), poolAndSchema.poolId, poolAndSchema.dbSchema, result.getInt(3));
+                                MultiKey key = new MultiKey(I(temp.writeDBPoolID), temp.dbSchema, I(temp.filestoreID));
 
-                            FilestoreContextBlock block = blocks.get(key);
-                            if (null == block) {
-                                FilestoreContextBlock newBlock = new FilestoreContextBlock(poolAndSchema.poolId, temp.filestoreID);
-                                block = blocks.putIfAbsent(key, newBlock);
+                                FilestoreContextBlock block = blocks.get(key);
                                 if (null == block) {
-                                    block = newBlock;
+                                    FilestoreContextBlock newBlock = new FilestoreContextBlock(poolAndSchema.poolId, temp.filestoreID);
+                                    block = blocks.putIfAbsent(key, newBlock);
+                                    if (null == block) {
+                                        block = newBlock;
+                                    }
                                 }
-                            }
 
-                            block.addForUser(temp);
+                                block.addForUser(temp);
+                            }
 
                             return null;
                         } catch (PoolException e) {

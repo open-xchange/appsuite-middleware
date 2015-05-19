@@ -2,6 +2,7 @@
 
  - Fix for bug 38201: Fixed parsing HTML content for possible referenced/inlined images
  - Fix for bug 38239: Do not pass left-hand/right-hand limit to storage layer if internal sorting is supposed to be performed
+ - Fix for bug 38277: Fixed wrong "java.sql.ResultSet" usage
 
 * 2015-05-18 - thorben.betten@open-xchange.com
 
