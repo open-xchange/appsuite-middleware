@@ -1,6 +1,7 @@
 * 2015-05-19 - thorben.betten@open-xchange.com
 
  - Fix for bug 38201: Fixed parsing HTML content for possible referenced/inlined images
+ - Fix for bug 38291: Proper precondition check for participant state changes
 
 * 2015-05-18 - thorben.betten@open-xchange.com
 
