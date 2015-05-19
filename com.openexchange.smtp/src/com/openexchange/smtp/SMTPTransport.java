@@ -1238,7 +1238,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         if (null == hostName) {
             hostName = getHostName();
         }
-        MimeMessageConverter.saveChanges(mimeMessage, hostName, keepMessageIdIfPresent);
+        MimeMessageUtility.saveChanges(mimeMessage, hostName, keepMessageIdIfPresent);
         // Check whether to remove MIME-Version headers from sub-parts
         if (TransportProperties.getInstance().isRemoveMimeVersionInSubParts()) {
             /*-

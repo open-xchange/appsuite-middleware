@@ -52,6 +52,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 %doc com.openexchange.messaging.sms/ChangeLog
 
 %changelog
+* Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
 * Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-05-04 (2496)
 * Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>

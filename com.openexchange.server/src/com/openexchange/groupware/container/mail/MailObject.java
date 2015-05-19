@@ -87,7 +87,6 @@ import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.datasource.MimeMessageDataSource;
@@ -604,7 +603,7 @@ public class MailObject {
         if (null == hostName) {
             hostName = getHostName();
         }
-        MimeMessageConverter.saveChanges(mimeMessage, hostName, false);
+        MimeMessageUtility.saveChanges(mimeMessage, hostName, false);
     }
 
     private static String getHostName() {
