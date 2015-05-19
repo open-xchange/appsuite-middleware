@@ -60,6 +60,7 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.oauth.provider.client.DefaultClient;
 import com.openexchange.oauth.provider.grant.DefaultGrantView;
 import com.openexchange.oauth.provider.grant.GrantView;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -89,10 +90,16 @@ public class AllResponse extends AbstractAJAXResponse {
             client.setName(jClient.getString("name"));
             client.setDescription(jClient.getString("description"));
             client.setWebsite(jClient.getString("website"));
+
+            List<String> scopeTokens = new LinkedList<>();
+            JSONObject jScopes = jGrant.getJSONObject("scopes");
+            scopeTokens.addAll(jScopes.keySet());
+            Scope scope = Scope.newInstance(scopeTokens);
             Date latestGrantDate = new Date(jGrant.getLong("date"));
 
             DefaultGrantView grant = new DefaultGrantView();
             grant.setClient(client);
+            grant.setScope(scope);
             grant.setLatestGrantDate(latestGrantDate);
             grants.add(grant);
 

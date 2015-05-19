@@ -92,8 +92,7 @@ public class JSONApiTest extends AbstractOAuthTest {
             }
         }
         Assert.assertNotNull(expected);
-        // FIXME: maybe object - {"read_contacts": "Read all your contacts"}
-//        Assert.assertEquals(3, expected.getScope().size());
+        Assert.assertEquals(3, expected.getScope().size());
 
         // revoke access for application
         ajaxClient.execute(new RevokeRequest(expected.getClient().getId()));

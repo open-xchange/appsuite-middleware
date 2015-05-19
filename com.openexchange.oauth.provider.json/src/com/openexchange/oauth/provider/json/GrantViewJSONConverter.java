@@ -51,6 +51,7 @@ package com.openexchange.oauth.provider.json;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Iterator;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -119,20 +120,22 @@ public class GrantViewJSONConverter {
         return json;
     }
 
-    private JSONArray convertScope(Scope scope) throws JSONException {
-        JSONArray json = new JSONArray();
-        for (String token : scope.get()) {
+    private JSONObject convertScope(Scope scope) throws JSONException {
+        JSONObject jScopes = new JSONObject();
+        Set<String> scopeTokens = scope.get();
+        for (String token : scopeTokens) {
             OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
+            String description;
             if (scopeProvider == null) {
                 LOG.warn("No scope provider available for token {}", token);
-                json.put(token);
+                description = token;
             } else {
-                String description = translator.translate(scopeProvider.getDescription());
-                json.put(description);
+                description = translator.translate(scopeProvider.getDescription());
             }
+            jScopes.put(token, description);
         }
 
-        return json;
+        return jScopes;
     }
 
     private JSONObject convertClient(Client client) throws JSONException, OXException {
