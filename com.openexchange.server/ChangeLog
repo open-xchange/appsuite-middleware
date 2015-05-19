@@ -5,6 +5,7 @@
  - Fix for bug 38277: Fixed wrong "java.sql.ResultSet" usage
  - Fix for bug 38282: Return write-pool identifier in case read-pool one is not set as it hints to a pool w/o a slave
  - Fix for bug 38291: Proper precondition check for participant state changes
+ - Fix for bug 38295: Only check for delete exceptions if available in calendar object
 
 * 2015-05-18 - thorben.betten@open-xchange.com
 
