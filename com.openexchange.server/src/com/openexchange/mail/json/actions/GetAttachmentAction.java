@@ -541,6 +541,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 mailPart.setFileName(fileName);
             }
 
+            /*
+             * Since file's size given from mail server is just an estimation and therefore does not exactly match the file's size a
+             * future file access via WebDAV can fail because of the size mismatch. Thus set the file size to 0 to make the storage
+             * measure the size.
+             */
+            mailPart.setSize(0);
+
             // Store properties
             Map<String, Object> storeProps = new HashMap<String, Object>(4);
             storeProps.put("folder", destFolderID);

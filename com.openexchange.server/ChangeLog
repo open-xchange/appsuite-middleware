@@ -1,6 +1,7 @@
 * 2015-05-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 38189: More robust handling in case invalid/insufficient JSON data was received from client that could not be parsed to a message
+ - Fix for bug 38327: Do not signal file size when storing a mail attachment in Drive App as mail server's size might not be exact
 
 * 2015-05-19 - thorben.betten@open-xchange.com
 
