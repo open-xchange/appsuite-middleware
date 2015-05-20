@@ -100,6 +100,7 @@ import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
+import com.openexchange.share.notification.FullNameBuilder;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;

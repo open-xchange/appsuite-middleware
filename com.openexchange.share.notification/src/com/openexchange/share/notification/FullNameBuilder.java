@@ -1,5 +1,5 @@
 
-package com.openexchange.share.notification.mail.impl;
+package com.openexchange.share.notification;
 
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
