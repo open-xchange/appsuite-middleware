@@ -179,6 +179,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid request body. Expect to be of type "%1$s", but is "%2$s".
      */
     INVALID_REQUEST_BODY("Invalid request body. Expect to be of type \"%1$s\", but is \"%2$s\".", MESSAGE, Category.CATEGORY_ERROR, 28),
+    /**
+     * Client sent invalid JSON data in request body.
+     */
+    INVALID_JSON_REQUEST_BODY("Client sent invalid JSON data in request body.", AjaxExceptionMessages.INVALID_JSON_REQUEST_BODY, Category.CATEGORY_ERROR, 29),
 
     ;
 
