@@ -6,7 +6,6 @@ Bundle-Version: 7.6.3
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
- com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.server.services,
  com.openexchange.timer,
