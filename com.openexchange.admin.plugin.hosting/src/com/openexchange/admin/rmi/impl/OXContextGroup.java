@@ -72,17 +72,21 @@ public class OXContextGroup implements OXContextGroupInterface {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.rmi.OXContextGroupInterface#deleteContextGroup(java.lang.String, com.openexchange.admin.rmi.dataobjects.Credentials)
      */
     @Override
-    public void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException {
+    public void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException {
         OXContextGroupStorageInterface storage = AdminServiceRegistry.getInstance().getService(OXContextGroupStorageInterface.class);
 
         if (contextGroupId == null) {
             throw new IllegalArgumentException("The contextGroupId is null");
         }
 
-        storage.deleteContextGroup(contextGroupId);
+        try {
+            storage.deleteContextGroup(contextGroupId);
+        } catch (OXException e) {
+            throw StorageException.wrapForRMI(e);
+        }
     }
 }

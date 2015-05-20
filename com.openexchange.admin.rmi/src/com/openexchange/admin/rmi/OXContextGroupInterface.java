@@ -52,7 +52,6 @@ package com.openexchange.admin.rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link OXContextGroupInterface}
@@ -68,9 +67,9 @@ public interface OXContextGroupInterface extends Remote {
 
     /**
      * Deletes all data from the globaldb that is associated to the specified context group.
-     * 
+     *
      * @param contextGroupId The context group identifier
      * @throws RemoteException
      */
-    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException, OXException;
+    void deleteContextGroup(String contextGroupId) throws RemoteException, StorageException;
 }
