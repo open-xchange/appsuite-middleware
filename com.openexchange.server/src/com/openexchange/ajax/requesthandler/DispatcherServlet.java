@@ -461,7 +461,7 @@ public class DispatcherServlet extends SessionServlet {
         if (APIResponseRenderer.expectsJsCallback(req)) {
             writeErrorAsJsCallback(e, req, resp);
         } else {
-            super.handleOXException(e, req, resp);
+            super.handleOXException(e, req, resp, false);
         }
     }
 

@@ -247,7 +247,20 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp);
+        handleOXException(e, req, resp, true);
+    }
+
+    /**
+     * Handles passed {@link OXException} instance.
+     *
+     * @param e The {@code OXException} instance
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
+     * @param doLog <code>true</code> to perform appropriate logging; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     */
+    protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp, boolean doLog) throws IOException {
+        handleOXException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "An error occurred inside the server which prevented it from fulfilling the request.", req, resp, doLog);
     }
 
     private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
@@ -260,9 +273,10 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param reasonPhrase The HTTP reason phrase
      * @param req The associated HTTP request
      * @param resp The associated HTTP response
+     * @param doLog <code>true</code> to perform appropriate logging; otherwise <code>false</code>
      * @throws IOException If an I/O error occurs
      */
-    protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+    protected void handleOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp, boolean doLog) throws IOException {
         if (UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e)) {
             // An upload failed
             LOG.debug("", e);
@@ -286,24 +300,26 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         } else {
-            switch (e.getCategories().get(0).getLogLevel()) {
-                case TRACE:
-                    LOG.trace("", e);
-                    break;
-                case DEBUG:
-                    LOG.debug("", e);
-                    break;
-                case INFO:
-                    LOG.info("", e);
-                    break;
-                case WARNING:
-                    LOG.warn("", e);
-                    break;
-                case ERROR:
-                    LOG.error("", e);
-                    break;
-                default:
-                    break;
+            if (doLog) {
+                switch (e.getCategories().get(0).getLogLevel()) {
+                    case TRACE:
+                        LOG.trace("", e);
+                        break;
+                    case DEBUG:
+                        LOG.debug("", e);
+                        break;
+                    case INFO:
+                        LOG.info("", e);
+                        break;
+                    case WARNING:
+                        LOG.warn("", e);
+                        break;
+                    case ERROR:
+                        LOG.error("", e);
+                        break;
+                    default:
+                        break;
+                }
             }
 
             // Check expected output format
