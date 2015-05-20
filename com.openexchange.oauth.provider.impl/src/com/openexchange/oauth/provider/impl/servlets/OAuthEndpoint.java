@@ -60,7 +60,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -181,7 +180,7 @@ public abstract class OAuthEndpoint extends HttpServlet {
     }
 
     protected static String icon2HTMLDataSource(Icon icon) throws IOException {
-        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(IOUtils.toByteArray(icon.getInputStream()));
+        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(icon.getData());
     }
 
     protected static boolean isInvalidCSRFToken(HttpServletRequest request) {

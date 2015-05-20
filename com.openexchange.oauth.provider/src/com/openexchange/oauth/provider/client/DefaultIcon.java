@@ -49,9 +49,6 @@
 
 package com.openexchange.oauth.provider.client;
 
-import java.io.InputStream;
-import com.openexchange.java.Streams;
-
 /**
  * Default implementation of an {@link Icon}, based on a byte array.
  *
@@ -101,8 +98,8 @@ public class DefaultIcon implements Icon {
     }
 
     @Override
-    public InputStream getInputStream() {
-        return Streams.newByteArrayInputStream(data);
+    public byte[] getData() {
+        return data;
     }
 
 }

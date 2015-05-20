@@ -49,13 +49,11 @@
 
 package com.openexchange.oauth.provider.rmi.impl;
 
-import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import org.slf4j.Logger;
-import com.google.common.io.ByteStreams;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
@@ -244,15 +242,10 @@ public class RemoteClientManagementImpl implements RemoteClientManagement {
             return null;
         }
 
-        try {
-            IconDto rmiIcon = new IconDto();
-            rmiIcon.setMimeType(icon.getMimeType());
-            rmiIcon.setData(ByteStreams.toByteArray(icon.getInputStream()));
-            return rmiIcon;
-        } catch (IOException e) {
-            LOGGER.error("Error while converting icon", e);
-            throw new RemoteClientManagementException(e.getMessage());
-        }
+        IconDto rmiIcon = new IconDto();
+        rmiIcon.setMimeType(icon.getMimeType());
+        rmiIcon.setData(icon.getData());
+        return rmiIcon;
     }
 
     private static ClientData rmi2ClientData(ClientDataDto rmiClientData) {

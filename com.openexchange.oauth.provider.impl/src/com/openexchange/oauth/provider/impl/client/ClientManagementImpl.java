@@ -306,6 +306,8 @@ public class ClientManagementImpl implements ClientManagement {
             throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, msg.toString());
         }
 
+        assertNotNullOrEmpty("The icons data is mandatory and must be set", icon.getData());
+
         if (icon.getSize() > MAX_ICON_SIZE) {
             throw new ClientManagementException(Reason.INVALID_CLIENT_DATA, "Icon is too large, it must not exceed " + MAX_ICON_SIZE + " bytes.");
         }

@@ -50,7 +50,6 @@
 package com.openexchange.oauth.provider.impl.client;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -102,8 +101,8 @@ public class LazyIcon implements Icon {
     }
 
     @Override
-    public InputStream getInputStream() {
-        return getDelegate().getInputStream();
+    public byte[] getData() {
+        return getDelegate().getData();
     }
 
     private Icon getDelegate() {

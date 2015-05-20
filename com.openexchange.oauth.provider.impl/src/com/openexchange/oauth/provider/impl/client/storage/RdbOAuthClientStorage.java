@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.client.storage;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,7 +62,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.osgi.framework.BundleException;
-import com.google.common.io.ByteStreams;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -231,7 +230,7 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             stmt.setString(5, clientData.getDescription());
 
             Icon icon = clientData.getIcon();
-            stmt.setBlob(6, icon.getInputStream());
+            stmt.setBlob(6, new ByteArrayInputStream(icon.getData()));
             stmt.setString(7, icon.getMimeType());
             stmt.setString(8, clientData.getDefaultScope());
             stmt.setString(9, clientData.getContactAddress());
@@ -342,10 +341,8 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
 
             if (clientData.containsIcon()) {
                 sql.append(" icon = ?, icon_mime_type = ?,");
-
                 Icon icon = clientData.getIcon();
-                // MySQL JDBC driver is unable to cope with input streams in java.sql.PreparedStatement.setObject(int, Object, int)
-                values.add(new TypedObject(ByteStreams.toByteArray(icon.getInputStream()), Types.BLOB));
+                values.add(new TypedObject(icon.getData(), Types.BLOB));
                 values.add(new TypedObject(icon.getMimeType(), Types.VARCHAR));
             }
 
@@ -403,8 +400,6 @@ public class RdbOAuthClientStorage extends AbstractOAuthClientStorage {
             }
 
             return reloaded;
-        } catch (IOException e) {
-            throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
         } catch (SQLException e) {
             checkForDuplicateName(e, groupId, clientData);
             throw new ClientManagementException(e, Reason.STORAGE_ERROR, e.getMessage());
