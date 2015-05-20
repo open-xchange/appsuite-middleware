@@ -97,7 +97,7 @@ The registration data consists of the following parameters:
 
 The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteClientManagement`. All related classes are annotated with JavaDoc. Below you find an example of all operations that manipulate client data. Of course there are also methods to list and get all or certain registered clients.
 
-    package me.coolhosting.ox.oauth.provisioning;
+    package me.coolhosting.ox.oauth;
 
     import java.io.ByteArrayOutputStream;
     import java.io.FileInputStream;
@@ -107,28 +107,27 @@ The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteCli
     import java.rmi.Naming;
     import java.rmi.NotBoundException;
     import java.rmi.RemoteException;
-    import java.util.HashSet;
-    import java.util.Set;
+    import java.util.ArrayList;
+    import java.util.List;
     import com.openexchange.admin.rmi.dataobjects.Credentials;
     import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-    import com.openexchange.oauth.provider.client.Client;
-    import com.openexchange.oauth.provider.client.ClientData;
-    import com.openexchange.oauth.provider.client.ClientManagementException;
-    import com.openexchange.oauth.provider.client.DefaultIcon;
-    import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
-    import com.openexchange.oauth.provider.scope.Scope;
+    import com.openexchange.oauth.provider.rmi.client.ClientDto;
+    import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
+    import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
+    import com.openexchange.oauth.provider.rmi.client.IconDto;
+    import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 
     public class ClientProvisioningRoundtrip {
 
         public static void main(String[] args) {
             try {
                 // Lookup remote
-                RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://ox-prov.coolhosting.me:1099/" + RemoteClientManagement.RMI_NAME);
+                RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://coolhosting.me:1099/" + RemoteClientManagement.RMI_NAME);
                 // All method calls require the master credentials.
                 Credentials credentials = new Credentials("oxadminmaster", "secret");
 
-                ClientData clientData = prepareClientData();
-                Client client = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, credentials); // use default context group
+                ClientDataDto clientData = prepareClientData();
+                ClientDto client = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, credentials); // use default context group
                 System.out.println("Client '" + client.getName() + "' was successfully registered: [ID: " + client.getId() + ", secret: " + client.getSecret() + "]");
 
                 // You can disable clients temporarily. API access is then prohibited.
@@ -148,7 +147,7 @@ The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteCli
                 // Of course you can update the client data. Every field set within ClientData will be overridden.
                 // Fields that are not set will not be modified. Scope and redirect URIs must always be submitted
                 // in total, no merging will be applied here.
-                clientData = new ClientData();
+                clientData = new ClientDataDto();
                 clientData.setDescription("A new and fancy client description.");
                 client = clientManagement.updateClient(client.getId(), clientData, credentials);
                 System.out.println("Client '" + client.getName() + "' got a new description: " + client.getDescription());
@@ -157,30 +156,27 @@ The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteCli
                 if (clientManagement.unregisterClient(client.getId(), credentials)) {
                     System.out.println("Client '" + client.getName() + "' was successfully unregistered");
                 }
-            } catch (MalformedURLException | RemoteException | NotBoundException | ClientManagementException | InvalidCredentialsException | FileNotFoundException e) {
+            } catch (MalformedURLException | RemoteException | NotBoundException | RemoteClientManagementException | InvalidCredentialsException | FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
 
-        private static ClientData prepareClientData() throws FileNotFoundException {
-            DefaultIcon icon = new DefaultIcon();
+        private static ClientDataDto prepareClientData() throws FileNotFoundException {
+            IconDto icon = new IconDto();
             icon.setData(loadIcon()); // the icon serialized as an array of bytes
             icon.setMimeType("image/png");
 
-            Set<String> redirectURIs = new HashSet<>();
+            List<String> redirectURIs = new ArrayList<>(2);
             redirectURIs.add("http://localhost/oauth/callback"); // URI for local testing
             redirectURIs.add("https://example.com/api/oauth/callback"); // production URI
 
-            // read and write contacts
-            Scope defaultScope = Scope.newInstance("read_contacts", "write_contacts");
-
-            ClientData clientData = new ClientData();
+            ClientDataDto clientData = new ClientDataDto();
             clientData.setName("Example.com");
             clientData.setDescription("The Example.com web apps description.");
             clientData.setIcon(icon);
             clientData.setContactAddress("support@example.com");
             clientData.setWebsite("http://www.example.com");
-            clientData.setDefaultScope(defaultScope.toString());
+            clientData.setDefaultScope("read_contacts write_contacts"); // read and write contacts
             clientData.setRedirectURIs(redirectURIs);
             return clientData;
         }
@@ -205,6 +201,7 @@ The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteCli
         }
 
     }
+
 
 
 ###SOAP Provisioning###
