@@ -84,13 +84,6 @@ public class AutocompleteParameters implements Map<String, Object> {
 	 */
 	public static final String IGNORE_DISTRIBUTION_LISTS = "ignore_distribution_lists";
 
-	/**
-	 * The parameter key to signal to exclude such users from the results that have no webmail permission
-	 * enabled.<br>
-	 * <b>Defaults to the value for {@link #REQUIRE_EMAIL} if absent</b>
-	 */
-	public static final String IGNORE_NON_WEBMAIL_USERS = "ignore_non_webmail_users";
-
 	private final Map<String, Object> parameters = new HashMap<String, Object>();
 
 	private AutocompleteParameters() {

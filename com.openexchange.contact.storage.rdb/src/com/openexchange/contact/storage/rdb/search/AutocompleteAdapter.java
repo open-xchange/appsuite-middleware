@@ -96,7 +96,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 	private void appendAutocomplete(List<String> patterns, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields) throws OXException {
         boolean requireEmail = parameters.getBoolean(AutocompleteParameters.REQUIRE_EMAIL, true);
         boolean ignoreDistributionLists = parameters.getBoolean(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, false);
-        boolean ignoreNonWebmailUsers = parameters.getBoolean(AutocompleteParameters.IGNORE_NON_WEBMAIL_USERS, requireEmail);
+        boolean ignoreNonWebmailUsers = false; // TODO: Maybe for future use
 		if (null == patterns || 0 == patterns.size()) {
 	        stringBuilder.append(getSelectClause(fields)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ")
 	            .append(getFolderIDsClause(folderIDs));

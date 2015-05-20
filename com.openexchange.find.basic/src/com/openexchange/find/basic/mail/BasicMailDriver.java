@@ -215,7 +215,6 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
         parameters.put(AutocompleteParameters.REQUIRE_EMAIL, Boolean.TRUE);
         parameters.put(AutocompleteParameters.IGNORE_DISTRIBUTION_LISTS, Boolean.TRUE);
-        parameters.put(AutocompleteParameters.IGNORE_NON_WEBMAIL_USERS, Boolean.TRUE);
         List<Contact> contacts = autocompleteContacts(session, autocompleteRequest, parameters);
         List<Facet> facets = new ArrayList<Facet>(5);
         List<String> prefixTokens = null;
