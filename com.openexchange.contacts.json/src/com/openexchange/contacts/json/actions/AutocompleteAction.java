@@ -101,7 +101,7 @@ public class AutocompleteAction extends ContactAction {
         /*
          * extract parameters
          */
-        boolean requireEmail = request.isRequireEmail();
+        Boolean requireEmail = Boolean.valueOf(request.isRequireEmail());
         String query = request.getQuery();
         boolean excludeAdmin = request.isExcludeAdmin();
         int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
@@ -111,7 +111,8 @@ public class AutocompleteAction extends ContactAction {
          * perform search
          */
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
-        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, new Boolean(requireEmail));
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, requireEmail);
+        parameters.put(AutocompleteParameters.IGNORE_NON_WEBMAIL_USERS, requireEmail);
         SearchIterator<Contact> searchIterator;
         if (null != folderID) {
             searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),

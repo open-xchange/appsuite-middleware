@@ -68,14 +68,14 @@ import com.openexchange.contact.storage.ContactStorage;
  * @since v7.6.1
  */
 public class AutocompleteParameters implements Map<String, Object> {
-	
+
 	/**
 	 * The parameter key to indicate if the returned contacts should have at least one e-mail address.
 	 * If so, the value must be {@link Boolean#TRUE}, otherwise <code>false</code> is assumed.<br>
 	 * <b>Default value: <code>true</code></b>
 	 */
 	public static final String REQUIRE_EMAIL = "require_email";
-	
+
 	/**
 	 * The parameter key to specify if distribution lists shall be ignored and not be part of the
 	 * returned results. If so, the value must be {@link Boolean#TRUE}, otherwise <code>false</code>
@@ -83,24 +83,31 @@ public class AutocompleteParameters implements Map<String, Object> {
 	 * <b>Default value: <code>false</code></b>
 	 */
 	public static final String IGNORE_DISTRIBUTION_LISTS = "ignore_distribution_lists";
-	
+
+	/**
+	 * The parameter key to signal to exclude such users from the results that have no webmail permission
+	 * enabled.<br>
+     * <b>Default value: <code>false</code></b>
+	 */
+	public static final String IGNORE_NON_WEBMAIL_USERS = "ignore_non_webmail_users";
+
 	private final Map<String, Object> parameters = new HashMap<String, Object>();
-	
+
 	private AutocompleteParameters() {
 		super();
 	}
-	
+
 	/**
 	 * Creates a new, empty {@link AutocompleteParameters} instance.
 	 */
 	public static AutocompleteParameters newInstance() {
 		return new AutocompleteParameters();
 	}
-	
+
 	/**
 	 * Gets the boolean value for the given key or the passed default value,
 	 * if the parameter is not set or not of type {@link Boolean}.
-	 * 
+	 *
 	 * @param key The parameter key
 	 * @param defaultValue The default value
 	 * @return The parameters boolean value
@@ -110,14 +117,14 @@ public class AutocompleteParameters implements Map<String, Object> {
 		if (object == null || !(object instanceof Boolean)) {
 			return defaultValue;
 		}
-		
+
 		return ((Boolean) object).booleanValue();
 	}
-	
+
 	/**
 	 * Gets the integer value for the given key or the passed default value,
 	 * if the parameter is not set or not of type {@link Integer}.
-	 * 
+	 *
 	 * @param key The parameter key
 	 * @param defaultValue The default value
 	 * @return The parameters integer value
@@ -127,14 +134,14 @@ public class AutocompleteParameters implements Map<String, Object> {
 		if (object == null || !(object instanceof Integer)) {
 			return defaultValue;
 		}
-		
+
 		return ((Integer) object).intValue();
 	}
-	
+
 	/**
 	 * Gets the long value for the given key or the passed default value,
 	 * if the parameter is not set or not of type {@link Long}.
-	 * 
+	 *
 	 * @param key The parameter key
 	 * @param defaultValue The default value
 	 * @return The parameters long value
@@ -144,14 +151,14 @@ public class AutocompleteParameters implements Map<String, Object> {
 		if (object == null || !(object instanceof Long)) {
 			return defaultValue;
 		}
-		
+
 		return ((Long) object).longValue();
 	}
-	
+
 	/**
 	 * Gets the float value for the given key or the passed default value,
 	 * if the parameter is not set or not of type {@link Float}.
-	 * 
+	 *
 	 * @param key The parameter key
 	 * @param defaultValue The default value
 	 * @return The parameters float value
@@ -161,14 +168,14 @@ public class AutocompleteParameters implements Map<String, Object> {
 		if (object == null || !(object instanceof Float)) {
 			return defaultValue;
 		}
-		
+
 		return ((Float) object).floatValue();
 	}
-	
+
 	/**
 	 * Gets the double value for the given key or the passed default value,
 	 * if the parameter is not set or not of type {@link Double}.
-	 * 
+	 *
 	 * @param key The parameter key
 	 * @param defaultValue The default value
 	 * @return The parameters double value
@@ -178,14 +185,14 @@ public class AutocompleteParameters implements Map<String, Object> {
 		if (object == null || !(object instanceof Double)) {
 			return defaultValue;
 		}
-		
+
 		return ((Double) object).doubleValue();
 	}
-	
+
 	/**
 	 * Gets the string value for the given key or the passed default value,
 	 * if the parameter is not set or not of type {@link String}.
-	 * 
+	 *
 	 * @param key The parameter key
 	 * @param defaultValue The default value
 	 * @return The parameters string value
@@ -195,10 +202,10 @@ public class AutocompleteParameters implements Map<String, Object> {
 		if (object == null || !(object instanceof String)) {
 			return defaultValue;
 		}
-		
+
 		return (String) object;
 	}
-	
+
 	/*
 	 * Map implementation
 	 */
@@ -273,18 +280,23 @@ public class AutocompleteParameters implements Map<String, Object> {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) {
+            return true;
+        }
+		if (obj == null) {
+            return false;
+        }
+		if (getClass() != obj.getClass()) {
+            return false;
+        }
 		AutocompleteParameters other = (AutocompleteParameters) obj;
 		if (parameters == null) {
-			if (other.parameters != null)
-				return false;
-		} else if (!parameters.equals(other.parameters))
-			return false;
+			if (other.parameters != null) {
+                return false;
+            }
+		} else if (!parameters.equals(other.parameters)) {
+            return false;
+        }
 		return true;
 	}
 

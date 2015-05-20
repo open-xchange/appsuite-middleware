@@ -440,8 +440,7 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(adapter.getClause());
+        StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
             if (0 < sortOptions.getLimit()) {
@@ -474,8 +473,7 @@ public class Executor {
          * construct query string
          */
         SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(adapter.getClause());
+        StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
             if (0 < sortOptions.getLimit()) {

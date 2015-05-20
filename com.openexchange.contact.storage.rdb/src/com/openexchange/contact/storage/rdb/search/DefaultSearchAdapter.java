@@ -122,8 +122,19 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 		return Types.VARCHAR == mapping.getSqlType();
 	}
 
-    protected static String getSelectClause(ContactField[] fields) throws OXException {
-        return "SELECT " + Mappers.CONTACT.getColumns(fields) + " FROM " + Table.CONTACTS;
+	protected static String getSelectClause(ContactField[] fields) throws OXException {
+	    return getSelectClause(fields, true);
+    }
+
+    protected static String getSelectClause(ContactField[] fields, boolean withTable) throws OXException {
+        StringBuilder sb = new StringBuilder(256);
+        sb.append("SELECT ");
+        sb.append(Mappers.CONTACT.getColumns(fields));
+        sb.append(" FROM ");
+        if (withTable) {
+            sb.append(Table.CONTACTS);
+        }
+        return sb.toString();
     }
 
     protected static String getSelectClause(String tableAlias, ContactField[] fields) throws OXException {
@@ -151,7 +162,7 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
             return columnlabel + " IN (" + Tools.toCSV(folderIDs) + ")";
         }
     }
-	
+
 	protected static String getEMailAutoCompleteClause() throws OXException {
 		return getEMailAutoCompleteClause(false);
 	}
@@ -165,13 +176,13 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
         String dlColumn = Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel();
         if (ignoreDistributionLists) {
         	stringBuilder.append(" AND ").append(getIgnoreDistributionListsClause());
-        } else {            	
+        } else {
         	stringBuilder.append(" OR ").append(dlColumn).append(">0");
         }
-        
+
         return stringBuilder.toString();
     }
-	
+
 	protected static String getIgnoreDistributionListsClause() throws OXException {
 		String dlColumn = Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel();
 		StringBuilder stringBuilder = new StringBuilder();
