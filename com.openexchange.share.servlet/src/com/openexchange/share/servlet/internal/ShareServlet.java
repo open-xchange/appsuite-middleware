@@ -50,12 +50,12 @@
 package com.openexchange.share.servlet.internal;
 
 import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.GuestShare;
@@ -112,16 +112,17 @@ public class ShareServlet extends HttpServlet {
                 Locale locale = request.getLocale();
                 if (paths == null || paths.length == 0) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
+                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                     return;
                 }
 
-                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
-                if (null == share) {
+                try {
+                    share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
+                } catch (OXException e) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
+                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                     return;
@@ -132,7 +133,7 @@ public class ShareServlet extends HttpServlet {
                     if (null == target) {
                         //TODO: fallback to share without target?
                         LOG.debug("No share target found at '{}'", pathInfo);
-                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
+                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                         response.setStatus(HttpServletResponse.SC_FOUND);
                         response.sendRedirect(redirectUrl);
                         return;

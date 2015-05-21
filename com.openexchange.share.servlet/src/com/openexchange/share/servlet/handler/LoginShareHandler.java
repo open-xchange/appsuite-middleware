@@ -60,11 +60,13 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
@@ -121,12 +123,17 @@ public class LoginShareHandler extends AbstractShareHandler {
                 String type = target.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
                 message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle())));
             } else {
-                message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET)));
+                displayName = displayName(share);
+                if (Strings.isEmpty(displayName)) {
+                    message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET)));
+                } else {
+                    message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName)));
+                }
             }
             if (!guestInfo.isPasswordSet()) {
                 User guest = ShareServiceLookup.getService(UserService.class).getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                 Set<String> loginsWithoutPassword = guest.getAttributes().get("guestLoginWithoutPassword");
-                int loginCount = -1;
+                int loginCount = 0;
                 if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
                     try {
                         loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
@@ -136,12 +143,15 @@ public class LoginShareHandler extends AbstractShareHandler {
                 }
                 int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
                 if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
-                    String count = (emptyGuestPasswords - loginCount) < 0 ? translator.translate(ShareServletStrings.UNLIMITED) : String.valueOf((emptyGuestPasswords - loginCount));
-                    if (null != proxy) {
-                        message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.ASK_PASSWORD_WITH_TARGET), proxy.getTitle(), count)));
-                    } else {
-                        message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.ASK_PASSWORD_WITHOUT_TARGET), count)));
+                    String count = emptyGuestPasswords < 0 ? translator.translate(ShareServletStrings.UNLIMITED) : String.valueOf((emptyGuestPasswords - loginCount));
+                    if (emptyGuestPasswords >= 0) {
+                        if (null != proxy) {
+                            message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.ASK_PASSWORD_WITH_TARGET), proxy.getTitle(), count)));
+                        } else {
+                            message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.ASK_PASSWORD_WITHOUT_TARGET), count)));
+                        }
                     }
+                    message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD)));
                     messageType = "WARN";
                     action = "ask_password";
                 } else {
@@ -180,5 +190,15 @@ public class LoginShareHandler extends AbstractShareHandler {
     private boolean handles(GuestShare share) {
         AuthenticationMode authentication = share.getGuest().getAuthentication();
         return null != authentication && (AuthenticationMode.ANONYMOUS_PASSWORD == authentication || AuthenticationMode.GUEST_PASSWORD == authentication);
+    }
+
+    private String displayName(GuestShare share) throws OXException {
+        ShareService service = ShareServiceLookup.getService(ShareService.class, true);
+        Set<Integer> users = service.getSharingUsersFor(share.getGuest().getContextID(), share.getGuest().getGuestID());
+        if (users.size() != 1) {
+            return null;
+        }
+        User sharingUser = ShareServiceLookup.getService(UserService.class).getUser(users.iterator().next(), share.getGuest().getContextID());
+        return FullNameBuilder.buildFullName(sharingUser, ShareServiceLookup.getService(TranslatorFactory.class).translatorFor(share.getGuest().getLocale()));
     }
 }
