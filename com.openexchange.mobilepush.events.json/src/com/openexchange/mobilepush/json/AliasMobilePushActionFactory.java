@@ -47,46 +47,25 @@
  *
  */
 
-package com.openexchange.mobilepush.json.osgi;
+package com.openexchange.mobilepush.json;
 
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
-import com.openexchange.mobilepush.json.AliasMobilePushActionFactory;
-import com.openexchange.mobilepush.json.MobilePushActionFactory;
-import com.openexchange.push.PushListenerService;
+import com.openexchange.documentation.annotations.Module;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link MobilePushJsonActivator}
+ * {@link AliasMobilePushActionFactory}
  *
- * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class MobilePushJsonActivator extends AJAXModuleActivator {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilePushJsonActivator.class);
+@Module(name = "pushregistry", description = "Provides access to mobile notifier module.")
+public final class AliasMobilePushActionFactory extends MobilePushActionFactory {
 
     /**
-     * Initializes a new {@link MobilePushJsonActivator}.
+     * Initializes a new {@link AliasMobilePushActionFactory}.
      */
-    public MobilePushJsonActivator() {
-        super();
+    public AliasMobilePushActionFactory(ServiceLookup serviceLookup) {
+        super(serviceLookup);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, MobilePushStorageService.class, PushListenerService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
-        registerModule(new MobilePushActionFactory(this), "mobilenotifier");
-        registerModule(new AliasMobilePushActionFactory(this), "pushregistry");
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: {}", context.getBundle().getSymbolicName());
-        super.stopBundle();
-    }
 }
