@@ -84,6 +84,7 @@ import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -374,7 +375,7 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND)));
+    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED, UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED)));
 
     /**
      * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
@@ -483,15 +484,27 @@ public class DispatcherServlet extends SessionServlet {
                     return;
                 }
             }
-
             // Dispatch it...
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
             dispatchOXException(e, httpRequest, httpResponse);
         } catch (OXException e) {
             // Dispatch it...
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
             dispatchOXException(e, httpRequest, httpResponse);
         } catch (RuntimeException e) {
             logException(e);
-            handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
+            OXException oxe = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                oxe.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
+            handleOXException(oxe, httpRequest, httpResponse);
         } finally {
             if (null != requestData) {
                 requestData.cleanUploads();
@@ -544,7 +557,7 @@ public class DispatcherServlet extends SessionServlet {
         if (APIResponseRenderer.expectsJsCallback(httpRequest)) {
             writeErrorAsJsCallback(e, httpRequest, httpResponse);
         } else {
-            handleOXException(e, httpRequest, httpResponse);
+            super.handleOXException(e, httpRequest, httpResponse, false, false);
         }
     }
 
