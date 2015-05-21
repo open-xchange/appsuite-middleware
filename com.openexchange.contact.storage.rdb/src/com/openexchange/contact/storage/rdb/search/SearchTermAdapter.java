@@ -89,7 +89,7 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
 	 */
 	public SearchTermAdapter(SearchTerm<?> term, String charset) throws OXException {
 		super(charset);
-		this.stringBuilder = new StringBuilder();
+		this.stringBuilder = new StringBuilder(256);
 		this.append(term);
 	}
 
