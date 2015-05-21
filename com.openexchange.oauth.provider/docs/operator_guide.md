@@ -95,7 +95,7 @@ The registration data consists of the following parameters:
 
 ###RMI Provisioning###
 
-The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteClientManagement`. All related classes are annotated with JavaDoc. Below you find an example of all operations that manipulate client data. Of course there are also methods to list and get all or certain registered clients.
+To use RMI as provisioning mechanism you need to link your code against the correct API classes. You'll find the according JAR files on your provisioning node. Navigate to `/opt/open-xchange/libs` and fetch `com.openexchange.admin.rmi.jar` and `com.openexchange.oauth.provider.rmi.jar`. Note that both files are symlinks. Besides the JARs you'll find the according JavaDoc in `/usr/share/doc/open-xchange-admin/javadoc` and `/usr/share/doc/open-xchange-oauth-provider/javadoc`. After adding both JARs to your classpath you can start development. The remote interface is `com.openexchange.oauth.provider.rmi.RemoteClientManagement`. Below you find an example of all operations that manipulate client data. Of course there are also methods to list and get all or certain registered clients.
 
     package me.coolhosting.ox.oauth;
 
@@ -183,6 +183,7 @@ The according remote interface is `com.openexchange.oauth.provider.rmi.RemoteCli
 
         private static byte[] loadIcon() throws FileNotFoundException {
             byte[] iconBytes = null;
+            // TODO: change this path accordingly
             try (FileInputStream fis = new FileInputStream("/home/admin/oauth-clients/example_com.png")) {
                 byte[] buf = new byte[4096];
                 int len = fis.read(buf);
