@@ -2,6 +2,10 @@
 
  - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
 
+* 2015-05-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38365: Properly handle escape sequences in personal part of an E-Mail address
+
 * 2015-05-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 38327: Do not signal file size when storing a mail attachment in Drive App as mail server's size might not be exact

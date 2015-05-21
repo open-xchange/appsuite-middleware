@@ -432,12 +432,7 @@ public final class QuotedInternetAddress extends InternetAddress {
                     c = s.charAt(index);
                     switch (c) {
                     case '\\':
-                        // Look ahead and don't skip next '"'
-                        boolean inRange = (index + 1 < length);
-                        boolean quote = inRange && s.charAt(index + 1) == '"';
-                        if (!quote) {
-                            index++;
-                        }
+                        index++; // skip both '\' and the escaped char
                         break;
                     case '"':
                         break outq; // out of for loop
