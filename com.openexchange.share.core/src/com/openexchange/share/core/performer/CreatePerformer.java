@@ -108,6 +108,9 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
         List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(internalRecipients.size() + externalRecipients.size());
         for (ShareRecipient recipient : internalRecipients) {
             InternalRecipient internal = (InternalRecipient) recipient;
+            if (internal.getEntity() == session.getUserId()) {
+                throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+            }
             targetPermissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
         }
         /*
