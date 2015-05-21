@@ -65,6 +65,7 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.InviteRequest;
+import com.openexchange.ajax.share.actions.InviteResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -77,6 +78,7 @@ import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -240,6 +242,19 @@ public class InviteTest extends ShareTest {
          */
         listResp = guestClient.execute(new ListInfostoreRequest(listItems, Metadata.columns(Metadata.HTTPAPI_VALUES_ARRAY)));
         assertListResponse(listResp, guestUserId, ObjectPermission.READ);
+    }
+
+    public void testPreventShareWithYourself() throws Exception {
+        DefaultFile file = files.get(0);
+        ShareTarget target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), file.getFolderId(), file.getId());
+        InternalRecipient recipient = new InternalRecipient();
+        recipient.setEntity(client.getValues().getUserId());
+        recipient.setBits(FOLDER_READ_PERMISSION);
+
+        InviteResponse response = client.execute(new InviteRequest(Collections.<ShareTarget> singletonList(target), Collections.<ShareRecipient> singletonList(recipient), false));
+        assertTrue(response.hasError());
+        assertTrue(ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.equals(response.getException()));
+
     }
 
     private void assertListResponse(ListInfostoreResponse listResp, int entity, int permissionBits) {
