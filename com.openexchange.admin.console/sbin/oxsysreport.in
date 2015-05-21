@@ -49,7 +49,7 @@
 #
 
 OXFUNCTIONS=@oxfunctions@
-export PATH="${PATH}:/opt/open-xchange/sbin"
+export PATH="/opt/open-xchange/sbin:${PATH}"
 
 # some defaults
 PATH="${PATH}:/opt/open-xchange/sbin"
