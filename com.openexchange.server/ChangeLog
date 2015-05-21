@@ -1,3 +1,7 @@
+* 2015-05-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37576: Check for "denied" parameter when receiving call-back from Twitter
+
 * 2015-05-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 38189: More robust handling in case invalid/insufficient JSON data was received from client that could not be parsed to a message
