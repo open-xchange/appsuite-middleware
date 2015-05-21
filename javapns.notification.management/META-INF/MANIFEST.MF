@@ -17,6 +17,7 @@ Export-Package: javapns,
  javapns.communication.exceptions,
  javapns.devices,
  javapns.devices.exceptions,
+ javapns.devices.implementations.basic,
  javapns.json,
  javapns.notification,
  javapns.notification.management
