@@ -51,7 +51,6 @@ package com.openexchange.groupware.upload.impl;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
-import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
@@ -226,28 +225,13 @@ public class UploadException extends OXException {
          * @return The newly created {@link UploadException} instance
          */
         public UploadException create(final Throwable cause, final Object... args) {
-            final Category category = getCategory();
-            final UploadException ret;
-            if (category.getLogLevel().implies(LogLevel.DEBUG)) {
-                ret = new UploadException(getNumber(), getMessage(), cause, args);
-                ret.setLogMessage(message, args);
-            } else {
-                if (OXExceptionFactory.DISPLAYABLE.contains(category.getType())) {
-                    // Displayed message is equal to logged one
-                    final String message = getMessage();
-                    ret = new UploadException(getNumber(), message, cause, args);
-                    ret.setLogMessage(message, args);
-                } else {
-                    ret = new UploadException(
-                        getNumber(),
-                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                        cause,
-                        new Object[0]);
-                    ret.setLogMessage(getMessage(), args);
-                }
-            }
-            ret.addCategory(category);
-            ret.setPrefix(getPrefix());
+            Category cat = category;
+            UploadException ret = new UploadException(getNumber(), getDisplayMessage(), cause, args);
+            ret.setLogMessage(getMessage(), args);
+
+            // Apply rest
+            ret.addCategory(cat).setPrefix(getPrefix()).setExceptionCode(this);
+
             return ret;
         }
     }
