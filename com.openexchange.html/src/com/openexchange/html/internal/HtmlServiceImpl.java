@@ -1495,7 +1495,7 @@ public final class HtmlServiceImpl implements HtmlService {
         // Check URLs
         if (replaceUrls) {
             UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
-            JerichoParser.getInstance().parse(html, handler);
+            JerichoParser.getInstance().parse(html, handler, false);
             html = handler.getHTML();
         }
 
