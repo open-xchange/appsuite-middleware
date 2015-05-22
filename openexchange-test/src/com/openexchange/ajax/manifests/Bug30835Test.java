@@ -56,7 +56,6 @@ import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.manifests.actions.ConfigRequest;
 import com.openexchange.ajax.manifests.actions.ConfigResponse;
 
-
 /**
  * {@link Bug30835Test}
  *
@@ -118,17 +117,15 @@ public class Bug30835Test extends AbstractAJAXSession {
                 return o1.length() - o2.length();
             }
 
-            for (int i = 0; i < o1.length(); i++) {
-                try {
-                    String key1 = o1.getString(i);
-                    String key2 = o2.getString(i);
-                    int comp = key1.compareToIgnoreCase(key2);
-                    if (comp > 0) {
-                        return comp;
-                    }
-                } catch (JSONException e) {
-                    return 1;
+            try {
+                String key1 = o1.getString(0);
+                String key2 = o2.getString(0);
+                int comp = key1.compareToIgnoreCase(key2);
+                if (comp > 0) {
+                    return comp;
                 }
+            } catch (JSONException e) {
+                return 1;
             }
             return -1;
         }

@@ -105,12 +105,6 @@ public class NotificationStrings implements LocalizableStrings {
     // Click here to confirm to reset your password
     public static final String RESET_PASSWORD_CONFIRM_INTRO = "Click here to confirm to reset your password";
 
-    /*
-     * Invite E-Mails
-     */
-    /** $givenname $surname */
-    public static final String USER_NAME = "%1$s %2$s";
-
     // subject
     /** Welcome! $user_name invited you to $product_name! */
     public static final String SUBJECT_WELCOME_INVITE_TO_PRODUCT = "Welcome! %1$s invited you to %2$s!";
