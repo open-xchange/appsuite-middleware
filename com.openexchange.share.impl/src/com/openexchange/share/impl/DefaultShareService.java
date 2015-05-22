@@ -224,6 +224,12 @@ public class DefaultShareService implements ShareService {
         List<ShareInfo> createdShares = new ArrayList<ShareInfo>(recipients.size());
         Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = addTargets(session, Collections.singletonList(target), recipients);
         for (ShareRecipient recipient : recipients) {
+            if (InternalRecipient.class.isInstance(recipient)) {
+                InternalRecipient internal = (InternalRecipient) recipient;
+                if (internal.getEntity() == session.getUserId()) {
+                    throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                }
+            }
             List<ShareInfo> shares = sharesPerRecipient.get(recipient);
             if (null == shares || 1 != shares.size()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unexpected number of shares created for recipient " + recipient);
