@@ -1243,4 +1243,37 @@ public class Strings {
 
     }
 
+    /**
+     * Omits leading and trailing whitespaces in given <code>StringBuilder</code> instance.
+     *
+     * @param sb The <code>StringBuilder</code> instance
+     * @return The <code>StringBuilder</code> instance with leading and trailing whitespaces omitted
+     */
+    public static StringBuilder trim(StringBuilder sb) {
+        if (null == sb) {
+            return null;
+        }
+
+        int len = sb.length();
+        int st = 0;
+
+        while ((st < len) && (sb.charAt(st) <= ' ')) {
+            st++;
+        }
+        while ((st < len) && (sb.charAt(len - 1) <= ' ')) {
+            len--;
+        }
+
+        if ((st > 0) || (len < sb.length())) {
+            for (int i = sb.length(); i > len; i--) {
+                sb.deleteCharAt(i-1);
+            }
+            for (int i = st; i-- > 0;) {
+                sb.deleteCharAt(0);
+            }
+        }
+
+        return sb;
+    }
+
 }

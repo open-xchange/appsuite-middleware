@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.reminder.json.actions.AbstractReminderAction;
-import com.openexchange.oauth.provider.OAuthModule;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 /**

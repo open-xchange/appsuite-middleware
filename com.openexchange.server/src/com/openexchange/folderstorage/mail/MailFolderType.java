@@ -111,7 +111,7 @@ public final class MailFolderType implements FolderType {
             } catch (final NumberFormatException e) {
                 final IllegalArgumentException err = new IllegalArgumentException("Mail account is not a number: " + folderId);
                 err.initCause(e);
-                LOG.error("", err);
+                LOG.warn("Ignoring invalid folder identifier", err);
                 return false;
             }
         }

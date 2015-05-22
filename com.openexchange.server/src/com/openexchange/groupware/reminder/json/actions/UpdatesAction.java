@@ -68,7 +68,7 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
-import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;

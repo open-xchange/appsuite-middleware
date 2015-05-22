@@ -72,7 +72,7 @@ import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject.Marker;
 import com.openexchange.groupware.results.CollectionDelta;
 import com.openexchange.groupware.search.Order;
-import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;

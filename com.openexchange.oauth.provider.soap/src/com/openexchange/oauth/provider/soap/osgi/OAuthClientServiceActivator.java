@@ -53,7 +53,7 @@ import java.rmi.Remote;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.oauth.provider.rmi.RemoteClientManagement;
+import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.soap.OAuthClientServicePortType;
 import com.openexchange.oauth.provider.soap.OAuthClientServicePortTypeImpl;
 import com.openexchange.osgi.HousekeepingActivator;

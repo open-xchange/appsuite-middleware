@@ -55,7 +55,7 @@ import java.util.Random;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
-import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
+import com.openexchange.ajax.oauth.client.actions.OAuthService;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.FolderTestManager;
 
@@ -105,7 +105,7 @@ public class AbstractInfostoreThirdpartyTest extends AbstractAJAXSession {
         FolderObject[] fObjs = fMgr.listFoldersOnServer(1, columns);
         for(FolderObject fObj : fObjs) {
             if(fObj.getFullName() != null) {
-                for(AuthenticationProvider authProvider : AuthenticationProvider.values()) {
+                for(OAuthService authProvider : OAuthService.values()) {
                     if(fObj.getFullName().startsWith(authProvider.getFilestorageService())) {
                         folderId = fObj.getFullName();
                         ProviderIdMapper pidm = new ProviderIdMapper();

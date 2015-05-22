@@ -3634,11 +3634,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (null == messages) {
             return null;
         }
-        String[] retval = new String[messages.length];
+        List<String> retval = new ArrayList<String>(messages.length);
         for (int i = 0; i < messages.length; i++) {
-            retval[i] = messages[i].getMailId();
+            MailMessage mail = messages[i];
+            if (null != mail) {
+                retval.add(mail.getMailId());
+            }
         }
-        return retval;
+        return retval.toArray(new String[retval.size()]);
     }
 
     private void postEvent(int accountId, String fullName, boolean contentRelated) {

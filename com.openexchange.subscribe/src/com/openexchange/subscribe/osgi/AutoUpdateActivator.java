@@ -130,7 +130,7 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
                     }
                 }
 
-                EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session));
+                EXECUTOR.executeSubscriptions(subscriptionsToRefresh, ServerSessionAdapter.valueOf(session), null);
             } catch (OXException e) {
                 LOG.error("", e);
             }

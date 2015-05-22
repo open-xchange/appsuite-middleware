@@ -129,6 +129,9 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** The token \"%1$s\" is invalid. */
     INVALID_TOKEN("The token \"%1$s\" is invalid.", ShareExceptionMessages.INVALID_TOKEN_MSG, Category.CATEGORY_USER_INPUT, 16),
 
+    /** You can't share with yourself. */
+    NO_SHARING_WITH_YOURSELF(ShareExceptionMessages.NO_SHARING_WITH_YOURSELF, ShareExceptionMessages.NO_SHARING_WITH_YOURSELF, Category.CATEGORY_USER_INPUT, 17)
+
     ;
 
     private static final String PREFIX = "SHR";

@@ -63,6 +63,7 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
 
     private String token;
     private String confirm;
+    private String account;
 
     public DefaultPasswordResetConfirmNotification(Transport transport) {
         super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
@@ -78,12 +79,21 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
         return confirm;
     }
 
+    @Override
+    public String getAccount() {
+        return account;
+    }
+
     public void setToken(String token) {
         this.token = token;
     }
 
     public void setConfirm(String confirm) {
         this.confirm = confirm;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
     }
 
 }

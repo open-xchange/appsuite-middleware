@@ -62,6 +62,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.ServletException;
@@ -75,9 +76,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionCode;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.upload.impl.UploadException;
@@ -324,7 +327,12 @@ public class DispatcherServlet extends SessionServlet {
     /**
      * A set of those {@link OXExceptionCode} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
      */
-    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED)));
+    private static final Set<OXExceptionCode> IGNOREES = Collections.unmodifiableSet(new HashSet<OXExceptionCode>(Arrays.<OXExceptionCode> asList(OXFolderExceptionCode.NOT_EXISTS, MailExceptionCode.MAIL_NOT_FOUND, SessionExceptionCodes.SESSION_EXPIRED, UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED, UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED)));
+
+    /**
+     * A set of those {@link Category categories} that should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
+     */
+    private static final Set<Category> CAT_IGNOREES = Collections.unmodifiableSet(new HashSet<Category>(Arrays.<Category> asList(Category.CATEGORY_PERMISSION_DENIED)));
 
     /**
      * Checks if passed {@code OXException} instance should not be logged as <tt>ERROR</tt>, but as <tt>DEBUG</tt> only.
@@ -333,11 +341,19 @@ public class DispatcherServlet extends SessionServlet {
      * @return <code>true</code> to ignore; otherwise <code>false</code> for common error handling
      */
     protected static boolean ignore(OXException e) {
+        Category category = e.getCategory();
+        for (Category cat : CAT_IGNOREES) {
+            if (cat == category) {
+                return true;
+            }
+        }
+
         for (OXExceptionCode code : IGNOREES) {
             if (code.equals(e)) {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -359,6 +375,7 @@ public class DispatcherServlet extends SessionServlet {
         */
         Tools.disableCaching(httpResponse);
 
+        ServerSession session = null;
         AJAXState state = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
@@ -371,6 +388,7 @@ public class DispatcherServlet extends SessionServlet {
             /*
              * Perform request
              */
+            session = requestData.getSession();
             AJAXRequestResult result = dispatcher.perform(requestData, state, requestData.getSession());
             if (renderResponse(requestData, result, httpRequest, httpResponse)) {
                 /*-
@@ -387,16 +405,31 @@ public class DispatcherServlet extends SessionServlet {
         } catch (UploadException e) {
             if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
                 // An upload failed
-                httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getMessage());
-                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
-                return;
+                if (null == session || !"com.openexchange.ox.gui.dhtml".equals(session.getClient())) {
+                    httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
+                    logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
+                    return;
+                }
+            }
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
             }
             handleOXException(e, httpRequest, httpResponse);
         } catch (OXException e) {
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                e.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
             handleOXException(e, httpRequest, httpResponse);
         } catch (RuntimeException e) {
             logException(e);
-            super.handleOXException(AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage()), httpRequest, httpResponse);
+            OXException oxe = AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            Locale locale = getLocaleFrom(session, null);
+            if (null != locale) {
+                oxe.setProperty(OXExceptionConstants.PROPERTY_LOCALE, locale.toString());
+            }
+            super.handleOXException(oxe, httpRequest, httpResponse, false, false);
         } finally {
             if (null != state) {
                 dispatcher.end(state);
@@ -436,7 +469,7 @@ public class DispatcherServlet extends SessionServlet {
             Throwable cause = e.getCause();
             LOG.error("Unexpected error", null == cause ? e : cause);
         } else {
-            // Ignore special "folder not found" error
+            // Ignore special errors
             if (ignore(e)) {
                 logException(e, LogLevel.DEBUG, -1);
             } else {
@@ -447,7 +480,7 @@ public class DispatcherServlet extends SessionServlet {
         if (APIResponseRenderer.expectsJsCallback(req)) {
             writeErrorAsJsCallback(e, req, resp);
         } else {
-            super.handleOXException(e, req, resp);
+            super.handleOXException(e, req, resp, false, false);
         }
     }
 

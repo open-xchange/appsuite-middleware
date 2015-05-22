@@ -72,8 +72,8 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.OAuthAction;
-import com.openexchange.oauth.provider.OAuthGrant;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

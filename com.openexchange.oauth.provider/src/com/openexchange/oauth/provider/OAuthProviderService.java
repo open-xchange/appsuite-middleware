@@ -54,6 +54,10 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.grant.GrantView;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -96,13 +100,13 @@ public interface OAuthProviderService {
      * @param user The user ID
      * @param clientId The client identifier
      * @param redirectURI The redirect URI
-     * @param scope The scope string, must have been validated before
+     * @param scope The scope, must have been validated before
      * @param userId The user identifier
      * @param contextId The context identifier
      * @return A new authorization code
      * @throws OXException If operation fails
      */
-    String generateAuthorizationCodeFor(String clientId, String redirectURI, String scopeString, int userId, int contextId) throws OXException;
+    String generateAuthorizationCodeFor(String clientId, String redirectURI, Scope scope, int userId, int contextId) throws OXException;
 
     /**
      * Redeems the passed authorization code for an access token.
@@ -167,20 +171,20 @@ public interface OAuthProviderService {
     // --------------------------------------- Helper methods -------------------------------------- \\
 
     /**
-     * Checks if the given scope string is valid in terms of syntax and server-side provided scopes.
+     * Checks if the given scope is valid in terms of syntax and server-side provided scopes.
      *
-     * @param scopeString The scope string to check
-     * @return <code>true</code> if the scope string contains at least one scope and all scopes belong
+     * @param scope The scope to check
+     * @return <code>true</code> if the scope contains at least one token and all tokens belong
      * to registered providers. Otherwise <code>false</code>.
      */
-    boolean isValidScopeString(String scopeString);
+    boolean isValidScope(String scope);
 
     /**
      * Gets the scope provider for a given scope ID (must be non-qualified).
      *
-     * @param scopeId The scope ID
+     * @param token The scope token
      * @return The provider or <code>null</code> if none can be found
      */
-    OAuthScopeProvider getScopeProvider(String scopeId);
+    OAuthScopeProvider getScopeProvider(String token);
 
 }

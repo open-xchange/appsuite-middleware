@@ -296,7 +296,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static volatile Boolean allowSORTDISPLAY;
     /** Whether SORT=DISPLAY is allowed to be utilized */
-    static boolean allowSORTDISPLAY() {
+    public static boolean allowSORTDISPLAY() {
         Boolean b = allowSORTDISPLAY;
         if (null == b) {
             synchronized (IMAPMessageStorage.class) {
@@ -855,7 +855,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
                 if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
-                    throw handleMessagingException(imapFolder.getFullName(), e);
+                    throw handleMessagingException("INBOX", e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, "INBOX");
             }
@@ -984,7 +984,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
                 if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
-                    throw handleMessagingException(imapFolder.getFullName(), e);
+                    throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, fullName);
             }
@@ -4508,7 +4508,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             } catch (final MessagingException e) {
                 final Exception next = e.getNextException();
                 if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
-                    throw handleMessagingException(imapFolder.getFullName(), e);
+                    throw handleMessagingException(fullName, e);
                 }
                 throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, "INBOX");
             }

@@ -52,7 +52,7 @@ package com.openexchange.oauth.provider.client;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.oauth.provider.Scopes;
+import com.openexchange.oauth.provider.scope.Scope;
 
 
 /**
@@ -65,21 +65,21 @@ import com.openexchange.oauth.provider.Scopes;
 public interface Client extends Serializable {
 
     /**
-     * Gets the client's public identifier
+     * Gets the clients public identifier
      *
      * @return The public identifier
      */
     String getId();
 
     /**
-     * Gets the client's name
+     * Gets the clients name
      *
      * @return The name
      */
     String getName();
 
     /**
-     * Gets the client's description
+     * Gets the clients description
      *
      * @return The description
      */
@@ -114,15 +114,15 @@ public interface Client extends Serializable {
     String getWebsite();
 
     /**
-     * Gets the default scope that should be assumed when the authorization request does not
+     * Gets the default scope that should be applied when an authorization request does not
      * specify a certain scope.
      *
      * @return The default scope
      */
-    Scopes getDefaultScope();
+    Scope getDefaultScope();
 
     /**
-     * Gets the client's secret identifier
+     * Gets the clients secret identifier
      *
      * @return The secret identifier
      */
@@ -149,6 +149,5 @@ public interface Client extends Serializable {
      * @return <code>true</code> if the client is enabled
      */
     boolean isEnabled();
-
 
 }

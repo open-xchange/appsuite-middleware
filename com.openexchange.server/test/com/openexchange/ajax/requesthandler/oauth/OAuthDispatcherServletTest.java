@@ -87,18 +87,17 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
-import com.openexchange.oauth.provider.DefaultScopes;
-import com.openexchange.oauth.provider.OAuthAction;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.OAuthInvalidRequestException;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.OAuthModule;
-import com.openexchange.oauth.provider.OAuthRequestException;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
+import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthScopeCheck;
-import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.SimOAuthResourceService;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -158,7 +157,7 @@ public class OAuthDispatcherServletTest {
 
             @OAuthScopeCheck
             public boolean checkScope(AJAXRequestData requestData, ServerSession session, OAuthGrant grant) {
-                return grant.getScopes().has("r_test") && grant.getScopes().has("w_test");
+                return grant.getScope().has("r_test") && grant.getScope().has("w_test");
             }
         }
 
@@ -190,16 +189,16 @@ public class OAuthDispatcherServletTest {
         private final String accessToken;
         private final String refreshToken;
         private final Date expirationDate;
-        private final Scopes scopes;
+        private final Scope scope;
 
-        public TestGrant(int contextId, int userId, String accessToken, String refreshToken, Date expirationDate, Scopes scopes) {
+        public TestGrant(int contextId, int userId, String accessToken, String refreshToken, Date expirationDate, Scope scope) {
             super();
             this.contextId = contextId;
             this.userId = userId;
             this.accessToken = accessToken;
             this.refreshToken = refreshToken;
             this.expirationDate = expirationDate;
-            this.scopes = scopes;
+            this.scope = scope;
         }
 
         @Override
@@ -233,8 +232,8 @@ public class OAuthDispatcherServletTest {
         }
 
         @Override
-        public Scopes getScopes() {
-            return scopes;
+        public Scope getScope() {
+            return scope;
         }
     }
 
@@ -247,7 +246,6 @@ public class OAuthDispatcherServletTest {
     private String writeToken;
     private String readWriteToken;
     private String expiredToken;
-    private String scopelessToken;
 
     @BeforeClass
     public static void beforeClass() {
@@ -262,25 +260,21 @@ public class OAuthDispatcherServletTest {
     @Before
     public void setUp() throws Exception {
         resourceService = new SimOAuthResourceService();
-        TestGrant readToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes("r_test"));
+        TestGrant readToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), Scope.newInstance("r_test"));
         resourceService.addToken(readToken);
         this.readToken = readToken.getAccessToken();
 
-        TestGrant writeToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes("w_test"));
+        TestGrant writeToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), Scope.newInstance("w_test"));
         resourceService.addToken(writeToken);
         this.writeToken = writeToken.getAccessToken();
 
-        TestGrant readWriteToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes("r_test", "w_test"));
+        TestGrant readWriteToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), Scope.newInstance("r_test", "w_test"));
         resourceService.addToken(readWriteToken);
         this.readWriteToken = readWriteToken.getAccessToken();
 
-        TestGrant expiredToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), new DefaultScopes("r_test"));
+        TestGrant expiredToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() - 1L), Scope.newInstance("r_test"));
         resourceService.addToken(expiredToken);
         this.expiredToken = expiredToken.getAccessToken();
-
-        TestGrant scopelessToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), new DefaultScopes());
-        resourceService.addToken(scopelessToken);
-        this.scopelessToken = scopelessToken.getAccessToken();
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(OAuthResourceService.class, resourceService);
@@ -385,24 +379,6 @@ public class OAuthDispatcherServletTest {
     }
 
     @Test
-    public void testInsufficientScope3() throws Exception {
-        prepareRequest("readwrite", scopelessToken);
-        servlet.service(request, response);
-        assertStatus(HttpServletResponse.SC_FORBIDDEN);
-        OAuthInsufficientScopeException expectedException = new OAuthInsufficientScopeException();
-        assertErrorResponse(expectedException);
-    }
-
-    @Test
-    public void testCustomScopeCheck1() throws Exception {
-        prepareRequest("readwrite", scopelessToken);
-        servlet.service(request, response);
-        assertStatus(HttpServletResponse.SC_FORBIDDEN);
-        OAuthInsufficientScopeException expectedException = new OAuthInsufficientScopeException();
-        assertErrorResponse(expectedException);
-    }
-
-    @Test
     public void testCustomScopeCheck2() throws Exception {
         prepareRequest("readwrite", readToken);
         servlet.service(request, response);
@@ -423,13 +399,6 @@ public class OAuthDispatcherServletTest {
     @Test
     public void testCustomScopeCheck4() throws Exception {
         prepareRequest("readwrite", readWriteToken);
-        servlet.service(request, response);
-        assertStatus(HttpServletResponse.SC_OK);
-    }
-
-    @Test
-    public void testGrantAllScope1() throws Exception {
-        prepareRequest("unprivileged", scopelessToken);
         servlet.service(request, response);
         assertStatus(HttpServletResponse.SC_OK);
     }

@@ -49,11 +49,9 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
@@ -64,9 +62,8 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.iterator.SearchIterator;
 
 
@@ -109,29 +106,8 @@ public class AllAction extends ContactAction {
         }
         List<Contact> contacts = new LinkedList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        request.sortInternalIfNeeded(contacts);
-
-        int leftHandLimit = request.optInt(AJAXServlet.LEFT_HAND_LIMIT);
-        int rightHandLimit = request.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
-        if (leftHandLimit >= 0 || rightHandLimit > 0) {
-            final int size = contacts.size();
-            final int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
-            final int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
-            if ((fromIndex) > size) {
-                contacts = Collections.<Contact> emptyList();
-            } else if (fromIndex >= toIndex) {
-                contacts = Collections.<Contact> emptyList();
-            } else {
-                /*
-                 * Check if end index is out of range
-                 */
-                if (toIndex < size) {
-                    contacts = contacts.subList(fromIndex, toIndex);
-                } else if (fromIndex > 0) {
-                    contacts = contacts.subList(fromIndex, size);
-                }
-            }
-            contacts = new PropertizedList<Contact>(contacts).setProperty("more", Integer.valueOf(size));
+        if (request.sortInternalIfNeeded(contacts)) {
+            contacts = request.slice(contacts);
         }
 
         return new AJAXRequestResult(contacts, lastModified, "contact");

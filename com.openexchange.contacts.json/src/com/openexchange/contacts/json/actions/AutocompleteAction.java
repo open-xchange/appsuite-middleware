@@ -53,9 +53,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.AutocompleteParameters;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.Type;
@@ -64,6 +64,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -83,6 +84,7 @@ import com.openexchange.tools.iterator.SearchIterator;
     @Parameter(name = "collation", description = "Allows you to specify a collation to sort the contacts by. As of 6.20, only supports \"gbk\" and \"gb2312\", not needed for other languages. Parameter sort should be set for this to work."),
     @Parameter(name = "admin", optional=true, type=Type.BOOLEAN, description = "Whether to include the contact representing the admin in the result or not. Defaults to \"true\".")
 }, responseDescription = "An array with contact data. Each array element describes one contact and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
+@OAuthAction(ContactActionFactory.OAUTH_READ_SCOPE)
 public class AutocompleteAction extends ContactAction {
 
     /**
@@ -99,7 +101,7 @@ public class AutocompleteAction extends ContactAction {
         /*
          * extract parameters
          */
-        boolean requireEmail = request.isRequireEmail();
+        Boolean requireEmail = Boolean.valueOf(request.isRequireEmail());
         String query = request.getQuery();
         boolean excludeAdmin = request.isExcludeAdmin();
         int excludedAdminID = excludeAdmin ? request.getSession().getContext().getMailadmin() : -1;
@@ -109,7 +111,7 @@ public class AutocompleteAction extends ContactAction {
          * perform search
          */
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
-        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, new Boolean(requireEmail));
+        parameters.put(AutocompleteParameters.REQUIRE_EMAIL, requireEmail);
         SearchIterator<Contact> searchIterator;
         if (null != folderID) {
             searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),
@@ -123,7 +125,9 @@ public class AutocompleteAction extends ContactAction {
          */
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        request.sortInternalIfNeeded(contacts);
+        if (request.sortInternalIfNeeded(contacts)) {
+            contacts = request.slice(contacts);
+        }
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

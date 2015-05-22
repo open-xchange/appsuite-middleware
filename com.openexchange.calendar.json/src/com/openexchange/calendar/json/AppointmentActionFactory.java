@@ -71,7 +71,7 @@ import com.openexchange.calendar.json.actions.UpdateAction;
 import com.openexchange.calendar.json.actions.UpdatesAction;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthModule;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 
 

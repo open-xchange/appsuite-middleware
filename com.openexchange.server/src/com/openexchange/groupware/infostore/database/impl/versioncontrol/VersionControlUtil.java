@@ -86,6 +86,14 @@ public final class VersionControlUtil {
         super();
     }
 
+    private static void releaseWriteConnection(Context context, Connection con, boolean afterReading, DBProvider provider) {
+        if (afterReading) {
+            provider.releaseWriteConnectionAfterReading(context, con);
+        } else {
+            provider.releaseWriteConnection(context, con);
+        }
+    }
+
     private static Map<Integer, DocumentMetadata> asMap(List<DocumentMetadata> documents) {
         if (null == documents) {
             return null;
@@ -145,12 +153,16 @@ public final class VersionControlUtil {
      * @throws OXException If operation fails
      */
     public static Map<Integer, List<VersionControlResult>> doVersionControl(DBProvider provider, List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, long destinationFolder, Context context) throws OXException {
+        Map<Integer, List<VersionControlResult>> resultMap = null;
+
         Connection wcon = provider.getWriteConnection(context);
         try {
-            return doVersionControl(documents, oldDocuments, destinationFolder, context, wcon);
+            resultMap = doVersionControl(documents, oldDocuments, destinationFolder, context, wcon);
         } finally {
-            provider.releaseWriteConnection(context, wcon);
+            releaseWriteConnection(context, wcon, (null == resultMap || resultMap.isEmpty()), provider);
         }
+
+        return resultMap;
     }
 
     /**
@@ -244,12 +256,16 @@ public final class VersionControlUtil {
      * @throws OXException If operation fails
      */
     public static Map<Integer, List<VersionControlRestored>> restoreVersionControl(DBProvider provider, Map<Integer, List<VersionControlResult>> resultMap, Context context) throws OXException {
+        Map<Integer, List<VersionControlRestored>> restoredMap = null;
+
         Connection wcon = provider.getWriteConnection(context);
         try {
-            return restoreVersionControl(resultMap, context, wcon);
+            restoredMap = restoreVersionControl(resultMap, context, wcon);
         } finally {
-            provider.releaseWriteConnection(context, wcon);
+            releaseWriteConnection(context, wcon, (null == restoredMap || restoredMap.isEmpty()), provider);
         }
+
+        return restoredMap;
     }
 
     /**

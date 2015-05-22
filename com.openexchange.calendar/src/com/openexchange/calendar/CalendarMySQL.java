@@ -3135,7 +3135,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Check if every possible occurrence is covered by a delete exception
              */
-            if (rresults.size() <= cdao.getDeleteException().length) {
+            if (null != cdao.getDeleteException() && rresults.size() <= cdao.getDeleteException().length) {
                 /*
                  * Commit current transaction
                  */

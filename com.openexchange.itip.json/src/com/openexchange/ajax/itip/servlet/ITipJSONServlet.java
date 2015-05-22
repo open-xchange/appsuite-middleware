@@ -49,10 +49,17 @@
 
 package com.openexchange.ajax.itip.servlet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.openexchange.ajax.MultipleAdapterServletNew;
 import com.openexchange.ajax.itip.ITipActionFactory;
+import com.openexchange.capabilities.Capability;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link ITipJSONServlet}
@@ -61,13 +68,36 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class ITipJSONServlet extends MultipleAdapterServletNew {
 
-    public ITipJSONServlet() {
-        super(ITipActionFactory.INSTANCE);
-    }
+	private static final long serialVersionUID = -3362240321744774414L;
 
-    @Override
-    protected boolean hasModulePermission(ServerSession session) {
-        return session.getUserPermissionBits().hasCalendar();
-    }
+	private static final Logger LOG = LoggerFactory.getLogger(ITipJSONServlet.class);
+
+	public static final Capability CAPABILITY = new Capability("com.openxchange.itip.json.ITIP_JSON_ENABLED");
+
+	private ServiceLookup services;
+
+	public ITipJSONServlet(ServiceLookup services) {
+		super(ITipActionFactory.INSTANCE);
+		this.services = services;
+	}
+
+	@Override
+	protected boolean hasModulePermission(ServerSession session) {
+		return session.getUserPermissionBits().hasCalendar() || hasCapability(session);
+	}
+
+	private boolean hasCapability(ServerSession session) {
+		CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+		if (capabilityService == null) {
+			return false;
+		}
+		try {
+			CapabilitySet capabilities = capabilityService.getCapabilities(session);
+			return capabilities.contains(CAPABILITY);
+		} catch (OXException e) {
+			LOG.error("Error while retrieving capabilities", e);
+			return false;
+		}
+	}
 
 }

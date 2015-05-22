@@ -175,7 +175,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
          */
         {
             Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
-            writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
+            writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
         }
         {
             List<String> remoteParameterNames = new LinkedList<String>();

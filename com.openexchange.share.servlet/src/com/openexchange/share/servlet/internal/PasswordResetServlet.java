@@ -58,6 +58,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -65,7 +66,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -168,15 +168,24 @@ public class PasswordResetServlet extends HttpServlet {
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
 
-                    UserImpl user = new UserImpl();
-                    user.setId(guestID);
+                    UserImpl user = new UserImpl(guest);
                     user.setPasswordMech(guest.getPasswordMech());
-                    user.setUserPassword(PasswordMech.valueOf(guest.getPasswordMech()).encode(PasswordUtility.INITIAL_GUEST_PASSWORD));
+                    user.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
+                    userService.updateUser(user, context);
+                    userService.invalidateUser(context, guestID);
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
-
+                    String status = "require_password";
+                    int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
+                    if (emptyGuestPasswords > 0) {
+                        String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
+                        int loginCount = null != count ? Integer.parseInt(count) : 0;
+                        if (emptyGuestPasswords > loginCount) {
+                            status = "ask_password";
+                        }
+                    }
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
                         URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                        "resetPassword");
+                        status);
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                 } else {

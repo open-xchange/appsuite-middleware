@@ -100,6 +100,12 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2496)
+* Fri Apr 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-09 (2495)
 * Wed Apr 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2474)
 * Tue Apr 07 2015 Marcus Klein <marcus.klein@open-xchange.com>

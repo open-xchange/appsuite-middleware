@@ -231,7 +231,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
             @Override
             public Object call() throws Exception {
                 try {
-                    return ox.perform(request().module("user").action("get").params("timezone", "utc", "id", "" + session.getUserId()).format("json").build(), null, session).getResultObject();
+                    return ox.perform(request().module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(), null, session).getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
                 }

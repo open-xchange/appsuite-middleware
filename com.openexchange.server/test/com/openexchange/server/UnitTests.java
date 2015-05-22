@@ -63,6 +63,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
 @SuiteClasses({
     com.openexchange.ajax.ProcessUploadStaticTest.class,
     com.openexchange.ajax.parser.TaskLastModifiedTest.class,
+    com.openexchange.ajax.writer.DataWriterTest.class,
+    com.openexchange.ajax.writer.TaskWriterTest.class,
     com.openexchange.ajax.LoginAddFragmentTest.class,
     com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
     com.openexchange.groupware.ldap.Bug33891Test.class,

@@ -49,12 +49,14 @@
 
 package com.openexchange.oauth.internal;
 
+import static com.openexchange.oauth.OAuthConstants.OAUTH_PROBLEM_PERMISSION_DENIED;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.oauth.CallbackRegistry;
+import com.openexchange.oauth.OAuthConstants;
 
 /**
  * {@link CallbackRegistryImpl}
@@ -106,15 +108,35 @@ public class CallbackRegistryImpl implements CustomRedirectURLDetermination, Run
         if (tokenMap.isEmpty()) {
             return null;
         }
+
         String token = req.getParameter("oauth_token");
-        if (null == token) {
-            token = req.getParameter("state");
-            if (null == token || !token.startsWith("__ox")) {
+        if (null != token) {
+            // By OAuth token
+            UrlAndStamp urlAndStamp = tokenMap.remove(token);
+            return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
+        }
+
+        token = req.getParameter("state");
+        if (null != token && token.startsWith("__ox")) {
+            // By state parameter
+            UrlAndStamp urlAndStamp = tokenMap.remove(token);
+            return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
+        }
+
+        token = req.getParameter("denied");
+        if (null != token) {
+            // Denied...
+            UrlAndStamp urlAndStamp = tokenMap.remove(token);
+            if (null == urlAndStamp) {
                 return null;
             }
+            StringBuilder callback = new StringBuilder(urlAndStamp.callbackUrl);
+            callback.append(urlAndStamp.callbackUrl.indexOf('?') > 0 ? '&' : '?');
+            callback.append(OAuthConstants.URLPARAM_OAUTH_PROBLEM).append('=').append(OAUTH_PROBLEM_PERMISSION_DENIED);
+            return callback.toString();
         }
-        final UrlAndStamp urlAndStamp = tokenMap.remove(token);
-        return null == urlAndStamp ? null : urlAndStamp.callbackUrl;
+
+        return null;
     }
 
     @Override

@@ -61,16 +61,9 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
  */
 public class DistListMember extends DistributionListEntryObject {
 
-	private int parentContactID;
-	private boolean b_parentContactID;
+    private static final long serialVersionUID = 3887003030363062903L;
 
-	private int contextID;
-	private boolean b_contextID;
-	
-	private UUID uuid;
-	private boolean b_uuid;
-
-	/**
+    /**
 	 * Creates an array of distribution list members using the supplied data.
 	 *
 	 * @param distList an array of distribution list entry objects
@@ -118,6 +111,24 @@ public class DistListMember extends DistributionListEntryObject {
 
 		return member;
 	}
+
+	// ------------------------------------------------------------------------------------------------------------------------
+
+	private int parentContactID;
+    private boolean b_parentContactID;
+
+    private int contextID;
+    private boolean b_contextID;
+
+    private UUID uuid;
+    private boolean b_uuid;
+
+    /**
+     * Initializes a new {@link DistListMember}.
+     */
+    public DistListMember() {
+        super();
+    }
 
 	/**
 	 * @return the parentContactID
@@ -173,21 +184,21 @@ public class DistListMember extends DistributionListEntryObject {
 	public boolean containsParentContactID() {
 		return b_parentContactID;
 	}
-	
+
 	public void setUuid(UUID uuid) {
 	    this.b_uuid = true;
 	    this.uuid = uuid;
 	}
-	
+
 	public void removeUuid() {
 	    this.uuid = null;
 	    this.b_uuid = false;
 	}
-	
+
 	public boolean containsUuid() {
 	    return b_uuid;
 	}
-	
+
 	public UUID getUuid() {
 	    return uuid;
 	}

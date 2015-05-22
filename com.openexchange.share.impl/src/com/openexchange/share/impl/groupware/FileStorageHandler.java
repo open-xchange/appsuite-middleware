@@ -172,16 +172,16 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public boolean canShare(boolean canShareInFolder, TargetProxy proxy, HandlerParameters parameters) {
+    public boolean canShare(TargetProxy proxy, HandlerParameters parameters) {
         File file = ((FileTargetProxy) proxy).getFile();
         List<ObjectPermission> objectPermissions = PermissionHelper.getObjectPermissions(file.getObjectPermissions());
         if (objectPermissions == null || objectPermissions.isEmpty()) {
-            return canShareInFolder;
+            return false;
         }
 
         ObjectPermission objectPermission = EffectiveObjectPermissions.find(parameters.getUser(), objectPermissions);
         if (objectPermission == null) {
-            return canShareInFolder;
+            return false;
         }
 
         return objectPermission.canWrite();
@@ -223,7 +223,7 @@ public class FileStorageHandler implements ModuleHandler {
     public ShareTarget adjustTarget(ShareTarget target, int contextID, int userID, boolean isGuest) throws OXException {
         if (null != target && false == target.isFolder()) {
             /*
-             * access the folder of file targets based on guest flag 
+             * access the folder of file targets based on guest flag
              */
             String sharedFilesFolder = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
             if (isGuest) {
@@ -235,7 +235,7 @@ public class FileStorageHandler implements ModuleHandler {
                     fileID.setFolderId(sharedFilesFolder);
                     String adjustedItem = fileID.toUniqueID();
                     return new AdjustedShareTarget(target, sharedFilesFolder, adjustedItem);
-                }                
+                }
             } else if (AdjustedShareTarget.class.isInstance(target) ) {
                 /*
                  * re-adjust file target to the original folder for non-guests

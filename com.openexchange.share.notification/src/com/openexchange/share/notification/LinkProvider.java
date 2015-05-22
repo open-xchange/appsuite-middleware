@@ -81,4 +81,11 @@ public interface LinkProvider {
      */
     String getPasswordResetConfirmUrl(String confirm);
 
+    /**
+     * Gets the direct link to a shared file/folder for an internal user
+     *
+     * @return The direct link to a shared file/folder
+     */
+    String getInternalLink();
+
 }

@@ -63,10 +63,9 @@ import com.openexchange.exception.OXException;
  */
 public class SearchIteratorDelegator<T> implements SearchIterator<T> {
 
+    private final Collection<T> collection;
     private final Iterator<T> delegate;
-
     private final int size;
-
     private final List<OXException> warnings;
 
     /**
@@ -79,6 +78,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         delegate = iter;
         warnings = new ArrayList<OXException>(2);
         size = -1;
+        collection = null;
     }
 
     /**
@@ -96,6 +96,7 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
         delegate = iter;
         this.size = size;
         warnings = new ArrayList<OXException>(2);
+        collection = null;
     }
 
     /**
@@ -104,8 +105,31 @@ public class SearchIteratorDelegator<T> implements SearchIterator<T> {
      * @param collection The collection to iterate
      */
     public SearchIteratorDelegator(final Collection<T> collection) {
-        this(collection.iterator(), collection.size());
+        super();
+        delegate = collection.iterator();
+        this.size = collection.size();
+        warnings = new ArrayList<OXException>(2);
+        this.collection = collection;
     }
+
+    /**
+     * Gets the collection
+     *
+     * @return The collection
+     */
+    public Collection<T> getCollection() {
+        return collection;
+    }
+
+    /**
+     * Spawns a new {@link SearchIterator} from this instance (if possible).
+     *
+     * @return The new {@code SearchIterator} instance or <code>null</code>
+     */
+    public SearchIteratorDelegator<T> newSearchIterator() {
+        return null == collection ? null : new SearchIteratorDelegator<>(collection);
+    }
+
 
     @Override
     public boolean hasNext() throws OXException {

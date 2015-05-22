@@ -59,6 +59,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.OrderFields;
 import com.openexchange.ajax.fields.SearchTermFields;
 import com.openexchange.ajax.parser.SearchTermParser;
@@ -82,6 +83,7 @@ import com.openexchange.search.SearchExceptionMessages;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.collections.PropertizedList;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -157,18 +159,20 @@ public class ContactRequest {
      */
     public SortOptions getSortOptions() throws OXException {
         SortOptions sortOptions = new SortOptions();
-    	int leftHandLimit = this.getLeftHandLimit();
-    	if (0 < leftHandLimit) {
-    	    sortOptions.setRangeStart(leftHandLimit);
-    	}
-    	int rightHandLimit = this.getRightHandLimit();
-    	if (0 < rightHandLimit) {
-    	    if (rightHandLimit < leftHandLimit) {
-    	        throw OXJSONExceptionCodes.INVALID_VALUE.create(rightHandLimit, "right_hand_limit");
-    	    }
-            sortOptions.setLimit(rightHandLimit - leftHandLimit);
-    	}
         if (false == isInternalSort()) {
+            // Left-hand and right-hand limit only applicable if no internal sorting is supposed to be performed
+            int leftHandLimit = this.getLeftHandLimit();
+            if (0 < leftHandLimit) {
+                sortOptions.setRangeStart(leftHandLimit);
+            }
+            int rightHandLimit = this.getRightHandLimit();
+            if (0 < rightHandLimit) {
+                if (rightHandLimit < leftHandLimit) {
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(rightHandLimit, "right_hand_limit");
+                }
+                sortOptions.setLimit(rightHandLimit - leftHandLimit);
+            }
+
        		sortOptions.setCollation(this.getCollation());
         	int sort = this.getSort();
         	if (0 < sort) {
@@ -186,17 +190,21 @@ public class ContactRequest {
      * Sort the supplied contacts internally according to the requested 'sort' field.
      *
      * @param contacts the contacts to sort
-     * @throws OXException
+     * @return <code>true</code> if internal sorting was performed; otherwise <code>false</code>
+     * @throws OXException If internal sorting fails
      */
-    public void sortInternalIfNeeded(final List<Contact> contacts) throws OXException {
+    public boolean sortInternalIfNeeded(List<Contact> contacts) throws OXException {
         if (this.isInternalSort() && null != contacts && 1 < contacts.size()) {
-            final int sort = this.getSort();
+            int sort = this.getSort();
             if (0 == sort || Contact.SPECIAL_SORTING == sort) {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
+                return true;
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
                 Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
+                return true;
             }
         }
+        return false;
     }
 
     /**
@@ -205,19 +213,60 @@ public class ContactRequest {
      *
      * @param contacts The contacts to sort
      * @param reference the reference date
-     * @throws OXException
+     * @return <code>true</code> if internal sorting was performed; otherwise <code>false</code>
+     * @throws OXException If internal sorting fails
      */
-    public void sortInternalIfNeeded(List<Contact> contacts, ContactField dateField, Date reference) throws OXException {
+    public boolean sortInternalIfNeeded(List<Contact> contacts, ContactField dateField, Date reference) throws OXException {
         if (null != contacts && 1 < contacts.size()) {
             int sort = this.getSort();
             if (Contact.SPECIAL_SORTING == sort) {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
+                return true;
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
                 Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
+                return true;
             } else if (0 == sort) {
                 Collections.sort(contacts, RequestTools.getAnnualDateComparator(dateField, reference));
+                return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Slices given contact list according possibly available left-hand and right-hand parameters
+     *
+     * @param toSlice The contact list to slice
+     * @return The sliced contact list
+     * @throws OXException If slice attempt fails
+     */
+    public List<Contact> slice(List<Contact> toSlice) throws OXException {
+        List<Contact> contacts = toSlice;
+
+        int leftHandLimit = this.optInt(AJAXServlet.LEFT_HAND_LIMIT);
+        int rightHandLimit = this.optInt(AJAXServlet.RIGHT_HAND_LIMIT);
+        if (leftHandLimit >= 0 || rightHandLimit > 0) {
+            int size = contacts.size();
+            int fromIndex = leftHandLimit > 0 ? leftHandLimit : 0;
+            int toIndex = rightHandLimit > 0 ? (rightHandLimit > size ? size : rightHandLimit) : size;
+            if ((fromIndex) > size) {
+                contacts = Collections.<Contact> emptyList();
+            } else if (fromIndex >= toIndex) {
+                contacts = Collections.<Contact> emptyList();
+            } else {
+                /*
+                 * Check if end index is out of range
+                 */
+                if (toIndex < size) {
+                    contacts = contacts.subList(fromIndex, toIndex);
+                } else if (fromIndex > 0) {
+                    contacts = contacts.subList(fromIndex, size);
+                }
+            }
+            contacts = new PropertizedList<Contact>(contacts).setProperty("more", Integer.valueOf(size));
+        }
+
+        return contacts;
     }
 
     /**

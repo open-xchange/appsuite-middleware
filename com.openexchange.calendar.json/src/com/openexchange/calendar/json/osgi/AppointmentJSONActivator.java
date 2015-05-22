@@ -60,8 +60,8 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.LocalizableStrings;
-import com.openexchange.oauth.provider.AbstractScopeProvider;
-import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.user.UserService;
 
 /**

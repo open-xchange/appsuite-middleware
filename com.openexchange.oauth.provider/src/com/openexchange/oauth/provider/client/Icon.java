@@ -49,7 +49,6 @@
 
 package com.openexchange.oauth.provider.client;
 
-import java.io.InputStream;
 import java.io.Serializable;
 
 /**
@@ -75,11 +74,10 @@ public interface Icon extends Serializable {
     String getMimeType();
 
     /**
-     * Gets an {@link InputStream} for the icons data. Every subsequent call returns
-     * a new stream.
+     * Gets the icons raw bytes.
      *
-     * @return An input stream to the icons data
+     * @return The icon data
      */
-    InputStream getInputStream();
+    byte[] getData();
 
 }

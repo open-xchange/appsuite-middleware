@@ -99,6 +99,7 @@ import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.share.storage.ShareStorage;
@@ -223,6 +224,12 @@ public class DefaultShareService implements ShareService {
         List<ShareInfo> createdShares = new ArrayList<ShareInfo>(recipients.size());
         Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = addTargets(session, Collections.singletonList(target), recipients);
         for (ShareRecipient recipient : recipients) {
+            if (InternalRecipient.class.isInstance(recipient)) {
+                InternalRecipient internal = (InternalRecipient) recipient;
+                if (internal.getEntity() == session.getUserId()) {
+                    throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                }
+            }
             List<ShareInfo> shares = sharesPerRecipient.get(recipient);
             if (null == shares || 1 != shares.size()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unexpected number of shares created for recipient " + recipient);
@@ -262,12 +269,12 @@ public class DefaultShareService implements ShareService {
                 User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
                 List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
                 /*
-                 * prepare shares for each target, remember new guest shares for storing 
+                 * prepare shares for each target, remember new guest shares for storing
                  */
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
                     if (guestUser.isGuest()) {
-                        sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));    
+                        sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));
                         sharesToStore.add(share);
                     } else {
                         sharesForGuest.add(new InternalUserShareInfo(contextID, guestUser, share));
@@ -741,7 +748,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Gets a guest user for a new share. A new guest user is created if no matching one exists, the permission bits are applied as needed.
-     * In case the guest recipient denotes an already existing, internal user, this user is returned. 
+     * In case the guest recipient denotes an already existing, internal user, this user is returned.
      *
      * @param connection A (writable) connection to the database
      * @param context The context
@@ -782,11 +789,15 @@ public class DefaultShareService implements ShareService {
                     /*
                      * guest recipient points to internal user
                      */
-                    LOG.debug("Guest recipient {} points to internal user {} in context {}: {}", 
+                    LOG.debug("Guest recipient {} points to internal user {} in context {}: {}",
                         guestRecipient.getEmailAddress(), existingUser.getLoginInfo(), context.getContextId(), existingUser.getId());
                 }
                 return existingUser;
             }
+        } else if (InternalRecipient.class.isInstance(recipient)) {
+            InternalRecipient internalRecipient = (InternalRecipient) recipient;
+            User user = userService.getUser(internalRecipient.getEntity(), context);
+            return user;
         }
         /*
          * create new guest user & contact in this context

@@ -65,3 +65,4 @@ opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/webdav-disabled-message.txt
 opt/open-xchange/etc/tokenlogin-secrets
+opt/open-xchange/etc/globaldb.yml

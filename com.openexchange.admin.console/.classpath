@@ -9,5 +9,8 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.admin.plugin.hosting"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.classic.extensions"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.core.extensions"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.logback.extensions"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

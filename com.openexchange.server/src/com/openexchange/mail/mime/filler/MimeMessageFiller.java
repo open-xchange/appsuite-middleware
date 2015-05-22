@@ -638,13 +638,13 @@ public class MimeMessageFiller {
              * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
              * "References:" field.
              */
-            mimeMessage.setHeader(HDR_REFERENCES, refBuilder.toString());
+            mimeMessage.setHeader(HDR_REFERENCES, MimeMessageUtility.fold(12, refBuilder.toString()));
         } else if (refBuilder.length() > 0) {
             /*
              * If the parent has none of the "References:", "In-Reply-To:", or "Message-ID:" fields, then the new message will have no
              * "References:" field.
              */
-            mimeMessage.setHeader(HDR_REFERENCES, refBuilder.toString());
+            mimeMessage.setHeader(HDR_REFERENCES, MimeMessageUtility.fold(12, refBuilder.toString()));
         }
     }
 

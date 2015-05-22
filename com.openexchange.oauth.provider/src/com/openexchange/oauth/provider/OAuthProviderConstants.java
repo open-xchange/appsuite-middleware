@@ -61,22 +61,22 @@ public interface OAuthProviderConstants {
     /**
      * Servlet alias of the authorization endpoint without leading and trailing slashes
      */
-    public static final String AUTHORIZATION_SERVLET_ALIAS = "o/oauth2/authorization";
+    public static final String AUTHORIZATION_SERVLET_ALIAS = "oauth/provider/authorization";
 
     /**
      * Servlet alias of the access token endpoint without leading and trailing slashes
      */
-    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "o/oauth2/accessToken";
+    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "oauth/provider/accessToken";
 
     /**
      * Servlet alias of the endpoint for grant revocation by client applications
      */
-    public static final String REVOKE_SERVLET_ALIAS = "o/oauth2/revoke";
+    public static final String REVOKE_SERVLET_ALIAS = "oauth/provider/revoke";
 
     /**
      * Servlet alias of the endpoint for client icons
      */
-    public static final String CLIENT_ICON_SERVLET_ALIAS = "o/oauth2/icon";
+    public static final String AUTH_INFO_SERVLET_ALIAS = "oauth/provider/authinfo";
 
     // -------------------------------------------------------------------------------------------------------
 
@@ -85,9 +85,9 @@ public interface OAuthProviderConstants {
      */
     public static final long DEFAULT_EXPIRATION = TimeUnit.HOURS.toMillis(1L);
 
-    // -------------------------------------------------------------------------------------------------------
+    // ---------------- Parameters ---------------------------------------------------------------------------
 
-    /** Required. Value is always <b><code>code</code></b> */
+    /** Required. See {@link #RESPONSE_TYPE_AUTH_CODE} */
     public static final String PARAM_RESPONSE_TYPE = "response_type";
 
     /** Required. Value of your <b>API Key</b> given when you registered your application */
@@ -126,14 +126,21 @@ public interface OAuthProviderConstants {
     /** Required. The CSRF token */
     public static final String PARAM_CSRF_TOKEN = "csrf_token";
 
-    /** Optional. The language */
-    public static final String PARAM_LANGUAGE = "language";
-
     /** The error */
     public static final String PARAM_ERROR = "error";
 
     /** The error description */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
 
+    // ---------------- Common parameter values --------------------------------------------------------------
+
+    /** Response type <b><code>code</code></b> */
+    public static final String RESPONSE_TYPE_AUTH_CODE = "code";
+
+    /** Grant type <b><code>refresh_token</code></b> */
+    public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+
+    /** Grant type <b><code>authorization_code</code></b> */
+    public static final String GRANT_TYPE_AUTH_CODE = "authorization_code";
 
 }

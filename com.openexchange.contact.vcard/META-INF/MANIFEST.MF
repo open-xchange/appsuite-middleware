@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange contact to/from vCard conversion
+Bundle-Version: 7.8.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Eclipse-BuddyPolicy: registered
+Bundle-ClassPath: .,
+ lib/ez-vcard-0.9.6.jar
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.exception,
+ com.openexchange.groupware.container,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.encoding,
+ com.openexchange.tools.images,
+ com.openexchange.tools.iterator,
+ com.openexchange.version,
+ javax.imageio,
+ javax.mail.internet;version="1.5.0",
+ javax.xml.namespace,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j,
+ org.w3c.dom,
+ org.xml.sax
+Bundle-SymbolicName: com.openexchange.contact.vcard
+Bundle-Activator: com.openexchange.contact.vcard.osgi.ContactVCardActivator
+Export-Package: com.openexchange.contact.vcard

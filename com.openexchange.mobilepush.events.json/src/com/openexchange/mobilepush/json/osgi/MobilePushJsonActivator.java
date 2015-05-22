@@ -52,6 +52,7 @@ package com.openexchange.mobilepush.json.osgi;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
+import com.openexchange.mobilepush.json.AliasMobilePushActionFactory;
 import com.openexchange.mobilepush.json.MobilePushActionFactory;
 import com.openexchange.push.PushListenerService;
 
@@ -80,6 +81,7 @@ public class MobilePushJsonActivator extends AJAXModuleActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         registerModule(new MobilePushActionFactory(this), "mobilenotifier");
+        registerModule(new AliasMobilePushActionFactory(this), "pushregistry");
     }
 
     @Override
