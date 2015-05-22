@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange notification utilities
+Bundle-SymbolicName: com.openexchange.notification
+Bundle-Version: 7.8.0
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.groupware.ldap,
+ com.openexchange.i18n
+Export-Package: com.openexchange.notification
