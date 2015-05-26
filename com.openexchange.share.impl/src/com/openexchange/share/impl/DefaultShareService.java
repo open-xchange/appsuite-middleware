@@ -224,12 +224,6 @@ public class DefaultShareService implements ShareService {
         List<ShareInfo> createdShares = new ArrayList<ShareInfo>(recipients.size());
         Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = addTargets(session, Collections.singletonList(target), recipients);
         for (ShareRecipient recipient : recipients) {
-            if (InternalRecipient.class.isInstance(recipient)) {
-                InternalRecipient internal = (InternalRecipient) recipient;
-                if (internal.getEntity() == session.getUserId()) {
-                    throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
-                }
-            }
             List<ShareInfo> shares = sharesPerRecipient.get(recipient);
             if (null == shares || 1 != shares.size()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unexpected number of shares created for recipient " + recipient);
@@ -265,6 +259,12 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
             List<Share> sharesToStore = new ArrayList<Share>(expectedShares);
             for (ShareRecipient recipient : recipients) {
+                if (InternalRecipient.class.isInstance(recipient)) {
+                    InternalRecipient internal = (InternalRecipient) recipient;
+                    if (internal.getEntity() == session.getUserId()) {
+                        throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                    }
+                }
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
                 User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
                 List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
