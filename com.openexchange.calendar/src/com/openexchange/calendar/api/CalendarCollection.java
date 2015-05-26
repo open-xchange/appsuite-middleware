@@ -1064,8 +1064,8 @@ public Date getOccurenceDate(final CalendarDataObject cdao) throws OXException {
 
 
     @Override
-    public void fillMap(final RecurringResultsInterface rss, final long s, final long diff, final int d, final int counter) {
-        final RecurringResult rs = new RecurringResult(s, diff, d, counter);
+    public void fillMap(final RecurringResultsInterface rss, final long s, final long diff, final int d, final int counter, String timezone) {
+        final RecurringResult rs = new RecurringResult(s, diff, d, counter, timezone);
         rss.add(rs);
     }
 

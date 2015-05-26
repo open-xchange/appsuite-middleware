@@ -57,7 +57,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -812,10 +814,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setTimezone(timezone);
                 }
                 recColl.fillDAO(cdao);
-
-                recColl.checkRecurring(cdao);
-                // cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) /
-                // Constants.MILLI_DAY)));
+                
                 cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
                 Date realStart = calculateRealRecurringStartDate(cdao);
                 if (realStart != null) {
@@ -1051,7 +1050,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
 
     private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) {
         Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
-        return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime(), cdao.getRecurrenceCalculator());
+        boolean fulltime = (cdao.containsFullTime() || edao == null) ? cdao.getFullTime() : edao.getFullTime(); 
+        String timezone = cdao.getTimezone() == null ? edao.getTimezone() : cdao.getTimezone();
+        Date untilDate = null == until ? recColl.getMaxUntilDate(cdao) : until;
+        return calculateRealRecurringEndDate2(untilDate, cdao.getEndDate(), fulltime, timezone);
     }
 
     /**
@@ -1088,6 +1090,40 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         }
 
         return new Date(until + mod);
+    }
+
+    private static final Date calculateRealRecurringEndDate2(final Date untilDate, final Date endDate, final boolean isFulltime, String timezone) {
+        if (isFulltime) {
+            return untilDate;
+        }
+        TimeZone tz = TimeZone.getTimeZone(timezone == null ? "UTC" :  timezone);
+        /*
+         * Create the until without times as UTC.
+         */
+        Calendar untilWithoutTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        untilWithoutTime.setTime(untilDate);
+        untilWithoutTime.set(Calendar.HOUR_OF_DAY, 0);
+        untilWithoutTime.set(Calendar.MINUTE, 0);
+        untilWithoutTime.set(Calendar.SECOND, 0);
+        untilWithoutTime.set(Calendar.MILLISECOND, 0);
+        
+        /*
+         * Create the given end with given timezone
+         */
+        Calendar end = new GregorianCalendar(tz);
+        end.setTime(endDate);
+        
+        /*
+         * Use the date of the until and the time of the end. All with given tz.
+         */
+        Calendar newEnd = new GregorianCalendar(tz);
+        newEnd.set(untilWithoutTime.get(Calendar.YEAR), untilWithoutTime.get(Calendar.MONTH), untilWithoutTime.get(Calendar.DAY_OF_MONTH));
+        newEnd.set(Calendar.HOUR_OF_DAY, end.get(Calendar.HOUR_OF_DAY));
+        newEnd.set(Calendar.MINUTE, end.get(Calendar.MINUTE));
+        newEnd.set(Calendar.SECOND, end.get(Calendar.SECOND));
+        newEnd.set(Calendar.MILLISECOND, end.get(Calendar.MILLISECOND));
+
+        return newEnd.getTime();
     }
 
     private static final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
@@ -1975,6 +2011,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
+            cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
             //checkAndRemoveRecurrenceFields(cdao);
             cdao.setRecurrence(edao.getRecurrence());
             /*

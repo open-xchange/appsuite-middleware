@@ -462,7 +462,7 @@ public class MockCalendarCollectionService implements CalendarCollectionService{
      * @see com.openexchange.groupware.calendar.CalendarCollectionService#fillMap(com.openexchange.groupware.calendar.RecurringResultsInterface, long, long, int, int)
      */
     @Override
-    public void fillMap(RecurringResultsInterface rss, long s, long diff, int d, int counter) {
+    public void fillMap(RecurringResultsInterface rss, long s, long diff, int d, int counter, String calc_timezone) {
         // Nothing to do
 
     }

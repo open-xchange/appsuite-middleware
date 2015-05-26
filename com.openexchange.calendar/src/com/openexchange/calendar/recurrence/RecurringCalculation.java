@@ -54,6 +54,7 @@ package com.openexchange.calendar.recurrence;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TimeZone;
@@ -344,7 +345,32 @@ public class RecurringCalculation {
     public void setStartAndEndTime(final long start, final long end) {
         this.start_of_series = start;
         this.end_of_series = end;
-        diff = Math.abs((end - start) % Constants.MILLI_DAY);
+        calculateLength();
+    }
+
+    /**
+     * Calculates the duration of the appointment, reduced by full days.
+     */
+    private void calculateLength() {
+        TimeZone tz = TimeZone.getTimeZone(calc_timezone);
+        // Start of series
+        Calendar s = new GregorianCalendar(tz);
+        s.setTimeInMillis(start_of_series);
+        // End of series
+        Calendar e = new GregorianCalendar(tz);
+        e.setTimeInMillis(end_of_series);
+
+        // Strip down to the same day, ignoring everything > 24h. This is handled by "recurrence_calculator".
+        e.set(Calendar.YEAR, s.get(Calendar.YEAR));
+        e.set(Calendar.MONTH, s.get(Calendar.MONTH));
+        e.set(Calendar.DAY_OF_MONTH, s.get(Calendar.DAY_OF_MONTH));
+
+        // Avoid calculation errors for appointments which switch days (e.g. 22:00 - 01:00)
+        while (e.getTimeInMillis() - s.getTimeInMillis() < 0) {
+            e.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        diff = e.getTimeInMillis() - s.getTimeInMillis();
     }
 
     /**
@@ -501,7 +527,7 @@ public class RecurringCalculation {
                 if (((!boundaries) || (start_of_occurrence < range_end && end_of_occurrence > range_start) || pos == ds_count)
                     && (!recColl.isException(normalized_start_of_series, changeExceptions, deleteExceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                        recColl.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
+                        recColl.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count, calc_timezone);
                     }
                     if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                         break;
@@ -628,7 +654,7 @@ public class RecurringCalculation {
 							break loop;
 						}
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                            recColl.fillMap(rs, range, diff, recurrence_calculator, ds_count);
+                            recColl.fillMap(rs, range, diff, recurrence_calculator, ds_count, calc_timezone);
                         }
                         if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break loop;
@@ -717,7 +743,7 @@ public class RecurringCalculation {
                         && (!recColl.isException(start_of_series, changeExceptions, deleteExceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                                recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
+                                recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count, calc_timezone);
                             }
                             if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                                 break;
@@ -895,7 +921,7 @@ public class RecurringCalculation {
                     && (!recColl.isException(start_of_series, changeExceptions, deleteExceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                            recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
+                            recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count, calc_timezone);
                         }
                         if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break;
@@ -971,7 +997,7 @@ public class RecurringCalculation {
                         && (!recColl.isException(start_of_series, changeExceptions, deleteExceptions))) {
                             //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                                recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
+                                recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count, calc_timezone);
                             }
                             if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                                 break;
@@ -1125,7 +1151,7 @@ public class RecurringCalculation {
                     && (!recColl.isException(start_of_series, changeExceptions, deleteExceptions))) {
                         //if (!isException(start_of_series, change_exceptions, delete_exceptions)) {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
-                            recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
+                            recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count, calc_timezone);
                         }
                         if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break;
