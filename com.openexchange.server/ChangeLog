@@ -2,6 +2,7 @@
 
  - Fix for bug 38469: Execute update of config-tree settings sequentially one-by-one in a separate thread (from thread pool) to avoid excessive concurrent row locking leading to MySQL deadlocks
  - Fix for bug 38434: Check length of passed JSON array in request body to be greater than zero
+ - Fix for bug 38431: Safe access to Servlet's PrintWriter
 
 * 2015-05-26 - martin.herfurth@open-xchange.com
 
