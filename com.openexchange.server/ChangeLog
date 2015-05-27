@@ -2,6 +2,10 @@
 
  - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
 
+* 2015-05-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38469: Execute update of config-tree settings sequentially one-by-one in a separate thread (from thread pool) to avoid excessive concurrent row locking leading to MySQL deadlocks
+
 * 2015-05-21 - thorben.betten@open-xchange.com
 
  - Fix for bug 38365: Properly handle escape sequences in personal part of an E-Mail address
