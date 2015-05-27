@@ -53,7 +53,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -87,6 +86,7 @@ import com.openexchange.config.WildcardFilter;
 import com.openexchange.config.cascade.ReinitializableConfigProviderService;
 import com.openexchange.config.internal.filewatcher.FileWatcher;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -151,7 +151,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private final Map<String, String> propertiesFiles;
 
     /** Maps objects to yaml filename, with a path */
-    private final Map<String, String> yamlFiles;
+    private final Map<String, byte[]> yamlFiles;
 
     /** Maps filenames to whole file paths for yaml lookup */
     private final Map<String, String> yamlPaths;
@@ -183,7 +183,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         texts = new ConcurrentHashMap<String, String>(1024);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
-        yamlFiles = new HashMap<String, String>(64);
+        yamlFiles = new HashMap<String, byte[]>(64);
         yamlPaths = new HashMap<String, String>(64);
         dirs = new File[directories.length];
         xmlFiles = new HashMap<String, byte[]>(2048);
@@ -214,23 +214,12 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         };
 
-        final org.slf4j.Logger log = LOG;
         final FileProcessor processor2 = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
-                Object o = null;
-                try {
-                    o = Yaml.load(file);
-                } catch (final FileNotFoundException e) {
-                    // IGNORE
-                    return;
-                } catch (final RuntimeException x) {
-                    log.warn("Could not parse .yml file: {}", file.toString(), x);
-                }
                 yamlPaths.put(file.getName(), file.getPath());
-                //Save as immutable string so configs don't get accidentally modified
-                yamlFiles.put(file.getPath(), Yaml.dump(o));
+                yamlFiles.put(file.getPath(), readFile(file).getBytes());
             }
 
         };
@@ -724,20 +713,20 @@ public final class ConfigurationImpl implements ConfigurationService {
             return null;
         }
 
-        return Yaml.load(yamlFiles.get(path));
+        return Yaml.load(new String(yamlFiles.get(path)));
     }
 
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<String, String>> iter = yamlFiles.entrySet().iterator();
+        final Iterator<Entry<String, byte[]>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<String, String> entry = iter.next();
+                final Entry<String, byte[]> entry = iter.next();
                 if (entry.getKey().startsWith(fldName)) {
-                    retval.put(entry.getKey(), Yaml.load(entry.getValue()));
+                    retval.put(entry.getKey(), Yaml.load(new String(entry.getValue(), Charsets.UTF_8)));
                 }
             }
         }
@@ -753,6 +742,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Copy current content to get associated files on check for expired PropertyWatchers
         final Map<String, Properties> oldPropertiesByFile = new HashMap<String, Properties>(propertiesByFile);
         final Map<String, byte[]> oldXml = new HashMap<String, byte[]>(xmlFiles);
+        final Map<String, byte[]> oldYaml = new HashMap<String, byte[]>(yamlFiles);
 
         // Clear maps
         properties.clear();
@@ -770,7 +760,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         reinitConfigCascade();
 
         // Check if properties have been changed, abort if not
-        Set<String> changes = getChanges(oldPropertiesByFile, oldXml);
+        Set<String> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
         if (changes.isEmpty()) {
             LOG.info("No changes in configuration files detected");
             return;
@@ -889,7 +879,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile, Map<String, byte[]> oldXml) {
+    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile, Map<String, byte[]> oldXml, Map<String, byte[]> oldYaml) {
         final Set<String> result = new HashSet<String>(oldPropertiesByFile.size());
         for (final Map.Entry<String, Properties> newEntry : propertiesByFile.entrySet()) {
             final String fileName = newEntry.getKey();
@@ -916,6 +906,19 @@ public final class ConfigurationImpl implements ConfigurationService {
         final Set<String> removedXml = new HashSet<String>(oldXml.keySet());
         removedXml.removeAll(xmlFiles.keySet());
         result.addAll(removedXml);
+
+        // ... and one more time for yamls
+        for (String filename : yamlFiles.keySet()) {
+            byte[] oldHash = oldYaml.get(filename);
+            byte[] newHash = yamlFiles.get(filename);
+            if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
+                result.add(filename);
+            }
+        }
+        final Set<String> removedYaml = new HashSet<String>(oldYaml.keySet());
+        removedYaml.removeAll(yamlFiles.keySet());
+        result.addAll(removedYaml);
+
         return result;
     }
 
