@@ -309,7 +309,7 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         config.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
         config.setProperty(GroupProperties.PROP_VERSION_CHECK_ENABLED, "false");
         config.setProperty(GroupProperties.PROP_OPERATION_CALL_TIMEOUT_MILLIS,
-            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "5000"));
+            configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX_DETAILED,
             configService.getProperty("com.openexchange.hazelcast.jmxDetailed", "true"));
