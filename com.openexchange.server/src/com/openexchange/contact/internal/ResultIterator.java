@@ -54,6 +54,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import com.openexchange.contact.ContactServiceInterceptor;
 import com.openexchange.contact.storage.ContactStorage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
@@ -85,43 +87,41 @@ public class ResultIterator implements SearchIterator<Contact> {
 	private final Map<String, Boolean> canReadAllMap;
 	private final Boolean canReadAll;
 	private final Session session;
+	private final ContactServiceInterceptorRegistry contactInterceptorRegistry;
 
 	/**
-	 * Initializes a new {@link ResultIterator} where the 'can read all'
-	 * information is evaluated dynamically based on the contact's parent
+	 * Initializes a new {@link ResultIterator} where the 'can read all' information is evaluated dynamically based on the contact's parent
 	 * folders.
 	 *
-	 * @param delegate
-	 * @param needsAttachmentInfo
-	 * @param contextID
-	 * @param userID
-	 * @throws OXException
+	 * @param delegate The underlying search iterator
+	 * @param needsAttachmentInfo <code>true</code> if attachment information is required and should be fetched
+	 * @param session The session used to access the contacts
+	 * @param contactInterceptorRegistry A reference to the contact interceptor registry
 	 */
-	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session) throws OXException {
-		this(delegate, needsAttachmentInfo, session, null);
+	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, ContactServiceInterceptorRegistry contactInterceptorRegistry) throws OXException {
+		this(delegate, needsAttachmentInfo, session, contactInterceptorRegistry, null);
 	}
 
 	/**
-	 * Initializes a new {@link ResultIterator} where the supplied 'can read
-	 * all' information is used statically.
+	 * Initializes a new {@link ResultIterator} where the supplied 'can read all' information is used statically.
 	 *
-	 * @param delegate
-	 * @param needsAttachmentInfo
-	 * @param contextID
-	 * @param userID
-	 * @param canReadAll
-	 * @throws OXException
+	 * @param delegate The underlying search iterator
+	 * @param needsAttachmentInfo <code>true</code> if attachment information is required and should be fetched
+	 * @param session The session used to access the contacts
+	 * @param contactInterceptorRegistry A reference to the contact interceptor registry
+	 * @param canReadAll <code>true</code> if the accessing user is able to read all contacts, <code>false</code>, otherwise
 	 */
-	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, boolean canReadAll) throws OXException {
-		this(delegate, needsAttachmentInfo, session, Boolean.valueOf(canReadAll));
+	public ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, ContactServiceInterceptorRegistry contactInterceptorRegistry, boolean canReadAll) throws OXException {
+		this(delegate, needsAttachmentInfo, session, contactInterceptorRegistry, Boolean.valueOf(canReadAll));
 	}
 
-	private ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, Boolean canReadAll) throws OXException {
+	private ResultIterator(SearchIterator<Contact> delegate, boolean needsAttachmentInfo, Session session, ContactServiceInterceptorRegistry contactInterceptorRegistry, Boolean canReadAll) throws OXException {
 		super();
 		this.delegate = delegate;
 		this.needsAttachmentInfo = needsAttachmentInfo;
 		this.session = session;
 		this.canReadAll = canReadAll;
+		this.contactInterceptorRegistry = contactInterceptorRegistry;
 		this.canReadAllMap = new HashMap<String, Boolean>();
 		initNext();
 	}
@@ -132,6 +132,7 @@ public class ResultIterator implements SearchIterator<Contact> {
             if (this.accept(next)) {
             	addAttachmentInfo(next);
             	addDistributionListInfo(next);
+            	onAfterRead(next);
                 return;
             }
         }
@@ -176,6 +177,20 @@ public class ResultIterator implements SearchIterator<Contact> {
 						convertToOneOff(members[i]);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Invokes the {@link ContactServiceInterceptor#afterRead()} method on each registered interceptor.
+	 *
+	 * @param contact The read contact
+	 */
+	private void onAfterRead(Contact contact) throws OXException {
+		List<ContactServiceInterceptor> interceptors = null != contactInterceptorRegistry ? contactInterceptorRegistry.getInterceptors() : null;
+		if (null != interceptors && 0 < interceptors.size()) {
+			for (ContactServiceInterceptor interceptor : interceptors) {
+				interceptor.afterRead(contact, session);
 			}
 		}
 	}

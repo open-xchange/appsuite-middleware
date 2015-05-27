@@ -100,14 +100,19 @@ import com.openexchange.user.UserServiceInterceptorRegistry;
  */
 public class ContactServiceImpl extends DefaultContactService {
 
-    private final UserServiceInterceptorRegistry interceptorRegistry;
+    private final UserServiceInterceptorRegistry userInterceptorRegistry;
+    private final ContactServiceInterceptorRegistry contactInterceptorRegistry;
 
     /**
      * Initializes a new {@link ContactServiceImpl}.
+     *
+     * @param userInterceptorRegistry A reference to the user interceptor registry
+     * @param contactInterceptorRegistry A reference to the contact interceptor registry
      */
-    public ContactServiceImpl(UserServiceInterceptorRegistry interceptorRegistry) {
+    public ContactServiceImpl(UserServiceInterceptorRegistry userInterceptorRegistry, ContactServiceInterceptorRegistry contactInterceptorRegistry) {
         super();
-        this.interceptorRegistry = interceptorRegistry;
+        this.userInterceptorRegistry = userInterceptorRegistry;
+        this.contactInterceptorRegistry = contactInterceptorRegistry;
     }
 
     @Override
@@ -438,7 +443,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * pass through to storage
          */
-        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        List<UserServiceInterceptor> interceptors = userInterceptorRegistry.getInterceptors();
         beforeUserUpdate(storageContext, storedContact, interceptors);
         storage.update(session, folderID, objectID, delta, lastRead);
         afterUserUpdate(storageContext, updatedContact, interceptors);
@@ -657,7 +662,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * filter results respecting object permission restrictions, adding attachment info as needed
          */
-        return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), session, permission.canReadAllObjects());
+        return new ResultIterator(contacts, queryFields.needsAttachmentInfo(), session, contactInterceptorRegistry, permission.canReadAllObjects());
     }
 
     @Override
@@ -714,7 +719,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * get results, filtered respecting object permission restrictions, adding attachment info as needed
          */
-        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions, contactInterceptorRegistry);
     }
 
     @Override
@@ -767,7 +772,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * get results, filtered respecting object permission restrictions, adding attachment info as needed
          */
-        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions, contactInterceptorRegistry);
     }
 
     @Override
@@ -810,7 +815,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * get results, filtered respecting object permission restrictions, adding attachment info as needed
          */
-        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions, contactInterceptorRegistry);
     }
 
     @Override
@@ -892,7 +897,7 @@ public class ContactServiceImpl extends DefaultContactService {
          * get user contacts from storage
          */
         return new ResultIterator(storage.search(session, searchTerm, queryFields.getFields(), sortOptions),
-                queryFields.needsAttachmentInfo(), session, true);
+                queryFields.needsAttachmentInfo(), session, contactInterceptorRegistry, true);
     }
 
     @Override
@@ -921,7 +926,7 @@ public class ContactServiceImpl extends DefaultContactService {
          * get user contacts from storage
          */
         return new ResultIterator(storage.search(session, contactSearch, queryFields.getFields(), sortOptions),
-                queryFields.needsAttachmentInfo(), session, true);
+                queryFields.needsAttachmentInfo(), session, contactInterceptorRegistry, true);
     }
 
     @Override
@@ -958,7 +963,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * get results, filtered respecting object permission restrictions, adding attachment info as needed
          */
-        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions, contactInterceptorRegistry);
     }
 
     @Override
@@ -995,7 +1000,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * get results, filtered respecting object permission restrictions, adding attachment info as needed
          */
-        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions, contactInterceptorRegistry);
     }
 
     @Override
@@ -1036,7 +1041,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * get results, filtered respecting object permission restrictions, adding attachment info as needed
          */
-        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions);
+        return perform(tasks, session, queryFields.needsAttachmentInfo(), sOptions, contactInterceptorRegistry);
     }
 
     @Override
@@ -1123,11 +1128,12 @@ public class ContactServiceImpl extends DefaultContactService {
      * @param needsAttachmentInfo <code>true</code>, whether the result iterator needs attachment information, <code>false</code>,
      *        otherwise
      * @param sortOptions The sort options or use, or <code>null</code> if not needed
+	 * @param contactInterceptorRegistry A reference to the contact interceptor registry
      * @return The combined iterator
      * @throws OXException
      */
     private static SearchIterator<Contact> perform(List<AbstractTask<SearchIterator<Contact>>> tasks, Session session,
-        boolean needsAttachmentInfo, SortOptions sortOptions) throws OXException {
+        boolean needsAttachmentInfo, SortOptions sortOptions, ContactServiceInterceptorRegistry contactInterceptorRegistry) throws OXException {
         try {
             if (null == tasks || 0 == tasks.size()) {
                 /*
@@ -1139,7 +1145,7 @@ public class ContactServiceImpl extends DefaultContactService {
                 /*
                  * one task, execute locally
                  */
-                return new ResultIterator(tasks.get(0).call(), needsAttachmentInfo, session);
+                return new ResultIterator(tasks.get(0).call(), needsAttachmentInfo, session, contactInterceptorRegistry);
             } else {
                 /*
                  * multiple tasks, invoke in executor...
@@ -1147,7 +1153,7 @@ public class ContactServiceImpl extends DefaultContactService {
                 List<SearchIterator<Contact>> searchIterators = new ArrayList<SearchIterator<Contact>>();
                 ExecutorService executor = ContactServiceLookup.getService(ThreadPoolService.class).getExecutor();
                 for (Future<SearchIterator<Contact>> future : executor.invokeAll(tasks)) {
-                    searchIterators.add(new ResultIterator(future.get(), needsAttachmentInfo, session));
+                    searchIterators.add(new ResultIterator(future.get(), needsAttachmentInfo, session, contactInterceptorRegistry));
                 }
                 /*
                  * ... and merge results, respecting the sort options
