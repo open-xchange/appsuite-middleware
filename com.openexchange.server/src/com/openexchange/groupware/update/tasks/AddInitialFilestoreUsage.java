@@ -67,6 +67,7 @@ import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.file.external.QuotaFileStorages;
 
 /**
  * Creates an initial empty filestore usage entry for every context that currently did not uploaded anything. The new quota counting
@@ -117,11 +118,13 @@ public class AddInitialFilestoreUsage extends UpdateTaskAdapter {
         }
     }
 
-    private boolean isFilestoreUsageMissing(Connection con, int contextID) throws SQLException {
+    private boolean isFilestoreUsageMissing(Connection con, int contextID) throws SQLException, OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
+            boolean hasUserColumn = QuotaFileStorages.hasUserColumn(con, contextID);
+
+            stmt = con.prepareStatement(hasUserColumn ? "SELECT used FROM filestore_usage WHERE cid=? AND user=0" : "SELECT used FROM filestore_usage WHERE cid=?");
             stmt.setInt(1, contextID);
             result = stmt.executeQuery();
             return !result.next();

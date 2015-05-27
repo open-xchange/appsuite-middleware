@@ -1210,9 +1210,6 @@ public class RdbUserStorage extends UserStorage {
             try {
                 if (userId == -1 && considerAliases) {
                     sql = "SELECT id FROM user_attribute WHERE cid=? AND name=? AND value LIKE ?";
-                	if (hasGuestCreatedBy(con, context.getContextId())) {
-                		sql += " AND guestCreatedBy<1";
-                	}
                     stmt = con.prepareStatement(sql);
                     int pos = 1;
                     stmt.setInt(pos++, context.getContextId());

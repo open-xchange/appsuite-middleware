@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-freebusy
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 17
+%define        ox_release 18
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -82,6 +82,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Mon May 18 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-05-15 (2529)
 * Thu Apr 30 2015 Steffen Templin <marcus.klein@open-xchange.com>

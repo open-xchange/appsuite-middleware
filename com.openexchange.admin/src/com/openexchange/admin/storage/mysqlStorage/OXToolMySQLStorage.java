@@ -1548,16 +1548,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException {
         int context_id = ctx.getId().intValue();
-
-        final Connection con;
+        Connection con = null;
         try {
             con = cache.getConnectionForContext(context_id);
+            primaryMailExists(con, ctx, mail);
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        }
-        try {
-            primaryMailExists(con, ctx, mail);
         } finally {
             if (null != con) {
                 try {
@@ -1570,15 +1567,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException {
+        int contextId = ctx.getId().intValue();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT mail FROM user WHERE cid=? AND mail=?");
-            stmt.setInt(1, ctx.getId().intValue());
+            stmt = con.prepareStatement("SELECT mail, id FROM user WHERE cid=? AND mail=?");
+            stmt.setInt(1, contextId);
             stmt.setString(2, mail);
             result = stmt.executeQuery();
             if (result.next()) {
-                throw new InvalidDataException("Primary mail address already exists in this context.");
+                int userId = result.getInt(2);
+                throw new InvalidDataException("Primary mail address \"" + mail + "\" already exists in context " + contextId + " (Already assigned to user " + userId + ").");
             }
         } catch (SQLException e) {
             log.error("SQL Error", e);

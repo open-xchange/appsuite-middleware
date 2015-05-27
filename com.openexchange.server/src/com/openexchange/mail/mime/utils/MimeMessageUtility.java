@@ -51,7 +51,6 @@ package com.openexchange.mail.mime.utils;
 
 import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -68,6 +67,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -85,7 +85,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.BodyPart;
@@ -104,7 +103,6 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
-
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
@@ -115,8 +113,8 @@ import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
-
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -130,7 +128,6 @@ import com.openexchange.java.CharsetDetector;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
@@ -139,6 +136,7 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
@@ -2218,6 +2216,56 @@ public final class MimeMessageUtility {
                 return null;
             }
             throw e;
+        }
+    }
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage parseMimeMessageFrom(InputStream is, Date optReceivedDate) throws OXException {
+        return newMimeMessage(is, optReceivedDate);
+    }
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage newMimeMessage(InputStream is, Date optReceivedDate) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
         }
     }
 

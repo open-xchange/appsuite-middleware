@@ -80,11 +80,13 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.arrays.Collections;
+import com.openexchange.tools.file.external.QuotaFileStorages;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -1526,7 +1528,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT cid,used FROM filestore_usage");
+            boolean hasUserColumn = QuotaFileStorages.hasUserColumn(con, representativeContextID);
+
+            stmt = con.prepareStatement(hasUserColumn ? "SELECT cid,used FROM filestore_usage WHERE user=0" : "SELECT cid,used FROM filestore_usage");
             result = stmt.executeQuery();
             while (result.next()) {
                 final int cid = result.getInt(1);
@@ -1534,6 +1538,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 block.update(cid, usage);
             }
         } catch (final SQLException e) {
+            throw new StorageException(e);
+        } catch (final OXException e) {
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
@@ -1587,7 +1593,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         ResultSet result = null;
         long quotaUsed = 0;
         try {
-            stmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=?");
+            boolean hasUserColumn = QuotaFileStorages.hasUserColumn(con, cid);
+
+            stmt = con.prepareStatement(hasUserColumn ? "SELECT used FROM filestore_usage WHERE cid=? AND user=0" : "SELECT used FROM filestore_usage WHERE cid=?");
             stmt.setInt(1, cid);
             result = stmt.executeQuery();
             // One line per context in that table. cid is PRIMARY KEY.
@@ -1596,6 +1604,9 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final OXException e) {
+            LOG.error("OX Error", e);
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
