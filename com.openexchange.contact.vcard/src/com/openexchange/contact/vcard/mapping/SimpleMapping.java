@@ -79,7 +79,7 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
         T existingProperty = getFirstProperty(vCard);
-        if (null != contact.get(field)) {
+        if (has(contact, field)) {
             if (null == existingProperty) {
                 vCard.addProperty(exportProperty(contact));
             } else {

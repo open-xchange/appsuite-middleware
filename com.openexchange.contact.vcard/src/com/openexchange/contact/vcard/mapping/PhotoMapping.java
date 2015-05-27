@@ -49,23 +49,35 @@
 
 package com.openexchange.contact.vcard.mapping;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
+import org.slf4j.Logger;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ScaleType;
@@ -82,6 +94,7 @@ import ezvcard.property.Photo;
 public class PhotoMapping extends AbstractMapping {
 
     private static final String X_ABCROP_RECTANGLE = "X-ABCROP-RECTANGLE";
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PhotoMapping.class);
 
     /**
      * Initializes a new {@link PhotoMapping}.
@@ -123,9 +136,9 @@ public class PhotoMapping extends AbstractMapping {
             try {
                 transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), targetDimension, getSource(parameters));
             } catch (OXException e) {
-                getLogger(PhotoMapping.class).error("error scaling image, falling back to unscaled image.", e);
+                LOG.error("error scaling image, falling back to unscaled image.", e);
             } catch (RuntimeException e) {
-                getLogger(PhotoMapping.class).error("error scaling image, falling back to unscaled image.", e);
+                LOG.error("error scaling image, falling back to unscaled image.", e);
             }
             if (null != transformedImage) {
                 Photo photo = new Photo(transformedImage.getImageData(), imageType);
@@ -139,7 +152,7 @@ public class PhotoMapping extends AbstractMapping {
     }
 
     private static void importPhoto(Contact contact, Photo photo, VCardParameters parameters) {
-        byte[] imageData = null != photo ? photo.getData() : null;
+        byte[] imageData = photo.getData();
         if (null != imageData) {
             Rectangle clipRect = extractClipRect(photo.getParameters(X_ABCROP_RECTANGLE));
             if (null != clipRect) {
@@ -149,10 +162,25 @@ public class PhotoMapping extends AbstractMapping {
                 try {
                     imageData = doABCrop(imageData, clipRect, getFormatName(photo.getContentType()), parameters);
                 } catch (IOException e) {
-                    getLogger(PhotoMapping.class).error("error cropping image, falling back to uncropped image.", e);
+                    LOG.error("error cropping image, falling back to uncropped image.", e);
                 } catch (OXException e) {
-                    getLogger(PhotoMapping.class).error("error cropping image, falling back to uncropped image.", e);
+                    LOG.error("error cropping image, falling back to uncropped image.", e);
                 }
+            }
+        } else if (null != photo.getUrl()) {
+            String urlString = photo.getUrl();
+            IFileHolder fileHolder = null;
+            InputStream inputStream = null;
+            try {
+                fileHolder = loadImageFromURL(urlString, parameters);
+                if (null != fileHolder) {
+                    inputStream =  fileHolder.getStream();
+                    imageData = Streams.stream2bytes(inputStream);
+                }
+            } catch (IOException e) {
+                LOG.warn("I/O error while loading photo from URL: {}", urlString, e);
+            } catch (OXException e) {
+                LOG.warn("Unexpected error while loading photo from URL: {}", urlString, e);
             }
         }
         if (null == imageData) {
@@ -194,7 +222,7 @@ public class PhotoMapping extends AbstractMapping {
         }
         ImageTransformationService imageService = VCardServiceLookup.getOptionalService(ImageTransformationService.class);
         if (null == imageService) {
-            getLogger(PhotoMapping.class).warn("unable to acquire image transformation service, unable to scale image");
+            LOG.warn("unable to acquire image transformation service, unable to scale image");
             return null;
         }
         try {
@@ -250,7 +278,7 @@ public class PhotoMapping extends AbstractMapping {
                         int targetHeight = Integer.parseInt(matcher.group(4));
                         return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
                     } catch (NumberFormatException e) {
-                        getLogger(PhotoMapping.class).warn("unable to parse clipping rectangle from {}", value, e);
+                        LOG.warn("unable to parse clipping rectangle from {}", value, e);
                     }
                 }
             }
@@ -281,7 +309,7 @@ public class PhotoMapping extends AbstractMapping {
              */
             ImageTransformationService imageService = VCardServiceLookup.getOptionalService(ImageTransformationService.class);
             if (null == imageService) {
-                getLogger(PhotoMapping.class).warn("unable to acquire image transformation service, unable to crop image");
+                LOG.warn("unable to acquire image transformation service, unable to crop image");
                 return imageBytes;
             }
             return imageService.transfom(sourceImage, getSource(parameters)).crop(clipRect.x * -1,
@@ -293,6 +321,94 @@ public class PhotoMapping extends AbstractMapping {
 
     private static Object getSource(VCardParameters parameters) {
         return null != parameters && null != parameters.getSession() ? parameters.getSession().getSessionID() : null;
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
+     *
+     * @param contact The contact container to fill
+     * @param urlString The image URL
+     * @return A file holder containing the downloaded image, or <code>null</code> if no valid image could be loaded
+     */
+    private static ThresholdFileHolder loadImageFromURL(String urlString, VCardParameters parameters) throws IOException, OXException {
+        URL url = null;
+        try {
+            url = new URL(urlString);
+        } catch (MalformedURLException e) {
+            LOG.warn("invalid photo URL: {}", urlString, e);
+            return null;
+        }
+        /*
+         * download to file holder
+         */
+        ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+        String mimeType = null;
+        InputStream inputStream = null;
+        try {
+            URLConnection urlConnnection = url.openConnection();
+            urlConnnection.setConnectTimeout(2500);
+            urlConnnection.setReadTimeout(2500);
+            urlConnnection.connect();
+            mimeType = urlConnnection.getContentType();
+            inputStream = urlConnnection.getInputStream();
+            fileHolder.write(inputStream);
+        } catch (SocketTimeoutException e) {
+            LOG.warn("encountered timeout while reading photo from URL: {}", urlString, e);
+            return null;
+        } finally {
+            Streams.close(inputStream);
+        }
+        /*
+         * check image validity
+         */
+        if (false == isValidImage(fileHolder)) {
+            LOG.warn("image downloaded from {} appears not to be valid, skipping import.", urlString);
+            Streams.close(fileHolder);
+            return null;
+        }
+        /*
+         * additional fallbacks to determine the mime type
+         */
+        if (null == mimeType) {
+            mimeType = ImageTypeDetector.getMimeType(fileHolder.getStream());
+            if ("application/octet-stream".equals(mimeType)) {
+                mimeType = MimeType2ExtMap.getContentType(urlString, ImageType.JPEG.getMediaType());
+            }
+        }
+        fileHolder.setContentType(mimeType);
+        return fileHolder;
+    }
+
+    private static boolean isValidImage(ThresholdFileHolder fileHolder) throws IOException, OXException {
+        if (fileHolder.isInMemory()) {
+            InputStream inputStream = null;
+            ImageInputStream imageInputStream = null;
+            try {
+                inputStream = fileHolder.getStream();
+                imageInputStream = ImageIO.createImageInputStream(inputStream);
+                return isValidImage(imageInputStream);
+            } finally {
+                Streams.close(imageInputStream, inputStream);
+            }
+        } else {
+            File file = fileHolder.getTempFile();
+            ImageInputStream imageInputStream = null;
+            try {
+                imageInputStream = ImageIO.createImageInputStream(file);
+                return isValidImage(imageInputStream);
+            } finally {
+                Streams.close(imageInputStream);
+            }
+        }
+    }
+
+    private static boolean isValidImage(ImageInputStream imageInputStream) {
+        if (null == imageInputStream) {
+            return false;
+        }
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInputStream);
+        return null != readers && readers.hasNext();
     }
 
 }

@@ -69,6 +69,7 @@ public class UnitTests {
     public static Test suite() {
         TestSuite tests = new TestSuite();
         tests.addTestSuite(AddressTest.class);
+        tests.addTestSuite(BasicTest.class);
         tests.addTestSuite(RoundtripTest.class);
         tests.addTestSuite(UpdateTest.class);
         return tests;
