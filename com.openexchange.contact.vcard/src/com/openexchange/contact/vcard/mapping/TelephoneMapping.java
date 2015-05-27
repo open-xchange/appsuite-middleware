@@ -54,6 +54,7 @@ import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import ezvcard.VCard;
 import ezvcard.parameter.TelephoneType;
 import ezvcard.property.Telephone;
@@ -195,7 +196,15 @@ public class TelephoneMapping extends AbstractMapping {
      */
     private static Telephone importTelephone(List<Telephone> properties, int index, boolean voice, Contact contact, int field, String...types) {
         Telephone telephone = getTelephone(properties, index, voice, types);
-        contact.set(field, null == telephone ? null : telephone.getText());
+        if (null != telephone) {
+            String value = telephone.getText();
+            if (Strings.isEmpty(value) && null != telephone.getUri()) {
+                value = telephone.getUri().getNumber();
+            }
+            contact.set(field, value);
+        } else {
+            contact.set(field, null);
+        }
         return telephone;
     }
 
