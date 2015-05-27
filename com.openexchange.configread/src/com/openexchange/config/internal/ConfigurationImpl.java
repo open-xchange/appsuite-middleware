@@ -762,7 +762,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Check if properties have been changed, abort if not
         Set<String> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
         if (changes.isEmpty()) {
-            LOG.info("No changes in configuration files detected");
+            LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
             return;
         }
 
