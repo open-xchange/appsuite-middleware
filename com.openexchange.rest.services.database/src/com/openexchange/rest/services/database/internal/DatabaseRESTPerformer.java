@@ -118,19 +118,19 @@ public class DatabaseRESTPerformer {
 
     private BeforeHandler beforeHandler;
 
-    private RESTRequest request;
+    private final RESTRequest request;
 
-    private ServiceLookup services;
-    private DatabaseEnvironment environment;
+    private final ServiceLookup services;
+    private final DatabaseEnvironment environment;
 
     /**
-     * 
+     *
      * Initializes a new {@link DatabaseRESTPerformer}.
-     * 
+     *
      * @param request The RESTRequest
      * @param services The ServiceLookup instance
      * @param environment The DatabaseEnvironment instance containing the TransactionKeeper and the VersionChecker
-     * 
+     *
      * @throws OXException
      */
     public DatabaseRESTPerformer(RESTRequest request, ServiceLookup services, DatabaseEnvironment environment) throws OXException {
@@ -150,7 +150,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Perform an update or a query on the 'configdb'
-     * 
+     *
      * @param accessType The access type
      * @return The response of the query/update
      * @throws OXException
@@ -178,7 +178,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Perform an update or a query on the 'configdb'
-     * 
+     *
      * @param ctxId The context identifier
      * @param accessType The access type
      * @return The response of the query/update
@@ -207,7 +207,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Perform an update or a query in a monitored db.
-     * 
+     *
      * @param readId The read pool identifier
      * @param writeId The write pool identifier
      * @param schema The schema name
@@ -239,7 +239,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Executes the transaction with the specified transaction identifier
-     * 
+     *
      * @param txId The transaction identifier
      * @return A JSONObject with the results
      * @throws OXException
@@ -265,7 +265,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Rolls back the transaction with the specified transaction identifier
-     * 
+     *
      * @param txId The transaction identifier
      * @throws OXException
      */
@@ -293,7 +293,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Commits the transaction with the specified transaction identifier
-     * 
+     *
      * @param txId The transaction identifier
      * @throws OXException
      */
@@ -321,7 +321,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Initialize a new database schema with the specified name and the specified write pool identifier.
-     * 
+     *
      * @param writePoolId The write pool identifier
      * @param schema The schema name
      * @throws OXException If the initialization of the new schema fails
@@ -347,7 +347,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Inserts the partition identifiers to the replication monitor table
-     * 
+     *
      * @param writeId The write identifier referencing the master db server
      * @param schema The name of the schema
      * @throws OXException If the operation fails
@@ -378,7 +378,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
-     * 
+     *
      * @param ctxId The context identifier
      * @param module The module
      * @throws OXException If the operation fails
@@ -404,7 +404,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Unlocks a schema/module combination for the specified context identifier.
-     * 
+     *
      * @param readPoolId The read pool identifier
      * @param writePoolId The write pool identifier
      * @param schema The schema name
@@ -433,7 +433,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Migrate from the specified version to the specified version
-     * 
+     *
      * @param ctxId The context identifier
      * @param fromVersion Version updating from
      * @param toVersion Version updating to
@@ -468,7 +468,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Migrate from the specified version to the specified version by using a monitored connection
-     * 
+     *
      * @param readId The read identifier
      * @param writeId The write identifier
      * @param schema The name of the schema
@@ -506,7 +506,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Performs the execution of the DatabaseQuery objects
-     * 
+     *
      * @return A JSONObject with the results.
      * @throws OXException
      * @throws JSONException
@@ -609,7 +609,7 @@ public class DatabaseRESTPerformer {
     /**
      * Handles the SQL exception by rolling back the current transaction (if any) and restoring the post processor object
      * Returns a response code of 400
-     * 
+     *
      * @throws OXException
      */
     private void handleSQLException(JSONObject response) throws OXException {
@@ -633,7 +633,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Extract the queries from the data object
-     * 
+     *
      * @param ajaxData The data object (either String or JSONObject)
      * @param accessType Defines the access type for the returned queries
      * @return A map with all queries
@@ -759,7 +759,7 @@ public class DatabaseRESTPerformer {
     /**
      * Performs a cleanup and closes all open ResultSets and Statements,
      * as well as invokes the done() method from the PostProcessor
-     * 
+     *
      * @throws OXException If the operation fails
      */
     private void cleanup() throws OXException {
@@ -769,11 +769,15 @@ public class DatabaseRESTPerformer {
         for (Statement stmt : statements) {
             DBUtils.closeSQLStuff(stmt);
         }
+        ConnectionPostProcessor postProcessor = this.postProcessor;
         if (postProcessor != null) {
-            try {
-                postProcessor.done(connection);
-            } catch (SQLException e) {
-                halt(Status.INTERNAL_SERVER_ERROR, e.getMessage());
+            Connection con = this.connection;
+            if (null != con) {
+                try {
+                    postProcessor.done(con);
+                } catch (SQLException e) {
+                    halt(Status.INTERNAL_SERVER_ERROR, e.getMessage());
+                }
             }
         }
     }
@@ -796,7 +800,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Returns the monitored connection when the processing is finished.
-     * 
+     *
      * @param accessType The access type of the database connection
      * @param readId The read identifier
      * @param writeId The write identifier
@@ -828,7 +832,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Returns the connection when the processing is finished
-     * 
+     *
      * @param accessType The access type of the database connection
      */
     private void returnConnectionWhenDone(final DatabaseAccessType accessType) {
@@ -856,7 +860,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Returns the connection when the processing is finished
-     * 
+     *
      * @param accessType The access type of the database connection
      * @param ctxId The context identifiers
      */
@@ -1061,7 +1065,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Determines whether the request is considered to be part of a transaction
-     * 
+     *
      * @param data The AJAX request data
      * @return true if the request is part of a transaction; false otherwise
      * @throws OXException
@@ -1074,7 +1078,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code and the specified header name and value
-     * 
+     *
      * @param statusCode The status code for the error
      * @param hName Header name
      * @param hValue Header value
@@ -1088,7 +1092,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code
-     * 
+     *
      * @param statusCode The status code for the error
      */
     private void halt(Status statusCode) {
@@ -1097,7 +1101,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code
-     * 
+     *
      * @param statusCode The status code for the error
      */
     private void halt(int statusCode) {
@@ -1109,7 +1113,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code and the specified error message
-     * 
+     *
      * @param statusCode The status code for the error
      * @param message The error message
      */
@@ -1119,7 +1123,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code and the specified error message
-     * 
+     *
      * @param statusCode The status code for the error
      * @param message The error message
      */
@@ -1132,7 +1136,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code and the specified JSONObject body
-     * 
+     *
      * @param statusCode The status code for the error
      * @param entity The error's bodys
      */
@@ -1142,7 +1146,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Throws a WebApplicationException with the specified status code and the specified JSONObject body
-     * 
+     *
      * @param statusCode The status code for the error
      * @param entity The error's bodys
      */
@@ -1155,7 +1159,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Adds the 'Pragma', 'Cache-Control' and 'X-OX-ACHTUNG' headers
-     * 
+     *
      * @param r The response builder
      */
     private void addHeaders(ResponseBuilder r) {
@@ -1166,7 +1170,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Compiles the response object for a successful/error-free response
-     * 
+     *
      * @param statusCode The status code
      * @param entity The body of the response
      * @return The response object
@@ -1179,7 +1183,7 @@ public class DatabaseRESTPerformer {
 
     /**
      * Compiles the response object for a successful/error-free response
-     * 
+     *
      * @param statusCode The status code
      * @return The response object
      */
