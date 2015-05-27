@@ -288,10 +288,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
              * Full names for: Trash, Sent, Drafts, and Spam
              */
             {
-                final Session session = SessiondService.SERVICE_REFERENCE.get().getAnyActiveSessionForUser(userId, contextId);
+                SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
+                Session session = null == sessiondService ? null : sessiondService.getAnyActiveSessionForUser(userId, contextId);
                 if (null != session) {
-                    final String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
-                    final String[] fullNames = MailSessionCache.getInstance(session).getParameter(id, parameterName);
+                    String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
+                    String[] fullNames = MailSessionCache.getInstance(session).getParameter(id, parameterName);
                     String s = getOptionalString(result.getString(15));
                     mailAccount.setTrashFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_TRASH]) : s);
                     s = getOptionalString(result.getString(16));
