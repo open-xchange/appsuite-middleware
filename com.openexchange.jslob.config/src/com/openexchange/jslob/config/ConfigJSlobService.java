@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
@@ -86,6 +85,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.SequentialCompletionService;
 import com.openexchange.java.Streams;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONPathElement;
@@ -101,7 +101,6 @@ import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -646,28 +645,35 @@ public final class ConfigJSlobService implements JSlobService {
             }
             // Remember the paths to purge
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
-            // Config Tree Values first
 
-            final CompletionServiceReference cr = new CompletionServiceReference();
+            // Config Tree Values first
             {
-                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
-                if (equiv != null) {
-                    session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
-                    try {
-                        final SettingStorage stor = SettingStorage.getInstance(session);
-                        final ConfigTree configTree = ConfigTree.getInstance();
-                        final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
-                        // Update setting
-                        updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
-                    } finally {
-                        session.setParameter("__serverUserSetting", null);
+                final CompletionServiceReference cr = new CompletionServiceReference();
+                try {
+                    final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                    if (equiv != null) {
+                        session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
+                        try {
+                            final SettingStorage stor = SettingStorage.getInstance(session);
+                            final ConfigTree configTree = ConfigTree.getInstance();
+                            final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+                            // Update setting
+                            updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
+                        } finally {
+                            session.setParameter("__serverUserSetting", null);
+                        }
+                    }
+
+                    // Check completion service
+                    if (cr.num > 0) {
+                        ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
+                    }
+                } finally {
+                    SequentialCompletionService<Void> completionService = cr.completionService;
+                    if (null != completionService) {
+                        completionService.close();
                     }
                 }
-            }
-
-            // Check completion service
-            if (cr.num > 0) {
-                ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
             }
 
             // Set (or replace) JSlob
@@ -702,9 +708,9 @@ public final class ConfigJSlobService implements JSlobService {
         }
     }
 
-    private void updateConfigTreeSetting(final String prefix, final JSONObject jObject, final ConfigTree configTree, final Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, final List<List<JSONPathElement>> pathsToPurge, final CompletionServiceReference cr) throws OXException {
+    private void updateConfigTreeSetting(String prefix, JSONObject jObject, final ConfigTree configTree, Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, List<List<JSONPathElement>> pathsToPurge, CompletionServiceReference cr) throws OXException {
         for (final Entry<String, Object> entry : jObject.entrySet()) {
-            final String key = prefix + entry.getKey();
+            String key = prefix + entry.getKey();
             final Object value = entry.getValue();
             String path = attribute2ConfigTreeMap.get(key);
             if (path != null) {
@@ -716,12 +722,12 @@ public final class ConfigJSlobService implements JSlobService {
                     path = path.substring(0, path.length() - 1);
                 }
                 final String _path = path;
-                final Callable<Void> task = new Callable<Void>() {
+                Callable<Void> task = new Callable<Void>() {
 
                     @Override
                     public Void call() throws Exception {
                         try {
-                            final Setting setting = configTree.optSettingByPath(_path);
+                            Setting setting = configTree.optSettingByPath(_path);
                             if (null != setting) {
                                 setting.setSingleValue(value);
                                 saveSettingWithSubs(stor, setting);
@@ -737,7 +743,7 @@ public final class ConfigJSlobService implements JSlobService {
                 };
 
                 if (null == cr.completionService) {
-                    cr.completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                    cr.completionService = new SequentialCompletionService<Void>(ThreadPools.getThreadPool().getExecutor());
                 }
                 cr.completionService.submit(task);
                 cr.num++;
@@ -1222,7 +1228,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private static final class CompletionServiceReference {
 
-        CompletionService<Void> completionService = null;
+        SequentialCompletionService<Void> completionService = null;
         int num = 0;
 
         /**
