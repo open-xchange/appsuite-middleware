@@ -337,11 +337,15 @@ public class DBRESTService extends OXRESTService<DBRESTService.Environment> {
         for(Statement stmt: statements) {
             DBUtils.closeSQLStuff(stmt);
         }
+        ConnectionPostProcessor postProcessor = this.postProcessor;
         if (postProcessor != null) {
-            try {
-                postProcessor.done(con);
-            } catch (SQLException e) {
-                respond(500, e.getMessage());
+            Connection con = this.con;
+            if (null != con) {
+                try {
+                    postProcessor.done(con);
+                } catch (SQLException e) {
+                    respond(500, e.getMessage());
+                }
             }
         }
         super.after();
