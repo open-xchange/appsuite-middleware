@@ -162,7 +162,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
             String optRmiHostName = null;
             {
                 if (cmd.hasOption('p')) {
-                    int optPort = parsePort('p', -1, cmd, options);
+                    int optPort = parsePort('p', 1099, cmd, options);
                     String optServer = cmd.getOptionValue('s');
                     if (optPort > 0 || null != optServer) {
                         optRmiHostName = "rmi://" + (null == optServer ? "localhost" : optServer) + ":" + (optPort > 0 ? optPort : 1099) + "/";
