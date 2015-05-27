@@ -382,32 +382,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             ClientAdminThread.cache.setAdminCredentials(ctx,mech,cauth);
         }
-        final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-        if (null != cacheService) {
-            try {
-                final CacheKey key = cacheService.newCacheKey(ctx.getId().intValue(), userid.intValue());
-                Cache jcs = cacheService.getCache("User");
-                jcs.remove(key);
-
-                jcs = cacheService.getCache("UserPermissionBits");
-                jcs.remove(key);
-
-                jcs = cacheService.getCache("UserConfiguration");
-                jcs.remove(key);
-
-                jcs = cacheService.getCache("UserSettingMail");
-                jcs.remove(key);
-
-                jcs = cacheService.getCache("Capabilities");
-                jcs.removeFromGroup(userid, ctx.getId().toString());
-
-                jcs = cacheService.getCache("MailAccount");
-                jcs.remove(cacheService.newCacheKey(ctx.getId().intValue(), String.valueOf(0), userid.toString()));
-                jcs.invalidateGroup(ctx.getId().toString());
-            } catch (final OXException e) {
-                LOGGER.error("", e);
-            }
-        }
     }
 
     @Override
