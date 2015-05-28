@@ -54,7 +54,6 @@ import org.jsoup.nodes.Element;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.java.Strings;
 import com.openexchange.test.report.AssertationResults;
 import com.openexchange.test.report.util.FileUtil;
 
@@ -105,7 +104,6 @@ public class SuiteWatcher extends TestWatcher {
         for (Class<?> clazz : classes.value()) {
             String simpleName = clazz.getSimpleName();
             String assertStatus = AssertationResults.getInstance().get(clazz.getName());
-            assertStatus = Strings.isEmpty(assertStatus) ? "failed" : assertStatus;
             index.appendElement("div").attr("class", assertStatus).attr("id", "link").appendElement("a").attr("id", assertStatus).attr("href", simpleName + ".html").attr("target", "display").text(simpleName);
         }
 
