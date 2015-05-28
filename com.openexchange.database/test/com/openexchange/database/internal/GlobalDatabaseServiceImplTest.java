@@ -108,9 +108,8 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("es", config4);
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
@@ -124,9 +123,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("es", config4);
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
-
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
         verifyResult(reloadedConfig, newConfig);
     }
@@ -145,9 +142,8 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("es", config4);
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
@@ -165,9 +161,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("es", config4);
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
-
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
         verifyResult(reloadedConfig, newConfig);
     }
@@ -186,9 +180,8 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("es", config4);
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
+        Map<String, GlobalDbConfig> reloadedConfig =  globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
@@ -206,9 +199,7 @@ public class GlobalDatabaseServiceImplTest {
         newConfig.put("es", config4);
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
-
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
         verifyResult(reloadedConfig, newConfig);
     }
@@ -225,9 +216,8 @@ public class GlobalDatabaseServiceImplTest {
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
         Assert.assertEquals(newConfig.size(), reloadedConfig.size());
     }
 
@@ -243,9 +233,7 @@ public class GlobalDatabaseServiceImplTest {
         Map<String, GlobalDbConfig> newConfig = new ConcurrentHashMap<String, GlobalDbConfig>();
         PowerMockito.when(GlobalDbInit.init((ConfigurationService) Matchers.any(), (ConfigDatabaseServiceImpl) Matchers.any(), (Pools) Matchers.any(), (ReplicationMonitor) Matchers.any())).thenReturn(newConfig);
 
-        globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
-
-        Map<String, GlobalDbConfig> reloadedConfig = (Map<String, GlobalDbConfig>) MockUtils.getValueFromField(globalDatabaseServiceImpl, "globalDbConfigs");
+        Map<String, GlobalDbConfig> reloadedConfig = globalDatabaseServiceImpl.loadGlobalDbConfigs(configurationService);
 
         verifyResult(reloadedConfig, newConfig);
     }
