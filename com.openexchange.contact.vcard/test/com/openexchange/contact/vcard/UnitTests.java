@@ -69,9 +69,14 @@ public class UnitTests {
     public static Test suite() {
         TestSuite tests = new TestSuite();
         tests.addTestSuite(AddressTest.class);
+        tests.addTestSuite(DistributionListTest.class);
         tests.addTestSuite(BasicTest.class);
         tests.addTestSuite(RoundtripTest.class);
         tests.addTestSuite(UpdateTest.class);
+        tests.addTestSuite(WarningsTest.class);
+        tests.addTestSuite(Bug15008Test.class);
+        tests.addTestSuite(Bug18226Test.class);
+        tests.addTestSuite(Bug21656Test.class);
         return tests;
     }
 }

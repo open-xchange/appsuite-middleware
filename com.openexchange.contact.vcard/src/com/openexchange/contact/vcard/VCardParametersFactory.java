@@ -49,39 +49,30 @@
 
 package com.openexchange.contact.vcard;
 
-import java.io.InputStream;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link VCardService} - The VCard merge service for VCards and contacts.
+ * {@link VCardParametersFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public interface VCardService extends VCardParametersFactory {
+public interface VCardParametersFactory {
 
     /**
-     * Exports a contact to a vCard, optionally merging with an existing vCard.
+     * Initializes a new vCard parameters instance using the default settings.
      *
-     * @param contact The contact to export
-     * @param originalVCard The vCard to merge the contact into, or <code>null</code> to export to a new vCard
-     * @param parameters Further parameters for vCard export, or <code>null</code> if not used
-     * @return The exported contact as vCard
-     * @throws OXException If exporting given contact to a VCard fails
+     * @param session The used groupware session
+     * @return The vCard parameters
      */
-    InputStream exportContact(Contact contact, InputStream originalVCard, VCardParameters parameters) throws OXException;
+    VCardParameters createParameters(Session session);
 
     /**
-     * Imports a vCard, optionally merging with an existing contact.
+     * Initializes a new vCard parameters instance using the default settings.
      *
-     * @param vCard The vCard to import
-     * @param contact The contact to merge the vCard into, or <code>null</code> to import as a new contact
-     * @param parameters Further parameters for vCard import, or <code>null</code> if not used
-     * @return The imported vCard as contact, which is a new instance if passed contact reference is <code>null</code>, or the passed
-     *         contact itself, otherwise
-     * @throws OXException If importing VCard into an existing contact fails
+     * @return The vCard parameters
      */
-    Contact importVCard(InputStream vCard, Contact contact, VCardParameters parameters) throws OXException;
+    VCardParameters createParameters();
 
 }

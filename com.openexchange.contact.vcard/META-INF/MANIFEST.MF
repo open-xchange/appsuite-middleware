@@ -9,6 +9,8 @@ Bundle-ClassPath: .,
  lib/ez-vcard-0.9.6.jar
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
+ com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.groupware.container,
  com.openexchange.i18n,

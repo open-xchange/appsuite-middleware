@@ -67,7 +67,6 @@ import java.util.regex.Pattern;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import org.slf4j.Logger;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.vcard.VCardParameters;
@@ -94,7 +93,6 @@ import ezvcard.property.Photo;
 public class PhotoMapping extends AbstractMapping {
 
     private static final String X_ABCROP_RECTANGLE = "X-ABCROP-RECTANGLE";
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(PhotoMapping.class);
 
     /**
      * Initializes a new {@link PhotoMapping}.
@@ -131,14 +129,13 @@ public class PhotoMapping extends AbstractMapping {
         byte[] contactImage = contact.getImage1();
         if (null != contactImage) {
             ImageType imageType = getImageType(contact.getImageContentType());
-            Dimension targetDimension = null != parameters ? parameters.getPhotoScaleDimension() : null;
             TransformedImage transformedImage = null;
             try {
-                transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), targetDimension, getSource(parameters));
+                transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), parameters);
             } catch (OXException e) {
-                LOG.error("error scaling image, falling back to unscaled image.", e);
+                addConversionWarning(parameters, e, "PHOTO", e.getMessage());
             } catch (RuntimeException e) {
-                LOG.error("error scaling image, falling back to unscaled image.", e);
+                addConversionWarning(parameters, e, "PHOTO", e.getMessage());
             }
             if (null != transformedImage) {
                 Photo photo = new Photo(transformedImage.getImageData(), imageType);
@@ -154,7 +151,7 @@ public class PhotoMapping extends AbstractMapping {
     private static void importPhoto(Contact contact, Photo photo, VCardParameters parameters) {
         byte[] imageData = photo.getData();
         if (null != imageData) {
-            Rectangle clipRect = extractClipRect(photo.getParameters(X_ABCROP_RECTANGLE));
+            Rectangle clipRect = extractClipRect(photo.getParameters(X_ABCROP_RECTANGLE), parameters);
             if (null != clipRect) {
                 /*
                  * try to crop the image based on defined rectangular area
@@ -162,9 +159,9 @@ public class PhotoMapping extends AbstractMapping {
                 try {
                     imageData = doABCrop(imageData, clipRect, getFormatName(photo.getContentType()), parameters);
                 } catch (IOException e) {
-                    LOG.error("error cropping image, falling back to uncropped image.", e);
+                    addConversionWarning(parameters, e, "PHOTO", e.getMessage());
                 } catch (OXException e) {
-                    LOG.error("error cropping image, falling back to uncropped image.", e);
+                    addConversionWarning(parameters, e, "PHOTO", e.getMessage());
                 }
             }
         } else if (null != photo.getUrl()) {
@@ -174,14 +171,22 @@ public class PhotoMapping extends AbstractMapping {
             try {
                 fileHolder = loadImageFromURL(urlString, parameters);
                 if (null != fileHolder) {
-                    inputStream =  fileHolder.getStream();
-                    imageData = Streams.stream2bytes(inputStream);
+                    if (null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < fileHolder.getLength()) {
+                        addConversionWarning(parameters, "PHOTO", "Referenced image exceeds maximum contact image size");
+                    } else {
+                        inputStream = fileHolder.getStream();
+                        imageData = Streams.stream2bytes(inputStream);
+                    }
                 }
             } catch (IOException e) {
-                LOG.warn("I/O error while loading photo from URL: {}", urlString, e);
+                addConversionWarning(parameters, e, "PHOTO", e.getMessage());
             } catch (OXException e) {
-                LOG.warn("Unexpected error while loading photo from URL: {}", urlString, e);
+                addConversionWarning(parameters, e, "PHOTO", e.getMessage());
             }
+        }
+        if (null != imageData && null != parameters && 0 < parameters.getMaxContactImageSize() && parameters.getMaxContactImageSize() < imageData.length) {
+            addConversionWarning(parameters, "PHOTO", "Image exceeds maximum contact image size");
+            imageData = null;
         }
         if (null == imageData) {
             contact.setImage1(null);
@@ -212,21 +217,22 @@ public class PhotoMapping extends AbstractMapping {
      *
      * @param source The image data
      * @param formatName The image format name
-     * @param targetDimension The maximum target dimension, or <code>null</code> to skip scaling
+     * @param parameters The vCard parameters
      * @param source The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      * @return The scaled image data, or <code>null</code> if no scaling needed
      */
-    private static TransformedImage scaleImageIfNeeded(byte[] imageBytes, String formatName, Dimension targetDimension, Object source) throws OXException {
+    private static TransformedImage scaleImageIfNeeded(byte[] imageBytes, String formatName, VCardParameters parameters) throws OXException {
+        Dimension targetDimension = null != parameters ? parameters.getPhotoScaleDimension() : null;
         if (null == imageBytes || null == targetDimension || 1 > targetDimension.getWidth() || 1 > targetDimension.getHeight()) {
             return null;
         }
         ImageTransformationService imageService = VCardServiceLookup.getOptionalService(ImageTransformationService.class);
         if (null == imageService) {
-            LOG.warn("unable to acquire image transformation service, unable to scale image");
+            addConversionWarning(parameters, "PHOTO", "unable to acquire image transformation service, unable to scale image");
             return null;
         }
         try {
-            return imageService.transfom(imageBytes, source)
+            return imageService.transfom(imageBytes, getSource(parameters))
                 .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN).getTransformedImage(formatName);
         } catch (IOException e) {
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
@@ -263,9 +269,10 @@ public class PhotoMapping extends AbstractMapping {
      * image in the target image from the left border, the 'y' property is the vertical offset from the bottom.
      *
      * @param cropValues The 'X-ABCROP-RECTANGLE' parameter values
+     * @param parameters The vCard parameters
      * @return The clipping rectangle, or <code>null</code>, if not defined
      */
-    private static Rectangle extractClipRect(List<String> cropValues) {
+    private static Rectangle extractClipRect(List<String> cropValues, VCardParameters parameters) {
         if (null != cropValues && 0 < cropValues.size()) {
             Pattern clipRectPattern = Pattern.compile("ABClipRect_1&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&");
             for (String value : cropValues) {
@@ -278,7 +285,7 @@ public class PhotoMapping extends AbstractMapping {
                         int targetHeight = Integer.parseInt(matcher.group(4));
                         return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
                     } catch (NumberFormatException e) {
-                        LOG.warn("unable to parse clipping rectangle from {}", value, e);
+                        addConversionWarning(parameters, e, "PHOTO", e.getMessage());
                     }
                 }
             }
@@ -309,7 +316,7 @@ public class PhotoMapping extends AbstractMapping {
              */
             ImageTransformationService imageService = VCardServiceLookup.getOptionalService(ImageTransformationService.class);
             if (null == imageService) {
-                LOG.warn("unable to acquire image transformation service, unable to crop image");
+                addConversionWarning(parameters, "PHOTO", "unable to acquire image transformation service, unable to crop image");
                 return imageBytes;
             }
             return imageService.transfom(sourceImage, getSource(parameters)).crop(clipRect.x * -1,
@@ -336,7 +343,7 @@ public class PhotoMapping extends AbstractMapping {
         try {
             url = new URL(urlString);
         } catch (MalformedURLException e) {
-            LOG.warn("invalid photo URL: {}", urlString, e);
+            addConversionWarning(parameters, e, "PHOTO", e.getMessage());
             return null;
         }
         /*
@@ -354,7 +361,7 @@ public class PhotoMapping extends AbstractMapping {
             inputStream = urlConnnection.getInputStream();
             fileHolder.write(inputStream);
         } catch (SocketTimeoutException e) {
-            LOG.warn("encountered timeout while reading photo from URL: {}", urlString, e);
+            addConversionWarning(parameters, e, "PHOTO", e.getMessage());
             return null;
         } finally {
             Streams.close(inputStream);
@@ -363,7 +370,7 @@ public class PhotoMapping extends AbstractMapping {
          * check image validity
          */
         if (false == isValidImage(fileHolder)) {
-            LOG.warn("image downloaded from {} appears not to be valid, skipping import.", urlString);
+            addConversionWarning(parameters, "PHOTO", "image downloaded from" + urlString + " appears not to be valid, skipping import.");
             Streams.close(fileHolder);
             return null;
         }

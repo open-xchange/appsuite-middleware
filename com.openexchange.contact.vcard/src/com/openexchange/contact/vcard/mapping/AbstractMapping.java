@@ -55,9 +55,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.contact.vcard.internal.VCardExceptionCodes;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
 import ezvcard.parameter.VCardParameter;
 import ezvcard.parameter.VCardParameters;
+import ezvcard.property.RawProperty;
 import ezvcard.property.VCardProperty;
 
 /**
@@ -66,6 +70,21 @@ import ezvcard.property.VCardProperty;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class AbstractMapping implements VCardMapping {
+
+    protected static boolean addConversionWarning(com.openexchange.contact.vcard.VCardParameters parameters, Throwable cause, String propertyName, String message) {
+        return addWarning(parameters, VCardExceptionCodes.CONVERSION_FAILED.create(cause, propertyName, message));
+    }
+
+    protected static boolean addConversionWarning(com.openexchange.contact.vcard.VCardParameters parameters, String propertyName, String message) {
+        return addWarning(parameters, VCardExceptionCodes.CONVERSION_FAILED.create(propertyName, message));
+    }
+
+    protected static boolean addWarning(com.openexchange.contact.vcard.VCardParameters parameters, OXException warning) {
+        if (null != parameters && null != parameters.getWarnings()) {
+            return parameters.getWarnings().add(warning);
+        }
+        return false;
+    }
 
     protected static boolean hasAll(Contact contact, int...fields) {
         for (int field : fields) {
@@ -293,6 +312,17 @@ public abstract class AbstractMapping implements VCardMapping {
             }
         }
         return false;
+    }
+
+    /**
+     * Gets a value indicating whether the vCard represents a legacy OX distribution list.
+     *
+     * @param vCard The vCard to check
+     * @return <code>true</code> if the vCard represents a legacy OX distribution list, <code>false</code>, otherwise
+     */
+    protected static boolean isLegacyDistributionList(VCard vCard) {
+        RawProperty property = vCard.getExtendedProperty("X-OPEN-XCHANGE-CTYPE");
+        return null != property && "dlist".equalsIgnoreCase(property.getValue());
     }
 
 }

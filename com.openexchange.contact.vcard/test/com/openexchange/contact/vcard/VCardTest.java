@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.vcard;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,7 +60,10 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import junit.framework.TestCase;
+import com.openexchange.contact.vcard.internal.DefaultVCardService;
 import com.openexchange.contact.vcard.internal.VCardMapper;
+import com.openexchange.contact.vcard.internal.VCardParametersFactoryImpl;
+import com.openexchange.contact.vcard.internal.VCardParametersImpl;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Streams;
@@ -357,6 +361,7 @@ public abstract class VCardTest extends TestCase {
     };
 
     private final VCardMapper mapper;
+    private final DefaultVCardService vCardService;
 
     /**
      * Initializes a new {@link VCardTest}.
@@ -364,10 +369,15 @@ public abstract class VCardTest extends TestCase {
     public VCardTest() {
         super();
         this.mapper = new VCardMapper();
+        this.vCardService = new DefaultVCardService(new VCardParametersFactoryImpl());
     }
 
     protected VCardMapper getMapper() {
         return mapper;
+    }
+
+    protected VCardService getService() {
+        return vCardService;
     }
 
     protected static VCard getOutlook2007VCard() throws IOException {
@@ -376,6 +386,15 @@ public abstract class VCardTest extends TestCase {
 
     protected static VCard parse(String vCard) {
         return Ezvcard.parse(vCard).first();
+    }
+
+    protected static VCard parse(byte[] vCard) throws IOException {
+        ByteArrayInputStream inputStream = Streams.newByteArrayInputStream(vCard);
+        try {
+            return Ezvcard.parse(inputStream).first();
+        } finally {
+            Streams.close(inputStream);
+        }
     }
 
     protected static String dump(VCard vCard) {
@@ -539,6 +558,10 @@ public abstract class VCardTest extends TestCase {
         contact.setYomiFirstName("yomi first name");
         contact.setYomiLastName("yomi last name");
         return contact;
+    }
+
+    protected static VCardParametersImpl getParameters() {
+        return new VCardParametersFactoryImpl().createParameters();
     }
 
 }

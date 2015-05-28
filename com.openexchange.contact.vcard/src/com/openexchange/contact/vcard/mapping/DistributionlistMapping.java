@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.vcard.mapping;
 
-import static org.slf4j.LoggerFactory.getLogger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -63,6 +62,8 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
+import ezvcard.parameter.EmailType;
+import ezvcard.property.Email;
 import ezvcard.property.Kind;
 import ezvcard.property.Member;
 
@@ -84,7 +85,19 @@ public class DistributionlistMapping extends AbstractMapping {
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+        /*
+         * clear legacy distribution list remnants during export
+         */
+        if (isLegacyDistributionList(vCard)) {
+            List<Email> memberEmails = getPropertiesWithTypes(vCard.getEmails(), EmailType.INTERNET.getValue());
+            if (null != memberEmails && 0 < memberEmails.size()) {
+                for (Email memberEmail : memberEmails) {
+                    vCard.removeProperty(memberEmail);
+                }
+            }
+        }
+        vCard.removeExtendedProperty("X-OPEN-XCHANGE-CTYPE");
         Kind existingKind = vCard.getKind();
         List<Member> existingMembers = vCard.getMembers();
         if (contact.getMarkAsDistribtuionlist()) {
@@ -93,7 +106,7 @@ public class DistributionlistMapping extends AbstractMapping {
              */
             vCard.setKind(Kind.group());
             vCard.removeProperties(Member.class);
-            List<Member> members = exportMembers(contact.getDistributionList());
+            List<Member> members = exportMembers(contact.getDistributionList(), parameters);
             for (Member member : members) {
                 vCard.addMember(member);
             }
@@ -111,14 +124,20 @@ public class DistributionlistMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
-        Kind kind = vCard.getKind();
-        if (null != kind && kind.isGroup()) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+        if (isLegacyDistributionList(vCard)) {
+            /*
+             * import legacy distribution list members
+             */
+            contact.setMarkAsDistributionlist(true);
+            List<Email> memberEmails = getPropertiesWithTypes(vCard.getEmails(), EmailType.INTERNET.getValue());
+            contact.setDistributionList(importLegacyMembers(memberEmails, parameters));
+        } else if (null != vCard.getKind() && vCard.getKind().isGroup()) {
             /*
              * apply distribution list flag and import members
              */
             contact.setMarkAsDistributionlist(true);
-            contact.setDistributionList(importMembers(vCard.getMembers()));
+            contact.setDistributionList(importMembers(vCard.getMembers(), parameters));
         } else {
             /*
              * not/no longer a distribution list, remove distribution list entries and flag
@@ -128,11 +147,11 @@ public class DistributionlistMapping extends AbstractMapping {
         }
     }
 
-    private static DistributionListEntryObject[] importMembers(List<Member> members) {
+    private static DistributionListEntryObject[] importMembers(List<Member> members, VCardParameters parameters) {
         if (null != members && 0 < members.size()) {
             List<DistributionListEntryObject> entries = new ArrayList<DistributionListEntryObject>(members.size());
             for (Member member : members) {
-                DistributionListEntryObject entry = importMember(member);
+                DistributionListEntryObject entry = importMember(member, parameters);
                 if (null != entry) {
                     entries.add(entry);
                 }
@@ -142,15 +161,15 @@ public class DistributionlistMapping extends AbstractMapping {
         return null;
     }
 
-    private static DistributionListEntryObject importMember(Member member) {
-        String email = extractEMailAddress(member.getUri());
+    private static DistributionListEntryObject importMember(Member member, VCardParameters parameters) {
+        String email = extractEMailAddress(member.getUri(), parameters);
         if (null != email) {
             DistributionListEntryObject entry = new DistributionListEntryObject();
             entry.setDisplayname(member.getParameter(X_OX_FN));
             try {
                 entry.setEmailaddress(email);
             } catch (OXException e) {
-                getLogger(DistributionlistMapping.class).warn("error setting e-mail address {}", email, e);
+                addConversionWarning(parameters, e, "MEMBER", e.getMessage());
                 return null;
             }
             String oxReference = member.getParameter(X_OX_REF);
@@ -164,7 +183,36 @@ public class DistributionlistMapping extends AbstractMapping {
         return null;
     }
 
-    private static String extractEMailAddress(String uriString) {
+    private static DistributionListEntryObject[] importLegacyMembers(List<Email> members, VCardParameters parameters) {
+        if (null != members && 0 < members.size()) {
+            List<DistributionListEntryObject> entries = new ArrayList<DistributionListEntryObject>(members.size());
+            for (Email member : members) {
+                DistributionListEntryObject entry = importLegacyMember(member, parameters);
+                if (null != entry) {
+                    entries.add(entry);
+                }
+            }
+            return 0 < entries.size() ? entries.toArray(new DistributionListEntryObject[entries.size()]) : null;
+        }
+        return null;
+    }
+
+    private static DistributionListEntryObject importLegacyMember(Email member, VCardParameters parameters) {
+        String email = member.getValue();
+        if (null != email) {
+            DistributionListEntryObject entry = new DistributionListEntryObject();
+            try {
+                entry.setEmailaddress(email);
+            } catch (OXException e) {
+                addConversionWarning(parameters, e, "MEMBER", e.getMessage());
+                return null;
+            }
+            return entry;
+        }
+        return null;
+    }
+
+    private static String extractEMailAddress(String uriString, VCardParameters parameters) {
         if (Strings.isEmpty(uriString)) {
             return null;
         }
@@ -175,27 +223,27 @@ public class DistributionlistMapping extends AbstractMapping {
                 email = uri.getSchemeSpecificPart();
             }
         } catch (URISyntaxException e) {
-            getLogger(DistributionlistMapping.class).debug("error decoding URI from member property value {}", uriString, e);
+            addConversionWarning(parameters, e, "MEMBER", e.getMessage());
         }
         if (null != email) {
             try {
                 new InternetAddress(email);
                 return email;
             } catch (AddressException e) {
-                getLogger(DistributionlistMapping.class).debug("ignoring invalid e-mail address in member property value {}", uriString, e);
+                addConversionWarning(parameters, e, "MEMBER", e.getMessage());
             }
         }
         return null;
     }
 
-    private static Member exportMember(DistributionListEntryObject entry) {
+    private static Member exportMember(DistributionListEntryObject entry, VCardParameters parameters) {
         String email = entry.getEmailaddress();
         if (null != email) {
             String uriString = null;
             try {
                 uriString = new URI("mailto", email, null).toString();
             } catch (URISyntaxException e) {
-                getLogger(DistributionlistMapping.class).warn("error encoding URI for e-mail {}", email, e);
+                addConversionWarning(parameters, e, "MEMBER", e.getMessage());
                 uriString = email;
             }
             Member member = new Member(uriString);
@@ -203,20 +251,20 @@ public class DistributionlistMapping extends AbstractMapping {
                 member.addParameter(X_OX_FN, entry.getDisplayname());
             }
             if (DistributionListEntryObject.INDEPENDENT != entry.getEmailfield()) {
-                // TODO: encode context id, contact id & email field in X_OX_REF
+                // TODO: encode context id, contact id & email field in X_OX_REF (or better to avoid wrong references when importing vcard from other server?)
             }
             return member;
         }
         return null;
     }
 
-    private static List<Member> exportMembers(DistributionListEntryObject[] entries) {
+    private static List<Member> exportMembers(DistributionListEntryObject[] entries, VCardParameters parameters) {
         if (null == entries) {
             return Collections.emptyList();
         }
         List<Member> members = new ArrayList<Member>(entries.length);
         for (DistributionListEntryObject entry : entries) {
-            Member member = exportMember(entry);
+            Member member = exportMember(entry, parameters);
             if (null != member) {
                 members.add(member);
             }

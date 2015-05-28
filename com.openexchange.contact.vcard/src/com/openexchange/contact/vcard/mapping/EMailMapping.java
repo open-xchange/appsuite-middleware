@@ -50,8 +50,11 @@
 package com.openexchange.contact.vcard.mapping;
 
 import java.util.List;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import ezvcard.VCard;
 import ezvcard.parameter.EmailType;
 import ezvcard.property.Email;
@@ -133,17 +136,23 @@ public class EMailMapping extends AbstractMapping {
 
     @Override
     public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+        /*
+         * skip import for legacy distribution list vCards
+         */
+        if (isLegacyDistributionList(vCard)) {
+            return;
+        }
         List<Email> emails = vCard.getEmails();
         /*
          * email1 - type "WORK"
          */
         Email businessEmail = getPropertyWithTypes(emails, EmailType.WORK);
-        contact.setEmail1(null != businessEmail ? businessEmail.getValue() : null);
+        contact.setEmail1(parseEMail(businessEmail, parameters));
         /*
          * email2 - type "HOME"
          */
         Email homeEmail = getPropertyWithTypes(emails, EmailType.HOME);
-        contact.setEmail2(null != homeEmail ? homeEmail.getValue() : null);
+        contact.setEmail2(parseEMail(homeEmail, parameters));
         /*
          * email3 - type "X-OTHER", or no specific type
          */
@@ -151,12 +160,29 @@ public class EMailMapping extends AbstractMapping {
         if (null == otherEmail) {
             otherEmail = getPropertyWithoutTypes(emails, 0, EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
         }
-        contact.setEmail3(null != otherEmail ? otherEmail.getValue() : null);
+        contact.setEmail3(parseEMail(otherEmail, parameters));
         /*
          * telex - type "TLX"
          */
         Email telexEmail = getPropertyWithTypes(emails, EmailType.TLX);
-        contact.setTelephoneTelex(null != telexEmail ? telexEmail.getValue() : null);
+        contact.setTelephoneTelex(parseEMail(telexEmail, parameters));
+    }
+
+    private String parseEMail(Email property, VCardParameters parameters) {
+        if (null != property) {
+            String value = property.getValue();
+            if (false == Strings.isEmpty(value)) {
+                if (null != parameters && parameters.isValidateContactEMail()) {
+                    try {
+                        new InternetAddress(value);
+                    } catch (AddressException e) {
+                        addConversionWarning(parameters, e, "EMAIL", e.getMessage());
+                    }
+                }
+                return value;
+            }
+        }
+        return null;
     }
 
 }

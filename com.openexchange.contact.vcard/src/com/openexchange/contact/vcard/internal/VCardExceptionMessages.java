@@ -58,8 +58,17 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class VCardExceptionMessages implements LocalizableStrings {
 
-    public final static String NO_VCARD_FOUND_MSG = "No vCard could be found in the supplied file. Please use a valid vCard file and try again.";
+    public static final String NO_VCARD_FOUND_MSG = "No vCard could be found in the supplied file. Please use a valid vCard file and try again.";
 
+    public static final String VALIDATION_FAILED_MSG = "Validation failed for property \"%1$s\": %2$s";
+
+    public static final String PARSER_ERROR_MSG = "Error reading vCard: %1$s";
+
+    public static final String CONVERSION_FAILED_MSG = "Conversion failed for property \"%1$s\": %2$s";
+
+    /**
+     * Initializes a new {@link VCardExceptionMessages}.
+     */
     private VCardExceptionMessages() {
         super();
     }

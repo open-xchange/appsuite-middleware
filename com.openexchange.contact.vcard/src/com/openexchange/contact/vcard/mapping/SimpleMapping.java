@@ -64,6 +64,12 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
     protected final int field;
     protected final Class<T> propertyClass;
 
+    /**
+     * Initializes a new {@link SimpleMapping}.
+     *
+     * @param field The mapped contact column identifier
+     * @param propertyClass The vCard property class
+     */
     protected SimpleMapping(int field, Class<T> propertyClass) {
         super();
         this.field = field;

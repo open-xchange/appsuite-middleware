@@ -336,7 +336,6 @@ public class VCardMapper {
         mappings.add(new ExtendedStringPropertyMapping(Contact.EMPLOYEE_TYPE, "X-OX-EMPLOYEE-TYPE"));
         mappings.add(new ExtendedStringPropertyMapping(Contact.MARITAL_STATUS, "X-OX-MARITAL-STATUS"));
         mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_COMPANY, "X-OX-YOMI-COMPANY"));
-
     }
 
     /**
@@ -344,7 +343,7 @@ public class VCardMapper {
      *
      * @param contact The contact to export
      * @param vCard The vCard to merge the contact into, or <code>null</code> to export to a new vCard
-     * @param parameters Further options to use, or <code>null</code> to use to the default options
+     * @param parameters Further options to use
      * @return The exported contact as vCard
      */
     public VCard exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
@@ -362,7 +361,7 @@ public class VCardMapper {
      *
      * @param vCard The vCard to import
      * @param contact The contact to merge the vCard into, or <code>null</code> to import as a new contact
-     * @param parameters Further options to use, or <code>null</code> to use to the default options
+     * @param parameters Further options to use
      * @return The imported vCard as contact
      */
     public Contact importVCard(VCard vCard, Contact contact, VCardParameters parameters) {

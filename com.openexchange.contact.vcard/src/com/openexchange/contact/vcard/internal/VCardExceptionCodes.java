@@ -68,10 +68,25 @@ public enum VCardExceptionCodes implements DisplayableOXExceptionCode {
      */
     IO_ERROR("An I/O error occurred: %1$s", MESSAGE, Category.CATEGORY_ERROR, 1),
     /**
-     * No vCard found
+     * No vCard found <br />
      * No vCard could be found in the supplied file. Please use a valid vCard file and try again.
      */
     NO_VCARD("No vCard found", VCardExceptionMessages.NO_VCARD_FOUND_MSG, Category.CATEGORY_USER_INPUT, 2),
+    /**
+     * Validation failed for [%1$s]: %2$s (W%3$d) <br />
+     * Validation failed for property \"%1$s\": %2$s
+     */
+    VALIDATION_FAILED("Validation failed for [%1$s]: %2$s (W%3$d)", VCardExceptionMessages.VALIDATION_FAILED_MSG, Category.CATEGORY_WARNING, 3),
+    /**
+     * Parser warning: %1$s <br />
+     * Error reading vCard: %1$s
+     */
+    PARSER_ERROR("Parser warning: %1$s", VCardExceptionMessages.PARSER_ERROR_MSG, Category.CATEGORY_WARNING, 4),
+    /**
+     * Conversion failed for [%1$s]: %2$s <br />
+     * Conversion failed for property \"%1$s\": %2$s
+     */
+    CONVERSION_FAILED("Conversion failed for [%1$s]: %2$s", VCardExceptionMessages.CONVERSION_FAILED_MSG, Category.CATEGORY_WARNING, 5),
 
     ;
 

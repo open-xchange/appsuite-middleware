@@ -49,9 +49,14 @@
 
 package com.openexchange.contact.vcard.osgi;
 
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.internal.DefaultVCardService;
+import com.openexchange.contact.vcard.internal.VCardParametersFactoryImpl;
 import com.openexchange.contact.vcard.internal.VCardServiceLookup;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.tools.images.ImageTransformationService;
 
@@ -70,9 +75,33 @@ public class ContactVCardActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         VCardServiceLookup.set(this);
+        final VCardParametersFactoryImpl vCardParametersFactory = new VCardParametersFactoryImpl();
+        track(ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+
+            @Override
+            public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
+                ConfigurationService configService = context.getService(reference);
+                try {
+                    vCardParametersFactory.reinitialize(configService);
+                } catch (OXException e) {
+                    org.slf4j.LoggerFactory.getLogger(ContactVCardActivator.class).error("Error during reinitialization: {}", e.getMessage(), e);
+                }
+                return configService;
+            }
+
+            @Override
+            public void modifiedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+                // no
+            }
+
+            @Override
+            public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
+                context.ungetService(reference);
+            }}
+        );
         trackService(ImageTransformationService.class);
         openTrackers();
-        registerService(VCardService.class, new DefaultVCardService());
+        registerService(VCardService.class, new DefaultVCardService(vCardParametersFactory));
     }
 
     @Override

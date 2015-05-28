@@ -50,8 +50,8 @@
 package com.openexchange.contact.vcard;
 
 import java.awt.Dimension;
-import java.nio.charset.Charset;
-import com.openexchange.java.Charsets;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 
@@ -61,113 +61,61 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class VCardParameters {
-
-    private VCardVersion version;
-    private Dimension photoScaleDimension;
-    private boolean strict;
-    private Session session;
-    private Charset charset;
+public interface VCardParameters {
 
     /**
-     * Initializes a new {@link VCardParameters}.
-     */
-    public VCardParameters() {
-        super();
-        this.version = VCardVersion.VERSION_3_0;
-        this.strict = false;
-        this.photoScaleDimension = new Dimension(200, 200);
-        this.charset = Charsets.UTF_8;
-        this.session = null;
-    }
-
-    /**
-     * Gets the version
+     * Gets the target version to use during export.
      *
      * @return The version
      */
-    public VCardVersion getVersion() {
-        return version;
-    }
-    /**
-     * Sets the version
-     *
-     * @param version The version to set
-     */
-    public void setVersion(VCardVersion version) {
-        this.version = version;
-    }
+    VCardVersion getVersion();
 
     /**
-     * Gets the photoScaleDimension
+     * Gets the dimensions for scaling contact images during export.
      *
-     * @return The photoScaleDimension
+     * @return The photo scale dimension, or <code>null</code> if no scaling should be done
      */
-    public Dimension getPhotoScaleDimension() {
-        return photoScaleDimension;
-    }
+    Dimension getPhotoScaleDimension();
+    /**
+     * Gets a value indicating whether import and export is done in <i>strict</i> mode or not.
+     *
+     * @return <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
+     */
+    boolean isStrict();
 
     /**
-     * Sets the photoScaleDimension
+     * Gets the underlying groupware session.
      *
-     * @param photoScaleDimension The photoScaleDimension to set
+     * @return The session, or <code>null</code> if not set
      */
-    public void setPhotoScaleDimension(Dimension photoScaleDimension) {
-        this.photoScaleDimension = photoScaleDimension;
-    }
+    Session getSession();
 
     /**
-     * Gets the strict
+     * Gets the maximum allowed size in bytes for contact images.
      *
-     * @return The strict
+     * @return The maximum allowed size
      */
-    public boolean isStrict() {
-        return strict;
-    }
+    int getMaxContactImageSize();
 
     /**
-     * Sets the strict
+     * Gets a value indicating whether e-mail addresses in contacts should by checked for validity or not.
      *
-     * @param strict The strict to set
+     * @return <code>true</code> to validate e-mail addresses, <code>false</code>, otherwise
      */
-    public void setStrict(boolean strict) {
-        this.strict = strict;
-    }
+    boolean isValidateContactEMail();
 
     /**
-     * Gets the session
+     * Gets a list of warnings that occurred during import or export.
      *
-     * @return The session
+     * @return The warnings
      */
-    public Session getSession() {
-        return session;
-    }
+    List<OXException> getWarnings();
 
     /**
-     * Sets the session
+     * Gets a value indicating whether vCards should be validated after parsing or not.
      *
-     * @param session The session to set
+     * @return <code>true</code> if additional validation is skipped, <code>false</code>, otherwise
      */
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    /**
-     * Gets the charset
-     *
-     * @return The charset
-     */
-    public Charset getCharset() {
-        return charset;
-    }
-
-    /**
-     * Sets the charset
-     *
-     * @param charset The charset to set
-     */
-    public void setCharset(Charset charset) {
-        this.charset = charset;
-    }
+    boolean isSkipValidation();
 
 }
