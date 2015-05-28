@@ -1,6 +1,10 @@
 * 2015-05-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
+ 
+* 2015-08-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38260: Include distribution list entries when searching in contact module
 
 * 2015-05-27 - thorben.betten@open-xchange.com
 
