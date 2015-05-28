@@ -432,6 +432,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                         errorBuilder.append(errorMsg);
                     }
                     LOG.error(errorBuilder.toString(), t);
+                    reset();
                     /*
                      * Shut-down
                      */
@@ -449,7 +450,6 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     } else {
                         shutDownBundle(bundle, errorBuilder);
                     }
-                    reset();
                 }
             }
         }

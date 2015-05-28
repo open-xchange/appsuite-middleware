@@ -245,30 +245,46 @@ public class ContextSetConfigProvider extends AbstractContextBasedConfigProvider
     protected void prepare(Map<String, Object> yamlFiles) {
         ContextSetTermParser parser = new ContextSetTermParser();
         for (Map.Entry<String, Object> file : yamlFiles.entrySet()) {
-            @SuppressWarnings("unchecked")
-            Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
-            for (Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
-                Object configName = configData.getKey();
-                Map<String, Object> configuration = configData.getValue();
+            String filename = file.getKey();
 
-                Object withTags = configuration.get("withTags");
-                if (withTags == null) {
-                    String filename = file.getKey();
-                    throw new IllegalArgumentException("Missing withTags specification in configuration " + configName + " in file " + filename);
-                }
-                try {
-                    ContextSetTerm term = parser.parse(withTags.toString());
-                    contextSetConfigs.add(new ContextSetConfig(term, configuration));
-                    Object addTags = configuration.get("addTags");
-                    if (addTags != null) {
-                        final String additional = addTags.toString();
-                        final List<String> additionalList = Arrays.asList(additional.split("\\s*,\\s*"));
-                        additionalPredicates.add(new AdditionalPredicates(term, additionalList));
+            try {
+                @SuppressWarnings("unchecked")
+                Map<Object, Map<String, Object>> content = (Map<Object, Map<String, Object>>) file.getValue();
+                for (Map.Entry<Object, Map<String, Object>> configData : content.entrySet()) {
+                    Object configName = configData.getKey();
+
+                    // Check value validity
+                    {
+                        Object value = configData.getValue();
+                        if (!(configData.getValue() instanceof Map)) {
+                            throw new IllegalArgumentException("Invalid value. Expected " + Map.class.getName() + ", but was " + (null == value ? "null" : value.getClass().getName()) + ". Please check syntax of file " + filename);
+                        }
                     }
-                } catch (IllegalArgumentException x) {
-                    String filename = file.getKey();
-                    throw new IllegalArgumentException("Could not parse withTags expression '" + withTags + "' in configuration " + configName + " in file " + filename, x);
+
+                    Map<String, Object> configuration = configData.getValue();
+
+                    Object withTags = configuration.get("withTags");
+                    if (withTags == null) {
+                        throw new IllegalArgumentException("Missing withTags specification in configuration " + configName + " in file " + filename);
+                    }
+
+                    try {
+                        ContextSetTerm term = parser.parse(withTags.toString());
+                        contextSetConfigs.add(new ContextSetConfig(term, configuration));
+                        Object addTags = configuration.get("addTags");
+                        if (addTags != null) {
+                            final String additional = addTags.toString();
+                            final List<String> additionalList = Arrays.asList(additional.split("\\s*,\\s*"));
+                            additionalPredicates.add(new AdditionalPredicates(term, additionalList));
+                        }
+                    } catch (IllegalArgumentException x) {
+                        throw new IllegalArgumentException("Could not parse withTags expression '" + withTags + "' in configuration " + configName + " in file " + filename, x);
+                    }
                 }
+            } catch (IllegalArgumentException x) {
+                throw x;
+            } catch (RuntimeException x) {
+                throw new IllegalArgumentException("Failed to process file " + filename + " due to error: " + x.getMessage(), x);
             }
         }
     }

@@ -1,3 +1,7 @@
+* 2015-05-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38502: Proper shut-down of DeferredActivator in case an error occurs on bundle start-up
+
 * 2015-05-28 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38503: Avoid NPE.
