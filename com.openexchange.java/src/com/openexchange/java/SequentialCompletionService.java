@@ -55,11 +55,11 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 
 
@@ -93,15 +93,13 @@ public class SequentialCompletionService<V> implements CompletionService<V>, Clo
 
     // -----------------------------------------------------------------------------------------------------------------------
 
-    private static class ConsumerCallable<V> implements Callable<Void> {
+    private static class ExecuterCallable<V> implements Callable<Void> {
 
-        private final ExecutorService executor;
         private final BlockingQueue<FutureTask<V>> submittedTasks;
         private final BlockingQueue<Future<V>> requestTaskQueue;
 
-        ConsumerCallable(BlockingQueue<FutureTask<V>> submittedTasks, BlockingQueue<Future<V>> requestTaskQueue, ExecutorService executor) {
+        ExecuterCallable(BlockingQueue<FutureTask<V>> submittedTasks, BlockingQueue<Future<V>> requestTaskQueue) {
             super();
-            this.executor = executor;
             this.submittedTasks = submittedTasks;
             this.requestTaskQueue = requestTaskQueue;
         }
@@ -121,7 +119,7 @@ public class SequentialCompletionService<V> implements CompletionService<V>, Clo
                     return null;
                 }
                 // Await its completion
-                awaitCompletion(first);
+                execute(first);
 
                 tasks.clear();
                 submittedTasks.drainTo(tasks);
@@ -131,16 +129,16 @@ public class SequentialCompletionService<V> implements CompletionService<V>, Clo
                         return null;
                     }
                     // Await its completion
-                    awaitCompletion(c);
+                    execute(c);
                 }
             }
 
             return null;
         }
 
-        private void awaitCompletion(FutureTask<V> first) throws InterruptedException, ExecutionException {
-            executor.submit(first).get();
-            requestTaskQueue.offer(first);
+        private void execute(FutureTask<V> task) {
+            task.run();
+            requestTaskQueue.offer(task);
         }
     } // End of ConsumerCallable class
 
@@ -148,10 +146,12 @@ public class SequentialCompletionService<V> implements CompletionService<V>, Clo
 
     private final BlockingQueue<FutureTask<V>> submittedTasks;
     private final BlockingQueue<Future<V>> requestTaskQueue;
-    private final ConsumerCallable<V> consumer;
+    private final ExecuterCallable<V> consumer;
 
     /**
      * Initializes a new {@link SequentialCompletionService}.
+     *
+     * @throws RejectedExecutionException If there is no vacant thread in thread pool
      */
     public SequentialCompletionService(ExecutorService executor) {
         super();
@@ -160,7 +160,7 @@ public class SequentialCompletionService<V> implements CompletionService<V>, Clo
         }
         BlockingQueue<FutureTask<V>> submittedTasks = new LinkedBlockingQueue<FutureTask<V>>();
         BlockingQueue<Future<V>> requestTaskQueue = new LinkedBlockingQueue<Future<V>>();
-        ConsumerCallable<V> consumer = new ConsumerCallable<V>(submittedTasks, requestTaskQueue, executor);
+        ExecuterCallable<V> consumer = new ExecuterCallable<V>(submittedTasks, requestTaskQueue);
         executor.submit(consumer);
         this.consumer = consumer;
         this.requestTaskQueue = requestTaskQueue;
