@@ -122,7 +122,7 @@ public final class TokenLogin implements LoginRequestHandler {
 
         Tools.disableCaching(resp);
         
-        if (req.getParameter("jsonResponse").equalsIgnoreCase("true")) {
+        if (req.getParameter("jsonResponse") != null && req.getParameter("jsonResponse").equalsIgnoreCase("true")) {
         	JSONObject response = new JSONObject();
         	try {
 				response.put("serverToken", serverToken);
