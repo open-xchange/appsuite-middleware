@@ -55,8 +55,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -78,7 +78,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
 
     private static final String NEW_TABLE_NAME = "user_alias";
 
-    private static final String CREATE_ALIAS_TABLE = "CREATE TABLE `" + NEW_TABLE_NAME + "` ( "
+    private static final String CREATE_ALIAS_TABLE = "CREATE TABLE `" + NEW_TABLE_NAME + "` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
         + "`cid` INT4 UNSIGNED NOT NULL, "
         + "`user` INT4 UNSIGNED NOT NULL, "
         + "`alias` VARCHAR(255) NOT NULL, "
@@ -95,15 +95,13 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         Connection conn = Database.getNoTimeout(ctxId, true);
         try {
             conn.setAutoCommit(false);
-            boolean exists = Tools.tableExists(conn, NEW_TABLE_NAME);
-            if (!exists) {
+            if (false == Tools.tableExists(conn, NEW_TABLE_NAME)) {
                 createTable(conn);
             }
 
-            List<Alias> aliase = getAllAliasesInUserAttributes(conn, ctxId);
-
+            List<Alias> aliase = getAllAliasesInUserAttributes(conn);
             if (aliase != null && false == aliase.isEmpty()) {
-                insertAliases(conn, ctxId, aliase);
+                insertAliases(conn, aliase);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -128,19 +126,21 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private List<Alias> getAllAliasesInUserAttributes(Connection conn, int contextId) throws SQLException {
+    private List<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
-        List<Alias> aliases = new ArrayList<Alias>();
         try {
             stmt = conn.prepareStatement(SELECT_OLD_ALIAS_ENTRIES);
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptyList();
             }
+
+            List<Alias> aliases = new LinkedList<Alias>();
+            int index;
             do {
-                int index = 0;
+                index = 0;
                 int cid = rs.getInt(++index);
                 int uid = rs.getInt(++index);
                 String alias = rs.getString(++index);
@@ -153,17 +153,23 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private int insertAliases(Connection conn, int contextId, List<Alias> aliases) throws SQLException {
+    private int insertAliases(Connection conn, List<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            int updated = 0;
             stmt = conn.prepareStatement(INSERT_ALIAS_IN_NEW_TABLE);
+            int index;
             for (Alias alias : aliases) {
-                int index = 0;
+                index = 0;
                 stmt.setInt(++index, alias.getCid());
                 stmt.setInt(++index, alias.getUserId());
                 stmt.setString(++index, alias.getAlias());
-                updated += stmt.executeUpdate();
+                stmt.addBatch();
+            }
+            int[] updateCounts = stmt.executeBatch();
+
+            int updated = 0;
+            for (int updateCount : updateCounts) {
+                updated += updateCount;
             }
             return updated;
         } finally {
