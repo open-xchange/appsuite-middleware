@@ -770,13 +770,13 @@ public final class ConfigJSlobService implements JSlobService {
      * @param setting actual setting.
      * @throws OXException If an error occurs.
      */
-    protected void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException {
+    protected void saveSettingWithSubs(SettingStorage storage, Setting setting) throws OXException {
         try {
             if (setting.isLeaf()) {
-                final String value = setting.getSingleValue().toString();
+                String value = setting.getSingleValue().toString();
                 if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                    final JSONArray array = asJsonArray(value);
-                    if(array != null) {
+                    JSONArray array = asJsonArray(value);
+                    if (array != null) {
                         if (array.length() == 0) {
                             setting.setEmptyMultiValue();
                         } else {
@@ -789,37 +789,37 @@ public final class ConfigJSlobService implements JSlobService {
                 }
                 storage.save(setting);
             } else {
-                final JSONObject json;
+                // Construct JSON object
+                JSONObject json;
                 {
-                    final Object singleValue = setting.getSingleValue();
-                    if (singleValue instanceof JSONObject) {
-                        json = new JSONObject((JSONObject) singleValue);
-                    } else {
-                        json = new JSONObject(singleValue.toString());
-                    }
+                    Object singleValue = setting.getSingleValue();
+                    json = singleValue instanceof JSONObject ? new JSONObject((JSONObject) singleValue) : new JSONObject(singleValue.toString());
                 }
-                final Iterator<String> iter = json.keys();
+
+                // Save it
                 OXException exc = null;
-                while (iter.hasNext()) {
-                    final String key = iter.next();
-                    Setting sub = ConfigTree.optSettingByPath(setting, new String[] { key });
-                    if (null != sub) {
-                        sub.setSingleValue(json.getString(key));
+                for (Iterator<String> iter = json.keys(); iter.hasNext();) {
+                    String key = iter.next();
+                    Setting subSetting = ConfigTree.optSettingByPath(setting, new String[] { key });
+                    if (null != subSetting) {
+                        subSetting.setSingleValue(json.getString(key));
                         try {
                             // Catch single exceptions if GUI writes not writable fields.
-                            saveSettingWithSubs(storage, sub);
-                        } catch (final OXException e) {
+                            saveSettingWithSubs(storage, subSetting);
+                        } catch (OXException e) {
                             exc = e;
                         }
                     }
                 }
+
+                // Check for exception
                 if (null != exc) {
                     throw exc;
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }
     }
