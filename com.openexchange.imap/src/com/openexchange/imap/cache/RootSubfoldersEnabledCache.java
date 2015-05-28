@@ -157,8 +157,8 @@ public final class RootSubfoldersEnabledCache {
         });
     }
 
-    private static String getKeyFor(Store store, IMAPConfig imapConfig) {
-        if (namespacePerUser()) {
+    private static String getKeyFor(Store store, IMAPConfig imapConfig, boolean namespacePerUser) {
+        if (namespacePerUser) {
             return store.getURLName().toString();
         }
         return new StringBuilder(24).append(imapConfig.isSecure() ? "imaps://" : "imap://").append(imapConfig.getServer()).append(':').append(imapConfig.getPort()).toString();
@@ -174,7 +174,8 @@ public final class RootSubfoldersEnabledCache {
      */
     public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final IMAPStore imapStore) throws OXException {
         try {
-            return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig), imapConfig, (DefaultFolder) imapStore.getDefaultFolder());
+            boolean namespacePerUser = namespacePerUser();
+            return isRootSubfoldersEnabled0(getKeyFor(imapStore, imapConfig, namespacePerUser), imapConfig, (DefaultFolder) imapStore.getDefaultFolder(), namespacePerUser);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig);
         }
@@ -189,17 +190,18 @@ public final class RootSubfoldersEnabledCache {
      * @throws OXException If a mail error occurs
      */
     public static boolean isRootSubfoldersEnabled(final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
-        return isRootSubfoldersEnabled0(getKeyFor(imapDefaultFolder.getStore(), imapConfig), imapConfig, imapDefaultFolder);
+        boolean namespacePerUser = namespacePerUser();
+        return isRootSubfoldersEnabled0(getKeyFor(imapDefaultFolder.getStore(), imapConfig, namespacePerUser), imapConfig, imapDefaultFolder, namespacePerUser);
     }
 
     /**
      * Checks if root sub-folders capability is enabled for given IMAP account.
      */
-    private static boolean isRootSubfoldersEnabled0(final String key, final IMAPConfig imapConfig, final DefaultFolder imapDefaultFolder) throws OXException {
+    private static boolean isRootSubfoldersEnabled0(String key, IMAPConfig imapConfig, DefaultFolder imapDefaultFolder, boolean namespacePerUser) throws OXException {
         final ConcurrentMap<String, Future<Boolean>> map = MAP;
         Future<Boolean> f = map.get(key);
         if (null == f) {
-            final FutureTask<Boolean> ft = new FutureTask<Boolean>(new RootSubfoldersEnabledCallable(imapDefaultFolder));
+            final FutureTask<Boolean> ft = new FutureTask<Boolean>(new RootSubfoldersEnabledCallable(imapDefaultFolder, namespacePerUser));
             f = map.putIfAbsent(key, ft);
             if (null == f) {
                 f = ft;
@@ -232,15 +234,17 @@ public final class RootSubfoldersEnabledCache {
     private static final class RootSubfoldersEnabledCallable implements Callable<Boolean> {
 
         private final DefaultFolder imapDefaultFolder;
+        private final boolean mNamespacePerUser;
 
-        RootSubfoldersEnabledCallable(final DefaultFolder imapDefaultFolder) {
+        RootSubfoldersEnabledCallable(final DefaultFolder imapDefaultFolder, boolean namespacePerUser) {
             super();
             this.imapDefaultFolder = imapDefaultFolder;
+            this.mNamespacePerUser = namespacePerUser;
         }
 
         @Override
         public Boolean call() throws Exception {
-            return canCreateSubfolder(imapDefaultFolder);
+            return canCreateSubfolder(imapDefaultFolder, mNamespacePerUser);
         }
 
     }
