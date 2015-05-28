@@ -49,7 +49,6 @@
 
 package com.openexchange.rest.services.database.internal;
 
-import static com.openexchange.java.util.NativeBuilders.map;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -74,7 +73,6 @@ import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.NativeBuilders.MapBuilder;
 import com.openexchange.rest.services.database.DatabaseRESTErrorCodes;
 import com.openexchange.rest.services.database.migrations.VersionChecker;
 import com.openexchange.rest.services.database.sql.CreateServiceSchemaLockTable;
@@ -562,7 +560,8 @@ public class DatabaseRESTPerformer {
                     results.put(question.getKey(), result);
                 } else {
                     int rows = stmt.executeUpdate();
-                    MapBuilder<Object, Object> res = map().put("updated", rows);
+                    JSONObject res = new JSONObject();
+                    res.put("updated", rows);
 
                     if (query.wantsGeneratedKeys()) {
                         ResultSet rs = stmt.getGeneratedKeys();
@@ -573,7 +572,7 @@ public class DatabaseRESTPerformer {
                         }
                         res.put("generatedKeys", keys);
                     }
-                    results.put(question.getKey(), res.build());
+                    results.put(question.getKey(), res);
                 }
                 success = true;
             } catch (SQLException x) {
