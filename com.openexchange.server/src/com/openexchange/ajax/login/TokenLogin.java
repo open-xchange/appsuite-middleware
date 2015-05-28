@@ -51,11 +51,17 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -115,14 +121,37 @@ public final class TokenLogin implements LoginRequestHandler {
         User user = result.getUser();
 
         Tools.disableCaching(resp);
-        resp.sendRedirect(generateRedirectURL(
-            LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
-            LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
-            session,
-            user.getPreferredLanguage(),
-            conf.getUiWebPath(),
-            request.getHttpSessionID(),
-            serverToken));
+        
+        if (req.getParameter("jsonResponse").equalsIgnoreCase("true")) {
+        	JSONObject response = new JSONObject();
+        	try {
+				response.put("serverToken", serverToken);
+				response.put("jsessionid", request.getHttpSessionID());
+				response.put(PARAMETER_USER, session.getLogin());
+				response.put(PARAMETER_USER_ID, session.getUserId());
+				response.put("url", generateRedirectURL(
+                    LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
+                    LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
+                    session,
+                    user.getPreferredLanguage(),
+                    conf.getUiWebPath(),
+                    request.getHttpSessionID(),
+                    serverToken));
+				resp.getWriter().print(response);
+        	} catch (JSONException e) {
+
+			}
+        	
+        } else {
+            resp.sendRedirect(generateRedirectURL(
+                    LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
+                    LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
+                    session,
+                    user.getPreferredLanguage(),
+                    conf.getUiWebPath(),
+                    request.getHttpSessionID(),
+                    serverToken));        	
+        }
     }
 
     private static String generateRedirectURL(String uiWebPathParam, String shouldStore, Session session, String language, String uiWebPath, String httpSessionId, String serverToken) {
