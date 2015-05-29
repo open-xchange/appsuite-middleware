@@ -783,30 +783,40 @@ public abstract class MailConfig {
      *
      * @param mailAccount The mail account
      */
-    public void applyStandardNames(final MailAccount mailAccount) {
+    public void applyStandardNames(MailAccount mailAccount) {
+        applyStandardNames(mailAccount, false);
+    }
+
+    /**
+     * Applies folder name information from given mail account
+     *
+     * @param mailAccount The mail account
+     * @param force <code>true</code> to enforce setting folder name information from given mail account; otherwise <code>false</code>
+     */
+    public void applyStandardNames(MailAccount mailAccount, boolean force) {
         if (null == mailAccount) {
             return;
         }
-        put(StorageUtility.INDEX_CONFIRMED_HAM, mailAccount.getConfirmedHam(), standardNames);
-        put(StorageUtility.INDEX_CONFIRMED_SPAM, mailAccount.getConfirmedSpam(), standardNames);
-        put(StorageUtility.INDEX_DRAFTS, mailAccount.getDrafts(), standardNames);
-        put(StorageUtility.INDEX_SENT, mailAccount.getSent(), standardNames);
-        put(StorageUtility.INDEX_SPAM, mailAccount.getSpam(), standardNames);
-        put(StorageUtility.INDEX_TRASH, mailAccount.getTrash(), standardNames);
+        put(StorageUtility.INDEX_CONFIRMED_HAM, mailAccount.getConfirmedHam(), standardNames, force);
+        put(StorageUtility.INDEX_CONFIRMED_SPAM, mailAccount.getConfirmedSpam(), standardNames, force);
+        put(StorageUtility.INDEX_DRAFTS, mailAccount.getDrafts(), standardNames, force);
+        put(StorageUtility.INDEX_SENT, mailAccount.getSent(), standardNames, force);
+        put(StorageUtility.INDEX_SPAM, mailAccount.getSpam(), standardNames, force);
+        put(StorageUtility.INDEX_TRASH, mailAccount.getTrash(), standardNames, force);
 
-        put(StorageUtility.INDEX_CONFIRMED_HAM, mailAccount.getConfirmedHamFullname(), standardFullNames);
-        put(StorageUtility.INDEX_CONFIRMED_SPAM, mailAccount.getConfirmedSpamFullname(), standardFullNames);
-        put(StorageUtility.INDEX_DRAFTS, mailAccount.getDraftsFullname(), standardFullNames);
-        put(StorageUtility.INDEX_SENT, mailAccount.getSentFullname(), standardFullNames);
-        put(StorageUtility.INDEX_SPAM, mailAccount.getSpamFullname(), standardFullNames);
-        put(StorageUtility.INDEX_TRASH, mailAccount.getTrashFullname(), standardFullNames);
+        put(StorageUtility.INDEX_CONFIRMED_HAM, mailAccount.getConfirmedHamFullname(), standardFullNames, force);
+        put(StorageUtility.INDEX_CONFIRMED_SPAM, mailAccount.getConfirmedSpamFullname(), standardFullNames, force);
+        put(StorageUtility.INDEX_DRAFTS, mailAccount.getDraftsFullname(), standardFullNames, force);
+        put(StorageUtility.INDEX_SENT, mailAccount.getSentFullname(), standardFullNames, force);
+        put(StorageUtility.INDEX_SPAM, mailAccount.getSpamFullname(), standardFullNames, force);
+        put(StorageUtility.INDEX_TRASH, mailAccount.getTrashFullname(), standardFullNames, force);
     }
 
-    private static void put(final int index, final String value, final String[] arr) {
-        if (Strings.isEmpty(value)) {
+    private static void put(int index, String value, String[] arr, boolean force) {
+        if (!force && Strings.isEmpty(value)) {
             return;
         }
-        arr[index] = MailFolderUtility.prepareMailFolderParam(value).getFullname();
+        arr[index] = null == value ? null : MailFolderUtility.prepareMailFolderParam(value).getFullname();
     }
 
     @Override
