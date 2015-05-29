@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard;
 import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link VCardService} - The VCard merge service for VCards and contacts.
@@ -59,6 +60,7 @@ import com.openexchange.groupware.container.Contact;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface VCardService extends VCardParametersFactory {
 
     /**
@@ -66,9 +68,10 @@ public interface VCardService extends VCardParametersFactory {
      *
      * @param contact The contact to export
      * @param originalVCard The vCard to merge the contact into, or <code>null</code> to export to a new vCard
-     * @param parameters Further parameters for vCard export, or <code>null</code> if not used
+     * @param parameters Further parameters for the vCard export, or <code>null</code> if not used
      * @return The exported contact as vCard
-     * @throws OXException If exporting given contact to a VCard fails
+     * @throws OXException If exporting given contact to a vCard fails - non-fatal conversion warnings are accessible via passed vCard
+     *                     parameters reference
      */
     InputStream exportContact(Contact contact, InputStream originalVCard, VCardParameters parameters) throws OXException;
 
@@ -77,10 +80,11 @@ public interface VCardService extends VCardParametersFactory {
      *
      * @param vCard The vCard to import
      * @param contact The contact to merge the vCard into, or <code>null</code> to import as a new contact
-     * @param parameters Further parameters for vCard import, or <code>null</code> if not used
+     * @param parameters Further parameters for the vCard import, or <code>null</code> if not used
      * @return The imported vCard as contact, which is a new instance if passed contact reference is <code>null</code>, or the passed
      *         contact itself, otherwise
-     * @throws OXException If importing VCard into an existing contact fails
+     * @throws OXException If importing the vCard fails - non-fatal conversion warnings are accessible via passed vCard parameters
+     *                     reference
      */
     Contact importVCard(InputStream vCard, Contact contact, VCardParameters parameters) throws OXException;
 
