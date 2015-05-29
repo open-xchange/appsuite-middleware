@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.osgi.UserServiceHolder;
+import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -142,61 +143,68 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If an error occurs during deletion
      */
     public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws OXException {
-        if (!KNOWN_TREES.contains(treeId)) {
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Delete not supported by tree " + treeId);
-        }
-        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
-        if (null == folderStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
-        }
-        if (null != timeStamp) {
-            storageParameters.setTimeStamp(timeStamp);
-        }
-
-        TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
-        /*
-         * Throws an exception if someone tries to add an element. If this happens, you found a bug.
-         * As long as a TransactionManager is present, every storage has to add itself to the
-         * TransactionManager in FolderStorage.startTransaction() and must return false.
-         */
-        final List<FolderStorage> openedStorages = Collections.emptyList();
-        checkOpenedStorage(folderStorage, openedStorages);
-        try {
-            if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                /*
-                 * Real delete
-                 */
-                deleteRealFolder(folderId, folderStorage, transactionManager);
-            } else {
-                /*-
-                 * Virtual delete:
-                 *
-                 * 1. Delete from virtual storage
-                 * 2. Delete from real storage
-                 */
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
-                if (null == realStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
-                }
-                if (folderStorage.equals(realStorage)) {
-                    deleteRealFolder(folderId, realStorage, transactionManager);
-                } else {
-                    /*
-                     * Delete from virtual storage
-                     */
-                    deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages, transactionManager);
-                }
+        if (KNOWN_TREES.contains(treeId)) {
+            final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
+            if (null != timeStamp) {
+                storageParameters.setTimeStamp(timeStamp);
+            }
+
+            TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
             /*
-             * Commit
+             * Throws an exception if someone tries to add an element. If this happens, you found a bug.
+             * As long as a TransactionManager is present, every storage has to add itself to the
+             * TransactionManager in FolderStorage.startTransaction() and must return false.
              */
-            transactionManager.commit();
-        } catch (final OXException e) {
-            transactionManager.rollback();
-            throw e;
-        } catch (final Exception e) {
-            transactionManager.rollback();
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            final List<FolderStorage> openedStorages = Collections.emptyList();
+            checkOpenedStorage(folderStorage, openedStorages);
+            try {
+                if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                    /*
+                     * Real delete
+                     */
+                    deleteRealFolder(folderId, folderStorage, transactionManager);
+                } else {
+                    /*-
+                     * Virtual delete:
+                     *
+                     * 1. Delete from virtual storage
+                     * 2. Delete from real storage
+                     */
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+                    if (null == realStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+                    }
+                    if (folderStorage.equals(realStorage)) {
+                        deleteRealFolder(folderId, realStorage, transactionManager);
+                    } else {
+                        /*
+                         * Delete from virtual storage
+                         */
+                        deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages, transactionManager);
+                    }
+                }
+                /*
+                 * Commit
+                 */
+                transactionManager.commit();
+            } catch (final OXException e) {
+                transactionManager.rollback();
+                throw e;
+            } catch (final Exception e) {
+                transactionManager.rollback();
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+        } else if (VirtualFolderStorage.FOLDER_TREE_EAS.equals(treeId)) {
+            FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+            }
+            folderStorage.deleteFolder(treeId, folderId, storageParameters);
+        } else {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Delete not supported by tree " + treeId);
         }
     }
 

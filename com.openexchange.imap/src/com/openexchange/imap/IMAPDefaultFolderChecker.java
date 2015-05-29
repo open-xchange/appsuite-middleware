@@ -68,6 +68,9 @@ import javax.mail.StoreClosedException;
 import org.slf4j.Logger;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderResponse;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
@@ -102,6 +105,8 @@ public class IMAPDefaultFolderChecker {
 
     /** The logger constant */
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPDefaultFolderChecker.class);
+
+    private static final String MDC_KEY = "_accountchanged";
 
     /** The INBOX full name. */
     protected static final String INBOX = "INBOX";
@@ -321,6 +326,25 @@ public class IMAPDefaultFolderChecker {
                         throw MimeMailException.handleMessagingException(e, imapConfig, session);
                     }
                 }
+                /*
+                 * Mail account data changed?
+                 */
+                boolean todo = false;
+                if (todo) {
+                    String val = org.slf4j.MDC.get(MDC_KEY);
+                    if ("true".equals(val)) {
+                        org.slf4j.MDC.remove(MDC_KEY);
+                        FolderService folderService = Services.getServiceLookup().getOptionalService(FolderService.class);
+                        if (null != folderService) {
+                            FolderResponse<UserizedFolder[]> resp = folderService.getAllVisibleFolders("20", null, session, null);
+                            UserizedFolder[] folders = resp.getResponse();
+                            for (UserizedFolder userizedFolder : folders) {
+                                folderService.deleteFolder("20", userizedFolder.getID(), userizedFolder.getLastModified(), session, null);
+                            }
+                            folderService.checkConsistency("20", session);
+                        }
+                    }
+                }
             } finally {
                 lock.unlock();
             }
@@ -433,67 +457,8 @@ public class IMAPDefaultFolderChecker {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
 
-        // Special handling for full names in case of primary mail account
-        if (MailAccount.DEFAULT_ID == accountId) {
-            /*-
-             * Check full names for primary account:
-             *
-             * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
-             * In that case create them with respect to determined prefix
-             */
-            TIntList indexes = new TIntLinkedList();
-            for (int i = 0; i < fullNames.length; i++) {
-                String fullName = fullNames[i];
-                if (isEmpty(fullName)) {
-                    fullNames[i] = null;
-                } else {
-                    if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
-                        // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
-                        String expectedFullName = checkedIndexes.get(i);
-                        if (null == expectedFullName) {
-                            expectedFullName = namespace + names[i];
-                        }
-                        if (!expectedFullName.equals(fullName)) {
-                            LOG.warn("Found invalid full name in settings of account {}. Should be \"{}\", but is \"{}\" (user={}, context={})", Integer.valueOf(accountId), expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                            indexes.add(i);
-                        }
-                        fullNames[i] = null;
-                    }
-                }
-            }
-            if (!indexes.isEmpty()) {
-                MailAccount modifiedAccount = clearAccountFullNames(indexes.toArray());
-                if (null != modifiedAccount) {
-                    imapConfig.applyStandardNames(modifiedAccount);
-                }
-            }
-        } else {
-            if (!checkedIndexes.isEmpty()) {
-                TIntObjectMap<String> toSet = new TIntObjectHashMap<String>(6);
-                boolean added = false;
-                for (int i = 0; i < fullNames.length; i++) {
-                    String expectedFullName = checkedIndexes.get(i);
-                    if (null != expectedFullName) {
-                        String fullName = fullNames[i];
-                        if (isEmpty(fullName)) {
-                            toSet.put(i, expectedFullName);
-                            added = true;
-                        } else if (!expectedFullName.equals(fullName)) {
-                            fullNames[i] = null;
-                            toSet.put(i, expectedFullName);
-                            added = true;
-                        }
-                    }
-                }
-                if (added) {
-                    MailAccount modifiedAccount = setAccountFullNames(toSet);
-                    if (null != modifiedAccount) {
-                        imapConfig.applyStandardNames(modifiedAccount);
-                    }
-                }
-            }
-            LOG.debug("Checking standard folder for account {} (user={}, context={})", Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-        }
+        // Sanitize given names and full-names against mail account settings
+        sanitizeAgainstMailAccount(names, fullNames, namespace, sep, checkedIndexes);
 
         // Check folders
         TIntObjectMap<String> toSet = (MailAccount.DEFAULT_ID == accountId) ? null : new TIntObjectHashMap<String>(6);
@@ -542,13 +507,120 @@ public class IMAPDefaultFolderChecker {
         if (added && (null != toSet)) {
             MailAccount modifiedAccount = setAccountFullNames(toSet);
             if (null != modifiedAccount) {
-                imapConfig.applyStandardNames(modifiedAccount);
+                imapConfig.applyStandardNames(modifiedAccount, true);
             }
         }
 
         // Check for modifications
         if (modified.get()) {
             ListLsubCache.clearCache(accountId, session);
+        }
+    }
+
+    /**
+     * Sanitizes given names and full-names against mail account settings.
+     *
+     * @param names The names for standard folders
+     * @param fullNames The full-names for standard folders
+     * @param namespace The user's namespace; e.g. <code>"INBOX/"</code>
+     * @param sep The separator character; e.g. <code>'/'</code>
+     * @param checkedIndexes The checked indexes according to SPECIAL-USE flags advertised by IMAP server (if any)
+     */
+    protected void sanitizeAgainstMailAccount(String[] names, String[] fullNames, String namespace, char sep, TIntObjectMap<String> checkedIndexes) {
+        // Special handling for full names in case of primary mail account
+        if (MailAccount.DEFAULT_ID == accountId) {
+            /*-
+             * Check full names for primary account:
+             *
+             * Null'ify full name if not on root level OR not equal to name; meaning not intended to create default folders next to INBOX
+             * In that case create them with respect to determined prefix
+             */
+            TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
+            TIntList indexes = new TIntLinkedList();
+            for (int i = 0; i < fullNames.length; i++) {
+                String fullName = fullNames[i];
+                if (isEmpty(fullName)) {
+                    // No full name given
+                    String expectedFullName = checkedIndexes.get(i);
+                    if (null != expectedFullName) {
+                        // Deduce expected name from SPECIAL-USE full name
+                        String expectedName = expectedFullName.substring(expectedFullName.lastIndexOf(sep) + 1);
+                        if (!expectedName.equals(names[i])) {
+                            LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                            names[i] = expectedName;
+                            namesToSet.put(i, expectedFullName);
+                        }
+                    }
+                    fullNames[i] = null;
+                } else {
+                    // Full name specified
+                    if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
+                        // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
+                        String expectedFullName = checkedIndexes.get(i);
+                        if (null == expectedFullName) {
+                            // Deduce expected full-name from namespace + name concatenation
+                            expectedFullName = namespace + names[i];
+                            if (!expectedFullName.equals(fullName)) {
+                                LOG.warn("Clearing invalid full name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                                indexes.add(i);
+                            }
+                        } else {
+                            // Check against actual full-name
+                            if (!expectedFullName.equals(fullName)) {
+                                LOG.warn("Clearing invalid full name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedFullName, fullName, Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                                indexes.add(i);
+                            }
+
+                            // Deduce expected name from SPECIAL-USE full name
+                            String expectedName = expectedFullName.substring(expectedFullName.lastIndexOf(sep) + 1);
+                            if (!expectedName.equals(names[i])) {
+                                LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                                names[i] = expectedName;
+                                namesToSet.put(i, expectedFullName);
+                            }
+                        }
+                        fullNames[i] = null;
+                    }
+                }
+            }
+            if (!indexes.isEmpty()) {
+                MailAccount modifiedAccount = clearAccountFullNames(indexes.toArray());
+                if (null != modifiedAccount) {
+                    imapConfig.applyStandardNames(modifiedAccount, true);
+                }
+            }
+            if (!namesToSet.isEmpty()) {
+                MailAccount modifiedAccount = setAccountNames(namesToSet);
+                if (null != modifiedAccount) {
+                    imapConfig.applyStandardNames(modifiedAccount, true);
+                }
+            }
+        } else {
+            if (!checkedIndexes.isEmpty()) {
+                TIntObjectMap<String> toSet = new TIntObjectHashMap<String>(6);
+                boolean added = false;
+                for (int i = 0; i < fullNames.length; i++) {
+                    String expectedFullName = checkedIndexes.get(i);
+                    if (null != expectedFullName) {
+                        String fullName = fullNames[i];
+                        if (isEmpty(fullName)) {
+                            toSet.put(i, expectedFullName);
+                            added = true;
+                        } else if (!expectedFullName.equals(fullName)) {
+                            fullNames[i] = null;
+                            toSet.put(i, expectedFullName);
+                            added = true;
+                        }
+                    }
+                }
+                if (added) {
+                    MailAccount modifiedAccount = setAccountFullNames(toSet);
+                    if (null != modifiedAccount) {
+                        imapConfig.applyStandardNames(modifiedAccount, true);
+                    }
+                }
+            }
+            LOG.debug("Checking standard folder for account {} (user={}, context={})", Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
         }
     }
 
@@ -934,7 +1006,9 @@ public class IMAPDefaultFolderChecker {
                 } else {
                     mass.clearFullNamesForMailAccount(accountId, indexes, session.getUserId(), session.getContextId());
                 }
-                return mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
+
+                org.slf4j.MDC.put(MDC_KEY, "true");
+                return mass.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (Exception x) {
                 LOG.warn("Failed to clear full names for mail account {}", Integer.valueOf(accountId), x);
             }
@@ -954,14 +1028,41 @@ public class IMAPDefaultFolderChecker {
             try {
                 TIntList indexes = new TIntArrayList(map.size());
                 List<String> fullNames = new ArrayList<String>(map.size());
-
                 for (int index : map.keys()) {
                     indexes.add(index);
                     fullNames.add(map.get(index));
                 }
 
                 mass.setFullNamesForMailAccount(accountId, indexes.toArray(), fullNames.toArray(new String[fullNames.size()]), session.getUserId(), session.getContextId());
-                return mass.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                org.slf4j.MDC.put(MDC_KEY, "true");
+                return mass.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
+            } catch (Exception x) {
+                LOG.warn("Failed to set full names for mail account {}", Integer.valueOf(accountId), x);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Sets the specified names in settings of associated account
+     *
+     * @return The modified mail account or <code>null</code> if service is absent
+     */
+    protected MailAccount setAccountNames(TIntObjectMap<String> map) {
+        // Invalidate mail account settings as obviously wrong
+        MailAccountStorageService mass = Services.optService(MailAccountStorageService.class);
+        if (null != mass) {
+            try {
+                TIntList indexes = new TIntArrayList(map.size());
+                List<String> names = new ArrayList<String>(map.size());
+                for (int index : map.keys()) {
+                    indexes.add(index);
+                    names.add(map.get(index));
+                }
+
+                mass.setNamesForMailAccount(accountId, indexes.toArray(), names.toArray(new String[names.size()]), session.getUserId(), session.getContextId());
+                org.slf4j.MDC.put(MDC_KEY, "true");
+                return mass.getRawMailAccount(accountId, session.getUserId(), session.getContextId());
             } catch (Exception x) {
                 LOG.warn("Failed to set full names for mail account {}", Integer.valueOf(accountId), x);
             }
