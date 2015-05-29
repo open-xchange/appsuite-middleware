@@ -143,7 +143,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
      */
     public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws OXException {
         if (!KNOWN_TREES.contains(treeId)) {
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Delete not supported by tree " + treeId);
         }
         final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
         if (null == folderStorage) {
