@@ -66,6 +66,7 @@ import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.folderstorage.FolderService;
 import com.openexchange.imap.IMAPProvider;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.config.IMAPProperties;
@@ -160,6 +161,7 @@ public final class IMAPActivator extends HousekeepingActivator {
              */
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             track(CacheEventService.class, new ListLsubInvalidator(context));
+            trackService(FolderService.class);
             openTrackers();
             /*
              * Initialize cache region

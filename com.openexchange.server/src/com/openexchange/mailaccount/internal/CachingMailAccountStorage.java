@@ -178,6 +178,12 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
+        invalidateMailAccount(id, userId, contextId);
+    }
+
+    @Override
     public void deleteMailAccount(int id, Map<String, Object> properties, int userId, int contextId, boolean deletePrimary, Connection con) throws OXException {
         dropSessionParameter(userId, contextId);
 
@@ -285,6 +291,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             accounts[i] = getMailAccount0(ids[i], userId, contextId, con);
         }
         return accounts;
+    }
+
+    @Override
+    public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
+        return delegate.getRawMailAccount(id, userId, contextId);
     }
 
     @Override

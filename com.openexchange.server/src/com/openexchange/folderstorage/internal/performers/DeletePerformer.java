@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.internal.CalculatePermission;
+import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.tools.session.ServerSession;
@@ -128,60 +129,67 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If an error occurs during deletion
      */
     public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws OXException {
-        if (!KNOWN_TREES.contains(treeId)) {
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Create not supported by tree " + treeId);
-        }
-        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
-        if (null == folderStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
-        }
-        final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
-        checkOpenedStorage(folderStorage, openedStorages);
-        if (null != timeStamp) {
-            storageParameters.setTimeStamp(timeStamp);
-        }
-        try {
-            if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
-                /*
-                 * Real delete
-                 */
-                folderStorage.deleteFolder(treeId, folderId, storageParameters);
-            } else {
-                /*-
-                 * Virtual delete:
-                 *
-                 * 1. Delete from virtual storage
-                 * 2. Delete from real storage
-                 */
-                final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
-                if (null == realStorage) {
-                    throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
-                }
-                if (folderStorage.equals(realStorage)) {
+        if (KNOWN_TREES.contains(treeId)) {
+            FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
+            }
+            final List<FolderStorage> openedStorages = new ArrayList<FolderStorage>(4);
+            checkOpenedStorage(folderStorage, openedStorages);
+            if (null != timeStamp) {
+                storageParameters.setTimeStamp(timeStamp);
+            }
+            try {
+                if (FolderStorage.REAL_TREE_ID.equals(treeId)) {
+                    /*
+                     * Real delete
+                     */
                     folderStorage.deleteFolder(treeId, folderId, storageParameters);
                 } else {
-                    /*
-                     * Delete from virtual storage
+                    /*-
+                     * Virtual delete:
+                     *
+                     * 1. Delete from virtual storage
+                     * 2. Delete from real storage
                      */
-                    deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages);
+                    final FolderStorage realStorage = folderStorageDiscoverer.getFolderStorage(FolderStorage.REAL_TREE_ID, folderId);
+                    if (null == realStorage) {
+                        throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folderId);
+                    }
+                    if (folderStorage.equals(realStorage)) {
+                        folderStorage.deleteFolder(treeId, folderId, storageParameters);
+                    } else {
+                        /*
+                         * Delete from virtual storage
+                         */
+                        deleteVirtualFolder(folderId, treeId, folderStorage, openedStorages);
+                    }
                 }
+                /*
+                 * Commit
+                 */
+                for (final FolderStorage fs : openedStorages) {
+                    fs.commitTransaction(storageParameters);
+                }
+            } catch (final OXException e) {
+                for (final FolderStorage fs : openedStorages) {
+                    fs.rollback(storageParameters);
+                }
+                throw e;
+            } catch (final Exception e) {
+                for (final FolderStorage fs : openedStorages) {
+                    fs.rollback(storageParameters);
+                }
+                throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            /*
-             * Commit
-             */
-            for (final FolderStorage fs : openedStorages) {
-                fs.commitTransaction(storageParameters);
+        } else if (VirtualFolderStorage.FOLDER_TREE_EAS.equals(treeId)) {
+            FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
-        } catch (final OXException e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
-            throw e;
-        } catch (final Exception e) {
-            for (final FolderStorage fs : openedStorages) {
-                fs.rollback(storageParameters);
-            }
-            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            folderStorage.deleteFolder(treeId, folderId, storageParameters);
+        } else {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Delete not supported by tree " + treeId);
         }
     }
 
