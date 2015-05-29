@@ -101,7 +101,7 @@ public class BasicTest extends VCardTest {
         assertEquals("Mustermann", contact.getSurName());
         assertEquals("Erika", contact.getGivenName());
         assertEquals("Wikipedia", contact.getCompany());
-        assertEquals("Oberleutnant", contact.getProfession());
+        assertEquals("Oberleutnant", contact.getPosition());
         assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
@@ -113,7 +113,7 @@ public class BasicTest extends VCardTest {
         assertEquals("Koeln", contact.getCityHome());
         assertEquals("51147", contact.getPostalCodeHome());
         assertEquals("Deutschland", contact.getCountryHome());
-        assertEquals("erika@mustermann.de", contact.getEmail3());
+        assertEquals("erika@mustermann.de", contact.getEmail1());
     }
 
     public void testImportVCard2() throws Exception {
@@ -146,7 +146,7 @@ public class BasicTest extends VCardTest {
         assertEquals("Mustermann", contact.getSurName());
         assertEquals("Erika", contact.getGivenName());
         assertEquals("Wikipedia", contact.getCompany());
-        assertEquals("Oberleutnant", contact.getProfession());
+        assertEquals("Oberleutnant", contact.getPosition());
         assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
@@ -158,7 +158,7 @@ public class BasicTest extends VCardTest {
         assertEquals("K\u00f6ln", contact.getCityHome());
         assertEquals("51147", contact.getPostalCodeHome());
         assertEquals("Germany", contact.getCountryHome());
-        assertEquals("erika@mustermann.de", contact.getEmail3());
+        assertEquals("erika@mustermann.de", contact.getEmail1());
         assertEquals("http://de.wikipedia.org/", contact.getURL());
     }
 
@@ -192,7 +192,7 @@ public class BasicTest extends VCardTest {
         assertEquals("Mustermann", contact.getSurName());
         assertEquals("Erika", contact.getGivenName());
         assertEquals("Wikipedia", contact.getCompany());
-        assertEquals("Oberleutnant", contact.getProfession());
+        assertEquals("Oberleutnant", contact.getPosition());
         assertEquals("image/jpeg", contact.getImageContentType());
         assertNotNull(contact.getImage1());
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
@@ -205,7 +205,7 @@ public class BasicTest extends VCardTest {
         assertEquals("K\u00f6ln", contact.getCityHome());
         assertEquals("51147", contact.getPostalCodeHome());
         assertEquals("Germany", contact.getCountryHome());
-        assertEquals("erika@mustermann.de", contact.getEmail3());
+        assertEquals("erika@mustermann.de", contact.getEmail1());
     }
 
     public void testImportVCard4() throws Exception {
@@ -249,7 +249,7 @@ public class BasicTest extends VCardTest {
         assertEquals("Doe", contact.getSurName());
         assertEquals("John", contact.getGivenName());
         assertEquals("Example.com Inc.", contact.getCompany());
-        assertEquals("Imaginary test person", contact.getProfession());
+        assertEquals("Imaginary test person", contact.getPosition());
         assertEquals("+1 617 555 1212", contact.getTelephoneBusiness1());
         assertEquals("+1 (617) 555-1234", contact.getTelephoneBusiness2());
         assertEquals("+1 781 555 1212", contact.getCellularTelephone1());
@@ -312,7 +312,7 @@ public class BasicTest extends VCardTest {
         assertEquals("(111) 555-1212", contact.getTelephoneBusiness1());
         assertEquals("(404) 555-1212", contact.getTelephoneHome1());
         assertEquals("(404) 555-1213", contact.getTelephoneHome2());
-        assertEquals("forrestgump@example.com", contact.getEmail3());
+        assertEquals("forrestgump@example.com", contact.getEmail1());
         assertEquals("42 Plantation St.", contact.getStreetHome());
         assertEquals("Baytown", contact.getCityHome());
         assertEquals("LA", contact.getStateHome());
@@ -430,14 +430,14 @@ public class BasicTest extends VCardTest {
          */
         Contact contact = getMapper().importVCard(vCards.get(0), null, null);
         assertNotNull(contact);
-        assertEquals("john.doe@company.com", contact.getEmail3());
+        assertEquals("john.doe@company.com", contact.getEmail1());
         assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 2nd imported contact
          */
         contact = getMapper().importVCard(vCards.get(1), null, null);
         assertNotNull(contact);
-        assertEquals("jane.doe@company.com", contact.getEmail3());
+        assertEquals("jane.doe@company.com", contact.getEmail1());
         assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 3rd imported contact
@@ -473,7 +473,6 @@ public class BasicTest extends VCardTest {
         assertEquals("123456", contact.getTelephoneBusiness1());
         assertEquals("123456", contact.getFaxBusiness());
         assertEquals("bob@company.com", contact.getEmail1());
-        assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getEmail3());
         assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getCompany());
         assertEquals("www.company.com", contact.getURL());
         assertEquals("image/jpeg", contact.getImageContentType());
@@ -489,7 +488,7 @@ public class BasicTest extends VCardTest {
         assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getDisplayName());
         assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getSurName());
         assertEquals("55556666", contact.getCellularTelephone1());
-        assertEquals("henry@company.com", contact.getEmail3());
+        assertEquals("henry@company.com", contact.getEmail1());
         assertEquals("\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1\u00d1", contact.getCompany());
         assertEquals("My Contacts", contact.getCategories());
     }
@@ -594,7 +593,7 @@ public class BasicTest extends VCardTest {
         assertEquals("IBM", contact.getCompany());
         assertEquals("Accounting", contact.getDepartment());
         assertEquals("Dungeon", contact.getBranches());
-        assertEquals("Money Counter", contact.getProfession());
+        assertEquals("Money Counter", contact.getPosition());
         assertEquals("Big Blue", contact.getManagerName());
         assertEquals("Little Red", contact.getAssistantName());
         assertEquals("VIP", contact.getCategories());
@@ -672,7 +671,7 @@ public class BasicTest extends VCardTest {
         assertEquals("905-555-1234", contact.getCellularTelephone1());
         assertEquals("905-666-1234", contact.getTelephoneHome1());
         assertEquals("IBM", contact.getCompany());
-        assertEquals("Money Counter", contact.getProfession());
+        assertEquals("Money Counter", contact.getPosition());
         assertEquals("john.doe@ibm.com", contact.getEmail2());
         assertEquals("http://www.ibm.com", contact.getURL());
         String expectedNote =
@@ -1319,8 +1318,8 @@ public class BasicTest extends VCardTest {
         assertEquals("Johny", contact.getNickname());
         assertEquals("IBM", contact.getCompany());
         assertEquals("Accounting", contact.getDepartment());
-        assertEquals("Money Counter", contact.getProfession());
-        assertEquals("john.doe@ibm.com", contact.getEmail3());
+        assertEquals("Money Counter", contact.getPosition());
+        assertEquals("john.doe@ibm.com", contact.getEmail1());
         assertEquals("905-555-1234", contact.getCellularTelephone1());
         assertEquals("905-666-1234", contact.getTelephoneHome1());
         assertEquals("905-777-1234", contact.getTelephoneBusiness1());
@@ -1343,6 +1342,752 @@ public class BasicTest extends VCardTest {
         BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
         assertNotNull(bufferedImage);
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
+    }
+
+    public void testImportVCard11() throws Exception {
+        /*
+         * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_LOTUS_NOTES.vcf
+         */
+        String vCardString =
+            "BEGIN:VCARD\r\n" +
+            "VERSION:3.0\r\n" +
+            "PRODID:-//Apple Inc.//Address Book 6.1//EN\r\n" +
+            "N:Doe;John;Johny;Mr.;I\r\n" +
+            "FN:Mr. Doe John I Johny\r\n" +
+            "NICKNAME:Johny\\,JayJay\r\n" +
+            "ORG:IBM;SUN\r\n" +
+            "TITLE:Generic Accountant\r\n" +
+            "EMAIL;type=INTERNET;type=WORK;type=pref:john.doe@ibm.com\r\n" +
+            "EMAIL;type=INTERNET;type=WORK:billy_bob@gmail.com\r\n" +
+            "TEL;type=CELL;type=VOICE;type=pref:+1 (212) 204-34456\r\n" +
+            "TEL;type=WORK;type=FAX:00-1-212-555-7777\r\n" +
+            "item1.ADR;type=HOME;type=pref:;;25334\\nSouth cresent drive\\, Building 5\\, 3rd floo r;New York;New York;NYC887;U.S.A.\r\n" +
+            "NOTE:THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\\nAND ANY EXPRESS OR IMPLIED WARRANTIES\\, INCLUDING\\, BUT NOT LIMITED TO \\, THE\\nIMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR P URPOSE\\nARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTOR S BE\\nLIABLE FOR ANY DIRECT\\, INDIRECT\\, INCIDENTAL\\, SPECIAL\\, EXEMPLARY\\, OR\\nCONSEQUENTIAL DAMAGES (INCLUDING\\, BUT NOT LIMITED TO\\, PROCUREMENT OF\\n SUBSTITUTE GOODS OR SERVICES\\; LOSS OF USE\\, DATA\\, OR PROFITS\\; OR BUSINESS \\nINTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY\\, WHETHER IN\\n CONTRACT\\, STRICT LIABILITY\\, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\\nA RISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE\\, EVEN IF ADVISED OF THE\\n POSSIBILITY OF SUCH DAMAGE.\r\n" +
+            "item2.URL;type=pref:http://www.sun.com\r\n" +
+            "item2.X-ABLabel:_$!<HomePage>!$_\r\n" +
+            "BDAY;value=date:1980-05-21\r\n" +
+            "PHOTO;ENCODING=b;TYPE=JPEG:/9j/4AAQSkZJRgABAQAAAQABAAD/4QBARXhpZgAATU0AKgAA\r\n" +
+            " AAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAyKADAAQAAAABAAAAyAAAAAD/2wBDAA\r\n" +
+            " IBAQIBAQICAQICAgICAwUDAwMDAwYEBAMFBwYHBwcGBgYHCAsJBwgKCAYGCQ0JCgsLDAwMBwkN\r\n" +
+            " Dg0MDgsMDAv/2wBDAQICAgMCAwUDAwULCAYICwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCw\r\n" +
+            " sLCwsLCwsLCwsLCwsLCwsLCwsLCwv/wAARCADIAMgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEA\r\n" +
+            " AAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhBy\r\n" +
+            " JxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZ\r\n" +
+            " WmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxM\r\n" +
+            " XGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAA\r\n" +
+            " AAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFE\r\n" +
+            " KRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVm\r\n" +
+            " Z2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyM\r\n" +
+            " nK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD9/KKKKAIN59T+dG8+\r\n" +
+            " p/OkorkuzMXefU/nRvPqfzpKKLsBd59T+dG8+p/OkqC+u/skZYkDAzyaLsCUyNk/MfzrkPihq9\r\n" +
+            " 3p9s5sLq4gIjQ5jkK878djWd4p+L8Wg3TI91aJgnhp0XufUe1eY/FX9oSCWCQfbrD/AFaj/j5j\r\n" +
+            " /v8A0q0xn5C/8Fm/20vjH8LvGjRfDP4s/Ezw7Fx8ml+KL6zX/V2Z6RSju7/99H1NflT4i/4Ktf\r\n" +
+            " tRwaxMsP7Sfx9RRtwF+IOrgD5R/wBPNfcv/BajxwniLxozLNC/T7sit/yzs/T6V+TviPD6zMcj\r\n" +
+            " nb/6CK6YbHZBaHuH/D1/9qX/AKOV+P8A/wCHC1f/AOSa2vAH/BVT9qC98SRJeftIfHuVDjKv8Q\r\n" +
+            " NWYH5l7G4r5nZdtbnw7k8vxNET7f8Aoa1omg5T+hz/AIIe/tYfFP4s+V/wtT4leP8AxNnbn+1f\r\n" +
+            " EN3e5/48v+esjf33/wC+j6mv2a+Hl7Ne6buvZpZm8qM5dyxyQc9a/n4/4IYfEZPDXk7ri3j+79\r\n" +
+            " +VV/58vUe1ftR8Nf2h4V07Bv7D/VRf8vMXofasJbmM9z6Aorh/CHxUj8Rz7VubaT/cmRvX0HtX\r\n" +
+            " awTCZMgg/Q1NyAlYjOCagMjZPzH86ml71AQcnitqRtHYVZGLcsfzp+8+p/Oo1B3U+rY7IcrEsM\r\n" +
+            " k9fWpqgT74+tT1EjOYUUUVJAUUUUAQ7DSFCBT6R/u1lZGTQyiiisWSKBuNcV8Zdfk8P6HPJA20\r\n" +
+            " rAzdf9l/celdsn3q80/aTJHhW7x1+yv/AOgSVdhrU/HX/gpL/wAFIPEfwl+I+oWmk6hLEsTyAA\r\n" +
+            " Tyr0luB2nX+4K+GPFX/BY7xhf3c6SatOQGK/8AH1P2Y/8AT1Wt/wAFqJ7hfjNq/lSzL+9m6MR/\r\n" +
+            " y3vK/MjU7q7/ALVucz3P+tb+NvU1eljVHun7SX7VOqfGbUvO1m5kmJ7mR27RjvI39wV4LesLi5\r\n" +
+            " Z26nH8qQySsP3ryN9STThCXPAJNZuTR30o3RXkG081No982n3wljOCP8Qf6VoWvhebUMbEkOfQ\r\n" +
+            " H/CrX/Cu7oDIjnx/un/4mqVVdWU4nv8A+y3+2trXwU2/2LeSQ4x0lkX/AJ5f3ZV/55ivp/wZ/w\r\n" +
+            " AFk/GVveRxLq8+GXH/AB9T9lP/AE9V+at/o11o3Rp0/Ej+ntT/AAzqV0uuQg3E/wDF/wAtD/dN\r\n" +
+            " PmuYSjqf0ff8Evf+CgGv/GLxQsOsX0soPrNI38Fye8zf3BX68/D/AFd9V0svK2SP8W/wr+cv/g\r\n" +
+            " hbeTS+O18yWRuvVif+Wd7X9EnwgJOhNn2/9Cen5mEjrmO7rSbB70tFaRdkJNoaUx0ptSHoajrR\r\n" +
+            " O5SYqffH1qeoE++PrU9KQpBRRRUkhRRRQAmwe9J5Yp1FLlQWIivPNG2nHqaSiyFZBjFea/tGoG\r\n" +
+            " 8L3ef+fV//AECSvSz1rzb9on/kWLr/AK9n/wDQJKTWhB/N1/wWX0pJvjFq5YDmWb/0feV+aera\r\n" +
+            " FH/aVycL/rW7e59q/Tz/AILHDPxh1bP/AD1m/wDR93X5tanFv1K4AHWVv5mvNqVGmdUYqyORvt\r\n" +
+            " PSBsADFP0PT1ubsq+MD/A1vS+E5r85hOB9B/j7Vf8AC/w6uhekluPoPQ/7VS6mm56NKOiPa/gH\r\n" +
+            " 8EdO8TtbfbI4zvRicqv/AD1A7oa92b9kvQ/7G8wQwZx/cj/u/wDXOqH7Kfg5rdrLzxnEb/8Ao8\r\n" +
+            " e9fUT6BGvho/J+p/ufWvnMXjJwnZM6lTTVz83f2pPg/YeDt32BEXr0Cj/nr6KP7or54sIfI8Rw\r\n" +
+            " hf7zj9DX2r+3pYLb79o9e/8A13r4wX/kZoP9+T+Rr6PLajqU02cNaNmfrz/wQk+bx4ue2f8A0X\r\n" +
+            " e1/RX8IEH9hN+H/oT1/Op/wQjH/FeL+P8A6Lva/os+EH/ICb8P/QnrvZwVNGdbsFGwUtFOLMxC\r\n" +
+            " gNJ5Qp1FaxYXGiMA06iimAUUUUAFFFFADfMNHmGm0UANZ/mo3/Wkf71JV2RdkS59a82/aKP/AB\r\n" +
+            " TF1/17P/6BJXpFecftDxmTwxdAf8+r/wDoElRIiyP5x/8AgshJj4wat/11m/8AR93X536Zp41H\r\n" +
+            " Vpw3edx/Wv0c/wCCxGgS3Xxd1Uof+Ws3p/z3u/evgTwl4SmOsTZbn7RJ2Hp9a8mtHVnRDQ+r/w\r\n" +
+            " BkX9jGy+KWkCW6HJ92/vSjtKP7lfUGjf8ABLXS4LdJAOue7+pH/PxW1/wTB8IA+GAZ1yfr/t3P\r\n" +
+            " vX6CWPg6H+yIsxc8/wAR/vfWvmcXiakJuKPVo25T4V8Mfsf2ngLb5Ax5YK9W7nd/z1NaviP4ep\r\n" +
+            " ZaI6oOBn1/un/ar6Z8d+Egok8pdvI75/h+teY+N/CzrpcmPf8Ak3vXlSnOcrs3ukj8tv8Agor4\r\n" +
+            " eFnv2+//ALce9fB8tvs8UQdfvy/yNfov/wAFMtEeEybvf/2596/PW6sWXxTBz/HL/I19jlcmqa\r\n" +
+            " PLry97c/WT/ghWvl+Ol/H/ANF3tf0SfCCY/wBhN+H/AKE9fzuf8EOXFt44Unnr/wCi72v6FfhF\r\n" +
+            " q6Lobgj0/wDQnr1k7nDJ3Z3qSlm5qSqNrqCyyDHerobcMitoK5ItFFFabEthRRRQNBRRRQMKKK\r\n" +
+            " KAI6KKKuxdhpTJo8v3p1MmuFgGZDTGPrifjRpv9o6DcJ6wMP8Ax1/8a6C58bWFqxE0mCP9pf8A\r\n" +
+            " GuV+IXj7TbnTZVSUEmMj7yejf7VZ7mZ+Lf8AwUw/Zg/4TL4k6jNt+/JIenrLcn/nmf71fIHhf9\r\n" +
+            " h4Jqcp2Hmdz09v+uNfql+2Bo8Ov+L7uS3XcGZ+wP8AHL7H1rwzw78PsXzHyv8Alq38Pt/u1jKi\r\n" +
+            " pGiZ61/wTs/Zb/sPw6FKfp/tXH/TP3r7i074C7tMjBXpnt7/AO5Xnf7EvhlbTQhvTH4f7U3tX1\r\n" +
+            " tpunRCxQY9ew9TXh4jAwlNto6YVpJHzf4i/Ze/tHd8vUjt7Y/551w3jz9kHGiSNtPft/st/wBM\r\n" +
+            " q+zm0iFuq/oP8Kw/HuhQN4elwvPPYf3W9q5Hl9PsX7dn8+v/AAVv/Z8/4R3zePXt/wBfX+wPSv\r\n" +
+            " y81v4e/ZvE0Jx0kl/l/u1+5H/BaPwg935v2RP73Rf+vz0FfkV4p8A3g8RRkRdJJf4W/wDia9fD\r\n" +
+            " U1TikjlqVG3qfY//AASLv/8AhEfFqv06/wDoF39P71ftv8Lfjz5GllS3X/Fv9uvxA/4J7Wknh7\r\n" +
+            " xCGuxsH0I/hn9cetfp38PviDbRWu1pef8AeHq3+1XbBGDZ9q+Cvix/bOoRJn73/wAUB/ePrXqG\r\n" +
+            " mX32qIH1Gf5V8ofBTxfDfa9arHJnOP4h/wA9F96+o/C8wms0I/uD+QreKBGsZOKb59B6Go60Su\r\n" +
+            " UkmSibJHvT6gT74+tT0NWBpIKKKKkQUUUUAVPtH1oFxk96iorQ6uRFkScVxXxZ8df8Inp80mcb\r\n" +
+            " MfqUHqPWuzX7teNftTzPFoV15Qz9z/0KKgztqfnl+0j/AMFfv+Fba1fw+bjyHjH3/WHf/wA/Ir\r\n" +
+            " xbQv8AguL/AMJlqrWnm53S+V9/3A/5+z/er4d/4KIeK9Wt/GOuC2g3ASwY+dB/y5j1FfLXwK8Y\r\n" +
+            " 61P46AktsD7fj/WR/wDPRPamopmVj+iL4I/8ZQ6JDqY+b7SFb1+8qN/t/wDPX1/+v6/on7EBRI\r\n" +
+            " 5Nn3xv6eo/6415L/wR3spNW+EOlPqC7GMUOeQf+WFp6fU1+kmk+FIBptsc/wDLJex9B71LRLk0\r\n" +
+            " ecfA74Mf8IRYhNuP/wBb/wCwP71evW9r5UIXHSm2WmpajCVbAxWEqMW7sFNorNFiqHiKw+3aY8\r\n" +
+            " Z75/ka036VDcIHjIasHQiS6sj4V/bv/Y3/AOFyb/lznPQZ/wCe/wD0yb+/XxH4q/4JG/vTP5f3\r\n" +
+            " HY/d9SP+nav2R8eeF4dT/wBYcZ+v+17+9ee+KvhnanSJju5yOx/vD/apcqiTz33Pxh+JXwu/4Z\r\n" +
+            " KtvtZG3Hrx3Uf3U/57f57+ZW//AAVP/sLV47cOPmz/ABf7Of8An4HrX0z/AMFj9LHhzwczW3zH\r\n" +
+            " j2/jtPXPrX4d+LPiBdW/jO2AXj5u4/55j/ZrWIXuz98/2D/29/8AhY/xD0i1L/6/H8X/AE9Rr/\r\n" +
+            " z2PrX64/CLXf7b0SCTP3oVb/x1Pc+tfzW/8ElvHjT/ABm8OrcnaDtz3/5f4fRa/oq/Zz8UWjeG\r\n" +
+            " LXzJufsqfwN/cj9q2iaI9YPQ1HUEWtW1xxDLkn/ZP+FTBgw4rSJpHYcn3x9anqBPvj61PSkKQU\r\n" +
+            " UUVJIUUUUAUfL96UR81LSMwXrU8503YKMDmuA+NXg1/FOmzxxdX2/zT3HpXdtexIcM36GobiSC\r\n" +
+            " 6GGfr7GjnZnqfiZ+1Z/wSk1b4h+INSmtxxO8ZHKdoAve5FeL/DL/AIIp63oPiUTyLx9q8zrH/f\r\n" +
+            " U/8/Z9K/fu++H1lqEjFn+8fRvp/eqCH4UWUL7lbvno3/xVaKZJ85fsA/s13Pwc8BWNneDDRJGD\r\n" +
+            " 07RwDtI39yvr2yHlWcKn+FFH6Vn6NoEWlxhYTkAe/t7+1aQGBVGLZNEcg06mQ/dp9Q9xETDIqN\r\n" +
+            " huFTP96k61m9RNGJremm5+7/nrXM+KPDrnRZzn+7/6EPeu7lQNmsvxPCP7Dn/4D/6EK5pSsydj\r\n" +
+            " 8Y/+C3mkNB4IYt7f+jLKv5//AIjN9j8WQux+7u/9AWv6Gv8Aguam3wM34f8Aoyyr+eH4vnGvL+\r\n" +
+            " P/AKClVGVwufTX7D37UFr8JPiDpV7dn5bfGev/AD8xv2jb+7X6t/CH/gtromg6fawSNz5aR9JP\r\n" +
+            " RB/z6H0r+eiz1+XS2Dw8lfp659K19H+LV9FqVsFT/lqvdfUf7NdEHdGsHdH9Vn7Kn/BUbS/jJ4\r\n" +
+            " ptbOzbJldB0fu8Q726/wB+vvDwN4vTxHDCY/8AlpGr/mpPoK/mT/4I0fEK61b4w6Qky4Blh7j/\r\n" +
+            " AJ72f+z71/Rv+zxOZrKwLd7WE/8AkI1adjWL0PW0++PrU9QJ98fWp6G7ikFFFFIkKKKKAKHnVn\r\n" +
+            " 6trqWSN5pA2/T1x61Pv9/1rjfHt20UU+0njHf/AG6+V/tSR3qmcf4t/aO0nQ7xo7mWIEY6snoP\r\n" +
+            " 9v3rO0b9qTRdQlAimhJP+0nv/wBNPavkH4/eMLm28RTCNp+NvQn+7H71x3w28bXUt7EHa4PXuf\r\n" +
+            " RverjmTua/V1a5+o/hbxTBrcMb25B3gngjs2PWujjhLAHnnmvHfgPqTXOj2Rdjkq/U8/62vZra\r\n" +
+            " QGCM5H3R/KvQhjG0cU42dh0cZFP2GnKQRxilrqjinYx5EIsnljBpftAqKb71MrpjNyVyGkifzN\r\n" +
+            " 2TSbj7Uxfu0tRKRDeoMeuazPE//IEn/wCA/wDoQrRc1neJ/wDkBz/8B/8AQhXDVqalKNz8fP8A\r\n" +
+            " guhj/hBWxnt/6Msq/ng+L4/4ny8+v/oKV/Q9/wAFz/8AkRm/D/0ZZV/PB8X/APkPL+P/AKClbU\r\n" +
+            " ZXRDVjj5RuUgU3S7c/2rb5/wCeq/zFSYzVjSk/4mltx/y1Xt7iuhSsa01ofpd/wRVgK/GbSCP+\r\n" +
+            " e0P/AKPs6/pO/ZzQ/YrD/r1h/wDRTV/N1/wRZXHxm0fj/lrD/wCj7Ov6SP2dDiysM/8APrD/AO\r\n" +
+            " imrjr4t03ZGqietxqfMX61aqBCN4571PW+DruvFtimrBRRRXYQFFFFAGD5orkvHMBmhnwM5x/6\r\n" +
+            " HXT1g+J13xS/h/6FX8//AOsNU9qMLs+CPjr4HnvPEExRCQcdj/dT2rjvAPgK4s7uMsjcZ7H0b2\r\n" +
+            " r3/wCKWmiTV5DsU9Ow/urXLaFpgilXCLx7D3rpp8QVG0erDDJxPon4M6xHpel2iytgqrZ/7+Zr\r\n" +
+            " 1qy8a27RoPMHQDqP8a8F8ITeVbxAEjAPT/ersdMviSnzN2HU+1fT4bOJySOKpgYns2maot5GGj\r\n" +
+            " OQf/rVeEmetcr4Ln3WCHJPA/kK6RWJUcnpX0eHxkpxTZ5FWmoysOmcbqZvHrRN9+mV7lGreKOZ\r\n" +
+            " xJVkGOtKZRUNFaORHKSs4bpWf4n/AOQHP/wH/wBCFXY+9UvE/wDyA5/+A/8AoQrx8TWcZ2NIwV\r\n" +
+            " j8fP8AgugMeBWz7f8Aoyyr+eD4vKTrq49//QUr+h//AILpH/ih3/D/ANGWVfzxfFtSdeTn1/8A\r\n" +
+            " QUrvwk3KNy1RTOYt7NpnAUVq6P4flbUbc7D/AK1e3uPaotEj3TqOp/8Ar12OhW3+m23A++vb3F\r\n" +
+            " Y4nEuk7I6qWHVj9Av+CM2lSW3xj0guv/LWH/0fZ1/Rv+z1IEsrDPa1h/8ARRr+eX/gkBDs+Lmk\r\n" +
+            " nA/1kP8A6OtK/oT+ADYtLLP/AD7Rf+izXymZZtOnIcqKR7DDODKo9SKvVkWz5uY/94fzrXr3uF\r\n" +
+            " sZLGUqjl0a/I5a8eVoKKKK+pMAooooA8d/4Wpaf3/0b/4msnXfiXaTRvh+uOx9f92vmf8A4S2T\r\n" +
+            " +/8AoP8ACmv4pkkGN/8A46P8K/jJZxI++WVJdTpPHOrpeag7JznHY+i+1c9pt0I3Gc/5zVCa+M\r\n" +
+            " 7ZJyTUXnFCDmvRo5m9GdSwqirXPVtC8VxQQICegPY+v0rVl+JNtpyBpXwAM9D/APE+1eJDWGiJ\r\n" +
+            " +b9P/rVy3xM8Uy22lTFX6RMeg9G9q+tweavRWOeeFTPftS/bS0LwfIYb662MnBHlSHpx2iP92k\r\n" +
+            " 03/goT4au2wl7yCR/qZfT/AK4V+JX7bnx1utF8a3iRz7QHf+AH/lpMP7ntXg/gH9pO8l1Ng1z/\r\n" +
+            " AMt5B/q1/u/9c6/Ssur89JM8Gvg1zM/qc+D/AMcbD4h2vm6XL5g/3GHd/VB/dNeowEzRBlBwa/\r\n" +
+            " ML/gkJ8QJvEnhFWmk3df4QP47v/ZHpX6daA/maRET3z/6Ea+loVfdR41aHJJol2H0oZCB0NWV+\r\n" +
+            " b71MuQFiJFdPtLoxsZd9qi2mfNOPw+tY3iDxLE+lTLu5OOx/vD2rO+Il2Yhwcf5auB1HUi0bAt\r\n" +
+            " 1Pp7183jsTyzZ20qPMj4Z/4K5fDu48f+EWj05N5OO4H8dr6sP7tfij8Sv2J9dvdYV47X1/5ax/\r\n" +
+            " 3V/6a1/R18ZfC0fiO0KzLv8AxI7p7j0rwnVvgNazzgm36f8ATQ+3+3XnS4glhvdSO6nhU0fhTp\r\n" +
+            " f7EevQyqWtOn/TWP1/6610mkfsca1DdwM1rwHXP72P1H/TWv2kl+AdqqnNvj/gZ/8Ai6h/4Uba\r\n" +
+            " p/yx6f7Z/wDi68rE8SSk9jrp4VHxv/wTk+DV98PviLYT6jFsVHjP3lPSW3PZz/dNfsR8Ivihaa\r\n" +
+            " Vb2gmkwVgjU8HshH92vkiz8CxeGnEkMe3bz94n+p9K0Y/Fctlwr4A46D/CvncZmjryuW8GmfeX\r\n" +
+            " hr4v2Op+I9PtopcvcXMcSja3JZgP7vvXrtfm78DPGkt18bfB0TPkSa5ZKeB3nQelfpFX6JwBV9\r\n" +
+            " rh6z/vL8jxszo+ylFBRRRX355gUUUUAfmjk+opwORVTcfU1JG2Rzmv4gVCx+rJ3Lsa+vWlZC1S\r\n" +
+            " W67gOlTmIdq6Iy5ClG5mSRZB4rk/iVYPcaVMEQsTE3QH0au5aAZqjrWmpdQMJFDZXHI9jXqUcy\r\n" +
+            " 9m1oN4e6Pym/bU+FGpaz4zu3tLGaRWd+RHIf45vQe9eGeAfgTrEWpMW0y4H7+Q/wCql/u/7tfr\r\n" +
+            " H8Svg3p+uanI9zZRSFieTCp7t6qfWsDw3+zzpUNxuGm24+dj/wAe6en+5X6Dl3EXLCMbHl1sFf\r\n" +
+            " W57T/wSI8HXegeEVW9t3iPP3lYfx3fqPev048P/LpEIP8Atf8AoRr5O/Yt8DW3h3RglrAkY9kA\r\n" +
+            " /im9APWvq7TmKWiDsM9PrX6Ll2Ye2pKVj4/HUeSo0aG4etV9TuVgsmZ2AHr+Bpdx9TWL48uWtv\r\n" +
+            " D0rISCM9/9lq9eNbmRxch4Z+018ZNL8Hbv7U1CCDGfvSRL/wA9P7zD+6a+dNV/a78NRz7W12zy\r\n" +
+            " WYD/AEi3/wDi6+dv+C1Hxz1LwP5v9m309vjd92Zk/wCfz0cf3RX5C+Kv21vEMfiKJBrl7gySj/\r\n" +
+            " j8l7f9ta56uX/WPePSoR0P6BLP48aP4tOzTdTt52/2ZYj/AOgsfQ1oLqCXIzGwI/Cvym/4J8/t\r\n" +
+            " E6r418QBNQ1K4nHo1w7fwz+rn+7X6a+Cb9rrTy0hJx7+7V8FnVH6tV5T1qFO6OhlYHkVXkXdnF\r\n" +
+            " OD8806NQzD614ipe1N37pm3+nPdRkIpYn0BrKm8JXD9LeQ5/2W/wAK9F8MaYl5dKroCCR1HuK7\r\n" +
+            " ez8GQOFzBGeP7g/wo+o8/UXOeUfA3wrcW/xr8HyPA4Eet2TE7W4xOntX6P18r/DzwfBa+P8AQ5\r\n" +
+            " UhQGPULdgdg4xIp9K+qK/TOBaHsKFZf3l+R4Oby5px9Aooor7o8cKKKKAPz0/4V1d/8+0v/ftv\r\n" +
+            " /iacnw4u+1tL/wB+2/8Aia+r/wDhX9l/z6x/98J/hQfAFkOlrHn/AHE/wr+O3hT7lZn5HzFbfD\r\n" +
+            " +7CD/R34/6Zn/4mm3vg25tUJaFxj1Q/wCFfUI8C2gH/HtH/wB8p/hXM+PvCdtbWkhigQYx/Cvq\r\n" +
+            " vtXJUo8pvTzLmaVj5S1fWE0+R1ldVK+px2z61lTeLoJcqsqHt94f41z/AMZtVew1S7WJyoDIOp\r\n" +
+            " /5557V5tpniieW+ZWmcjzMdW9R7140q/LOx9TRj7SNz1e8hOpyF4huB9Of89asaJoEolBMbdT/\r\n" +
+            " AAn0+lWfhnEt/psbTDeSB1+i+v1r0TRtEhIX92vPsPSvpcFitEc1WkeyfszWjW2nAMpH4e8le/\r\n" +
+            " 2b4t1/H+dePfBC1WGxyigfQe7167bORCK/ZshrXw8fQ+AzKFqrRcEnFY/jqM3Ph+VEBJOe3+y1\r\n" +
+            " aQf071HeRi4tysgyD/hX1FOfu3PN5T8c/wDgs9+z/qnxCMv9ladcXGd33IHf/n89EP8AeH51+R\r\n" +
+            " 3ir9g3xNJr8cg0DUCBJKc/YZe//bGv6pvjB8ENI8df8hjTre5/34om/v8A95T/AHj+deTar+xV\r\n" +
+            " 4UkVnbw9Ykg5z9mte5/3Kwq519X92x0058uh+Ln7Bv7O+q/DnXhJq+m3Nsvq9u6fwz+qD+8Pzr\r\n" +
+            " 9HPBmsx2dkUlkAJ/2h6n3rr/jJ8CNI8BWZk0XTLe2b1SKJe6f3VH94/nXiE+ry2eoIiSMoOeMn\r\n" +
+            " 0r4TOcb9brcx7uD96Nz3DQ5Rq1wiW/zlvTnviuusPAd1cKpW3c554jP+FcR+z2/9o+JLNLk7w2\r\n" +
+            " OvP/LVR3r7K8GeCrOexjL28ZJQH7q+g9qWDpc6OfFVvZux4n4S8CXUF4pe3cAY/wCWZ9R7V39h\r\n" +
+            " 4YmVRmJ+g/hP+Feo2XguzifK26D/AICv+FaUfhu3Uf6lP++V/wAK9alhbo4njDzbwjoEsPizS3\r\n" +
+            " aNgEu4iTtPGHHtXutc3Y6HDDewusSAq6kHaOOa6SvuuF6XsqVRea/I8zG1fayTCiiivqDiCiii\r\n" +
+            " gDl6KKK/ktnuEdch8Tv+PJ/w/mtFFebW2Z1UPjR+dPx+/wCQve/7yf8AoqvJtF/5CJ/66/1FFF\r\n" +
+            " fJ1vjP0XB/w0fRnwa/5A8X0X/0FK9X0j/Vp/ntRRX0GC2RNbZnuvwc/wCPH/Pq9ep2/wDqhRRX\r\n" +
+            " 7ZkH+7R9D88zT+PIl/u049DRRX1lP4TzBF/pUGp/8ejfh/MUUV8tmX8Rh1Plv9sj/kCn/P8AFD\r\n" +
+            " Xw5rH/ACGE/H/0EUUV8zifiPocB/DPeP2Xv+RvsPw/9HpX3v4C/wCQbH/1zH8loor18u2PPzH4\r\n" +
+            " joovv1NRRX0FHY8mQ6L/AFq/UVeoor7Hh7+HP1Oer0CiiivoTE//2Q==\r\n" +
+            "UID:0e7602cc-443e-4b82-b4b1-90f62f99a199\r\n" +
+            "X-ABUID:0E7602CC-443E-4B82-B4B1-90F62F99A199:ABPerson\r\n" +
+            "GEO:-2.600000;3.400000\r\n" +
+            "CLASS:Public\r\n" +
+            "PROFILE:VCard\r\n" +
+            "TZ:1:00\r\n" +
+            "LABEL;TYPE=HOME,PARCEL,PREF:John Doe\\nNew York\\, NewYork\\,\\nSouth Crecent Dr\r\n" +
+            " ive\\,\\nBuilding 5\\, floor 3\\,\\nUSA\r\n" +
+            "SORT-STRING:JOHN\r\n" +
+            "ROLE:Counting Money\r\n" +
+            "X-GENERATOR:Cardme Generator\r\n" +
+            "SOURCE:Whatever\r\n" +
+            "MAILER:Mozilla Thunderbird\r\n" +
+            "NAME:VCard for John Doe\r\n" +
+            "X-LONG-STRING:12345678901234567890123456789012345678901234567890123456789012\r\n" +
+            " 34567890123456789012345678901234567890\r\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("Doe", contact.getSurName());
+        assertEquals("John", contact.getGivenName());
+        assertEquals("Johny", contact.getMiddleName());
+        assertEquals("Mr.", contact.getTitle());
+        assertEquals("I", contact.getSuffix());
+        assertEquals("Mr. Doe John I Johny", contact.getDisplayName());
+        assertEquals("Johny,JayJay", contact.getNickname());
+        assertEquals("IBM", contact.getCompany());
+        assertEquals("SUN", contact.getDepartment());
+        assertEquals("Generic Accountant", contact.getPosition());
+        assertEquals("john.doe@ibm.com", contact.getEmail1());
+        assertEquals("+1 (212) 204-34456", contact.getCellularTelephone1());
+        assertEquals("00-1-212-555-7777", contact.getFaxBusiness());
+        assertEquals("25334\r\nSouth cresent drive, Building 5, 3rd floo r", contact.getStreetHome());
+        assertEquals("New York", contact.getCityHome());
+        assertEquals("New York", contact.getStateHome());
+        assertEquals("NYC887", contact.getPostalCodeHome());
+        assertEquals("U.S.A.", contact.getCountryHome());
+        String expectedNote =
+            "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\r\n" +
+            "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO , THE\r\n" +
+            "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR P URPOSE\r\n" +
+            "ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTOR S BE\r\n" +
+            "LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\r\n" +
+            "CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\r\n" +
+            " SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS \r\n" +
+            "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\r\n" +
+            " CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\r\n" +
+            "A RISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\r\n " +
+            "POSSIBILITY OF SUCH DAMAGE.";
+        assertEquals(expectedNote, contact.getNote());
+        assertEquals("http://www.sun.com", contact.getURL());
+        assertEquals(TimeTools.D("1980-05-21 00:00:00", TimeZones.UTC), contact.getBirthday());
+        assertEquals("image/jpeg", contact.getImageContentType());
+        assertNotNull(contact.getImage1());
+        BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
+        assertNotNull(bufferedImage);
+        assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
+        assertEquals("0e7602cc-443e-4b82-b4b1-90f62f99a199", contact.getUid());
+        assertEquals("Counting Money", contact.getProfession());
+    }
+
+    public void testImportVCard12() throws Exception {
+        /*
+         * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_MAC_ADDRESS_BOOK.vcf
+         */
+        String vCardString =
+            "BEGIN:VCARD\r\n" +
+            "VERSION:3.0\r\n" +
+            "N:Doe;John;Richter\\,James;Mr.;Sr.\r\n" +
+            "FN:Mr. John Richter\\,James Doe Sr.\r\n" +
+            "NICKNAME:Johny\r\n" +
+            "X-PHONETIC-FIRST-NAME:Jon\r\n" +
+            "X-PHONETIC-LAST-NAME:Dow\r\n" +
+            "ORG:IBM;Accounting\r\n" +
+            "TITLE:Money Counter\r\n" +
+            "EMAIL;type=INTERNET;type=WORK;type=pref:john.doe@ibm.com\r\n" +
+            "TEL;type=WORK;type=pref:905-777-1234\r\n" +
+            "TEL;type=HOME:905-666-1234\r\n" +
+            "TEL;type=CELL:905-555-1234\r\n" +
+            "TEL;type=HOME;type=FAX:905-888-1234\r\n" +
+            "TEL;type=WORK;type=FAX:905-999-1234\r\n" +
+            "TEL;type=PAGER:905-111-1234\r\n" +
+            "item1.TEL:905-222-1234\r\n" +
+            "item1.X-ABLabel:AssistantPhone\r\n" +
+            "item2.ADR;type=HOME;type=pref:;;Silicon Alley 5\\,;New York;New York;12345;United States of America\r\n" +
+            "item2.X-ABADR:Silicon Alley\r\n" +
+            "item3.ADR;type=WORK:;;Street4\\nBuilding 6\\nFloor 8;New York;;12345;USA\r\n" +
+            "item3.X-ABADR:Street 4, Building 6,\\nFloor 8\\nNew York\\nUSA\r\n" +
+            "NOTE:THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \\\"AS IS\\\" AND ANY EXPRESS OR IMPLIED WARRANTIES\\, INCLUDING\\, BUT NOT LIMITED TO\\, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT\\, INDIRECT\\, INCIDENTAL\\, SPECIAL\\, EXEMPLARY\\, OR CONSEQUENTIAL DAMAGES (INCLUDING\\, BUT NOT LIMITED TO\\, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES\\; LOSS OF USE\\, DATA\\, OR PROFITS\\; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY\\, WHETHER IN CONTRACT\\, STRICT LIABILITY\\, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE\\, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\\nFavotire Color\\: Blue\r\n" +
+            "item4.URL;type=pref:http\\://www.ibm.com\r\n" +
+            "item4.X-ABLabel:_$!<HomePage>!$_\r\n" +
+            "BDAY;value=date:2012-06-06\r\n" +
+            "PHOTO;BASE64:\r\n" +
+            " /9j/4AAQSkZJRgABAQAAAQABAAD/4QBARXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAA\r\n" +
+            " AqACAAQAAAABAAABAKADAAQAAAABAAABAAAAAAD/2wBDAAIBAQIBAQICAQICAgICAwUDAwMDAwYE\r\n" +
+            " BAMFBwYHBwcGBgYHCAsJBwgKCAYGCQ0JCgsLDAwMBwkNDg0MDgsMDAv/2wBDAQICAgMCAwUDAwUL\r\n" +
+            " CAYICwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwsLCwv/wAAR\r\n" +
+            " CAEAAQADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgED\r\n" +
+            " AwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRol\r\n" +
+            " JicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWW\r\n" +
+            " l5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3\r\n" +
+            " +Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3\r\n" +
+            " AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5\r\n" +
+            " OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaan\r\n" +
+            " qKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIR\r\n" +
+            " AxEAPwD9/KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKK\r\n" +
+            " KACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAoooo\r\n" +
+            " AKKKKACiiigAooooAKKKKACiiigAooooAKKK8t/bU/aq0X9iX9l/xf8AE/x5bzXth4WtBMtpC22S\r\n" +
+            " 9nd1ihhDEHbvlkjUtg7QScHGKaTk0kJtRV2epUV/PP4k/wCDrP8AaGv9buZfDPhn4W6dYPITBbya\r\n" +
+            " Zd3DxJngNJ9qXccdTtGfQdK29B/4OQ/2t/E/wr17xponhf4Uz+HfDV7aafqFyNKuAYZ7rzfIQIb3\r\n" +
+            " c27yJOVBA284yK7Xl9Vb2+85frtN9z9/aK/nq1T/AIOe/wBqrQ7mWHWvCnw5s5oEWSSOfw5fRtGr\r\n" +
+            " EBWYNdggEkYJ65pk/wDwdB/tTWrlbnwv8No2AckN4dvQRs+/1u/4e/p3o/s+r5feH12n5n9DFFfi\r\n" +
+            " N8N/+CzX7d3xc+Ful+L/AId+Bvg3qWma6lzJpdsiquo6mtuzJMbaxbUhPNsZWBCITxwDXkY/4Oev\r\n" +
+            " 2q200Xq+E/hybMzfZhP/AMI5feUZc48vd9rxuz/D1pLA1HomvvG8ZBbp/cf0K0V/PNrf/B0N+1L4\r\n" +
+            " au1g8R+GPhrp87LvEdz4evYnK5IyA12DjIPPtXvX/BOr/g6A8Q/FL486L4N/bZ8OeF9P0rxNdxWF\r\n" +
+            " rr2hpLarps8jbUNzFLLIGiLFQXVlKZJIYdFLAVYq9gjjKcnY/Z+iiiuM6gooooAKKKKACiiigAoo\r\n" +
+            " ooAKKKKACiiigAooooAKKKKACiiigAooooAK+Q/+C8ng2Txv/wAEmvjDb2qb5LPT7bUQPRbe9t5m\r\n" +
+            " P4IjGtH/AIKy/wDBUnQf+CXPwS0zXtX0Z/E3iXxNdvZaJpAuPs6TMihpZpZdrFY4wyZwpJZ0Axks\r\n" +
+            " Px8/aK/4Ocfiz+0f8FPGPgLxR4B+GtnovjLSrnR7iSCO9a4ginjaMsjNc7d6hsglcZA4rsw2GqTc\r\n" +
+            " akVpc5cRXpxTg3rY/N2vsP8AYw/a9+F37IPwV0q38WahqnijW/E3jfRdd1bS7bSCq+H7bT/tg81Z\r\n" +
+            " ZW2XEubmKREAAyhBIr4685fWkMiE5OM17tSCqKzZ5EJuDuj7v1r/AIKLfD3wx8Hrrwv4q1K9+Omv\r\n" +
+            " Q6Q1s2teI7K9t49TMutW14lsWSdLkJbRQyyKWcAySMoBXBbrvjZ/wVY+EnxC0H4gaP8AY9VuV1LT\r\n" +
+            " /F9z4c1BdPKS2N9qU10kUDhjnyZ4LiJmPJR7eL/ar84g6A8Y5o8xPasfq0e5p7d9j7T+Bf7Vfwb8\r\n" +
+            " J/C39mrXfil4r8S2nif4BXuo6rJ4d03RXll1ueTUPtdvGt2zrHFGdiq7HcQGICmuq8If8FNfAf8A\r\n" +
+            " ZWm694o8QeIrG2uPD9tod18OodNdtMtL8aol3LqqSBvLIADTAhfO8w7Puc18Al0b7200F0PXbQ8O\r\n" +
+            " m73D27StY9//AOCk/wC0JoP7TX7UN54p+G2unXNKurdliJi1GM2wNxM6xkX88r5CuCRGViBPyovN\r\n" +
+            " eE2V01jeRTwHDwuHX6g5FVxIgPGBS+cvrW0IqEVEylLmdz+zb4ZeKYvHPw28Pa3YP5kGsaZbX0bf\r\n" +
+            " 3lliVwfyYVuV/Oz8Gv8Ag6L+MvwW+EXhbwdongj4aX1l4U0i10e3uLuG+M88dvCsSvIVugCxVATg\r\n" +
+            " AZ7Cul/4i1/jf/0T34Uf9+L/AP8AkuvEeX1b6fmessbTtqf0A0V/P9/xFr/G/wD6J78KP+/F/wD/\r\n" +
+            " ACXR/wARa/xv/wCie/Cj/vxf/wDyXS/s+t2/Ef12kf0A0V/P9/xFr/G//onvwo/78X//AMl0f8Ra\r\n" +
+            " /wAb/wDonvwo/wC/F/8A/JdH9n1u34h9dpH9ANFfz/f8Ra/xv/6J78KP+/F//wDJdH/EWv8AG/8A\r\n" +
+            " 6J78KP8Avxf/APyXR/Z9bt+IfXaR/QDRX8/3/EWv8b/+ie/Cj/vxf/8AyXR/xFr/ABv/AOie/Cj/\r\n" +
+            " AL8X/wD8l0f2fW7fiH12kf0A0V/P9/xFr/G//onvwo/78X//AMl0f8Ra/wAb/wDonvwo/wC/F/8A\r\n" +
+            " /JdH9n1u34h9dpH9ANFfz/f8Ra/xv/6J78KP+/F//wDJdH/EWv8AG/8A6J78KP8Avxf/APyXR/Z9\r\n" +
+            " bt+IfXaR/QDRX8/3/EWv8b/+ie/Cj/vxf/8AyXR/xFr/ABv/AOie/Cj/AL8X/wD8l0f2fW7fiH12\r\n" +
+            " kf0A0V+AEf8AwdsfG0SKZvh58KmTPzAQ34JHsftRx+Vfpv8A8Efv+Cumkf8ABUz4feIGn0D/AIRT\r\n" +
+            " xj4PeBdV05Ln7RbyxzB/LngkIDbSYpAUYZUgcnINZ1cJUpR5pLQuniadV8qep9kUUUVzHQH1rgda\r\n" +
+            " /ao+Gvh3VpbHXfHvhK1vIH8uSGTVYQ6N/dI3cH2rh/8Ago38TL74Y/st6tN4cllt7rVp49NE0bbW\r\n" +
+            " iSTcz4PuqMv/AAKvxy8Y+KHsNTSeOXHkNv3BsZ5A4/MUPRCvqe2/8HRFppP7U3wc+FOsfs56rY+N\r\n" +
+            " tU8NavfW11Z6LMt7NHBcQxsZWWMkhVa2Vc+sgr8ZoP2aviVcput/Avit1HGV0yU/+y+4r9KbPxib\r\n" +
+            " XTILQKZPPuC6EfxK4UKeR6qf5VpaX4vtbHTl8p5N0108IlLYHlsmBISORyytjHQV00cdOlHlSOer\r\n" +
+            " hI1ZczZ+YY/Zr+JRCkeBfFR3HA/4lkvP/jvuKmsP2W/ihqkmzTvAHi6dgpbCaXKTgcE/d96/S3R7\r\n" +
+            " +4kBt5I5fMV9jxtxuIz8oYdCTjB9QPSugtbPVrK9W40RrzMIUSblP7tuOH69OPwx7VbzWS3SIWXJ\r\n" +
+            " 9T8spf2XPihDE0k3gDxcqIcMx0qYBfr8vFVX/Z2+Isb7X8E+KA3TB02XP/oNfrfqlrfXXiCK5s7B\r\n" +
+            " 5Ib1V86FG2q5YYbZ6HPPA55I6Gsjxdp1xaz3AJtreK2Yoq+X8zAnABxz+J/OpWbS7Ir+zY9z8ph+\r\n" +
+            " z18QznHgrxPx1/4l0vH/AI7UkX7N/wASJyBD4H8UsT0xpsp/9lr9KNTiNvo0s7zFZo35jLYYk5HT\r\n" +
+            " 0HHP+FZOg+NGiufKdzvU9M9a0WZSfQh4CK6nwb4Z/YX+N3jOXZ4T+FPj7UnH8Nvok8h/ILW+P+CY\r\n" +
+            " n7SbH5fgX8VT/wBy1df/ABFftt/wTe8S3/jfVvsGi39u1zbRlhb3BJO3cpJVh/D0yhDdARg8j9Dv\r\n" +
+            " DFjJeWiPdo8Nyo2yxk52sPQ9x6GnHMZvoZywaTsmfye/8Ovv2lv+iEfFf/wmLv8A+N0H/gl/+0qO\r\n" +
+            " vwJ+K/8A4TN3/wDG6/rcXTpMdf0pp0+Xtj8qv+0JdhfU0fySH/gmD+0oOvwK+K3/AITN3/8AG6Q/\r\n" +
+            " 8ExP2kx1+BfxV/8ACauv/jdf1tPYSDqqflSGxb/nnGaPr8uwvqiP5Jf+HY37SX/RC/ip/wCE1df/\r\n" +
+            " ABFH/Dsb9pL/AKIX8VP/AAmrr/4iv61zYHPMSflQbAn/AJYr+VH1+XYPqnmfyUH/AIJj/tJf9EL+\r\n" +
+            " Kv8A4TV1/wDG6T/h2R+0j/0Qv4qf+E1df/G6/rXOnkj/AFK/lR/Z3/TBfyo+vy7C+qeZ/JR/w7J/\r\n" +
+            " aR/6IZ8VP/Cauv8A43R/w7K/aQ/6IZ8VP/Cauv8A43X9azaYp6wD8qb/AGYuflg/Sj6/LsH1TzP5\r\n" +
+            " Kz/wTJ/aRHX4GfFT/wAJq6/+N0n/AA7M/aQ/6Ib8U/8Awmrr/wCIr+tUabjrAPypn9loWO6DOfQU\r\n" +
+            " fX5dhfVT+S0/8EzP2jx1+BvxT/8ACauv/iKQ/wDBM79o/v8AA74pf+E3df8AxFf1oyaTEcboCPwo\r\n" +
+            " bSICP9Saf1+XYPqvmfyX/wDDs39o/wD6Id8U/wDwm7r/AOIoH/BMz9o89Pgb8U//AAm7r/4iv6zv\r\n" +
+            " 7Gt2XmI0z+w7bfyhFH1+XYX1Y/k1/wCHZX7SB/5ob8U//Cbuv/iK/Wn/AINav2SvHH7Nmu/GLW/2\r\n" +
+            " kPB/iPwReanBpljpqa3YS2TXUatcvMYxIBuAPk59Miv1iGgWxHKkfhSf8I/bKDhWrOri5VYuDW5p\r\n" +
+            " TounJSRvN4gsUGXvLcD3kFW1YOoKkEHkEd65Y+HrZudrVreGVFqkttFnZFh1z23Z4H4qT+NcTjod\r\n" +
+            " kJybs0fO3/BW65Np+yPM6gEjVIevb93NzX41eMrtvENneW2nKWlguBLHgcvG2AR+GFP4+9fs9/wV\r\n" +
+            " e0KXXv2RL1LU4aDVLSQn0G4r/wCz1+bXhj9n20j1GCXUCjg/dYIQcnHGc81wYrFKg0md1Gj7RN3P\r\n" +
+            " ENG8MavefZZLVZpreIKsWcnylOXAHp8xYkdmPvXf+GvglrWqMg0qGRra5X7hGAhPYf3uma+qPBnw\r\n" +
+            " m8PeF7FJtRsYLlX+ZcrkZ9fY/hXoXhW2sJrSIWdtBGpOVVV7deK86eOc9Ebxo26Hg3wn/ZJ1PVQk\r\n" +
+            " etWMc4mXaF3hHQ8HcpGc49Mda+m/h/8AsrppdnBcarDZSXKJsYFQQ/u3HB5PHvXqfwn06OJ0lt41\r\n" +
+            " A24OwYHP8+1dvJB9pLFQJVBwSn+fatoXnG7M5RVz538Sfs0WjwFreGO2QNvCIAdpzyFJ6dBx/KvJ\r\n" +
+            " vjN+zxpfh/RbyezSedo4yJJQm9n3JweR1Bxzjjk8GvtBgsN0Q4yD2PSud8S+GbfxHp97YzIscU6M\r\n" +
+            " pCrgknkHPb6d6yas9GU46H4z6/52sXGqxRKRPp4BZQcsy7goIz2yVGP9v2AHAvdT21/CSkse3Egf\r\n" +
+            " HG0nr68Ej86+lPjR4ft/gV8c9UsdahN/Be75lWJCJbeONlYtz94Yibp0CnpXkXxJ8B3fh6+e6uYp\r\n" +
+            " Q5ZLaBSwIjBd0X5SP+maKB23DPFdtKvpqZTs2ej/ALCfxyPw7+Nuj3LzyAxXCFtuQSpIDL1H8JYV\r\n" +
+            " +5Hhe+g1nR7a90+VJ4rmIOkinIcHkV/Oh8DPt+mfEDRb0RSNbpcRQzN0LK5xyOOCp6+x9Dj97P2T\r\n" +
+            " r+QfDS0sLiQy/YFEccnVZUwCpB9wQefWuqEk3oYyVj1fYaPLoL8UCTJ6GtiLgUz3pPLNL5mDyDS7\r\n" +
+            " 80BcTZx2oEfrj8qUtxmgN/ewKBieX9Pyo8vjoPyoMq56jNIbqNfvOg+poFcXygeoH5UnlD2/KmPq\r\n" +
+            " ECcvNEB/vCon12zQ4a5gB/3xRYXNFdSwYR7UeSPaqv8AwkViTxdRH6HNMPiiwHW5jP0p2E5x7l3y\r\n" +
+            " BnkCl8kHqBVJfElm33Zg30BpzeILUDPm/pSDmi+pa8lfSj7MnpVP/hI7X/nqPypf+Ehte8v6GgOa\r\n" +
+            " L6lv7On90UhtkPaqh8R2gODMufTFQ3njTTdO2/b7uOIP93dxmnZg5w7ml9nT0FQwRiPU5toxmJP5\r\n" +
+            " vWYnxI0WVsRX8LH0FX9J1K31iSW402VZUwsZI7EZP/swp7JiU4SdkzwP/gqrr0Xhj9h/xZf3m/y7\r\n" +
+            " eWyJKAbhm7iGRn61+eHw7+JNhq+geYbnGwb2WQbMrz36dutfoL/wV40o6v8A8E8fiIi4zFFZyjJw\r\n" +
+            " DtvYDX5KfDXWJr7w3M1miuVt2VVJ5Q7ec8e30r5nOpuFSNu36nsYFJwfqfY3gPVx4m0oeXKskUoK\r\n" +
+            " Aqdw4A6Hv2/Gum8ICTTLoxuruUY7+cdu34HFfPPwbvZbGxAFyYxGd2xR93PQeuec/hXfeFfG9xeS\r\n" +
+            " r9iuC4mJJdjnOCBkDsPvenSvJhiNrnTKnZ2R9e/DPXzbyQxWYFwpZC54GxC33seuO3/6q9O+1JbW\r\n" +
+            " rMRtJXAzknv+v+NeD/s9wSalax3N+kRG3C5QHjHykdhkDpye/evX5NRRkVCoyCOFByeB0xz3/l61\r\n" +
+            " 72GqNwTZw1IpSsQ3MgiQHc+eDn0HvnrWfbXYW9aRirqSM8jtVrWbuO1sHjVDhl288Ajjuea5eHWV\r\n" +
+            " MbgOFJ7/AKVnUmotalxi5I+Wf+CnfwghvltfF+ggJfaUHedYowWnQoQQSegClufU18r/ABc8e2Xx\r\n" +
+            " BOuXEafv5rCVFiycrcxTFl2+gcAcDHJH4fbn7a3iPT7n4bajb6neW8KToRKWfadhDfLg98n06gH6\r\n" +
+            " /mL4w+MGnaZZyu81o/25r1UcyoXBaRYl2jODxsbpngHPWnCeuhySWrRraJ8X4dd8a+GZ/DcQj8y9\r\n" +
+            " SPy2UKgiViGyM4yUOecYyelfsh8BPiVe+G/AmweWk3yMvyAKYyoKFfbHHoNuK/DP4D39vrPxv0ey\r\n" +
+            " 0eBZ9MmvUuI0jO5pAWQqu4HnKzHOODjiv3J1fQJNH0G1itkEQgtY02AcLhRx+Ferg1zts8vMakqS\r\n" +
+            " XKd7D8ctTkQEyoM/7Iqzp3xk1We8WOCSBmkIUeaAFGffjH1zXjlrLfGNfLxV23kv4jkjODXo8p4y\r\n" +
+            " xdRbtnvbeLvEXlgxrpDk+kq4/wDQ6ifxd4m3KBBpHJ5/fLx/4/Xltp44lgtVim8P6VIqjG5vMy3u\r\n" +
+            " fmpw8cgtx4a0jj/rp/8AFVHL5HX9bT+0/wAf8j1IeKvEpYBoNIPuZV/+LrH8UfEPWNMUQ6gmmp5w\r\n" +
+            " IzFhnH0wxxXDHx75YO3w5pAJ9fMx/wCh1zeqapd3N1JLDbxwK7bvLjJ2r7DJpqN+hFTGWXuydztJ\r\n" +
+            " vGF02c3Eh+r0yHxJKY8tM3X+9Xn1zqN4F+6fXrVvQFur2MPKWAzjGarlOT28mztTrk9wQFdiPrVm\r\n" +
+            " 2+0SY8xm596q6ZpixLHk+ma2yixqAW4pXsdFOLlq2WNPiYpksc9KsmIiT2ospkMI+YdOxoa+UEjP\r\n" +
+            " zHsBUtnXGKSLkEoRfmOPenz3/lWrPHHJKACQEXczfQDqa8f/AGiv2g9I+BXgq61jxLZXeozrIttZ\r\n" +
+            " 2MMxDXszHCoB0GT1OOBk1+e37Xf/AAV++KXwUh3WOlLp8Fy6rH9jjVbO1k67GlZWaVxwCAQvBHY1\r\n" +
+            " MpqO44y5tEfpN4m+MGsW961voXhy4hK8Ga+fy1HvsXJ/UVseGfifNd2hXXRapKkZctbJIckdvmz/\r\n" +
+            " AEr4V/Zk/wCCqfjLxFazX/xz0+1vNFW++wzTRW4hkicD5zHgDIRvlIIPI6ivt/RNVTXrGPU/D9xH\r\n" +
+            " c6ff2Rlglj5V1OCCKqMlLY55c6le+hyHiT4qS+MbOG80C6nsI4bo24ldSxkbjoq56e+BXc6V8OFu\r\n" +
+            " Ykfxdf3GoSY65K/1Nea/sa2cl38PtRGs4uHGrTEeYM46YxmvcYwcjI9qpK+pnQj7T35dTK1LQ9M8\r\n" +
+            " PaZu0q0AbI+Ykk9fU11vwRvDeaFett2hbrAH/AFrmfF2bfRHIzyy9unIrofgAd/hG7fnJvXH5IlO\r\n" +
+            " XwnZh1aukjlP+Chfhb/hMv2J/iTYYB3aLLMM/wDTIrL/AOyV+RfgDwRc6L4CupJkGY4JnfcOqhGJ\r\n" +
+            " JPYcE+p/l+0v7SGlDXP2fPHFoQG8/Qr1cHof3D1+Rfg7Uk+IXjG+8PzE/wBmRWphuRGQDKXj+ZSc\r\n" +
+            " Hs5GPr7V8tnkbygz6XAy3Rwvhn4kreReT4edGiJVHkkGPNcYPHGQuTjPfAPevdfgz4OutSurWeUq\r\n" +
+            " xvXEa5yAmB8wJ9MkivkT4H/8VH4qm+1YEdtcNFMExhSvylh7bh+NfoH+zRqFkt5DFevGrLjYCMoD\r\n" +
+            " jDfTIwfwFeFQpc8kmenWagtD6E+HOhSaFoCJG9vGpwNvlHK5H+91/wA810Mvm200bs8beWu4koeg\r\n" +
+            " +jY7/TrXN2utpY3EUt9NDBFEpbOf3bjBGdx44PXp/jIP2hvAtjq40zxBrmmQ3Mh2hHnG8++0Hof6\r\n" +
+            " mvoYJWS2PLbuy54hluLm3dU8tsjGc4z/AMBJOOe+e/0rkpLkySKAzbeWZemDwMf/AFq7vUb/AEnV\r\n" +
+            " 7GF9DuIp4JkbZIr7l4Gfz/KuJ1KAG4Kwr91sZOOfb8v6Vx4qEro3pSTR4H+3R8NtQ8a/De4m0Azl\r\n" +
+            " LdTLMsYXAjVSWJB68hTjvivxS/agin0DxjdwDa0FvIm2MncxO77renRfl9vXp/Qr4y0ZdW8GajaX\r\n" +
+            " QIS4tXQk8kZB6evP8q/AX9vnwr/wh3xLvre+Kkw3AiyB8u3fuJwP4huPX+nKw6s9TOp8Wh6P/wAE\r\n" +
+            " gfhJd/G/9sTwdaaNaC9ttLvI7yXa2PMRAzSLnuP3OAD6/jX7/a74d1e9sXfVdMvIJJVPCoWUYHqK\r\n" +
+            " /Ef/AIN9I/Elj+0LqGp+HrK+fTNJup1e7hBQFZP4BnG7pIfYE561+0nxK+I1/wD8K5eePUb2F05c\r\n" +
+            " rKQ64IPY+lfQYGpHWKep4Ga0ZRfPJPlscX8TPGuhfAbw0NU+Lms2Xh+yAwJLycR7z/dVerH2AJrE\r\n" +
+            " +Dn7WHw3+OWqfYPhr400XU79vu2wuPKnb/djk2s34CvmX4B/s+af/wAFBvF7fEz9p261HxAdVuJl\r\n" +
+            " 0vR5ZW+yaXarIVjRUXG4lVBYnqSeM10H7U//AAS0+HOi2f8AafwhtrvwZ4hssT2d/YzSIIpVwysV\r\n" +
+            " LYPIHTB9663iYp2sccMsco8x916b8N9SuoQ0UEjAjjHPFOn+H17bOBcRSIT61y//AAT4+IutftCf\r\n" +
+            " smeEvE3jHVrxNYnhktb7y8BXmgleB3A/2jFu/wCBV2Wt+IJtKvXGoX7NFbTyoZJH2jaucE9u1a8x\r\n" +
+            " nOhCCu0ysvwu1O6UGKByPY1m6n8NtVtOHgkBY8fNXX+EAfFXh+1udP8AEBeSaFJHWEqyozKCRwfe\r\n" +
+            " uG+Lk+oaPK9rJfTXCrc2Tq5yrDdcKGBweeB+tO5FWjCEeaz+8G+D2uXPzQ2khX3YDNWtL+GmqaPY\r\n" +
+            " Mt/bSKwJJOQQKhfU74MQLqdV9BIeP1rmfih8a9H+Cvwy1XW/ijqM0ek26yCQ+YS0hOflXnrjcfYA\r\n" +
+            " ntTb5TKEKbezOoXwz4j1LUYls4I4bdJsEj5mdBjuemee1ZPjrwP468Q3M9toEc9jAs4jEqsoxHu5\r\n" +
+            " Zeck4ya+FT/wXi0sfE/StO8HeGJdQtbwsfI+2Ot55YbG4fLtDHBIVhkj619X/s4/E62+P9jr2v8A\r\n" +
+            " gnV7m40rXZ0lgEkhY2p2ndE6Z+VlPBGfccEVCkp7F8iS6/f/AMA9q8B/D6/0GyniL3N15svmb5ZN\r\n" +
+            " 7fdUEZ+oP51g6R8LvFVh8e9X1bVZriXQLuwhS3hMn7uGRT82Fz1PBzjvW58P/NtPDkKySOW56Ej8\r\n" +
+            " q1ZLycvzM5CjONx4pWOulNKCsj84v+Cs3xwudA+JIsLcKzaDGotoTlg95OzJHkDnhQDj0J9a634B\r\n" +
+            " f8EafB/xH07Sde/a88W+LvG2vhVvJLGfVPs+k2U2QwjjgiVcqh+Xk4bBO0A4Hh/7a2sJ40/bja12\r\n" +
+            " G9ez8UWm+LBIZI0QdBnJBL9j96vs/wDZu/aC8SePdWubPVPAt/o2kIQLW+nZ1ecFN+WjdBs42jGd\r\n" +
+            " 2TgqMHHBObdRnThYws79TyX49f8ABMD4d6KNR1j4Qtq/h7Xt811HL9ukurV5mJY+ZBKWG1mJzt2n\r\n" +
+            " nIIrqf8Agjf+0mfjH4G8TeBfEjpHrHhOeQLbhwxiXfslRT3QPtYH/bPpW34t+InxB8UePptKvfC8\r\n" +
+            " K6JfArDdQogNshDf6wtcbnb5cErGANwwGHzV8i/sGXOofs2/8FZtbRoLmPw94tv59PD7CIpJJIw5\r\n" +
+            " AbodkrYOK0ou0iq3LdOx+ovwj+H0/gy1v7ZbZ1jkuGmU7epJOf0AruEs5EUCSJxXJ+CfE8+oC9dL\r\n" +
+            " h2CXLKp3HjGOK6AaxdEHdNIcerV3K5xxcIrQTxdpc15oxS3hmcll4VSe4rovgvpL6R4LC3CsjzXE\r\n" +
+            " khVhgjkL/wCy1yPifxlqGkaSz2FzLG4dBke5Fdz8KdSuNZ8B2N3qkhlnn8xnYjr+8YD9AKJv3TXD\r\n" +
+            " OMqztvYv+NdOXWPB2rWk2Sl1ZTQtj0ZGH9a/Bj/gmv8AFNPHPiHXpZZt0/8AaMhRScMVJOByfX0r\r\n" +
+            " 9+WUMpDDIPBHrX8wP7H9vffCf9v/AMa+EUnZI9B8S6hpki7ziTybt0wMf7h/CvBzmnemqnb9T6PL\r\n" +
+            " 1zOcV2PZ/CHww8ZfCL4oeMY9T0W8jW91G5uLKQxlo5VaRmAU4+bGeR6fhnyz4/ftj/HP4IXd/deD\r\n" +
+            " rQ2WnxoC8tzaZjt8Yxhj06gZJPbjjn9w9C8N+HfFfgexiubK1uC8KM5dASWx1x61+eX/AAV8/ZFk\r\n" +
+            " 8S6dB4gnab/hGbFwkOl2qhTe3JOQWyR8iIrMzH+8oHIrxVS9lLnvdHbCqqs0pqx+WXir/gqD8efi\r\n" +
+            " nJJH4j8XTLbsrBLdVWGHBAB4JC9ARzn1wT07j9nP46eKtdvZP7W8W+E0a7dbWZrrU0jMZYnCiaQh\r\n" +
+            " FZ9pGWJ3Ed8Gu4/ZZ+FHhFfEt+njjSnuzqsclkbdNNEhhRwQPLkDHBGcZwOhzX0N+yL/AMEvtF1v\r\n" +
+            " xrBqF9c/afD0l3ZXt1pJsLhE1VoC/lm4gkKxIcM4+UEgFhkFufThUo1o9jnxMZUZ8sY6dyx8C59f\r\n" +
+            " uviDHoH/AAkd3puv+Uskdt5eJJIssVaJujxks37xWZeBjkDP6Gfs/wCi+KNB0Bbfxvqd5qnyKVku\r\n" +
+            " NpZOvcdeo7ngfgOW8Af8EvfDUM9trWkx/wBkNZXJutPtYdwjsnLEnyRuUQB/4kQoh9M5J98sfB0+\r\n" +
+            " g2gjvRK0kagNIyfL06cE/q3fvXJ7OS3WhN43vEzdWMdvp8y3X7xZEZWX1GDX4nf8FEfhxa/ED9oB\r\n" +
+            " rbS5Gee5ufs06OxywzujkyehCEqe+PL64Br9q9Vk/wBGYAkup4BPB/D9a/NL9ob4ZXPjv/gopbeH\r\n" +
+            " fDmlw6i16JNRlgVTvHlQxMVOPu+YzoM+meM9c4TtJ2NKkLWZ9kfCf9kjT/2ef2GNS0LwbNNpxtPD\r\n" +
+            " RSXULcCO5mfynbzWdcHOWboenevPf+Cbni3V/HX7M2q2OrSXNyYbpWgEj5YhlDMo3HAzg8epr1L4\r\n" +
+            " PftdD42aLeeB/iZYQeHriWA6VcWKqQyKV2cZA49+1Y/wR+G0/wCzt+zRZQagsUF5cXjSTrkq6qkg\r\n" +
+            " VQv5d+xrqy5qtiIyh0TuLOJrDZfUp1lq3G3/AADQ/Zu/Zom8CfDuy1O41CGKPw/FDb7EimW4jlTa\r\n" +
+            " p2OkihFLbiQUJJPJxxXWfGL4V3PxDlvtf+1YNlOYZxeS3InQLgr5OJRGuBuypjO716isPVvilc+H\r\n" +
+            " L+70WJbG+0htSzdQyB5DgklXwgYtgnBGCQazb34skPremaFY6fZ2OoTxxNLG8oe8kAb5sSop44G4\r\n" +
+            " +voK9iSdzxoSpuCtsfQH7A2jL8P/ANnz+yYo3j+yanfygFSFCy3Mkq7c9tsi/jmvALebX/23/ip4\r\n" +
+            " 10v+0YtE0fw7q89jHBLCZhLgsu/AZcMSGbcc44AHWvorwQmseE/DMNnZ3enFdnJktndyfdhIAfTp\r\n" +
+            " 0ArivBvw5tvhz428Q31hM9vc69J9ub7MNm+RVORznqccA56+uK6K/MoI4qE4VKnL0PC/H3wFuv2D\r\n" +
+            " /Hlr8QPB/jC9V4JkhvrKZ3FtfRs4xHsDbMsWC8rxkEYIr6T+KXjO38Z6HBq/hySO4g1IaZcWzZ+W\r\n" +
+            " QPMrLz6HIrz39rn4VwftD/Ca58OWlzerqet3KvG08hf7J5cwcOEY/J91GK8HA6ZPOingv/hUnwY8\r\n" +
+            " O6NLdiaHRf7LsEl2lSUiliXcxJOSeTmjDc1nfYzzJKC5Yljwd4l8e3/i4x+OtK0Cy0ghsSW11I8o\r\n" +
+            " P8OQygfWvm/9tQ3/AMX/ANo/Rfh1aTwW+gWcUd1e3kxX7NbtKwaRpCx2nEQYLn/loYh0Jr6ouPHu\r\n" +
+            " jzusVvqNm7v8qjzQST6da8L+G3h/S/GWueMtM+KtnPO15ej7TdJOY3eIyziNRtwV2tFJnJIKsvpT\r\n" +
+            " rzUo2TOLBwUp2Zofto/sR+DfG3wHTVvhP4U0aTxv4YtRNoskQWJrkIARB5q44cAgE5w2018Of8ET\r\n" +
+            " v2pfGHh/9qW/8Ba3Df2tpq2pype6ZdJmWB/LkYltwDK6GM5PGRuznNffHjf4feCfid4UPhbUxdab\r\n" +
+            " pGkRmS1ntLkoIWV8qYmViG+UDoCACQcZIr5YtfhND4X/AG1tB8f/AA2tbywlEscKnb+6vodk6JIx\r\n" +
+            " A5kZ7edCuQdkR4IYVjTqJXPTxVPaVtT9LPCHjO1uNUbSIlb7TBAJ2YY2bScYz68Vp6pr9tpyXTXL\r\n" +
+            " ECCIyHjoAK5f4XavZ6xaXUmlzea9nO9nONpHlyIRuXnrjiuJ/bi+P2lfs3fs9674l8QXCRyxW5jt\r\n" +
+            " 41bEkzEgYUevP612OSSbOOMZRilLc/PnVPE39m/8FD7i7uRHNLcalf3UqPjb5sCxcA/UV+hFx8Qp\r\n" +
+            " V8J6fqPgXw9da1PHL/pGn2c0FvO+UILAzMinacZGc855r8G7X9pHW/FnxRu9fd2e4isNYnEi/wAU\r\n" +
+            " lxA4Vsn0cgg9cAV+iHwR/aI07w5pmkeHf+Cia2PhXxC1klzYa9LHE+na/bsinzI5JFKBxkb43AKs\r\n" +
+            " cjg15nU9DD3grM+19V+Id5ofwrtk1WG3t9XaH9/GkwmMDddpcABsZ6gAV8Afs/fGibxR+17Yw+IX\r\n" +
+            " tGt9N1mc2Pk5O4C+kZ5XyT87MZBleNsajtW78df2l9M8ZW8vw9/4J6Qw67r2txNPc6tZwolpp8Gd\r\n" +
+            " rTvIqhT/AHUA4zj0wfN/gT+zf4i+BHxN0rSfiLZy23iLw8ixXOTuDsWkYsrfxDezHd3DCqUrWbJx\r\n" +
+            " D5j9Rf2atefVPC2qzXOSy6jMo564Nekw6j5kJcAjPr2ryf8AZ0tJdH8NajHOD+81CWUAj1xXoKaj\r\n" +
+            " vLocYJI6160FeKPHjOy18yLxvqxXSSrYyZI/5ivY/hjALf4e6MqDbutUcj3Ybj+pNeAeOrsi0A3f\r\n" +
+            " xoK+jvDNkdN8OafbOQzW9tHGSO+1QP6UqmiO7L3zVJvyL1fzjfGv4Wy/B3/gsh8ZGv1EEDeLrvUA\r\n" +
+            " meWS7b7ShHP92YE1/RzX4gf8FUfg7NpP/BYvXrojbb+KdK03UowP4gIVt2OfXfbNXh5y39Wdu6Pp\r\n" +
+            " stdqrv2Ptn4Baw8vgqweBCI2hAXDZzj2PSrPxo+Ett8ZfCMun3aI7Kd0Zkzx6j6EZ9qvfBCztofh\r\n" +
+            " RotvDhJ7ODY5XGDzn867XR/3KgTLg54xzn/PpXjU4uyT6o6aiUtT418FfsEeEvB+rSNc2p0yd7jP\r\n" +
+            " mRkiPBH3dmfl6HkY7cen1R8F/hx4f8J+UHijuGIwHErfKOx+Zjkc1N460q1unIgtgZ0YbQ7DkY/T\r\n" +
+            " IxXN6UkumarbwI+woW+7IZAD9eMY/XmrjahLRGbg6urZ9BxXVhFasliXwy4AB69emeO1c54sMy6P\r\n" +
+            " JLA4ZMjcCM7R7HJ7Y/n7VpeHtFL6Kjap5J2jnqcDj3wDz09vpXO/ETxJEbL7LpzAxtwxA7E+v1r0\r\n" +
+            " Ks+WF5GVON5aHGay3nrI4xuwOBx36f59a+e/+CfulaX4/wD2oPij43usSNokr6dDdEghFVv3hB6j\r\n" +
+            " BRBu6HZj+Hn6GcsNJnlPO1CRx1x9Pxrk/wBn74d6N4c8Ma5HouniH+3z5V60B8trgFGDEdMEbzx2\r\n" +
+            " +ua8un8Sdjpq6tRPK7H4Pan8QP2ovEHjqSBNJ8LLdGaF9wMk6Jj51QdAxHGcGvUPjVbzeJfBU0uo\r\n" +
+            " jy7c48rcwQDLLk/l3r0uy8JaL4U8Kx2MEbR29lH829uNo5O4mvi74k/FS++JXi+aW+vXuLOOR/st\r\n" +
+            " uOEiXOFwo49BnBJ4/D1sqw/s3NvrueXn8njI043sl+SOY+M3h/xN478f634g/Zq8SWOg6vaXe6SO\r\n" +
+            " 4ga5stQiXaiyvGMMrAKh3r/dwQcDHLSfDv4h3MT65+054y0vWIIctZ6bokMltb3Tdd8rN+8kBbtw\r\n" +
+            " vBznNU/iz4/1X4UNFL4Zg8tbm6D/AGtJFH2VW/55j724khcHg565IB0/Bk/ibxh4Fsr34vTWovp1\r\n" +
+            " MksNmzF2VjlFkc8gKrKpIADFTjgYPqOD5r3PLjZRSse4/Eb/AIKA+L4/AuiJ8HPDi3Mk9irX2q3Z\r\n" +
+            " DiCZflcR2ync2SCQxOB6V8xH9vzxZ4T8cR+Lfiz4s1kw2rNZxssKSWkDM2B51llFdCVUMFZJADlX\r\n" +
+            " BGD65p0X2PTl+xxFVtUURxrn7uSuPbp169fWuW+PvwO8MfHrwa+j/EK3mMU7fu7m3byrmBlAIZXx\r\n" +
+            " hhk/dYMPbPNbqalpJaGSp8jUo7jPEn/BRTQfHyQsnjGPxd471j/iX6bHoGlT6PpHh5JMLLc4ndpp\r\n" +
+            " J9pc79zDChQEBZm9U8K/tjalr2kWWi/FVftOnXF9CqaiDtuI1jlVsyoBhsheowR3zX502X7Oj/sc\r\n" +
+            " fFiHUPEN/wD2po1xE39lXfl7N7kYZZByFdVPTODuBB6ge7W/j631XQdLuLdy4FwsjYP95mX+oreN\r\n" +
+            " GnFLk2ZnWk6r94/Ry3+DegTvBe2E1zKOJUIlBVu4IwOQa1fDHg6wbRPEurlbaK9lt3lMs0ghRGtv\r\n" +
+            " PZS8h4VSXwxPbntXin7OPx507Q/hutj40vGgntLmSKAOjtmIhXXkA8fORXjP7YH7dd1p2j3/AMOf\r\n" +
+            " A0Nwjanv+236DCmKR2ZYQM7sspGTjvjvXLVUKMXoYYKm51+SJ3/g34teKvjj4/bR/ht8ItT8GJFG\r\n" +
+            " 8F74m1qdF09Ic8m3CMzSlv7ihQe5Uc14n8Fv+ChEvwl/a11nw9K9v4q+Gmh3g0+GU2cBuZZU81nu\r\n" +
+            " 45SuSVmurkoAQCrEdwRa/bK/bKuf2e/hs/w6+Ecb/wDCU21sPtt5M7PDYQNCJBlSQWlVWRdpG3kH\r\n" +
+            " rwvx98G9FuU1eygaYSn5TK5TDytnJJPck5OfevOnP2bSifRYfD+2TlU10P6BvgzoeieLvC0es/Cu\r\n" +
+            " dJ9J1uRrz7TtYea7HDHawyDkHivnz/gp1/wTI1b9r3SrJfCWr/ZwESK7SSV2eWIOGKxqxEacqOmC\r\n" +
+            " 2TkjGa+qfgn8NLDwX8F/DmgpBFNaaNBFAQ65y3lgliPXLPmty9+Hfh/VXVdS0mxnBO8B4gQD9Ole\r\n" +
+            " lKPNGzOBU4y2PyO+J3/BGe3+EPh3SNMRbS4k1a1SGdoJCRF5kycFwo81ykMgz8qrvwMjk/Vfxe/Z\r\n" +
+            " b8K/GT4a2vhf4v8Ah6y13SLIKkMU6keXhQFaN1IZGwMZUg9q+rde8MWmr30enapZW1uLWMnTWiXC\r\n" +
+            " OgXlAOishJ47ggjuF5i+8O/aY8aahMRX5gAMryOefWuSdLldzenG1zxj9kb9jHwb8GNTttC+Dfh2\r\n" +
+            " 30nTfOSS8kUvI8oX5trSSFmIUE4BOAW96+gPi5+zZ4f+K3iSK8120/0q0fzEkj+V34wQfUEY4P8A\r\n" +
+            " dFaPgcL4VtprXw3bf2jrMp/e44gscjIEsnQHnJUZY8cY5rfEWoeHpVMUkmsQ8BlYqJ0OOcE4DD2O\r\n" +
+            " D7npW1KHLHUJKL0see6l4MPhx7h9HXEbyl2XHKk9iKyXuip/fwqfXjmvVNU+zeKLWSbTjLDPD8si\r\n" +
+            " yRNG6+zIwBx7/lXH6jpsJLxuUaWP7w712QlpY8vEYfld0edeKNSgvdc0rTFkjS61C8jjjiY4LZ4/\r\n" +
+            " nivq1VCqAvAHAr5ktdMTUfjD4VtlhjY/2qkmSPuhI3c/olfTlTV6GmWRa535/wBfmFfmz/wV7+FD\r\n" +
+            " TftpfDfxJbIhbVdBl0/33W1wX6+/2pQPpX6TV8a/8Fj9Kh0v4f8AgLxVKwWXSNcfTwW4GLmEt19d\r\n" +
+            " 1suPqa8vM4e0w01/W572Ely1Ym58ENFi0z4bQG6lVWkUMAh9ABgDA9+fr7VpajKYpdu1/L6BmH3f\r\n" +
+            " rXFfCf4v6X4e+F9hLr9uzShQUYuShOB91Ryx471BbftheHPFnjGHw1Y2niK41e73GJG8P3kUbDuw\r\n" +
+            " keJUx75xXj88PZxVzvUZOTdh3jD4u2B8SyWWoBIpI1+9nk9e+PYfQ12Pg+w03WpzfIUkdHGwlcMp\r\n" +
+            " JHODxnOee+a+Vv26/BuseA9cs/E+giZYXkUXkYBZV6YPoB0Gf51137PPxSl8Q6DCEYplCSC3APAI\r\n" +
+            " OBz1PeuRYhwqctRGjp3jeLPqHxH4zNrZG3gcAqu18dW+vHbJrz++1B9U1HGwhQMAZP8An1qOKaTU\r\n" +
+            " XBdgCVw2DlfXHP8AKrtvbmG6VSScYwcdO3860rVpVnYmEVTRneKLg2fhW7eIujPF8p44P0NcdceJ\r\n" +
+            " B8NfD2m6hNcTypPcOSgAJfKod+c4GNuPfdmul8d3Hm2LJPGZoeF2jjk9z6+uPbNcNFf6J41s/wCw\r\n" +
+            " Ib5JdWsoN4gIwsyHJDxnoTg/MOCCD25rqwNKFWpy1NjzsfWqUVzU9zxT9rL9t/XPFGl3uh+FrdtL\r\n" +
+            " sW/4+5WbdPPHnlSeiAgN6578V5B4K8fSXF75XliLABKd1AG5ensM8e+O9ei/GH4WCZb0qu9Cynno\r\n" +
+            " ACd388fjXzRrvie48C6ndhhJ5caMItx+bKqMEnqOoI9MEd6+jhSjSVorQ8KWInVlzSdzvPjfeLr3\r\n" +
+            " iHSLG3JeGPZOxORghsgeg5RSPdT7V6V8LFW9+GunwXJaWaENGGII2xpIx4J46FM180n4rR6h4su8\r\n" +
+            " yBmLiPOMFcAZHI9vT36Y3e9/BzxNFH4LtVmBP2hrjccZOMoScDPZSOc/zpXuzd/Cjs9C1swXSxHa\r\n" +
+            " fPmUnJzhRlsfrVXX9Rhg0d0nkjQQeWqHPOGZcg9uQ/H4DnFUbqc6XqZmkISMEiNkBJz6Ljr16n8K\r\n" +
+            " 5Dxx4wjij0gXM5jEk3nyHO1pAiPgADjkk8H0Jz0qkrGbdhnx9+G9p8X/AIW6joJUfbbpDNp7MQNl\r\n" +
+            " wp/dsCcY3HCEekhr5++B0xudOs7W5yDGRG6t1BB6H8RXvfg3xBc67q9rNdZO5jhMYUKWG0L7/Lz7\r\n" +
+            " 15zoHwV1ey+Omsw6fHusJ9Qa5i2rgIsh37R7Ddj8K0g+hnJ3R9ifA7wdZeKdIkj1SASGOON0OeTw\r\n" +
+            " Qf6V8F/tl+JW8K/to+KoLFzcWttdwiGFWztKxRhlz25U/rX6XfBDwjN4Y0GIsAZWhwB6nHH6ivxi\r\n" +
+            " +M/ijU/+F1eJbjxp5qapJfzfaVlBDq5c5BB6Vx4/4VY2yeMfrE5vsevftYfG9P2i/jJrniSxhewt\r\n" +
+            " 78wRRREDesUSIhViOpYI2f8Ae9qf+y5oE/jr4saJpelpun1C/htYx6l3VR/OvDW+I1jaxBbl8n69\r\n" +
+            " a+rf+CQdvD47/bL8CJtLxJqIuSAM4EatJ/7LXn04uc1dH0VarCFJ2fQ/fC+I8MW16rlfL8pJxj6E\r\n" +
+            " Nx9VX86etxvgidOwBz7Yqv43bFt/pSIYVjeJwWzlGH+IFZfgG4VPDFjbGeW6NvAkPnSkGSXaAu5i\r\n" +
+            " MDccZPHWvdktDwKcrM6K9sYNUs1F0hcxOJo2Q4dHHQqfXqPcEg8E1zmmW0EerzGeB2iQF0VlKFyT\r\n" +
+            " 8q4PQk10lo22LA7U5LONbxrg/M7BRz2xnp+ZrFxvubp9UWYIV0zS1SJUDKvIUYBb6fWqkkRRAyy4\r\n" +
+            " YnHPRj1qa8uAoXPOTnFch4l8aXdrIx0izjkSM/NJNL5YP0wCT+OKpK5M5KKNrXPEJhto4z/rXJ3D\r\n" +
+            " 2HfP5fnXmV7qjR+MN00h/eq2f7p4J/mKtyfECbxJqvk3VokBgjYuyybw2SMdAPQ1yniPWPs+qW9w\r\n" +
+            " Y53VS64jQuTkHsPxraKsefiKt1dM6n4Vab/b3xrsJgRjTBNdHvuzEYhj/v6D+Fe+V4T+yNqS+JvE\r\n" +
+            " /iC8S0v7YWcMUINxCYw/mMxOM9ceUPzr3as5u7OjLl+65u7f+QV8tf8ABZ34Y3vxS/4J0+PYPDFs\r\n" +
+            " t1qmji11i2Ug5XyLmN5WBHIIh87n0zX1LWL8SPB8PxC+Hmu6Df5EOtafPYuQASBJGyZAPGRuzWNS\r\n" +
+            " HtIuL6o9GMnFqS6H5NfsPftvHxP4G0zSWtYEuNIiWGXLbHBBKsxZs98entz1+rfAvxGt57tprm3W\r\n" +
+            " O6Y4eXdu3j1Zuw5zxX51fsz/AAl0fwV8f/EviKPXGk0qa5KpbW42ujgkMXXjadw9Pzr7U8O+PPAV\r\n" +
+            " /YfZ4brULUDlfOAZQ3cjnPXIx7DGO3ytKpybvY9SUJs9X8b3ulfELw7NpWu26Tw3EZjcuwPXjr26\r\n" +
+            " 57dq8Y+GfwtPw11ieO0YtbpJgDPVcjJXnp0GD0x7VhfHP436B8PLGxm0rW9OJupFjjQSjexyTwpx\r\n" +
+            " xjcfofwruPAfi8eMrW0uYQp3orBw+CSc8EYGO2MVFaUajv1CDcXZnpOjSI2wwqQNoznv9BTNS1TN\r\n" +
+            " tMIATICc4B+b9OnvVex1D7LY3Dytt8n7p7Dvk/nVDTL2eS7nY4VCMsGkw4IPUEZG3p+fOKzWrSKm\r\n" +
+            " 7alHxbfTy2ciQvAkmPk3s21n4AwB26/hXxV8d/ibqnw0/bW8Pz+ELmeGC7h0+aSynUpku2GIHYnr\r\n" +
+            " nHOfevsXW7o6pcrb6JG7PeTIkbId2AxwpIA+UD1x29K+Of20tLjm/wCCuvww8M2cJCajb6YyJtwr\r\n" +
+            " RxTSFxkccLGa2s1b1M4L2jfofan7VvwPTw1qKXumwCOz1NeUUYWNyMkfj1/Cvgv9pP4Iy3N7JJpM\r\n" +
+            " Lu65LlRgDPv9cHvjAx61+yvxc+HafEHwHLaGMNMqBosjkOBx/h+NfIPjD9n67uxKl9YkckkEDgiv\r\n" +
+            " sYu61PlK9KVKei0Z+RmjfDPVLbxS7uhRHmZyQfVs9/8AP6Y+nfgxG0Pgq2ivYzG1qHKl22/elI69\r\n" +
+            " +M17b4q/ZdW3mfzLRVJOe3FR6T8IE03TEhSLywzYJUZIIJP9ajksy3N2R5frmrtDarE0p8oqPmHV\r\n" +
+            " Tyev1z0/DvXn3jHWNV1zX47DRtPN6kUHmSuinERPCjOOOVcke/brXuHir4SNDK8umL5E6n5TjKuB\r\n" +
+            " 2ZRwfT1HrXHa34HuYbWV4beCGZX824iQZW44x83T+EdD6YqkiOZMxfBPh2TQY4Ddyo8gEKZQgndt\r\n" +
+            " yxHTIJYD321798CfA0Wt3E12YB5kDryRnKnOP5GvKvCmhyssMc8SqUYPwC2wAjA/D0r6l/Yv8BXH\r\n" +
+            " ivxNqWnaKA7C1WYtIcAlWxj2+/Vrcid5xstzrtLsHtYEGwDaOw6V+X3/AAW+8OeFNK+Nnh680LS7\r\n" +
+            " Zdfv7Rjq8sLBfNYEeWXXGd4XvkEgj0r9ePjF4On+CXw71LxH4vWL7HpcPmOkThpJDkAKvuSQK/Dv\r\n" +
+            " 9qiz1P43/GHVdd1UNIt3dSTIjc+WCxwoPsMCsayc42ReX03Sq81TQ+bNZ8MW15Ahiyp9CTx+Pev0\r\n" +
+            " P/4IJ+DVtP2sPDE06kqsd1hhzt/0aQA18hN8HZbq7ijEBALAcV+mv/BFrwDB8N/imNS1S1uJvLsJ\r\n" +
+            " IovKKL5bNtBcl2UABS2ec89DXJhlLnSke1jJwdO6P0p+JupXUPhy9XSojd3yQuI1A4Y7TgmvLf2e\r\n" +
+            " /jePHOiJ9pIS/hJiuINhRopV+8hB6Ee9eySx2utanAYfOjDEHKxEo3TO6UAqx9sivmnxz4JufhL8\r\n" +
+            " VLnxJ4AtxI0V00Graf8Ad/tGJchZUPQTKpwCfvDg9Bj1FaTPHnzQtK59Nabqy3FpE6/xLnmrhuxG\r\n" +
+            " TzkjFcZ4V8Sxarolnd2IkENzEsqq4wwDDPI7HnmtfUNWEEDbgYznkHrWbVzqjPS4eJPGdvYZFzIF\r\n" +
+            " 2ryTxiuC8SfFHS3t5Wt/Mu5YkLJEpCh2xwMsQBn1ql8TNZ8N6Jatf/EPVxp8TH92nnndIfRU5yfZ\r\n" +
+            " Rk1w0l3qXj+3aL4Y+Ep7XTgCov8AVkMDN6FYz+8bPuBVxskctScjp9H1q5urSW81lolvJkAMUbZS\r\n" +
+            " Dk4UHvwTk9zntioJNT8zY5ywVsnv3rS074bXHhnw1bRzRzS3O398xU43Y7eg61nyaDcICqRSAE/3\r\n" +
+            " TxVI4Kzlax7X+zbpptvBl1cyKAbu7Yq2PvKqhR/49v8A1r0Oue+FWk/2L8O9JhOdzQCVs9cv85/9\r\n" +
+            " Croawnuz3cNDkpRj5BRTJZxEPmNUrnX4bf77j86k3Pxl/ae/ZUvPhl+2R8R9P0PxFPZRX+uz6vDG\r\n" +
+            " sIULFdj7T5WdwGweZjjB+Qc8nPWfBH/gnF4fnvrjxH8TvGfiHxJHdfvnsLrVJWso+hA8kEIBk9Gy\r\n" +
+            " fl4Nd/8A8Fs21/wF8TPC/jn4baXb6nY6tbf2bfOd26C4ifdFkgj76MQOn+pbk5ArkP2dfiXq/iTw\r\n" +
+            " bBLrVstuFODGpG1TxngZx3H4V8zi37CrKLWn+Z7NGrF01JPU1PiT/wAEyvhL8TPD121t4XsodTd1\r\n" +
+            " eDU4v3Mlq6klPK2gHGcA5znuKtfsteAtQ+DNw3hnxBez3TWi5gnmO55AOBk+mOMj8a9h0rxLLFGQ\r\n" +
+            " ct8h+QZJGM+n8vpWZb6q2ueJYHvIwEjG7zMcjqD069uT71xT9+zQpz7s6jV5Vh0djcNjzsB+RwPo\r\n" +
+            " fy7da56/1iTw7pjveS/ZohGCxk5bPQ5x+X4jNbusX9mnOsyIsaguSRjbjqR9Dj/Irk9KuIfiJrrX\r\n" +
+            " iLL/AGXBKPL8z5ftWOrAf3N2evXAI4A3XCDbuznqSvsdR8HLCZrqfVNQbCupWJCvJ5YmQn1+Yge3\r\n" +
+            " 1r538ZeCYPiX/wAFzPhW9piR/D3hO41C6A52YmkjTPp/rifpX1T4s8WaR8O/BNzq3iCaK3s7CFpC\r\n" +
+            " CRk4BOBXzT/wR90m6+Pv7Z3xT+MPiZWYTLHpGnZ58iNfmKD22+T07g120qTnUijSm/Z05zv0t95+\r\n" +
+            " nyJmHC8YFfOX7Q82oeFvEsphlk+z3Cl0x2PQj/PrX0fIrGHAIHFeffGP4ZN440kqWUPGCUOOh9K+\r\n" +
+            " li7M8HFQlUj7m58l6rr0+oufNkJ+oFYl1DI8QCuTnJX65Ndt4o+Eep6NeypsDBT1BrJg8CapBGS1\r\n" +
+            " uxzyMjpWm+qPO5ZrRnKnSft0YVxlgemKyL/wGjyMTGJWmB3Iw4b6+vpXpUOiTwQn7VZygjg4XNX9\r\n" +
+            " M8LNqgdoIWDRgE71wTzjA9f/AK1MLM8qsvhSLRl+zoYkyCEVyQMHjA6L+Fez/A/SrzwL5l1pbSW0\r\n" +
+            " jxeX8jYOMg/0FXdE8CTTyputz6DjpXYW3hGW3gwsZHHTFNK5lUbtoeW/tOeJNe8WeFLixl33trOP\r\n" +
+            " KcSEsozxyM/qPSvirW/2bmmnciFgSc9K/RXWvAM2oRSLglXGCMVzNz8C1lJIi6+q0uVEwqOO5+f2\r\n" +
+            " k/s2StqkZ8oud3TbX2x+wz8G7rwBqUGo6l5Ygxs8vq3POfQdK3LX4IfYrwP5P3favRvDdo/hvQY/\r\n" +
+            " KQKfNC4x7GhQSNVWlPRnvWk3dpdSRmONyzAHcST/AFryr4y2P2vxXrUMCL9qhVJoxj/WIVBH4hlb\r\n" +
+            " 8x61ueHvE7WNzCJ8hAQPm/8Ar1zHxZ1waf43ub5Tua0lVZf9qB1Ab8ihb/gNSlZnbOadNEXw81BL\r\n" +
+            " vwvai1bMa5VcdgCRirOrak9zIsOnyGQKMhuT+HPNY+kzR6NPOtoAkUs5kVRwMsBn9a2NOMczS3K/\r\n" +
+            " KJXOBnO3Bxj8wat6mSlpa5laF4DtrTUDqF3bQS6jNy13KoaRB/dQnlVHoOpyepp3ivxe+mw7tMcR\r\n" +
+            " 2enOJJXHWaRTkKPYHkn147GrGu6rKjJaaWxNzc5G88+Sn8T49ugHckds1z/xHt0tvA93HbhwixhQ\r\n" +
+            " Aeeo/WhbmM5cqbR0EXx0v5NKjk8uybcu4ZrQ8IftBXOtaza6c2mWZmvpUt1cMflLEKD+ua8x8K6a\r\n" +
+            " knhy2VlkYiMZB6jNdl8G9Ft7f4lWM0mEWwDXMpbI42lUHHQliCM9QjUWVrs4qNevWqRjGW59Logj\r\n" +
+            " QKvAUYFLWbbeIoLn/VuD+NXorhZR8pBrnPqDO18yeW3k5zXmPjd9RCv9l3Z9q9fmgEo+YZqjdeHY\r\n" +
+            " LkfvEB/CgD5A+KfhvUfGWmXGneIbT7bZT/fikGQccgj0IPcV5fZfB7VvCoKaDBbeSpyiy2hZl65G\r\n" +
+            " VdRg5PYV9/XHw+s52y0S/lVd/hbp8n3oEP4VlUoU63xxuVGbjsz4H8SaZ4vvLYw20dtboM7WiglD\r\n" +
+            " AH3831APT2rHjl8Z6N8ttZWbx4UMDbvl8DAyfM+o6V+hUnwh01+tvH+VQSfBTS5PvW0fP+zWf1Si\r\n" +
+            " vsjc5Pdn5s+J7rxzq08Pn2sX2aI7nhSJwsx56nfwD6DHT8Ks23xb8baDj7N4ZsX2cjiQZ4x61+i8\r\n" +
+            " nwI0eQ/NaxH/AICKrv8As96K/wB60i/75FP6pR/lJ5mflX+0H4o+Ivxt0X+zr/TotPsjkvHDG7eY\r\n" +
+            " fclqvfsh/HTxt+xh4Ll0fwn4Js9W8+Z55Z5pZImkZmJyQoPQYH4Cv0/f9m7Q362cP/fIqF/2YtAf\r\n" +
+            " 71nD/wB8itIUoQ+FA25Llb0Ph25/4KyfFW3XCfDPTTjpi+mH/stZ95/wV9+LSIyr8L9NYH1vpf8A\r\n" +
+            " 4ivux/2VvDz9bKA/8AFRP+yZ4cfrYwf98CtuZmXso/02fnL4g/4Kj/FbVrgvP8L9MwTkqLuTn/xy\r\n" +
+            " s9v+CoXxLhOG+EemOB2OoSj/ANp1+kz/ALInhputhb/98Co2/Y98Mt/zD7f/AL4FHOw9lH+mz82v\r\n" +
+            " +HqfxJhP/JG9Lb2/tKX/AON1bsf+CuXxL09iY/gtpRz/ANRSb/41X6Ln9jnwz/0D7f8A74FIf2N/\r\n" +
+            " DH/QPt/++BRzMfs49j4C0v8A4LRfE7TnyvwO0dz33arNz/5CrYj/AOC43xPYc/AjQR/3FJv/AIzX\r\n" +
+            " 3N/wxv4Y/wCgfbf98Cgfsc+Gf+gfb/8AfApczHyI+HR/wWy+JV0f3vwJ0A/9xOX/AONVND/wWY+I\r\n" +
+            " s4+b4F+Hx/3EZv8A41X2+v7Hvhkf8w+3/wC+BUi/sieGl6WFv/3wKfMxezj2PiJP+Cufj67+/wDB\r\n" +
+            " DQVJ/wCojMf/AGnVXXP+Cl/xA8U6c1ufhPpNoGIYNHfTZH/jtfdafsm+HF6WMH/fAqZP2VvDydLK\r\n" +
+            " D/vgUc7E6MH0Pz/s/wBtz4gywCNPh9pyDjrczNj3HHB9xTNC/au+Ld1qmsS+LtE03U4dSmMlvGYH\r\n" +
+            " iazQ4/d7g37wfKDkjJJbnmv0Ij/Zi0CP7tnD/wB8ip4/2btDQ8WcP/fIp+0kR9Xp9vzPhS0/aX8e\r\n" +
+            " 3enLbT+FbHaE2bt8u7HQc569Oa6TQf2mPHlvZxQnwzp7CJQu5zKSfcndyfevs1P2e9FT7tpF/wB8\r\n" +
+            " irEfwI0eP7ttF/3yKPaSBYamuh8iaZ8fvGjTPI/hrS98uMkrKeB0H3unJP41s/8AC5/Fur25hvvD\r\n" +
+            " mjmF/vL5cuT+O+vqiP4K6XH922iH/ARU8fwh01OlvH+VHOx+wp9j5p0/4neIYdPEOmeGNCtmIwZD\r\n" +
+            " DM5A9h5oGfrke1HhRfECXjyT+a0kzb5HIwXP4cD2A4HQV9Op8LdPT7sCflU8Hw8soGysKflUuTZU\r\n" +
+            " aUIO8VY848EPqRCfat/416h4eMnlr52antfDcFt/q0A/Cr0NssX3RikaEtFFFABRRRQAUUUUAFFF\r\n" +
+            " FABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUU\r\n" +
+            " AFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQB\r\n" +
+            " /9k=\r\n" +
+            "item5.X-ABRELATEDNAMES;type=pref:Jenny\r\n" +
+            "item5.X-ABLabel:Spouse\r\n" +
+            "X-ABUID:6B29A774-D124-4822-B8D0-2780EC117F60\\:ABPerson\r\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("Doe", contact.getSurName());
+        assertEquals("John", contact.getGivenName());
+        assertEquals("Richter,James", contact.getMiddleName());
+        assertEquals("Mr.", contact.getTitle());
+        assertEquals("Sr.", contact.getSuffix());
+        assertEquals("Mr. John Richter,James Doe Sr.", contact.getDisplayName());
+        assertEquals("Johny", contact.getNickname());
+        assertEquals("Jon", contact.getYomiFirstName());
+        assertEquals("Dow", contact.getYomiLastName());
+        assertEquals("IBM", contact.getCompany());
+        assertEquals("Accounting", contact.getDepartment());
+        assertEquals("Money Counter", contact.getPosition());
+        assertEquals("john.doe@ibm.com", contact.getEmail1());
+        assertEquals("905-777-1234", contact.getTelephoneBusiness1());
+        assertEquals("905-666-1234", contact.getTelephoneHome1());
+        assertEquals("905-555-1234", contact.getCellularTelephone1());
+        assertEquals("905-888-1234", contact.getFaxHome());
+        assertEquals("905-999-1234", contact.getFaxBusiness());
+        assertEquals("905-111-1234", contact.getTelephonePager());
+        assertEquals("Silicon Alley 5,", contact.getStreetHome());
+        assertEquals("New York", contact.getCityHome());
+        assertEquals("New York", contact.getStateHome());
+        assertEquals("12345", contact.getPostalCodeHome());
+        assertEquals("United States of America", contact.getCountryHome());
+        assertEquals("Street4\r\nBuilding 6\r\nFloor 8", contact.getStreetBusiness());
+        assertEquals("New York", contact.getCityBusiness());
+        assertEquals("12345", contact.getPostalCodeBusiness());
+        assertEquals("USA", contact.getCountryBusiness());
+        String expectedNote =
+            "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\" AND ANY EXPRESS OR IMPLIED WARRANTIES, " +
+            "INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE " +
+            "DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, " +
+            "SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR " +
+            "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, " +
+            "WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE " +
+            "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\r\nFavotire Color: Blue"
+        ;
+        assertEquals(expectedNote, contact.getNote());
+        assertEquals("http://www.ibm.com", contact.getURL());
+        assertEquals(TimeTools.D("2012-06-06 00:00:00", TimeZones.UTC), contact.getBirthday());
+        assertEquals("image/jpeg", contact.getImageContentType());
+        assertNotNull(contact.getImage1());
+        BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
+        assertNotNull(bufferedImage);
+        assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
+    }
+
+    public void testImportVCard13() throws Exception {
+        /*
+         * https://github.com/mangstadt/ez-vcard/blob/master/src/test/resources/ezvcard/io/text/John_Doe_MS_OUTLOOK.vcf
+         */
+        String vCardString =
+            "BEGIN:VCARD\r\n" +
+            "VERSION:2.1\r\n" +
+            "N;LANGUAGE=en-us:Doe;John;Richter,James;Mr.;Sr.\r\n" +
+            "FN:Mr. John Richter James Doe Sr.\r\n" +
+            "NICKNAME:Johny\r\n" +
+            "ORG:IBM;Accounting\r\n" +
+            "TITLE:Money Counter\r\n" +
+            "NOTE:THIS SOFTWARE IS PROVIDED BY GEORGE EL-HADDAD \'\'AS IS\'\' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL GEORGE EL-HADDAD OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\r\n" +
+            "TEL;WORK;VOICE:(905) 555-1234\r\n" +
+            "TEL;HOME;VOICE:(905) 666-1234\r\n" +
+            "ADR;WORK;PREF:;;Cresent moon drive;Albaney;New York;12345;United States of America\r\n" +
+            "LABEL;WORK;PREF;ENCODING=QUOTED-PRINTABLE:Cresent moon drive=0D=0A=\r\n" +
+            "Albaney, New York 12345\r\n" +
+            "ADR;HOME:;;Silicon Alley 5,;New York;New York;12345;United States of America\r\n" +
+            "LABEL;HOME;ENCODING=QUOTED-PRINTABLE:Silicon Alley 5,=0D=0A=\r\n" +
+            "New York, New York 12345\r\n" +
+            "X-MS-OL-DEFAULT-POSTAL-ADDRESS:2\r\n" +
+            "URL;WORK:http://www.ibm.com\r\n" +
+            "ROLE:Counting Money\r\n" +
+            "BDAY:19800322\r\n" +
+            "X-MS-ANNIVERSARY:20110113\r\n" +
+            "EMAIL;PREF;INTERNET:john.doe@ibm.cm\r\n" +
+            "X-MS-IMADDRESS:johny5@aol.com\r\n" +
+            "PHOTO;TYPE=JPEG;ENCODING=BASE64:\r\n" +
+            " /9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQY\r\n" +
+            " GBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYa\r\n" +
+            " KCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAAR\r\n" +
+            " CAAaACADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAA\r\n" +
+            " AgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkK\r\n" +
+            " FhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWG\r\n" +
+            " h4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl\r\n" +
+            " 5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREA\r\n" +
+            " AgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYk\r\n" +
+            " NOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOE\r\n" +
+            " hYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk\r\n" +
+            " 5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDzS20gtj5a1R4feMqJYnQlQwDAjII4Irub\r\n" +
+            " PQTx8ldNYacfs6213F59sM7R0eL1Kn+nT+dZyk1sQ2zyUaBkfc/SpB4ZOPuc/Su61vSo5tTf\r\n" +
+            " SrZySEDKWQgyFgSowSBgEDdz7Z71S8ITNB4luPD2szQvdvM4t/KYsoGNwUNgZwAecCpVWLfK\r\n" +
+            " NO56ba2sSqpIGD0Na1vDBxwKwYifU1dhJx1NJq5m1cw/Enw9Gt6ydRbXLmNljMcUW0FYgSCc\r\n" +
+            " YI9KXwX4EXwz4hm1STUhdM8RiCtGM4JByWz7DpXQ72/vH86idm/vH86ShZ3uNXtY/9k=\r\n" +
+            "\r\n" +
+            "X-MS-OL-DESIGN;CHARSET=utf-8:<card xmlns=\"http://schemas.microsoft.com/office/outlook/12/electronicbusinesscards\" ver=\"1.0\" layout=\"left\" bgcolor=\"ffffff\"><img xmlns=\"\" align=\"tleft\" area=\"32\" use=\"photo\"/><fld xmlns=\"\" prop=\"name\" align=\"left\" dir=\"ltr\" style=\"b\" color=\"000000\" size=\"10\"/><fld xmlns=\"\" prop=\"org\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"title\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"dept\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"telwork\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"><label align=\"right\" color=\"626262\">Work</label></fld><fld xmlns=\"\" prop=\"telhome\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"><label align=\"right\" color=\"626262\">Home</label></fld><fld xmlns=\"\" prop=\"email\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"addrwork\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"addrhome\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"webwork\" align=\"left\" dir=\"ltr\" color=\"000000\" size=\"8\"/><fld xmlns=\"\" prop=\"blank\" size=\"8\"/><fld xmlns=\"\" prop=\"blank\" size=\"8\"/><fld xmlns=\"\" prop=\"blank\" size=\"8\"/><fld xmlns=\"\" prop=\"blank\" size=\"8\"/><fld xmlns=\"\" prop=\"blank\" size=\"8\"/><fld xmlns=\"\" prop=\"blank\" size=\"8\"/></card>\r\n" +
+            "X-MS-MANAGER:Big Blue\r\n" +
+            "X-MS-ASSISTANT:Jenny\r\n" +
+            "REV:20120305T131933Z\r\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("Doe", contact.getSurName());
+        assertEquals("John", contact.getGivenName());
+        assertEquals("Richter James", contact.getMiddleName());
+        assertEquals("Mr.", contact.getTitle());
+        assertEquals("Sr.", contact.getSuffix());
+        assertEquals("Mr. John Richter James Doe Sr.", contact.getDisplayName());
+        assertEquals("Johny", contact.getNickname());
+        assertEquals("IBM", contact.getCompany());
+        assertEquals("Accounting", contact.getDepartment());
+        assertEquals("Money Counter", contact.getPosition());
+        String expectedNote =
+            "THIS SOFTWARE IS PROVIDED BY GEORGE EL-HADDAD ''AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED " +
+            "TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL " +
+            "GEORGE EL-HADDAD OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL " +
+            "DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR " +
+            "BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT " +
+            "(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE " +
+            "POSSIBILITY OF SUCH DAMAGE."
+        ;
+        assertEquals(expectedNote, contact.getNote());
+        assertEquals("(905) 555-1234", contact.getTelephoneBusiness1());
+        assertEquals("(905) 666-1234", contact.getTelephoneHome1());
+        assertEquals("Cresent moon drive", contact.getStreetBusiness());
+        assertEquals("Albaney", contact.getCityBusiness());
+        assertEquals("New York", contact.getStateBusiness());
+        assertEquals("12345", contact.getPostalCodeBusiness());
+        assertEquals("United States of America", contact.getCountryBusiness());
+        assertEquals("Cresent moon drive\r\nAlbaney, New York 12345", contact.getAddressBusiness());
+        assertEquals("Silicon Alley 5", contact.getStreetHome());
+        assertEquals("New York", contact.getCityHome());
+        assertEquals("New York", contact.getStateHome());
+        assertEquals("12345", contact.getPostalCodeHome());
+        assertEquals("United States of America", contact.getCountryHome());
+        assertEquals("Silicon Alley 5,\r\nNew York, New York 12345", contact.getAddressHome());
+        assertEquals("http://www.ibm.com", contact.getURL());
+        assertEquals("Counting Money", contact.getProfession());
+        assertEquals(TimeTools.D("1980-03-22 00:00:00", TimeZones.UTC), contact.getBirthday());
+//        assertEquals(TimeTools.D("2011-01-13 00:00:00", TimeZones.UTC), contact.getAnniversary());
+        assertEquals("john.doe@ibm.cm", contact.getEmail1());
+        assertEquals("image/jpeg", contact.getImageContentType());
+        assertNotNull(contact.getImage1());
+        BufferedImage bufferedImage = javax.imageio.ImageIO.read(Streams.newByteArrayInputStream(contact.getImage1()));
+        assertNotNull(bufferedImage);
+        assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
+        assertEquals("Big Blue", contact.getManagerName());
+        assertEquals("Jenny", contact.getAssistantName());
     }
 
 }

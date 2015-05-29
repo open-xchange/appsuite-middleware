@@ -66,7 +66,7 @@ import ezvcard.property.Email;
  */
 public class EMailMapping extends AbstractMapping {
 
-    static final String TYPE_OTHER = "X-OTHER";
+    static final String TYPE_OTHER = "x-other";
 
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
@@ -74,13 +74,13 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        Email businessEmail = getPropertyWithTypes(emails, EmailType.WORK);
+        Email businessEmail = getEmail(emails, EmailType.WORK.getValue(), 0);
         if (has(contact, Contact.EMAIL1)) {
             if (null == businessEmail) {
                 vCard.addEmail(contact.getEmail1(), EmailType.WORK, EmailType.PREF);
             } else {
                 businessEmail.setValue(contact.getEmail1());
-                addTypeIfMissing(businessEmail, EmailType.PREF.getValue());
+                addTypesIfMissing(businessEmail, EmailType.WORK.getValue(), EmailType.PREF.getValue());
             }
         } else if (null != businessEmail) {
             vCard.removeProperty(businessEmail);
@@ -88,12 +88,13 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email2 - type "HOME"
          */
-        Email homeEmail = getPropertyWithTypes(emails, EmailType.HOME);
+        Email homeEmail = getEmail(emails, EmailType.HOME.getValue(), 1);
         if (has(contact, Contact.EMAIL2)) {
             if (null == homeEmail) {
                 vCard.addEmail(contact.getEmail2(), EmailType.HOME);
             } else {
                 homeEmail.setValue(contact.getEmail2());
+                addTypeIfMissing(homeEmail, EmailType.HOME.getValue());
             }
         } else if (null != homeEmail) {
             vCard.removeProperty(homeEmail);
@@ -101,13 +102,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        Email otherEmail = getPropertyWithTypes(emails, TYPE_OTHER);
-        if (null == otherEmail) {
-            otherEmail = getPropertyWithoutTypes(emails, 0, EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
-            if (null != otherEmail) {
-                otherEmail.addParameter(ezvcard.parameter.VCardParameters.TYPE, TYPE_OTHER);
-            }
-        }
+        Email otherEmail = getEmail(emails, TYPE_OTHER, 2);
         if (has(contact, Contact.EMAIL3)) {
             if (null == otherEmail) {
                 otherEmail = new Email(contact.getEmail3());
@@ -115,6 +110,7 @@ public class EMailMapping extends AbstractMapping {
                 vCard.addEmail(otherEmail);
             } else {
                 otherEmail.setValue(contact.getEmail3());
+                addTypeIfMissing(otherEmail, TYPE_OTHER);
             }
         } else if (null != otherEmail) {
             vCard.removeProperty(otherEmail);
@@ -146,26 +142,19 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        Email businessEmail = getPropertyWithTypes(emails, EmailType.WORK);
-        contact.setEmail1(parseEMail(businessEmail, parameters));
+        contact.setEmail1(parseEMail(getEmail(emails, EmailType.WORK.getValue(), 0), parameters));
         /*
          * email2 - type "HOME"
          */
-        Email homeEmail = getPropertyWithTypes(emails, EmailType.HOME);
-        contact.setEmail2(parseEMail(homeEmail, parameters));
+        contact.setEmail2(parseEMail(getEmail(emails, EmailType.HOME.getValue(), 1), parameters));
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        Email otherEmail = getPropertyWithTypes(emails, TYPE_OTHER);
-        if (null == otherEmail) {
-            otherEmail = getPropertyWithoutTypes(emails, 0, EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
-        }
-        contact.setEmail3(parseEMail(otherEmail, parameters));
+        contact.setEmail3(parseEMail(getEmail(emails, TYPE_OTHER, 2), parameters));
         /*
          * telex - type "TLX"
          */
-        Email telexEmail = getPropertyWithTypes(emails, EmailType.TLX);
-        contact.setTelephoneTelex(parseEMail(telexEmail, parameters));
+        contact.setTelephoneTelex(parseEMail(getPropertyWithTypes(emails, EmailType.TLX), parameters));
     }
 
     private String parseEMail(Email property, VCardParameters parameters) {
@@ -183,6 +172,37 @@ public class EMailMapping extends AbstractMapping {
             }
         }
         return null;
+    }
+
+    /**
+     * Chooses a specific e-mail address from a list of candidates matching either a distinguishing type, or, if the candidates are not
+     * using any distinguishing e-mail types at all, the n-th e-mail property as fallback.
+     *
+     * @param emails The possible e-mail properties to choose from
+     * @param distinguishingType The distinguishing type
+     * @param fallbackIndex The index in the candidate list to use when selecting the fallback property, or <code>-1</code> to use no fallback
+     * @return The matching e-mail property, or <code>null</code> if none was found
+     */
+    private Email getEmail(List<Email> emails, String distinguishingType, int fallbackIndex) {
+        if (null == emails || 0 == emails.size()) {
+            return null;
+        }
+        /*
+         * prefer the most preferred property matching the type
+         */
+        Email email = getPropertyWithTypes(emails, distinguishingType);
+        if (null == email && 0 <= fallbackIndex) {
+            /*
+             * if no distinguishing e-mail types defined, use the first address as fallback
+             */
+            List<Email> simpleEmails = getPropertiesWithoutTypes(emails,
+                EmailType.WORK.getValue(), EmailType.HOME.getValue(), TYPE_OTHER, EmailType.TLX.getValue());
+            if (fallbackIndex < simpleEmails.size() && simpleEmails.size() == emails.size()) {
+                sort(simpleEmails);
+                email = simpleEmails.get(fallbackIndex);
+            }
+        }
+        return email;
     }
 
 }

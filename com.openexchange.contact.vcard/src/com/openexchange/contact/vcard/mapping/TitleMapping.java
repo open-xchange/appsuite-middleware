@@ -63,22 +63,22 @@ public class TitleMapping extends SimpleMapping<Title> {
      * Initializes a new {@link TitleMapping}.
      */
     public TitleMapping() {
-        super(Contact.PROFESSION, Title.class);
+        super(Contact.POSITION, Title.class);
     }
 
     @Override
     protected void exportProperty(Contact contact, Title property) {
-        property.setValue(contact.getProfession());
+        property.setValue(contact.getPosition());
     }
 
     @Override
     protected Title exportProperty(Contact contact) {
-        return new Title(contact.getProfession());
+        return new Title(contact.getPosition());
     }
 
     @Override
     protected void importProperty(Title property, Contact contact) {
-        contact.setProfession(property.getValue());
+        contact.setPosition(property.getValue());
     }
 
 }

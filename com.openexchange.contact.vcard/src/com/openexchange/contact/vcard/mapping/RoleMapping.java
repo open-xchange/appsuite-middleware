@@ -63,22 +63,22 @@ public class RoleMapping extends SimpleMapping<Role> {
      * Initializes a new {@link RoleMapping}.
      */
     public RoleMapping() {
-        super(Contact.POSITION, Role.class);
+        super(Contact.PROFESSION, Role.class);
     }
 
     @Override
     protected void exportProperty(Contact contact, Role property) {
-        property.setValue(contact.getPosition());
+        property.setValue(contact.getProfession());
     }
 
     @Override
     protected Role exportProperty(Contact contact) {
-        return new Role(contact.getPosition());
+        return new Role(contact.getProfession());
     }
 
     @Override
     protected void importProperty(Role property, Contact contact) {
-        contact.setPosition(property.getValue());
+        contact.setProfession(property.getValue());
     }
 
 }

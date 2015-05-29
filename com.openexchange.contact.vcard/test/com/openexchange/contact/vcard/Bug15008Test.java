@@ -92,7 +92,7 @@ public class Bug15008Test extends VCardTest {
          */
         assertNotNull(contact);
         assertEquals("VPC", contact.getCompany());
-        assertEquals("Stefan.Adams@vipcomag.de", contact.getEmail3());
+        assertEquals("Stefan.Adams@vipcomag.de", contact.getEmail1());
         assertEquals("+498954750108", contact.getTelephoneBusiness1());
         assertEquals("+49 (4952) 610430", contact.getTelephoneHome1());
         assertEquals("+49 (151) 50104436", contact.getCellularTelephone1());

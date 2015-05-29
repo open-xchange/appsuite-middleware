@@ -94,11 +94,11 @@ public class Bug21656Test extends VCardTest {
          */
         assertNotNull(contact);
         assertEquals("Peschla & Rochmes GmbH", contact.getCompany());
-        assertEquals("mnickel@gpr.de", contact.getEmail3());
+        assertEquals("mnickel@gpr.de", contact.getEmail1());
 //        assertEquals("069 36 60 87 09", contact.getFaxOther());
         assertEquals("069 36 60 87 08", contact.getTelephoneBusiness1());
         assertEquals("0172 670 11 57", contact.getCellularTelephone1());
-        assertEquals("Bereichsleiter Energie und Abfall", contact.getProfession());
+        assertEquals("Bereichsleiter Energie und Abfall", contact.getPosition());
         assertEquals("Hintergasse 18", contact.getStreetBusiness());
         assertEquals("Hochheim am Main", contact.getCityBusiness());
         assertEquals("65239", contact.getPostalCodeBusiness());

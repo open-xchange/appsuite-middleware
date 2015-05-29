@@ -71,14 +71,38 @@ import ezvcard.property.VCardProperty;
  */
 public abstract class AbstractMapping implements VCardMapping {
 
+    /**
+     * Initializes and adds a new conversion warning to the warnings collection in the supplied vCard parameters reference.
+     *
+     * @param parameters The parameters to add the warning to
+     * @param cause The underlying exception
+     * @param propertyName The vCard property name where the warning occurred
+     * @param message The warning message
+     * @return <code>true</code> if the warning was added, <code>false</code>, otherwise
+     */
     protected static boolean addConversionWarning(com.openexchange.contact.vcard.VCardParameters parameters, Throwable cause, String propertyName, String message) {
         return addWarning(parameters, VCardExceptionCodes.CONVERSION_FAILED.create(cause, propertyName, message));
     }
 
+    /**
+     * Initializes and adds a new conversion warning to the warnings collection in the supplied vCard parameters reference.
+     *
+     * @param parameters The parameters to add the warning to
+     * @param propertyName The vCard property name where the warning occurred
+     * @param message The warning message
+     * @return <code>true</code> if the warning was added, <code>false</code>, otherwise
+     */
     protected static boolean addConversionWarning(com.openexchange.contact.vcard.VCardParameters parameters, String propertyName, String message) {
         return addWarning(parameters, VCardExceptionCodes.CONVERSION_FAILED.create(propertyName, message));
     }
 
+    /**
+     * Adds a conversion warning to the warnings collection in the supplied vCard parameters reference.
+     *
+     * @param parameters The parameters to add the warning to
+     * @param warning The warning to add
+     * @return <code>true</code> if the warning was added, <code>false</code>, otherwise
+     */
     protected static boolean addWarning(com.openexchange.contact.vcard.VCardParameters parameters, OXException warning) {
         if (null != parameters && null != parameters.getWarnings()) {
             return parameters.getWarnings().add(warning);
@@ -143,6 +167,14 @@ public abstract class AbstractMapping implements VCardMapping {
         }
         parameters.addType(type);
         return true;
+    }
+
+    protected static boolean addTypesIfMissing(VCardProperty property, String...types) {
+        boolean added = false;
+        for (String type : types) {
+            added |= addTypeIfMissing(property, type);
+        }
+        return added;
     }
 
     protected static String[] getTypeValues(VCardParameter...types) {
@@ -247,7 +279,7 @@ public abstract class AbstractMapping implements VCardMapping {
      * @param properties The properties to check
      * @param index The 0-based index in the list of all matching candidates to use
      * @param types The types that should not be present in the property
-     * @return The property, or <code>null</code> if not matching property was found
+     * @return The property, or <code>null</code> if no matching property was found
      */
     protected static <T extends VCardProperty> T getPropertyWithoutTypes(List<T> properties, int index, String...types) {
         int matches = 0;
@@ -262,6 +294,26 @@ public abstract class AbstractMapping implements VCardMapping {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets those properties whose type parameters do not contain any of the specified type values, ignoring case.
+     *
+     * @param properties The properties to check
+     * @param types The types that should not be present in the property
+     * @return The properties, or an empty list if no matching property was found
+     */
+    protected static <T extends VCardProperty> List<T> getPropertiesWithoutTypes(List<T> properties, String...types) {
+        List<T> matchingProperties = new ArrayList<T>();
+        if (null != properties && 0 < properties.size()) {
+            for (T property : properties) {
+                VCardParameters parameters = property.getParameters();
+                if (null == parameters || false == containsAnyIgnoreCase(parameters.getTypes(), types)) {
+                    matchingProperties.add(property);
+                }
+            }
+        }
+        return matchingProperties;
     }
 
     /**
