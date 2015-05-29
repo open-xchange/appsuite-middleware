@@ -84,35 +84,37 @@ public class ServerConfigServiceImpl implements ServerConfigService {
     private final static String SERVERCONFIG_PREFIX = "com.openexchange.appsuite.serverConfig.";
     private final static String SERVER_PREFIX = "com.openexchange.appsuite.server";
     private final static String[] prefixes = {SERVERCONFIG_PREFIX, SERVER_PREFIX};
-    
-    private ServiceLookup serviceLookup;
-    private ServerConfigServicesLookup serverConfigServicesLookup;
-    
 
+    private final ServiceLookup serviceLookup;
+    private final ServerConfigServicesLookup serverConfigServicesLookup;
+
+    /**
+     * Initializes a new {@link ServerConfigServiceImpl}.
+     */
     public ServerConfigServiceImpl(ServiceLookup serviceLookup, ServerConfigServicesLookup serverConfigServicesLookup) {
         super();
         this.serviceLookup = serviceLookup;
-        this.serverConfigServicesLookup = serverConfigServicesLookup; 
+        this.serverConfigServicesLookup = serverConfigServicesLookup;
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
         ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
-        
+
         // The resulting brand/server configuration
         Map<String, Object> serverConfiguration = new HashMap<String, Object>(4);
-        
+
         // Get configured brands/server configurations
         Map<String, Object> configurations = (Map<String, Object>)configService.getYaml("as-config.yml");
         debugOut("as-config.yml", configurations);
-        
+
         Map<String, Object> defaults = (Map<String, Object>) configService.getYaml("as-config-defaults.yml");
         if (defaults != null) {
             serverConfiguration.putAll((Map<String, Object>) defaults.get("default"));
             debugOut("as-config-defaults.yml", defaults);
         }
-        
+
         // Find other applicable brands/server configurations
         if (configurations != null) {
             boolean empty = true;
@@ -137,10 +139,10 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
 
-       
+
             /*
              * Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the serverconfig. The mentioned prefix is
-             * stripped from resulting name and entries are only added if the session is not anonymous.   
+             * stripped from resulting name and entries are only added if the session is not anonymous.
              */
             Map<String, Object> ccValues = new HashMap<String, Object>();
             ConfigView configView = null;
@@ -149,12 +151,12 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
             Map<String, ComposedConfigProperty<String>> allProperties = configView.all();
             for(Map.Entry<String, ComposedConfigProperty<String>> entry: allProperties.entrySet()) {
-                
+
                 String propName = entry.getKey();
                 for (String prefix : prefixes) {
                     if(propName.startsWith(prefix)) {
                         String value = entry.getValue().get();
-                        //Allow to keep value from global config if specified as "<as-config>" 
+                        //Allow to keep value from global config if specified as "<as-config>"
                         if (!value.equals("<as-config>")) {
                             ccValues.put(propName.substring(prefix.length()), value);
                         }
@@ -162,7 +164,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
             applicableConfigs.add(ccValues);
-            
+
             if (!empty) {
                 for (Map<String, Object> config : applicableConfigs) {
                     serverConfiguration.putAll(config);
@@ -176,7 +178,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
         for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
             computed.addValue(serverConfiguration, hostName, userID, contextID);
         }
-        
+
         ServerConfigImpl serverConfigImpl = new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
         return serverConfigImpl;
     }
@@ -186,8 +188,8 @@ public class ServerConfigServiceImpl implements ServerConfigService {
      * should be used for an incoming request. If either of these matches the host given in the {@link AJAXRequestData} the configuration
      * objects looks applicable to us.
      * This check can additionally be expanded by your own {@link ServerConfigMatcherServices} that might apply other criteria to decide if
-     * a configuration object is applicable for the combination of {@link AJAXRequestData} and {@link ServerSession}. 
-     * 
+     * a configuration object is applicable for the combination of {@link AJAXRequestData} and {@link ServerSession}.
+     *
      * @param possibleConfiguration A possible configuration Object that should be checked
      * @param requestData The current request data
      * @param session The current session
@@ -242,7 +244,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
 
         return false;
     }
-    
+
     // ---------------------------------------------------- DEBUG STUFF --------------------------------------------------------------- //
 
     /**

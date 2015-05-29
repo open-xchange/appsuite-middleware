@@ -759,10 +759,23 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Re-initialize config-cascade
         reinitConfigCascade();
 
-        // Check if properties have been changed, abort if not
+        // Check if properties have been changed, execute only forced ones if not
         Set<String> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
         if (changes.isEmpty()) {
             LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
+
+            // Trigger only forced ones
+            for (Reloadable reloadable : reloadableServices.values()) {
+                try {
+                    Map<String, String[]> configFileNames = reloadable.getConfigFileNames();
+                    if (null == configFileNames || configFileNames.isEmpty()) {
+                        reloadable.reloadConfiguration(this);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
+                }
+            }
+
             return;
         }
 

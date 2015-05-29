@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,61 @@
  *
  */
 
-package com.openexchange.config;
+package com.openexchange.apps.manifests.json.osgi;
 
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import com.openexchange.apps.manifests.ManifestContributor;
+import com.openexchange.apps.manifests.json.ManifestBuilder;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+
 
 /**
- * {@link Reloadable} - Marks services that perform necessary actions in order to apply (possibly) new configuration.
+ * {@link ManifestContributorTracker}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Added some JavaDoc
- * @since 7.6.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public interface Reloadable {
+public class ManifestContributorTracker extends RankingAwareNearRegistryServiceTracker<ManifestContributor> {
+
+    private final AtomicReference<ManifestBuilder> builderReference;
 
     /**
-     * Signals that the configuration has been reloaded.
-     * <p>
-     * This {@link Reloadable} instance should perform necessary actions in order to apply (possibly) new configuration.
+     * Initializes a new {@link ManifestContributorTracker}.
      *
-     * @param configService The configuration service providing newly initialized properties
+     * @param context The bundle context
      */
-    void reloadConfiguration(ConfigurationService configService);
+    public ManifestContributorTracker(BundleContext context) {
+        super(context, ManifestContributor.class);
+        builderReference = new AtomicReference<ManifestBuilder>();
+    }
 
     /**
-     * Returns a set of configuration file names, which are needed for the reloadable service.
+     * Sets the associated manifest builder instance.
      *
-     * @return A set of configuration file names or <code>null</code>
+     * @param manifestBuilder The manifest builder instance
      */
-    Map<String, String[]> getConfigFileNames();
+    public void setManifestBuilder(ManifestBuilder manifestBuilder) {
+        builderReference.set(manifestBuilder);
+    }
+
+    @Override
+    protected void onServiceAdded(ManifestContributor service) {
+        super.onServiceAdded(service);
+        resetBuilder();
+    }
+
+    @Override
+    protected void onServiceRemoved(ManifestContributor service) {
+        super.onServiceRemoved(service);
+        resetBuilder();
+    }
+
+    private void resetBuilder() {
+        ManifestBuilder manifestBuilder = builderReference.get();
+        if (null != manifestBuilder) {
+            manifestBuilder.reset();
+        }
+    }
 
 }
