@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,37 +47,62 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.mapping;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
+import ezvcard.property.RawProperty;
 
 /**
- * {@link UnitTests}
+ * {@link ColorLabelMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UnitTests {
+public class ColorLabelMapping extends AbstractMapping {
+
+    static final String X_OX_COLOR_LABEL = "X-OX-COLOR-LABEL";
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Initializes a new {@link ColorLabelMapping}.
      */
-    public UnitTests() {
+    public ColorLabelMapping() {
         super();
     }
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(AddressTest.class);
-        tests.addTestSuite(DistributionListTest.class);
-        tests.addTestSuite(BasicTest.class);
-        tests.addTestSuite(RoundtripTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(WarningsTest.class);
-        tests.addTestSuite(ColorLabelTest.class);
-        tests.addTestSuite(Bug15008Test.class);
-        tests.addTestSuite(Bug18226Test.class);
-        tests.addTestSuite(Bug21656Test.class);
-        return tests;
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+        RawProperty property = getFirstProperty(vCard.getExtendedProperties(X_OX_COLOR_LABEL));
+        int colorLabel = contact.getLabel();
+        if (Contact.LABEL_NONE != colorLabel) {
+            if (null == property) {
+                vCard.addExtendedProperty(X_OX_COLOR_LABEL, String.valueOf(colorLabel));
+            } else {
+                property.setValue(String.valueOf(colorLabel));
+            }
+        } else if (null != property) {
+            vCard.removeProperty(property);
+        }
+    }
+
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+        RawProperty property = getFirstProperty(vCard.getExtendedProperties(X_OX_COLOR_LABEL));
+        if (null != property) {
+            int colorLabel;
+            try {
+                colorLabel = Integer.parseInt(property.getValue());
+            } catch (NumberFormatException e) {
+                addConversionWarning(parameters, e, X_OX_COLOR_LABEL, e.getMessage());
+                return;
+            }
+            if (Contact.LABEL_1 <= colorLabel && colorLabel <= Contact.LABEL_10) {
+                contact.setLabel(colorLabel);
+            } else {
+                addConversionWarning(parameters, X_OX_COLOR_LABEL, "Ignoring illegal color label: " + colorLabel);
+            }
+        } else {
+            contact.setLabel(Contact.LABEL_NONE);
+        }
     }
 }

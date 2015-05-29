@@ -57,6 +57,7 @@ import com.openexchange.contact.vcard.mapping.AnniversaryMapping;
 import com.openexchange.contact.vcard.mapping.BirthdayMapping;
 import com.openexchange.contact.vcard.mapping.CategoriesMapping;
 import com.openexchange.contact.vcard.mapping.ClassMapping;
+import com.openexchange.contact.vcard.mapping.ColorLabelMapping;
 import com.openexchange.contact.vcard.mapping.DistributionlistMapping;
 import com.openexchange.contact.vcard.mapping.EMailMapping;
 import com.openexchange.contact.vcard.mapping.ExtendedStringPropertyMapping;
@@ -336,6 +337,7 @@ public class VCardMapper {
         mappings.add(new ExtendedStringPropertyMapping(Contact.EMPLOYEE_TYPE, "X-OX-EMPLOYEE-TYPE"));
         mappings.add(new ExtendedStringPropertyMapping(Contact.MARITAL_STATUS, "X-OX-MARITAL-STATUS"));
         mappings.add(new ExtendedStringPropertyMapping(Contact.YOMI_COMPANY, "X-OX-YOMI-COMPANY"));
+        mappings.add(new ColorLabelMapping());
     }
 
     /**

@@ -49,35 +49,55 @@
 
 package com.openexchange.contact.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
 
 /**
- * {@link UnitTests}
+ * {@link ColorLabelTest}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UnitTests {
+public class ColorLabelTest extends VCardTest {
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * Initializes a new {@link ColorLabelTest}.
      */
-    public UnitTests() {
+    public ColorLabelTest() {
         super();
     }
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(AddressTest.class);
-        tests.addTestSuite(DistributionListTest.class);
-        tests.addTestSuite(BasicTest.class);
-        tests.addTestSuite(RoundtripTest.class);
-        tests.addTestSuite(UpdateTest.class);
-        tests.addTestSuite(WarningsTest.class);
-        tests.addTestSuite(ColorLabelTest.class);
-        tests.addTestSuite(Bug15008Test.class);
-        tests.addTestSuite(Bug18226Test.class);
-        tests.addTestSuite(Bug21656Test.class);
-        return tests;
+    public void testExportColorLabel() {
+        /*
+         * create test contact
+         */
+        Contact contact = new Contact();
+        contact.setDisplayName("test");
+        contact.setLabel(Contact.LABEL_4);
+        /*
+         * export to new vCard
+         */
+        VCard vCard = getMapper().exportContact(contact, null, null);
+        /*
+         * verify vCard
+         */
+        assertNotNull("no vCard exported", vCard);
+        assertNotNull("no color label exported", vCard.getExtendedProperty("X-OX-COLOR-LABEL"));
+        assertEquals("wrong value for color label", String.valueOf(Contact.LABEL_4), vCard.getExtendedProperty("X-OX-COLOR-LABEL").getValue());
     }
+
+    public void testImportColorLabel() {
+        /*
+         * create test vCard
+         */
+        VCard vCard = new VCard();
+        vCard.setFormattedName("test");
+        vCard.setExtendedProperty("X-OX-COLOR-LABEL", String.valueOf(Contact.LABEL_7));
+        /*
+         * parse vCard & verify color label
+         */
+        Contact contact = getMapper().importVCard(vCard, null, null);
+        assertNotNull("no contact imported", contact);
+        assertEquals("wrong value for color label", Contact.LABEL_7, contact.getLabel());
+    }
+
 }

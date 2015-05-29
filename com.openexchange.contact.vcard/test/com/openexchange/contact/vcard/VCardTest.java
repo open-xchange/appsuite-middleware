@@ -441,6 +441,10 @@ public abstract class VCardTest extends TestCase {
         return Autoboxing.I2i(fields);
     }
 
+    protected static int[] getMappedIntegerFields() {
+        return new int[] { Contact.COLOR_LABEL };
+    }
+
     protected static int[] getMappedDateFields() {
         return new int[] { Contact.BIRTHDAY, Contact.ANNIVERSARY };
     }

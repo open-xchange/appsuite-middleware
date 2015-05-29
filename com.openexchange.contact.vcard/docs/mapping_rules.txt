@@ -95,6 +95,7 @@ Besides the mappings where a direct property mapping is possible, there are some
 |          521 |     employee_type |      X-OX-EMPLOYEE-TYPE |         |
 |          512 |    marital_status |     X-OX-MARITAL-STATUS |         |
 |          618 |      yomi_company |       X-OX-YOMI-COMPANY |         |
+|          102 |       color_label |        X-OX-COLOR-LABEL |         |
 
 
 Advanced mappings
