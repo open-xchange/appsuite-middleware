@@ -175,7 +175,7 @@ public final class ConfigJSlobService implements JSlobService {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
             for (String line = reader.readLine(); null != line; line = reader.readLine()) {
                 line = line.trim();
-                if (!isEmpty(line) && '#' != line.charAt(0)) {
+                if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
                     final int pos = line.indexOf('>');
                     if (pos > 0) {
                         final String configTreePath = line.substring(0, pos).trim();
@@ -219,7 +219,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param jslobPath The associated jslob path
      */
     public void addConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -254,7 +254,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param jslobPath The associated jslob path
      */
     public void removeConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -1213,18 +1213,6 @@ public final class ConfigJSlobService implements JSlobService {
             path = JSONPathElement.parsePath(preferencePath);
         }
     } // End of class AttributedProperty
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 
     private static final class CompletionServiceReference {
 

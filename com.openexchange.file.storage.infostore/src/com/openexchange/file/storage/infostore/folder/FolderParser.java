@@ -98,19 +98,19 @@ public final class FolderParser {
             folder.setTreeID(REAL_TREE_ID);
             {
                 final String str = fsFolder.getId();
-                if (!isEmpty(str)) {
+                if (!com.openexchange.java.Strings.isEmpty(str)) {
                     folder.setID(str);
                 }
             }
             {
                 final String str = fsFolder.getParentId();
-                if (!isEmpty(str)) {
+                if (!com.openexchange.java.Strings.isEmpty(str)) {
                     folder.setParentID(str);
                 }
             }
             {
                 final String str = fsFolder.getName();
-                if (!isEmpty(str)) {
+                if (!com.openexchange.java.Strings.isEmpty(str)) {
                     folder.setName(str);
                 }
             }
@@ -124,7 +124,7 @@ public final class FolderParser {
                     folder.setPermissions(parsePermission(permissions));
                 }
             }
-            
+
             folder.setMeta(fsFolder.getMeta());
 
             return folder;
@@ -185,18 +185,4 @@ public final class FolderParser {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
-
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

@@ -65,6 +65,7 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.I18nServices;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -112,7 +113,7 @@ public class AvailableTimeZones implements PreferencesItemService {
                     long now = System.currentTimeMillis();
                     for (final String timeZoneID : TimeZone.getAvailableIDs()) {
                         final int len = timeZoneID.length();
-                        if (len >= 4 || SPECIAL.contains(toUpperCase(timeZoneID))) {
+                        if (len >= 4 || SPECIAL.contains(Strings.toUpperCase(timeZoneID))) {
                             if (timeZoneID.startsWith("Etc")) {
                                 /*
                                  * The special area of "Etc" is used for some administrative zones, particularly for "Etc/UTC" which
@@ -157,22 +158,6 @@ public class AvailableTimeZones implements PreferencesItemService {
                     return String.format("(GMT-%02d:%02d) %s", Math.abs(hours), Math.abs(extraMinutes), translate);
                 }
             }
-
-
-            /** ASCII-wise to upper-case */
-            private String toUpperCase(final CharSequence chars) {
-                if (null == chars) {
-                    return null;
-                }
-                final int length = chars.length();
-                final StringBuilder builder = new StringBuilder(length);
-                for (int i = 0; i < length; i++) {
-                    final char c = chars.charAt(i);
-                    builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-                }
-                return builder.toString();
-            }
-
         }; // End of ReadOnlyValue implementation
     }
 

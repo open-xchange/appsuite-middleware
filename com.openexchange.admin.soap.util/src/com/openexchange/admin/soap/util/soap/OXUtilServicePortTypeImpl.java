@@ -219,7 +219,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     public java.util.List<MaintenanceReason> listMaintenanceReason(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.MaintenanceReason[] reasons = utilInterface.listMaintenanceReason(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.MaintenanceReason[] reasons = utilInterface.listMaintenanceReason(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == reasons) {
                 return Collections.emptyList();
             }
@@ -286,7 +286,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     public java.util.List<Server> listServer(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Server[] servers = utilInterface.listServer(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Server[] servers = utilInterface.listServer(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == servers) {
                 return Collections.emptyList();
             }
@@ -324,7 +324,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     public java.util.List<Database> listDatabase(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Database[] databases = utilInterface.listDatabase(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Database[] databases = utilInterface.listDatabase(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == databases) {
                 return Collections.emptyList();
             }
@@ -516,7 +516,7 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
     public java.util.List<Filestore> listFilestore(final java.lang.String searchPattern,final Credentials auth) throws StorageException_Exception , InvalidCredentialsException_Exception , InvalidDataException_Exception , RemoteException_Exception    {
         final OXUtilInterface utilInterface = getUtilInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Filestore[] filestores = utilInterface.listFilestore(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Filestore[] filestores = utilInterface.listFilestore(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == filestores) {
                 return Collections.emptyList();
             }
@@ -884,17 +884,4 @@ public class OXUtilServicePortTypeImpl implements OXUtilServicePortType {
         soapDatabase.setUrl(database.getUrl());
         return soapDatabase;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

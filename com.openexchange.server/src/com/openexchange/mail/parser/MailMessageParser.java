@@ -328,7 +328,7 @@ public final class MailMessageParser {
              * Parse content
              */
             final ContentType contentType = mail.getContentType();
-            if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+            if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(com.openexchange.java.Strings.toLowerCase("type"))))) {
                 parseMailContent(MimeSmilFixer.getInstance().process(mail), handler, prefix, 1);
             } else {
                 parseMailContent(mail, handler, prefix, 1);
@@ -954,7 +954,7 @@ public final class MailMessageParser {
      */
     public static String getFileName(final String rawFileName, final String sequenceId, final String baseMimeType) {
         String filename = rawFileName;
-        if ((filename == null) || isEmptyString(filename)) {
+        if ((filename == null) || com.openexchange.java.Strings.isEmpty(filename)) {
             final List<String> exts = MimeType2ExtMap.getFileExtensions(baseMimeType.toLowerCase(Locale.ENGLISH));
             final StringBuilder sb = new StringBuilder(16).append(PREFIX).append(sequenceId).append('.');
             if (exts == null) {
@@ -965,25 +965,8 @@ public final class MailMessageParser {
             filename = sb.toString();
         } else {
             filename = MimeMessageUtility.decodeMultiEncodedHeader(filename);
-            // try {
-            // filename = MimeUtility.decodeText(filename.replaceAll("\\?==\\?", "?= =?"));
-            // } catch (final Exception e) {
-            // LOG.error("", e);
-            // }
         }
         return filename;
-    }
-
-    private static boolean isEmptyString(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**
@@ -1144,26 +1127,4 @@ public final class MailMessageParser {
         }
         return false;
     }
-
-    private static boolean isWinmailDat(final String fileName) {
-        if (isEmptyString(fileName)) {
-            return false;
-        }
-        final String toCheck = LocaleTools.toLowerCase(fileName);
-        return toCheck.startsWith("winmail", 0) && toCheck.endsWith(".dat");
-    }
-
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

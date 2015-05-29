@@ -104,23 +104,11 @@ public class Klass<T extends CalendarComponent, U extends CalendarObject> extend
             cObj.setPrivateFlag(false);
         } else {
             final String value = clazz.getValue();
-            if (isEmpty(value)) {
+            if (com.openexchange.java.Strings.isEmpty(value)) {
                 warnings.add(new ConversionWarning(index, Code.EMPTY_CLASS, new Object[0]));
             } else {
                 warnings.add(new ConversionWarning(index, Code.UNKNOWN_CLASS, value));
             }
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

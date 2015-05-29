@@ -63,7 +63,6 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -104,7 +103,7 @@ public class UpdateAction extends ContactAction {
             Object imageObject = json.opt("image1");
             if (imageObject instanceof String) {
                 imageBase64 = (String) imageObject;
-                if (isEmpty(imageBase64)) {
+                if (com.openexchange.java.Strings.isEmpty(imageBase64)) {
                     imageBase64 = null;
                 } else {
                     json.remove("image1");
@@ -120,7 +119,7 @@ public class UpdateAction extends ContactAction {
 		}
 
         if (containsImage) {
-            if (!json.has("image1") || !isEmpty(json.opt("image1").toString())) {
+            if (!json.has("image1") || !com.openexchange.java.Strings.isEmpty(json.opt("image1").toString())) {
                 RequestTools.setImageData(request, contact);
             }
         } else if (null != imageBase64) {
@@ -139,18 +138,4 @@ public class UpdateAction extends ContactAction {
         		new Date(request.getTimestamp()));
         return new AJAXRequestResult(new JSONObject(0), contact.getLastModified(), "json");
     }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

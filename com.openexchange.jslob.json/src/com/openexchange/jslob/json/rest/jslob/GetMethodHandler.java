@@ -82,7 +82,7 @@ public final class GetMethodHandler extends AbstractMethodHandler {
     @Override
     protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         // E.g. pathInfo="11" (preceding "jslob" removed)
-        if (isEmpty(pathInfo)) {
+        if (com.openexchange.java.Strings.isEmpty(pathInfo)) {
             requestData.setAction("all");
         } else {
             final String[] pathElements = SPLIT_PATH.split(pathInfo);

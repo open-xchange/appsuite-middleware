@@ -265,7 +265,7 @@ public final class IMAPFolderConverter {
                     String owner = null;
                     for (int i = 0; !shared && i < users.length; i++) {
                         final String userNamespace = users[i];
-                        if (!isEmpty(userNamespace)) {
+                        if (!com.openexchange.java.Strings.isEmpty(userNamespace)) {
                             if (imapFullName.equals(userNamespace)) {
                                 shared = true;
                             } else {
@@ -295,7 +295,7 @@ public final class IMAPFolderConverter {
                         final String[] personals = NamespaceFoldersCache.getPersonalNamespaces(imapStore, true, session, accountId);
                         for (int i = 0; !shared && i < shares.length; i++) {
                             final String sharedNamespace = shares[i];
-                            if (!isEmpty(sharedNamespace)) {
+                            if (!com.openexchange.java.Strings.isEmpty(sharedNamespace)) {
                                 if (imapFullName.equals(sharedNamespace)) {
                                     isPublic = true;
                                 } else {
@@ -890,17 +890,4 @@ public final class IMAPFolderConverter {
             LOG.debug("Failed MYRIGHTS for: {}", fullName, e);
         }
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

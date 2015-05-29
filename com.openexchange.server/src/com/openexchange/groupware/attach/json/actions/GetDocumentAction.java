@@ -131,7 +131,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
             ATTACHMENT_BASE.startTransaction();
             final AttachmentMetadata attachment = ATTACHMENT_BASE.getAttachment(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             String sContentType;
-            if ((null == contentType) || (APPLICATION_OCTET_STREAM.equals(toLowerCase(contentType)))) {
+            if ((null == contentType) || (APPLICATION_OCTET_STREAM.equals(com.openexchange.java.Strings.toLowerCase(contentType)))) {
                 sContentType = APPLICATION_OCTET_STREAM;
             } else {
                 final String contentTypeByFileName = MimeType2ExtMap.getContentType(attachment.getFilename(), null);
@@ -142,7 +142,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                     } else {
                         final String primaryType1 = getPrimaryType(preferredContentType);
                         final String primaryType2 = getPrimaryType(contentTypeByFileName);
-                        if (!toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                        if (!com.openexchange.java.Strings.toLowerCase(primaryType1).startsWith(com.openexchange.java.Strings.toLowerCase(primaryType2))) {
                             preferredContentType = contentTypeByFileName;
                         }
                     }
@@ -150,7 +150,7 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 // Compare...
                 final String primaryType1 = getPrimaryType(preferredContentType);
                 final String primaryType2 = getPrimaryType(contentType);
-                if (toLowerCase(primaryType1).startsWith(toLowerCase(primaryType2))) {
+                if (com.openexchange.java.Strings.toLowerCase(primaryType1).startsWith(com.openexchange.java.Strings.toLowerCase(primaryType2))) {
                     sContentType = contentType;
                 } else {
                     // Specified Content-Type does NOT match file's real MIME type
@@ -202,19 +202,6 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 LOG.debug("", e);
             }
         }
-    }
-
-    private String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     private String getPrimaryType(final String contentType) {

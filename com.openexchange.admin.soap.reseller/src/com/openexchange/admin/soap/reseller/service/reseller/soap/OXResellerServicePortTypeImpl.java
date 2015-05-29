@@ -223,7 +223,7 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
     public List<ResellerAdmin> list(final java.lang.String searchPattern,final Credentials creds) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXResellerInterface resellerInterface = getResellerInterface();
         try {
-            final com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin[] resellerAdmins = resellerInterface.list(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(creds));
+            final com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin[] resellerAdmins = resellerInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(creds));
             if (null == resellerAdmins) {
                 return Collections.emptyList();
             }
@@ -863,17 +863,4 @@ public class OXResellerServicePortTypeImpl implements OXResellerServicePortType 
         soapMap.setEntries(entries);
         return soapMap;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

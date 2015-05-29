@@ -142,23 +142,9 @@ public class CapabilityUserConfigurationStorage extends UserConfigurationStorage
     private static Set<String> stringify(final CapabilitySet capabilities) {
         Set<String> set = new HashSet<String>(capabilities.size());
         for (Capability capability : capabilities) {
-            set.add(toLowerCase(capability.getId()));
+            set.add(com.openexchange.java.Strings.toLowerCase(capability.getId()));
         }
         return set;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /**

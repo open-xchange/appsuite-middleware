@@ -710,7 +710,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 final FacebookUser facebookUser = FacebookFQLUserJsonParser.parseUserJsonElement(iterator.next());
                 final String name = facebookUser.getName();
                 final long facebookUserId = facebookUser.getUid();
-                if (ignoreFbInFeed && FB_IN_FEED.equals(toLowerCase(name))) {
+                if (ignoreFbInFeed && FB_IN_FEED.equals(com.openexchange.java.Strings.toLowerCase(name))) {
                     // Drop messages from results list
                     for (final FacebookMessagingMessage message : mUser.get(facebookUserId)) {
                         messages.remove(message);
@@ -748,7 +748,7 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
                 final FacebookGroup facebookGroup = FacebookFQLGroupJsonParser.parseGroupJsonElement(iterator.next());
                 final String name = facebookGroup.getName();
                 final long facebookGroupId = facebookGroup.getGid();
-                if (ignoreFbInFeed && FB_IN_FEED.equals(toLowerCase(name))) {
+                if (ignoreFbInFeed && FB_IN_FEED.equals(com.openexchange.java.Strings.toLowerCase(name))) {
                     // Drop messages from results list
                     for (final FacebookMessagingMessage message : mGroup.get(facebookGroupId)) {
                         messages.remove(message);
@@ -997,28 +997,8 @@ public final class FacebookMessagingMessageAccess extends AbstractFacebookAccess
         throw new UnsupportedOperationException();
     }
 
-    private Long getQueryTimestamp(final FQLQueryType queryType) {
-        final String tmp = (String) messagingAccount.getConfiguration().get(queryType.toString());
-        return null == tmp ? null : Long.valueOf(tmp);
-    }
-
     private void updateQueryTimestamp(final FQLQueryType queryType, final long timestamp) throws OXException {
         messagingAccount.getConfiguration().put(queryType.toString(), Long.toString(timestamp));
         messagingAccount.getMessagingService().getAccountManager().updateAccount(messagingAccount, session);
     }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

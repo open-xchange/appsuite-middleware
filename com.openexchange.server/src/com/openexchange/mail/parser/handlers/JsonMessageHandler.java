@@ -1644,21 +1644,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     private boolean hasNoImage(final String htmlContent) {
-        return null == htmlContent || (toLowerCase(htmlContent).indexOf("<img ") < 0);
+        return null == htmlContent || (com.openexchange.java.Strings.toLowerCase(htmlContent).indexOf("<img ") < 0);
     }
-
-    /** ASCII-wise to lower-case */
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

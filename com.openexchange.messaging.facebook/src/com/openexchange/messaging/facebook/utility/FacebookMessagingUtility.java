@@ -83,7 +83,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.messaging.MessagingContent;
 import com.openexchange.messaging.MessagingExceptionCodes;
 import com.openexchange.messaging.MessagingField;
@@ -690,7 +689,7 @@ public final class FacebookMessagingUtility {
      */
     public static String encodeUrl(final String s) {
         try {
-            return isEmpty(s) ? s : URL_CODEC.encode(s);
+            return com.openexchange.java.Strings.isEmpty(s) ? s : URL_CODEC.encode(s);
         } catch (final EncoderException e) {
             return s;
         }
@@ -703,47 +702,12 @@ public final class FacebookMessagingUtility {
      */
     public static String decodeUrl(final String s, final String charset) {
         try {
-            return isEmpty(s) ? s : (isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
+            return com.openexchange.java.Strings.isEmpty(s) ? s : (com.openexchange.java.Strings.isEmpty(charset) ? URL_CODEC.decode(s) : URL_CODEC.decode(s, charset));
         } catch (final DecoderException e) {
             return s;
         } catch (final UnsupportedEncodingException e) {
             return s;
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    private static boolean startsWith(final char startingChar, final String toCheck, final boolean ignoreHeadingWhitespaces) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        if (!ignoreHeadingWhitespaces) {
-            return startingChar == toCheck.charAt(0);
-        }
-        int i = 0;
-        if (Strings.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
     }
 
     /**

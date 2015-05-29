@@ -87,7 +87,7 @@ public final class ConfigurationServiceTracker implements ServiceTrackerCustomiz
         } else {
             final String[] wildcardPatterns = property.split(" *, *", 0);
             for (final String wildcardPattern : wildcardPatterns) {
-                if (!isEmpty(wildcardPattern)) {
+                if (!com.openexchange.java.Strings.isEmpty(wildcardPattern)) {
                     clientWhitelist.add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
                 }
             }
@@ -105,18 +105,6 @@ public final class ConfigurationServiceTracker implements ServiceTrackerCustomiz
     @Override
     public void removedService(final ServiceReference<ConfigurationService> reference, final ConfigurationService service) {
         // no-op
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static String removeQuotes(final String quoted) {

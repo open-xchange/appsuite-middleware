@@ -714,7 +714,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             String clientIp = null;
             if (imapConfProps.isPropagateClientIPAddress() && isPropagateAccount(imapConfProps)) {
                 final String ip = session.getLocalIp();
-                if (!isEmpty(ip)) {
+                if (!com.openexchange.java.Strings.isEmpty(ip)) {
                     clientIp = ip;
                 }
             }
@@ -1352,24 +1352,6 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             return imapStore.toString();
         }
         return "[not connected]";
-    }
-
-    /**
-     * Checks if given string is empty.
-     *
-     * @param s The string to check
-     * @return <code>true</code> if empty; otherwise <code>false</code>
-     */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private static final int MAX_STACK_TRACE_ELEMENTS = 1000;

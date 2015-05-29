@@ -192,7 +192,7 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         Pattern.CASE_INSENSITIVE);
 
     private void simplifySubject() {
-        if (isEmpty(subject)) {
+        if (com.openexchange.java.Strings.isEmpty(subject)) {
             subject2 = "";
             return;
         }
@@ -506,17 +506,5 @@ public final class Threadable implements Cloneable, Serializable, Iterable<Threa
         public void remove() {
             throw new UnsupportedOperationException("remove() not supported");
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

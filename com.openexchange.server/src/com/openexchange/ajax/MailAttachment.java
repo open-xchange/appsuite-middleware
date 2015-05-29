@@ -339,7 +339,7 @@ public class MailAttachment extends AJAXServlet {
                     }
                     outputStream.flush();
                 } catch (final java.net.SocketException e) {
-                    final String lmsg = toLowerCase(e.getMessage());
+                    final String lmsg = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                     if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                         // Assume client-initiated connection closure
                         LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
@@ -349,7 +349,7 @@ public class MailAttachment extends AJAXServlet {
                 } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                     resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
                 } catch (final IOException e) {
-                    if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
+                    if ("connection reset by peer".equals(com.openexchange.java.Strings.toLowerCase(e.getMessage()))) {
                         /*-
                          * The client side has abruptly aborted the connection.
                          * That can have many causes which are not controllable by us.
@@ -440,20 +440,6 @@ public class MailAttachment extends AJAXServlet {
     protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
         res.setContentType("text/html; charset=UTF-8");
         res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /**

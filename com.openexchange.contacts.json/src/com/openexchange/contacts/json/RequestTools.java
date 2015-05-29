@@ -160,7 +160,7 @@ public class RequestTools {
                 // Examine first chunk
                 if ((read = fis.read(buf, 0, buflen)) > 0) {
                     mimeType = com.openexchange.java.ImageTypeDetector.getMimeType(buf, 0, read);
-                    if (!toLowerCase(mimeType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
+                    if (!com.openexchange.java.Strings.toLowerCase(mimeType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(buf, 0, read)) {
                         throw AjaxExceptionCodes.NO_IMAGE_FILE.create(file.getPreparedFileName(), mimeType);
                     }
                     outputStream.write(buf, 0, read);
@@ -199,14 +199,14 @@ public class RequestTools {
     public static void setImageData(final Contact contact, final byte[] bytes, final String mimeType) throws OXException {
         try {
             // First check MIME type
-            String contentType = null == mimeType ? "image/jpeg" : toLowerCase(mimeType);
+            String contentType = null == mimeType ? "image/jpeg" : com.openexchange.java.Strings.toLowerCase(mimeType);
             if (!contentType.startsWith("image/")) {
                 final String readableType = null == mimeType ? "application/unknown" : mimeType;
                 throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", readableType);
             }
             // Check image data
             contentType = com.openexchange.java.ImageTypeDetector.getMimeType(bytes);
-            if (!toLowerCase(contentType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(bytes)) {
+            if (!com.openexchange.java.Strings.toLowerCase(contentType).startsWith("image/") || com.openexchange.java.HTMLDetector.containsHTMLTags(bytes)) {
                 throw AjaxExceptionCodes.NO_IMAGE_FILE.create("file", contentType);
             }
             // Final check for image's width & height using javax.imageio.*
@@ -241,7 +241,7 @@ public class RequestTools {
     }
 
     private static boolean isImageContentType(final String contentType) {
-        return null != contentType && toLowerCase(contentType).startsWith("image/");
+        return null != contentType && com.openexchange.java.Strings.toLowerCase(contentType).startsWith("image/");
     }
 
     private static boolean isValidImage(final InputStream data) {
@@ -318,19 +318,4 @@ public class RequestTools {
             }
         };
     }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

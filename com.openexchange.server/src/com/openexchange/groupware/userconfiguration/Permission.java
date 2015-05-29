@@ -60,6 +60,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import com.openexchange.java.Strings;
 
 /**
  * Enumeration of known permissions.
@@ -107,7 +108,7 @@ public enum Permission {
         @Override
         public boolean execute(final int bit, final Permission p) {
             if (bit == (bits & bit)) {
-                set.add(UserConfiguration.toLowerCase(p.name()));
+                set.add(Strings.toLowerCase(p.name()));
             }
             return true;
         }

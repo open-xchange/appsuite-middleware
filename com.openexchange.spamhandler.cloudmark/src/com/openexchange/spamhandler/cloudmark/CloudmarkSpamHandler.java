@@ -104,7 +104,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
-                    if (isEmpty(targetSpamEmailAddress)) {
+                    if (com.openexchange.java.Strings.isEmpty(targetSpamEmailAddress)) {
                         LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress', cannot process spam reporting to server.");
                     } else {
                         transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetSpamEmailAddress, true) });
@@ -139,18 +139,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         }
     }
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     @Override
     public void handleHam(final int accountId, final String fullname, final String[] mailIDs, final boolean move, final Session session) throws OXException {
     	ConfigurationService configuration = services.getService(ConfigurationService.class);
@@ -165,7 +153,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
-                    if (isEmpty(targetHamEmailAddress)) {
+                    if (com.openexchange.java.Strings.isEmpty(targetHamEmailAddress)) {
                         LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetHamEmailAddress', cannot process ham reporting to server.");
                     } else {
                         transport.sendRawMessage(mailMessage[i].getSourceBytes(), new Address[] { new InternetAddress(targetHamEmailAddress, true) });
