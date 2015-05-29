@@ -361,7 +361,7 @@ public final class OXFolderUtility {
                      * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
                      */
                     throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(
-                        getUserName(permissionBits.getUserId(), context), getFolderName(folder, context), I(context.getContextId()));
+                        getUserName(permissionBits.getUserId(), context), getFolderName(folder, context), Integer.valueOf(context.getContextId()));
                 }
             }
         }
