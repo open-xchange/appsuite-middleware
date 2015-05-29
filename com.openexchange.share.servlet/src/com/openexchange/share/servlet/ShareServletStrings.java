@@ -60,6 +60,8 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ShareServletStrings implements LocalizableStrings {
 
+    public static final String GUEST = "guest";
+
     public static final String FILE = "file";
 
     public static final String FOLDER = "folder";

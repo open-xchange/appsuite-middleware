@@ -488,7 +488,9 @@ public class RdbUserStorage extends UserStorage {
                         if (false == user.isGuest()) {
                             regularUsers.put(user.getId(), user);
                         } else if (Strings.isEmpty(user.getMail()) && Strings.isEmpty(user.getDisplayName())) {
-                            user.setDisplayName(StringHelper.valueOf(user.getLocale()).getString(Users.GUEST));
+                            String guest = StringHelper.valueOf(user.getLocale()).getString(Users.GUEST);
+                            user.setDisplayName(guest);
+                            user.setLoginInfo(guest);
                         }
                     }
                 } finally {
