@@ -59,6 +59,7 @@ import com.openexchange.apps.manifests.json.ManifestActionFactory;
 import com.openexchange.apps.manifests.json.ManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Reloadable;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.groupware.notify.hostname.HostnameService;
@@ -74,7 +75,7 @@ import com.openexchange.serverconfig.ServerConfigService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ManifestJSONActivator extends AJAXModuleActivator implements Reloadable {
+public class ManifestJSONActivator extends AJAXModuleActivator implements ForcedReloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivator.class);
 

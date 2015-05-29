@@ -79,6 +79,7 @@ import org.ho.yaml.Yaml;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
@@ -767,8 +768,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             // Trigger only forced ones
             for (Reloadable reloadable : reloadableServices.values()) {
                 try {
-                    Map<String, String[]> configFileNames = reloadable.getConfigFileNames();
-                    if (null == configFileNames || configFileNames.isEmpty()) {
+                    if (ForcedReloadable.class.isInstance(reloadable)) {
                         reloadable.reloadConfiguration(this);
                     }
                 } catch (Exception e) {

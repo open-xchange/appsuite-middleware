@@ -56,6 +56,7 @@ import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.cm.ManagedService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.internal.ConfigProviderServiceImpl;
@@ -123,6 +124,7 @@ public final class ConfigActivator extends HousekeepingActivator {
 
             // Add & open service trackers
             track(Reloadable.class, new ReloadableServiceTracker(context, configService));
+            track(ForcedReloadable.class, new ForcedReloadableServiceTracker(context, configService));
             track(ManagementService.class, new ManagementServiceTracker(context, configService));
             track(ConfigProviderService.class, configProviderServiceTracker);
             openTrackers();

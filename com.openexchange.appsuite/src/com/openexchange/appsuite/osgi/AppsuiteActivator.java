@@ -59,6 +59,7 @@ import com.openexchange.appsuite.AppsLoadServlet;
 import com.openexchange.appsuite.FileContribution;
 import com.openexchange.appsuite.FileContributor;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -71,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link AppsuiteActivator} - The activator for <code>"com.openexchange.appsuite"</code> bundle.
  */
-public class AppsuiteActivator extends HousekeepingActivator implements Reloadable {
+public class AppsuiteActivator extends HousekeepingActivator implements ForcedReloadable {
 
     private volatile AppsLoadServlet appsLoadServlet;
 
