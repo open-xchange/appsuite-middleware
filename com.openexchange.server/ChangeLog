@@ -208,6 +208,10 @@
 
  - Fix for bug 37282: Added support for startup with Java 9.
 
+* 2015-04-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37809: Added null guards as null is a valid value inside returned MailMessage[] array
+
 * 2015-03-20 - thorben.betten@open-xchange.com
 
  - Fix for bug 37102: Improved handling for special "FLS-0017" error code
