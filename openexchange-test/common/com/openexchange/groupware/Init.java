@@ -615,7 +615,7 @@ public final class Init {
 
     private static void startAndInjectContactServices() {
         if (null == TestServiceRegistry.getInstance().getService(ContactService.class)) {
-            final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null));
+            final ContactService contactService = new ContactServiceImpl(new UserServiceInterceptorRegistry(null), null);
             ContactServiceLookup.set(new ServiceLookup() {
 
                 @Override
