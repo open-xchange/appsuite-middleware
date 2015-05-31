@@ -91,6 +91,9 @@ import com.openexchange.session.Session;
 import com.openexchange.spamhandler.NoSpamHandler;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
+import com.openexchange.threadpool.AbstractTask;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPStore;
 
@@ -325,11 +328,24 @@ public class IMAPDefaultFolderChecker {
                  * Mail account data changed?
                  */
                 if (accountChanged.getValue()) {
-                    FolderService folderService = Services.getServiceLookup().getOptionalService(FolderService.class);
-                    if (null != folderService) {
-                        // Reinitialize the EAS favorite folder tree
-                        folderService.reinitialize("20", session);
-                    }
+                    final Logger logger = LOG;
+                    ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            try {
+                                FolderService folderService = Services.getServiceLookup().getOptionalService(FolderService.class);
+                                if (null != folderService) {
+                                    // Reinitialize the EAS favorite folder tree
+                                    folderService.reinitialize("20", session);
+                                }
+                            } catch (Exception x) {
+                                logger.warn("Failed to propagate changed mail default folders", x);
+                            }
+                            return null;
+                        }
+
+                    }, CallerRunsBehavior.<Void> getInstance());
                 }
             } finally {
                 lock.unlock();
