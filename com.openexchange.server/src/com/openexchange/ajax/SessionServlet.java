@@ -52,6 +52,7 @@ package com.openexchange.ajax;
 import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.ServletException;
@@ -66,6 +67,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRendere
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -189,6 +191,22 @@ public abstract class SessionServlet extends AJAXServlet {
 
     protected void superService(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         super.service(req, resp);
+    }
+
+    /**
+     * Gets the locale from the user associated with given session
+     *
+     * @param session The session
+     * @param defaultLocale The default locale
+     * @return The determined locale or given <code>defaultLocale</code>
+     */
+    protected Locale getLocaleFrom(ServerSession session, Locale defaultLocale) {
+        if (null == session) {
+            return defaultLocale;
+        }
+
+        User user = session.getUser();
+        return null == user ? defaultLocale : user.getLocale();
     }
 
     /**

@@ -10,6 +10,10 @@
 
  - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
 
+* 2015-06-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
+
 * 2015-05-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
