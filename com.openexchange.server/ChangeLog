@@ -24,10 +24,6 @@
  - Fix for bug 38427: Turn column identifiers to mail field guaranteed not to hold any null values
  - Fix for bug 38425: Null guard when accessing optional session parameter
 
-* 2015-05-26 - martin.herfurth@open-xchange.com
-
- - Fix for bug 38079: Fixed some strange series calculation issues.
-
 * 2015-05-22 - marc.arens@open-xchange.com
 
  - Fix for bug 38380: Don't let malformed Cookies break request processing
