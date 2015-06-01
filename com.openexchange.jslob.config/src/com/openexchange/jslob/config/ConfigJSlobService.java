@@ -322,6 +322,29 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(SessiondService.class);
     }
 
+    private void mergeWithSharedJSlobs(String id, JSlob jsonJSlob, Map<String, SharedJSlobService> sharedJSlobs, Session session) throws OXException {
+        for (Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
+            String sharedId = entry.getKey();
+            if (sharedId.startsWith(id)) {
+                try {
+                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
+                    JSONObject jsonObject = jsonJSlob.getJsonObject();
+                    if (sharedId.equals(id)) {
+                        JSONObject sharedJsonObject = sharedJSlob.getJsonObject();
+                        for (Entry<String,Object> sharedEntry : sharedJsonObject.entrySet()) {
+                            jsonObject.put(sharedEntry.getKey(), sharedEntry.getValue());
+                        }
+                    } else {
+                        String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                        jsonObject.put(newId, sharedJSlob.getJsonObject());
+                    }
+                } catch (JSONException e) {
+                    // should not happen
+                }
+            }
+        }
+    }
+
     @Override
     public Collection<JSlob> get(final Session session) throws OXException {
         final int userId = session.getUserId();
@@ -362,24 +385,12 @@ public final class ConfigJSlobService implements JSlobService {
             addConfigTreeToJslob(session, jSlob);
         }
 
-        for (JSlob jSlob : ret) {
-            String id = jSlob.getId().getId();
-            for (String sharedId : sharedJSlobs.keySet()) {
-                if (sharedId.startsWith(id)) {
-                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                    JSONObject jsonObject = jSlob.getJsonObject();
-                    JSONObject sharedObject = sharedJSlob.getJsonObject();
-                    for (String key : sharedObject.keySet()) {
-                        if (sharedObject.hasAndNotNull(key)) {
-                            try {
-                                jsonObject.put(newId, sharedObject);
-                            } catch (JSONException e) {
-                                // should not happen
-                            }
-                        }
-                    }
-                }
+        // Search for shared jslobs and merge them if necessary
+        Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        if (!sharedJSlobs.isEmpty()) {
+            for (JSlob jSlob : ret) {
+                String id = jSlob.getId().getId();
+                mergeWithSharedJSlobs(id, jSlob, sharedJSlobs, session);
             }
         }
         return ret;
@@ -424,19 +435,7 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
         // Search for shared jslobs and merge them if necessary
-        final Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
-        for (final Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
-            final String sharedId = entry.getKey();
-            if (sharedId.startsWith(id)) {
-                try {
-                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
-                    String newId = id.length() < sharedId.length() ? sharedId.substring(id.length() + 1, sharedId.length()) : sharedId;
-                    jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
-                } catch (JSONException e) {
-                    // should not happen
-                }
-            }
-        }
+        mergeWithSharedJSlobs(id, jsonJSlob, this.sharedJSlobs, session);
 
         return jsonJSlob;
     }
@@ -485,25 +484,12 @@ public final class ConfigJSlobService implements JSlobService {
             ret.add(jsonJSlob);
         }
 
-        for (JSlob jslob : ret) {
-            String id = jslob.getId().getId();
-            // Search for shared jslobs and merge them if neccessary
-            for (String sharedId : sharedJSlobs.keySet()) {
-                if (sharedId.startsWith(id)) {
-                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                    JSONObject jsonObject = jslob.getJsonObject();
-                    JSONObject sharedObject = sharedJSlob.getJsonObject();
-                    for (String key : sharedObject.keySet()) {
-                        if (sharedObject.hasAndNotNull(key)) {
-                            try {
-                                jsonObject.put(newId, sharedObject);
-                            } catch (JSONException e) {
-                                // should not happen
-                            }
-                        }
-                    }
-                }
+        // Search for shared jslobs and merge them if necessary
+        Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        if (!sharedJSlobs.isEmpty()) {
+            for (JSlob jslob : ret) {
+                String id = jslob.getId().getId();
+                mergeWithSharedJSlobs(id, jslob, sharedJSlobs, session);
             }
         }
 
