@@ -87,6 +87,7 @@ import com.openexchange.oauth.provider.impl.groupware.OAuthProviderDeleteListene
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
@@ -231,7 +232,8 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
-            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class };
+            HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
+            SessiondService.class };
     }
 
     @Override

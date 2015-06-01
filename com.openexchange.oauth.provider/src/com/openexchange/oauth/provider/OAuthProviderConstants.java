@@ -120,6 +120,9 @@ public interface OAuthProviderConstants {
     /** Required. The user password */
     public static final String PARAM_USER_PASSWORD = "user_password";
 
+    /** Required. The session ID */
+    public static final String PARAM_SESSION = "session";
+
     /** Required. The user password */
     public static final String PARAM_ACCESS_DENIED = "access_denied";
 

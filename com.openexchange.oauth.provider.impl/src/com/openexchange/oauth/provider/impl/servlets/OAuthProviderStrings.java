@@ -78,4 +78,16 @@ public class OAuthProviderStrings implements LocalizableStrings {
     // label of login form
     public static final String LOGIN = "Login";
 
+    // An error occurred
+    public static final String ERROR_PAGE_TITLE = "An error occurred";
+
+    // There seems to be a problem with this app.
+    public static final String ERROR_HEADLINE = "There seems to be a problem with this app.";
+
+    // Don't worry, your data is perfectly safe.
+    public static final String ERROR_MESSAGE = "Don't worry, your data is perfectly safe.";
+
+    // View error details:
+    public static final String ERROR_DETAILS_SUMMARY = "View error details:";
+
 }

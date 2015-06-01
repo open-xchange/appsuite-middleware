@@ -49,12 +49,17 @@
 
 package com.openexchange.oauth.provider.impl.servlets;
 
+import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -69,11 +74,17 @@ import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.OXTemplateExceptionHandler;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -92,12 +103,15 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
     protected final OAuthProviderService oAuthProvider;
 
+    protected final ServiceLookup services;
+
     /**
      * Initializes a new {@link OAuthEndpoint}.
      */
-    protected OAuthEndpoint(OAuthProviderService oAuthProvider) {
+    protected OAuthEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
         super();
         this.oAuthProvider = oAuthProvider;
+        this.services = services;
     }
 
     /**
@@ -122,6 +136,52 @@ public abstract class OAuthEndpoint extends HttpServlet {
             response.reset();
             Tools.disableCaching(response);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Responds with a HTML error page.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param message The detailed error message to guide client developers
+     * @throws IOException
+     */
+    protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Content-Disposition", "inline");
+        response.setStatus(200);
+        try {
+            PrintWriter writer = response.getWriter();
+            writeErrorPage(writer, message, determineLocale(request));
+            writer.flush();
+        } catch (OXException e) {
+            LOG.error("Could not write error page", e);
+            Tools.sendErrorPage(response, HttpServletResponse.SC_OK, message);
+        }
+    }
+
+    /**
+     * Responds with a HTML error page. The passed exceptions ID is returned
+     * as part of the detailed error description.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param e The OXException causing the error response
+     * @throws IOException
+     */
+    protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, OXException e) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Content-Disposition", "inline");
+        response.setStatus(200);
+        String message = "An internal error occurred. If you want to contact our support because of this, please provide this error code: " + e.getErrorCode() + "(" + e.getExceptionId() + ").";
+        try {
+            PrintWriter writer = response.getWriter();
+            writeErrorPage(writer, message, determineLocale(request));
+            writer.flush();
+        } catch (OXException oxe) {
+            LOG.error("Could not write error page", oxe);
+            Tools.sendErrorPage(response, HttpServletResponse.SC_OK, message);
         }
     }
 
@@ -235,6 +295,23 @@ public abstract class OAuthEndpoint extends HttpServlet {
         }
 
         return false;
+    }
+
+    private void writeErrorPage(Writer writer, String message, Locale locale) throws OXException, IOException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        TemplateService templateService = requireService(TemplateService.class, services);
+        Translator translator = translatorFactory.translatorFor(locale);
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("lang", locale.getLanguage());
+        vars.put("title", translator.translate(OAuthProviderStrings.ERROR_PAGE_TITLE));
+        vars.put("headline", translator.translate(OAuthProviderStrings.ERROR_HEADLINE));
+        vars.put("message", translator.translate(OAuthProviderStrings.ERROR_MESSAGE));
+        vars.put("detailsSummary", translator.translate(OAuthProviderStrings.ERROR_DETAILS_SUMMARY));
+        vars.put("detailsText", message);
+
+        OXTemplate loginPage = templateService.loadTemplate("oauth-provider-error.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
+        loginPage.process(vars, writer);
     }
 
 }

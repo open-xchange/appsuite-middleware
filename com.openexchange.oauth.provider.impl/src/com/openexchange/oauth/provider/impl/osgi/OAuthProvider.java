@@ -175,8 +175,8 @@ public class OAuthProvider {
 
     private void registerServlets(OAuthProviderService oAuthProvider) throws ServletException, NamespaceException, OXException {
         AuthorizationEndpoint authorizationEndpoint = new AuthorizationEndpoint(oAuthProvider, activator);
-        TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider);
-        RevokeEndpoint revokeEndpoint = new RevokeEndpoint(oAuthProvider);
+        TokenEndpoint tokenEndpoint = new TokenEndpoint(oAuthProvider, activator);
+        RevokeEndpoint revokeEndpoint = new RevokeEndpoint(oAuthProvider, activator);
         AuthInfoEndpoint authInfoEndpoint = new AuthInfoEndpoint(oAuthProvider, activator);
 
         HttpService httpService = requireService(HttpService.class, activator);

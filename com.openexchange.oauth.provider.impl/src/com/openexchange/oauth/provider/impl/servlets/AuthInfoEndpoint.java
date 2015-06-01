@@ -90,11 +90,8 @@ public class AuthInfoEndpoint extends OAuthEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(AuthInfoEndpoint.class);
 
-    private final ServiceLookup services;
-
     public AuthInfoEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
-        super(oAuthProvider);
-        this.services = services;
+        super(oAuthProvider, services);
     }
 
     @Override

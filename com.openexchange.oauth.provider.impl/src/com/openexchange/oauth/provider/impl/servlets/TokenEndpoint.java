@@ -68,6 +68,7 @@ import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -86,8 +87,8 @@ public class TokenEndpoint extends OAuthEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(TokenEndpoint.class);
 
 
-    public TokenEndpoint(OAuthProviderService oAuthProvider) {
-        super(oAuthProvider);
+    public TokenEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
+        super(oAuthProvider, services);
     }
 
     @Override
