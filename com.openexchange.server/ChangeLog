@@ -1,3 +1,7 @@
+* 2015-06-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
+
 * 2015-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 38502: Proper shut-down of DeferredActivator in case an error occurs on bundle start-up
