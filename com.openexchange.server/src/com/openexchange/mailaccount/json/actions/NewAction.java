@@ -110,7 +110,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
     }
 
     @Override
-    protected AJAXRequestResult innerPerform(final AJAXRequestData requestData, final ServerSession session, final JSONValue jData) throws OXException, JSONException {
+    protected AJAXRequestResult innerPerform(AJAXRequestData requestData, ServerSession session, JSONValue jData) throws OXException, JSONException {
         if (!session.getUserPermissionBits().isMultipleMailAccounts()) {
             throw
             MailAccountExceptionCodes.NOT_ENABLED.create(
@@ -143,17 +143,16 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         {
-            final String name = accountDescription.getName();
+            String name = accountDescription.getName();
             if (isEmpty(name) || "null".equalsIgnoreCase(name)) {
                 accountDescription.setName(accountDescription.getPrimaryAddress());
             }
         }
 
-        final MailAccountStorageService storageService =
-            ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
 
         // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
-        final boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+        boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
@@ -173,7 +172,16 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             try {
                 mailAccess = getMailAccess(accountDescription, session, warnings);
                 mailAccess.connect(false);
-                Tools.checkNames(accountDescription, availableAttributes, mailAccess.getFolderStorage().getFolder("INBOX").getSeparator());
+
+                // Determine separator character
+                char separator = mailAccess.getFolderStorage().getFolder("INBOX").getSeparator();
+
+                // Close MailAccess and discard
+                mailAccess.close(false);
+                mailAccess = null;
+
+                // Check names
+                Tools.checkNames(accountDescription, availableAttributes, Character.valueOf(separator));
             } finally {
                 if (null != mailAccess) {
                     mailAccess.close(false);
@@ -181,19 +189,21 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
-        final int cid = session.getContextId();
-        final int id;
+        int cid = session.getContextId();
+        int id;
         MailAccount newAccount = null;
         {
-            final Connection wcon = Database.get(cid, true);
+            Connection wcon = Database.get(cid, true);
             boolean rollback = false;
             try {
                 Databases.startTransaction(wcon);
                 rollback = true;
+
+                // Insert account
                 id = storageService.insertMailAccount(accountDescription, session.getUserId(), session.getContext(), session, wcon);
+
                 // Check full names after successful creation
                 newAccount = storageService.getMailAccount(id, session.getUserId(), cid, wcon);
-
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
@@ -202,9 +212,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
                 wcon.commit();
                 rollback = false;
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-            } catch (final RuntimeException e) {
+            } catch (RuntimeException e) {
                 throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollback) {
@@ -215,17 +225,39 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
             }
         }
 
+        // Live connect to orderly check default folders
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session, id);
+            mailAccess.connect(true);
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close();
+            }
+        }
+
+        // Reload account
         {
-            final JSONObject jBody = jData.toObject();
+            Connection wcon = Database.get(cid, true);
+            try {
+                // Insert account
+                newAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId(), wcon);
+            } finally {
+                Database.backAfterReading(cid, wcon);
+            }
+        }
+
+        {
+            JSONObject jBody = jData.toObject();
             if (jBody.hasAndNotNull(META)) {
                 final JSONObject jMeta = jBody.optJSONObject(META);
                 getStorage().store(new JSlobId(JSLOB_SERVICE_ID, Integer.toString(id), session.getUserId(), session.getContextId()), new DefaultJSlob(jMeta));
             }
         }
 
-        final JSONObject jsonAccount;
+        JSONObject jsonAccount;
         if (null == newAccount) {
-            final MailAccount loadedMailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
+            MailAccount loadedMailAccount = storageService.getMailAccount(id, session.getUserId(), session.getContextId());
             if (null == loadedMailAccount) {
                 throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
             }

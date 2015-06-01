@@ -1,6 +1,8 @@
 * 2015-06-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
+ - Fix for bug 38553: Live connect against IMAP server to determine whether special folders are supposed to be used for standard mail folders
+                      (e.g. through advertising SPECIAL-USE flags)
 
 * 2015-05-28 - thorben.betten@open-xchange.com
 
