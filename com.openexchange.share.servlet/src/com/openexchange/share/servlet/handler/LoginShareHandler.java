@@ -143,20 +143,20 @@ public class LoginShareHandler extends AbstractShareHandler {
                 }
                 int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
                 if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
-                    String count = emptyGuestPasswords < 0 ? translator.translate(ShareServletStrings.UNLIMITED) : String.valueOf((emptyGuestPasswords - loginCount));
-                    if (emptyGuestPasswords >= 0) {
+                    if (emptyGuestPasswords - loginCount == 1) {
                         if (null != proxy) {
-                            message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.ASK_PASSWORD_WITH_TARGET), proxy.getTitle(), count)));
+                            message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD_WITH_TARGET)));
                         } else {
-                            message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.ASK_PASSWORD_WITHOUT_TARGET), count)));
+                            message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD_WITHOUT_TARGET)));
                         }
+                    } else {
+                        message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD)));
                     }
-                    message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD)));
                     messageType = "WARN";
                     action = "ask_password";
                 } else {
                     if (null != proxy) {
-                        message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.REQUIRE_PASSWORD_WITH_TARGET), proxy.getTitle())));
+                        message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.REQUIRE_PASSWORD_WITH_TARGET)));
                     } else {
                         message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.REQUIRE_PASSWORD_WITHOUT_TARGET)));
                     }
