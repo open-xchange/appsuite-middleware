@@ -604,24 +604,41 @@ public class IMAPDefaultFolderChecker {
             }
         } else {
             if (!checkedIndexes.isEmpty()) {
-                TIntObjectMap<String> toSet = new TIntObjectHashMap<String>(6);
-                boolean added = false;
+                TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<String>(6);
+                TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
                 for (int i = 0; i < fullNames.length; i++) {
                     String expectedFullName = checkedIndexes.get(i);
                     if (null != expectedFullName) {
                         String fullName = fullNames[i];
                         if (isEmpty(fullName)) {
-                            toSet.put(i, expectedFullName);
-                            added = true;
+                            fullNamesToSet.put(i, expectedFullName);
+                            // Check name, too
+                            String expectedName = expectedFullName.substring(expectedFullName.lastIndexOf(sep) + 1);
+                            if (!expectedName.equals(names[i])) {
+                                names[i] = expectedName;
+                                namesToSet.put(i, expectedFullName);
+                            }
                         } else if (!expectedFullName.equals(fullName)) {
                             fullNames[i] = null;
-                            toSet.put(i, expectedFullName);
-                            added = true;
+                            fullNamesToSet.put(i, expectedFullName);
+                            // Check name, too
+                            String expectedName = expectedFullName.substring(expectedFullName.lastIndexOf(sep) + 1);
+                            if (!expectedName.equals(names[i])) {
+                                names[i] = expectedName;
+                                namesToSet.put(i, expectedFullName);
+                            }
                         }
                     }
                 }
-                if (added) {
-                    MailAccount modifiedAccount = setAccountFullNames(toSet);
+                if (!fullNamesToSet.isEmpty()) {
+                    MailAccount modifiedAccount = setAccountFullNames(fullNamesToSet);
+                    accountChanged.setValue(true);
+                    if (null != modifiedAccount) {
+                        imapConfig.applyStandardNames(modifiedAccount, true);
+                    }
+                }
+                if (!namesToSet.isEmpty()) {
+                    MailAccount modifiedAccount = setAccountNames(namesToSet);
                     accountChanged.setValue(true);
                     if (null != modifiedAccount) {
                         imapConfig.applyStandardNames(modifiedAccount, true);
