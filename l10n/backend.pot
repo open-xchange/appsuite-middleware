@@ -3292,6 +3292,26 @@ msgstr ""
 msgid "Username"
 msgstr ""
 
+#. An error occurred
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:82
+msgid "An error occurred"
+msgstr ""
+
+#. There seems to be a problem with this app.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:85
+msgid "There seems to be a problem with this app."
+msgstr ""
+
+#. Don't worry, your data is perfectly safe.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:88
+msgid "Don't worry, your data is perfectly safe."
+msgstr ""
+
+#. View error details:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:91
+msgid "View error details:"
+msgstr ""
+
 #. Account not found.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:63
 msgid "Account not found"
