@@ -69,6 +69,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Client;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.SessionUtility;
@@ -405,7 +406,7 @@ public class DispatcherServlet extends SessionServlet {
         } catch (UploadException e) {
             if (UploadException.UploadCode.MAX_UPLOAD_FILE_SIZE_EXCEEDED.equals(e) || UploadException.UploadCode.MAX_UPLOAD_SIZE_EXCEEDED.equals(e)) {
                 // An upload failed
-                if (null == session || !"com.openexchange.ox.gui.dhtml".equals(session.getClient())) {
+                if (null == session || !Client.OX6_UI.getClientId().equals(session.getClient())) {
                     httpResponse.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, e.getDisplayMessage(getLocaleFrom(session, Locale.US)));
                     logException(e, LogLevel.DEBUG, HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
                     return;

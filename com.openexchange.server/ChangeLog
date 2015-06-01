@@ -1,3 +1,7 @@
+* 2015-06-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
+
 * 2015-08-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38260: Include distribution list entries when searching in contact module
