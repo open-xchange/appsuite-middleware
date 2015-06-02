@@ -192,7 +192,7 @@ public class OneDriveAccess {
         super();
 
         // Initialize map
-        knownIds = new ConcurrentHashMap<String, Object>(256);
+        knownIds = new ConcurrentHashMap<String, Object>(256, 0.9f, 1);
 
         // Get OAuth account identifier from messaging account's configuration
         int oauthAccountId;

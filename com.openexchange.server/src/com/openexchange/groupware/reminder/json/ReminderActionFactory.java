@@ -82,7 +82,7 @@ public class ReminderActionFactory implements AJAXActionServiceFactory {
      */
     public ReminderActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractReminderAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractReminderAction>(4, 0.9f, 1);
         actions.put("delete", new com.openexchange.groupware.reminder.json.actions.DeleteAction(services));
         actions.put("updates", new com.openexchange.groupware.reminder.json.actions.UpdatesAction(services));
         actions.put("range", new com.openexchange.groupware.reminder.json.actions.RangeAction(services));

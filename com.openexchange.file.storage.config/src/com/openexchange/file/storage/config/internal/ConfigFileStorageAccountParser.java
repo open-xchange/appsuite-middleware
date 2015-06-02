@@ -93,7 +93,7 @@ public final class ConfigFileStorageAccountParser {
      */
     private ConfigFileStorageAccountParser() {
         super();
-        authenticators = new ConcurrentHashMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator>(4);
+        authenticators = new ConcurrentHashMap<ConfigFileStorageAuthenticator, ConfigFileStorageAuthenticator>(4, 0.9f, 1);
         map = Collections.emptyMap();
     }
 
@@ -177,7 +177,7 @@ public final class ConfigFileStorageAccountParser {
                 final String serviceId = account.getServiceId();
                 Map<String, ConfigFileStorageAccountImpl> map = m.get(serviceId);
                 if (null == map) {
-                    map = new ConcurrentHashMap<String, ConfigFileStorageAccountImpl>(2);
+                    map = new ConcurrentHashMap<String, ConfigFileStorageAccountImpl>(2, 0.9f, 1);
                     m.put(serviceId, map);
                 }
                 map.put(account.getId(), account);

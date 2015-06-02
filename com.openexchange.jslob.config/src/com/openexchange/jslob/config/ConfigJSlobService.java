@@ -149,9 +149,9 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
         if (null == file) {
-            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2);
+            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2, 0.9f, 1);
         } else {
-            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48);
+            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
             readPerfMap(file, configTreeEquivalents);
             this.configTreeEquivalents = configTreeEquivalents;
         }

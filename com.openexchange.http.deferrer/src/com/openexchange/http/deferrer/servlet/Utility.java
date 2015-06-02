@@ -66,7 +66,7 @@ import com.openexchange.configuration.ServerConfig;
  */
 public final class Utility {
 
-    private static final ConcurrentMap<String, URLCodec> URL_CODECS = new ConcurrentHashMap<String, URLCodec>(8);
+    private static final ConcurrentMap<String, URLCodec> URL_CODECS = new ConcurrentHashMap<String, URLCodec>(8, 0.9f, 1);
 
     private static URLCodec getUrlCodec(final String charset) {
         String cs = charset;

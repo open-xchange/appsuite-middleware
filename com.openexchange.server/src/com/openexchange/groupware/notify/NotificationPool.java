@@ -80,7 +80,7 @@ public final class NotificationPool {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationPool.class);
 
-    private static final NotificationPool instance = new NotificationPool();
+    private static final NotificationPool INSTANCE = new NotificationPool();
 
     /**
      * Gets the {@link NotificationPool} instance
@@ -88,19 +88,16 @@ public final class NotificationPool {
      * @return The {@link NotificationPool} instance
      */
     public static NotificationPool getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------
+
     private final AtomicBoolean started;
-
     private final ReadWriteLock lock;
-
     private final Lock readLock;
-
-    private ScheduledTimerTask timerTask;
-
+    private volatile ScheduledTimerTask timerTask;
     private final Map<PooledNotification, PooledNotification> map;
-
     private final DelayQueue<PooledNotification> queue;
 
     /**
@@ -109,7 +106,7 @@ public final class NotificationPool {
     private NotificationPool() {
         super();
         started = new AtomicBoolean();
-        map = new ConcurrentHashMap<PooledNotification, PooledNotification>(1024);
+        map = new ConcurrentHashMap<PooledNotification, PooledNotification>(1024, 0.9f, 1);
         queue = new DelayQueue<PooledNotification>();
         lock = new ReentrantReadWriteLock();
         readLock = lock.readLock();
@@ -203,6 +200,7 @@ public final class NotificationPool {
      */
     public void shutdown() {
         if (started.compareAndSet(true, false)) {
+            ScheduledTimerTask timerTask = this.timerTask;
             timerTask.cancel(false);
             final TimerService timer = ServerServiceRegistry.getInstance().getService(TimerService.class);
             if (null != timer) {
@@ -210,7 +208,7 @@ public final class NotificationPool {
             }
             map.clear();
             queue.clear();
-            timerTask = null;
+            this.timerTask = null;
         }
     }
 

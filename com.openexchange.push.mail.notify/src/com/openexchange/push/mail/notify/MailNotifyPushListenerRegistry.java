@@ -105,7 +105,7 @@ public final class MailNotifyPushListenerRegistry {
      */
     public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) {
         super();
-        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048);
+        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048, 0.9f, 1);
         this.useOXLogin = useOXLogin;
         this.useEmailAddress = useEmailAddress;
         notificationsQueue = new MailNotifyDelayQueue();

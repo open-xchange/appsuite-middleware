@@ -54,7 +54,6 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,11 +72,8 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.file.storage.googledrive.osgi.Services;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
 import com.openexchange.session.Session;
 
@@ -320,7 +316,7 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthA
             this.password = password;
             this.userId = userId;
             this.contextId = contextId;
-            parameters = new ConcurrentHashMap<String, Object>(8);
+            parameters = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
         }
 
         @Override

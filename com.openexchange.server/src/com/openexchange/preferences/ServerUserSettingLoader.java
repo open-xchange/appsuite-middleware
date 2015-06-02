@@ -121,7 +121,7 @@ public final class ServerUserSettingLoader  {
             if (!rs.next()) {
                 return null;
             }
-            final Map<String,Object> newMap = new ConcurrentHashMap<String, Object>(12);
+            final Map<String,Object> newMap = new ConcurrentHashMap<String, Object>(12, 0.9f, 1);
             newMap.put("__lastAccessed", Long.valueOf(System.currentTimeMillis()));
 
             do {

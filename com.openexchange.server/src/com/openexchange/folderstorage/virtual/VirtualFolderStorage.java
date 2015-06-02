@@ -586,7 +586,7 @@ public final class VirtualFolderStorage implements ReinitializableFolderStorage 
         /*
          * Create destination map
          */
-        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size);
+        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size, 0.9f, 1);
         int taskCount = 0;
         for (final java.util.Map.Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();

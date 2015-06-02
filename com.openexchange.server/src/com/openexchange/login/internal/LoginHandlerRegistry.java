@@ -104,7 +104,7 @@ public final class LoginHandlerRegistry {
      */
     private LoginHandlerRegistry() {
         super();
-        handlers = new ConcurrentHashMap<Class<? extends LoginHandlerService>, LoginHandlerService>(4);
+        handlers = new ConcurrentHashMap<Class<? extends LoginHandlerService>, LoginHandlerService>(4, 0.9f, 1);
     }
 
     /**
