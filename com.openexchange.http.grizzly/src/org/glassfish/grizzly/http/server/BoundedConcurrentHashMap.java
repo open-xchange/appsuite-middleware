@@ -78,7 +78,7 @@ class BoundedConcurrentHashMap<K, V> implements Map<K, V> {
         super();
         counter = new AtomicInteger(0);
         lock = new ReentrantLock(false);
-        map = new ConcurrentHashMap<K, V>(initialCapacity);
+        map = new ConcurrentHashMap<K, V>(initialCapacity, 0.9f, 1);
         this.maxSize = maxSize;
     }
 
