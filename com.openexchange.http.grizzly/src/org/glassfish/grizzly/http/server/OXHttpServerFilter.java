@@ -270,7 +270,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     public OXHttpServerFilter(final ServerFilterConfiguration config, final DelayedExecutor delayedExecutor) {
         super(config, delayedExecutor);
         // Ping stuff
-        pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512);
+        pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512, 0.75f, 32);
         {
             final ConfigurationService service = Services.optService(ConfigurationService.class);
             pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);

@@ -101,12 +101,12 @@ public class DefaultDispatcher implements Dispatcher {
      */
     public DefaultDispatcher() {
         super();
-        fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-        publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-        omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128);
-        noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128);
+        fallbackSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
+        publicSessionAuthCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
+        omitSessionActionsCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
+        noSecretCallbackCache = new ConcurrentHashMap<StrPair, Boolean>(128, 0.9f, 1);
 
-        actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>();
+        actionFactories = new ConcurrentHashMap<String, AJAXActionServiceFactory>(64, 0.9f, 1);
         customizerFactories = new ConcurrentLinkedQueue<AJAXActionCustomizerFactory>();
         annotationProcessors = new ConcurrentLinkedQueue<AJAXActionAnnotationProcessor>();
     }

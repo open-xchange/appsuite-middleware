@@ -71,8 +71,8 @@ public final class ClientWhitelist {
      */
     public ClientWhitelist() {
         super();
-        map = new ConcurrentHashMap<Pattern, Pattern>(4);
-        allowedCache = new ConcurrentHashMap<String, Boolean>(4);
+        map = new ConcurrentHashMap<Pattern, Pattern>(4, 0.9f, 1);
+        allowedCache = new ConcurrentHashMap<String, Boolean>(4, 0.9f, 1);
     }
 
     /**

@@ -70,7 +70,7 @@ public final class I18n {
      */
     private I18n() {
         super();
-        services = new ConcurrentHashMap<Locale, I18nService>(4);
+        services = new ConcurrentHashMap<Locale, I18nService>(4, 0.9f, 1);
     }
 
     /**

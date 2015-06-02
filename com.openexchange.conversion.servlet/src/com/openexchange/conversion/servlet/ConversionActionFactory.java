@@ -73,7 +73,7 @@ public class ConversionActionFactory implements AJAXActionServiceFactory {
      */
     public ConversionActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
         actions.put("convert", new ConvertAction(services));
     }
 

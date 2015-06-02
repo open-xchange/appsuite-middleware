@@ -114,7 +114,7 @@ public class MonitoringInfo {
 
     private static int[] numberOfSessionsInContainer;
 
-    private static final ConcurrentMap<Integer, Counter> COUNTER_MAP = new ConcurrentHashMap<Integer, Counter>(8);
+    private static final ConcurrentMap<Integer, Counter> COUNTER_MAP = new ConcurrentHashMap<Integer, Counter>(8, 0.9f, 1);
 
     private static final Counter EMPTY_COUNTER = new Counter() {
 

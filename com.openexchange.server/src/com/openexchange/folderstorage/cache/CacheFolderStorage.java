@@ -1770,7 +1770,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         /*
          * Create destination map
          */
-        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size);
+        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size, 0.9f, 1);
         int taskCount = 0;
         for (java.util.Map.Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage fs = entry.getKey();

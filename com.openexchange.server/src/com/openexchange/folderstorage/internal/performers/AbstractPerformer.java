@@ -171,7 +171,7 @@ public abstract class AbstractPerformer {
         } else {
             this.storageParameters = storageParameters;
         }
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
         check4Duplicates = true;
     }
 
@@ -199,7 +199,7 @@ public abstract class AbstractPerformer {
         this.user = user;
         this.context = context;
         storageParameters = new StorageParametersImpl(user, context);
-        warnings = new ConcurrentHashMap<OXException, Object>(2);
+        warnings = new ConcurrentHashMap<OXException, Object>(2, 0.9f, 1);
         check4Duplicates = true;
     }
 

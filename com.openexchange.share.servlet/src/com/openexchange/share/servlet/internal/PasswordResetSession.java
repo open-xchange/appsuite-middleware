@@ -82,7 +82,7 @@ public class PasswordResetSession implements Session {
         this.contextId = contextId;
         this.userId = userId;
         this.request = request;
-        parameters = new ConcurrentHashMap<String, Object>(4);
+        parameters = new ConcurrentHashMap<String, Object>(4, 0.9f, 1);
     }
 
     @Override

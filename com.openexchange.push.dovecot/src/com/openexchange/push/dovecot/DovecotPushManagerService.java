@@ -145,7 +145,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         super();
         this.services = services;
         this.clusterLock = clusterLock;
-        listeners = new ConcurrentHashMap<SimpleKey, DovecotPushListener>(512);
+        listeners = new ConcurrentHashMap<SimpleKey, DovecotPushListener>(512, 0.9f, 1);
 
         ConfigurationService service = services.getService(ConfigurationService.class);
 
