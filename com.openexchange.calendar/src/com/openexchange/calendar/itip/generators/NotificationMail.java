@@ -319,7 +319,40 @@ public class NotificationMail {
         if (!getRecipient().getConfiguration().interestedInStateChanges() && isAboutStateChangesOnly()) {
             return false;
         }
+        LOG.debug("NotificationMail.shouldBeSend, User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
         return true;
+    }
+    
+    private String id() {
+        try {
+            return getRecipient().getUser().getId() + "";
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+    
+    private String diffs() {
+        try {
+            return getDiff().getDifferingFieldNames().toString();
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+    
+    private String changes() {
+        try {
+            return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+    
+    private String stateChanges() {
+        try {
+            return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
+        } catch (Exception e) {
+            return "NPE";
+        }
     }
 
     private boolean onlyPseudoChangesOnParticipants() {

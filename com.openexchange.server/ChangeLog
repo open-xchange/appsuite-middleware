@@ -1,3 +1,7 @@
+* 2015-06-02 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38571: Added debug logging to track down unwanted notification mails.
+
 * 2015-03-09 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 37112: Ensure that the complete appointment data is loaded for change exceptions before applying outgoing patches
