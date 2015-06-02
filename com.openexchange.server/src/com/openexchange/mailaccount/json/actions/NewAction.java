@@ -59,6 +59,7 @@ import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -99,6 +100,8 @@ import com.openexchange.tools.session.ServerSession;
 }, requestBody = "A JSON object describing the new account to create. See mail account data.",
     responseDescription = "A JSON object representing the inserted mail account. See mail account data.")
 public final class NewAction extends AbstractMailAccountAction implements MailAccountFields {
+
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(NewAction.class);
 
     public static final String ACTION = AJAXServlet.ACTION_NEW;
 
@@ -230,6 +233,8 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         try {
             mailAccess = MailAccess.getInstance(session, id);
             mailAccess.connect(true);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to live-connect against mail server {} on port {}. Aborting to check default folders consistency.", accountDescription.getMailServer(), accountDescription.getMailPort(), e);
         } finally {
             if (null != mailAccess) {
                 mailAccess.close();
