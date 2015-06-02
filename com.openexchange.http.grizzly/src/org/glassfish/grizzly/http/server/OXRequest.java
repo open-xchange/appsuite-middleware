@@ -73,6 +73,16 @@ public class OXRequest extends Request {
 
     private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
 
+    private static final boolean SIZE_AWARE;
+
+    static {
+        int max = grizzlyConfig.getMaxNumberOfHttpSessions();
+        if (max > 0) {
+            sessions = new BoundedConcurrentHashMap<String, Session>(1024, max);
+        }
+        SIZE_AWARE = true;
+    }
+
     // ---------------------------- Members ---------------------------- //
 
     public static Request create() {
@@ -206,13 +216,16 @@ public class OXRequest extends Request {
      * @param sessionId The new SessionId that has to be registered
      */
     private void registerNewSession(String sessionId) {
-        // Check possible limitation first
-        final int max = grizzlyConfig.getMaxNumberOfHttpSessions();
-        if (max > 0 && sessions.size() >= max) {
-            final String message = "Max. number of HTTP session (" + max + ") exceeded.";
-            LOG.warn(message);
-            throw new IllegalStateException(message);
+        if (false == SIZE_AWARE) {
+            // Check possible limitation
+            final int max = grizzlyConfig.getMaxNumberOfHttpSessions();
+            if (max > 0 && sessions.size() >= max) {
+                final String message = "Max. number of HTTP session (" + max + ") exceeded.";
+                LOG.warn(message);
+                throw new IllegalStateException(message);
+            }
         }
+
         // Proceed creating that session
         session = new Session(sessionId);
         session.setTimestamp(System.currentTimeMillis());
