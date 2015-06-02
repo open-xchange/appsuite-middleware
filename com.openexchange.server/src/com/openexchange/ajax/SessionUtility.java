@@ -50,7 +50,6 @@
 package com.openexchange.ajax;
 
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
@@ -465,38 +464,67 @@ public final class SessionUtility {
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
-     * @throws OXException if the session can not be found.
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
     public static ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
         return getSession(hashSource, req, sessionId, sessiondService);
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
-     * @param source defines how the cookie should be found
+     * @param source The {@link CookieHashSource} to calculate the secret cookies hash.
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
      * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
     public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
         return getSession(source, req, sessionId, sessiondService, null);
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
-     * @param source defines how the cookie should be found
+     * @param source The {@link CookieHashSource} to calculate the secret cookies hash.
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
+     * @param optChecker The {@link SessionSecretChecker} to verify the secret cookie.
+     *        May be <code>null</code> to use the default.
      * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
     public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
         final Session session = sessiondService.getSession(sessionId);
@@ -539,7 +567,7 @@ public final class SessionUtility {
             }
             throw e;
         } catch (final UndeclaredThrowableException e) {
-            throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
         }
     }
 
