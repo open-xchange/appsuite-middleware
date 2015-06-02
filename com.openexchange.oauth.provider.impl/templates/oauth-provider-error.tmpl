@@ -6,7 +6,7 @@
     <title>${title}</title>
   </head>
   <body>
-    <div id="header">
+    <div id="main">
       <!-- There seems to be a problem with this app. -->
       <h1 id="headline">${headline}</h1>
       <!-- Don't worry, your data is perfectly safe. -->
@@ -17,6 +17,9 @@
         <!-- Request was missing a required parameter: client_id -->
         <p>${detailsText}</p>
       </details>
+    </div>
+    <div id="escape">
+      <button type="button" onclick="window.close();">${close}</button>
     </div>
   </body>
 </html>

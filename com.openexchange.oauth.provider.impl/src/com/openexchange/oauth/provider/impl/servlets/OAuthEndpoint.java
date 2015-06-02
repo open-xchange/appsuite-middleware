@@ -70,8 +70,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
@@ -112,31 +110,6 @@ public abstract class OAuthEndpoint extends HttpServlet {
         super();
         this.oAuthProvider = oAuthProvider;
         this.services = services;
-    }
-
-    /**
-     * Sends a JSON error response as defined in the HTTP API.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     * @param e The OXException
-     * @throws IOException
-     */
-    protected static void sendJSONError(HttpServletRequest request, HttpServletResponse response, OXException e) throws IOException {
-        Response errorResponse = new Response();
-        errorResponse.setLocale(determineLocale(request));
-        errorResponse.setException(e);
-        try {
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            ResponseWriter.write(errorResponse, response.getWriter());
-        } catch (JSONException je) {
-            LOG.error("Could not send error response", je);
-            response.reset();
-            Tools.disableCaching(response);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-        }
     }
 
     /**
@@ -182,31 +155,6 @@ public abstract class OAuthEndpoint extends HttpServlet {
         } catch (OXException oxe) {
             LOG.error("Could not write error page", oxe);
             Tools.sendErrorPage(response, HttpServletResponse.SC_OK, message);
-        }
-    }
-
-    /**
-     * Sends a JSON response as defined in the HTTP API.
-     *
-     * @param request The servlet request
-     * @param response The servlet response
-     * @param e The OXException
-     * @throws IOException
-     */
-    protected static void sendJSONResponse(HttpServletRequest request, HttpServletResponse response, JSONObject data) throws IOException {
-        try {
-            Response redirectResponse = new Response();
-            redirectResponse.setData(data);
-            redirectResponse.setLocale(determineLocale(request));
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            ResponseWriter.write(redirectResponse, response.getWriter());
-        } catch (JSONException e) {
-            LOG.error("Could not send redirect response", e);
-            response.reset();
-            Tools.disableCaching(response);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -309,6 +257,7 @@ public abstract class OAuthEndpoint extends HttpServlet {
         vars.put("message", translator.translate(OAuthProviderStrings.ERROR_MESSAGE));
         vars.put("detailsSummary", translator.translate(OAuthProviderStrings.ERROR_DETAILS_SUMMARY));
         vars.put("detailsText", message);
+        vars.put("close", translator.translate(OAuthProviderStrings.CLOSE));
 
         OXTemplate loginPage = templateService.loadTemplate("oauth-provider-error.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
         loginPage.process(vars, writer);

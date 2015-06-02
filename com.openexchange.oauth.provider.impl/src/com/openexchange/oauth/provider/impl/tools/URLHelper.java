@@ -51,7 +51,11 @@ package com.openexchange.oauth.provider.impl.tools;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -104,18 +108,30 @@ public class URLHelper {
     }
 
     public static String getRedirectLocation(String redirectURI, String... additionalParams) throws OXException {
+        Map<String, String> parameterMap;
+        if (additionalParams != null && additionalParams.length > 0) {
+            if (additionalParams.length % 2 != 0) {
+                throw new IllegalArgumentException("The number of additional arguments must be even!");
+            }
+
+            parameterMap = new LinkedHashMap<>();
+            for (int i = 0; i < additionalParams.length; i++) {
+                String name = additionalParams[i++];
+                String value = additionalParams[i];
+                parameterMap.put(name, value);
+            }
+        } else {
+            parameterMap = Collections.emptyMap();
+        }
+
+        return getRedirectLocation(redirectURI, parameterMap);
+    }
+
+    public static String getRedirectLocation(String redirectURI, Map<String, String> additionalParams) throws OXException {
         try {
             URIBuilder builder = new URIBuilder(redirectURI);
-            if (additionalParams != null && additionalParams.length > 0) {
-                if (additionalParams.length % 2 != 0) {
-                    throw new IllegalArgumentException("The number of additional arguments must be even!");
-                }
-
-                for (int i = 0; i < additionalParams.length; i++) {
-                    String name = additionalParams[i++];
-                    String value = additionalParams[i];
-                    builder.setParameter(name, value);
-                }
+            for (Entry<String, String> param : additionalParams.entrySet()) {
+                builder.setParameter(param.getKey(), param.getValue());
             }
 
             return builder.build().toString();

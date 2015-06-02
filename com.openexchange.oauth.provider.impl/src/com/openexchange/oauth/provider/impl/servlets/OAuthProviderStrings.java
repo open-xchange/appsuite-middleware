@@ -90,4 +90,7 @@ public class OAuthProviderStrings implements LocalizableStrings {
     // View error details:
     public static final String ERROR_DETAILS_SUMMARY = "View error details:";
 
+    // Close this popup window
+    public static final String CLOSE = "Close";
+
 }

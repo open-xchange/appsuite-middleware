@@ -104,8 +104,6 @@ public abstract class EndpointTest {
 
     protected static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
 
-    protected static final String AUTH_INFO_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTH_INFO_SERVLET_ALIAS;
-
     protected static String hostname;
     protected static String login;
     protected static String password;

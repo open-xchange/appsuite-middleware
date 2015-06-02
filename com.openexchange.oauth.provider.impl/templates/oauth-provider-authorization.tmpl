@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="${lang}">
+  <head>
+    <meta charset="utf-8">
+    <title>${title}</title>
+  </head>
+  <body>
+    <div id="main">
+      <div id="header">
+        <img src="${iconURL}" alt="${iconAlternative}" height="128" width="128">
+        <span id="intro">${intro}</span>
+        <ul>
+          <#list scopeDescriptions as desc>
+          <li>${desc}</li>
+          </#list>
+        </ul>
+      </div>
+      <div id="auth-form">
+        <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
+          <input name="client_id" type="hidden" value="${clientId}">
+          <input name="redirect_uri" type="hidden" value="${redirectURI}">
+          <input name="scope" type="hidden" value="${scopes}">
+          <input name="state" type="hidden" value="${state}">
+          <input name="csrf_token" type="hidden" value="${csrfToken}">
+          <input name="response_type" type="hidden" value="code">
+          <input name="session" type="hidden" value="${session}">
+          <input name="session_type" type="hidden" value="${sessionType}">
+
+          <button name="access_denied" type="submit" value="false">${allowLabel}</button>
+          <button name="access_denied" type="submit" value="true">${denyLabel}</button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

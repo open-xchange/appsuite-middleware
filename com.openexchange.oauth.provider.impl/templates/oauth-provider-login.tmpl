@@ -7,14 +7,13 @@
   <body>
     <div id="main">
       <div id="header">
-        <img src="${iconURL}" alt="${iconAlternative}" height="128" width="128">
-        <span id="intro">${intro}</span>
-        <ul>
-          <#list scopeDescriptions as desc>
-          <li>${desc}</li>
-          </#list>
-        </ul>
+        <h1>${productName}</h1>
       </div>
+      <#if error?has_content>
+        <div id="error-container">
+          <span>${error}</span>
+        </div>
+      </#if>
       <div id="login-form">
         <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
           <fieldset>
@@ -22,11 +21,11 @@
             <table>
               <tr>
                 <td><label for="user_login">${usernameLabel}:</label></td>
-                <td><input id="user_login" name="user_login" type="text"></td>
+                <td><input id="user_login" name="login" type="text"></td>
               </tr>
               <tr>
                 <td><label for="user_password">${passwordLabel}:</label></td>
-                <td><input id="user_password" name="user_password" type="password"></td>
+                <td><input id="user_password" name="password" type="password"></td>
               </tr>
               <tr>
                 <td colspan="2">
@@ -41,7 +40,6 @@
             <input name="state" type="hidden" value="${state}">
             <input name="csrf_token" type="hidden" value="${csrfToken}">
             <input name="response_type" type="hidden" value="code">
-            <input name="redirect" type="hidden" value="true">
           </fieldset>
         </form>
       </div>
