@@ -229,20 +229,24 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         // Live connect to orderly check default folders
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            mailAccess = MailAccess.getInstance(session, id);
-            mailAccess.connect(true);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to live-connect against mail server {} on port {}. Aborting to check default folders consistency.", accountDescription.getMailServer(), accountDescription.getMailPort(), e);
-        } finally {
-            if (null != mailAccess) {
-                mailAccess.close();
+        boolean reload = false;
+        {
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            try {
+                mailAccess = MailAccess.getInstance(session, id);
+                mailAccess.connect(true);
+                reload = true;
+            } catch (Exception e) {
+                LOGGER.warn("Failed to live-connect against mail server {} on port {}. Aborting to check default folders consistency.", accountDescription.getMailServer(), accountDescription.getMailPort(), e);
+            } finally {
+                if (null != mailAccess) {
+                    mailAccess.close();
+                }
             }
         }
 
         // Reload account
-        {
+        if (reload) {
             Connection wcon = Database.get(cid, true);
             try {
                 // Insert account
