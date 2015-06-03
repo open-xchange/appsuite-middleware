@@ -373,6 +373,12 @@ public final class PushManagerRegistry implements PushListenerService {
                         }
                     }
                 }
+            } else {
+                // Already registered a permanent listener for the client
+                CredentialStorage credentialStorage = optCredentialStorage();
+                if (null != credentialStorage) {
+                    credentialStorage.getCredentials(userId, contextId);
+                }
             }
             return inserted;
         }
