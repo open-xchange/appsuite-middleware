@@ -310,6 +310,59 @@ public final class IMAPSort {
      * Attempts to perform a IMAP-based sort with a given search term.
      *
      * @param imapFolder The IMAP folder; not <code>null</code>
+     * @param jmsSearchTerm The search term or <code>null</code> to sort all messages
+     * @param sortField The sort field; not <code>null</code>
+     * @param order The sort order; not <code>null</code>
+     * @param allowESORT Whether to allow the ESORT command being issued (if supported) to limit number of sort results
+     * @param allowSORTDISPLAY Whether to allow the SORT=DISPLAY extension being used (if supported) to sort by DISPLAY value for From/To address
+     * @param imapConfig The IMAP configuration; not <code>null</code>
+     * @return The IMAP-sorted sequence number
+     * @throws MessagingException
+     * @throws OXException
+     */
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, javax.mail.search.SearchTerm jmsSearchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, IMAPConfig imapConfig) throws MessagingException, OXException {
+        SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC, allowSORTDISPLAY && imapConfig.asMap().containsKey("SORT=DISPLAY"));
+        if (sortTerms == null) {
+            throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
+        }
+
+        boolean sortedByLocalPart = false;
+        for (SortTerm sortTerm : sortTerms) {
+            if (SortTerm.FROM == sortTerm) {
+                sortedByLocalPart = true;
+            } else if (SortTerm.TO == sortTerm) {
+                sortedByLocalPart = true;
+            } else if (SortTerm.CC == sortTerm) {
+                sortedByLocalPart = true;
+            }
+        }
+
+        boolean rangeApplied = false;
+        int[] seqNums;
+        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && null == jmsSearchTerm) {
+            seqNums = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
+
+            // Check result
+            if (null == seqNums) {
+                // Apparently, SORT RETURN PARTIAL command failed
+                try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
+            } else {
+                // SORT RETURN PARTIAL command succeeded
+                rangeApplied = true;
+            }
+        } else {
+            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
+        }
+
+        return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
+    }
+
+    /**
+     * Attempts to perform a IMAP-based sort with a given search term.
+     *
+     * @param imapFolder The IMAP folder; not <code>null</code>
      * @param searchTerm The search term or <code>null</code> to sort all messages
      * @param sortField The sort field; not <code>null</code>
      * @param order The sort order; not <code>null</code>
