@@ -1,3 +1,7 @@
+* 2015-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38592: Ensure existence of table 'configdb.context2push_registration'
+
 * 2015-06-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
