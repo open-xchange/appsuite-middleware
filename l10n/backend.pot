@@ -3254,18 +3254,31 @@ msgstr ""
 msgid "%1$s %2$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:63
-msgid "New external application connected with your %1$s"
+#. Successfully connected ExampleApp with your account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:64
+msgid "Successfully connected %1$s with your account"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:65
+#. Salutation with name: "Hello Peter,"
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:67
 msgid "Hello %1$s,"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:67
+#. your account peter@example.com has been successfully connected to ExampleApp.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:70
+msgid "your account %1$s has been successfully connected to %2$s."
+msgstr ""
+
+#. You may revoke access for this application at any time, by visiting your settings page.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:73
 msgid ""
-"you have have connected the application %1$s with your %2$s. You can manage "
-"and check the access of external applications in your %3$s."
+"You may revoke access for this application at any time, by visiting your "
+"settings page."
+msgstr ""
+
+#. Go to settings
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/notification/NotificationStrings.java:76
+msgid "Go to settings"
 msgstr ""
 
 #. Application "%1$s" wants to access to your data. It requires the following permissions:
@@ -3310,6 +3323,11 @@ msgstr ""
 #. View error details:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:91
 msgid "View error details:"
+msgstr ""
+
+#. Close this popup window
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:94
+msgid "Close"
 msgstr ""
 
 #. Account not found.
