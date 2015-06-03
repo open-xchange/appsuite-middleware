@@ -150,7 +150,7 @@ public class OAuthSession extends AJAXSession {
     }
 
     public static HttpResponse requestAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, Scope scope, String... queryParams) throws Exception {
-        URIBuilder getLoginRedirectBuilder = new URIBuilder()
+        URIBuilder uriBuilder = new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
             .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
@@ -159,52 +159,69 @@ public class OAuthSession extends AJAXSession {
             .setParameter("redirect_uri", redirectURI)
             .setParameter("state", state);
         if (scope != null) {
-            getLoginRedirectBuilder.setParameter("scope", scope.toString());
+            uriBuilder.setParameter("scope", scope.toString());
         }
 
         if (queryParams != null && queryParams.length > 0) {
             for (int i = 0; i < queryParams.length;) {
-                getLoginRedirectBuilder.setParameter(queryParams[i++], queryParams[i++]);
+                uriBuilder.setParameter(queryParams[i++], queryParams[i++]);
             }
         }
 
-        HttpGet getLoginRedirect = new HttpGet(getLoginRedirectBuilder.build());
-        HttpResponse loginRedirectResponse = client.execute(getLoginRedirect);
-        releaseConnectionOnRedirect(loginRedirectResponse);
-        return loginRedirectResponse;
+        HttpGet getLoginPage = new HttpGet(uriBuilder.build());
+        HttpResponse loginPageResponse = client.execute(getLoginPage);
+        return loginPageResponse;
     }
 
     public static HttpResponse performAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, Scope scope, String csrfToken, String login, String password, String... formParams) throws Exception {
-        LinkedList<NameValuePair> authFormParams = new LinkedList<>();
-        authFormParams.add(new BasicNameValuePair("user_login", login));
-        authFormParams.add(new BasicNameValuePair("user_password", password));
-        authFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        authFormParams.add(new BasicNameValuePair("client_id", clientId));
-        authFormParams.add(new BasicNameValuePair("state", state));
-        authFormParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
-        authFormParams.add(new BasicNameValuePair("response_type", "code"));
-        authFormParams.add(new BasicNameValuePair("csrf_token", csrfToken));
+        LinkedList<NameValuePair> generalFormParams = new LinkedList<>();
+        generalFormParams.add(new BasicNameValuePair("access_denied", "false"));
+        generalFormParams.add(new BasicNameValuePair("client_id", clientId));
+        generalFormParams.add(new BasicNameValuePair("state", state));
+        generalFormParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
+        generalFormParams.add(new BasicNameValuePair("response_type", "code"));
         if (scope != null) {
-            authFormParams.add(new BasicNameValuePair("scope", scope.toString()));
+            generalFormParams.add(new BasicNameValuePair("scope", scope.toString()));
         }
 
         if (formParams != null && formParams.length > 0) {
             for (int i = 0; i < formParams.length;) {
-                authFormParams.add(new BasicNameValuePair(formParams[i++], formParams[i++]));
+                generalFormParams.add(new BasicNameValuePair(formParams[i++], formParams[i++]));
             }
         }
 
+        LinkedList<NameValuePair> loginFormParams = new LinkedList<>(generalFormParams);
+        loginFormParams.add(new BasicNameValuePair("login", login));
+        loginFormParams.add(new BasicNameValuePair("password", password));
+        loginFormParams.add(new BasicNameValuePair("csrf_token", csrfToken));
         HttpPost submitLoginForm = new HttpPost(new URIBuilder()
             .setScheme("https")
             .setHost(hostname)
             .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
             .build());
         submitLoginForm.setHeader(HttpHeaders.REFERER, "https://" + hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
-        submitLoginForm.setEntity(new UrlEncodedFormEntity(authFormParams));
+        submitLoginForm.setEntity(new UrlEncodedFormEntity(loginFormParams));
 
-        HttpResponse authCodeResponse = client.execute(submitLoginForm);
-        releaseConnectionOnRedirect(authCodeResponse);
-        return authCodeResponse;
+        HttpResponse loginResponse = client.execute(submitLoginForm);
+        releaseConnectionOnRedirect(loginResponse);
+        HttpGet getAuthForm = new HttpGet(loginResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
+        HttpResponse authFormResponse = client.execute(getAuthForm);
+        Map<String, String> authFormFields = getHiddenFormFields(EntityUtils.toString(authFormResponse.getEntity()));
+
+        LinkedList<NameValuePair> authFormParams = new LinkedList<>(generalFormParams);
+        authFormParams.add(new BasicNameValuePair("session", authFormFields.get("session")));
+        authFormParams.add(new BasicNameValuePair("csrf_token", authFormFields.get("csrf_token")));
+        HttpPost submitAuthForm = new HttpPost(new URIBuilder()
+            .setScheme("https")
+            .setHost(hostname)
+            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
+            .build());
+        submitAuthForm.setHeader(HttpHeaders.REFERER, "https://" + hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
+        submitAuthForm.setEntity(new UrlEncodedFormEntity(authFormParams));
+
+        HttpResponse authResponse = client.execute(submitAuthForm);
+        releaseConnectionOnRedirect(authResponse);
+        return authResponse;
     }
 
     public static HttpResponse redeemAuthCode(HttpClient client, String hostname, String clientId, String clientSecret, String code, String redirectURI, String... formParams) throws Exception {
@@ -258,16 +275,15 @@ public class OAuthSession extends AJAXSession {
         String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
         String password = AJAXConfig.getProperty(user.getPassword());
         String state = UUIDs.getUnformattedStringFromRandom();
-        HttpResponse loginRedirectResponse = requestAuthorization(client, hostname, clientId, redirectURI, state, scope);
-        assertEquals(HttpStatus.SC_MOVED_TEMPORARILY, loginRedirectResponse.getStatusLine().getStatusCode());
-        URI location = new URI(loginRedirectResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
-        Map<String, String> parameters = extractFragmentParams(location.getFragment());
+        HttpResponse loginPageResponse = requestAuthorization(client, hostname, clientId, redirectURI, state, scope);
+        assertEquals(HttpStatus.SC_OK, loginPageResponse.getStatusLine().getStatusCode());
+        assertTrue(loginPageResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue().startsWith("text/html"));
+        Map<String, String> parameters = getHiddenFormFields(EntityUtils.toString(loginPageResponse.getEntity()));
 
         HttpResponse authCodeResponse = performAuthorization(client, hostname, clientId, redirectURI, state, scope, parameters.get("csrf_token"), login, password);
-        assertEquals("Unexpected status code", HttpStatus.SC_OK, authCodeResponse.getStatusLine().getStatusCode());
-        JSONObject authCodeJSON = extractJSON(authCodeResponse);
-        assertFalse(authCodeJSON.toString(), authCodeJSON.has("error"));
-        String redirectLocation = authCodeJSON.getString("redirect_uri");
+        assertEquals("Unexpected status code", HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
+        String redirectLocation = new URI(authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue()).toString();
+        assertFalse(redirectLocation.contains("error"));
         assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(redirectURI));
 
         Map<String, String> redirectParams = extractQueryParams(redirectLocation);
