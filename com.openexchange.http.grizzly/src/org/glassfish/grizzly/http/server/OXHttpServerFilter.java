@@ -447,7 +447,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 final byte[] crlfBytes = CRLF;
 
                 final int maxPingCount = this.maxPingCount;
-                final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
+                final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : maxPingCount);
                 final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
                 final int pingDelay = this.pingDelay;
 
