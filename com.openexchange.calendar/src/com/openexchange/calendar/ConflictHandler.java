@@ -187,8 +187,9 @@ public class ConflictHandler {
 	}
 
     private CalendarDataObject[] resolveParticipantsRecurring() throws OXException {
-        final long limit = CalendarConfig.getSeriesConflictLimit() ? System.currentTimeMillis() + Constants.MILLI_YEAR : 0;
-        final RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, 0, limit , 0);
+        long now = System.currentTimeMillis();
+        final long limit = CalendarConfig.getSeriesConflictLimit() ? now + Constants.MILLI_YEAR : 0;
+        final RecurringResultsInterface rresults = recColl.calculateRecurring(cdao, now, limit, 0);
         for (int i = 0; i < rresults.size(); i++) {
             final RecurringResultInterface recurringResult = rresults.getRecurringResult(i);
             final CalendarDataObject[] conflicts = resolveParticipantConflicts(new Date(recurringResult.getStart()), new Date(recurringResult.getEnd()));
