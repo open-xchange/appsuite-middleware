@@ -116,4 +116,11 @@ public interface ISMTPProperties extends ITransportProperties {
      */
     public String getSSLCipherSuites();
 
+    /**
+     * Whether partial send is allowed or message transport is supposed to be aborted.
+     *
+     * @return <code>true</code> if partial send is allowed; otherwise <code>false</code>
+     */
+    public boolean isSendPartial();
+
 }
