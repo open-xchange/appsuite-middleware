@@ -40,7 +40,6 @@
 
 package javax.mail.internet;
 
-import java.net.*;
 import javax.mail.Session;
 
 /**
@@ -59,7 +58,12 @@ class UniqueValue {
     /**
      * A global unique number, to ensure uniqueness of generated strings.
      */
-    private static int id = 0;
+    private static final java.util.concurrent.atomic.AtomicInteger id = new java.util.concurrent.atomic.AtomicInteger(0);
+
+    /**
+     * A global UUID for this JVM instance.
+     */
+    private static final String UUID = java.util.UUID.randomUUID().toString();
 
     /**
      * Get a unique value for use in a multipart boundary string.
@@ -107,17 +111,15 @@ class UniqueValue {
 
 	// Unique string is <hashcode>.<id>.<currentTime>.JavaMail.<suffix>
 	s.append(s.hashCode()).append('.').append(getUniqueId()).append('.').
-	  append(System.currentTimeMillis()).append('.').
-	  append("JavaMail.").
+	  append(UUID).append('.').
 	  append(suffix);
 	return s.toString();
     }
 
     /**
      * Ensure ID is unique by synchronizing access.
-     * XXX - Could use AtomicInteger.getAndIncrement() in J2SE 5.0.
      */
-    private static synchronized int getUniqueId() {
-	return id++;
+    private static int getUniqueId() {
+	return id.getAndIncrement();
     }
 }
