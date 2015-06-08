@@ -2141,7 +2141,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         final boolean byEnvelope = byEnvelope();
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
-        List<Conversation> conversations = Collections.emptyList();
+        List<Conversation> conversations;
         {
             // Retrieve from actual folder
             FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
