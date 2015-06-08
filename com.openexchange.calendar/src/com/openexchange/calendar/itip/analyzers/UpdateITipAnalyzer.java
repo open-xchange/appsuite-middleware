@@ -285,23 +285,23 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (original.getParticipants() == null || original.getParticipants().length == 0) {
             return;
         }
-        
+
         List<Participant> newParticipants = new ArrayList<Participant>();
         for (Participant p : original.getParticipants()) {
             if (p.getType() == Participant.RESOURCE || p.getType() == Participant.RESOURCEGROUP) {
                 newParticipants.add(p);
             }
         }
-        
+
         if (newParticipants.isEmpty()) {
             return;
         }
-        
+
         if (update.getParticipants() == null || update.getParticipants().length == 0) {
             update.setParticipants(newParticipants);
             return;
         }
-        
+
         List<Participant> participants = Arrays.asList(update.getParticipants());
         for (Participant p : newParticipants) {
             if (!participants.contains(p)) {
@@ -331,11 +331,11 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         if (update.containsLastModified()) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getLastModified());
-        } else if (original.containsCreationDate()) {
+        } else if (update.containsCreationDate()) {
             updateLastTouched = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             updateLastTouched.setTime(update.getCreationDate());
         }
-        
+
         if (originalLastTouched != null && updateLastTouched != null) {
             if (timeInMillisWithoutMillis(originalLastTouched) > timeInMillisWithoutMillis(updateLastTouched)) { //Remove millis, since ical accuracy is just of seconds.
                 return true;
@@ -343,7 +343,7 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
         }
         return false;
     }
-    
+
     private long timeInMillisWithoutMillis(Calendar cal) {
         return cal.getTimeInMillis() - cal.get(Calendar.MILLISECOND);
     }
