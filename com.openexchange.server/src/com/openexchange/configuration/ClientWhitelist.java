@@ -54,6 +54,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ClientWhitelist} - A client whitelist.
@@ -88,8 +89,8 @@ public final class ClientWhitelist {
         allowedCache.clear();
         final String[] wps = wildcardPatterns.split(" *, *", 0);
         for (final String wildcardPattern : wps) {
-            if (!com.openexchange.java.Strings.isEmpty(wildcardPattern)) {
-                add(Pattern.compile(wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
+            if (!Strings.isEmpty(wildcardPattern)) {
+                add(Pattern.compile(Strings.wildcardToRegex(removeQuotes(wildcardPattern.trim())), Pattern.CASE_INSENSITIVE));
             }
         }
         return this;
@@ -206,33 +207,6 @@ public final class ClientWhitelist {
             retval = retval.substring(0, end);
         }
         return retval;
-    }
-
-    /**
-     * Converts specified wildcard string to a regular expression
-     *
-     * @param wildcard The wildcard string to convert
-     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
-     */
-    private static String wildcardToRegex(final String wildcard) {
-        final StringBuilder s = new StringBuilder(wildcard.length());
-        s.append('^');
-        final int len = wildcard.length();
-        for (int i = 0; i < len; i++) {
-            final char c = wildcard.charAt(i);
-            if (c == '*') {
-                s.append(".*");
-            } else if (c == '?') {
-                s.append('.');
-            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
-                s.append('\\');
-                s.append(c);
-            } else {
-                s.append(c);
-            }
-        }
-        s.append('$');
-        return (s.toString());
     }
 
 }
