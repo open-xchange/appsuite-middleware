@@ -452,7 +452,9 @@ public final class TNEF2ICal {
                  * Trigger
                  */
                 d = findNamedProp("0x8560", mapiProps);
-                vAlarm.getProperties().add(new Trigger(new DateTime(d)));
+                if (null != d) {
+                    vAlarm.getProperties().add(new Trigger(new DateTime(d)));
+                }
                 /*
                  * Reminder
                  */
