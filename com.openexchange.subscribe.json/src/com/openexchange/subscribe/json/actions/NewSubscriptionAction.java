@@ -54,14 +54,19 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.secret.SecretService;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
+import com.openexchange.subscribe.SubscriptionSource;
+import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public class NewSubscriptionAction extends AbstractSubscribeAction {
 
+    /**
+     * Initializes a new {@link NewSubscriptionAction}.
+     */
     public NewSubscriptionAction(ServiceLookup services) {
         super(services);
     }
@@ -73,20 +78,28 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
             subscribeRequest.getServerSession(),
             services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
         subscription.setId(-1);
-        final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
-        subscribeService.subscribe(subscription);
-        String urlPrefix = "";
-        {
-            String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
-            if (serverUrl != null) {
-                urlPrefix = serverUrl;
-            }
+
+        SubscriptionSource subscriptionSource = subscription.getSource();
+        if (null == subscriptionSource) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("source");
         }
+
+        subscriptionSource.getSubscribeService().subscribe(subscription);
+
+        //        String urlPrefix = "";
+        //        {
+        //            String serverUrl = subscribeRequest.getRequestData().getParameter("__serverURL");
+        //            if (serverUrl != null) {
+        //                urlPrefix = serverUrl;
+        //            }
+        //        }
+
         // JSONObject jsonTemp = new SubscriptionJSONWriter().write(
         // subscription,
         // subscription.getSource().getFormDescription(),
         // urlPrefix,
         // subscribeRequest.getTimeZone());
+
         return new AJAXRequestResult(Integer.valueOf(subscription.getId()), "json");
     }
 
