@@ -50,8 +50,11 @@
 package com.openexchange.file.storage.dropbox;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -64,7 +67,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class DropboxAccountAccess implements FileStorageAccountAccess {
+public final class DropboxAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 
     private final FileStorageAccount account;
     private final Session session;
@@ -82,6 +85,11 @@ public final class DropboxAccountAccess implements FileStorageAccountAccess {
         this.account = account;
         this.session = session;
         dropboxOAuthAccess = DropboxOAuthAccess.accessFor(account, session);
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(DropboxFileAccess.class, capability);
     }
 
     /**

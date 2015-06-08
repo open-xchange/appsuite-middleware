@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,22 @@
  *
  */
 
-package com.openexchange.file.storage.fs;
-
-import java.io.File;
-import com.openexchange.file.storage.AbstractFileStorageAccountAccess;
-import com.openexchange.file.storage.CapabilityAware;
-import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageCapability;
-import com.openexchange.file.storage.FileStorageCapabilityTools;
-import com.openexchange.session.Session;
+package com.openexchange.file.storage;
 
 
 /**
- * {@link FSAccountAccess}
+ * {@link CapabilityAware} - A capability-aware {@code FileStorageAccountAccess}.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FSAccountAccess extends AbstractFileStorageAccountAccess implements FileStorageAccountAccess, CapabilityAware {
+public interface CapabilityAware extends FileStorageAccountAccess {
 
-    public FSAccountAccess(String accountId, File file, Session session, FSFileStorageServiceFactory fsFileStorageServiceFactory) {
-        super(fsFileStorageServiceFactory, session, accountId);
-    }
-
-    @Override
-    public Boolean supports(FileStorageCapability capability) {
-        return FileStorageCapabilityTools.supportsByClass(FSFileAccess.class, capability);
-    }
+    /**
+     * Checks class-wise if specified capability is supported
+     *
+     * @param capability The capability to check
+     * @return A {@code Boolean} instance indicating support for specified capability or <code>null</code> if support cannot be checked by class (but by instance; see {@link FileStorageCapabilityTools#supports(FileStorageFileAccess, FileStorageCapability)})
+     */
+    Boolean supports(FileStorageCapability capability);
 
 }

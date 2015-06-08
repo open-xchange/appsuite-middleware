@@ -58,7 +58,7 @@ import com.openexchange.drive.checksum.ChecksumProvider;
 import com.openexchange.drive.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.composition.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
 /**

@@ -61,8 +61,11 @@ import org.apache.chemistry.opencmis.commons.SessionParameter;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.spi.CmisBinding;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -76,7 +79,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CMISAccountAccess implements FileStorageAccountAccess {
+public final class CMISAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CMISAccountAccess.class);
 
@@ -134,6 +137,11 @@ public final class CMISAccountAccess implements FileStorageAccountAccess {
         authType = tmp == null ? "basic" : tmp.trim();
         readTimeout = parseInt(configuration.get(CMISConstants.CMIS_TIMEOUT), -1);
         this.service = service;
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(CMISFileAccess.class, capability);
     }
 
     private boolean useAtomPub() {

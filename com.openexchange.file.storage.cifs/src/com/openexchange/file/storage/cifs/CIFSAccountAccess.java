@@ -57,9 +57,12 @@ import jcifs.smb.NtlmPasswordAuthentication;
 import jcifs.smb.SmbException;
 import jcifs.smb.SmbFile;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.DefaultWarningsAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -73,7 +76,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CIFSAccountAccess implements FileStorageAccountAccess, WarningsAware {
+public final class CIFSAccountAccess implements FileStorageAccountAccess, WarningsAware, CapabilityAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CIFSAccountAccess.class);
 
@@ -108,6 +111,11 @@ public final class CIFSAccountAccess implements FileStorageAccountAccess, Warnin
         password = (String) configuration.get(CIFSConstants.CIFS_PASSWORD);
         this.service = service;
         warningsAware = new DefaultWarningsAware(false);
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(CIFSFileAccess.class, capability);
     }
 
     @Override

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.file.storage.composition;
+package com.openexchange.file.storage;
 
 /**
  * {@link FileStorageCapability}

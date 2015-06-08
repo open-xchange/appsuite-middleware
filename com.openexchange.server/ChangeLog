@@ -1,3 +1,7 @@
+* 2015-06-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38600: Proper check if non-infostore file storage supports the "SEARCH_BY_TERM" capability
+
 * 2015-06-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
