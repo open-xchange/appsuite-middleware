@@ -136,9 +136,11 @@ public enum CalendarField {
     }
 
     public static CalendarField getByDbField(String dbField) {
+        if (null == dbField) {
+            return null;
+        }
         for (CalendarField field : values()) {
-            String _dbField = field.dbField;
-            if (null != _dbField && _dbField.equals(dbField)) {
+            if (dbField.equals(field.dbField)) {
                 return field;
             }
         }
