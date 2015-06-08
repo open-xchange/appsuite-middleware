@@ -345,6 +345,7 @@ public final class PushManagerRegistry implements PushListenerService {
             boolean inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
 
             if (inserted) {
+                // Not registered
                 CredentialStorage credentialStorage = optCredentialStorage();
                 if (null != credentialStorage) {
                     try {
@@ -371,6 +372,19 @@ public final class PushManagerRegistry implements PushListenerService {
                                 LOG.error("Failed to plan rescheduling", e);
                             }
                         }
+                    }
+                }
+            } else {
+                // Already registered a permanent listener for the client
+                CredentialStorage credentialStorage = optCredentialStorage();
+                if (null != credentialStorage) {
+                    try {
+                        if (null == credentialStorage.getCredentials(userId, contextId)) {
+                            // No credentials stored, yet
+                            credentialStorage.storeCredentials(new DefaultCredentials(session));
+                        }
+                    } catch (OXException e) {
+                        LOG.error("Failed to check credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                     }
                 }
             }

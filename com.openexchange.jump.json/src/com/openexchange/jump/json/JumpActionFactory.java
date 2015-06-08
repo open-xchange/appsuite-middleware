@@ -78,7 +78,7 @@ public class JumpActionFactory implements AJAXActionServiceFactory {
      */
     public JumpActionFactory(final ServiceLookup lookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractJumpAction>(4, 0.9f, 1);
         actions.put("identityToken", new IdentityTokenAction(lookup));
         actions.put("dummy", new DummyEndpointHandlerAction(lookup));
     }

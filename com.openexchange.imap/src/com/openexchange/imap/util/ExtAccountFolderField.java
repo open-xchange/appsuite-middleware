@@ -140,7 +140,12 @@ public class ExtAccountFolderField implements AdditionalFolderField {
                 folderStorage = getImapFolderStorage(mailAccess);
                 IMAPStore imapStore = folderStorage.getImapStore();
                 Map<String, FolderInfo> folders = getExternalAccountFolders((IMAPFolder) imapStore.getDefaultFolder());
-                tmp = null == folders ? new ConcurrentHashMap<String, FolderInfo>(0) : new ConcurrentHashMap<String, FolderInfo>(folders);
+                if (null == folders) {
+                    tmp = new ConcurrentHashMap<String, FolderInfo>(0, 0.9f, 1);
+                } else {
+                    tmp = new ConcurrentHashMap<>(folders.size(), 0.9f, 1);
+                    tmp.putAll(folders);
+                }
             } catch (MessagingException e) {
                 throw folderStorage.handleMessagingException(e);
             } finally {

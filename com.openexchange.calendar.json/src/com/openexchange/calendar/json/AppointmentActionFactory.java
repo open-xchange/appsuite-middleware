@@ -97,7 +97,7 @@ public class AppointmentActionFactory implements AJAXActionServiceFactory {
      */
     public AppointmentActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(15);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(15, 0.9f, 1);
         actions.put("new", new NewAction(services));
         actions.put("update", new UpdateAction(services));
         actions.put("updates", new UpdatesAction(services));

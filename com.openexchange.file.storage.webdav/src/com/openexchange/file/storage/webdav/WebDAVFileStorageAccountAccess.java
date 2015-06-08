@@ -74,8 +74,11 @@ import org.apache.jackrabbit.webdav.client.methods.DavMethod;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -90,7 +93,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a> - Exceptions
  */
-public final class WebDAVFileStorageAccountAccess implements FileStorageAccountAccess {
+public final class WebDAVFileStorageAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 
     /**
      * The default HTTP time out.
@@ -140,6 +143,11 @@ public final class WebDAVFileStorageAccountAccess implements FileStorageAccountA
         this.session = session;
         user = (String) account.getConfiguration().get(WebDAVConstants.WEBDAV_LOGIN);
         this.service = service;
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(WebDAVFileStorageFileAccess.class, capability);
     }
 
     /**

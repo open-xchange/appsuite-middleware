@@ -77,7 +77,7 @@ public class LinkedInActionFactory implements AJAXActionServiceFactory {
      */
     public LinkedInActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractLinkedInAction>(3);
+        actions = new ConcurrentHashMap<String, AbstractLinkedInAction>(3, 0.9f, 1);
         actions.put("fullProfile", new FullProfilesAction(serviceLookup));
         actions.put("inbox", new InboxAction(serviceLookup));
         actions.put("updates", new UpdatesAction(serviceLookup));

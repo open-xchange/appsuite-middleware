@@ -128,7 +128,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.accountId = accountId;
         this.clusterLock = clusterLock;
         this.services = services;
-        listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512);
+        listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512, 0.9f, 1);
     }
 
     @Override

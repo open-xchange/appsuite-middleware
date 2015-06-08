@@ -179,9 +179,9 @@ public final class ConfigurationImpl implements ConfigurationService {
     public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
         this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
-        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
+        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128, 0.9f, 1);
         propertiesByFile = new HashMap<String, Properties>(256);
-        texts = new ConcurrentHashMap<String, String>(1024);
+        texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<String, byte[]>(64);

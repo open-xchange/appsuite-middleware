@@ -263,14 +263,14 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private final ConcurrentMap<FilterChainContext, WatchInfo> pingMap;
     private final int pingDelay;
     private final int maxPingCount;
-    private volatile Ping ping;
+    private final Ping ping;
 
     // ------------------------------------------------------------ Constructors
 
     public OXHttpServerFilter(final ServerFilterConfiguration config, final DelayedExecutor delayedExecutor) {
         super(config, delayedExecutor);
         // Ping stuff
-        pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512);
+        pingMap = new ConcurrentHashMap<FilterChainContext, WatchInfo>(512, 0.75f, 32);
         {
             final ConfigurationService service = Services.optService(ConfigurationService.class);
             pingDelay = null == service ? 90000 : service.getIntProperty("com.openexchange.http.grizzly.pingDelay", 90000);
@@ -281,15 +281,6 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         suspendedResponseQueue = Response.createDelayQueue(delayedExecutor);
         httpRequestInProcessAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("HttpServerFilter.Request");
         reregisterForReadAttr = Grizzly.DEFAULT_ATTRIBUTE_BUILDER.createAttribute("HttpServerFilter.reregisterForReadAttr");
-    }
-
-    /**
-     * Sets the ping
-     *
-     * @param ping The ping to set
-     */
-    public void setPing(final Ping ping) {
-        this.ping = ping;
     }
 
     @Override
@@ -343,10 +334,11 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                     } else {
                         final HttpHandler httpHandlerLocal = httpHandler;
                         if (httpHandlerLocal != null) {
-                            // Initiate ping
-                            if (allowsPing(handlerRequest) && !isLongRunning(handlerRequest)) {
-                                pingInitiated = initiatePing(handlerResponse, ctx);
+                            // Initiate ping (if required)
+                            if (ping != Ping.NONE && allowsPing(handlerRequest) && !isLongRunning(handlerRequest)) {
+                                pingInitiated = initiatePing(handlerResponse, ctx, ping);
                             }
+
                             // Handle HTTP message
                             httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
                         }
@@ -428,16 +420,16 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
     private static final String USM_USER_AGENT = "Open-Xchange USM HTTP Client";
     private static final String _NET_USER_AGENT = "Open-Xchange .NET HTTP Client";
     private static final String OXSTOR_USER_AGENT = "oxstor.dll";
+    private static final int MAX_UA_LEN = _NET_USER_AGENT.length();
 
     private static final Set<String> NO_PING = Collections.<String> unmodifiableSet(new HashSet<String>(Arrays.asList(USM_USER_AGENT, _NET_USER_AGENT, OXSTOR_USER_AGENT)));
 
     private boolean allowsPing(Request request) {
         String ua = request.getHeader("User-Agent");
-        return null != ua && !NO_PING.contains(ua);
+        return null != ua && (ua.length() > MAX_UA_LEN || !NO_PING.contains(ua));
     }
 
-    private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx) {
-        final Ping ping = this.ping;
+    private boolean initiatePing(final Response handlerResponse, final FilterChainContext ctx, final Ping ping) {
         if (ping != Ping.NONE) {
             final TimerService timerService = Services.optService(TimerService.class);
             if (null != timerService) {
@@ -447,7 +439,7 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
                 final byte[] crlfBytes = CRLF;
 
                 final int maxPingCount = this.maxPingCount;
-                final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : this.maxPingCount);
+                final AtomicInteger pingCount = new AtomicInteger(maxPingCount <= 0 ? Integer.MAX_VALUE : maxPingCount);
                 final AtomicReference<ScheduledTimerTask> ref = new AtomicReference<ScheduledTimerTask>();
                 final int pingDelay = this.pingDelay;
 

@@ -118,7 +118,7 @@ public final class FolderFieldRegistry {
      */
     private FolderFieldRegistry() {
         super();
-        map = new ConcurrentHashMap<FolderField, Object>(8);
+        map = new ConcurrentHashMap<FolderField, Object>(8, 0.9f, 1);
         numSet = new ConcurrentTIntObjectHashMap<FolderField>(8);
     }
 

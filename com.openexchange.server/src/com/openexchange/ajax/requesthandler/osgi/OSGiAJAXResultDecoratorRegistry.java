@@ -82,7 +82,7 @@ public final class OSGiAJAXResultDecoratorRegistry implements AJAXResultDecorato
     public OSGiAJAXResultDecoratorRegistry(final BundleContext context) {
         super();
         this.context = context;
-        map = new ConcurrentHashMap<String, AJAXResultDecorator>(8);
+        map = new ConcurrentHashMap<String, AJAXResultDecorator>(8, 0.9f, 1);
     }
 
     @Override

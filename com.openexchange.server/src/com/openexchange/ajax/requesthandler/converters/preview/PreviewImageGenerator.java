@@ -118,7 +118,7 @@ public class PreviewImageGenerator extends FutureTask<PreviewDocument> {
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
     /** Used to prevent multiple requests from generating and caching the same preview */
-    private static final ConcurrentMap<String, PreviewImageGenerator> RUNNING = new ConcurrentHashMap<String, PreviewImageGenerator>(32);
+    private static final ConcurrentMap<String, PreviewImageGenerator> RUNNING = new ConcurrentHashMap<String, PreviewImageGenerator>(32, 0.9f, 1);
 
     /**
      * Try to generate a {@link PreviewDocument} for the given request.

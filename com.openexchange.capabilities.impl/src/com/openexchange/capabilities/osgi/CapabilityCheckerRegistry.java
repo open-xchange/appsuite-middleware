@@ -90,7 +90,7 @@ public class CapabilityCheckerRegistry extends ServiceTracker<CapabilityChecker,
     public CapabilityCheckerRegistry(final BundleContext context, final ServiceLookup services) {
         super(context, CapabilityChecker.class, null);
         this.services = services;
-        map = new ConcurrentHashMap<String, List<CapabilityChecker>>(256);
+        map = new ConcurrentHashMap<String, List<CapabilityChecker>>(256, 0.9f, 1);
     }
 
     private Cache optCache() {

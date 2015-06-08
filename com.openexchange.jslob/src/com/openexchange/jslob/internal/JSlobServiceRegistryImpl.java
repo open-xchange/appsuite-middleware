@@ -86,7 +86,7 @@ public class JSlobServiceRegistryImpl implements JSlobServiceRegistry {
      */
     private JSlobServiceRegistryImpl() {
         super();
-        registry = new ConcurrentHashMap<String, JSlobService>(2);
+        registry = new ConcurrentHashMap<String, JSlobService>(2, 0.9f, 1);
     }
 
     @Override

@@ -163,7 +163,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     // ------------------------------------------------------------------------------------------------ //
 
     private static final ConcurrentEnumMap<Permission, Capability> P2CAPABILITIES = new ConcurrentEnumMap<Permission, Capability>(Permission.class);
-    private static final ConcurrentMap<String, Capability> CAPABILITIES = new ConcurrentHashMap<String, Capability>(96);
+    private static final ConcurrentMap<String, Capability> CAPABILITIES = new ConcurrentHashMap<String, Capability>(96, 0.9f, 1);
 
     /**
      * Gets the singleton capability for given identifier
@@ -227,7 +227,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     public AbstractCapabilityService(final ServiceLookup services, PermissionAvailabilityServiceRegistry registry) {
         super();
         this.services = services;
-        declaredCapabilities = new ConcurrentHashMap<String, Object>(32);
+        declaredCapabilities = new ConcurrentHashMap<String, Object>(32, 0.9f, 1);
         this.registry = registry;
     }
 
@@ -992,7 +992,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             super();
             this.userId = userId;
             this.contextId = contextId;
-            parameters = new ConcurrentHashMap<String, Object>(8);
+            parameters = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
         }
 
         @Override

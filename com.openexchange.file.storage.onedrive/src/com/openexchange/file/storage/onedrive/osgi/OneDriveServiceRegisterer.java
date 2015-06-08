@@ -59,7 +59,6 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.onedrive.OneDriveConstants;
 import com.openexchange.file.storage.onedrive.OneDriveFileStorageService;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthUtilizerCreator;
 
 /**
  * {@link OneDriveServiceRegisterer}
@@ -72,7 +71,6 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
     private volatile FileStorageAccountManagerProvider provider;
     private volatile OneDriveFileStorageService service;
     private volatile ServiceRegistration<FileStorageService> serviceRegistration;
-    private volatile ServiceRegistration<OAuthUtilizerCreator> creatorRegistration;
     private volatile ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration;
 
     /**
@@ -103,7 +101,6 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
                  */
                 service = OneDriveFileStorageService.newInstance();
                 this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                this.creatorRegistration = context.registerService(OAuthUtilizerCreator.class, service, null);
                 this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                 this.service = service;
                 this.provider = provider;
@@ -118,7 +115,6 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
                     unregisterService(null);
                     service = OneDriveFileStorageService.newInstance(compositeProvider);
                     this.serviceRegistration = context.registerService(FileStorageService.class, service, null);
-                    this.creatorRegistration = context.registerService(OAuthUtilizerCreator.class, service, null);
                     this.listenerRegistration = context.registerService(OAuthAccountDeleteListener.class, service, null);
                     this.service = service;
                     this.provider = compositeProvider;
@@ -156,12 +152,6 @@ public final class OneDriveServiceRegisterer implements ServiceTrackerCustomizer
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
             this.serviceRegistration = null;
-        }
-
-        ServiceRegistration<OAuthUtilizerCreator> creatorRegistration = this.creatorRegistration;
-        if (null != creatorRegistration) {
-            creatorRegistration.unregister();
-            this.creatorRegistration = null;
         }
 
         ServiceRegistration<OAuthAccountDeleteListener> listenerRegistration = this.listenerRegistration;

@@ -110,7 +110,7 @@ public class TikaTextXtractService extends AbstractTextXtractService {
      */
     public TikaTextXtractService() {
         super();
-        delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4);
+        delegatees = new ConcurrentHashMap<DelegateTextXtraction, Object>(4, 0.9f, 1);
 
         Match configMatch = JOOX.$("config");
         for (String parser : PARSERS) {

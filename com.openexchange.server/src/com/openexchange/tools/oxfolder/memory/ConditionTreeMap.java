@@ -108,7 +108,7 @@ public final class ConditionTreeMap {
     public ConditionTreeMap(int contextId, int time2live) {
         super();
         // Evict user-associated entries after <time2live> milliseconds
-        entity2tree = new ConcurrentHashMap<Integer, Future<ConditionTree>>(countEntities(contextId));
+        entity2tree = new ConcurrentHashMap<Integer, Future<ConditionTree>>(countEntities(contextId), 0.9f, 1);
         this.contextId = contextId;
         this.time2live = time2live;
     }
@@ -905,7 +905,7 @@ public final class ConditionTreeMap {
 
     public static final class ModuleCondition implements Condition {
 
-        private static final ConcurrentMap<Integer, ModuleCondition> conditions = new ConcurrentHashMap<Integer, ModuleCondition>(8);
+        private static final ConcurrentMap<Integer, ModuleCondition> conditions = new ConcurrentHashMap<Integer, ModuleCondition>(8, 0.9f, 1);
 
         static ModuleCondition moduleCondition(int module) {
             Integer key = Integer.valueOf(module);

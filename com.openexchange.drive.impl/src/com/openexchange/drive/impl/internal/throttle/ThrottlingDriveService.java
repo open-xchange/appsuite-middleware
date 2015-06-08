@@ -72,7 +72,6 @@ import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**

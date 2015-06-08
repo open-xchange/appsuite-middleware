@@ -123,7 +123,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
     public JSONObject getContribution(final ServerSession session, final AJAXRequestData loginRequest) throws OXException {
         int numberOfKeys = KEYS.length;
 
-        ConcurrentMap<String, Future<Object>> rampUps = new ConcurrentHashMap<String, Future<Object>>(numberOfKeys);
+        ConcurrentMap<String, Future<Object>> rampUps = new ConcurrentHashMap<String, Future<Object>>(numberOfKeys, 0.9f, 1);
         ThreadPoolService threads = services.getService(ThreadPoolService.class);
 
         final Dispatcher ox = services.getService(Dispatcher.class);

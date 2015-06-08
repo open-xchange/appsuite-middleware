@@ -83,7 +83,7 @@ public final class JSlobStorageRegistryImpl implements JSlobStorageRegistry {
      */
     private JSlobStorageRegistryImpl() {
         super();
-        registry = new ConcurrentHashMap<String, JSlobStorage>(2);
+        registry = new ConcurrentHashMap<String, JSlobStorage>(2, 0.9f, 1);
     }
 
     @Override

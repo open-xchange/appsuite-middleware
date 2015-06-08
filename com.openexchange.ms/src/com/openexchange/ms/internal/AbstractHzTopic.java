@@ -88,7 +88,7 @@ public abstract class AbstractHzTopic<E> extends AbstractHzResource implements T
         super();
         this.name = name;
         senderId = UUIDs.getUnformattedString(UUID.randomUUID());
-        registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8);
+        registeredListeners = new ConcurrentHashMap<MessageListener<E>, String>(8, 0.9f, 1);
         publishQueue = new BufferingQueue<E>(HzDataUtility.DELAY_MSEC);
         // Timer task
         final TimerService timerService = Services.getService(TimerService.class);

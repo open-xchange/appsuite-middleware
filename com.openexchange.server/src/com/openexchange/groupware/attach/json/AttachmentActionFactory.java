@@ -70,7 +70,7 @@ public class AttachmentActionFactory implements AJAXActionServiceFactory {
 
     public AttachmentActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(8);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(8, 0.9f, 1);
         actions.put("document", new com.openexchange.groupware.attach.json.actions.GetDocumentAction(services));
         actions.put("get", new com.openexchange.groupware.attach.json.actions.GetAction(services));
         actions.put("attach", new com.openexchange.groupware.attach.json.actions.AttachAction(services));

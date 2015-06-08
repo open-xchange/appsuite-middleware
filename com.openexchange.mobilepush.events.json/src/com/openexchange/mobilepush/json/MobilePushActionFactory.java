@@ -78,7 +78,7 @@ public class MobilePushActionFactory implements AJAXActionServiceFactory {
      */
     public MobilePushActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractMobilePushAction>(3);
+        actions = new ConcurrentHashMap<String, AbstractMobilePushAction>(3, 0.9f, 1);
         actions.put("subscribe", new SubscribeAction(serviceLookup));
         actions.put("unsubscribe", new UnsubscribeAction(serviceLookup));
         actions.put("updateToken", new UpdateAction(serviceLookup));

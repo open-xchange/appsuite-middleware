@@ -82,7 +82,7 @@ public class IPRange {
         super();
         this.ipv4Range = ipv4Range;
         this.ipv6Range = ipv6Range;
-        cache = new ConcurrentHashMap<String, Boolean>(512);
+        cache = new ConcurrentHashMap<String, Boolean>(512, 0.9f, 1);
     }
 
     /**

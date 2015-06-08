@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,35 +47,22 @@
  *
  */
 
-package com.openexchange.oauth;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+package com.openexchange.file.storage;
 
 
 /**
- * {@link OAuthUtilizerCreator}
+ * {@link CapabilityAware} - A capability-aware {@code FileStorageAccountAccess}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.1
  */
-public interface OAuthUtilizerCreator {
+public interface CapabilityAware extends FileStorageAccountAccess {
 
     /**
-     * Creates an appropriate utilizer if this creator handles specified OAuth account.
+     * Checks class-wise if specified capability is supported
      *
-     * @param oauthAccount The OAuth account (compliant to {@link #getApplicableApi()})
-     * @param session The associated session
-     * @return The utilizer's identifier or <code>null</code> if no utilizer has been created
-     * @throws OXException If create operation fails
+     * @param capability The capability to check
+     * @return A {@code Boolean} instance indicating support for specified capability or <code>null</code> if support cannot be checked by class (but by instance; see {@link FileStorageCapabilityTools#supports(FileStorageFileAccess, FileStorageCapability)})
      */
-    String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException;
-
-    /**
-     * Gets the applicable OAuth API
-     *
-     * @return The applicable API
-     */
-    API getApplicableApi();
+    Boolean supports(FileStorageCapability capability);
 
 }

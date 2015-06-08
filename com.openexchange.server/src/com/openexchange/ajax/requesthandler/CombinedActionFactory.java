@@ -77,8 +77,8 @@ public final class CombinedActionFactory implements AJAXActionServiceFactory {
      */
     public CombinedActionFactory() {
         super();
-        facs = new ConcurrentHashMap<AJAXActionServiceFactory, Object>(2);
-        actions = new ConcurrentHashMap<String, Object>(6);
+        facs = new ConcurrentHashMap<AJAXActionServiceFactory, Object>(2, 0.9f, 1);
+        actions = new ConcurrentHashMap<String, Object>(6, 0.9f, 1);
     }
 
     /**
