@@ -141,6 +141,16 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
     }
 
     @Override
+    public boolean isSendPartial() {
+        final String smtpPartialStr = properties.get("com.openexchange.smtp.sendPartial");
+        if (null == smtpPartialStr) {
+            return SMTPProperties.getInstance().isSendPartial();
+        }
+
+        return Boolean.parseBoolean(smtpPartialStr);
+    }
+
+    @Override
     public boolean isSmtpEnvelopeFrom() {
         final boolean retval;
         if (mailAccount.getId() == 0) {
