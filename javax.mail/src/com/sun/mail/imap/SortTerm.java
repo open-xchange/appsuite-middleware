@@ -93,8 +93,15 @@ public final class SortTerm {
      */
     public static final SortTerm TO = new SortTerm("TO");
 
-    private String term;
-    private SortTerm(String term) {
+    private final String term;
+
+    /**
+     * Creates a new sort term
+     *
+     * @param term The term's upper-case string representation
+     * @throws NullPointerException If string representation is <code>null</code>
+     */
+    public SortTerm(String term) {
 	this.term = term;
     }
 
