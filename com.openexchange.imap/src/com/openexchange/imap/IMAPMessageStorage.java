@@ -169,6 +169,7 @@ import com.openexchange.mail.mime.MimeCleanUp;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
@@ -1044,14 +1045,28 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private Part examinePart(final Part part, final String contentId) throws OXException {
         try {
-            final String ct = toLowerCase(getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part));
-            if (ct.startsWith("image/")) {
-                final String partContentId = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_ID, part);
+            String ct = Strings.toLowerCase(getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_TYPE, part));
+
+            String realFilename = null;
+            boolean considerAsImage = false;
+            if (null == ct) {
+                realFilename = getRealFilename(part);
+                if (false == Strings.isEmpty(realFilename) && MimeType2ExtMap.getContentType(realFilename, "").startsWith("image/")) {
+                    considerAsImage = true;
+                }
+            } else if (ct.startsWith("image/")) {
+                considerAsImage = true;
+            }
+
+            if (considerAsImage) {
+                String partContentId = getFirstHeaderFrom(MessageHeaders.HDR_CONTENT_ID, part);
                 if (null == partContentId) {
                     /*
                      * Compare with file name
                      */
-                    final String realFilename = getRealFilename(part);
+                    if (null == realFilename) {
+                        realFilename = getRealFilename(part);
+                    }
                     if (MimeMessageUtility.equalsCID(contentId, realFilename)) {
                         return part;
                     }
@@ -1065,12 +1080,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Compare with file name
                  */
-                final String realFilename = getRealFilename(part);
+                if (null == realFilename) {
+                    realFilename = getRealFilename(part);
+                }
                 if (MimeMessageUtility.equalsCID(contentId, realFilename)) {
                     return part;
                 }
-            } else if (ct.startsWith("multipart/")) {
-                final Multipart m;
+            } else if (null != ct && ct.startsWith("multipart/")) {
+                Multipart m;
                 {
                     final Object content = part.getContent();
                     if (content instanceof Multipart) {
@@ -1079,7 +1096,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         m = new MimeMultipart(part.getDataHandler().getDataSource());
                     }
                 }
-                final int count = m.getCount();
+                int count = m.getCount();
                 for (int i = 0; i < count; i++) {
                     final Part p = examinePart(m.getBodyPart(i), contentId);
                     if (null != p) {
@@ -1088,12 +1105,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
             }
             return null;
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             if (ImapUtility.isInvalidMessageset(e)) {
                 return null;
             }
             throw handleMessagingException(imapFolder.getFullName(), e);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
