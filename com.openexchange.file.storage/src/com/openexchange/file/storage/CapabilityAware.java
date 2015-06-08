@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,53 +47,22 @@
  *
  */
 
-package com.openexchange.drive.impl.sync.optimize;
-
-import java.util.ArrayList;
-import java.util.List;
-import com.openexchange.drive.Action;
-import com.openexchange.drive.FileVersion;
-import com.openexchange.drive.impl.DriveConstants;
-import com.openexchange.drive.impl.actions.AbstractAction;
-import com.openexchange.drive.impl.comparison.VersionMapper;
-import com.openexchange.drive.impl.internal.SyncSession;
-import com.openexchange.drive.impl.sync.IntermediateSyncResult;
+package com.openexchange.file.storage;
 
 
 /**
- * {@link FileDelayMetadataDownloadOptimizer}
+ * {@link CapabilityAware} - A capability-aware {@code FileStorageAccountAccess}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileDelayMetadataDownloadOptimizer extends FileActionOptimizer {
+public interface CapabilityAware extends FileStorageAccountAccess {
 
-    public FileDelayMetadataDownloadOptimizer(VersionMapper<FileVersion> mapper) {
-        super(mapper);
-    }
-
-    @Override
-    public IntermediateSyncResult<FileVersion> optimize(SyncSession session, IntermediateSyncResult<FileVersion> result) {
-        /*
-         * filter out all DOWNLOAD actions for .drive-meta file in case there are outstanding client-side modifications of the directory
-         * contents
-         */
-        AbstractAction<FileVersion> downloadMetadataAction = null;
-        boolean pendingClientChanges = false;
-        for (AbstractAction<FileVersion> action : result.getActionsForClient()) {
-            if (Action.UPLOAD.equals(action.getAction())) {
-                pendingClientChanges = true;
-            } else if (Action.DOWNLOAD.equals(action.getAction()) &&
-                DriveConstants.METADATA_FILENAME.equals(action.getNewVersion().getName())) {
-                downloadMetadataAction = action;
-            }
-        }
-        if (pendingClientChanges && null != downloadMetadataAction) {
-            List<AbstractAction<FileVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<FileVersion>>(result.getActionsForClient());
-            optimizedActionsForClient.remove(downloadMetadataAction);
-            return new IntermediateSyncResult<FileVersion>(result.getActionsForServer(), optimizedActionsForClient);
-        } else {
-            return result;
-        }
-    }
+    /**
+     * Checks class-wise if specified capability is supported
+     *
+     * @param capability The capability to check
+     * @return A {@code Boolean} instance indicating support for specified capability or <code>null</code> if support cannot be checked by class (but by instance; see {@link FileStorageCapabilityTools#supports(FileStorageFileAccess, FileStorageCapability)})
+     */
+    Boolean supports(FileStorageCapability capability);
 
 }

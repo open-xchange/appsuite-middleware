@@ -50,8 +50,8 @@
 package com.openexchange.drive.impl.actions;
 
 import com.openexchange.drive.Action;
-import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.impl.comparison.ThreeWayComparison;
 
 /**

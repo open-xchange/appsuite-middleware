@@ -77,10 +77,10 @@ import com.openexchange.drive.impl.sync.RenameTools;
 import com.openexchange.drive.impl.sync.SimpleFileVersion;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -463,21 +463,21 @@ public class DriveUtils {
         }
         return fids;
     }
-    
+
     /**
-     * Gets a value indicating whether a specific folder is synchronizable or not.  
-     * 
+     * Gets a value indicating whether a specific folder is synchronizable or not.
+     *
      * @param folderID The folder identifier to check
-     * @return <code>true</code> if the folder is synchronizable, <code>false</code>, otherwise 
+     * @return <code>true</code> if the folder is synchronizable, <code>false</code>, otherwise
      */
     public static boolean isSynchronizable(String folderID) {
         if (null != folderID) {
             /*
-             * check for numerical folder identifier, only allowing specific system folders if smaller than 20 
+             * check for numerical folder identifier, only allowing specific system folders if smaller than 20
              * constants from com.openexchange.groupware.container.FolderObject
              * MIN_FOLDER_ID = 20
              * SYSTEM_USER_INFOSTORE_FOLDER_ID = 10
-             * SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID = 15 
+             * SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID = 15
              */
             try {
                 int numericalID = Integer.parseInt(folderID);
@@ -494,7 +494,7 @@ public class DriveUtils {
         }
         return false;
     }
-    
+
     private DriveUtils() {
         super();
     }
