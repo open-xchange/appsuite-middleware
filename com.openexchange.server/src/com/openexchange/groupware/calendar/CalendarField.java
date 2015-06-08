@@ -70,6 +70,7 @@ import com.openexchange.i18n.LocalizableArgument;
  *
  */
 public enum CalendarField {
+
     OBJECTID ( Appointment.OBJECT_ID , "ObjectID", "intfield01" ),
     CREATEDBY ( Appointment.CREATED_BY , "CreatedBy", "created_from" ),
     CREATIONDATE ( Appointment.CREATION_DATE , "CreationDate", "creating_date" ),
@@ -103,13 +104,14 @@ public enum CalendarField {
     RECURRENCECALCULATOR ( Appointment.RECURRENCE_CALCULATOR, "RecurrenceCalculator", "intfield04"),
     ALARM ( Appointment.ALARM, "Alarm", null);
 
+    private final int appointmentObjectID; //this is the ID of AppointmentObject
+    private final String name;             //this is the name of the internal variable (as used by setters & getters)
+    private final String dbField;
 
-    private int appointmentObjectID; //this is the ID of AppointmentObject
-    private String name;             //this is the name of the internal variable (as used by setters & getters)
-    private String dbField;
-
-
-    private CalendarField(final int appointmentObjectID, final String name, String dbField){
+    /**
+     * Initializes a new {@link CalendarField}.
+     */
+    private CalendarField(int appointmentObjectID, String name, String dbField){
         this.appointmentObjectID = appointmentObjectID;
         this.name = name;
         this.dbField = dbField;
@@ -132,41 +134,33 @@ public enum CalendarField {
         }
         return null;
     }
-    
+
     public static CalendarField getByDbField(String dbField) {
         for (CalendarField field : values()) {
-            if (field.getdbField().equals(dbField)) {
+            String _dbField = field.dbField;
+            if (null != _dbField && _dbField.equals(dbField)) {
                 return field;
             }
         }
         return null;
     }
 
-
     public int getAppointmentObjectID() {
         return appointmentObjectID;
-    }
-
-    public void setAppointmentObjectID(final int appointmentObjectID) {
-        this.appointmentObjectID = appointmentObjectID;
     }
 
     public String getName() {
         return name;
     }
-    
+
     public Localizable getLocalizable() {
         return new LocalizableArgument(getName());
-    }
-
-    public void setName(final String name) {
-        this.name = name;
     }
 
     public String getICalElement(){
         return name; //TODO get real ICAL element name
     }
-    
+
     public String getdbField() {
         return dbField;
     }
