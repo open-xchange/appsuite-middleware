@@ -738,7 +738,9 @@ class UpdateData {
                 // Delegator has been removed from participant list.
                 delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
             }
-            orig.setParentFolderID(delegatorFolder.getIdentifier());
+            if (null != delegatorFolder) {
+                orig.setParentFolderID(delegatorFolder.getIdentifier());
+            }
         }
         sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
     }
