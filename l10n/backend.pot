@@ -80,10 +80,10 @@ msgid "calendar"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
-#. - See all your appointments.
+#. - Read all your appointments.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.json/src/com/openexchange/calendar/json/osgi/AppointmentJSONActivator.java:107
-msgid "See all your appointments."
+msgid "Read all your appointments."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
@@ -1323,10 +1323,10 @@ msgid "contacts"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
-#. - See all your contacts.
+#. - Read all your contacts.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:98
-msgid "See all your contacts."
+msgid "Read all your contacts."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
@@ -1626,9 +1626,7 @@ msgstr ""
 msgid "Select an existing account"
 msgstr ""
 
-#. label of login form
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:61
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:79
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:61
 msgid "Login"
 msgstr ""
@@ -1636,7 +1634,7 @@ msgstr ""
 #. label of username input field
 #. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:91
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
@@ -3281,52 +3279,79 @@ msgstr ""
 msgid "Go to settings"
 msgstr ""
 
-#. Application "%1$s" wants to access to your data. It requires the following permissions:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:64
+#. Application example.com would like to connect with your account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:63
+msgid "Application %1$s would like to connect with your account"
+msgstr ""
+
+#. Sign in to OX App Suite to connect example.com with your account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:66
+msgid "Sign in to %1$s to connect %2$s with your account"
+msgstr ""
+
+#. The application example.com would like to access your account, and is requesting following permissions:
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:69
 msgid ""
-"Application \"%1$s\" wants to access to your data. It requires the following "
-"permissions:"
+"The application #split# would like to access your account, and is requesting "
+"following permissions:"
+msgstr ""
+
+#. Only allow access for applications you trust. You may revoke access for this application at any time, by visiting your settings page.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:72
+msgid ""
+"Only allow access for applications you trust. You may revoke access for this "
+"application at any time, by visiting your settings page."
+msgstr ""
+
+#. label of cancel button
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:75
+msgid "Cancel"
+msgstr ""
+
+#. label of sign in button
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:78
+msgid "Sign in"
 msgstr ""
 
 #. label of deny button
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:81
 msgid "Deny"
 msgstr ""
 
 #. label of allow button
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:84
 msgid "Allow"
 msgstr ""
 
 #. label of password input field
 #. Username
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:76
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:88
 msgid "Username"
 msgstr ""
 
 #. An error occurred
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:93
 msgid "An error occurred"
 msgstr ""
 
 #. There seems to be a problem with this app.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:85
-msgid "There seems to be a problem with this app."
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:96
+msgid "There seems to be a problem with this app"
 msgstr ""
 
 #. Don't worry, your data is perfectly safe.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:88
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:99
 msgid "Don't worry, your data is perfectly safe."
 msgstr ""
 
 #. View error details:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:91
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:102
 msgid "View error details:"
 msgstr ""
 
 #. Close this popup window
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:105
 msgid "Close"
 msgstr ""
 
@@ -4166,10 +4191,10 @@ msgid "config"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
-#. - Change your settings.
+#. - Read and change your settings.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/config/json/osgi/ConfigJSONActivator.java:97
-msgid "Change your settings."
+msgid "Read and change your settings."
 msgstr ""
 
 #. The policy you have entered is malformed. It should look like \"condition:action\"
@@ -6305,10 +6330,10 @@ msgid "reminder"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
-#. - Fetch reminders for appointments and tasks.
+#. - Read reminders for appointments and tasks.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/reminder/osgi/ReminderActivator.java:103
-msgid "Fetch reminders for appointments and tasks."
+msgid "Read reminders for appointments and tasks."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
@@ -8221,10 +8246,10 @@ msgid "tasks"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
-#. - See all your tasks.
+#. - Read all your tasks.
 #. - ...
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.tasks.json/src/com/openexchange/tasks/json/osgi/TaskJSONActivator.java:101
-msgid "See all your tasks."
+msgid "Read all your tasks."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
