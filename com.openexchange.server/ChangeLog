@@ -1,3 +1,7 @@
+* 2015-06-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38079: Series breaks if the start of a series does not match the pattern.
+
 * 2015-06-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 38616: Fixed various null dereferences
