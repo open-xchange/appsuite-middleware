@@ -2,35 +2,35 @@
 <html lang="${lang}">
   <head>
     <meta charset="utf-8">
-    <title>${title}</title>
+    <title>${title?html}</title>
   </head>
   <body>
     <div id="main">
       <div id="header">
-        <h1>${productName}</h1>
+        <h1>${productName?html}</h1>
       </div>
       <#if error?has_content>
         <div id="error-container">
-          <span>${error}</span>
+          <span>${error?html}</span>
         </div>
       </#if>
       <div id="login-form">
         <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
           <fieldset>
-            <legend>${formHeading}</legend>
+            <legend>${formHeading?html}</legend>
             <table>
               <tr>
-                <td><label for="user_login">${usernameLabel}:</label></td>
+                <td><label for="user_login">${usernameLabel?html}:</label></td>
                 <td><input id="user_login" name="login" type="text"></td>
               </tr>
               <tr>
-                <td><label for="user_password">${passwordLabel}:</label></td>
+                <td><label for="user_password">${passwordLabel?html}:</label></td>
                 <td><input id="user_password" name="password" type="password"></td>
               </tr>
               <tr>
                 <td colspan="2">
-                  <button name="access_denied" type="submit" value="false">${allowLabel}</button>
-                  <button name="access_denied" type="submit" value="true">${denyLabel}</button>
+                  <button name="access_denied" type="submit" value="false">${allowLabel?html}</button>
+                  <button name="access_denied" type="submit" value="true">${denyLabel?html}</button>
                 </td>
               </tr>
             </table>

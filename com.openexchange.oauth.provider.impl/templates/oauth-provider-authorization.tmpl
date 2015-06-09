@@ -2,16 +2,16 @@
 <html lang="${lang}">
   <head>
     <meta charset="utf-8">
-    <title>${title}</title>
+    <title>${title?html}</title>
   </head>
   <body>
     <div id="main">
       <div id="header">
-        <img src="${iconURL}" alt="${iconAlternative}" height="128" width="128">
-        <span id="intro">${intro}</span>
+        <img src="${iconURL}" alt="${iconAlternative?html}" height="128" width="128">
+        <span id="intro">${intro?html}</span>
         <ul>
           <#list scopeDescriptions as desc>
-          <li>${desc}</li>
+          <li>${desc?html}</li>
           </#list>
         </ul>
       </div>
@@ -25,8 +25,8 @@
           <input name="response_type" type="hidden" value="code">
           <input name="session" type="hidden" value="${session}">
 
-          <button name="access_denied" type="submit" value="false">${allowLabel}</button>
-          <button name="access_denied" type="submit" value="true">${denyLabel}</button>
+          <button name="access_denied" type="submit" value="false">${allowLabel?html}</button>
+          <button name="access_denied" type="submit" value="true">${denyLabel?html}</button>
         </form>
       </div>
     </div>

@@ -3,23 +3,23 @@
   <head>
     <meta charset="utf-8">
     <!-- An error occurred -->
-    <title>${title}</title>
+    <title>${title?html}</title>
   </head>
   <body>
     <div id="main">
       <!-- There seems to be a problem with this app. -->
-      <h1 id="headline">${headline}</h1>
+      <h1 id="headline">${headline?html}</h1>
       <!-- Don't worry, your data is perfectly safe. -->
-      <span id="message">${message}</span>
+      <span id="message">${message?html}</span>
       <details id ="details">
         <!-- View error details: -->
-        <summary>${detailsSummary}</summary>
+        <summary>${detailsSummary?html}</summary>
         <!-- Request was missing a required parameter: client_id -->
-        <p>${detailsText}</p>
+        <p>${detailsText?html}</p>
       </details>
     </div>
     <div id="escape">
-      <button type="button" onclick="window.close();">${close}</button>
+      <button type="button" onclick="window.close();">${close?html}</button>
     </div>
   </body>
 </html>
