@@ -1640,6 +1640,122 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
+    public String getDisplayName(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        return getDisplayNames(ctx, new User[] {user}, auth)[0];
+    }
+
+    @Override
+    public String[] getDisplayNames(Context ctx, User[] users, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        try {
+            doNullCheck((Object[]) users);
+        } catch (final InvalidDataException e1) {
+            LOGGER.error("One of the given arguments for getData is null", e1);
+            throw e1;
+        }
+        try {
+            checkContext(ctx);
+            if (users.length <= 0) {
+                throw new InvalidDataException();
+            }
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
+        LOGGER.debug("getDisplayNames {} - {} - {}", ctx, Arrays.toString(users), auth);
+        try {
+            // enable check who wants to get data if authentication is enabled
+            if (!cache.contextAuthenticationDisabled()) {
+                // ok here its possible that a user wants to get his own data
+                // SPECIAL USER AUTH CHECK FOR THIS METHOD!
+                // check if credentials are from oxadmin or from an user
+                // check if given user is not admin, if he is admin, the
+                final User authuser = new User();
+                authuser.setName(auth.getLogin());
+                if( basicauth.isMasterOfContext(auth, ctx) ) {
+                    basicauth.doAuthentication(auth, ctx);
+                } else if (!tool.isContextAdmin(ctx, authuser)) {
+                    final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
+                    if (users.length == 1) {
+                        final int auth_user_id = authuser.getId().intValue();
+                        basicauth.doUserAuthentication(auth, ctx);
+                        // its possible that he wants his own data
+                        final Integer userid = users[0].getId();
+                        if (userid != null) {
+                            if (userid.intValue() != auth_user_id) {
+                                throw invalidCredentialsException;
+                            }
+                        } else {
+                            // id not set, try to resolv id by username and then check again
+                            final String username = users[0].getName();
+                            if (username != null) {
+                                final int check_user_id = tool.getUserIDByUsername(ctx, username);
+                                if (check_user_id != auth_user_id) {
+                                    LOGGER.debug("user[0].getId() does not match id from Credentials.getLogin()");
+                                    throw invalidCredentialsException;
+                                }
+                            } else {
+                                LOGGER.debug("Cannot resolv user[0]`s internal id because the username is not set!");
+                                throw new InvalidDataException("Username and userid missing.");
+                            }
+                        }
+                    } else {
+                        LOGGER.error("User sent {} users to get data for. Only context admin is allowed to do that", Integer.valueOf(users.length), invalidCredentialsException);
+                        throw invalidCredentialsException;
+                        // one user cannot edit more than his own data
+                    }
+                } else {
+                    basicauth.doAuthentication(auth, ctx);
+                }
+            } else {
+                basicauth.doAuthentication(auth, ctx);
+            }
+
+            checkContextAndSchema(ctx);
+
+            for (final User usr : users) {
+                final String username = usr.getName();
+                final Integer userid = usr.getId();
+                if (null != userid && !tool.existsUser(ctx, i(userid))) {
+                    if (username != null) {
+                        throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
+                    }
+                    throw new NoSuchUserException("No such user " + userid + " in context " + ctx.getId());
+                }
+                if (null != username && !tool.existsUserName(ctx, username)) {
+                    throw new NoSuchUserException("No such user " + username + " in context " + ctx.getId());
+                }
+                if (username == null && userid == null) {
+                    throw new InvalidDataException("Username and userid missing.");
+                }
+                // ok , try to get the username by id or username
+                if (username == null && null != userid) {
+                    usr.setName(tool.getUsernameByUserID(ctx, userid.intValue()));
+                }
+                if (userid == null) {
+                    usr.setId(new Integer(tool.getUserIDByUsername(ctx, username)));
+                }
+            }
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw(e);
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw(e);
+        }
+
+        String[] displayNames = oxu.getDisplayNames(ctx, users);
+
+        LOGGER.debug(Arrays.toString(displayNames));
+        return displayNames;
+    }
+
+    @Override
     public User getData(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException {
         return getData(ctx, new User[]{user}, auth)[0];
     }
