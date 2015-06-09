@@ -117,13 +117,14 @@ public abstract class OAuthEndpoint extends HttpServlet {
      *
      * @param request The servlet request
      * @param response The servlet response
+     * @param statusCode The HTTP status code
      * @param message The detailed error message to guide client developers
      * @throws IOException
      */
-    protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, String message) throws IOException {
+    protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, int statusCode, String message) throws IOException {
         response.setContentType("text/html; charset=UTF-8");
         response.setHeader("Content-Disposition", "inline");
-        response.setStatus(200);
+        response.setStatus(statusCode);
         try {
             PrintWriter writer = response.getWriter();
             writeErrorPage(writer, message, determineLocale(request));
@@ -135,8 +136,8 @@ public abstract class OAuthEndpoint extends HttpServlet {
     }
 
     /**
-     * Responds with a HTML error page. The passed exceptions ID is returned
-     * as part of the detailed error description.
+     * Responds with a HTML error page. The HTTP status code will be <code>500</code>.
+     * The passed exceptions ID is returned as part of the detailed error description.
      *
      * @param request The servlet request
      * @param response The servlet response
@@ -146,7 +147,7 @@ public abstract class OAuthEndpoint extends HttpServlet {
     protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, OXException e) throws IOException {
         response.setContentType("text/html; charset=UTF-8");
         response.setHeader("Content-Disposition", "inline");
-        response.setStatus(200);
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         String message = "An internal error occurred. If you want to contact our support because of this, please provide this error code: " + e.getErrorCode() + "(" + e.getExceptionId() + ").";
         try {
             PrintWriter writer = response.getWriter();

@@ -589,12 +589,12 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      */
     private boolean isPotentialCSRF(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (isInvalidReferer(request)) {
-            respondWithErrorPage(request, response, "Missing or invalid referer.");
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid referer.");
             return true;
         }
 
         if (isInvalidCSRFToken(request)) {
-            respondWithErrorPage(request, response, "Missing or invalid CSRF token.");
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid CSRF token.");
             return true;
         }
 
@@ -665,14 +665,14 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
          */
         String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
         if (Strings.isEmpty(clientId)) {
-            respondWithErrorPage(request, response, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
             return null;
         }
 
         try {
             Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null || !client.isEnabled()) {
-                respondWithErrorPage(request, response, "Invalid client ID: " + clientId);
+                respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid client ID: " + clientId);
                 return null;
             }
 
@@ -700,12 +700,12 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
          */
         String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
         if (Strings.isEmpty(redirectURI)) {
-            respondWithErrorPage(request, response, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_REDIRECT_URI);
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_REDIRECT_URI);
             return null;
         }
 
         if (!client.hasRedirectURI(redirectURI)) {
-            respondWithErrorPage(request, response, "Invalid redirect URI: " + redirectURI);
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid redirect URI: " + redirectURI);
             return null;
         }
 
