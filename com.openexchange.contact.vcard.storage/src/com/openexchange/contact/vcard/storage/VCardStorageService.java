@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,64 +47,52 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.vcard.storage;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import java.io.InputStream;
 
 /**
- * {@link RdbServiceLookup} - Provides access to services.
+ * Handles storing of VCards for contacts
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class RdbServiceLookup {
+public interface VCardStorageService {
 
     /**
-     * Initializes a new {@link DBChatServiceLookup}.
-     */
-    private RdbServiceLookup() {
-        super();
-    }
-
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
+     * Saves specified VCard stream as a file.
      *
-     * @return The service look-up or <code>null</code>
+     * @param file The stream to save as a file
+     * @param contextId The context identifier
+     * @return The VCard's identifier or <code>null</code> if an error occurred
      */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
-
-    public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
-        return RdbServiceLookup.getService(c, false);
-    }
-
-    public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        final ServiceLookup serviceLookup = ref.get();
-        final S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
-    }
-
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
-    }
+    String saveVCard(InputStream file, int contextId);
 
     /**
-     * Sets the service look-up
+     * Updates denoted VCard content with the given one
      *
-     * @param serviceLookup The service look-up or <code>null</code>
+     * @param file The stream to save as a file
+     * @param contextId The context identifier
+     * @param identifier The VCard identifier
+     * @return The new VCard identifier or <code>null</code> if an error occurred
      */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
+    String updateVCard(InputStream file, int contextId, String identifier);
 
+    /**
+     * Gets denoted VCard content as a stream.
+     *
+     * @param identifier The VCard identifier
+     * @param contextId The context identifier
+     * @return The content stream or <code>null</code> if an error occurred
+     */
+    InputStream getVCard(String identifier, int contextId);
+
+    /**
+     * Deletes denoted VCard.
+     *
+     * @param identifier The VCard identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if deletion was successful; otherwise <code>false</code>
+     */
+    boolean deleteVCard(String identifier, int contextId);
 }

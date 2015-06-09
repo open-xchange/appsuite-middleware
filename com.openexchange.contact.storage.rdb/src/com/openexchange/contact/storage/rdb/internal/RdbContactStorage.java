@@ -57,6 +57,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.apache.commons.io.IOUtils;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactUserStorage;
@@ -67,6 +68,7 @@ import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
@@ -76,6 +78,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.search.SearchTerm;
@@ -176,6 +179,28 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         } finally {
             connectionHelper.back();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean create(Session session, String folderId, Contact contact, String vCard) throws OXException {
+        VCardStorageService vCardStorageService = RdbServiceLookup.getOptionalService(VCardStorageService.class);
+        if (vCardStorageService == null) {
+            LOG.warn("VCardStorageService absent. Will not persist VCard for new contact " + contact.getDisplayName() + " in context " + contact.getContextId());
+            create(session, folderId, contact);
+            return false;
+        }
+
+        String vCardId = vCardStorageService.saveVCard(IOUtils.toInputStream(vCard), session.getContextId());
+        if (Strings.isEmpty(vCardId)) {
+            create(session, folderId, contact);
+            return false;
+        }
+        contact.setVCardId(vCardId);
+        create(session, folderId, contact);
+        return true;
     }
 
     @Override
@@ -290,6 +315,30 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
+    /**
+     * Tries to remove a persisted VCard from storage
+     *
+     * @param contextID the context identifier
+     * @param storedContacts List with the contacts to remove the VCard for
+     * @throws OXException
+     */
+    private void deleteVCard(final int contextID, final List<Contact> storedContacts) {
+        VCardStorageService vCardStorageService = RdbServiceLookup.getOptionalService(VCardStorageService.class);
+        if (vCardStorageService == null) {
+            LOG.warn("VCardSotrageService absent. Unable to delete stored VCards.");
+            return;
+        }
+        for (Contact contact : storedContacts) {
+            String vCardId = contact.getVCardId();
+            if (!Strings.isEmpty(vCardId)) {
+                boolean deleteVCard = vCardStorageService.deleteVCard(vCardId, contextID);
+                if (!deleteVCard) {
+                    LOG.warn("VCard for user " + contact.getUid() + " in context " + contextID + " with identifier " + vCardId + " cannot be deleted.");
+                }
+            }
+        }
+    }
+
     @Override
     public void delete(Session session, String folderId) throws OXException {
         int contextID = session.getContextId();
@@ -309,7 +358,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 folderID,
                 null,
                 Integer.MIN_VALUE,
-                new ContactField[] { ContactField.OBJECT_ID },
+                new ContactField[] { ContactField.OBJECT_ID, ContactField.VCARD_ID },
                 null,
                 null);
             if (null == contacts || 0 == contacts.size()) {
@@ -331,6 +380,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * delete contacts - per convention, don't check last modification time when clearing a folder
              */
             deletedContacts = deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
+            deleteVCard(contextID, contacts);
             /*
              * commit
              */
@@ -385,6 +435,27 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         } finally {
             connectionHelper.backWritable();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean update(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException {
+        VCardStorageService vCardStorageService = RdbServiceLookup.getOptionalService(VCardStorageService.class);
+        if (vCardStorageService == null) {
+            LOG.warn("VCardStorageService absent. Unable to update persisted VCard for " + contact.getDisplayName() + " in context " + contact.getContextId());
+            update(session, folderId, id, contact, lastRead);
+            return false;
+        }
+        String vCardId = vCardStorageService.updateVCard(IOUtils.toInputStream(vCard), session.getContextId(), contact.getVCardId());
+        if (Strings.isEmpty(vCardId)) {
+            update(session, folderId, id, contact, lastRead);
+            return false;
+        }
+        contact.setVCardId(vCardId);
+        update(session, folderId, id, contact, lastRead);
+        return true;
     }
 
     @Override
@@ -1169,7 +1240,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         try {
             Contact toDelete = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, userId,
-                new ContactField[] {ContactField.OBJECT_ID});
+                new ContactField[] { ContactField.OBJECT_ID });
             if (null != toDelete) {
                 executor.deleteSingle(con, Table.CONTACTS, contextId, toDelete.getObjectID(), lastRead.getTime());
             }
@@ -1229,7 +1300,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
         try {
-            Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] {ContactField.CREATED_BY});
+            Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.CREATED_BY });
             if (null == toUpdate) {
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
             }
@@ -1301,7 +1372,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
             Contact c = executor.selectSingle(connection, Table.CONTACTS, contextId, contactId,
-                new ContactField[] {ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED});
+                new ContactField[] { ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED });
             if (!c.containsInternalUserId() || userId != c.getInternalUserId()) {
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
@@ -1333,4 +1404,23 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
+    @Override
+    public void delete(Session session, String folderId, Contact contact, Date lastRead) throws OXException {
+        List<Contact> contacts = new ArrayList<Contact>();
+        contacts.add(contact);
+        this.deleteVCard(session.getContextId(), contacts);
+
+        this.delete(session, folderId, Integer.toString(contact.getObjectID()), lastRead);
+    }
+
+    @Override
+    public void delete(Session session, String folderId, List<Contact> contacts, Date lastRead) throws OXException {
+        this.deleteVCard(session.getContextId(), contacts);
+
+        List<String> contactsToDelete = new ArrayList<String>();
+        for (Contact contact : contacts) {
+            contactsToDelete.add(Integer.toString(contact.getObjectID()));
+        }
+        this.delete(session, folderId, contactsToDelete.toArray(new String[contactsToDelete.size()]), lastRead);
+    }
 }

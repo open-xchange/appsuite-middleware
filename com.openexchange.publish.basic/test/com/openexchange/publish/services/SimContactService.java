@@ -54,7 +54,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
@@ -442,4 +441,13 @@ public class SimContactService implements ContactService {
         return null;
     }
 
+    @Override
+    public void createContact(Session session, String folderId, Contact contact, String vcard) throws OXException {
+        // Nothing to do
+    }
+
+    @Override
+    public void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException {
+        // Nothing to do
+    }
 }

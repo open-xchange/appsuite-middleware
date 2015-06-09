@@ -203,7 +203,8 @@ public enum ContactField{
     OTHER_ADDRESS(Contact.ADDRESS_OTHER, "otherAddress", "OTHER_ADDRESS", "otherAddress", ContactFields.ADDRESS_OTHER, Types.VARCHAR),
     UID(Contact.UID, "uid", "UID", "uid", ContactFields.UID, Types.VARCHAR),
     FILENAME(Contact.FILENAME, "filename", "FILENAME", "filename", "", Types.VARCHAR),
-    SORT_NAME(Contact.SPECIAL_SORTING, "", "SORT_NAME", "sort_name", ContactFields.SORT_NAME, 0)
+    SORT_NAME(Contact.SPECIAL_SORTING, "", "SORT_NAME", "sort_name", ContactFields.SORT_NAME, 0),
+    VCARD_ID(Contact.VCARD_ID, "vCardId", "VCARD_ID", "vCardId", "", Types.VARCHAR)
     ;
 
     private int columnNumber, sqlType;

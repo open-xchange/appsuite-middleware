@@ -47,64 +47,25 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.vcard.storage;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link RdbServiceLookup} - Provides access to services.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link VCardStorageExceptionMessages}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class RdbServiceLookup {
+public class VCardStorageExceptionMessages implements LocalizableStrings {
+
+    public static final String FILESTORE_DOWN_MSG = "Unable to access the file store.";
 
     /**
-     * Initializes a new {@link DBChatServiceLookup}.
+     * Initializes a new {@link VCardStorageExceptionMessages}.
      */
-    private RdbServiceLookup() {
+    private VCardStorageExceptionMessages() {
         super();
     }
-
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
-
-    public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
-        return RdbServiceLookup.getService(c, false);
-    }
-
-    public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        final ServiceLookup serviceLookup = ref.get();
-        final S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
-    }
-
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
-    }
-
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
-
 }

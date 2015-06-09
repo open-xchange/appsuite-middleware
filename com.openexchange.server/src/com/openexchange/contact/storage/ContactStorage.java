@@ -51,7 +51,6 @@ package com.openexchange.contact.storage;
 
 import java.util.Date;
 import java.util.List;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.exception.OXException;
@@ -88,8 +87,7 @@ import com.openexchange.tools.iterator.SearchIterator;
  * can be found in the package <code>com.openexchange.groupware.tools.mappings
  * </code>.
  * </li><li>
- * While the interface uses {@link String} values for identifiers, the
- * {@link Contact} class still expects them to be in a numerical format for
+ * While the interface uses {@link String} values for identifiers, the {@link Contact} class still expects them to be in a numerical format for
  * legacy reasons. Therefore, extensive parsing of identifiers may be necessary
  * for now. A convenience <code>parse</code>-method for handling numerical
  * identifiers is available in {@link DefaultContactStorage}.
@@ -106,10 +104,8 @@ import com.openexchange.tools.iterator.SearchIterator;
  * least the properties that identify an object are required here (i.e.
  * timestamps and different identifiers).
  * </li><li>
- * Possible exceptions thrown in the storage must extend the
- * {@link OXException} base class. A storage might either define it's own
- * exceptions and/or use the pre-defined ones found at
- * {@link ContactExceptionCodes}.
+ * Possible exceptions thrown in the storage must extend the {@link OXException} base class. A storage might either define it's own
+ * exceptions and/or use the pre-defined ones found at {@link ContactExceptionCodes}.
  * </li><li>
  * As a general convention, all passed and returned object references are
  * assumed to be non-<code>null</code> unless otherwise specified.
@@ -158,8 +154,8 @@ public interface ContactStorage {
      * @param session the session
      * @param folderId the ID of the folder
      * @param canReadAll Whether the requesting user is allowed to see all objects within the folder.
-     * If set to <code>true</code> all objects should be counted except the ones that are marked as private.
-     * If set to <code>false</code>, only objects that have been created by the user may be counted.
+     *            If set to <code>true</code> all objects should be counted except the ones that are marked as private.
+     *            If set to <code>false</code>, only objects that have been created by the user may be counted.
      * @return the number of contacts
      * @throws OXException
      */
@@ -261,7 +257,7 @@ public interface ContactStorage {
      * @return the contacts
      * @throws OXException
      */
-	SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    SearchIterator<Contact> modified(Session session, String folderID, Date since, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for contacts.
@@ -320,6 +316,19 @@ public interface ContactStorage {
     void create(Session session, String folderId, Contact contact) throws OXException;
 
     /**
+     * Creates a new contact in a folder and tries to persist the given VCard. The storage below is responsible for a correct persistence of the given VCard. The caller will be informed by the returned boolean if persisting the VCard has been
+     * successful.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param contact the contact to create
+     * @param vCard the VCard to persist
+     * @return true, if saving the vCard has been successful. Otherwise false
+     * @throws OXException
+     */
+    boolean create(Session session, String folderId, Contact contact, String vCard) throws OXException;
+
+    /**
      * Updates a contact.
      *
      * @param session the session
@@ -329,6 +338,20 @@ public interface ContactStorage {
      * @throws OXException
      */
     void update(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
+
+    /**
+     * Updates an existing contact in a folder and to persist the given VCard. The storage below is responsible for a correct persistence of the given VCard. The caller will be informed by the returned boolean if persisting the VCard has been
+     * successful.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param contact the contact to update
+     * @param lastRead the time the object was last read from the storage
+     * @param vCard the VCard to persist
+     * @return true, if saving the vCard has been successful. Otherwise false
+     * @throws OXException
+     */
+    boolean update(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException;
 
     /**
      * Updates references to the supplied contact. This method is called
@@ -355,7 +378,18 @@ public interface ContactStorage {
     void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
 
     /**
-     * Deletes multiplce contacts.
+     * Deletes a contact <b>and the VCard<b> related to the contact.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param contact the contact to delete
+     * @param lastRead the time the object was last read from the storage
+     * @throws OXException
+     */
+    void delete(Session session, String folderId, Contact contact, Date lastRead) throws OXException;
+
+    /**
+     * Deletes multiple contacts.
      *
      * @param session the session
      * @param folderId the ID of the parent folder
@@ -366,7 +400,18 @@ public interface ContactStorage {
     void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException;
 
     /**
-     * Deletes all contacts in a folder.
+     * Deletes multiple contacts <b>including persisted VCards</b>.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param contacts the {@link Contact} to remove
+     * @param lastRead the time the objects were last read from the storage
+     * @throws OXException
+     */
+    void delete(Session session, String folderId, List<Contact> contacts, Date lastRead) throws OXException;
+
+    /**
+     * Deletes all contacts in a folder <b>including the persisted VCards</b> of the given contacts.
      *
      * @param session the session
      * @param folderId the ID of the parent folder
@@ -402,7 +447,6 @@ public interface ContactStorage {
      */
     SearchIterator<Contact> searchByAnniversary(Session session, List<String> folderIDs, Date from, Date until, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
-
     /**
      * Performs an optimized "auto-complete" lookup for contacts.
      *
@@ -410,12 +454,11 @@ public interface ContactStorage {
      * @param folderIDs A list of folder IDs to restrict the search to
      * @param query The search query as supplied by the client
      * @param parameters The additional parameters to refine the auto-complete search. If possible parameters are missing,
-     *                   their default values must be used (see JavaDoc of the common parameter keys in {@link AutocompleteParameters}).
+     *            their default values must be used (see JavaDoc of the common parameter keys in {@link AutocompleteParameters}).
      * @param fields The contact fields that should be retrieved
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
      * @throws OXException
      */
     SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
-
 }

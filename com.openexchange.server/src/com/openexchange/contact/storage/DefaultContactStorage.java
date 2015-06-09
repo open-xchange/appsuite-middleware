@@ -101,6 +101,26 @@ public abstract class DefaultContactStorage implements ContactStorage {
         super();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean create(Session session, String folderId, Contact contact, String vCard) throws OXException {
+        LOG.info("No appropriate implementation for storing VCard found. Will just create the contact.");
+        this.create(session, folderId, contact);
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean update(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException {
+        LOG.info("No appropriate implementation for storing VCard found. Will just update the contact.");
+        this.update(session, folderId, id, contact, lastRead);
+        return false;
+    }
+
     @Override
     public SearchIterator<Contact> all(Session session, final String folderId, final ContactField[] fields) throws OXException {
         return this.all(session, folderId, fields, SortOptions.EMPTY);
