@@ -1060,9 +1060,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 // check if given user is not admin, if he is admin, the
                 final User authuser = new User();
                 authuser.setName(auth.getLogin());
-                if( basicauth.isMasterOfContext(auth, ctx) ) {
-                    basicauth.doAuthentication(auth, ctx);
-                } else if (!tool.isContextAdmin(ctx, authuser)) {
+                if (!tool.isContextAdmin(ctx, authuser)) {
                     final InvalidCredentialsException invalidCredentialsException = new InvalidCredentialsException("Permission denied");
                     if (users.length == 1) {
                         final int auth_user_id = authuser.getId().intValue();

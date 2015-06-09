@@ -95,11 +95,24 @@ public final class Databases {
     }
 
     /**
+     * Closes the {@link Statement} instances.
+     *
+     * @param stmts The statements to close.
+     */
+    public static void closeSQLStuff(Statement... stmts) {
+        if (null != stmts) {
+            for (Statement stmt : stmts) {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    /**
      * Closes the {@link Statement}.
      *
      * @param stmt <code>null</code> or a {@link Statement} to close.
      */
-    public static void closeSQLStuff(final Statement stmt) {
+    public static void closeSQLStuff(Statement stmt) {
         if (null != stmt) {
             try {
                 stmt.close();
