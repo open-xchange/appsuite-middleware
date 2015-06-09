@@ -738,11 +738,16 @@ class UpdateData {
                 // Delegator has been removed from participant list.
                 delegatorFolder = FolderStorage.extractFolderOfUser(getOrigFolder(), getUserId());
             }
+            // Something similar happens if a user changes a task in a shared folder.
+            if (null == delegatorFolder && 1 == getOrigFolder().size()) {
+                // If that task is only located in a single folder use that as a fallback.
+                delegatorFolder = getOrigFolder().toArray(new Folder[1])[0];
+            }
             if (null != delegatorFolder) {
                 orig.setParentFolderID(delegatorFolder.getIdentifier());
             }
         }
-        sentEvent(session, getUpdated(), getOrigTask(), getDestFolder());
+        sentEvent(session, getUpdated(), orig, getDestFolder());
     }
 
     static void sentEvent(final Session session, final Task updated, final Task orig, final FolderObject dest) throws OXException {
