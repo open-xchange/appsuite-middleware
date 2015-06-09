@@ -49,50 +49,25 @@
 
 package com.openexchange.ajax.oauth.provider;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import org.apache.commons.httpclient.HttpStatus;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.ParseException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpParams;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AJAXSession;
+import com.openexchange.ajax.oauth.provider.protocol.Grant;
+import com.openexchange.ajax.oauth.provider.protocol.OAuthParams;
+import com.openexchange.ajax.oauth.provider.protocol.Protocol;
 import com.openexchange.configuration.AJAXConfig;
-import com.openexchange.html.internal.parser.HtmlHandler;
-import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.oauth.provider.scope.Scope;
 
@@ -113,9 +88,7 @@ public class OAuthSession extends AJAXSession {
 
     private final Scope scope;
 
-    private String accessToken;
-
-    private String refreshToken;
+    private Grant grant;
 
     /**
      * Initializes a new {@link OAuthSession}.
@@ -149,163 +122,21 @@ public class OAuthSession extends AJAXSession {
         return client;
     }
 
-    public static HttpResponse requestAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, Scope scope, String... queryParams) throws Exception {
-        URIBuilder uriBuilder = new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
-            .setParameter("response_type", "code")
-            .setParameter("client_id", clientId)
-            .setParameter("redirect_uri", redirectURI)
-            .setParameter("state", state);
-        if (scope != null) {
-            uriBuilder.setParameter("scope", scope.toString());
-        }
-
-        if (queryParams != null && queryParams.length > 0) {
-            for (int i = 0; i < queryParams.length;) {
-                uriBuilder.setParameter(queryParams[i++], queryParams[i++]);
-            }
-        }
-
-        HttpGet getLoginPage = new HttpGet(uriBuilder.build());
-        HttpResponse loginPageResponse = client.execute(getLoginPage);
-        return loginPageResponse;
-    }
-
-    public static HttpResponse performAuthorization(HttpClient client, String hostname, String clientId, String redirectURI, String state, Scope scope, String csrfToken, String login, String password, String... formParams) throws Exception {
-        LinkedList<NameValuePair> generalFormParams = new LinkedList<>();
-        generalFormParams.add(new BasicNameValuePair("access_denied", "false"));
-        generalFormParams.add(new BasicNameValuePair("client_id", clientId));
-        generalFormParams.add(new BasicNameValuePair("state", state));
-        generalFormParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
-        generalFormParams.add(new BasicNameValuePair("response_type", "code"));
-        if (scope != null) {
-            generalFormParams.add(new BasicNameValuePair("scope", scope.toString()));
-        }
-
-        if (formParams != null && formParams.length > 0) {
-            for (int i = 0; i < formParams.length;) {
-                generalFormParams.add(new BasicNameValuePair(formParams[i++], formParams[i++]));
-            }
-        }
-
-        LinkedList<NameValuePair> loginFormParams = new LinkedList<>(generalFormParams);
-        loginFormParams.add(new BasicNameValuePair("login", login));
-        loginFormParams.add(new BasicNameValuePair("password", password));
-        loginFormParams.add(new BasicNameValuePair("csrf_token", csrfToken));
-        HttpPost submitLoginForm = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
-            .build());
-        submitLoginForm.setHeader(HttpHeaders.REFERER, "https://" + hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
-        submitLoginForm.setEntity(new UrlEncodedFormEntity(loginFormParams));
-
-        HttpResponse loginResponse = client.execute(submitLoginForm);
-        releaseConnectionOnRedirect(loginResponse);
-        HttpGet getAuthForm = new HttpGet(loginResponse.getFirstHeader(HttpHeaders.LOCATION).getValue());
-        HttpResponse authFormResponse = client.execute(getAuthForm);
-        Map<String, String> authFormFields = getHiddenFormFields(EntityUtils.toString(authFormResponse.getEntity()));
-
-        LinkedList<NameValuePair> authFormParams = new LinkedList<>(generalFormParams);
-        authFormParams.add(new BasicNameValuePair("session", authFormFields.get("session")));
-        authFormParams.add(new BasicNameValuePair("csrf_token", authFormFields.get("csrf_token")));
-        HttpPost submitAuthForm = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(EndpointTest.AUTHORIZATION_ENDPOINT)
-            .build());
-        submitAuthForm.setHeader(HttpHeaders.REFERER, "https://" + hostname + EndpointTest.AUTHORIZATION_ENDPOINT);
-        submitAuthForm.setEntity(new UrlEncodedFormEntity(authFormParams));
-
-        HttpResponse authResponse = client.execute(submitAuthForm);
-        releaseConnectionOnRedirect(authResponse);
-        return authResponse;
-    }
-
-    public static HttpResponse redeemAuthCode(HttpClient client, String hostname, String clientId, String clientSecret, String code, String redirectURI, String... formParams) throws Exception {
-        LinkedList<NameValuePair> redeemAuthCodeParams = new LinkedList<>();
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_id", clientId));
-        redeemAuthCodeParams.add(new BasicNameValuePair("client_secret", clientSecret));
-        redeemAuthCodeParams.add(new BasicNameValuePair("grant_type", "authorization_code"));
-        redeemAuthCodeParams.add(new BasicNameValuePair("redirect_uri", redirectURI));
-        redeemAuthCodeParams.add(new BasicNameValuePair("code", code));
-
-        if (formParams != null && formParams.length > 0) {
-            for (int i = 0; i < formParams.length;) {
-                redeemAuthCodeParams.add(new BasicNameValuePair(formParams[i++], formParams[i++]));
-            }
-        }
-
-        HttpPost redeemAuthCode = new HttpPost(new URIBuilder()
-            .setScheme("https")
-            .setHost(hostname)
-            .setPath(EndpointTest.TOKEN_ENDPOINT)
-            .build());
-        redeemAuthCode.setEntity(new UrlEncodedFormEntity(redeemAuthCodeParams));
-
-        HttpResponse accessTokenResponse = client.execute(redeemAuthCode);
-        releaseConnectionOnRedirect(accessTokenResponse);
-        return accessTokenResponse;
-    }
-
-    public static JSONObject extractJSON(HttpResponse response) throws JSONException, ParseException, IOException {
-        JSONObject jsonObject = new JSONObject(EntityUtils.toString(response.getEntity()));
-        if (jsonObject.has("data")) {
-            return jsonObject.getJSONObject("data");
-        }
-
-        return jsonObject;
-    }
-
-    public static Map<String, String> extractQueryParams(String uri) throws UnsupportedEncodingException, URISyntaxException {
-        Map<String, String> params = new HashMap<>();
-        String[] redirectParamPairs = URLDecoder.decode(new URI(uri).getRawQuery(), "UTF-8").split("&");
-        for (String pair : redirectParamPairs) {
-            String[] split = pair.split("=");
-            params.put(split[0], split[1]);
-        }
-
-        return params;
-    }
-
     private void obtainAccess(User user, HttpClient client) throws Exception {
         String hostname = AJAXConfig.getProperty(AJAXConfig.Property.HOSTNAME);
         String login = AJAXConfig.getProperty(user.getLogin()) + "@" + AJAXConfig.getProperty(AJAXConfig.Property.CONTEXTNAME);
         String password = AJAXConfig.getProperty(user.getPassword());
         String state = UUIDs.getUnformattedStringFromRandom();
-        HttpResponse loginPageResponse = requestAuthorization(client, hostname, clientId, redirectURI, state, scope);
-        assertEquals(HttpStatus.SC_OK, loginPageResponse.getStatusLine().getStatusCode());
-        assertTrue(loginPageResponse.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue().startsWith("text/html"));
-        Map<String, String> parameters = getHiddenFormFields(EntityUtils.toString(loginPageResponse.getEntity()));
 
-        HttpResponse authCodeResponse = performAuthorization(client, hostname, clientId, redirectURI, state, scope, parameters.get("csrf_token"), login, password);
-        assertEquals("Unexpected status code", HttpStatus.SC_MOVED_TEMPORARILY, authCodeResponse.getStatusLine().getStatusCode());
-        String redirectLocation = new URI(authCodeResponse.getFirstHeader(HttpHeaders.LOCATION).getValue()).toString();
-        assertFalse(redirectLocation.contains("error"));
-        assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.startsWith(redirectURI));
-
-        Map<String, String> redirectParams = extractQueryParams(redirectLocation);
-        assertFalse(redirectParams.get("error_description"), redirectParams.containsKey("error"));
-        String returnedState = redirectParams.get("state");
-        assertEquals(state, returnedState);
-        String code = redirectParams.get("code");
-        assertNotNull(code);
-
-        HttpResponse accessTokenResponse = redeemAuthCode(client, hostname, clientId, clientSecret, code, redirectURI);
-        assertEquals(HttpStatus.SC_OK, accessTokenResponse.getStatusLine().getStatusCode());
-        JSONObject jAccessTokenResponse = JSONObject.parse(new InputStreamReader(accessTokenResponse.getEntity().getContent(), accessTokenResponse.getEntity().getContentEncoding() == null ? "UTF-8" : accessTokenResponse.getEntity().getContentEncoding().getValue())).toObject();
-        assertTrue("bearer".equalsIgnoreCase(jAccessTokenResponse.getString("token_type")));
-        assertNotNull(jAccessTokenResponse.get("access_token"));
-        assertNotNull(jAccessTokenResponse.get("refresh_token"));
-        assertNotNull(jAccessTokenResponse.get("scope"));
-        assertNotNull(jAccessTokenResponse.get("expires_in"));
-
-        accessToken = jAccessTokenResponse.getString("access_token");
-        refreshToken = jAccessTokenResponse.getString("refresh_token");
+        OAuthParams params = new OAuthParams()
+            .setHostname(hostname)
+            .setClientId(clientId)
+            .setClientSecret(clientSecret)
+            .setRedirectURI(redirectURI)
+            .setScope(scope.toString())
+            .setState(state);
+        grant = Protocol.obtainAccess(client, params, login, password);
     }
-
 
     /**
      * Gets the accessToken
@@ -313,9 +144,8 @@ public class OAuthSession extends AJAXSession {
      * @return The accessToken
      */
     public String getAccessToken() {
-        return accessToken;
+        return grant.getAccessToken();
     }
-
 
     /**
      * Gets the refreshToken
@@ -323,108 +153,7 @@ public class OAuthSession extends AJAXSession {
      * @return The refreshToken
      */
     public String getRefreshToken() {
-        return refreshToken;
+        return grant.getRefreshToken();
     }
 
-    /**
-     * Parses parameters out of an URI fragment
-     * @param fragment The decoded URI fragment
-     * @return A map of parameters
-     */
-    public static Map<String, String> extractFragmentParams(String fragment) {
-        Map<String, String> parameters = new HashMap<>();
-        String[] kvPairs = fragment.split("&");
-        for (String kvPair : kvPairs) {
-            int idx = kvPair.indexOf('=');
-            if (idx < 0) {
-                continue;
-            }
-
-            String key = kvPair.substring(0, idx);
-            String value = kvPair.substring(idx + 1);
-            parameters.put(key, value);
-        }
-
-        return parameters;
-    }
-
-    /**
-     * Returns all hidden form fields from an HTML form as name-value pairs.
-     *
-     * @param form The HTML form as String
-     * @return A map of fields
-     */
-    public static Map<String, String> getHiddenFormFields(String form) {
-        final Map<String, String> params = new HashMap<>();
-        HtmlParser.parse(form, new HtmlHandler() {
-
-            @Override
-            public void handleXMLDeclaration(String version, Boolean standalone, String encoding) {
-
-            }
-
-            @Override
-            public void handleText(String text, boolean ignorable) {
-
-            }
-
-            @Override
-            public void handleStartTag(String tag, Map<String, String> attributes) {
-                handleTag(tag, attributes);
-            }
-
-            @Override
-            public void handleSimpleTag(String tag, Map<String, String> attributes) {
-                handleTag(tag, attributes);
-            }
-
-            private void handleTag(String tag, Map<String, String> attributes) {
-                if ("input".equals(tag) && "hidden".equals(attributes.get("type"))) {
-                    String name = attributes.get("name");
-                    String value = attributes.get("value");
-                    if (name != null && value != null) {
-                        params.put(name, value);
-                    }
-                }
-            }
-
-            @Override
-            public void handleError(String errorMsg) {
-
-            }
-
-            @Override
-            public void handleEndTag(String tag) {
-
-            }
-
-            @Override
-            public void handleDocDeclaration(String docDecl) {
-
-            }
-
-            @Override
-            public void handleComment(String comment) {
-
-            }
-
-            @Override
-            public void handleCDATA(String text) {
-
-            }
-        });
-
-        return params;
-    }
-
-    public static void releaseConnectionOnRedirect(HttpResponse response) {
-        /*
-         * A custom grizzly extension always produces HTML output on redirects.
-         * We need to consume this entity or the connection cannot be re-used.
-         */
-        int statusCode = response.getStatusLine().getStatusCode();
-        if (statusCode == HttpStatus.SC_MOVED_PERMANENTLY || statusCode == HttpStatus.SC_MOVED_TEMPORARILY) {
-            EntityUtils.consumeQuietly(response.getEntity());
-        }
-    }
 }

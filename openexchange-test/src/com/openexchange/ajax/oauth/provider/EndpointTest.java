@@ -98,11 +98,11 @@ import com.openexchange.oauth.provider.scope.Scope;
  */
 public abstract class EndpointTest {
 
-    protected static final String AUTHORIZATION_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
+    public static final String AUTHORIZATION_ENDPOINT = "/ajax/" + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
 
-    protected static final String TOKEN_ENDPOINT = "/ajax/" + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS;
+    public static final String TOKEN_ENDPOINT = "/ajax/" + OAuthProviderConstants.ACCESS_TOKEN_SERVLET_ALIAS;
 
-    protected static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
+    public static final String REVOKE_ENDPOINT = "/ajax/" + OAuthProviderConstants.REVOKE_SERVLET_ALIAS;
 
     protected static String hostname;
     protected static String login;
