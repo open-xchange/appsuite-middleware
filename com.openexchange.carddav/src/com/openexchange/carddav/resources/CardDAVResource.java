@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.java.Streams;
@@ -91,6 +92,7 @@ public abstract class CardDAVResource extends AbstractResource {
     protected GroupwareCarddavFactory factory;
     protected WebdavPath url;
 	private String cachedVCard = null;
+	private String originalVCard = null;
 
     public CardDAVResource(GroupwareCarddavFactory factory, WebdavPath url) {
         super();
@@ -259,7 +261,13 @@ public abstract class CardDAVResource extends AbstractResource {
 
 	@Override
 	public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-    	VersitObject versitObject = this.readBody(body);
+	    try {
+            this.originalVCard = IOUtils.toString(body);
+        } catch (IOException ioException) {
+            LOG.warn("Unable to read original VCard from stream.", ioException);
+        }
+	    String copy = new String(this.originalVCard);
+    	VersitObject versitObject = this.readBody(new ByteArrayInputStream(copy.getBytes()));
     	if (null == versitObject) {
     	    throw this.protocolException(HttpServletResponse.SC_BAD_REQUEST);
         }
@@ -294,9 +302,8 @@ public abstract class CardDAVResource extends AbstractResource {
             WebdavProperty property = new WebdavProperty(namespace, name);
             property.setValue(this.getVCard());
             return property;
-        } else {
-        	return null;
         }
+        return null;
 	}
 
 	@Override
@@ -304,4 +311,12 @@ public abstract class CardDAVResource extends AbstractResource {
 		return true;
 	}
 
+    /**
+     * Gets the originalVCard
+     *
+     * @return The originalVCard
+     */
+    public String getOriginalVCard() {
+        return originalVCard;
+    }
 }

@@ -214,6 +214,9 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property MASTER_ACCOUNT_OVERRIDE false /opt/open-xchange/etc/AdminDaemon.properties
 
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
+
+    # SoftwareChange_Request-2535
+    ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
 fi
 
 %clean

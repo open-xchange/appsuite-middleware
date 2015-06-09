@@ -60,7 +60,6 @@ import com.openexchange.search.SearchTerm;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 
-
 /**
  * {@link ContactService} - Provides access to the contact module.
  *
@@ -74,9 +73,9 @@ public interface ContactService {
      * list, even if the current session's user has no sufficient access
      * permissions for that folder.
      */
-	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
-		ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED,
-		ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.EMAIL1 };
+    public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
+        ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED,
+        ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.UID, ContactField.EMAIL1 };
 
     /**
      * Gets a contact with all fields.
@@ -447,7 +446,7 @@ public interface ContactService {
      * @param folderIDs A list of folder IDs to restrict the search to
      * @param query The search query as supplied by the client
      * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
-     *                   but use an empty instance to use the default parameter values.
+     *            but use an empty instance to use the default parameter values.
      * @param fields The contact fields that should be retrieved
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
@@ -464,7 +463,7 @@ public interface ContactService {
      * @param session The session
      * @param query The search query as supplied by the client
      * @param parameters The additional parameters to refine the auto-complete search. Don't pass <code>null</code> here,
-     *                   but use an empty instance to use the default parameter values.
+     *            but use an empty instance to use the default parameter values.
      * @param fields The contact fields that should be retrieved
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
@@ -483,6 +482,17 @@ public interface ContactService {
     void createContact(Session session, String folderId, Contact contact) throws OXException;
 
     /**
+     * Creates a new contact in a folder and tries to persist the given VCard. The underlying ContactStorage is responsible for a successful storage of the VCard.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param contact the contact to create
+     * @param vCard the VCard to persist
+     * @throws OXException
+     */
+    void createContact(Session session, String folderId, Contact contact, String vCard) throws OXException;
+
+    /**
      * Updates a contact.
      *
      * @param session the session
@@ -493,6 +503,19 @@ public interface ContactService {
      * @throws OXException
      */
     void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
+
+    /**
+     * Updates a contact and the given VCard. The underlying ContactStorage is responsible for a successful storage of the VCard.
+     *
+     * @param session the session
+     * @param folderId the ID of the parent folder
+     * @param id the object ID
+     * @param contact the contact to update
+     * @param lastRead the time the object was last read from the storage
+     * @param vCard the VCard to persist
+     * @throws OXException
+     */
+    void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException;
 
     /**
      * Updates a user's contact data, ignoring the folder permissions of the
@@ -553,7 +576,7 @@ public interface ContactService {
      */
     Contact getUser(Session session, int userID) throws OXException;
 
-	/**
+    /**
      * Gets a user's contact with specified fields.<p>
      *
      * If the current user has no adequate permissions, no exception is thrown,
@@ -582,7 +605,7 @@ public interface ContactService {
      */
     SearchIterator<Contact> getUsers(Session session, int[] userIDs) throws OXException;
 
-	/**
+    /**
      * Gets user contacts with specified fields.<p>
      *
      * If the current user has no adequate permissions, no exception is thrown,
@@ -597,7 +620,7 @@ public interface ContactService {
      */
     SearchIterator<Contact> getUsers(Session session, int[] userIDs, ContactField[] fields) throws OXException;
 
-	/**
+    /**
      * Gets all user contacts with specified fields.<p>
      *
      * If the current user has no adequate permissions, no exception is thrown,
@@ -632,7 +655,7 @@ public interface ContactService {
      * @return the user contacts found with the search
      * @throws OXException
      */
-	<O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
+    <O> SearchIterator<Contact> searchUsers(Session session, SearchTerm<O> term, ContactField[] fields, SortOptions sortOptions) throws OXException;
 
     /**
      * Searches for users.

@@ -1186,6 +1186,11 @@ ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open
 ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
 ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-xchange/etc/subscribe.properties
 
+# SoftwareChange_Request-2530
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do

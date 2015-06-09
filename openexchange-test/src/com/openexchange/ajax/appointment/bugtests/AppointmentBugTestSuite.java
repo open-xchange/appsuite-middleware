@@ -156,6 +156,8 @@ public class AppointmentBugTestSuite extends TestSuite {
         tests.addTestSuite(Bug35355Test.class);
         tests.addTestSuite(Bug37198Test.class);
         tests.addTestSuite(Bug37668Test.class);
+        tests.addTestSuite(Bug38079Test.class);
+        tests.addTestSuite(WeirdRecurrencePatternTest.class); // Is also a bug test. Related to 37668 and 38079.
         return tests;
     }
 }

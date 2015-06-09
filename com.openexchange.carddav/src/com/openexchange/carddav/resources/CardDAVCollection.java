@@ -366,10 +366,9 @@ public abstract class CardDAVCollection extends AbstractCollection {
     		if (null != contact) {
               	LOG.debug("{}: found child resource by name '{}'", this.getUrl(), name);
     			return new ContactResource(contact, this.factory, constructPathForChildResource(contact));
-    		} else {
-              	LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
-    			return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
     		}
+            LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
+            return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
     	} catch (OXException e) {
     		throw protocolException(e);
 		}

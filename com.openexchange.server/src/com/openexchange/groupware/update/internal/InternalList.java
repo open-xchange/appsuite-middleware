@@ -787,6 +787,9 @@ public final class InternalList {
         // Drops the unused stored procedures from the database
         list.add(new com.openexchange.groupware.update.tasks.DropStoredProceduresUpdateTask());
 
+        // Add vCardId column if missing
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

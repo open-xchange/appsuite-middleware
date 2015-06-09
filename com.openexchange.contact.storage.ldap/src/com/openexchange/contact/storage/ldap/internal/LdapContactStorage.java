@@ -576,4 +576,13 @@ public class LdapContactStorage extends DefaultContactStorage {
         }
     }
 
+    @Override
+    public void delete(Session session, String folderId, Contact contact, Date lastRead) throws OXException {
+        throw LdapExceptionCodes.DELETE_NOT_POSSIBLE.create();
+    }
+
+    @Override
+    public void delete(Session session, String folderId, List<Contact> contacts, Date lastRead) throws OXException {
+        throw LdapExceptionCodes.DELETE_NOT_POSSIBLE.create();
+   }
 }

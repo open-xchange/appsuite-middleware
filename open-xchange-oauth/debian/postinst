@@ -85,6 +85,12 @@ postFix() {
             ox_remove_property ${OLDNAMES[$I-1]} $PFILE
         fi
     done
+
+    # SoftwareChange_Request-2532
+    VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
+    if dpkg --compare-versions "7.8.0" gt-nl "$1"; then
+        ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
+    fi
 }
 
 setConfigFilePermissions() {

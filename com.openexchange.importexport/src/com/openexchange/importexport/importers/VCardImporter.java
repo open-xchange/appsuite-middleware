@@ -214,7 +214,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                             contactObj.setParentFolderID(contactFolderId);
                             importResult.setDate(new Date());
                             try {
-                                super.createContact(session, contactObj, Integer.toString(contactFolderId));
+                                super.createContact(session, contactObj, Integer.toString(contactFolderId), new String(chunk.getContent()));
                                 count++;
                             } catch (final OXException oxEx) {
                                 if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {

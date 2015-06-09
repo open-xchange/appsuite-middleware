@@ -102,7 +102,7 @@ public class DBMigrationExecutor implements Runnable {
     public void run() {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
             if (false == needsUpdate(scheduledExecution)) {
-                LOG.debug("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
+                LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
                 scheduledExecution.setDone(null);
                 notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
                 continue;
