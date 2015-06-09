@@ -7,7 +7,7 @@
   <body>
     <div id="main">
       <div id="header">
-        <h1>${productName?html}</h1>
+        <h1>${headline?html}</h1>
       </div>
       <#if error?has_content>
         <div id="error-container">
@@ -17,7 +17,6 @@
       <div id="login-form">
         <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
           <fieldset>
-            <legend>${formHeading?html}</legend>
             <table>
               <tr>
                 <td><label for="user_login">${usernameLabel?html}:</label></td>
@@ -29,8 +28,8 @@
               </tr>
               <tr>
                 <td colspan="2">
-                  <button name="access_denied" type="submit" value="false">${allowLabel?html}</button>
-                  <button name="access_denied" type="submit" value="true">${denyLabel?html}</button>
+                  <button name="access_denied" type="submit" value="true">${cancelLabel?html}</button>
+                  <button name="access_denied" type="submit" value="false">${loginLabel?html}</button>
                 </td>
               </tr>
             </table>

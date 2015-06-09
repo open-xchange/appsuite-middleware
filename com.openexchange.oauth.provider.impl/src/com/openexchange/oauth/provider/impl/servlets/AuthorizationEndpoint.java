@@ -54,6 +54,8 @@ import static com.openexchange.osgi.Tools.requireService;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -65,6 +67,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.LoginServlet;
@@ -83,7 +86,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextExceptionMessage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
@@ -95,6 +97,7 @@ import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionMessages;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
@@ -125,6 +128,11 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AuthorizationEndpoint extends OAuthEndpoint {
+
+    /**
+     *
+     */
+    private static final String STRING_SPLITTER = "#split#";
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
 
@@ -428,25 +436,27 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         // build replacement strings
         Locale locale = determineLocale(request);
         Translator translator = translatorFactory.translatorFor(locale);
+        String productName = serverConfigService.getServerConfig(URLHelper.getHostname(request), ConfigProviderService.NO_USER, ConfigProviderService.NO_CONTEXT).getProductName();
+        String title = String.format(translator.translate(OAuthProviderStrings.POPUP_TITLE), authRequest.getClient().getName());
+        String headline = String.format(translator.translate(OAuthProviderStrings.LOGIN_FORM_HEADLINE), productName, authRequest.getClient().getName());
+
         Map<String, Object> vars = new HashMap<>();
         vars.put("lang", locale.getLanguage());
-        String title = translator.translate(OAuthProviderStrings.LOGIN);
         vars.put("title", title);
-        vars.put("productName", serverConfigService.getServerConfig(URLHelper.getHostname(request), ConfigProviderService.NO_USER, ConfigProviderService.NO_CONTEXT).getProductName());
+        vars.put("headline", headline);
+        if (error != null) {
+            vars.put("error", translator.translate(error.getMessage()));
+        }
         vars.put("target", getAuthorizationEndpointURL(request));
-        vars.put("formHeading", title);
         vars.put("usernameLabel", translator.translate(OAuthProviderStrings.USERNAME));
         vars.put("passwordLabel", translator.translate(OAuthProviderStrings.PASSWORD));
-        vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
-        vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
+        vars.put("cancelLabel", translator.translate(OAuthProviderStrings.CANCEL));
+        vars.put("loginLabel", translator.translate(OAuthProviderStrings.LOGIN));
         vars.put("clientId", authRequest.getClient().getId());
         vars.put("redirectURI", authRequest.getRedirectURI());
         vars.put("scopes", authRequest.getScope().toString());
         vars.put("state", authRequest.getState());
         vars.put("csrfToken", csrfToken);
-        if (error != null) {
-            vars.put("error", translator.translate(error.getMessage()));
-        }
 
         StringWriter writer = new StringWriter();
         loginPage.process(vars, writer);
@@ -536,20 +546,33 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     private String compileAuthorizationPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, Session session) throws OXException, IOException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         TemplateService templateService = requireService(TemplateService.class, services);
-        HtmlService htmlService = requireService(HtmlService.class, services);
         OXTemplate loginPage = templateService.loadTemplate("oauth-provider-authorization.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
 
-        // build replacement strings
         Locale locale = determineLocale(request);
         Translator translator = translatorFactory.translatorFor(locale);
+        String title = String.format(translator.translate(OAuthProviderStrings.POPUP_TITLE), authRequest.getClient().getName());
+        String intro = translator.translate(OAuthProviderStrings.AUTHORIZATION_INTRO);
+        int splitIndex = intro.indexOf(STRING_SPLITTER);
+        String introPre = intro;
+        String introPost = "";
+        if (splitIndex >= 0) {
+            introPre = intro.substring(0, splitIndex);
+            if (splitIndex + STRING_SPLITTER.length() <= intro.length()) {
+                introPost = intro.substring(splitIndex + STRING_SPLITTER.length());
+            }
+        }
+
         Map<String, Object> vars = new HashMap<>();
         vars.put("lang", locale.getLanguage());
-        String title = translator.translate(OAuthProviderStrings.LOGIN);
         vars.put("title", title);
+        vars.put("headline", title);
+        vars.put("clientDescription", authRequest.getClient().getDescription());
         vars.put("iconURL", icon2HTMLDataSource(authRequest.getClient().getIcon()));
-        String clientName = htmlService.htmlFormat(authRequest.getClient().getName());
-        vars.put("iconAlternative", clientName);
-        vars.put("intro", translator.translate(String.format(OAuthProviderStrings.OAUTH_INTRO, clientName)));
+        vars.put("iconAlternative", authRequest.getClient().getName());
+        vars.put("introPre", introPre);
+        vars.put("clientWebsite", authRequest.getClient().getWebsite());
+        vars.put("clientName", authRequest.getClient().getName());
+        vars.put("introPost", introPost);
         List<String> descriptions = new ArrayList<>(authRequest.getScope().size());
         for (String token : authRequest.getScope().get()) {
             OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
@@ -562,18 +585,30 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
         vars.put("scopeDescriptions", descriptions);
         vars.put("target", getAuthorizationEndpointURL(request));
-        vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
-        vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
         vars.put("clientId", authRequest.getClient().getId());
         vars.put("redirectURI", authRequest.getRedirectURI());
         vars.put("scopes", authRequest.getScope().toString());
         vars.put("state", authRequest.getState());
         vars.put("csrfToken", csrfToken);
         vars.put("session", session.getSessionID());
+        vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
+        vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
+        vars.put("footer", translator.translate(OAuthProviderStrings.AUTHORIZATION_FOOTER));
 
         StringWriter writer = new StringWriter();
         loginPage.process(vars, writer);
         return writer.toString();
+    }
+
+    /**
+     * Compiles a HTML data-URI for the icon image.
+     *
+     * @param icon The icon
+     * @return A URI in the form of <code>data:image/png;charset=UTF-8;base64,iVBORw0KGgoAAAANS...</code>
+     * @throws IOException
+     */
+    private static String icon2HTMLDataSource(Icon icon) throws IOException {
+        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(icon.getData());
     }
 
     /**
@@ -595,6 +630,74 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
 
         if (isInvalidCSRFToken(request)) {
             respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid CSRF token.");
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the current HTTP session already contains a CSRF token and the passed request contains
+     * the same token as parameter.
+     *
+     * @param request
+     * @return <code>true</code> if either the HTTP session or the request did NOT contain a valid CSRF token.
+     */
+    private static boolean isInvalidCSRFToken(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return true;
+        }
+
+        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
+        if (csrfToken == null) {
+            return true;
+        }
+
+        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
+        if (actualToken == null) {
+            return true;
+        }
+
+        if (!csrfToken.equals(actualToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the referer header of the passed request matches the scheme, host, port and
+     * path of this servlet.
+     *
+     * @param request
+     * @return <code>true</code> if the referer header is not set or invalid
+     */
+    private static boolean isInvalidReferer(HttpServletRequest request) {
+        String referer = request.getHeader(HttpHeaders.REFERER);
+        if (Strings.isEmpty(referer)) {
+            return true;
+        }
+
+        try {
+            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI actualReferer = new URI(referer);
+            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
+                return true;
+            }
+
+            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
+                return true;
+            }
+
+            if (expectedReferer.getPort() != actualReferer.getPort()) {
+                return true;
+            }
+
+            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
+                return true;
+            }
+        } catch (URISyntaxException e) {
             return true;
         }
 

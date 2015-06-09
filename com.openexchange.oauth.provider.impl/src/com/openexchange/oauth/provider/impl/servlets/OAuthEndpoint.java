@@ -55,30 +55,21 @@ import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.net.HttpHeaders;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.client.Icon;
-import com.openexchange.oauth.provider.impl.tools.URLHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
@@ -186,64 +177,6 @@ public abstract class OAuthEndpoint extends HttpServlet {
             locale = LocaleTools.getSaneLocale(LocaleTools.getLocale(language));
         }
         return locale;
-    }
-
-    protected static String icon2HTMLDataSource(Icon icon) throws IOException {
-        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(icon.getData());
-    }
-
-    protected static boolean isInvalidCSRFToken(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return true;
-        }
-
-        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
-        if (csrfToken == null) {
-            return true;
-        }
-
-        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
-        if (actualToken == null) {
-            return true;
-        }
-
-        if (!csrfToken.equals(actualToken)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    protected static boolean isInvalidReferer(HttpServletRequest request) {
-        String referer = request.getHeader(HttpHeaders.REFERER);
-        if (Strings.isEmpty(referer)) {
-            return true;
-        }
-
-        try {
-            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
-            URI actualReferer = new URI(referer);
-            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
-                return true;
-            }
-
-            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
-                return true;
-            }
-
-            if (expectedReferer.getPort() != actualReferer.getPort()) {
-                return true;
-            }
-
-            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
-                return true;
-            }
-        } catch (URISyntaxException e) {
-            return true;
-        }
-
-        return false;
     }
 
     private void writeErrorPage(Writer writer, String message, Locale locale) throws OXException, IOException {

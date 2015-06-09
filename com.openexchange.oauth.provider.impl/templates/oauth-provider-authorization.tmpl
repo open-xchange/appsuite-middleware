@@ -6,16 +6,21 @@
   </head>
   <body>
     <div id="main">
-      <div id="header">
-        <img src="${iconURL}" alt="${iconAlternative?html}" height="128" width="128">
-        <span id="intro">${intro?html}</span>
-        <ul>
-          <#list scopeDescriptions as desc>
-          <li>${desc?html}</li>
-          </#list>
-        </ul>
-      </div>
+      <h1>${headline?html}</h1>
+      <p>${clientDescription?html}</p>
+
       <div id="auth-form">
+        <img src="${iconURL}" alt="${iconAlternative?html}" height="128" width="128">
+        <p>${introPre?html}<a href="${clientWebsite}" target="_blank">${clientName?html}</a>${introPost?html}</p>
+
+        <div id="scope-descriptions">
+          <ul>
+            <#list scopeDescriptions as desc>
+            <li>${desc?html}</li>
+            </#list>
+          </ul>
+        </div>
+
         <form action="${target}" method="POST" enctype="application/x-www-form-urlencoded">
           <input name="client_id" type="hidden" value="${clientId}">
           <input name="redirect_uri" type="hidden" value="${redirectURI}">
@@ -25,9 +30,13 @@
           <input name="response_type" type="hidden" value="code">
           <input name="session" type="hidden" value="${session}">
 
-          <button name="access_denied" type="submit" value="false">${allowLabel?html}</button>
           <button name="access_denied" type="submit" value="true">${denyLabel?html}</button>
+          <button name="access_denied" type="submit" value="false">${allowLabel?html}</button>
         </form>
+      </div>
+
+      <div id="footer">
+        <p>${footer?html}</p>
       </div>
     </div>
   </body>

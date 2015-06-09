@@ -96,9 +96,9 @@ public class TaskJSONActivator extends AJAXModuleActivator {
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
         // Application 'xyz' requires following permissions:
-        //  - See all your tasks.
+        //  - Read all your tasks.
         //  - ...
-        public static final String READ_ONLY = "See all your tasks.";
+        public static final String READ_ONLY = "Read all your tasks.";
 
         // Application 'xyz' requires following permissions:
         //  - Create, modify and delete tasks.

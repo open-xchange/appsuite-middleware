@@ -92,9 +92,9 @@ public final class ConfigJSONActivator extends AJAXModuleActivator {
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
         // Application 'xyz' requires following permissions:
-        //  - Change your settings.
+        //  - Read and change your settings.
         //  - ...
-        public static final String WRITABLE = "Change your settings.";
+        public static final String WRITABLE = "Read and change your settings.";
     }
 
 }
