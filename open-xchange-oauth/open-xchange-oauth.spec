@@ -121,6 +121,10 @@ if [ ${1:-0} -eq 2 ]; then
             ox_remove_property ${OLDNAMES[$I-1]} $PFILE
         fi
     done
+
+    # SoftwareChange_Request-2532
+    VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
+    ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
 fi
 
 %clean
