@@ -191,6 +191,14 @@ public abstract class RunLoop<E> implements Runnable {
     public String getName() {
         return name;
     }
+    
+    /**
+     * Get the number of Elements being enqueued in this {@link RunLoop}.
+     * @return the number of Elements that are currently enqueued.
+     */
+    public int getQueueSize() {
+        return queue.size();
+    }
 
     protected abstract void handle(E element) throws OXException;
 

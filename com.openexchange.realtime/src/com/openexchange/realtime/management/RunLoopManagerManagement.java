@@ -49,13 +49,21 @@
 
 package com.openexchange.realtime.management;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Set;
+import java.util.TreeMap;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import org.junit.runner.notification.RunListener;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.synthetic.RunLoopManager;
@@ -96,7 +104,7 @@ public class RunLoopManagerManagement extends ManagementObject<RunLoopManagerMBe
     @Override
     public ObjectName getObjectName() {
         if (objectName == null) {
-            String managerName = "RunLoopManger";
+            String managerName = "RunLoopManager";
             try {
                 objectName = new ObjectName("com.openexchange.realtime", "name", managerName);
             } catch (MalformedObjectNameException e) {
@@ -106,6 +114,36 @@ public class RunLoopManagerManagement extends ManagementObject<RunLoopManagerMBe
             }
         }
         return objectName;
+    }
+
+    @Override
+    public List<String> getRunLoopFillStatus() {
+        //component-runloop <=> size
+        List<SyntheticChannelRunLoop> runLoopView = new ArrayList<>(runLoopManager.getRunLoopView());
+        Collections.sort(runLoopView, new NaturalRunLoopComparator());
+        //basic jmx clients like mission control or visualvm can't display sorted maps, so we simply use an ordered list of Strings
+        List<String> sortedLoopStatus = new ArrayList<>(runLoopView.size());
+        for (SyntheticChannelRunLoop runLoop : runLoopView) {
+                sortedLoopStatus.add(runLoop.getName() + " = " + runLoop.getQueueSize());
+        }
+        return sortedLoopStatus;
+    }
+    
+    @Override
+    public Map<String, Long> getRunLoopFillSum() {
+        Map<String, Collection<SyntheticChannelRunLoop>> runLoopsPerComponent = runLoopManager.getRunLoopsPerComponent();
+        Map<String, Long> retVal = new HashMap<>(runLoopsPerComponent.size());
+        
+        for (Entry<String, Collection<SyntheticChannelRunLoop>> entry : runLoopsPerComponent.entrySet()) {
+            String component = entry.getKey();
+            long sum=0;
+            for (SyntheticChannelRunLoop syntheticChannelRunLoop : entry.getValue()) {
+                sum += syntheticChannelRunLoop.getQueueSize();
+            }
+            retVal.put(component, sum);
+        }
+        
+        return retVal;
     }
 
 }

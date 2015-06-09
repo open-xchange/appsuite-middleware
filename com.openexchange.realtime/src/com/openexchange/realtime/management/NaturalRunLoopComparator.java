@@ -49,37 +49,38 @@
 
 package com.openexchange.realtime.management;
 
-import java.util.List;
-import java.util.Map;
+import static com.openexchange.realtime.synthetic.RunLoopManager.LOOP_NAMING_INFIX;
+import java.util.Comparator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.realtime.synthetic.SyntheticChannelRunLoop;
 
 
 /**
- * {@link RunLoopManagerMBean}
+ * {@link NaturalRunLoopComparator}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since 7.6.2
+ * @since v7.8.0
  */
-public interface RunLoopManagerMBean {
-
-    /**
-     * Get the mapping of ComponentHandles to RunLoops.
-     *
-     * @return the map
-     */
-    public Map<String, Map<String, String>> getComponentHandleMappings();
+public class NaturalRunLoopComparator implements Comparator<SyntheticChannelRunLoop> {
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NaturalRunLoopComparator.class);
+    private final static Pattern COMPARISON_PATTERN = Pattern.compile("(\\S+"+LOOP_NAMING_INFIX+")(\\d+)");
     
-    /**
-     * Get the fill status of each {@link RunLoop} that is currently managed
-     * 
-     * @return an ordered list of RunLoop fill status (name = number of entries)
-     */
-    public List<String> getRunLoopFillStatus();
-
-    /**
-     * Get the sum of elements in all RunLoops per component.
-     *   
-     * @return A map from component to sum of elements
-     */
-    Map<String, Long> getRunLoopFillSum();
-
+    @Override
+    public int compare(SyntheticChannelRunLoop o1, SyntheticChannelRunLoop o2) {
+        Matcher matcher1 = COMPARISON_PATTERN.matcher(o1.getName());
+        Matcher matcher2 = COMPARISON_PATTERN.matcher(o2.getName());
+        try {
+            if(matcher1.matches() && matcher2.matches()) {
+                int prefixComparison = matcher1.group(1).compareTo(matcher2.group(1));
+                if(prefixComparison != 0) {
+                    return prefixComparison;
+                }
+                return Integer.valueOf(matcher1.group(2)).compareTo(Integer.valueOf(matcher2.group(2)));
+            }
+        } catch (NumberFormatException | IllegalStateException | IndexOutOfBoundsException e) {
+            LOG.warn("RunLoop name doesn't match pattern. Continuing with default String comparison");
+        }
+        return o1.getName().compareTo(o2.getName());
+    }
 }
