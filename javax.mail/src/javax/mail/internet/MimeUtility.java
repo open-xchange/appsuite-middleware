@@ -342,7 +342,7 @@ public class MimeUtility {
 			new AsciiOutputStream(true, encodeEolStrict);
 	    try {
 		dh.writeTo(aos);
-	    } catch (IOException ex) { }	// ignore it
+	    } catch (Exception ex) { }	// ignore it
 	    if (aos.getAscii() == ALL_ASCII) // all ascii
 		encoding = "7bit";
 	    else // found atleast one non-ascii character, use b64 
