@@ -1173,6 +1173,11 @@ fi
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
 
+# SoftwareChange_Request-2530
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
