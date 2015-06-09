@@ -50,7 +50,6 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.util.Set;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -174,8 +173,7 @@ public abstract class OXUserStorageInterface {
      *
      * @throws StorageException
      */
-    public abstract void changeModuleAccess(final Context ctx,final int[] user_ids,final UserModuleAccess moduleAccess) throws StorageException;
-
+    public abstract void changeModuleAccess(Context ctx, int[] user_ids, UserModuleAccess moduleAccess) throws StorageException;
 
     /**
      * Retrieve user objects for a range of users identified by User.getUsername().
@@ -184,10 +182,20 @@ public abstract class OXUserStorageInterface {
      * @param users User[] with users to get data for. Attention: These objects will be cloned by a shallow copy, so
      * non native attributes will point to the same reference after this method
      * @return User[] containing result objects.
-     * @throws RemoteException
-     *
+     * @throws StorageException If users cannot be returned
      */
-    public abstract User[] getData(final Context ctx, User[] users) throws StorageException;
+    public abstract User[] getData(Context ctx, User[] users) throws StorageException;
+
+    /**
+     * Retrieve user display names for a range of users identified by User.getUsername().
+     *
+     * @param context Context object.
+     * @param users User[] with users to get data for. Attention: These objects will be cloned by a shallow copy, so
+     * non native attributes will point to the same reference after this method
+     * @return The display names
+     * @throws StorageException If display names cannot be returned
+     */
+    public abstract String[] getDisplayNames(Context ctx, User[] users) throws StorageException;
 
     /**
      * Changes specified context's capabilities.

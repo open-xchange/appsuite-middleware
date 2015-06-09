@@ -1,6 +1,7 @@
 * 2015-06-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 38616: Fixed various null dereferences
+ - Fix for bug 38605: Introduced separate method to OXUserInterface to retrieve only users' display names
 
 * 2015-06-08 - thorben.betten@open-xchange.com
 
