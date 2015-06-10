@@ -643,6 +643,19 @@ public class ContentType extends ParameterizedHeader {
     /**
      * Checks if this Content-Type has specified base type.
      *
+     * @param baseType The base type; e.g. <code>"text/plain"</code>
+     * @return <code>true</code> if equals given base type; otherwise <code>false</code>
+     */
+    public boolean isBaseType(final String baseType) {
+        if (null == baseType) {
+            throw new IllegalArgumentException("baseType is null");
+        }
+        return getLowerCaseBaseType().equals(toLowerCase(baseType));
+    }
+
+    /**
+     * Checks if this Content-Type has specified base type.
+     *
      * @param primaryType The primary type; e.g. <code>"text"</code>
      * @param subType The secondary type; e.g. <code>"plain"</code>
      * @return <code>true</code> if equals given base type; otherwise <code>false</code>

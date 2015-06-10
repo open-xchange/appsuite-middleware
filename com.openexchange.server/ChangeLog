@@ -1,3 +1,7 @@
+* 2015-06-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21064: Support display of S/MIME signed messages
+
 * 2015-06-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 38616: Fixed various null dereferences

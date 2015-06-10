@@ -64,6 +64,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import net.fortuna.ical4j.model.Property;
 import net.freeutils.tnef.Attachment;
@@ -78,6 +79,9 @@ import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.mail.smime.SMIMEException;
+import org.bouncycastle.mail.smime.SMIMESigned;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
@@ -97,6 +101,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -382,6 +387,13 @@ public final class MailMessageParser {
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
         if (isMultipart(lcct)) {
+            if (lcct.startsWith("multipart/signed")) {
+                MailPart handledSMIME = checkSMIME(mailPart, contentType);
+                if (null != handledSMIME) {
+                    parseMailContent(handledSMIME, handler, prefix, partCount);
+                    return;
+                }
+            }
             try {
                 final int count = mailPart.getEnclosedCount();
                 if (count == -1) {
@@ -856,6 +868,13 @@ public final class MailMessageParser {
                 return;
             }
         } else {
+            MailPart handledSMIME = checkSMIME(mailPart, contentType);
+            if (null != handledSMIME) {
+                parseMailContent(handledSMIME, handler, prefix, partCount);
+                return;
+            }
+
+            // As last resort
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -864,6 +883,30 @@ public final class MailMessageParser {
                 return;
             }
         }
+    }
+
+    private MailPart checkSMIME(MailPart mailPart, ContentType contentType) throws IOException, OXException {
+        if (!(mailPart instanceof MimeRawSource)) {
+            return null;
+        }
+
+        // Check for "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data"
+        SMIMESigned smimeSigned = null;
+        try {
+            if (contentType.isBaseType("multipart/signed")) {
+                smimeSigned = new SMIMESigned((MimeMultipart) ((MimeRawSource) mailPart).getPart().getContent());
+            } else if (isSigned(contentType)) {
+                smimeSigned = new SMIMESigned(((MimeRawSource) mailPart).getPart());
+            }
+        } catch (MessagingException e) {
+            LOG.warn("Failed to handle S/MIME message", e);
+        } catch (CMSException e) {
+            LOG.warn("Failed to handle S/MIME message", e);
+        } catch (SMIMEException e) {
+            LOG.warn("Failed to handle S/MIME message", e);
+        }
+
+        return smimeSigned == null ? null : MimeMessageConverter.convertPart(smimeSigned.getContent());
     }
 
     private void parseEnvelope(final MailMessage mail, final MailMessageHandler handler) throws OXException {
@@ -1164,6 +1207,10 @@ public final class MailMessageParser {
             builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
         }
         return builder.toString();
+    }
+
+    private static boolean isSigned(ContentType ct) {
+        return ct.isBaseType("application/pkcs7-mime") && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
     }
 
 }
