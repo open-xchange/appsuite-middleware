@@ -1027,7 +1027,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private static byte[] getBytesFromPart(final Part part) throws IOException, MessagingException {
         byte[] data;
         {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
             part.writeTo(out);
             data = out.toByteArray();
         }
@@ -1045,7 +1045,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
     private static byte[] getBytesFromMultipart(final Multipart multipart) throws IOException, MessagingException {
         byte[] data;
         {
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(4096);
+            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(4096);
             multipart.writeTo(out);
             data = out.toByteArray();
         }
