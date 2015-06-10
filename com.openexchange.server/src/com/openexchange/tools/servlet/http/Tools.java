@@ -658,6 +658,7 @@ public final class Tools {
      * @param statusCode The HTTP status code
      * @param body The associated JSON body
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
         sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
@@ -671,6 +672,7 @@ public final class Tools {
      * @param additionalHeaders Optional additional headers to apply to HTTP response
      * @param body The associated JSON body
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
         httpResponse.reset();
@@ -692,6 +694,7 @@ public final class Tools {
      * @param httpResponse The HTTP response
      * @param statusCode The HTTP status code
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
         sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
@@ -704,6 +707,7 @@ public final class Tools {
      * @param statusCode The HTTP status code
      * @param additionalHeaders Optional additional headers to apply to HTTP response
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
         httpResponse.reset();
@@ -722,6 +726,7 @@ public final class Tools {
      * @param desc The error description
      *
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorPage(HttpServletResponse httpResponse, int statusCode, String desc) throws IOException {
         httpResponse.reset();

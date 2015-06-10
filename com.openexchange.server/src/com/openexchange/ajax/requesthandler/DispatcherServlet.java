@@ -576,6 +576,12 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     protected void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+        // Check if HTTP response is committed
+        if (httpResponse.isCommitted()) {
+            // Status code and headers already written. Nothing can be done anymore...
+            return;
+        }
+
         // Try to write error page
         try {
             httpResponse.setStatus(statusCode);
