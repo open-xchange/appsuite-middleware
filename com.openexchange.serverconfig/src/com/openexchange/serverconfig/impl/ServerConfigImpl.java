@@ -50,14 +50,17 @@
 package com.openexchange.serverconfig.impl;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.regex.Pattern;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
 import com.openexchange.serverconfig.ServerConfig;
-import com.openexchange.serverconfig.ShareMailConfig;
+import com.openexchange.serverconfig.NotificationMailConfig;
 
 /**
  * {@link ServerConfigImpl}
@@ -66,10 +69,12 @@ import com.openexchange.serverconfig.ShareMailConfig;
  * @since v7.8.0
  */
 public class ServerConfigImpl implements ServerConfig {
-    
-    private Map<String, Object> mappings;
-    private List<ClientServerConfigFilter> clientServerConfigFilters;
-    
+
+    private static final Logger LOG = LoggerFactory.getLogger(ServerConfigImpl.class);
+
+    private final Map<String, Object> mappings;
+    private final List<ClientServerConfigFilter> clientServerConfigFilters;
+
     public ServerConfigImpl(Map<String, Object> mappings, List<ClientServerConfigFilter> clientServerConfigFilters) {
         this.mappings = mappings;
         this.clientServerConfigFilters = clientServerConfigFilters;
@@ -124,36 +129,66 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public Map<String, Object> forClient() {
+        Map<String, Object> forClient = new HashMap<>(mappings);
         for(ClientServerConfigFilter filter : clientServerConfigFilters) {
-            filter.apply(mappings);
+            filter.apply(forClient);
         }
-        return mappings;
+
+        forClient.remove("notificationMails");
+        return forClient;
     }
 
     @Override
-    public ShareMailConfig getShareMailConfig() {
-        Map<String, Object> sharingMap = (Map<String, Object>) mappings.get("sharing");
-        if(sharingMap != null) {
-            Map<String, Object> mailsMap = (Map<String, Object>) sharingMap.get("mails");
-            if(mailsMap != null) {
-                Map<String, Object> buttonMap = (Map<String,Object>) mailsMap.get("button");
-                ShareMailConfig shareMailConfig = new ShareMailConfig();
-                
-                String footerImage = (String) mailsMap.get("footer-image");
-                String footerText = (String) mailsMap.get("footer-text");
-                shareMailConfig.setFooterImage(footerImage);
-                shareMailConfig.setFooterText(footerText);
-                
-                String buttonBackgroundColor = (String) buttonMap.get("background-color");
-                String buttonBorderColor = (String) buttonMap.get("border-color");
-                String buttonColor = (String) buttonMap.get("color");                   
-                shareMailConfig.setButtonBackgroundColor(buttonBackgroundColor);
-                shareMailConfig.setButtonBorderColor(buttonBorderColor);
-                shareMailConfig.setButtoncolor(buttonColor);
-                return shareMailConfig;
+    public NotificationMailConfig getNotificationMailConfig() {
+        NotificationMailConfigImpl mailConfig = new NotificationMailConfigImpl();
+        mailConfig.setButtonBackgroundColor("#3c73aa");
+        mailConfig.setButtonBorderColor("#356697");
+        mailConfig.setButtonTextColor("#ffffff");
+        Map<String, Object> mailsMap = (Map<String, Object>) mappings.get("notificationMails");
+        if(mailsMap == null) {
+            LOG.warn("No 'notificationMails' config was found, please fix 'as-config.yml'. Falling back to default.");
+        } else {
+            Map<String, Object> buttonMap = (Map<String,Object>) mailsMap.get("button");
+            if (buttonMap == null) {
+                LOG.warn("No 'button' section was found for notification mails configuration, please fix 'as-config.yml'. Falling back to default.");
+            } else {
+                mailConfig.setButtonBackgroundColor(getColorCode(buttonMap, "backgroundColor", mailConfig.getButtonBackgroundColor()));
+                mailConfig.setButtonBorderColor(getColorCode(buttonMap, "borderColor", mailConfig.getButtonBorderColor()));
+                mailConfig.setButtonTextColor(getColorCode(buttonMap, "textColor", mailConfig.getButtonTextColor()));
             }
+
+            Map<String, Object> footerMap = (Map<String,Object>) mailsMap.get("footer");
+            if (footerMap != null) {
+                mailConfig.setFooterImage((String) footerMap.get("image"));
+                mailConfig.setFooterText((String) footerMap.get("text"));
+            }
+
+            return mailConfig;
         }
-        return null;
+
+        return mailConfig;
+    }
+
+    private static final Pattern COLOR_CODE = Pattern.compile("^\\s*#[0-9a-fA-F]{6}\\s*$");
+
+    private static String getColorCode(Map<String, Object> map, String key, String defaultValue) {
+        Object object = map.get(key);
+        if (object != null) {
+            if (object instanceof String) {
+                String value = (String) object;
+                if (COLOR_CODE.matcher(value).matches()) {
+                    return value.trim();
+                } else {
+                    LOG.warn("Color code for key '{}' has invalid syntax, please fix 'as-config.yml'. Falling back to default '{}'.", key, defaultValue);
+                }
+            } else {
+                LOG.warn("Color code for key '{}' is not a valid string, please fix 'as-config.yml'. Falling back to default '{}'.", key, defaultValue);
+            }
+        } else {
+            LOG.warn("No color code for key '{}' is defined, please fix 'as-config.yml'. Falling back to default '{}'.", key, defaultValue);
+        }
+
+        return defaultValue;
     }
 
 }

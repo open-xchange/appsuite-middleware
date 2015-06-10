@@ -67,9 +67,9 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.serverconfig.ShareMailConfig;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -104,7 +104,7 @@ import com.openexchange.user.UserService;
  */
 public class DefaultNotificationService implements ShareNotificationService {
 
-    private ServiceLookup serviceLookup;
+    private final ServiceLookup serviceLookup;
 
     /** The queue for additional handlers */
     private final ConcurrentMap<Transport, ShareNotificationHandler> handlers;
@@ -394,13 +394,13 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
         shareMailAware.setProductName(productName);
 
-        ShareMailConfig shareMailConfig = serverConfig.getShareMailConfig();
+        NotificationMailConfig shareMailConfig = serverConfig.getNotificationMailConfig();
         if (shareMailConfig == null) {
             throw ShareNotifyExceptionCodes.INVALID_SHARE_MAIL_CONFIG.create(userId, contextId);
         }
         shareMailAware.setButtonBackgroundColor(shareMailConfig.getButtonBackgroundColor());
         shareMailAware.setButtonBorderColor(shareMailConfig.getButtonBorderColor());
-        shareMailAware.setButtonColor(shareMailConfig.getButtonColor());
+        shareMailAware.setButtonColor(shareMailConfig.getButtonTextColor());
         shareMailAware.setFooterImage(shareMailConfig.getFooterImage());
         shareMailAware.setFooterText(shareMailConfig.getFooterText());
     }

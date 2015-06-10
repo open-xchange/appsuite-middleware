@@ -526,6 +526,16 @@ public class Strings {
     }
 
     /**
+     * Checks for a non-empty string.
+     *
+     * @param string The string
+     * @return <code>true</code> if input is a non-empty string;  else <code>false</code>
+     */
+    public static boolean isNotEmpty(final String string) {
+        return !isEmpty(string);
+    }
+
+    /**
      * Fixes possible charset problem in given string.
      * <p>
      * E.g.:&nbsp;&quot;&#195;&#164&quot; instead of &quot;&auml;&quot;

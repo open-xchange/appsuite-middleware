@@ -49,21 +49,45 @@
 
 package com.openexchange.notification;
 
-import com.openexchange.i18n.LocalizableStrings;
+import static com.openexchange.notification.CommonNotificationVariables.*;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import com.openexchange.serverconfig.NotificationMailConfig;
+import com.openexchange.templating.TemplateService;
 
 
 /**
- * {@link NotificationStrings}
+ * {@link TemplateHelper}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class NotificationStrings implements LocalizableStrings {
+public class TemplateHelper {
 
-    /*
-     * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
-     * The placeholders mean $givenname $surname.
-     */
-    public static final String USER_NAME = "%1$s %2$s";
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateHelper.class);
+
+    public static void injectNotificationMailConfig(Map<String, Object> vars, NotificationMailConfig mailConfig, TemplateService templateService) {
+        vars.put(BUTTON_COLOR, mailConfig.getButtonTextColor());
+        vars.put(BUTTON_BACKGROUND_COLOR, mailConfig.getButtonBackgroundColor());
+        vars.put(BUTTON_BORDER_COLOR, mailConfig.getButtonBorderColor());
+        String footerImageName = mailConfig.getFooterImage();
+        if (Strings.isNotEmpty(footerImageName)) {
+            try {
+                Pair<String, String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
+                vars.put(FOOTER_IMAGE_CONTENT_TYPE, footerImagePair.getFirst());
+                vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+            } catch (OXException e) {
+                LOG.error("Configured notification mail file '{}' could not be loaded. Please check your 'as-config.yml', the footer image will be ignored for now.", footerImageName, e);
+            }
+        }
+        String footerText = mailConfig.getFooterText();
+        if (Strings.isNotEmpty(footerText)) {
+            vars.put(FOOTER_TEXT, footerText);
+        }
+    }
 
 }

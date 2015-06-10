@@ -47,47 +47,40 @@
  *
  */
 
-package com.openexchange.share.notification.mail;
+package com.openexchange.notification;
 
-import java.util.Map;
-import com.openexchange.serverconfig.ClientServerConfigFilter;
 
 /**
- * {@link SharingMailNotificationClientServerConfigFilter} - Filter out sharing mail related contents from the server config. 
- * 
- * The parts that will be filtered correspond to the following brand specific yaml entries from <code>as-config.yml</code> 
- * <pre>
- * somebrand:
- *     sharing:
-           mails:
- * </pre>
- * 
- * The sharing node will be removed completely if it's empty after filtering out the mails subnode.
+ * Defines common variable names to be used in mail notification templates.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class SharingMailNotificationClientServerConfigFilter implements ClientServerConfigFilter {
+public class CommonNotificationVariables {
 
-    private final static String SHARING = "sharing";
-    private final static String MAILS= "mails";
-    
-    @Override
-    public void apply(Map<String, Object> brandConfig) {
-        if (brandConfig != null) {
-
-            Object sharingObject = brandConfig.get(SHARING);
-            if (sharingObject != null && sharingObject instanceof Map) {
-                Map<String, Object> sharingConfig = (Map<String, Object>) sharingObject;
-                //delete mails subnode
-                sharingConfig.remove(MAILS);
-
-                //check if sharing node is left empty and delete
-                if (sharingConfig.isEmpty()) {
-                    brandConfig.remove(SHARING);
-                }
-            }
-        }
-    }
+    /**
+     * Variable <code>footer_text</code>
+     */
+    public static final String FOOTER_TEXT = "footer_text";
+    /**
+     * Variable <code>footer_image</code>
+     */
+    public static final String FOOTER_IMAGE = "footer_image";
+    /**
+     * Variable <code>footer_image_content_type</code>
+     */
+    public static final String FOOTER_IMAGE_CONTENT_TYPE = "footer_image_content_type";
+    /**
+     * Variable <code>button_border_color</code>
+     */
+    public static final String BUTTON_BORDER_COLOR = "button_border_color";
+    /**
+     * Variable <code>button_background_color</code>
+     */
+    public static final String BUTTON_BACKGROUND_COLOR = "button_background_color";
+    /**
+     * Variable <code>button_color</code>
+     */
+    public static final String BUTTON_COLOR = "button_color";
 
 }

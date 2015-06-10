@@ -47,23 +47,51 @@
  *
  */
 
-package com.openexchange.notification;
-
-import com.openexchange.i18n.LocalizableStrings;
-
+package com.openexchange.serverconfig;
 
 /**
- * {@link NotificationStrings}
+ * {@link NotificationMailConfig} - Represents the notification mail config params that are set via our as-config approach and available as part of the
+ * {@link ServerConfig}.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class NotificationStrings implements LocalizableStrings {
+public interface NotificationMailConfig {
 
-    /*
-     * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
-     * The placeholders mean $givenname $surname.
+    /**
+     * Gets the text color for button labels
+     *
+     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
      */
-    public static final String USER_NAME = "%1$s %2$s";
+    String getButtonTextColor();
+
+    /**
+     * Gets the background color for buttons
+     *
+     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
+     */
+    String getButtonBackgroundColor();
+
+    /**
+     * Gets the border color for buttons
+     *
+     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
+     */
+    String getButtonBorderColor();
+
+    /**
+     * Gets the text for mail footers
+     *
+     * @return The footer text or <code>null</code> if none shall be displayed
+     */
+    String getFooterText();
+
+    /**
+     * Gets the footer image as file name below <code>/opt/open-xchange/templates</code>.
+     *
+     * @return The images file name or <code>null</code> if none shall be displayed
+     */
+    String getFooterImage();
 
 }

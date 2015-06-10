@@ -47,112 +47,118 @@
  *
  */
 
-package com.openexchange.serverconfig;
+package com.openexchange.serverconfig.impl;
+
+import com.openexchange.serverconfig.NotificationMailConfig;
 
 
 /**
- * {@link ShareMailConfig} - Represents the share mail config params that are set via our as-config approach and available as part of the 
- * {@link ServerConfig}.
+ * {@link NotificationMailConfigImpl}
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class ShareMailConfig {
+public class NotificationMailConfigImpl implements NotificationMailConfig {
 
-    private String buttoncolor;
+    private String buttonTextColor;
     private String buttonBackgroundColor;
     private String buttonBorderColor;
     private String footerText;
     private String footerImage;
-    
+
     /**
-     * Gets the buttoncolor
+     * Gets the text color for button labels
      *
-     * @return The buttoncolor
+     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
      */
-    public String getButtonColor() {
-        return buttoncolor;
+    @Override
+    public String getButtonTextColor() {
+        return buttonTextColor;
     }
-    
+
     /**
-     * Sets the buttoncolor
+     * Sets the text color for button labels
      *
-     * @param buttoncolor The buttoncolor to set
+     * @param color The color to set
      */
-    public void setButtoncolor(String buttoncolor) {
-        this.buttoncolor = buttoncolor;
+    public void setButtonTextColor(String color) {
+        this.buttonTextColor = color;
     }
-    
+
     /**
-     * Gets the buttonBackgroundColor
+     * Gets the background color for buttons
      *
-     * @return The buttonBackgroundColor
+     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
      */
+    @Override
     public String getButtonBackgroundColor() {
         return buttonBackgroundColor;
     }
-    
+
     /**
-     * Sets the buttonBackgroundColor
+     * Sets the background color for buttons
      *
-     * @param buttonBackgroundColor The buttonBackgroundColor to set
+     * @param color The color to set
      */
-    public void setButtonBackgroundColor(String buttonBackgroundColor) {
-        this.buttonBackgroundColor = buttonBackgroundColor;
+    public void setButtonBackgroundColor(String color) {
+        this.buttonBackgroundColor = color;
     }
-    
+
     /**
-     * Gets the buttonBorderColor
+     * Gets the border color for buttons
      *
-     * @return The buttonBorderColor
+     * @return The color as hexadecimal RGB code, e.g. <code>#ffffff</code>
      */
+    @Override
     public String getButtonBorderColor() {
         return buttonBorderColor;
     }
-    
+
     /**
-     * Sets the buttonBorderColor
+     * Sets the border color for buttons
      *
-     * @param buttonBorderColor The buttonBorderColor to set
+     * @param color The color to set
      */
-    public void setButtonBorderColor(String buttonBorderColor) {
-        this.buttonBorderColor = buttonBorderColor;
+    public void setButtonBorderColor(String color) {
+        this.buttonBorderColor = color;
     }
-    
+
     /**
-     * Gets the footerText
+     * Gets the text for mail footers
      *
-     * @return The footerText
+     * @return The footer text or <code>null</code> if none shall be displayed
      */
+    @Override
     public String getFooterText() {
         return footerText;
     }
-    
+
     /**
-     * Sets the footerText
+     * Sets the text for mail footers
      *
-     * @param footerText The footerText to set
+     * @param footerText The text to set
      */
     public void setFooterText(String footerText) {
         this.footerText = footerText;
     }
-    
+
     /**
-     * Gets the footer image
+     * Gets the footer image as file name below <code>/opt/open-xchange/templates</code>.
      *
-     * @return The footerImage
+     * @return The images file name or <code>null</code> if none shall be displayed
      */
+    @Override
     public String getFooterImage() {
         return footerImage;
     }
-    
+
     /**
-     * Sets the footer image
+     * Sets the footer image as file name below <code>/opt/open-xchange/templates</code>.
      *
-     * @param footerImage The footerImage to set
+     * @param footerImage The images file name
      */
-    public void setFooterImage(String footerImagePath) {
-        this.footerImage = footerImagePath;
+    public void setFooterImage(String fileName) {
+        this.footerImage = fileName;
     }
-    
+
 }
