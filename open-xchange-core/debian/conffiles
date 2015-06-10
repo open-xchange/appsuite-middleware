@@ -1,4 +1,5 @@
 opt/open-xchange/etc/hazelcast/serverTokenHz.properties
+opt/open-xchange/etc/hazelcast/credentials.properties
 opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf

@@ -1191,6 +1191,17 @@ ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchang
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
 
+# SoftwareChange_Request-2546
+VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
+    ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" /opt/open-xchange/etc/mail-push.properties
+    echo "Juhu"
+fi
+ox_add_property com.openexchange.push.allowPermanentPush true /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.enabled false /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.passcrypt "" /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.rdb false /opt/open-xchange/etc/mail-push.properties
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
