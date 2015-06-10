@@ -1,3 +1,7 @@
+* 2015-06-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21064: Support display of S/MIME signed messages
+
 * 2015-06-09 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38079: Series breaks if the start of a series does not match the pattern.
