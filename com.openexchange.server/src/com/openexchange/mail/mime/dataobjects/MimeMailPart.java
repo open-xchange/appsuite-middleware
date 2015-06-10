@@ -767,26 +767,24 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                     /*
                      * Compose a new body part with message/rfc822 data
                      */
-                    this.part = createBodyMessage(Streams.newByteArrayInputStream(serializedContent));
+                    this.part = createBodyMessageInMemory(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 } else if (STYPE_MIME_BODY_MULTI == serializeType) {
                     /*
                      * Compose a new body part with multipart/ data
                      */
-                    this.part = createBodyMultipart(Streams.newByteArrayInputStream(serializedContent), serializedContentType);
+                    this.part = createBodyMultipartInMemory(Streams.newByteArrayInputStream(serializedContent), serializedContentType);
                     this.multipart = null;
                     contentLoaded = true;
                 } else if (STYPE_MIME_BODY == serializeType) {
-                    this.part = createBodyPart(Streams.newByteArrayInputStream(serializedContent));
+                    this.part = createBodyPartInMemory(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 } else if (STYPE_MIME_MSG == serializeType) {
-                    this.part = createMessage(Streams.newByteArrayInputStream(serializedContent));
+                    this.part = createMessageInMemory(Streams.newByteArrayInputStream(serializedContent));
                     contentLoaded = true;
                 }
             } catch (final MessagingException e) {
-                final IOException ioe = new IOException(e.getMessage());
-                ioe.initCause(e);
-                throw ioe;
+                throw new IOException(e.getMessage(), e);
             } finally {
                 /*
                  * Discard content created for serialization
@@ -798,6 +796,8 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         }
     }
 
+    // ------------------------------------------------------------------------------------------------------------
+
     /**
      * Compose a new MIME body part with message/rfc822 data.
      *
@@ -805,7 +805,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @return A new MIME body part with message/rfc822 data
      * @throws MessagingException If a messaging error occurs
      */
-    private static MimeBodyPart createBodyMessage(final InputStream data) throws MessagingException {
+    private static MimeBodyPart createBodyMessageInMemory(final InputStream data) throws MessagingException {
         final MimeBodyPart mimeBodyPart = new MimeBodyPart();
         MessageUtility.setContent(new MimeMessage(MimeDefaultSession.getDefaultSession(), data), mimeBodyPart);
         //mimeBodyPart.setContent(
@@ -823,7 +823,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    private static MimeBodyPart createBodyMultipart(final InputStream data, final String contentType) throws MessagingException, IOException {
+    private static MimeBodyPart createBodyMultipartInMemory(final InputStream data, final String contentType) throws MessagingException, IOException {
         if (null == data) {
             return null;
         }
@@ -840,7 +840,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @return A new MIME body part
      * @throws MessagingException If a messaging error occurs
      */
-    private static MimeBodyPart createBodyPart(final InputStream data) throws MessagingException {
+    private static MimeBodyPart createBodyPartInMemory(final InputStream data) throws MessagingException {
         return new MimeBodyPart(data);
     }
 
@@ -851,8 +851,65 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
      * @return A new MIME message
      * @throws MessagingException If a messaging error occurs
      */
-    private static MimeMessage createMessage(final InputStream data) throws MessagingException {
+    private static MimeMessage createMessageInMemory(final InputStream data) throws MessagingException {
         return new MimeMessage(MimeDefaultSession.getDefaultSession(), data);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Compose a new MIME body part with message/rfc822 data.
+     *
+     * @param data The message/rfc822 data
+     * @return A new MIME body part with message/rfc822 data
+     * @throws OXException If a messaging error occurs
+     * @throws MessagingException If a messaging error occurs
+     */
+    private static MimeBodyPart createBodyMessage(final InputStream data) throws OXException, MessagingException {
+        final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+        MessageUtility.setContent(MimeMessageUtility.newMimeMessage(data, null), mimeBodyPart);
+        return mimeBodyPart;
+    }
+
+    /**
+     * Compose a new MIME body part with multipart/* data.
+     *
+     * @param data The multipart/* data
+     * @param contentType The multipart's content type (containing important boundary parameter)
+     * @return A new MIME body part with multipart/* data
+     * @throws MessagingException If a messaging error occurs
+     * @throws OXException If an I/O error occurs
+     */
+    private static MimeBodyPart createBodyMultipart(final InputStream data, final String contentType) throws MessagingException, OXException {
+        if (null == data) {
+            return null;
+        }
+        final MimeBodyPart mimeBodyPart = new MimeBodyPart();
+        MessageUtility.setContent(new MimeMultipart(MimeMessageUtility.newDataSource(data, contentType)), mimeBodyPart);
+        // mimeBodyPart.setContent(new MimeMultipart(new MessageDataSource(data, contentType)));
+        return mimeBodyPart;
+    }
+
+    /**
+     * Compose a new MIME body part directly from specified data.
+     *
+     * @param data The part's data
+     * @return A new MIME body part
+     * @throws OXException If a messaging error occurs
+     */
+    private static MimeBodyPart createBodyPart(final InputStream data) throws OXException {
+        return MimeMessageUtility.newMimeBodyPart(data);
+    }
+
+    /**
+     * Compose a new MIME message directly from specified data.
+     *
+     * @param data The message's data
+     * @return A new MIME message
+     * @throws OXException If a messaging error occurs
+     */
+    private static MimeMessage createMessage(final InputStream data) throws OXException {
+        return MimeMessageUtility.newMimeMessage(data, null);
     }
 
     /**

@@ -86,6 +86,7 @@ import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -103,6 +104,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
@@ -143,9 +145,11 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.DataHandlerWrapper;
+import com.openexchange.mail.mime.converters.FileBackedMimeBodyPart;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.CP932EmojiMapping;
@@ -2279,6 +2283,77 @@ public final class MimeMessageUtility {
             throw MimeMailException.handleMessagingException(e);
         } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    /**
+     * Constructs a MimeBodyPart by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @return The new {@link MimeBodyPart} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeBodyPart newMimeBodyPart(InputStream is) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            MimeBodyPart tmp;
+            if (null == tempFile) {
+                tmp = new MimeBodyPart(sink.getStream());
+            } else {
+                tmp = new FileBackedMimeBodyPart(tempFile);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    /**
+     * Constructs a DataSource by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param contentType The Content-Type to set
+     * @return The new {@link DataSource} instance
+     * @throws OXException If a new {@link DataSource} instance cannot be returned
+     */
+    public static DataSource newDataSource(InputStream is, String contentType) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            DataSource tmp;
+            if (null == tempFile) {
+                tmp = new ByteArrayDataSource(sink.getBuffer().toByteArray(), contentType);
+            } else {
+                tmp = new FileDataSource(tempFile, contentType);
+            }
+            closeSink = false;
+            return tmp;
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

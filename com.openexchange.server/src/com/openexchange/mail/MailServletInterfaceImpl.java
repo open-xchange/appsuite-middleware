@@ -1159,7 +1159,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         if (sameAccount) {
             initConnection(accountId);
             MailMessage[] originalMails = new MailMessage[folders.length];
-            int mlength = length - 1;
             if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
                 for (int i = 0; i < length; i++) {
                     String fullName = arguments[i].getFullname();
@@ -1167,9 +1166,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], fullName);
                     }
-                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
-                        origMail.loadContent();
-                    }
+                    origMail.loadContent();
                     originalMails[i] = origMail;
                 }
             } else {
@@ -1192,9 +1189,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (max > 0 && total > max) {
                         throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(UploadUtility.getSize(max));
                     }
-                    if (i < mlength && !fullName.equals(arguments[i + 1].getFullname())) {
-                        origMail.loadContent();
-                    }
+                    origMail.loadContent();
                     originalMails[i] = origMail;
                 }
             }
@@ -1209,8 +1204,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (null == origMail) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(fowardMsgUIDs[i], arguments[i].getFullname());
                     }
-                    originalMails[i] = origMail;
                     origMail.loadContent();
+                    originalMails[i] = origMail;
                 } finally {
                     ma.close(true);
                 }
@@ -1239,8 +1234,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     if (max > 0 && total > max) {
                         throw MailExceptionCode.UPLOAD_QUOTA_EXCEEDED.create(Long.valueOf(max));
                     }
-                    originalMails[i] = origMail;
                     origMail.loadContent();
+                    originalMails[i] = origMail;
                 } finally {
                     ma.close(true);
                 }
