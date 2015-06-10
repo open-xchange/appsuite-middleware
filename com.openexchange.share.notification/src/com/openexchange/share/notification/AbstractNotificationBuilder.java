@@ -72,10 +72,12 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
     protected LinkProvider linkProvider;
 
     protected int guestContextID;
-    
+
     protected int guestID;
 
     protected Locale locale;
+
+    protected RequestContext requestContext;
 
     protected AbstractNotificationBuilder(NotificationType type) {
         super();
@@ -111,10 +113,10 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
         this.guestContextID = contextID;
         return (B) this;
     }
-    
+
     /**
      * Sets the guestID.
-     * 
+     *
      * @param guestID
      */
     public B setGuestID(int guestID) {
@@ -133,6 +135,16 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
     }
 
     /**
+     * Sets the request context
+     *
+     * @param requestContext
+     */
+    public B setRequestContext(RequestContext requestContext) {
+        this.requestContext = requestContext;
+        return (B) this;
+    }
+
+    /**
      * Builds the {@link ShareNotification} with all the values set for this builder.
      *
      * @return The share notification
@@ -144,6 +156,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
         checkNotZero(guestContextID, "guestContextID");
         checkNotZero(guestID, "guestID");
         checkNotNull(locale, "locale");
+        checkNotNull(requestContext, "requestContext");
         return doBuild();
     }
 
@@ -160,9 +173,15 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
             throw new IllegalStateException("Field '" + fieldName + "' must be set before calling build()!");
         }
     }
-    
+
     protected static final void checkNotZero(int value, String fieldName) {
         if (value == 0) {
+            throw new IllegalStateException("Field '" + fieldName + "' must be set before calling build()!");
+        }
+    }
+
+    protected static final void checkGreaterZero(int value, String fieldName) {
+        if (value <= 0) {
             throw new IllegalStateException("Field '" + fieldName + "' must be set before calling build()!");
         }
     }

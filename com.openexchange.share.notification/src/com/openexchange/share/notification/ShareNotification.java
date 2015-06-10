@@ -129,4 +129,12 @@ public interface ShareNotification<T> {
      */
     Locale getLocale();
 
+    /**
+     * Gets context information about the HTTP request that led to the generation of this
+     * notification.
+     *
+     * @return The request context
+     */
+    RequestContext getRequestContext();
+
 }

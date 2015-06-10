@@ -67,7 +67,6 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
@@ -77,15 +76,13 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.DefaultLinkProvider;
+import com.openexchange.share.notification.DefaultRequestContext;
 import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotification;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.mail.MailNotifications;
-import com.openexchange.share.notification.mail.ShareMailAware;
-import com.openexchange.share.notification.mail.impl.PasswordResetConfirmMailNotification;
-import com.openexchange.share.notification.mail.impl.ShareCreatedMailNotification;
+import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -210,8 +207,6 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
 
         ServerSession session = notificationInfo.getSession();
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
         AJAXRequestData requestData = notificationInfo.getRequestData();
         List<ShareInfo> createdShares = notificationInfo.getShareInfos();
         GuestInfo guest = notificationInfo.getGuestInfo();
@@ -220,38 +215,35 @@ public class DefaultNotificationService implements ShareNotificationService {
         String protocol = determineProtocol(requestData);
 
         try {
-            ShareCreatedMailNotification scmn = new ShareCreatedMailNotification();
-
-            scmn.setTransportInfo(new InternetAddress(guest.getEmailAddress(), true));
-            scmn.setLinkProvider(buildLinkProvider(session.getUserId(), session.getContextId(), requestData.getHostname(), shareToken, protocol));
-            scmn.setGuestContextID(guest.getContextID());
-            scmn.setGuestID(guest.getGuestID());
-            scmn.setLocale(guest.getLocale());
-            scmn.setSession(session);
-            scmn.setTargets(getTargets(createdShares));
-            scmn.setMessage(notificationInfo.getMessage());
-            scmn.setCausedGuestCreation(isNewGuest(recipient));
+            ShareCreatedBuilder shareCreatedBuilder = MailNotifications.shareCreated()
+                .setTransportInfo(new InternetAddress(guest.getEmailAddress(), true))
+                .setLinkProvider(buildLinkProvider(session.getUserId(), session.getContextId(), requestData.getHostname(), shareToken, protocol))
+                .setGuestContext(guest.getContextID())
+                .setGuestID(guest.getGuestID())
+                .setLocale(guest.getLocale())
+                .setSession(session)
+                .setTargets(getTargets(createdShares))
+                .setMessage(notificationInfo.getMessage())
+                .setCausedGuestCreation(isNewGuest(recipient))
+                .setRequestContext(new AJAXRequestContext(requestData)); // TODO combine with link provider
 
             AuthenticationMode authMode = guest.getAuthentication();
             switch (authMode) {
                 case ANONYMOUS:
-
-                    scmn.setAuthMode(AuthenticationMode.ANONYMOUS);
+                    shareCreatedBuilder.setAuthMode(AuthenticationMode.ANONYMOUS);
                     break;
                 case ANONYMOUS_PASSWORD:
-                    scmn.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
-                    scmn.setPassword(((AnonymousRecipient) recipient).getPassword());
+                    shareCreatedBuilder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
+                    shareCreatedBuilder.setPassword(((AnonymousRecipient) recipient).getPassword());
                     break;
                 case GUEST_PASSWORD:
-                    scmn.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
-                    scmn.setUsername(guest.getEmailAddress());
-                    scmn.setPassword(((GuestRecipient) recipient).getPassword());
+                    shareCreatedBuilder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
+                    shareCreatedBuilder.setUsername(guest.getEmailAddress());
+                    shareCreatedBuilder.setPassword(((GuestRecipient) recipient).getPassword());
                     break;
             }
 
-            makeMailAware(scmn, requestData.getHostname(), userId, contextId);
-
-            return scmn;
+            return shareCreatedBuilder.build();
         } catch (AddressException e) {
             throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(guest.getEmailAddress());
         }
@@ -275,12 +267,10 @@ public class DefaultNotificationService implements ShareNotificationService {
                 .setShareToken(shareToken)
                 .setConfirm(hash)
                 .setAccount(mailAddress)
+                .setRequestContext(new DefaultRequestContext(requestHostname, protocol)) // TODO combine with link provider
                 .build();
 
-            PasswordResetConfirmMailNotification n = (PasswordResetConfirmMailNotification) notification;
-
-            makeMailAware(n, requestHostname, guestInfo.getGuestID(), guestInfo.getContextID());
-            send(n);
+            send(notification);
         } catch (Exception e) {
             throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
@@ -379,33 +369,6 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     /**
-     * Get all mail relevant branding infos from the {@linkServerConfig} and add all the needed infos for the mailcomposer to actually build the mail.
-     *
-     * @param shareMailAware The {@link ShareMailAware} {@link ShareNotification} to enrich with information.
-     * @param hostname The hostname
-     * @param userId The userId
-     * @param contextId The contextId
-     */
-    private void makeMailAware(ShareMailAware shareMailAware, String hostname, int userId, int contextId) throws OXException {
-        ServerConfig serverConfig = serviceLookup.getService(ServerConfigService.class).getServerConfig(hostname, userId, contextId);
-        String productName = serverConfig.getProductName();
-        if (Strings.isEmpty(productName)) {
-            throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userId, contextId);
-        }
-        shareMailAware.setProductName(productName);
-
-        NotificationMailConfig shareMailConfig = serverConfig.getNotificationMailConfig();
-        if (shareMailConfig == null) {
-            throw ShareNotifyExceptionCodes.INVALID_SHARE_MAIL_CONFIG.create(userId, contextId);
-        }
-        shareMailAware.setButtonBackgroundColor(shareMailConfig.getButtonBackgroundColor());
-        shareMailAware.setButtonBorderColor(shareMailConfig.getButtonBorderColor());
-        shareMailAware.setButtonColor(shareMailConfig.getButtonTextColor());
-        shareMailAware.setFooterImage(shareMailConfig.getFooterImage());
-        shareMailAware.setFooterText(shareMailConfig.getFooterText());
-    }
-
-    /**
      * Builds a {@link ShareNotification} ready to be sent out to a internal recipent via mail.
      *
      * @param notificationInfo The needed infos to build the {@link ShareNotification}
@@ -422,35 +385,38 @@ public class DefaultNotificationService implements ShareNotificationService {
         String protocol = determineProtocol(requestData);
         String uiWebPath = serviceLookup.getService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite");
         User internalUser = serviceLookup.getService(UserService.class).getUser(recipient.getEntity(), contextId);
-        ShareCreatedMailNotification scmn = new ShareCreatedMailNotification(NotificationType.INTERNAL_SHARE_CREATED);
-        try {
-            scmn.setTransportInfo(new InternetAddress(internalUser.getMail(), true));
-            if (createdShares.size() == 1 && null != createdShares.get(0).getShare().getTarget()) {
-                String module = Module.getForFolderConstant(createdShares.get(0).getShare().getTarget().getModule()).getName();
-                String folder = createdShares.get(0).getShare().getTarget().getFolder();
-                String item = createdShares.get(0).getShare().getTarget().getItem();
-                StringBuilder sb = new StringBuilder(uiWebPath).append("/ui#!!").append("&app=io.ox/").append(module).append("&folder=").append(folder);
-                if (null != item && !Strings.isEmpty(item)) {
-                    sb.append("&item=").append(item);
-                }
-                scmn.setLinkProvider(buildLinkProvider(userId, contextId, requestData.getHostname(), null, protocol, sb.toString()));
-            } else {
-                StringBuilder sb = new StringBuilder(uiWebPath).append("/ui#!!").append("&app=io.ox/").append("files").append("&folder=").append(10);
-                scmn.setLinkProvider(buildLinkProvider(userId, contextId, requestData.getHostname(), null, protocol, sb.toString()));
+
+        LinkProvider linkProvider;
+        if (createdShares.size() == 1 && null != createdShares.get(0).getShare().getTarget()) {
+            String module = Module.getForFolderConstant(createdShares.get(0).getShare().getTarget().getModule()).getName();
+            String folder = createdShares.get(0).getShare().getTarget().getFolder();
+            String item = createdShares.get(0).getShare().getTarget().getItem();
+            StringBuilder sb = new StringBuilder(uiWebPath).append("/ui#!!").append("&app=io.ox/").append(module).append("&folder=").append(folder);
+            if (null != item && !Strings.isEmpty(item)) {
+                sb.append("&item=").append(item);
             }
-            scmn.setContextID(contextId);
-            scmn.setGuestContextID(contextId);
-            scmn.setGuestID(internalUser.getId());
-            scmn.setLocale(internalUser.getLocale());
-            scmn.setSession(session);
-            scmn.setTargets(getTargets(createdShares));
-            scmn.setMessage(notificationInfo.getMessage());
-            scmn.setCausedGuestCreation(false);
+            linkProvider = buildLinkProvider(userId, contextId, requestData.getHostname(), null, protocol, sb.toString());
+        } else {
+            StringBuilder sb = new StringBuilder(uiWebPath).append("/ui#!!").append("&app=io.ox/").append("files").append("&folder=").append(10);
+            linkProvider = buildLinkProvider(userId, contextId, requestData.getHostname(), null, protocol, sb.toString());
+        }
+
+        try {
+            ShareCreatedBuilder builder = MailNotifications.shareCreated()
+                .setGuestContext(contextId)
+                .setGuestID(internalUser.getId())
+                .setLocale(internalUser.getLocale())
+                .setSession(session)
+                .setTargets(getTargets(createdShares))
+                .setMessage(notificationInfo.getMessage())
+                .setRequestContext(new AJAXRequestContext(requestData))
+                .setCausedGuestCreation(false)
+                .setTransportInfo(new InternetAddress(internalUser.getMail(), true))
+                .setLinkProvider(linkProvider);
+            return builder.build();
         } catch (Exception e) {
             throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        makeMailAware(scmn, requestData.getHostname(), userId, contextId);
-        return scmn;
     }
 
 }

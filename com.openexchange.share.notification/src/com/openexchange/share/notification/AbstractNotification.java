@@ -73,6 +73,8 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
 
     protected Locale locale;
 
+    protected RequestContext requestContext;
+
     /**
      * Initializes a new {@link AbstractNotification}.
      *
@@ -117,6 +119,11 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
         return locale;
     }
 
+    @Override
+    public RequestContext getRequestContext() {
+        return requestContext;
+    }
+
     /**
      * Sets the {@link LinkProvider}
      *
@@ -154,6 +161,15 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     }
 
     /**
+     * Sets the request context
+     *
+     * @param requestContext
+     */
+    public void setRequestContext(RequestContext requestContext) {
+        this.requestContext = requestContext;
+    }
+
+    /**
      * Applies all common fields at once by extracting them from the given builder.
      *
      * @param builder
@@ -163,6 +179,7 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
         this.linkProvider = builder.linkProvider;
         this.contextID = builder.guestContextID;
         this.locale = builder.locale;
+        this.requestContext = builder.requestContext;
     }
 
 }

@@ -81,4 +81,11 @@ public interface PasswordResetConfirmNotification<T> extends ShareNotification<T
      */
     String getAccount();
 
+    /**
+     * Get the ID of the according guest user
+     *
+     * @return The user ID
+     */
+    int getGuestID();
+
 }

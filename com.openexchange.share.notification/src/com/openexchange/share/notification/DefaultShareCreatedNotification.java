@@ -80,6 +80,8 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     private int guestID;
 
+    private boolean causedGuestCreation;
+
     /**
      * Initializes a new {@link DefaultShareCreatedNotification}.
      */
@@ -135,6 +137,11 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
         return guestID;
     }
 
+    @Override
+    public boolean getCausedGuestCreation() {
+        return causedGuestCreation;
+    }
+
     public void setTargets(List<ShareTarget> targets) {
         this.targets = targets;
     }
@@ -165,6 +172,10 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     public void setGuestID(int guestID) {
         this.guestID = guestID;
+    }
+
+    public void setCausedGuestCreation(boolean causedGuestCreation) {
+        this.causedGuestCreation = causedGuestCreation;
     }
 
 }

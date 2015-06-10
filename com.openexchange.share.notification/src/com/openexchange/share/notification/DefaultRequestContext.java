@@ -49,61 +49,40 @@
 
 package com.openexchange.share.notification;
 
-import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * {@link DefaultPasswordResetConfirmNotification}
+ * {@link DefaultRequestContext} - Default implementation of {@link RequestContext} based
+ * on plain fields.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since v7.8
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
+public class DefaultRequestContext implements RequestContext {
 
-    private String token;
-    private String confirm;
-    private String account;
-    private int guestId;
+    private final String protocol;
 
-    public DefaultPasswordResetConfirmNotification(Transport transport) {
-        super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
+    private final String hostname;
+
+    /**
+     * Initializes a new {@link DefaultRequestContext}.
+     * @param requestHostname
+     * @param protocol
+     */
+    public DefaultRequestContext(String hostname, String protocol) {
+        super();
+        this.hostname = hostname;
+        this.protocol = protocol;
     }
 
     @Override
-    public String getToken() {
-        return token;
+    public String getProtocol() {
+        return protocol;
     }
 
     @Override
-    public String getConfirm() {
-        return confirm;
-    }
-
-    @Override
-    public String getAccount() {
-        return account;
-    }
-
-    @Override
-    public int getGuestID() {
-        return guestId;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setConfirm(String confirm) {
-        this.confirm = confirm;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public void setGuestID(int guestId) {
-        this.guestId = guestId;
+    public String getHostname() {
+        return hostname;
     }
 
 }

@@ -47,100 +47,34 @@
  *
  */
 
-package com.openexchange.share.notification.mail;
+package com.openexchange.share.notification;
+
+import com.openexchange.groupware.notify.hostname.HostnameService;
 
 
 /**
- * {@link ShareMailAware}
+ * Encapsulates information about the current HTTP request that is crucial to generate
+ * a share notification.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareMailAware {
-    
-    /**
-     * Gets the productName
-     *
-     * @return The productName
-     */
-    public String getProductName();
-    
-    /**
-     * Sets the productName
-     *
-     * @param productName The productName to set
-     */
-    public void setProductName(String productName);
-    
-    /**
-     * Gets the buttoncolor
-     *
-     * @return The buttoncolor
-     */
-    public String getButtonColor();
-    
-    /**
-     * Sets the buttoncolor
-     *
-     * @param buttoncolor The buttoncolor to set
-     */
-    public void setButtonColor(String buttoncolor);
-    
-    /**
-     * Gets the buttonBackgroundColor
-     *
-     * @return The buttonBackgroundColor
-     */
-    public String getButtonBackgroundColor();
-    
-    /**
-     * Sets the buttonBackgroundColor
-     *
-     * @param buttonBackgroundColor The buttonBackgroundColor to set
-     */
-    public void setButtonBackgroundColor(String buttonBackgroundColor);
-    
-    /**
-     * Gets the buttonBorderColor
-     *
-     * @return The buttonBorderColor
-     */
-    public String getButtonBorderColor();
-    
-    /**
-     * Sets the buttonBorderColor
-     *
-     * @param buttonBorderColor The buttonBorderColor to set
-     */
-    public void setButtonBorderColor(String buttonBorderColor);
-    
-    /**
-     * Gets the footerText
-     *
-     * @return The footerText
-     */
-    public String getFooterText();
-    
-    /**
-     * Sets the footerText
-     *
-     * @param footerText The footerText to set
-     */
-    public void setFooterText(String footerText);
-    
-    /**
-     * Gets the footerImage path
-     *
-     * @return The footerImage
-     */
-    public String getFooterImage();
-    
-    /**
-     * Sets the footerImage path
-     *
-     * @param footerImage The footerImage path to set
-     */
-    public void setFooterImage(String footerImagePath);
+public interface RequestContext {
 
-    
+    /**
+     * Gets the protocol via which this request was received, either <code>http</code>
+     * or <code>https</code>.
+     *
+     * @return The protocol
+     */
+    String getProtocol();
+
+    /**
+     * Gets the requested hostname. This could have been determined by the HTTP request
+     * itself or an optional {@link HostnameService}.
+     *
+     * @return The hostname
+     */
+    String getHostname();
+
 }
