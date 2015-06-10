@@ -1,3 +1,9 @@
+open-xchange-guard-backend (7.6.2-1) stable; urgency=medium
+
+  * Build for patch 2015-06-08 (2540)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 10 Jun 2015 15:32:49 +0200
+
 open-xchange-guard-backend (7.6.2-0) unstable; urgency=low
 
   * initial packaging for OX Guard backend component
