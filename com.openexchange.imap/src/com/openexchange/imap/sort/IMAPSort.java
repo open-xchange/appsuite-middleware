@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.sort;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
@@ -134,6 +135,148 @@ public final class IMAPSort {
     private IMAPSort() {
         super();
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Attempts to perform a IMAP-based sort.
+     *
+     * @param imapFolder The IMAP folder
+     * @param filter The optional filter
+     * @param sortField The sort field
+     * @param orderDir The sort order
+     * @param imapConfig The IMAP configuration
+     * @return The IMAP-sorted sequence number or <code>null</code> if unable to do IMAP sort
+     * @throws MessagingException If sort attempt fails horribly
+     */
+    public static int[] sortMessages(IMAPFolder imapFolder, int[] filter, MailSortField sortField, OrderDirection orderDir, IMAPConfig imapConfig, boolean doImapSort, int threshold) throws MessagingException {
+        int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            return new int[0];
+        }
+
+        final int size = filter == null ? messageCount : filter.length;
+        if (doImapSort || (imapConfig.getCapabilities().hasSort() && (size >= threshold))) {
+            try {
+                // Get IMAP sort criteria
+                final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
+                final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                if (null != sortCriteria) {
+                    final int[] seqNums;
+                    {
+                        // Do IMAP sort
+                        final long start = System.currentTimeMillis();
+                        seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
+                    }
+                    if ((seqNums == null) || (seqNums.length == 0)) {
+                        return new int[0];
+                    }
+                    return seqNums;
+                }
+            } catch (final FolderClosedException e) {
+                /*
+                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 */
+                throw e;
+            } catch (final StoreClosedException e) {
+                /*
+                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 */
+                throw e;
+            } catch (final MessagingException e) {
+                if (e.getNextException() instanceof ProtocolException) {
+                    final ProtocolException protocolException = (ProtocolException) e.getNextException();
+                    final Response response = protocolException.getResponse();
+                    if (response != null && response.isBYE()) {
+                        /*
+                         * The BYE response is always untagged, and indicates that the server is about to close the connection.
+                         */
+                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                    }
+                    final Throwable cause = protocolException.getCause();
+                    if (cause instanceof StoreClosedException) {
+                        /*
+                         * Connection is down. No retry.
+                         */
+                        throw ((StoreClosedException) cause);
+                    } else if (cause instanceof FolderClosedException) {
+                        /*
+                         * Connection is down. No retry.
+                         */
+                        throw ((FolderClosedException) cause);
+                    }
+                }
+                LOG.warn("", IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage()));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Generates an appropriate <i>SORT</i> command as defined through the IMAP SORT EXTENSION corresponding to specified sort field and
+     * order direction.
+     * <p>
+     * The supported sort criteria are:
+     * <ul>
+     * <li><b>ARRIVAL</b><br>
+     * Internal date and time of the message. This differs from the ON criteria in SEARCH, which uses just the internal date.</li>
+     * <li><b>CC</b><br>
+     * RFC-822 local-part of the first "Cc" address.</li>
+     * <li><b>DATE</b><br>
+     * Sent date and time from the Date: header, adjusted by time zone. This differs from the SENTON criteria in SEARCH, which uses just the
+     * date and not the time, nor adjusts by time zone.</li>
+     * <li><b>FROM</b><br>
+     * RFC-822 local-part of the "From" address.</li>
+     * <li><b>REVERSE</b><br>
+     * Followed by another sort criterion, has the effect of that criterion but in reverse order.</li>
+     * <li><b>SIZE</b><br>
+     * Size of the message in octets.</li>
+     * <li><b>SUBJECT</b><br>
+     * Extracted subject text.</li>
+     * <li><b>TO</b><br>
+     * RFC-822 local-part of the first "To" address.</li>
+     * </ul>
+     * <p>
+     * Example:<br>
+     * {@link MailSortField#SENT_DATE} in descending order is turned to <code>"REVERSE DATE"</code>.
+     *
+     * @param sortField The sort field
+     * @param descendingDirection The order direction
+     * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command or <code>null</code> if sort field is not supported by IMAP
+     */
+    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) {
+        final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
+        switch (sortField) {
+        case SENT_DATE:
+            imapSortCritBuilder.append("DATE");
+            break;
+        case RECEIVED_DATE:
+            imapSortCritBuilder.append("ARRIVAL");
+            break;
+        case FROM:
+            imapSortCritBuilder.append("FROM");
+            break;
+        case TO:
+            imapSortCritBuilder.append("TO");
+            break;
+        case CC:
+            imapSortCritBuilder.append("CC");
+            break;
+        case SUBJECT:
+            imapSortCritBuilder.append("SUBJECT");
+            break;
+        case SIZE:
+            imapSortCritBuilder.append("SIZE");
+            break;
+        default:
+            return null;
+        }
+        return imapSortCritBuilder.toString();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Attempts to perform a IMAP-based sort with a given search term.
