@@ -3245,9 +3245,9 @@ msgid "Invalid OAuth account specified."
 msgstr ""
 
 #.
-#. * Invite E-Mails
+#. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
+#. * The placeholders mean $givenname $surname.
 #.
-#. * $givenname $surname
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
 msgid "%1$s %2$s"
 msgstr ""
