@@ -173,6 +173,7 @@ import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
@@ -290,7 +291,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class };
+        SearchService.class, AttachmentTokenService.class };
 
     private static volatile BundleContext CONTEXT;
 

@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
 import com.openexchange.documentation.RequestMethod;
@@ -63,10 +64,12 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -96,22 +99,18 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
-            final String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
+            ServerSession session = req.getSession();
+
+            // Read in parameters
+            String folderPath = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
+            String sequenceId = req.getParameter(Mail.PARAMETER_MAILATTCHMENT);
+            String imageContentId = req.getParameter(Mail.PARAMETER_MAILCID);
+
             if (sequenceId == null && imageContentId == null) {
-                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(
-                    Mail.PARAMETER_MAILCID).toString());
+                throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(Mail.PARAMETER_MAILATTCHMENT).append(" | ").append(Mail.PARAMETER_MAILCID).toString());
             }
+
             int ttlMillis;
             {
                 final String tmp = req.getParameter("ttlMillis");
@@ -121,41 +120,39 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
                     ttlMillis = -1;
                 }
             }
+
             boolean oneTime;
             {
-                final String tmp = req.getParameter("oneTime");
-                if (null == tmp) {
-                    oneTime = true;
-                } else {
-                    oneTime = Boolean.parseBoolean(tmp.trim());
-                }
+                String tmp = req.getParameter("oneTime");
+                oneTime = null == tmp ? true : Boolean.parseBoolean(tmp.trim());
             }
+
             boolean checkIp;
             {
-                final String tmp = req.getParameter("checkIp");
-                if (null == tmp) {
-                    checkIp = false;
-                } else {
-                    checkIp = Boolean.parseBoolean(tmp.trim());
+                String tmp = req.getParameter("checkIp");
+                checkIp = null == tmp ? false : Boolean.parseBoolean(tmp.trim());
+            }
+
+            // Check part existence if required
+            if (AJAXRequestDataTools.parseBoolParameter("checkPart", req.getRequest())) {
+                MailServletInterface mailInterface = getMailInterface(req);
+                MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, true);
+                if (mailPart == null) {
+                    throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
                 }
             }
-            /*
-             * Get mail part
-             */
-            final MailPart mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, true);
-            if (mailPart == null) {
-                throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
-            }
-            final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
-            token.setAccessInfo(mailInterface.getAccountID(), session);
+
+            AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
+            token.setAccessInfo(MailFolderUtility.prepareMailFolderParam(folderPath).getAccountId(), session);
             token.setAttachmentInfo(folderPath, uid, sequenceId);
-            AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(oneTime).setCheckIp(checkIp), session);
-            final JSONObject attachmentObject = new JSONObject(2);
+            AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
+            service.putToken(token.setOneTime(oneTime).setCheckIp(checkIp), session);
+
+            JSONObject attachmentObject = new JSONObject(2);
             attachmentObject.put("id", token.getId());
             attachmentObject.put("jsessionid", token.getJSessionId());
-            /*
-             * Return result
-             */
+
+            // Return result
             return new AJAXRequestResult(attachmentObject, "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
