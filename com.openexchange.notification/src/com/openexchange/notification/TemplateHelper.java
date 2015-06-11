@@ -70,6 +70,14 @@ public class TemplateHelper {
 
     private static final Logger LOG = LoggerFactory.getLogger(TemplateHelper.class);
 
+    /**
+     * Injects the variable substitutions for button styles and the footer into the passed
+     * map.
+     *
+     * @param vars The map containing the variables for template processing
+     * @param mailConfig The mail configuration that defines the substitutions to be applied
+     * @param templateService The template service to load and encode a potential footer image.
+     */
     public static void injectNotificationMailConfig(Map<String, Object> vars, NotificationMailConfig mailConfig, TemplateService templateService) {
         vars.put(BUTTON_COLOR, mailConfig.getButtonTextColor());
         vars.put(BUTTON_BACKGROUND_COLOR, mailConfig.getButtonBackgroundColor());

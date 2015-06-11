@@ -7,11 +7,7 @@
 </head>
 <body class="content">
   <#escape x as x?html>
-    <p>${salutation}</p>
-    <p>${appConnected}</p>
-    <p>${revokeAccess}</p>
-    <#-- view item_type button -->
-    <p><a class="btn" href="${settingsURL}"><span>${gotoSettings}</span></a></p>
+    <#-- Your mail content -->
   </#escape>
 
   <#include "notify.common.footer.html.tmpl">
