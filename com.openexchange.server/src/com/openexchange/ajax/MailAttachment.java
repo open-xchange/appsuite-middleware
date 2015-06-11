@@ -190,6 +190,7 @@ public class MailAttachment extends AJAXServlet {
                 String fullName = MailFolderUtility.prepareMailFolderParam(token.getFolderPath()).getFullname();
                 MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullName, token.getMailId(), token.getAttachmentId());
                 if (null == mailPart) {
+                    service.removeToken(id);
                     Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_NOT_FOUND.create(token.getAttachmentId(), token.getMailId(), fullName).getDisplayMessage(Locale.US));
                     return;
                 }
