@@ -49,53 +49,27 @@
 
 package com.openexchange.ajax;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
-import java.util.regex.Pattern;
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.json.JSONException;
-import com.openexchange.ajax.container.ByteArrayRandomAccess;
-import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.ajax.container.InputStreamReadable;
-import com.openexchange.ajax.container.Readable;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.helper.BrowserDetector;
-import com.openexchange.ajax.helper.DownloadUtility;
-import com.openexchange.ajax.helper.DownloadUtility.CheckedDownload;
-import com.openexchange.ajax.writer.ResponseWriter;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Dispatcher;
+import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
-import com.openexchange.html.HtmlService;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenService;
-import com.openexchange.mail.config.MailProperties;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.mail.json.MailActionFactory;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
@@ -107,17 +81,16 @@ public class MailAttachment extends AJAXServlet {
 
     private static final long serialVersionUID = -3109402774466180271L;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAttachment.class);
+    private static final String PARAMETER_MAILATTCHMENT = Mail.PARAMETER_MAILATTCHMENT;
 
-    private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
-    private static final int BUFLEN = 2048;
-    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
+    private final FileResponseRenderer renderer;
 
     /**
      * Initializes a new {@link MailAttachment}.
      */
     public MailAttachment() {
         super();
+        this.renderer = new FileResponseRenderer();
     }
 
     @Override
@@ -126,22 +99,11 @@ public class MailAttachment extends AJAXServlet {
         /*
          * Get attachment
          */
-        boolean outSelected = false;
         try {
             String id = req.getParameter(PARAMETER_ID);
             if (null == id) {
                 Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing mandatory parameter");
                 return;
-            }
-            boolean saveToDisk;
-            {
-                final String saveParam = req.getParameter("save");
-                saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
-            }
-            boolean filter;
-            {
-                final String filterParam = req.getParameter(PARAMETER_FILTER);
-                filter = Boolean.parseBoolean(filterParam) || "1".equals(filterParam);
             }
 
             // Look-up attachment by token identifier
@@ -160,437 +122,57 @@ public class MailAttachment extends AJAXServlet {
                 return;
             }
 
-            /*
-             * At least expect the same user agent as the one which created the attachment token
-             */
-            if (token.isOneTime() && null != token.getUserAgent()) {
-                final String requestUserAgent = req.getHeader("user-agent");
-                if (null == requestUserAgent) {
-                    service.removeToken(id);
-                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
-                    return;
-                }
-                if (!BrowserDetector.detectorFor(token.getUserAgent()).nearlyEquals(BrowserDetector.detectorFor(requestUserAgent))) {
-                    service.removeToken(id);
-                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
-                    return;
-                }
+            // At least expect the same user agent as the one which created the attachment token
+//            if (token.isOneTime() && null != token.getUserAgent()) {
+//                final String requestUserAgent = req.getHeader("user-agent");
+//                if (null == requestUserAgent) {
+//                    service.removeToken(id);
+//                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
+//                    return;
+//                }
+//                if (!BrowserDetector.detectorFor(token.getUserAgent()).nearlyEquals(BrowserDetector.detectorFor(requestUserAgent))) {
+//                    service.removeToken(id);
+//                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
+//                    return;
+//                }
+//            }
+
+            MailActionFactory actionFactory = MailActionFactory.getActionFactory();
+            if (null == actionFactory) {
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not orderly initialized");
+                return;
             }
 
-            // Write part to output stream
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+            AJAXActionService getAttachmentAction = actionFactory.createActionService("attachment");
+            if (null == getAttachmentAction) {
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not orderly initialized");
+                return;
+            }
 
-
-            Readable attachmentInputStream = null;
-            ThresholdFileHolder tfh = null;
+            // Perform request
             try {
-                mailAccess = MailAccess.getInstance(token.getUserId(), token.getContextId(), token.getAccountId());
-                mailAccess.connect();
+                SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                Session session = sessiondService.getSession(token.getSessionId());
+                ServerSession serverSession = ServerSessionAdapter.valueOf(session);
 
-                String fullName = MailFolderUtility.prepareMailFolderParam(token.getFolderPath()).getFullname();
-                MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullName, token.getMailId(), token.getAttachmentId());
-                if (null == mailPart) {
-                    service.removeToken(id);
-                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_NOT_FOUND.create(token.getAttachmentId(), token.getMailId(), fullName).getDisplayMessage(Locale.US));
-                    return;
-                }
+                // Create request & yield result
+                AJAXRequestData request = AJAXRequestDataTools.getInstance().parseRequest(req, false, false, serverSession, Dispatcher.PREFIX.get(), resp);
+                request.setSession(serverSession);
+                request.putParameter(PARAMETER_FOLDERID, token.getFolderPath());
+                request.putParameter(PARAMETER_ID, token.getMailId());
+                request.putParameter(PARAMETER_MAILATTCHMENT, token.getAttachmentId());
 
-                long length = -1L;
-                if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm", "text/xml")) {
-                    /*
-                     * Apply filter
-                     */
-                    final ContentType contentType = mailPart.getContentType();
-                    final String cs = contentType.containsCharsetParameter() ? contentType.getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset();
-                    String htmlContent = MessageUtility.readMailPart(mailPart, cs);
-                    htmlContent = MessageUtility.simpleHtmlDuplicateRemoval(htmlContent);
-                    final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                    final byte[] bytes = sanitizeHtml(htmlContent, htmlService).getBytes(Charsets.forName(cs));
-                    length = bytes.length;
-                    attachmentInputStream = new ByteArrayRandomAccess(bytes);
-                } else {
-                    attachmentInputStream = new InputStreamReadable(mailPart.getInputStream());
-                    /*-
-                     * Unfortunately, size indicated by mail part is not exact, therefore skip it.
-                     *
-                    length = mailPart.getSize();
-                    if (length <= 0) {
-                        tfh = new ThresholdFileHolder();
-                        tfh.write(attachmentInputStream);
-                        attachmentInputStream.close();
-                        attachmentInputStream = tfh.getStream();
-                        length = tfh.getLength();
-                    }
-                     *
-                     */
-                }
-                /*
-                 * Content-Length
-                 */
-                if (length > 0) {
-                    resp.setHeader("Accept-Ranges", "bytes");
-                    resp.setHeader("Content-Length", Long.toString(length));
-                }
-                /*
-                 * Set Content-Type and Content-Disposition header
-                 */
-                final String fileName = mailPart.getFileName();
-                final String userAgent = AJAXUtility.sanitizeParam(req.getHeader("user-agent"));
-                final String contentType;
-                if (saveToDisk) {
-                    /*
-                     * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment
-                     * disposition.
-                     */
-                    final StringBuilder sb = new StringBuilder(32);
-                    sb.append("attachment");
-                    DownloadUtility.appendFilenameParameter(fileName, null, userAgent, sb);
-                    resp.setHeader("Content-Disposition", sb.toString());
-                    if (mailPart.containsContentType()) {
-                        final ContentType ct = mailPart.getContentType();
-                        ct.removeParameter("name");
-                        contentType = ct.toString();
-                    } else {
-                        contentType = "application/octet-stream";
-                    }
-                    resp.setContentType(contentType);
-                } else {
-                    Session session = SessiondService.SERVICE_REFERENCE.get().getSession(token.getSessionId());
-                    CheckedDownload checkedDownload = DownloadUtility.checkInlineDownload(attachmentInputStream, fileName, mailPart.getContentType().toString(), userAgent, ServerSessionAdapter.valueOf(session));
-                    contentType = checkedDownload.getContentType();
-                    resp.setContentType(contentType);
-                    resp.setHeader("Content-Disposition", checkedDownload.getContentDisposition());
-                    attachmentInputStream = checkedDownload.getInputStream();
-                }
-                /*
-                 * Reset response header values since we are going to directly write into servlet's output stream and then some browsers do
-                 * not allow header "Pragma"
-                 */
-                Tools.removeCachingHeader(resp);
-                try {
-                    final ServletOutputStream outputStream = resp.getOutputStream();
-                    outSelected = true;
-                    final String sRange;
-                    if (length > 0 && null != (sRange = req.getHeader("Range"))) {
-                        // Taken from http://balusc.blogspot.co.uk/2009/02/fileservlet-supporting-resume-and.html
-                        // Range header should match format "bytes=n-n,n-n,n-n...". If not, then return 416.
-                        if (!PATTERN_BYTE_RANGES.matcher(sRange).matches()) {
-                            resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
-                            resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                            return;
-                        }
-                        // If-Range header should either match ETag or be greater then LastModified. If not,
-                        // then return full file.
-                        boolean full = false;
-                        // If any valid If-Range header, then process each part of byte range.
-                        final List<Range> ranges;
-                        if (full) {
-                            ranges = Collections.emptyList();
-                        } else {
-                            final String[] parts = Strings.splitByComma(sRange.substring(6));
-                            ranges = new ArrayList<Range>(parts.length);
-                            for (final String part : parts) {
-                                // Assuming a file with length of 100, the following examples returns bytes at:
-                                // 50-80 (50 to 80), 40- (40 to length=100), -20 (length-20=80 to length=100).
-                                final int dashPos = part.indexOf('-');
-                                long start = sublong(part, 0, dashPos);
-                                long end = sublong(part, dashPos + 1, part.length());
+                AJAXRequestResult result = getAttachmentAction.perform(request, serverSession);
 
-                                if (start == -1) {
-                                    start = length - end;
-                                    end = length - 1;
-                                } else if (end == -1 || end > length - 1) {
-                                    end = length - 1;
-                                }
-
-                                // Check if Range is syntactically valid. If not, then return 416.
-                                if (start > end) {
-                                    resp.setHeader("Content-Range", "bytes */" + length); // Required in 416.
-                                    resp.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-                                    return;
-                                }
-
-                                // Add range.
-                                ranges.add(new Range(start, end, length));
-                            }
-                        }
-                        if (full || ranges.isEmpty()) {
-                            // Return full file.
-                            final Range r = new Range(0L, length - 1, length);
-                            resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
-
-                            // Copy full range.
-                            copy(attachmentInputStream, outputStream, r.start, r.length);
-                        } else if (ranges.size() == 1) {
-
-                            // Return single part of file.
-                            final Range r = ranges.get(0);
-                            resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
-                            resp.setHeader("Content-Length", Long.toString(r.length));
-                            resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
-
-                            // Copy single part range.
-                            copy(attachmentInputStream, outputStream, r.start, r.length);
-                        } else {
-                            // Return multiple parts of file.
-                            final String boundary = MULTIPART_BOUNDARY;
-                            resp.setContentType(new StringBuilder("multipart/byteranges; boundary=").append(boundary).toString());
-                            resp.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT); // 206.
-
-                            // Copy multi part range.
-                            for (final Range r : ranges) {
-                                // Add multipart boundary and header fields for every range.
-                                outputStream.println();
-                                outputStream.println(new StringBuilder("--").append(boundary).toString());
-                                outputStream.println(new StringBuilder("Content-Type: ").append(contentType).toString());
-                                outputStream.println(new StringBuilder("Content-Range: bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
-
-                                // Copy single part range of multi part range.
-                                copy(attachmentInputStream, outputStream, r.start, r.length);
-                            }
-
-                            // End with multipart boundary.
-                            outputStream.println();
-                            outputStream.println(new StringBuilder("--").append(boundary).append("--").toString());
-                        }
-                    } else {
-                        final int len = BUFLEN;
-                        final byte[] buf = new byte[len];
-                        for (int read; (read = attachmentInputStream.read(buf, 0, len)) > 0;) {
-                            outputStream.write(buf, 0, read);
-                        }
-                    }
-                    outputStream.flush();
-                } catch (final java.net.SocketException e) {
-                    final String lmsg = toLowerCase(e.getMessage());
-                    if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
-                        // Assume client-initiated connection closure
-                        LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
-                    } else {
-                        LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
-                    }
-                } catch (final com.sun.mail.util.MessageRemovedIOException e) {
-                    resp.sendError(HttpServletResponse.SC_NOT_FOUND, "Message not found.");
-                } catch (final IOException e) {
-                    if ("connection reset by peer".equals(toLowerCase(e.getMessage()))) {
-                        /*-
-                         * The client side has abruptly aborted the connection.
-                         * That can have many causes which are not controllable by us.
-                         *
-                         * For instance, the peer doesn't understand what it received and therefore closes its socket.
-                         * For the next write attempt by us, the peer's TCP stack will issue an RST,
-                         * which results in this exception and message at the sender.
-                         */
-                        LOG.debug("Client dropped connection while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
-                    } else {
-                        LOG.warn("Lost connection to client while trying to output file{}", (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName), e);
-                    }
-                }
-            } finally {
-                Streams.close(attachmentInputStream, tfh);
-                if (null != mailAccess) {
-                    mailAccess.close();
-                }
+                renderer.write(request, result, req, resp);
+            } catch (OXException e) {
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, e.getDisplayMessage(Locale.US));
+                return;
             }
-        } catch (final OXException e) {
-            callbackError(resp, outSelected, e);
-        } catch (final Exception e) {
-            final OXException exc = getWrappingOXException(e);
-            LOG.error("", exc);
-            callbackError(resp, outSelected, exc);
-        }
-    }
-
-    private static boolean isMSIEOnWindows(final String userAgent) {
-        final BrowserDetector browserDetector = BrowserDetector.detectorFor(userAgent);
-        return (browserDetector.isMSIE() && browserDetector.isWindows());
-    }
-
-    /**
-     * Generates a wrapping {@link AbstractOXException} for specified exception.
-     *
-     * @param cause The exception to wrap
-     * @return The wrapping {@link AbstractOXException}
-     */
-    protected static final OXException getWrappingOXException(final Exception cause) {
-        final String lineSeparator = System.getProperty("line.separator");
-        LOG.warn("An unexpected exception occurred, which is going to be wrapped for proper display.{}For safety reason its original content is displayed here.", lineSeparator, cause);
-        return new OXException(cause);
-    }
-
-    private static void callbackError(final HttpServletResponse resp, final boolean outSelected, final OXException e) {
-        try {
-            resp.setContentType("text/html; charset=UTF-8");
-            final Writer writer;
-            if (outSelected) {
-                /*
-                 * Output stream has already been selected
-                 */
-                Tools.disableCaching(resp);
-                writer =
-                    new PrintWriter(new BufferedWriter(new OutputStreamWriter(resp.getOutputStream(), resp.getCharacterEncoding())), true);
-            } else {
-                writer = resp.getWriter();
-            }
-            resp.setHeader("Content-Disposition", null);
-            final Response response = new Response();
-            response.setException(e);
-            writer.write(substituteJS(ResponseWriter.getJSON(response).toString(), "error"));
-            writer.flush();
-        } catch (final UnsupportedEncodingException uee) {
-            uee.initCause(e);
-            LOG.error("", uee);
-        } catch (final IOException ioe) {
-            ioe.initCause(e);
-            LOG.error("", ioe);
-        } catch (final IllegalStateException ise) {
-            ise.initCause(e);
-            LOG.error("", ise);
-        } catch (final JSONException je) {
-            je.initCause(e);
-            LOG.error("", je);
-        }
-    }
-
-    private static String sanitizeHtml(final String htmlContent, final HtmlService htmlService) {
-        return htmlService.sanitize(htmlContent, null, false, null, null);
-    }
-
-    @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
-        res.setContentType("text/html; charset=UTF-8");
-        res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse res) throws ServletException, IOException {
-        res.setContentType("text/html; charset=UTF-8");
-        res.setStatus(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /**
-     * Returns a substring of the given string value from the given begin index to the given end index as a long.
-     * <p>
-     * If the substring is empty, then <code>-1</code> will be returned
-     *
-     * @param value The string value to return a substring as long for.
-     * @param beginIndex The begin index of the substring to be returned as long.
-     * @param endIndex The end index of the substring to be returned as long.
-     * @return A substring of the given string value as long or <code>-1</code> if substring is empty.
-     */
-    private long sublong(final String value, final int beginIndex, final int endIndex) {
-        final String substring = value.substring(beginIndex, endIndex);
-        return (substring.length() > 0) ? Long.parseLong(substring) : -1;
-    }
-
-    /**
-     * Copies the given byte range of the given input to the given output.
-     *
-     * @param inputStream The input to copy the given range to the given output for.
-     * @param output The output to copy the given range from the given input for.
-     * @param start Start of the byte range.
-     * @param length Length of the byte range.
-     * @throws IOException If something fails at I/O level.
-     */
-    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException {
-        if (inputStream instanceof IFileHolder.RandomAccess) {
-            copy((IFileHolder.RandomAccess) inputStream, output, start, length);
+        } catch (OXException e) {
+            Tools.sendErrorPage(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getDisplayMessage(Locale.US));
             return;
         }
-
-        // Write partial range.
-        // Discard previous bytes
-        byte[] buffer = new byte[1];
-        for (int i = 0; i < start; i++) {
-            if (inputStream.read(buffer, 0, 1) < 0) {
-                // Stream does not provide enough bytes
-                throw new IOException("Start index " + start + " out of range. Got only " + i);
-            }
-            // Valid byte read... Continue.
-        }
-        long toRead = length;
-
-        int buflen = BUFLEN;
-        buffer = new byte[buflen];
-        int read;
-        while ((read = inputStream.read(buffer, 0, buflen)) > 0) {
-            if ((toRead -= read) > 0) {
-                output.write(buffer, 0, read);
-            } else {
-                output.write(buffer, 0, (int) toRead + read);
-                break;
-            }
-        }
     }
-
-    /**
-     * Copies the given byte range of the given input to the given output.
-     *
-     * @param input The input to copy the given range to the given output for.
-     * @param output The output to copy the given range from the given input for.
-     * @param start Start of the byte range.
-     * @param length Length of the byte range.
-     * @throws IOException If something fails at I/O level.
-     */
-    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException {
-        int buflen = BUFLEN;
-        byte[] buffer = new byte[buflen];
-        int read;
-
-        if (input.length() == length) {
-            // Write full range.
-            while ((read = input.read(buffer, 0, buflen)) > 0) {
-                output.write(buffer, 0, read);
-            }
-        } else {
-            // Write partial range.
-            input.seek(start);
-            long toRead = length;
-
-            while ((read = input.read(buffer, 0, buflen)) > 0) {
-                if ((toRead -= read) > 0) {
-                    output.write(buffer, 0, read);
-                } else {
-                    output.write(buffer, 0, (int) toRead + read);
-                    break;
-                }
-            }
-        }
-    }
-
-    private static final class Range {
-
-        /** The begin position (inclusive) */
-        final long start;
-        /** The end position (inclusive) */
-        final long end;
-        /** The length */
-        final long length;
-        /** The total length */
-        final long total;
-
-        Range(final long start, final long end, final long total) {
-            super();
-            this.start = start;
-            this.end = end;
-            length = end - start + 1;
-            this.total = total;
-        }
-
-    } // End of class Range
 
 }
