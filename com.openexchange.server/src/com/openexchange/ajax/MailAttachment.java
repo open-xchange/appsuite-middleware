@@ -59,6 +59,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -81,11 +82,15 @@ import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.attachment.AttachmentToken;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -123,55 +128,72 @@ public class MailAttachment extends AJAXServlet {
          */
         boolean outSelected = false;
         try {
-            final String id = req.getParameter(PARAMETER_ID);
+            String id = req.getParameter(PARAMETER_ID);
             if (null == id) {
-                throw MailExceptionCode.MISSING_PARAM.create(PARAMETER_ID);
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing mandatory parameter");
+                return;
             }
-            final boolean saveToDisk;
+            boolean saveToDisk;
             {
                 final String saveParam = req.getParameter("save");
                 saveToDisk = ((saveParam == null || saveParam.length() == 0) ? false : ((Integer.parseInt(saveParam)) > 0));
             }
-            final boolean filter;
+            boolean filter;
             {
                 final String filterParam = req.getParameter(PARAMETER_FILTER);
                 filter = Boolean.parseBoolean(filterParam) || "1".equals(filterParam);
             }
-            Tools.removeCachingHeader(resp);
-            final AttachmentToken token = AttachmentTokenRegistry.getInstance().getToken(id);
+
+            // Look-up attachment by token identifier
+            AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
+            AttachmentToken token = service.getToken(id);
             if (null == token) {
-                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+                // No such attachment
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
+                return;
             }
-            /*-
-             * Security check
-             *
-             * IP-Check appropriate for roaming mobile devices?
-             */
+
+            // IP check
             if (token.isCheckIp() && null != token.getClientIp() && !req.getRemoteAddr().equals(token.getClientIp())) {
-                AttachmentTokenRegistry.getInstance().removeToken(id);
-                throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+                service.removeToken(id);
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
+                return;
             }
+
             /*
              * At least expect the same user agent as the one which created the attachment token
              */
             if (token.isOneTime() && null != token.getUserAgent()) {
                 final String requestUserAgent = req.getHeader("user-agent");
                 if (null == requestUserAgent) {
-                    AttachmentTokenRegistry.getInstance().removeToken(id);
-                    throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+                    service.removeToken(id);
+                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
+                    return;
                 }
                 if (!BrowserDetector.detectorFor(token.getUserAgent()).nearlyEquals(BrowserDetector.detectorFor(requestUserAgent))) {
-                    AttachmentTokenRegistry.getInstance().removeToken(id);
-                    throw MailExceptionCode.ATTACHMENT_EXPIRED.create();
+                    service.removeToken(id);
+                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));
+                    return;
                 }
             }
-            /*
-             * Write part to output stream
-             */
-            final MailPart mailPart = token.getAttachment();
+
+            // Write part to output stream
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+
+
             Readable attachmentInputStream = null;
             ThresholdFileHolder tfh = null;
             try {
+                mailAccess = MailAccess.getInstance(token.getUserId(), token.getContextId(), token.getAccountId());
+                mailAccess.connect();
+
+                String fullName = MailFolderUtility.prepareMailFolderParam(token.getFolderPath()).getFullname();
+                MailPart mailPart = mailAccess.getMessageStorage().getAttachment(fullName, token.getMailId(), token.getAttachmentId());
+                if (null == mailPart) {
+                    Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_NOT_FOUND.create(token.getAttachmentId(), token.getMailId(), fullName).getDisplayMessage(Locale.US));
+                    return;
+                }
+
                 long length = -1L;
                 if (filter && !saveToDisk && mailPart.getContentType().startsWithAny("text/htm", "text/xhtm", "text/xml")) {
                     /*
@@ -364,7 +386,10 @@ public class MailAttachment extends AJAXServlet {
                     }
                 }
             } finally {
-                Streams.close(token, attachmentInputStream, tfh);
+                Streams.close(attachmentInputStream, tfh);
+                if (null != mailAccess) {
+                    mailAccess.close();
+                }
             }
         } catch (final OXException e) {
             callbackError(resp, outSelected, e);

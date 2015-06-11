@@ -93,7 +93,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -439,7 +439,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
                 token.setAccessInfo(accountId, session);
                 token.setAttachmentInfo(tokenFolder, tokenMailId, attachmentId);
-                AttachmentTokenRegistry.getInstance().putToken(token, session);
+                AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
+                service.putToken(token, session);
                 final JSONObject attachmentObject = new JSONObject(2);
                 attachmentObject.put("id", token.getId());
                 attachmentObject.put("jsessionid", token.getJSessionId());
