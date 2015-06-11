@@ -1045,19 +1045,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     /* This fixes bug 16107 */
-    protected static void handleChangeFromFullTimeToNormal(final CalendarDataObject newApp, final CalendarDataObject oldApp) {
+    protected static void handleChangeFromFullTimeToNormal(final CalendarDataObject newApp, final CalendarDataObject oldApp) throws OXException {
         if (oldApp == null || newApp == null || !oldApp.getFullTime() || newApp.getFullTime() || newApp.getUntil() == null) {
             return;
         }
         newApp.setEndDate(calculateRealRecurringEndDate(newApp, oldApp));
     }
 
-    private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) {
+    private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
         String tzid = cdao.getTimezone() == null ? edao.getTimezone() : cdao.getTimezone();
         boolean fulltime = cdao.containsFullTime() ? cdao.getFullTime() : (edao != null ? edao.getFullTime() : false);
         return cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? calculateImplictEndOfSeries(edao, tzid, fulltime) : calculateImplictEndOfSeries(cdao, tzid, fulltime);
-//        Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
-//        return calculateRealRecurringEndDate(null == until ? recColl.getMaxUntilDate(cdao) : until, cdao.getEndDate(), cdao.getFullTime(), cdao.getRecurrenceCalculator());
     }
 
     /**
@@ -1078,26 +1076,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return null;
     }
 
-    private static Date calculateImplictEndOfSeries(CalendarDataObject cdao, String tzid, boolean fulltime) {
+    private static Date calculateImplictEndOfSeries(CalendarDataObject cdao, String tzid, boolean fulltime) throws OXException {
         CalendarDataObject clone = cdao.clone();
-        RecurringResultsInterface rresults = null;
-        try {
-            rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
-        } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        RecurringResultsInterface rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
         RecurringResultInterface rresult = rresults.getRecurringResult(0);
         Date retval = new Date(rresult.getEnd());
 
         TimeZone tz = TimeZone.getTimeZone(tzid);
-        int startOffset = 0;
-        try {
-            startOffset = tz.getOffset(calculateRealRecurringStartDate(cdao).getTime());
-        } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        int startOffset = tz.getOffset(calculateRealRecurringStartDate(cdao).getTime());
         int endOffset = tz.getOffset(retval.getTime());
         if (!fulltime) {
             retval.setTime(retval.getTime() + endOffset - startOffset);
