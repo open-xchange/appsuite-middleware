@@ -1077,6 +1077,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private static Date calculateImplictEndOfSeries(CalendarDataObject cdao, String tzid, boolean fulltime) throws OXException {
+        if (cdao.containsUntil() && cdao.getUntil() != null) {
+            return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), fulltime, cdao.getRecurrenceCalculator());
+        }
         CalendarDataObject clone = cdao.clone();
         RecurringResultsInterface rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
         RecurringResultInterface rresult = rresults.getRecurringResult(0);
