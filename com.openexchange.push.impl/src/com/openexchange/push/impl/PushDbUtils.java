@@ -60,8 +60,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-import org.slf4j.Logger;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -346,24 +344,10 @@ public class PushDbUtils {
         }
     }
 
-    private static final AtomicBoolean CHECKED_CONFIGDB = new AtomicBoolean(false);
-
     private static boolean markContextForPush(int contextId, DatabaseService service) throws OXException {
         Connection con = service.getWritable();
         PreparedStatement stmt = null;
         try {
-            if (CHECKED_CONFIGDB.compareAndSet(false, true) && false == tableExists(con, "context2push_registration")) {
-                try {
-                    stmt = con.prepareStatement("CREATE TABLE context2push_registration (cid INT4 UNSIGNED NOT NULL, PRIMARY KEY (cid)) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-                    stmt.executeUpdate();
-                } catch (Exception x) {
-                    Logger logger = org.slf4j.LoggerFactory.getLogger(PushDbUtils.class);
-                    logger.debug("Failed to create \"context2push_registration\" table in configdb. Another thread created it in the meantime.", x);
-                } finally {
-                    Databases.closeSQLStuff(stmt);
-                }
-            }
-
             stmt = con.prepareStatement("INSERT INTO context2push_registration (cid) VALUES (?)");
             stmt.setInt(1, contextId);
             try {
@@ -381,7 +365,6 @@ public class PushDbUtils {
             service.backWritable(con);
         }
     }
-
 
     // ----------------------------------------------------------------------------------------------------------------------------
 
