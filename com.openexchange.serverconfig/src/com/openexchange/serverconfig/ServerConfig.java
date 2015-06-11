@@ -122,7 +122,7 @@ public interface ServerConfig {
     /**
      * Get the product name
      *
-     * @return null or the product name
+     * @return the product name
      */
     String getProductName();
 
