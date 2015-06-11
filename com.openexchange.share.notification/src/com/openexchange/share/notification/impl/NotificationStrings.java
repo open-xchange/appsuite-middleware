@@ -249,5 +249,8 @@ public class NotificationStrings implements LocalizableStrings {
     /** The $product Team*/
     public static final String PWRC_THE_TEAM = "The %1$s Team";
 
+    // An error occurred for user 'unknown'
+    public static final String UNKNOWN_USER_NAME = "unknown";
+
 }
 

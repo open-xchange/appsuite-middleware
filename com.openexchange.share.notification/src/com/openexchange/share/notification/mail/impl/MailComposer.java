@@ -108,7 +108,6 @@ import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;
-import com.openexchange.share.notification.impl.ShareNotifyExceptionCodes;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -169,9 +168,6 @@ public class MailComposer {
         int contextId = notification.getContextID();
         ServerConfig serverConfig = getServerConfigService().getServerConfig(notification.getRequestContext().getHostname(), userId, contextId);
         String productName = serverConfig.getProductName();
-        if (Strings.isEmpty(productName)) {
-            throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userId, contextId);
-        }
 
         // Styling
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
@@ -296,9 +292,6 @@ public class MailComposer {
         int contextId = notification.getContextID();
         ServerConfig serverConfig = getServerConfigService().getServerConfig(notification.getRequestContext().getHostname(), userId, contextId);
         String productName = serverConfig.getProductName();
-        if (Strings.isEmpty(productName)) {
-            throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userId, contextId);
-        }
 
         // Styling
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
@@ -379,9 +372,6 @@ public class MailComposer {
         int contextId = notification.getContextID();
         ServerConfig serverConfig = getServerConfigService().getServerConfig(notification.getRequestContext().getHostname(), userId, contextId);
         String productName = serverConfig.getProductName();
-        if (Strings.isEmpty(productName)) {
-            throw ShareNotifyExceptionCodes.INVALID_PRODUCT_NAME.create(userId, contextId);
-        }
 
         // Styling
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();

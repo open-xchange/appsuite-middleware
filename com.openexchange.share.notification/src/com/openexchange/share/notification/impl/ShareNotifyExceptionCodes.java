@@ -49,7 +49,8 @@
 
 package com.openexchange.share.notification.impl;
 
-import static com.openexchange.share.notification.impl.ShareNotifyExceptionMessages.*;
+import static com.openexchange.share.notification.impl.ShareNotifyExceptionMessages.INVALID_MAIL_ADDRESS_MSG;
+import static com.openexchange.share.notification.impl.ShareNotifyExceptionMessages.MISSING_MAIL_ADDRESS_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -64,28 +65,36 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.8.0
  */
 public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
-    
-    /** An unexpected error occurred: %1$s */
-    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", null, Category.CATEGORY_ERROR, 1),
-    
-    /** Missing email address for user %1$s in context %2$s */
-    MISSING_MAIL_ADDRESS("Missing email address for user \"%1$s\" in context \"%2$s\"", null, Category.CATEGORY_ERROR, 2),
-    
-    /** \"%1$s\" is not a valid email address. */
+
+    /**
+     * An unexpected error occurred: %1$s
+     * Parameters:
+     * <ol>
+     *  <li>root cause (message)</li>
+     *  <li>recipients name/email address</li>
+     * </ol>
+     */
+    UNEXPECTED_ERROR("An unexpected error occurred: %1$s", ShareNotifyExceptionMessages.UNEXPECTED_ERROR_MSG, Category.CATEGORY_ERROR, 1),
+
+    /**
+     * Missing email address for user %1$s (%2$s) in context %3$s
+     * Parameters:
+     * <ol>
+     *  <li>user name</li>
+     *  <li>user id</li>
+     *  <li>context id</li>
+     * </ol>
+     */
+    MISSING_MAIL_ADDRESS("Missing email address for user \"%1$s\" (%2$s) in context \"%3$s\"", MISSING_MAIL_ADDRESS_MSG, Category.CATEGORY_ERROR, 2),
+
+    /**
+     * \"%1$s\" is not a valid email address.
+     */
     INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 3),
-    
-    /** The product name is missing for user %1$s in context %2$s. */
-    INVALID_PRODUCT_NAME("The product name is missing for user %1$s in context %2$s.", null, Category.CATEGORY_ERROR, 4),
-    
-    /** "The share mail config is missing or malformed for user %1$s in context %2$s." */
-    INVALID_SHARE_MAIL_CONFIG("The share mail config is missing or malformed for user %1$s in context %2$s.", null, Category.CATEGORY_ERROR, 5),
-    
-    /** "The configured mail footer image is missing or malformed: %1$s." */
-    INVALID_FOOTER_IMAGE("The configured mail footer image is missing or malformed: %1$s.", null, Category.CATEGORY_ERROR, 6),
-    
+
     ;
 
-    private static final String PREFIX = "SHR_NOT";
+    static final String PREFIX = "SHR_NOT";
 
     private final Category category;
     private final int number;

@@ -60,4 +60,9 @@ import com.openexchange.i18n.LocalizableStrings;
 public class ShareNotifyExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_MAIL_ADDRESS_MSG = "\"%1$s\" is not a valid email address.";
+
+    public static final String MISSING_MAIL_ADDRESS_MSG = "No notification mail could be sent to user \"%1$s\". We don't know his email address.";
+
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred, we were unable to send an email to \"%2$s\".";
+
 }
