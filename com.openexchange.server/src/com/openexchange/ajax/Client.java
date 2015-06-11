@@ -47,40 +47,76 @@
  *
  */
 
-package com.openexchange.mobilepush;
+package com.openexchange.ajax;
 
 /**
- * {@link Constants} - Constants for the Mobile Push module.
+ * {@link Client} - An enumeration for known clients accessing the AJAX HTTP-API.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class Constants {
+public enum Client {
 
     /**
-     * Initializes a new {@link Constants}.
+     * The client for OX6 UI: <code>"com.openexchange.ox.gui.dhtml"</code>
      */
-    private Constants() {
-        super();
+    OX6_UI("com.openexchange.ox.gui.dhtml"),
+    /**
+     * The client for App Suite UI: <code>"open-xchange-appsuite"</code>
+     */
+    APPSUITE_UI("open-xchange-appsuite"),
+    /**
+     * The client for Mobile App: <code>"open-xchange-mobileapp"</code>
+     */
+    MOBILE_APP("open-xchange-mobileapp"),
+    /**
+     * The client for USM/EAS: <code>"USM-EAS"</code>
+     */
+    USM_EAS("USM-EAS"),
+    /**
+     * The client for USM/JSON (OLOX): <code>"USM-JSON"</code>
+     */
+    USM_JSON("USM-JSON"),
+    /**
+     * The client for Outlook OXtender2 AddIn: <code>"OpenXchange.HTTPClient.OXAddIn"</code>
+     */
+    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn"),
+    /**
+     * The client for OX Notifier: <code>"OpenXchange.HTTPClient.OXNotifier"</code>
+     */
+    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier"),
+    /**
+     * The client for Outlook Update 1: <code>"com.open-xchange.updater.olox1"</code>
+     */
+    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1"),
+    /**
+     * The client for Outlook Update 2: <code>"com.open-xchange.updater.olox2"</code>
+     */
+    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2"),
+
+    ;
+
+    private final String clientId;
+
+    /**
+     * Initializes a new {@link Client}.
+     */
+    private Client(String clientId) {
+        this.clientId = clientId;
     }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
     /**
-     * The client identifier for the mobile application: <code>"open-xchange-mobileapp"</code>
+     * Gets the client identifier
+     *
+     * @return The client identifier
      */
-    public static final String CLIENT_ID = com.openexchange.ajax.Client.MOBILE_APP.getClientId();
+    public String getClientId() {
+        return clientId;
+    }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
-    /**
-     * The frequency for a session toucher.
-     */
-    public static final long SESSION_TOUCHER_FREQUENCY = 6L * 60L * 1000L; // 6 minutes
-
-    /**
-     * The life time for a session toucher.
-     */
-    public static final long SESSION_TOUCHER_LIFETIME = 8L * 60L * 60L * 1000L; // 8 hours
+    @Override
+    public String toString() {
+        return getClientId();
+    }
 
 }
