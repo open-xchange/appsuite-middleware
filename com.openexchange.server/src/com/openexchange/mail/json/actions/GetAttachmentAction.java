@@ -192,7 +192,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         return performPUT(req, bodyObject);
     }
 
-    private AJAXRequestResult performGET(final MailRequest req) throws OXException {
+    /**
+     * Performs GET request.
+     *
+     * @param req The mail request
+     * @return The result
+     * @throws OXException If something fails
+     */
+    public AJAXRequestResult performGET(final MailRequest req) throws OXException {
         try {
             // Read in parameters
             final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
