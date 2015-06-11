@@ -387,8 +387,8 @@ public final class MailMessageParser {
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
         if (isMultipart(lcct)) {
-            if (lcct.startsWith("multipart/signed")) {
-                MailPart handledSMIME = checkSMIME(mailPart, contentType);
+            if (lcct.equals("multipart/signed")) {
+                MailPart handledSMIME = checkSMIME(mailPart, lcct, contentType);
                 if (null != handledSMIME) {
                     parseMailContent(handledSMIME, handler, prefix, partCount);
                     return;
@@ -530,17 +530,23 @@ public final class MailMessageParser {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
                 if (isInline) {
-                    if (null != mailPart.getFileName()) {
-                        contentType.setParameter("realfilename", mailPart.getFileName());
-                    }
-                    try {
+                    if (null == mailPart.getFileName()) {
                         if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
                             stop = true;
                             return;
                         }
-                    } finally {
-                        contentType.removeParameter("realfilename");
+                    } else {
+                        contentType.setParameter("realfilename", mailPart.getFileName());
+                        try {
+                            if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
+                                stop = true;
+                                return;
+                            }
+                        } finally {
+                            contentType.removeParameter("realfilename");
+                        }
                     }
+
                 } else {
                     if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
                         stop = true;
@@ -868,7 +874,7 @@ public final class MailMessageParser {
                 return;
             }
         } else {
-            MailPart handledSMIME = checkSMIME(mailPart, contentType);
+            MailPart handledSMIME = checkSMIME(mailPart, lcct, contentType);
             if (null != handledSMIME) {
                 parseMailContent(handledSMIME, handler, prefix, partCount);
                 return;
@@ -885,7 +891,7 @@ public final class MailMessageParser {
         }
     }
 
-    private MailPart checkSMIME(MailPart mailPart, ContentType contentType) throws IOException, OXException {
+    private MailPart checkSMIME(MailPart mailPart, String lcct, ContentType contentType) throws IOException, OXException {
         if (!(mailPart instanceof MimeRawSource)) {
             return null;
         }
@@ -893,9 +899,9 @@ public final class MailMessageParser {
         // Check for "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data"
         SMIMESigned smimeSigned = null;
         try {
-            if (contentType.isBaseType("multipart/signed")) {
+            if ("multipart/signed".equals(lcct)) {
                 smimeSigned = new SMIMESigned((MimeMultipart) ((MimeRawSource) mailPart).getPart().getContent());
-            } else if (isSigned(contentType)) {
+            } else if (isSigned(lcct, contentType)) {
                 smimeSigned = new SMIMESigned(((MimeRawSource) mailPart).getPart());
             }
         } catch (MessagingException e) {
@@ -1209,8 +1215,8 @@ public final class MailMessageParser {
         return builder.toString();
     }
 
-    private static boolean isSigned(ContentType ct) {
-        return ct.isBaseType("application/pkcs7-mime") && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
+    private static boolean isSigned(String lcct, ContentType ct) {
+        return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
     }
 
 }
