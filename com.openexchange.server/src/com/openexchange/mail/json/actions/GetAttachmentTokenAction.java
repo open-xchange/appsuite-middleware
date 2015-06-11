@@ -124,7 +124,7 @@ public final class GetAttachmentTokenAction extends AbstractMailAction {
             boolean oneTime;
             {
                 String tmp = req.getParameter("oneTime");
-                oneTime = null == tmp ? true : Boolean.parseBoolean(tmp.trim());
+                oneTime = null == tmp ? false : Boolean.parseBoolean(tmp.trim());
             }
 
             boolean checkIp;
