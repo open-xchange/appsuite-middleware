@@ -732,7 +732,7 @@ public final class SessionUtility {
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     private static boolean isChangeable(Session session, HttpServletRequest req) {
-        return (isChangeableClient(detectClientId(session, req)) || isChangeableUserAgent(req.getHeader(USER_AGENT)));
+        return (isChangeableClient(detectClientId(session, req))) || (isChangeableUserAgent(req.getHeader(USER_AGENT)));
     }
 
     private static String detectClientId(Session session, HttpServletRequest req) {
@@ -743,7 +743,7 @@ public final class SessionUtility {
         return null == session ? null : session.getClient();
     }
 
-    private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));
+    private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(Client.MOBILE_APP.getClientId())));
 
     private static boolean isChangeableClient(String client) {
         return (null != client) && CHANGEABLE_CLIENTS.contains(client);
