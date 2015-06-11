@@ -172,6 +172,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.serverName = builder.serverName;
         this.serverPort = builder.serverPort;
         this.httpSessionID = builder.httpSessionID;
+        this.tranzient = builder.tranzient;
     }
 
     /**
