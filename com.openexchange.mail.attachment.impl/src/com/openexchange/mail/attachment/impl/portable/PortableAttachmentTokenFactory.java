@@ -70,7 +70,7 @@ public class PortableAttachmentTokenFactory extends AbstractCustomPortableFactor
 
     @Override
     public Portable create() {
-        return new PortableCheckTokenExistence();
+        return new PortableAttachmentToken();
     }
 
     @Override
