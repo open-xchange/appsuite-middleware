@@ -102,7 +102,7 @@ public class DBMigrationExecutor implements Runnable {
     public void run() {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
             if (false == needsUpdate(scheduledExecution)) {
-                LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
+                LOG.info("No unrun liquibase changesets detected OR an error occurred while evaluating possible changesets! Skipping migration {}.", scheduledExecution.getMigration());
                 scheduledExecution.setDone(null);
                 notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
                 continue;
@@ -231,6 +231,9 @@ public class DBMigrationExecutor implements Runnable {
                 releaseLocks = false;
                 return null != unrunChangeSets && 0 < unrunChangeSets.size();
             }
+        } catch (liquibase.exception.ValidationFailedException e) {
+            LOG.error("MD5Sum validation failed. No more ChangeSets will be executed!", e);
+            return false;
         } catch (Exception e) {
             LOG.warn("Error determining if liquibase update is required, assuming yes.", e);
         } finally {
