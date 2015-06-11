@@ -135,6 +135,9 @@ public class DBMigrationExecutor implements Runnable {
                     LOG.info("Running migrations of changelog {}", fileLocation);
                     liquibase.update(LIQUIBASE_NO_DEFINED_CONTEXT);
                 }
+            } catch (liquibase.exception.ValidationFailedException e) {
+                exception = e;
+                LOG.error("MD5Sum validation failed. No more ChangeSets will be executed!", e);
             } catch (liquibase.exception.LiquibaseException e) {
                 exception = e;
                 LOG.error("", e);
