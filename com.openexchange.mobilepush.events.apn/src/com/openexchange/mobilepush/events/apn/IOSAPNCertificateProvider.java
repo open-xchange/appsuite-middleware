@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,63 +50,17 @@
 package com.openexchange.mobilepush.events.apn;
 
 /**
- * {@link APNAccess}
+ * {@link IOSAPNCertificateProvider}
  *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class APNAccess {
-
-    private final String password;
-    private final Object keystore;
-    private final boolean production;
+public interface IOSAPNCertificateProvider {
 
     /**
-     * Initializes a new {@link APNAccess}.
+     * Gets the APN access containing the push certificate.
      *
-     * @param keystore A keystore containing the private key and the certificate signed by Apple. <p/>
-     *                 The following formats can be used:
-     *                 <ul>
-     *                 <li><code>java.io.File</code></li>
-     *                 <li><code>java.io.InputStream</code></li>
-     *                 <li><code>byte[]</code></li>
-     *                 <li><code>java.security.KeyStore</code></li>
-     *                 <li><code>java.lang.String</code> for a file path</li>
-     *                 </ul>
-     * @param password The keystore's password.
-     * @param production <code>true</code> to use Apple's production servers, <code>false</code> to use the sandbox servers
+     * @return The APN access
      */
-    public APNAccess(Object keystore, String password, boolean production) {
-        super();
-        this.keystore = keystore;
-        this.password = password;
-        this.production = production;
-    }
-
-    /**
-     * Gets the password
-     *
-     * @return The password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Gets the keystore
-     *
-     * @return The keystore
-     */
-    public Object getKeystore() {
-        return keystore;
-    }
-
-    /**
-     * Gets the production
-     *
-     * @return The production
-     */
-    public boolean isProduction() {
-        return production;
-    }
+    APNAccess getAccess();
 
 }

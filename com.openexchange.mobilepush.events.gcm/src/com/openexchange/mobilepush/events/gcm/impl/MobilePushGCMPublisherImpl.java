@@ -59,15 +59,17 @@ import com.google.android.gcm.Message;
 import com.google.android.gcm.MulticastResult;
 import com.google.android.gcm.Result;
 import com.google.android.gcm.Sender;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
+import com.openexchange.mobilepush.events.gcm.GCMKeyProvider;
 import com.openexchange.mobilepush.events.gcm.osgi.Services;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.events.storage.Subscription;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link MobilePushGCMPublisherImpl}
@@ -266,8 +268,14 @@ public class MobilePushGCMPublisherImpl implements MobilePushPublisher {
      * @throws OXException
      */
     private static Sender getSender() throws OXException {
-        ConfigurationService configService = Services.getService(ConfigurationService.class, true);
-        String gcmKey = configService.getProperty("com.openxchange.mobilepush.events.gcm.key");
-        return new Sender(gcmKey);
+        GCMKeyProvider keyProvider = Services.getOptionalService(GCMKeyProvider.class);
+        if (null == keyProvider) {
+            throw ServiceExceptionCode.absentService(GCMKeyProvider.class);
+        }
+        String key = keyProvider.getKey();
+        if (Strings.isEmpty(key)) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("com.openxchange.mobilepush.events.gcm.key");
+        }
+        return new Sender(keyProvider.getKey());
     }
 }

@@ -8,6 +8,7 @@ Bundle-Activator: com.openexchange.mobilepush.events.apn.osgi.MobilePushEventsAP
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: 
  com.openexchange.config,
+ com.openexchange.configuration,
  com.openexchange.exception,
  com.openexchange.java,
  com.openexchange.mobilepush,
@@ -26,3 +27,4 @@ Import-Package:
  org.slf4j
 Bundle-ActivationPolicy: lazy
 Require-Bundle: com.openexchange.mobilepush.events.storage
+Export-Package: com.openexchange.mobilepush.events.apn
