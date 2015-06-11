@@ -59,6 +59,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-2553
+    ox_add_property com.openexchange.smtp.sendPartial false $PFILE
 fi
 
 %clean
