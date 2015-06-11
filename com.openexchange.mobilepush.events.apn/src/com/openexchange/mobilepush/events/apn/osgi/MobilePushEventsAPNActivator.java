@@ -64,6 +64,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.apn.APNAccess;
+import com.openexchange.mobilepush.events.apn.IOSAPNCertificateProvider;
 import com.openexchange.mobilepush.events.apn.impl.MobilePushAPNPublisherImpl;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -99,17 +100,26 @@ public class MobilePushEventsAPNActivator extends HousekeepingActivator {
             final String configuredKey = configService.getProperty("com.openxchange.mobilepush.events.apn.ios.keystore");
             if (false == Strings.isEmpty(configuredKey)) {
                 final APNAccess access = createAccess(resourceName, password, production);
-                /*
-                 * register publisher
-                 */
-                getService(MobilePushEventService.class).registerPushPublisher(new MobilePushAPNPublisherImpl(access));
+                if(access != null) {
+                    registerService(IOSAPNCertificateProvider.class, new IOSAPNCertificateProvider() {
 
-                MobilePushAPNPublisherImpl publisher = new MobilePushAPNPublisherImpl(access);
-
-                String feedbackQueryInterval = configService.getProperty(
-                    "com.openxchange.mobilepush.events.apn.ios.feedbackQueryInterval", (String)null);
-                setupFeedbackQueries(publisher, feedbackQueryInterval);
+                        @Override
+                        public APNAccess getAccess() {
+                            return access;
+                        }
+                    }, 1);
+                }
             }
+            /*
+             * register publisher
+             */
+            getService(MobilePushEventService.class).registerPushPublisher(new MobilePushAPNPublisherImpl());
+
+            MobilePushAPNPublisherImpl publisher = new MobilePushAPNPublisherImpl();
+
+            String feedbackQueryInterval = configService.getProperty(
+                "com.openxchange.mobilepush.events.apn.ios.feedbackQueryInterval", (String)null);
+            setupFeedbackQueries(publisher, feedbackQueryInterval);
         }
     }
 

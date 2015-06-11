@@ -64,14 +64,17 @@ import javapns.notification.PayloadPerDevice;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
 import javapns.notification.PushedNotifications;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilepush.events.MailPushUtility;
 import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
 import com.openexchange.mobilepush.events.apn.APNAccess;
+import com.openexchange.mobilepush.events.apn.IOSAPNCertificateProvider;
 import com.openexchange.mobilepush.events.apn.osgi.Services;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.events.storage.Subscription;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link MobilePushAPNPublisherImpl}
@@ -91,18 +94,11 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
 
     private static final int MAX_PAYLOAD_SIZE = 256;
 
-    private final APNAccess apnAccess;
-
     /**
      * Initializes a new {@link MobilePushAPNPublisherImpl}.
      */
-    public MobilePushAPNPublisherImpl(APNAccess apnAccess) {
+    public MobilePushAPNPublisherImpl() {
         super();
-        this.apnAccess = apnAccess;
-    }
-
-    private APNAccess getAccess() throws OXException {
-        return apnAccess;
     }
 
     @Override
@@ -274,5 +270,17 @@ public class MobilePushAPNPublisherImpl implements MobilePushPublisher {
             LOG.warn("Unsufficient device information to remove subscriptions for: {}", device);
         }
         return false;
+    }
+
+    protected APNAccess getAccess() throws OXException {
+        IOSAPNCertificateProvider certificateProvider = Services.getOptionalService(IOSAPNCertificateProvider.class);
+        if (null == certificateProvider) {
+            throw ServiceExceptionCode.absentService(IOSAPNCertificateProvider.class);
+        }
+        APNAccess access = certificateProvider.getAccess();
+        if (null == access) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No APN access for service " + SERVICE_ID + " available.");
+        }
+        return access;
     }
 }
