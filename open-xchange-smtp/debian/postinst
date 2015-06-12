@@ -36,6 +36,9 @@ postFix() {
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-2553
+    ox_add_property com.openexchange.smtp.sendPartial false $PFILE
 }
 
 case "$1" in

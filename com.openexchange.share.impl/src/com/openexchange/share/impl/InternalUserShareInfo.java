@@ -65,14 +65,14 @@ import com.openexchange.share.recipient.RecipientType;
  * @since v7.8.0
  */
 public class InternalUserShareInfo implements ShareInfo {
-    
+
     private final int contextID;
     private final User user;
     private final Share share;
 
     /**
      * Initializes a new {@link InternalUserShareInfo}.
-     * 
+     *
      * @param contextID The context identifier
      * @param user The user
      * @param share The share
@@ -95,52 +95,57 @@ public class InternalUserShareInfo implements ShareInfo {
          * use special guest info for internal user
          */
         return new GuestInfo() {
-            
+
             @Override
             public boolean isPasswordSet() {
                 return true;
             }
-            
+
             @Override
             public RecipientType getRecipientType() {
                 return RecipientType.USER;
             }
-            
+
             @Override
             public String getPassword() throws OXException {
                 return null;
             }
-            
+
             @Override
             public Locale getLocale() {
                 return null;
             }
-            
+
             @Override
             public int getGuestID() {
                 return user.getId();
             }
-            
+
             @Override
             public String getEmailAddress() {
                 return user.getMail();
             }
-            
+
+            @Override
+            public String getDisplayName() {
+                return user.getDisplayName();
+            }
+
             @Override
             public int getCreatedBy() {
                 return 0;
             }
-            
+
             @Override
             public int getContextID() {
                 return contextID;
             }
-            
+
             @Override
             public String getBaseToken() throws OXException {
                 return null;
             }
-            
+
             @Override
             public AuthenticationMode getAuthentication() {
                 return null;

@@ -3245,9 +3245,9 @@ msgid "Invalid OAuth account specified."
 msgstr ""
 
 #.
-#. * Invite E-Mails
+#. * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
+#. * The placeholders mean $givenname $surname.
 #.
-#. * $givenname $surname
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.notification/src/com/openexchange/notification/NotificationStrings.java:67
 msgid "%1$s %2$s"
 msgstr ""
@@ -3355,33 +3355,8 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#. Account not found.
+#. You reached the max. number of 100 possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:63
-msgid "Account not found"
-msgstr ""
-
-#. Another process already revoked the secret for a client
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:66
-msgid "Another process already revoked the secret of your client"
-msgstr ""
-
-#. '%1$s' is not a valid redirect URI.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:69
-msgid "'%1$s' is not a valid redirect URI."
-msgstr ""
-
-#. The client '%1$s' could not be enabled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:72
-msgid "The client '%1$s' could not be enabled."
-msgstr ""
-
-#. The client '%1$s' could not be disabled.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:75
-msgid "The client '%1$s' could not be disabled."
-msgstr ""
-
-#. You reached the max. number of %3$d possible grants for 3rd party applications. Please revoke access for the ones you don't longer need.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider/src/com/openexchange/oauth/provider/exceptions/OAuthProviderExceptionMessages.java:78
 msgid ""
 "You reached the max. number of %3$d possible grants for 3rd party "
 "applications. Please revoke access for the ones you don't longer need."
@@ -8003,9 +7978,24 @@ msgstr ""
 msgid "The %1$s Team"
 msgstr ""
 
+#. An error occurred for user 'unknown'
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:253
+msgid "unknown"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/ShareNotifyExceptionMessages.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
 msgid "\"%1$s\" is not a valid email address."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/ShareNotifyExceptionMessages.java:64
+msgid ""
+"No notification mail could be sent to user \"%1$s\". We don't know his email "
+"address."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/ShareNotifyExceptionMessages.java:66
+msgid "An error occurred, we were unable to send an email to \"%2$s\"."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:63

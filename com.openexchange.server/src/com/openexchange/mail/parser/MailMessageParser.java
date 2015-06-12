@@ -64,6 +64,7 @@ import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import net.fortuna.ical4j.model.Property;
 import net.freeutils.tnef.Attachment;
@@ -78,6 +79,9 @@ import net.freeutils.tnef.mime.ContactHandler;
 import net.freeutils.tnef.mime.RawDataSource;
 import net.freeutils.tnef.mime.ReadReceiptHandler;
 import net.freeutils.tnef.mime.TNEFMime;
+import org.bouncycastle.cms.CMSException;
+import org.bouncycastle.mail.smime.SMIMEException;
+import org.bouncycastle.mail.smime.SMIMESigned;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
@@ -97,6 +101,7 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
@@ -382,6 +387,13 @@ public final class MailMessageParser {
          *     || disposition.equalsIgnoreCase(Part.INLINE)) && mailPart.getFileName() == null);
          */
         if (isMultipart(lcct)) {
+            if (lcct.equals("multipart/signed")) {
+                MailPart handledSMIME = checkSMIME(mailPart, lcct, contentType);
+                if (null != handledSMIME) {
+                    parseMailContent(handledSMIME, handler, prefix, partCount);
+                    return;
+                }
+            }
             try {
                 final int count = mailPart.getEnclosedCount();
                 if (count == -1) {
@@ -518,17 +530,23 @@ public final class MailMessageParser {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
                 if (isInline) {
-                    if (null != mailPart.getFileName()) {
-                        contentType.setParameter("realfilename", mailPart.getFileName());
-                    }
-                    try {
+                    if (null == mailPart.getFileName()) {
                         if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
                             stop = true;
                             return;
                         }
-                    } finally {
-                        contentType.removeParameter("realfilename");
+                    } else {
+                        contentType.setParameter("realfilename", mailPart.getFileName());
+                        try {
+                            if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
+                                stop = true;
+                                return;
+                            }
+                        } finally {
+                            contentType.removeParameter("realfilename");
+                        }
                     }
+
                 } else {
                     if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
                         stop = true;
@@ -856,6 +874,13 @@ public final class MailMessageParser {
                 return;
             }
         } else {
+            MailPart handledSMIME = checkSMIME(mailPart, lcct, contentType);
+            if (null != handledSMIME) {
+                parseMailContent(handledSMIME, handler, prefix, partCount);
+                return;
+            }
+
+            // As last resort
             if (!mailPart.containsSequenceId()) {
                 mailPart.setSequenceId(getSequenceId(prefix, partCount));
             }
@@ -864,6 +889,30 @@ public final class MailMessageParser {
                 return;
             }
         }
+    }
+
+    private MailPart checkSMIME(MailPart mailPart, String lcct, ContentType contentType) throws IOException, OXException {
+        if (!(mailPart instanceof MimeRawSource)) {
+            return null;
+        }
+
+        // Check for "application/pkcs7-mime; name=smime.p7m; smime-type=signed-data"
+        SMIMESigned smimeSigned = null;
+        try {
+            if ("multipart/signed".equals(lcct)) {
+                smimeSigned = new SMIMESigned((MimeMultipart) ((MimeRawSource) mailPart).getPart().getContent());
+            } else if (isSigned(lcct, contentType)) {
+                smimeSigned = new SMIMESigned(((MimeRawSource) mailPart).getPart());
+            }
+        } catch (MessagingException e) {
+            LOG.warn("Failed to handle S/MIME message", e);
+        } catch (CMSException e) {
+            LOG.warn("Failed to handle S/MIME message", e);
+        } catch (SMIMEException e) {
+            LOG.warn("Failed to handle S/MIME message", e);
+        }
+
+        return smimeSigned == null ? null : MimeMessageConverter.convertPart(smimeSigned.getContent());
     }
 
     private void parseEnvelope(final MailMessage mail, final MailMessageHandler handler) throws OXException {
@@ -1127,4 +1176,9 @@ public final class MailMessageParser {
         }
         return false;
     }
+
+    private static boolean isSigned(String lcct, ContentType ct) {
+        return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
+    }
+
 }

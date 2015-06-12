@@ -154,7 +154,7 @@ import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -2081,7 +2081,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
                 token.setAccessInfo(mailInterface.getAccountID(), session);
                 token.setAttachmentInfo(folderPath, uid, sequenceId);
-                AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(true), session);
+                AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
+                service.putToken(token.setOneTime(true), session);
                 final JSONObject attachmentObject = new JSONObject();
                 attachmentObject.put("id", token.getId());
                 attachmentObject.put("jsessionid", token.getJSessionId());

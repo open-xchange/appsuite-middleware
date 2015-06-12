@@ -47,112 +47,40 @@
  *
  */
 
-package com.openexchange.serverconfig;
+package com.openexchange.notification;
 
 
 /**
- * {@link ShareMailConfig} - Represents the share mail config params that are set via our as-config approach and available as part of the 
- * {@link ServerConfig}.
+ * Defines common variable names to be used in mail notification templates.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareMailConfig {
+public class CommonNotificationVariables {
 
-    private String buttoncolor;
-    private String buttonBackgroundColor;
-    private String buttonBorderColor;
-    private String footerText;
-    private String footerImage;
-    
     /**
-     * Gets the buttoncolor
-     *
-     * @return The buttoncolor
+     * Variable <code>footer_text</code>
      */
-    public String getButtonColor() {
-        return buttoncolor;
-    }
-    
+    public static final String FOOTER_TEXT = "footer_text";
     /**
-     * Sets the buttoncolor
-     *
-     * @param buttoncolor The buttoncolor to set
+     * Variable <code>footer_image</code>
      */
-    public void setButtoncolor(String buttoncolor) {
-        this.buttoncolor = buttoncolor;
-    }
-    
+    public static final String FOOTER_IMAGE = "footer_image";
     /**
-     * Gets the buttonBackgroundColor
-     *
-     * @return The buttonBackgroundColor
+     * Variable <code>footer_image_content_type</code>
      */
-    public String getButtonBackgroundColor() {
-        return buttonBackgroundColor;
-    }
-    
+    public static final String FOOTER_IMAGE_CONTENT_TYPE = "footer_image_content_type";
     /**
-     * Sets the buttonBackgroundColor
-     *
-     * @param buttonBackgroundColor The buttonBackgroundColor to set
+     * Variable <code>button_border_color</code>
      */
-    public void setButtonBackgroundColor(String buttonBackgroundColor) {
-        this.buttonBackgroundColor = buttonBackgroundColor;
-    }
-    
+    public static final String BUTTON_BORDER_COLOR = "button_border_color";
     /**
-     * Gets the buttonBorderColor
-     *
-     * @return The buttonBorderColor
+     * Variable <code>button_background_color</code>
      */
-    public String getButtonBorderColor() {
-        return buttonBorderColor;
-    }
-    
+    public static final String BUTTON_BACKGROUND_COLOR = "button_background_color";
     /**
-     * Sets the buttonBorderColor
-     *
-     * @param buttonBorderColor The buttonBorderColor to set
+     * Variable <code>button_color</code>
      */
-    public void setButtonBorderColor(String buttonBorderColor) {
-        this.buttonBorderColor = buttonBorderColor;
-    }
-    
-    /**
-     * Gets the footerText
-     *
-     * @return The footerText
-     */
-    public String getFooterText() {
-        return footerText;
-    }
-    
-    /**
-     * Sets the footerText
-     *
-     * @param footerText The footerText to set
-     */
-    public void setFooterText(String footerText) {
-        this.footerText = footerText;
-    }
-    
-    /**
-     * Gets the footer image
-     *
-     * @return The footerImage
-     */
-    public String getFooterImage() {
-        return footerImage;
-    }
-    
-    /**
-     * Sets the footer image
-     *
-     * @param footerImage The footerImage to set
-     */
-    public void setFooterImage(String footerImagePath) {
-        this.footerImage = footerImagePath;
-    }
-    
+    public static final String BUTTON_COLOR = "button_color";
+
 }

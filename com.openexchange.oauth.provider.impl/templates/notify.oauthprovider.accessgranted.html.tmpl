@@ -1,53 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
-    <meta charset="UTF-8"></meta>
-    <style type="text/css">
-
-    .content {
-        white-space: normal;
-        color: black;
-        font-family: OpenSans, Arial, Helvetica, sans-serif;
-        font-size: 12pt;
-        cursor: default;
-    }
-
-    .link {
-      <#if button_color?has_content>
-        color: ${button_color};
-      <#else>
-        color: #ffffff;
-      </#if>
-
-      <#if button_background_color?has_content>
-        background-color: ${button_background_color};
-      <#else>
-        background-color: #3c73aa;
-      </#if>
-
-      <#if button_border_color?has_content>
-        border-color: ${button_border_color};
-      <#else>
-        border-color: #356697;
-      </#if>
-
-      padding: 5px 10px;
-      font-size: 12px;
-      line-height: 1.5;
-      border-radius: 3px;
-
-      text-align: center;
-      text-decoration: none;
-      vertical-align: middle;
-    }
-
-    #signature img.logo {
-      display: inline;
-      float: right;
-    }
-
-  </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+  <meta charset="UTF-8"></meta>
+  <#include "notify.common.style.html.tmpl">
 </head>
 <body class="content">
   <#escape x as x?html>
@@ -55,21 +11,9 @@
     <p>${appConnected}</p>
     <p>${revokeAccess}</p>
     <#-- view item_type button -->
-    <p><a class="link" href="${settingsURL}"><span>${gotoSettings}</span></a></p>
-
-     <#if footer_text?has_content || footer_image?has_content>
-      <hr />
-        <div id="signature">
-          <p id="signature_text">
-            <#if footer_image_content_type?has_content && footer_image?has_content>
-              <img class="logo" id="signature_image" src="data:${footer_image_content_type};base64,${footer_image}">
-            </#if>
-            <#if footer_text?has_content>
-              ${footer_text}
-            </#if>
-          </p>
-        </div>
-      </#if>
+    <p><a class="btn" href="${settingsURL}"><span>${gotoSettings}</span></a></p>
   </#escape>
+
+  <#include "notify.common.footer.html.tmpl">
 </body>
 </html>

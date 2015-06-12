@@ -115,17 +115,25 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
      * @return The message or <code>null</code>, if nothing was provided
      */
     String getMessage();
-    
+
     /**
      * Get the context id of the guest user;
      * @return
      */
     public int getGuestContextID();
-    
+
     /**
      * Get the id of the guest user
      * @return
      */
     public int getGuestID();
+
+    /**
+     * Gets the causedGuestCreation flag to indicate if a new guest was created for this share and the notification needs to be phrased differently.
+     *
+     * @return true if a new guest was created, else false
+     */
+    boolean getCausedGuestCreation();
+
 
 }

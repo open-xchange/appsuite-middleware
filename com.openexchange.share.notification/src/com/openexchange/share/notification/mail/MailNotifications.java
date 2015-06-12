@@ -56,12 +56,12 @@ import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.AbstractNotificationBuilder;
+import com.openexchange.share.notification.DefaultPasswordResetConfirmNotification;
 import com.openexchange.share.notification.DefaultShareCreatedNotification;
 import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.notification.mail.impl.PasswordResetConfirmMailNotification;
 
 /**
  * {@link MailNotifications}
@@ -113,12 +113,14 @@ public class MailNotifications {
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkNotNull(shareToken, "shareToken");
             checkNotNull(confirm, "config");
+            checkGreaterZero(guestID, "guestID");
 
-            PasswordResetConfirmMailNotification notification = new PasswordResetConfirmMailNotification(Transport.MAIL);
+            DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<>(Transport.MAIL);
             notification.apply(this);
             notification.setToken(shareToken);
             notification.setConfirm(confirm);
             notification.setAccount(account);
+            notification.setGuestID(guestID);
 
             return notification;
         }
@@ -137,6 +139,8 @@ public class MailNotifications {
         private String message;
 
         private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
+
+        private boolean causedGuestCreation;
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
@@ -218,6 +222,17 @@ public class MailNotifications {
             return this;
         }
 
+        /**
+         * Set the causedGuestCreation flag to indicate if a new guest was created for this share and the notification needs to be phrased differently.
+         *
+         * @param causedGuestCreation the flag
+         */
+        public ShareCreatedBuilder setCausedGuestCreation(boolean causedGuestCreation) {
+            this.causedGuestCreation = causedGuestCreation;
+            return this;
+        }
+
+
         @Override
         protected ShareCreatedNotification<InternetAddress> doBuild() {
             checkNotNull(session, "session");
@@ -237,6 +252,7 @@ public class MailNotifications {
             notification.setPassword(password);
             notification.setTargets(targets);
             notification.setMessage(message);
+            notification.setCausedGuestCreation(causedGuestCreation);
             return notification;
         }
 

@@ -790,6 +790,9 @@ public final class InternalList {
         // Add vCardId column if missing
         list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdTask());
 
+        // Add vCardId column for del table if missing
+        list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdToDelTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

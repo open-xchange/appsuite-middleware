@@ -68,76 +68,76 @@ public interface ServerConfig {
     /**
      * Get the whole config object as map, might contain more entries than available via documented methods as the object is built
      * dynamically.
-     *  
+     *
      * @return The whole config object as map
      */
     Map<String, Object> asMap();
-    
+
     /**
      * Get the set of {@link Capability}s available for the {@link User} you requested the {@link ServerConfig} for
      * @return the set of {@link Capability}s
      */
     Set<Capability> getCapabilities();
-    
+
     /**
      * Check if the server is forced to assume https connections
      * @return true if the server is forced to assume https connections, else false
      */
     boolean isForceHttps();
-    
+
     /**
      * Get the hosts configuration
      * @return An array of hosts
      */
     String[] getHosts();
-    
+
     /**
      * Get a list of known languages as key -> value pairs e.g. "en_GB" -> "English (UK)"
-     * 
+     *
      * @return The list of languages
      */
     List<SimpleEntry<String, String>> getLanguages();
-    
+
     /**
      * Get the server version
-     * 
+     *
      * @return the server version
      */
     String getServerVersion();
-    
+
     /**
      * Get the server build date
-     * 
+     *
      * @return the server build date
      */
     String getServerBuildDate();
-    
+
     /**
      * Get the ui version
-     * 
+     *
      * @return the ui version
      */
     String getUIVersion();
-    
+
     /**
      * Get the product name
-     * 
-     * @return null or the product name
+     *
+     * @return the product name
      */
     String getProductName();
-    
+
     /**
      * Get a filtered config object as map. Not all ServerConfig entries are needed for the client. {@link ClientServerConfigFilter}s can
      * be registered to influence the filtering process.
-     *  
+     *
      * @return The filtered config object as map
      */
     Map<String, Object> forClient();
 
     /**
-     * Get the configuration for share mails
-     * 
-     * @return null if the config for share mails can't be read, the read config otherwise
+     * Get the style configuration for notification mails
+     *
+     * @return The configuration
      */
-    ShareMailConfig getShareMailConfig();
+    NotificationMailConfig getNotificationMailConfig();
 }

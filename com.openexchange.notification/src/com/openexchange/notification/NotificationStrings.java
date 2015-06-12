@@ -61,9 +61,9 @@ import com.openexchange.i18n.LocalizableStrings;
 public class NotificationStrings implements LocalizableStrings {
 
     /*
-     * Invite E-Mails
+     * The display of a users given and sur name name in e.g. notification mails (Hello John Doe, ...).
+     * The placeholders mean $givenname $surname.
      */
-    /** $givenname $surname */
     public static final String USER_NAME = "%1$s %2$s";
 
 }

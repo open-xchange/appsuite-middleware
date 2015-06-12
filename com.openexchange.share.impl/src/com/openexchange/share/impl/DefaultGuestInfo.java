@@ -118,6 +118,11 @@ public class DefaultGuestInfo implements GuestInfo {
     }
 
     @Override
+    public String getDisplayName() {
+        return guestUser.getDisplayName();
+    }
+
+    @Override
     public String getPassword() throws OXException {
         if (AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication()) {
             String cryptedPassword = guestUser.getUserPassword();

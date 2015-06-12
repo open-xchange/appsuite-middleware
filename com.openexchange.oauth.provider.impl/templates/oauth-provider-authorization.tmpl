@@ -29,6 +29,7 @@
           <input name="csrf_token" type="hidden" value="${csrfToken}">
           <input name="response_type" type="hidden" value="code">
           <input name="session" type="hidden" value="${session}">
+          <input name="language" type="hidden" value="${language}">
 
           <button name="access_denied" type="submit" value="true">${denyLabel?html}</button>
           <button name="access_denied" type="submit" value="false">${allowLabel?html}</button>

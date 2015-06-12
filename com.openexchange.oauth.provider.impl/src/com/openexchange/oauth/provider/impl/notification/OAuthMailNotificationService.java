@@ -72,8 +72,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
@@ -86,13 +84,13 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.notification.FullNameBuilder;
+import com.openexchange.notification.TemplateHelper;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.serverconfig.ShareMailConfig;
 import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
@@ -148,18 +146,7 @@ public class OAuthMailNotificationService {
         vars.put("settingsURL", getSettingsUrl(request));
 
         // style substitutions
-        ShareMailConfig mailConfig = serverConfig.getShareMailConfig(); // TODO: separate OAuth section
-        vars.put("button_color", mailConfig.getButtonColor());
-        vars.put("button_background_color", mailConfig.getButtonBackgroundColor());
-        vars.put("button_border_color", mailConfig.getButtonBorderColor());
-        String footerImageName = mailConfig.getFooterImage();
-        if (!Strings.isEmpty(footerImageName)) {
-            Pair<String, String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
-            vars.put("footer_image_content_type", footerImagePair.getFirst());
-            vars.put("footer_image", footerImagePair.getSecond());
-        }
-        vars.put("footer_text", mailConfig.getFooterText());
-
+        TemplateHelper.injectNotificationMailConfig(vars, serverConfig.getNotificationMailConfig(), templateService);
         MimeMessage mail = prepareEnvelope(subject, new InternetAddress(user.getMail(), userName));
         mail.setHeader("Auto-Submitted", "auto-generated");
         mail.setContent(prepareContent(templateService, "notify.oauthprovider.accessgranted.txt.tmpl", vars, "notify.oauthprovider.accessgranted.html.tmpl", vars));

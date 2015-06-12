@@ -81,7 +81,6 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.java.util.Pair;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
@@ -92,7 +91,11 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.notification.FullNameBuilder;
+import com.openexchange.notification.TemplateHelper;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.serverconfig.NotificationMailConfig;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareExceptionCodes;
@@ -102,6 +105,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
 import com.openexchange.share.notification.LinkProvider;
+import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.templating.OXTemplate;
@@ -116,16 +120,6 @@ import com.openexchange.user.UserService;
  * @since v7.8.0
  */
 public class MailComposer {
-
-
-    //css
-    private static final String BUTTON_COLOR = "button_color";
-    private static final String BUTTON_BACKGROUNDCOLOR = "button_background_color";
-    private static final String BUTTON_BORDERCOLOR = "button_border_color";
-    private static final String FOOTER_IMAGECONTENTTYPE = "footer_image_content_type";
-    private static final String FOOTER_IMAGE = "footer_image";
-    private static final String FOOTER_TEXT = "footer_text";
-
 
     // shareCreated
     private static final String SUBJECT = "subject";
@@ -154,8 +148,7 @@ public class MailComposer {
         super();
         this.services = services;
     }
-
-    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmMailNotification notification) throws OXException, MessagingException, UnsupportedEncodingException {
+    public ComposedMailMessage buildPasswordResetConfirmMail(PasswordResetConfirmNotification<InternetAddress> notification) throws OXException, MessagingException, UnsupportedEncodingException {
         Translator translator = getTranslator(notification.getLocale());
         String subject = translator.translate(NotificationStrings.PWRC_SUBJECT);
         Map<String, Object> vars = preparePasswordResetConfirmVars(notification, translator);
@@ -165,12 +158,20 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getContextID());
     }
 
-    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmMailNotification notification, Translator translator) throws OXException {
+    private Map<String, Object> preparePasswordResetConfirmVars(PasswordResetConfirmNotification<InternetAddress> notification, Translator translator) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
         LinkProvider linkProvider = notification.getLinkProvider();
         String confirmLink = linkProvider.getPasswordResetConfirmUrl(notification.getConfirm());
-        String productName = notification.getProductName();
         String email = notification.getAccount();
+
+        int userId = notification.getGuestID();
+        int contextId = notification.getContextID();
+        ServerConfig serverConfig = getServerConfigService().getServerConfig(notification.getRequestContext().getHostname(), userId, contextId);
+        String productName = serverConfig.getProductName();
+
+        // Styling
+        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
+        TemplateHelper.injectNotificationMailConfig(vars, mailConfig, getTemplateService());
 
         vars.put(PWRC_GREETING, translator.translate(NotificationStrings.PWRC_GREETING));
         vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
@@ -182,16 +183,6 @@ public class MailComposer {
         vars.put(PWRC_AUTOMATED_MAIL, translator.translate(NotificationStrings.PWRC_AUTOMATED_MAIL));
         vars.put(PWRC_THANKS, translator.translate(NotificationStrings.PWRC_THANKS));
         vars.put(PWRC_THE_TEAM, String.format(translator.translate(NotificationStrings.PWRC_THE_TEAM), productName));
-        vars.put(BUTTON_COLOR, notification.getButtonColor());
-        vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
-        vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
-        String footerImageName = notification.getFooterImage();
-        if (!Strings.isEmpty(footerImageName)) {
-            Pair<String, String> footerImagePair = getTemplateService().encodeTemplateImage(footerImageName);
-            vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
-            vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
-        }
-        vars.put(FOOTER_TEXT, notification.getFooterText());
 
         return vars;
     }
@@ -204,7 +195,7 @@ public class MailComposer {
      * @throws UnsupportedEncodingException
      * @throws MessagingException
      */
-    public ComposedMailMessage buildShareCreatedMail(ShareCreatedMailNotification notification) throws OXException, UnsupportedEncodingException, MessagingException {
+    public ComposedMailMessage buildShareCreatedMail(ShareCreatedNotification<InternetAddress> notification) throws OXException, UnsupportedEncodingException, MessagingException {
         User user = getUserService().getUser(notification.getSession().getUserId(), notification.getSession().getContextId());
         Map<String, Object> vars = prepareShareCreatedVars(notification, user);
         String subject = (String) vars.get(SUBJECT);
@@ -221,7 +212,7 @@ public class MailComposer {
         return new ContentAwareComposedMailMessage(mail, notification.getSession(), notification.getSession().getContextId());
     }
 
-    public ComposedMailMessage buildInternalShareCreatedMail(ShareCreatedMailNotification notification) throws OXException, UnsupportedEncodingException, MessagingException {
+    public ComposedMailMessage buildInternalShareCreatedMail(ShareCreatedNotification<InternetAddress> notification) throws OXException, UnsupportedEncodingException, MessagingException {
         User user = getUserService().getUser(notification.getSession().getUserId(), notification.getSession().getContextId());
         Map<String, Object> vars = prepareInternalShareCreatedVars(notification, user);
         String subject = (String) vars.get(SUBJECT);
@@ -284,7 +275,7 @@ public class MailComposer {
      * @return A mapping from template keywords to actual textual values
      * @throws OXException
      */
-    private Map<String, Object> prepareShareCreatedVars(ShareCreatedMailNotification notification, User user) throws OXException {
+    private Map<String, Object> prepareShareCreatedVars(ShareCreatedNotification<InternetAddress> notification, User user) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
         TemplateService templateService = getTemplateService();
         User guest = getUserService().getUser(notification.getGuestID(), notification.getGuestContextID());
@@ -297,18 +288,14 @@ public class MailComposer {
         String fullName = FullNameBuilder.buildFullName(user, translator);
         boolean causedGuestCreation = notification.getCausedGuestCreation();
 
-        String productName = notification.getProductName();
+        int userId = notification.getSession().getUserId();
+        int contextId = notification.getContextID();
+        ServerConfig serverConfig = getServerConfigService().getServerConfig(notification.getRequestContext().getHostname(), userId, contextId);
+        String productName = serverConfig.getProductName();
 
-        vars.put(BUTTON_COLOR, notification.getButtonColor());
-        vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
-        vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
-        String footerImageName = notification.getFooterImage();
-        if(!Strings.isEmpty(footerImageName)) {
-            Pair<String,String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
-            vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
-            vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
-        }
-        vars.put(FOOTER_TEXT, notification.getFooterText());
+        // Styling
+        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
+        TemplateHelper.injectNotificationMailConfig(vars, mailConfig, templateService);
 
         ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
         Map<ShareTarget, TargetProxy> proxyMap = new HashMap<>(shareTargets.size());
@@ -368,7 +355,7 @@ public class MailComposer {
         return vars;
     }
 
-    private Map<String, Object> prepareInternalShareCreatedVars(ShareCreatedMailNotification notification, User user) throws OXException {
+    private Map<String, Object> prepareInternalShareCreatedVars(ShareCreatedNotification<InternetAddress> notification, User user) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
         TemplateService templateService = getTemplateService();
         User guest = getUserService().getUser(notification.getGuestID(), notification.getGuestContextID());
@@ -381,20 +368,16 @@ public class MailComposer {
         String fullName = FullNameBuilder.buildFullName(user, translator);
         boolean causedGuestCreation = notification.getCausedGuestCreation();
 
-        String productName = notification.getProductName();
+        int userId = notification.getSession().getUserId();
+        int contextId = notification.getContextID();
+        ServerConfig serverConfig = getServerConfigService().getServerConfig(notification.getRequestContext().getHostname(), userId, contextId);
+        String productName = serverConfig.getProductName();
 
-        vars.put(BUTTON_COLOR, notification.getButtonColor());
-        vars.put(BUTTON_BACKGROUNDCOLOR, notification.getButtonBackgroundColor());
-        vars.put(BUTTON_BORDERCOLOR, notification.getButtonBorderColor());
-        String footerImageName = notification.getFooterImage();
-        if (!Strings.isEmpty(footerImageName)) {
-            Pair<String, String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
-            vars.put(FOOTER_IMAGECONTENTTYPE, footerImagePair.getFirst());
-            vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
-        }
-        vars.put(FOOTER_TEXT, notification.getFooterText());
+        // Styling
+        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
+        TemplateHelper.injectNotificationMailConfig(vars, mailConfig, templateService);
 
-        ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+        ModuleSupport moduleSupport = getModuleSupport();
         Map<ShareTarget, TargetProxy> proxyMap = new HashMap<>(shareTargets.size());
         Set<TargetProxyType> targetTypes = new HashSet<>(shareTargets.size());
         for (ShareTarget target : shareTargets) {
@@ -675,6 +658,10 @@ public class MailComposer {
 
     private ConfigurationService getConfigService() throws OXException {
         return requireService(ConfigurationService.class, services);
+    }
+
+    private ServerConfigService getServerConfigService() throws OXException {
+        return requireService(ServerConfigService.class, services);
     }
 
     private ModuleSupport getModuleSupport() throws OXException {

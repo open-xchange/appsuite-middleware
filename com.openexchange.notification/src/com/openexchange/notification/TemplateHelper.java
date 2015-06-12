@@ -47,100 +47,55 @@
  *
  */
 
-package com.openexchange.share.notification.mail;
+package com.openexchange.notification;
+
+import static com.openexchange.notification.CommonNotificationVariables.*;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
+import com.openexchange.serverconfig.NotificationMailConfig;
+import com.openexchange.templating.TemplateService;
 
 
 /**
- * {@link ShareMailAware}
+ * {@link TemplateHelper}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareMailAware {
-    
-    /**
-     * Gets the productName
-     *
-     * @return The productName
-     */
-    public String getProductName();
-    
-    /**
-     * Sets the productName
-     *
-     * @param productName The productName to set
-     */
-    public void setProductName(String productName);
-    
-    /**
-     * Gets the buttoncolor
-     *
-     * @return The buttoncolor
-     */
-    public String getButtonColor();
-    
-    /**
-     * Sets the buttoncolor
-     *
-     * @param buttoncolor The buttoncolor to set
-     */
-    public void setButtonColor(String buttoncolor);
-    
-    /**
-     * Gets the buttonBackgroundColor
-     *
-     * @return The buttonBackgroundColor
-     */
-    public String getButtonBackgroundColor();
-    
-    /**
-     * Sets the buttonBackgroundColor
-     *
-     * @param buttonBackgroundColor The buttonBackgroundColor to set
-     */
-    public void setButtonBackgroundColor(String buttonBackgroundColor);
-    
-    /**
-     * Gets the buttonBorderColor
-     *
-     * @return The buttonBorderColor
-     */
-    public String getButtonBorderColor();
-    
-    /**
-     * Sets the buttonBorderColor
-     *
-     * @param buttonBorderColor The buttonBorderColor to set
-     */
-    public void setButtonBorderColor(String buttonBorderColor);
-    
-    /**
-     * Gets the footerText
-     *
-     * @return The footerText
-     */
-    public String getFooterText();
-    
-    /**
-     * Sets the footerText
-     *
-     * @param footerText The footerText to set
-     */
-    public void setFooterText(String footerText);
-    
-    /**
-     * Gets the footerImage path
-     *
-     * @return The footerImage
-     */
-    public String getFooterImage();
-    
-    /**
-     * Sets the footerImage path
-     *
-     * @param footerImage The footerImage path to set
-     */
-    public void setFooterImage(String footerImagePath);
+public class TemplateHelper {
 
-    
+    private static final Logger LOG = LoggerFactory.getLogger(TemplateHelper.class);
+
+    /**
+     * Injects the variable substitutions for button styles and the footer into the passed
+     * map.
+     *
+     * @param vars The map containing the variables for template processing
+     * @param mailConfig The mail configuration that defines the substitutions to be applied
+     * @param templateService The template service to load and encode a potential footer image.
+     */
+    public static void injectNotificationMailConfig(Map<String, Object> vars, NotificationMailConfig mailConfig, TemplateService templateService) {
+        vars.put(BUTTON_COLOR, mailConfig.getButtonTextColor());
+        vars.put(BUTTON_BACKGROUND_COLOR, mailConfig.getButtonBackgroundColor());
+        vars.put(BUTTON_BORDER_COLOR, mailConfig.getButtonBorderColor());
+        String footerImageName = mailConfig.getFooterImage();
+        if (Strings.isNotEmpty(footerImageName)) {
+            try {
+                Pair<String, String> footerImagePair = templateService.encodeTemplateImage(footerImageName);
+                vars.put(FOOTER_IMAGE_CONTENT_TYPE, footerImagePair.getFirst());
+                vars.put(FOOTER_IMAGE, footerImagePair.getSecond());
+            } catch (OXException e) {
+                LOG.error("Configured notification mail file '{}' could not be loaded. Please check your 'as-config.yml', the footer image will be ignored for now.", footerImageName, e);
+            }
+        }
+        String footerText = mailConfig.getFooterText();
+        if (Strings.isNotEmpty(footerText)) {
+            vars.put(FOOTER_TEXT, footerText);
+        }
+    }
+
 }

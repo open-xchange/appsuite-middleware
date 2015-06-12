@@ -1,3 +1,7 @@
+* 2015-06-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21064: Support display of S/MIME signed messages
+
 * 2015-06-09 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38079: Series breaks if the start of a series does not match the pattern.
@@ -13,10 +17,6 @@
  - Fix for bug 38603: Added option "com.openexchange.smtp.sendPartial" to allow partial send in case one or more (but not all) recipients are considered to be invalid on message
                       transport
  - Fix for bug 38604: Aligned .yml configuration file to current T-Online page layout for contact subscription
-
-* 2015-06-03 - thorben.betten@open-xchange.com
-
- - Fix for bug 38592: Ensure existence of table 'configdb.context2push_registration'
 
 * 2015-06-01 - thorben.betten@open-xchange.com
 

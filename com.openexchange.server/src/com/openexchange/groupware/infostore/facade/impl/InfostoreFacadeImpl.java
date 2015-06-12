@@ -2087,7 +2087,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(folderId, session.getContext(), user, session.getUserPermissionBits());
         if (!(isperm.canReadAllObjects()) && !(isperm.canReadOwnObjects())) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
-        } else if (isperm.canReadOwnObjects()) {
+        } else if (!isperm.canReadAllObjects() && isperm.canReadOwnObjects()) {
             onlyOwn = true;
         }
         return db.countDocuments(folderId, onlyOwn, session.getContext(), user);

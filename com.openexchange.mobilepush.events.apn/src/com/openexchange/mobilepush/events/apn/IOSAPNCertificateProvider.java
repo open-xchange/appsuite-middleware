@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,20 @@
  *
  */
 
-package com.openexchange.share.notification.mail;
-
-import java.util.Map;
-import com.openexchange.serverconfig.ClientServerConfigFilter;
+package com.openexchange.mobilepush.events.apn;
 
 /**
- * {@link SharingMailNotificationClientServerConfigFilter} - Filter out sharing mail related contents from the server config. 
- * 
- * The parts that will be filtered correspond to the following brand specific yaml entries from <code>as-config.yml</code> 
- * <pre>
- * somebrand:
- *     sharing:
-           mails:
- * </pre>
- * 
- * The sharing node will be removed completely if it's empty after filtering out the mails subnode.
+ * {@link IOSAPNCertificateProvider}
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since v7.8.0
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
-public class SharingMailNotificationClientServerConfigFilter implements ClientServerConfigFilter {
+public interface IOSAPNCertificateProvider {
 
-    private final static String SHARING = "sharing";
-    private final static String MAILS= "mails";
-    
-    @Override
-    public void apply(Map<String, Object> brandConfig) {
-        if (brandConfig != null) {
-
-            Object sharingObject = brandConfig.get(SHARING);
-            if (sharingObject != null && sharingObject instanceof Map) {
-                Map<String, Object> sharingConfig = (Map<String, Object>) sharingObject;
-                //delete mails subnode
-                sharingConfig.remove(MAILS);
-
-                //check if sharing node is left empty and delete
-                if (sharingConfig.isEmpty()) {
-                    brandConfig.remove(SHARING);
-                }
-            }
-        }
-    }
+    /**
+     * Gets the APN access containing the push certificate.
+     *
+     * @return The APN access
+     */
+    APNAccess getAccess();
 
 }

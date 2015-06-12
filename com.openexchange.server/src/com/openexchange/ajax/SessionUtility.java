@@ -256,31 +256,23 @@ public final class SessionUtility {
      * @throws OXException If public session cannot be created
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
-        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if (cookies == null) {
-            // No cookies available - Try to look-up by parameter
-            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
-            if (null != publicSessionId) {
-                return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth || isChangeable(session, req));
-            }
-        } else {
-            Cookie cookie = cookies.get(getPublicSessionCookieName(req));
-            if (null != cookie) {
-                return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
-            }
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        Cookie cookie = cookies.get(getPublicSessionCookieName(req));
+        if (null != cookie) {
+            return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
+        }
 
-            // No such cookie
-            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
-            if (null != publicSessionId) {
-                return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth || isChangeable(session, req));
-            }
+        // No such cookie
+        String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+        if (null != publicSessionId) {
+            return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth);
+        }
 
-            // No such "public_session" parameter
-            if (mayUseFallbackSession && isChangeable(session, req)) {
-                for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
-                    if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                        return handlePublicSessionIdentifier(entry.getValue().getValue(), req, session, sessiondService, false);
-                    }
+        // No such "public_session" parameter
+        if (mayUseFallbackSession && isChangeable(req)) {
+            for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                    return handlePublicSessionIdentifier(entry.getValue().getValue(), req, session, sessiondService, false);
                 }
             }
         }
@@ -700,7 +692,7 @@ public final class SessionUtility {
                 }
 
                 // Check for special User-Agent to allow look-up by remembered cookie name
-                if (isChangeable(null, req)) {
+                if (isChangeable(req)) {
                     tmp.setLength(0);
                     cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
                     if (null != cookie) {
@@ -731,22 +723,8 @@ public final class SessionUtility {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
-    private static boolean isChangeable(Session session, HttpServletRequest req) {
-        return (isChangeableClient(detectClientId(session, req)) || isChangeableUserAgent(req.getHeader(USER_AGENT)));
-    }
-
-    private static String detectClientId(Session session, HttpServletRequest req) {
-        String clientByRequest = null == req ? null : req.getParameter("client");
-        if (null != clientByRequest) {
-            return clientByRequest;
-        }
-        return null == session ? null : session.getClient();
-    }
-
-    private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));
-
-    private static boolean isChangeableClient(String client) {
-        return (null != client) && CHANGEABLE_CLIENTS.contains(client);
+    private static boolean isChangeable(HttpServletRequest req) {
+        return isChangeableUserAgent(req.getHeader(USER_AGENT));
     }
 
     private static boolean isChangeableUserAgent(String userAgent) {

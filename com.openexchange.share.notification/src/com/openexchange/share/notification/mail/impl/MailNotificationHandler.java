@@ -51,6 +51,7 @@ package com.openexchange.share.notification.mail.impl;
 
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -59,6 +60,8 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.notification.PasswordResetConfirmNotification;
+import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -119,7 +122,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     private void sendShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        ShareCreatedMailNotification casted = (ShareCreatedMailNotification) notification;
+        ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = composer.buildShareCreatedMail(casted);
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
@@ -129,7 +132,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     private void sendInternalShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        ShareCreatedMailNotification casted = (ShareCreatedMailNotification) notification;
+        ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = composer.buildInternalShareCreatedMail(casted);
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
@@ -139,7 +142,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     private void sendPasswordResetConfirm(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        PasswordResetConfirmMailNotification casted = (PasswordResetConfirmMailNotification) notification;
+        PasswordResetConfirmNotification<InternetAddress> casted = (PasswordResetConfirmNotification<InternetAddress>) notification;
         ComposedMailMessage mail = composer.buildPasswordResetConfirmMail(casted);
         sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
     }

@@ -64,6 +64,7 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
     private String token;
     private String confirm;
     private String account;
+    private int guestId;
 
     public DefaultPasswordResetConfirmNotification(Transport transport) {
         super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
@@ -84,6 +85,11 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
         return account;
     }
 
+    @Override
+    public int getGuestID() {
+        return guestId;
+    }
+
     public void setToken(String token) {
         this.token = token;
     }
@@ -94,6 +100,10 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
 
     public void setAccount(String account) {
         this.account = account;
+    }
+
+    public void setGuestID(int guestId) {
+        this.guestId = guestId;
     }
 
 }

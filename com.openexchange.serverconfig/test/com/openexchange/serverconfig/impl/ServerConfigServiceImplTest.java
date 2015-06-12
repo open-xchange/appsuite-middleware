@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
+import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.test.mock.MockUtils;
@@ -88,13 +89,13 @@ import com.openexchange.test.mock.MockUtils;
 public class ServerConfigServiceImplTest {
 
     @Mock
-    private ServiceLookup serviceLookup = null;
+    private final ServiceLookup serviceLookup = null;
 
     private List<ComputedServerConfigValueService> values = new ArrayList<>();
-    
+
     private List<ClientServerConfigFilter> configFilters = new ArrayList<>();
 
-    private ServerConfigServicesLookup serverConfigServicesLookup = new ServerConfigServicesLookup() {
+    private final ServerConfigServicesLookup serverConfigServicesLookup = new ServerConfigServicesLookup() {
 
         @Override
         public List<ComputedServerConfigValueService> getComputed() {
@@ -118,16 +119,16 @@ public class ServerConfigServiceImplTest {
     private static Map<String, Object> asConfig;
 
     private static Map<String, Object> asConfigDefaults;
-    
+
     private static Map<String, ComposedConfigProperty<String>> composedConfigPropertyMap = new HashMap<>();
-    
+
     @Mock
     private ComposedConfigProperty<String> defaultingProperty;
 
     @Mock
     private ComposedConfigProperty<String> cascadeProperty;
 
-    private ServerConfigServiceImpl serverConfigServiceImpl = new ServerConfigServiceImpl(null, null);
+    private final ServerConfigServiceImpl serverConfigServiceImpl = new ServerConfigServiceImpl(null, null);
 
     @Before
     public void setUp() throws Exception {
@@ -141,10 +142,10 @@ public class ServerConfigServiceImplTest {
         PowerMockito.when(this.serviceLookup.getService(ConfigViewFactory.class)).thenReturn(this.configViewFactory);
         PowerMockito.when(this.configViewFactory.getView(Matchers.anyInt(), Matchers.anyInt())).thenReturn(this.configView);
         PowerMockito.when(this.configView.all()).thenReturn(composedConfigPropertyMap);
-        
+
         PowerMockito.when(this.defaultingProperty.get()).thenReturn("<as-config>");
         PowerMockito.when(this.cascadeProperty.get()).thenReturn("cascadeValue");
-        
+
         composedConfigPropertyMap.put("com.openexchange.appsuite.serverConfig.pageHeaderPrefix", defaultingProperty);
         composedConfigPropertyMap.put("com.openexchange.appsuite.serverConfig.cascadeProperty", cascadeProperty);
 
@@ -160,11 +161,11 @@ public class ServerConfigServiceImplTest {
     public void setConfigValues(List<ComputedServerConfigValueService> values) {
         this.values = values;
     }
-    
+
     public List<ClientServerConfigFilter> getConfigFilters() {
         return configFilters;
     }
-    
+
     public void setConfigFilters(List<ClientServerConfigFilter> configFilters) {
         this.configFilters = configFilters;
     }
@@ -193,13 +194,13 @@ public class ServerConfigServiceImplTest {
         //values that come from config-as and are applied because the hostregex matches
         assertEquals("host.*\\.mycloud\\.net", configMap.get("hostRegex"));
         assertEquals("someRegexHostValue", configMap.get("someRegexHostKey"));
-        
+
         /* We made sure to include this configvalue in the configcascade but we wanted to explicitely fall back to the value provided after
          * the merge of as-config-defaults and as-config via the <as-config> mechanism. So this is meant more as documentation as the key
          * is already checked above for the proper value configured for host1.
          */
         assertFalse("<as-config>".equals(configMap.get("pageHeaderPrefix")));
-        
+
         //values from configCascade
         assertEquals("cascadeValue", configMap.get("Config.cascadeProperty"));
         assertEquals("cascadeValue", configMap.get("cascadeProperty"));
@@ -245,6 +246,50 @@ public class ServerConfigServiceImplTest {
     @Test
     public void testGetServerConfigServicesLookup() {
         assertNotNull(serverConfigServiceImpl.getServerConfigServicesLookup());
+    }
+
+    @Test
+    public void testDefaultNotificationMailConfiguration() throws Exception {
+        ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("nonconfiguredhost.com", -1, -1);
+        NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
+        assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
+        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
+        assertEquals("Wrong footer image name", "ox_logo_claim_blue_small.png", nmc.getFooterImage());
+        assertEquals("Wrong footer text", "", nmc.getFooterText());
+    }
+
+    @Test
+    public void testCustomNotificationMailConfiguration() throws Exception {
+        ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host3.mycloud.net", -1, -1);
+        NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
+        assertEquals("Wrong button text color", "#000000", nmc.getButtonTextColor());
+        assertEquals("Wrong button background color", "#ffffff", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button border color", "#000000", nmc.getButtonBorderColor());
+        assertEquals("Wrong footer image name", "custom_logo.png", nmc.getFooterImage());
+        assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());
+    }
+
+    @Test
+    public void testCustomNotificationMailConfigurationWithoutFooter() throws Exception {
+        ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host2.mycloud.net", -1, -1);
+        NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
+        assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
+        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
+        assertEquals("Wrong footer image name", null, nmc.getFooterImage());
+        assertEquals("Wrong footer text", null, nmc.getFooterText());
+    }
+
+    @Test
+    public void testCustomNotificationMailConfigurationWithoutFooterImage() throws Exception {
+        ServerConfig serverConfig = serverConfigServiceImpl.getServerConfig("host1.mycloud.net", -1, -1);
+        NotificationMailConfig nmc = serverConfig.getNotificationMailConfig();
+        assertEquals("Wrong button text color", "#ffffff", nmc.getButtonTextColor());
+        assertEquals("Wrong button background color", "#3c73aa", nmc.getButtonBackgroundColor());
+        assertEquals("Wrong button border color", "#356697", nmc.getButtonBorderColor());
+        assertEquals("Wrong footer image name", null, nmc.getFooterImage());
+        assertEquals("Wrong footer text", "Footer text", nmc.getFooterText());
     }
 
 }

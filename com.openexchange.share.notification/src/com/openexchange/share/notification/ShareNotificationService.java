@@ -77,15 +77,8 @@ public interface ShareNotificationService {
     }
 
     /**
-     * Notifies the recipient of a {@link ShareNotification} about the according share.
+     * Send a notification mail that requests a confirmation for a requested password reset from the user.
      *
-     * @param notification The notification
-     */
-    <T extends ShareNotification<?>> void send(T notification) throws OXException;
-    
-    /**
-     * Send a notification mail that requests a confirmation for a requested password reset from the user. 
-     * 
      * @param transport The type of {@link Transport} to use when sending notifications
      * @param guestShare The guest share
      * @param shareToken The current share token
@@ -95,7 +88,7 @@ public interface ShareNotificationService {
      * @throws OXException
      */
     void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) throws OXException;
-    
+
     /**
      * Sends notifications about one or more created shares to multiple guest user recipients.
      *

@@ -52,7 +52,7 @@ package com.openexchange.mobilepush.events.apn;
 /**
  * {@link APNAccess}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class APNAccess {
 
