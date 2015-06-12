@@ -71,7 +71,7 @@ public class MessageDispatch {
         this.stanza = stanza;
     }
 
-    public void tick() throws OXException {
+    public void tick() {
         stanza.trace("Passing stanza to handler");
         handle.process(stanza);
     }

@@ -176,7 +176,31 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
 
     /** You are no member of the GroupDispatcher: %1$s. Please join first. */
     NOT_A_MEMBER("You are no member of the GroupDispatcher: %1$s. Please join first.", CATEGORY_ERROR, 1008,
-        RealtimeExceptionMessages.NOT_A_MEMBER_MSG, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST)
+        RealtimeExceptionMessages.NOT_A_MEMBER_MSG, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
+        
+    /** The request didn't yield any response. */
+    RESULT_MISSING("The request didn't yield any response.", CATEGORY_ERROR, 1009, RealtimeExceptionMessages.RESULT_MISSING_MSG,
+        null, null),
+        
+    /** The GroupDispatcher was already disposed. */
+    GROUP_DISPOSED("The GroupDispatcher %1$s was already disposed.", CATEGORY_ERROR, 1010, RealtimeExceptionMessages.GROUP_DISPOSED_MSG,
+        null, null),
+        
+    /** The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s. */
+    STANZA_PROCESSING_FAILED("The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.", CATEGORY_ERROR, 1011, RealtimeExceptionMessages.STANZA_PROCESSING_FAILED_MSG,
+        null, null),
+
+   /** Joining the GroupDispatcher %1$s failed. */
+   JOIN_FAILED("Joining the GroupDispatcher %1$s failed.", CATEGORY_ERROR, 1012, RealtimeExceptionMessages.JOIN_FAILED_MSG,
+            null, null),
+
+   /** The GroupDispatcher failed to process the Stanza */
+   LEAVE_FAILED("Leaving the GroupDispatcher %1$s failed.", CATEGORY_ERROR, 1013, RealtimeExceptionMessages.LEAVE_FAILED_MSG,
+            null, null),
+
+   /** ResponseChannel timed out while simulating synchronous behaviour. */
+   RESPONSE_AWAIT_TIMEOUT("ResponseChannel timed out while simulating synchronous behaviour.", CATEGORY_ERROR, 1014, RealtimeExceptionMessages.RESPONSE_AWAIT_TIMEOUT_MSG,
+       null, null),
     ;
 
     private int number;

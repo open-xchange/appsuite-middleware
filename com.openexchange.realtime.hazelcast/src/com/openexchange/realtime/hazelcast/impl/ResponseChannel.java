@@ -125,7 +125,7 @@ public class ResponseChannel implements Channel {
             condition.get(id).await(timeout, unit);
             stanza = responses.get(id);
             if (stanza == null) {
-                throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Timeout while waiting for response to " + id);
+                throw RealtimeExceptionCodes.RESPONSE_AWAIT_TIMEOUT.create();
             }
 
             return stanza;

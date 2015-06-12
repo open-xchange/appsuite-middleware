@@ -138,8 +138,11 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         }
 
         if (recipients.isEmpty()) {
-            LOG.warn("Received empty map of recipients for '{}', giving up.", stanza.getTo());
-            stanza.trace("Received empty map of recipients, giving up.");
+            String logString = String.format(
+                "Received empty map of recipients when trying to send from %1$s, giving up. Resource missing for ID: %2$s."
+                , stanza.getFrom(), stanza.getTo());
+            LOG.warn(logString);
+            stanza.trace(logString);
             return Collections.emptyMap();
         }
 

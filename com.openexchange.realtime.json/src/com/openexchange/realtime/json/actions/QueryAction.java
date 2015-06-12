@@ -121,7 +121,11 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class QueryAction extends RTAction {
 
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueryAction.class);
+    private static final String CARESULT_ANSWER = "answer";
+    private static final String CARESULT_DONE = "done";
+    private static final String CARESULT_EXCEPTION = "exception";
+    
+    protected final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(QueryAction.class);
     private final ServiceLookup services;
     private final StanzaSequenceGate gate;
     private final StateManager stateManager;
@@ -176,21 +180,23 @@ public class QueryAction extends RTAction {
             sendLock.lock();
             LOG.debug("{}: Got lock", Thread.currentThread());
             final Condition handled = sendLock.newCondition();
+            
+            
+            
             if(gate.handle(stanza, stanza.getTo(), new CustomGateAction() {
 
                 @Override
                 public void handle(final Stanza stanza, ID recipient) {
                     LOG.debug("Handling stanza: {}", stanza);
                     try {
-                        customActionResults.put("answer", services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
-                    } catch (OXException e) {
-                        customActionResults.put("exception", e);
+                        customActionResults.put(CARESULT_ANSWER, services.getService(MessageDispatcher.class).sendSynchronously(stanza, request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS));
+                    } catch (RealtimeException re) {
+                        customActionResults.put(CARESULT_EXCEPTION, re);
                     } catch (Throwable t) {
                         ExceptionUtils.handleThrowable(t);
-                        LOG.error("", t);
-                        customActionResults.put("exception", new OXException(t));
+                        customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create(t));
                     }
-                    customActionResults.put("done", Boolean.TRUE);
+                    customActionResults.put(CARESULT_DONE, Boolean.TRUE);
                     try {
                         sendLock.lock();
                         handled.signal();
@@ -210,41 +216,50 @@ public class QueryAction extends RTAction {
                 }
             }
 
+            
+            
             // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
-            if (!customActionResults.containsKey("done")) {
-                if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
-                    LOG.debug("Timeout while waiting for correct sequence/handling Stanza:{}", new StanzaWriter().write(stanza));
+            if (!customActionResults.containsKey(CARESULT_DONE)) {
+                try {
+                    if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
+                        LOG.debug("Timeout while waiting for correct sequence/handling Stanza:{}", new StanzaWriter().write(stanza));
+                        customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.SEQUENCE_INVALID.create());
+                    }
+                } catch (InterruptedException e) {
+                    customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create(e));
                 }
             }
 
-            OXException exception = (OXException) customActionResults.get("exception");
-            if (exception != null) {
-                throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(exception, exception.getMessage());
-            }
-        } catch (OXException e) {
-            LOG.error("", e);
-            RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
-            throw re;
-        } catch (InterruptedException e) {
-            LOG.error("", e);
-            RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(e, e.getMessage());
-            throw re;
-        } catch (Throwable t) {
-            ExceptionUtils.handleThrowable(t);
+        }
+        catch (Throwable t) {
             LOG.error("", t);
-            RealtimeException re = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(t, t.getMessage());
-            throw re;
-        } finally {
+            throw RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create(t, t.getMessage());
+        }
+        finally {
             sendLock.unlock();
         }
 
         //Add the result Object to the response data
-        Object answer = customActionResults.get("answer");
+        Object answer = customActionResults.get(CARESULT_ANSWER);
         if (answer == null || !Stanza.class.isInstance(answer)) {
-            RealtimeException noResponseException = RealtimeExceptionCodes.STANZA_INTERNAL_SERVER_ERROR.create("Request didn't yield any response.");
-            LOG.error("", noResponseException);
-            stanza.trace(noResponseException.getMessage(), noResponseException);
-            queryActionResults.put(ERROR, exceptionToJSON(noResponseException, session));
+            Throwable cause = (Throwable) customActionResults.get(CARESULT_EXCEPTION);
+            /*
+             * If the answer contains an exception that isn't a specific RealtimeException we have to wrap it into generic server error so
+             * the client gets something that he knows to handle 
+             */
+            RealtimeException noResultException = null;
+            if(cause != null) {
+                if(!RealtimeException.class.isInstance(cause)) {
+                    noResultException = RealtimeExceptionCodes.RESULT_MISSING.create(cause);
+                } else {
+                    noResultException = RealtimeException.class.cast(cause);
+                }
+            } else {
+                noResultException = RealtimeExceptionCodes.RESULT_MISSING.create();
+            }
+            queryActionResults.put(ERROR, exceptionToJSON(noResultException, session));
+            stanza.trace(noResultException.getMessage(), noResultException);
+            LOG.error("", noResultException);
         } else {
             Stanza answerStanza = (Stanza)answer;
             //Set the recipient to the client that originally sent the request

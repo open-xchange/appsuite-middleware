@@ -200,7 +200,7 @@ public abstract class RunLoop<E> implements Runnable {
         return queue.size();
     }
 
-    protected abstract void handle(E element) throws OXException;
+    protected abstract void handle(E element);
 
     /**
      * Unblock the potentially blocked internal {@link BlockingQueue} by inserting a NoOp element.

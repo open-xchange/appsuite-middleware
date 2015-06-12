@@ -49,11 +49,13 @@
 
 package com.openexchange.realtime.group.commands;
 
+import java.util.concurrent.ExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
 import com.openexchange.realtime.group.NotMember;
@@ -76,37 +78,44 @@ public class LeaveCommand implements GroupCommand {
     private static final Logger LOG = LoggerFactory.getLogger(LeaveCommand.class);
 
     @Override
-    public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
-        ID realSender = getRealSender(stanza);
-        if(!groupDispatcher.isMember(realSender)) {
-            LOG.info("Refusing to send leave to GroupDispatcher. {} is no member of the GroupDispatcher {}.", realSender, groupDispatcher.getId());
-            doNotifyNotMember(stanza, groupDispatcher);
-            return;
-        }
-        if (isSynchronous(stanza)) { // call:// surrogate sender in from, use getOnBehalf for real sender
-            if (shouldExecuteAsynchronously(groupDispatcher)) {
-                GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
-
-                    @Override
-                    public Void call() {
-                        try {
-                            doSignOff(stanza, groupDispatcher);
-                        } catch (Throwable t) {
-                            ExceptionUtils.handleThrowable(t);
-                            LOG.error("Error invoking LeaveCommand.", t);
-                        }
-                        return null;
-                    }
-                });
-            } else {
-                doSignOff(stanza, groupDispatcher);
+    public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws RealtimeException {
+        try {
+            ID realSender = getRealSender(stanza);
+            if (!groupDispatcher.isMember(realSender)) {
+                LOG.info("Refusing to send leave to GroupDispatcher. {} is no member of the GroupDispatcher {}.", realSender, groupDispatcher.getId());
+                doNotifyNotMember(stanza, groupDispatcher);
+                return;
             }
-        } else { // real sender in from
-            groupDispatcher.leave(stanza.getFrom(), stanza);
+            if (isSynchronous(stanza)) { // call:// surrogate sender in from, use getOnBehalf for real sender
+                if (shouldExecuteAsynchronously(groupDispatcher)) {
+                    try {
+                        GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
+
+                            @Override
+                            public Void call() throws OXException {
+                                doSignOff(stanza, groupDispatcher);
+                                return null;
+                            }
+                        }).get();
+                    } catch (InterruptedException e) {
+                        throw e;
+                    } catch (ExecutionException e) {
+                        throw e.getCause();
+                    }
+                } else {
+                    doSignOff(stanza, groupDispatcher);
+                }
+            } else { // real sender in from
+                groupDispatcher.leave(stanza.getFrom(), stanza);
+            }
+        } catch(RealtimeException re) {
+            throw re;
+        } catch (Throwable t) {
+            throw RealtimeExceptionCodes.LEAVE_FAILED.create(t, stanza.getFrom().toString());
         }
     }
 
-    private void doSignOff(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
+    protected void doSignOff(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
         Stanza signOffMessage = groupDispatcher.getSignOffMessage(stanza.getOnBehalfOf());
         signOffMessage.setFrom(groupDispatcher.getId());
         signOffMessage.setTo(stanza.getFrom());

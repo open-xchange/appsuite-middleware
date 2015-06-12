@@ -49,8 +49,11 @@
 
 package com.openexchange.realtime.group.commands;
 
+import java.util.concurrent.ExecutionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.group.GroupCommand;
 import com.openexchange.realtime.group.GroupDispatcher;
 import com.openexchange.realtime.group.osgi.GroupServiceRegistry;
@@ -70,26 +73,38 @@ import com.openexchange.threadpool.ThreadPoolService;
 public class JoinCommand implements GroupCommand {
 
     @Override
-    public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws OXException {
-        if (isSynchronous(stanza)) {
-            if (shouldExecuteAsynchronously(groupDispatcher)) {
-                GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
+    public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws RealtimeException {
+        try {
+            if (isSynchronous(stanza)) {
+                if (shouldExecuteAsynchronously(groupDispatcher)) {
+                    try {
+                        GroupServiceRegistry.getInstance().getService(ThreadPoolService.class).submit(new AbstractTask<Void>() {
 
-                    @Override
-                    public Void call() throws Exception {
-                        doWelcome(stanza, groupDispatcher);
-                        return null;
+                            @Override
+                            public Void call() throws OXException {
+                                doWelcome(stanza, groupDispatcher);
+                                return null;
+                            }
+                        }).get();
+                    } catch (InterruptedException e) {
+                        throw e;
+                    } catch (ExecutionException e) {
+                        throw e.getCause();
                     }
-                });
+                } else {
+                    doWelcome(stanza, groupDispatcher);
+                }
             } else {
-                doWelcome(stanza, groupDispatcher);
+                groupDispatcher.join(stanza.getFrom(), stanza.getSelector(), stanza);
             }
-        } else {
-            groupDispatcher.join(stanza.getFrom(), stanza.getSelector(), stanza);
+        } catch (RealtimeException re) {
+            throw re;
+        } catch(Throwable t) {
+            throw RealtimeExceptionCodes.JOIN_FAILED.create(t, stanza.getFrom().toString());
         }
     }
 
-    private void doWelcome(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
+    void doWelcome(Stanza stanza, GroupDispatcher groupDispatcher) throws OXException {
         groupDispatcher.join(stanza.getOnBehalfOf(), stanza.getSelector(), stanza);
         Stanza welcomeMessage = groupDispatcher.getWelcomeMessage(stanza.getOnBehalfOf());
         welcomeMessage.setFrom(groupDispatcher.getId());
