@@ -4102,6 +4102,36 @@ msgstr ""
 msgid "You are no member of the GroupDispatcher: %1$s. Please join first."
 msgstr ""
 
+#. * The request didn't yield any response.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:98
+msgid "The request didn't yield any response."
+msgstr ""
+
+#. * The GroupDispatcher %1$s was already disposed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
+msgid "The GroupDispatcher %1$s was already disposed."
+msgstr ""
+
+#. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
+msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
+msgstr ""
+
+#. * Joining the GroupDispatcher %1$s failed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:107
+msgid "Joining the GroupDispatcher %1$s failed."
+msgstr ""
+
+#. * Leaving the GroupDispatcher %1$s failed.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:110
+msgid "Leaving the GroupDispatcher %1$s failed."
+msgstr ""
+
+#. * ResponseChannel timed out while simulating synchronous behaviour.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:113
+msgid "ResponseChannel timed out while simulating synchronous behaviour."
+msgstr ""
+
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
