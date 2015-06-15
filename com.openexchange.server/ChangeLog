@@ -1,3 +1,7 @@
+* 2015-06-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38550: Make the iOS client use the default contact folder as first collection
+
 * 2015-06-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 21064: Support display of S/MIME signed messages
