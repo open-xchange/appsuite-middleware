@@ -119,87 +119,103 @@ To use RMI as provisioning mechanism you need to link your code against the corr
 
     public class ClientProvisioningRoundtrip {
 
-        public static void main(String[] args) {
-            try {
-                // Lookup remote
-                RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://coolhosting.me:1099/" + RemoteClientManagement.RMI_NAME);
-                // All method calls require the master credentials.
-                Credentials credentials = new Credentials("oxadminmaster", "secret");
+      public static void main(String[] args) {
+        try {
+          // Lookup remote
+          RemoteClientManagement clientManagement = 
+            (RemoteClientManagement) Naming.lookup(
+              "rmi://coolhosting.me:1099/" + RemoteClientManagement.RMI_NAME);
 
-                ClientDataDto clientData = prepareClientData();
-                ClientDto client = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, credentials); // use default context group
-                System.out.println("Client '" + client.getName() + "' was successfully registered: [ID: " + client.getId() + ", secret: " + client.getSecret() + "]");
+          // All method calls require the master credentials.
+          Credentials credentials = new Credentials("oxadminmaster", "secret");
 
-                // You can disable clients temporarily. API access is then prohibited.
-                if (clientManagement.disableClient(client.getId(), credentials)) {
-                    System.out.println("Client '" + client.getName() + "' was disabled");
-                }
+          ClientDataDto clientData = prepareClientData();
+          ClientDto client = clientManagement.registerClient(
+            RemoteClientManagement.DEFAULT_GID, // use default context group
+            clientData,
+            credentials);
 
-                // Of course enabling disabled clients is also possible.
-                if (clientManagement.enableClient(client.getId(), credentials)) {
-                    System.out.println("Client '" + client.getName() + "' was enabled again");
-                }
+          System.out.println("Client '" + client.getName() + "' was successfully " +
+            "registered: [ID: " + client.getId() + ", secret: " + client.getSecret() + "]");
 
-                // You can revoke a clients secret. For security reasons all existing grants are invalidated then.
-                client = clientManagement.revokeClientSecret(client.getId(), credentials);
-                System.out.println("Client '" + client.getName() + "' was assigned a new secret: " + client.getSecret());
+          // You can disable clients temporarily. API access is then prohibited.
+          if (clientManagement.disableClient(client.getId(), credentials)) {
+            System.out.println("Client '" + client.getName() + "' was disabled");
+          }
 
-                // Of course you can update the client data. Every field set within ClientData will be overridden.
-                // Fields that are not set will not be modified. Scope and redirect URIs must always be submitted
-                // in total, no merging will be applied here.
-                clientData = new ClientDataDto();
-                clientData.setDescription("A new and fancy client description.");
-                client = clientManagement.updateClient(client.getId(), clientData, credentials);
-                System.out.println("Client '" + client.getName() + "' got a new description: " + client.getDescription());
+          // Of course enabling disabled clients is also possible.
+          if (clientManagement.enableClient(client.getId(), credentials)) {
+            System.out.println("Client '" + client.getName() + "' was enabled again");
+          }
 
-                // You can unregister clients completely and withdraw their granted accesses.
-                if (clientManagement.unregisterClient(client.getId(), credentials)) {
-                    System.out.println("Client '" + client.getName() + "' was successfully unregistered");
-                }
-            } catch (MalformedURLException | RemoteException | NotBoundException | RemoteClientManagementException | InvalidCredentialsException | FileNotFoundException e) {
-                e.printStackTrace();
-            }
+          // You can revoke a clients secret. For security reasons all existing grants
+          // are invalidated then.
+          client = clientManagement.revokeClientSecret(client.getId(), credentials);
+          System.out.println("Client '" + client.getName() + "' was assigned a new " +
+            "secret: " + client.getSecret());
+
+          // Of course you can update the client data. Every field set within ClientData
+          // will be overridden. Fields that are not set will not be modified. Scope and
+          // redirect URIs must always be submitted in total, no merging will be applied
+          // here.
+          clientData = new ClientDataDto();
+          clientData.setDescription("A new and fancy client description.");
+          client = clientManagement.updateClient(client.getId(), clientData, credentials);
+          System.out.println("Client '" + client.getName() + 
+            "' got a new description: " + client.getDescription());
+
+          // You can unregister clients completely and withdraw their granted accesses.
+          if (clientManagement.unregisterClient(client.getId(), credentials)) {
+            System.out.println("Client '" + client.getName() + 
+              "' was successfully unregistered");
+          }
+        } catch (MalformedURLException | RemoteException | NotBoundException | 
+                 RemoteClientManagementException | InvalidCredentialsException |
+                 FileNotFoundException e) {
+
+            e.printStackTrace();
+        }
+      }
+
+      private static ClientDataDto prepareClientData() throws FileNotFoundException {
+        IconDto icon = new IconDto();
+        icon.setData(loadIcon()); // the icon serialized as an array of bytes
+        icon.setMimeType("image/png");
+
+        List<String> redirectURIs = new ArrayList<>(2);
+        redirectURIs.add("http://localhost/oauth/callback"); // URI for local testing
+        redirectURIs.add("https://example.com/api/oauth/callback"); // production URI
+
+        ClientDataDto clientData = new ClientDataDto();
+        clientData.setName("Example.com");
+        clientData.setDescription("The Example.com web apps description.");
+        clientData.setIcon(icon);
+        clientData.setContactAddress("support@example.com");
+        clientData.setWebsite("http://www.example.com");
+        clientData.setDefaultScope("read_contacts write_contacts");
+        clientData.setRedirectURIs(redirectURIs);
+        return clientData;
+      }
+
+      private static byte[] loadIcon() throws FileNotFoundException {
+        byte[] iconBytes = null;
+        // TODO: change this path accordingly
+        try (FileInputStream fis = new FileInputStream("/path/to/icon.png")) {
+          byte[] buf = new byte[4096];
+          int len = fis.read(buf);
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          do {
+            baos.write(buf, 0, len);
+            len = fis.read(buf);
+          } while (len >= 0);
+
+          iconBytes = baos.toByteArray();
+        } catch (IOException e) {
+          // closing the input stream failed - ignore...
         }
 
-        private static ClientDataDto prepareClientData() throws FileNotFoundException {
-            IconDto icon = new IconDto();
-            icon.setData(loadIcon()); // the icon serialized as an array of bytes
-            icon.setMimeType("image/png");
-
-            List<String> redirectURIs = new ArrayList<>(2);
-            redirectURIs.add("http://localhost/oauth/callback"); // URI for local testing
-            redirectURIs.add("https://example.com/api/oauth/callback"); // production URI
-
-            ClientDataDto clientData = new ClientDataDto();
-            clientData.setName("Example.com");
-            clientData.setDescription("The Example.com web apps description.");
-            clientData.setIcon(icon);
-            clientData.setContactAddress("support@example.com");
-            clientData.setWebsite("http://www.example.com");
-            clientData.setDefaultScope("read_contacts write_contacts"); // read and write contacts
-            clientData.setRedirectURIs(redirectURIs);
-            return clientData;
-        }
-
-        private static byte[] loadIcon() throws FileNotFoundException {
-            byte[] iconBytes = null;
-            // TODO: change this path accordingly
-            try (FileInputStream fis = new FileInputStream("/home/admin/oauth-clients/example_com.png")) {
-                byte[] buf = new byte[4096];
-                int len = fis.read(buf);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                do {
-                    baos.write(buf, 0, len);
-                    len = fis.read(buf);
-                } while (len >= 0);
-
-                iconBytes = baos.toByteArray();
-            } catch (IOException e) {
-                // closing the input stream failed - ignore...
-            }
-
-            return iconBytes;
-        }
+        return iconBytes;
+      }
 
     }
 
