@@ -589,7 +589,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * delete contact from storage
          */
-        storage.delete(session, folderID, storedContact, lastRead);
+        storage.delete(session, folderID, objectID, lastRead);
         /*
          * broadcast event
          */
@@ -651,7 +651,7 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * delete contacts from storage
          */
-        storage.delete(session, folderID, storedContacts, lastRead);
+        storage.delete(session, folderID, objectIDs, lastRead);
         /*
          * broadcast event
          */

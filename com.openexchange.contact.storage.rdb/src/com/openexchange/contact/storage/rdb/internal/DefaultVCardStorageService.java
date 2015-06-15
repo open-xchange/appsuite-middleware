@@ -79,7 +79,7 @@ public class DefaultVCardStorageService implements VCardStorageService {
         Validate.notNull(file, "VCard InputStream might not be null!");
 
         try {
-            SaveFileAction action = new SaveFileAction(getFileStorage(contextId), file, -1, false);
+            SaveFileAction action = createFileAction(file, contextId);
             action.perform();
             String fileStorageID = action.getFileStorageID();
             return fileStorageID;
@@ -88,6 +88,11 @@ public class DefaultVCardStorageService implements VCardStorageService {
         }
         return null;
     }
+
+    protected SaveFileAction createFileAction(InputStream file, int contextId) throws OXException {
+        return new SaveFileAction(getFileStorage(contextId), file, -1, false);
+    }
+
 
     /**
      * {@inheritDoc}

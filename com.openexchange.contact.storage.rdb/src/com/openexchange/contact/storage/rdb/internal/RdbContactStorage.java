@@ -322,12 +322,16 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
      * @param storedContacts List with the contacts to remove the VCard for
      * @throws OXException
      */
-    private void deleteVCard(final int contextID, final List<Contact> storedContacts) {
+    protected void deleteVCard(final int contextID, final List<Contact> storedContacts) {
         VCardStorageService vCardStorageService = RdbServiceLookup.getOptionalService(VCardStorageService.class);
         if (vCardStorageService == null) {
             LOG.warn("VCardSotrageService absent. Unable to delete stored VCards.");
             return;
         }
+        if ((storedContacts == null) || (storedContacts.isEmpty())) {
+            return;
+        }
+
         for (Contact contact : storedContacts) {
             String vCardId = contact.getVCardId();
             if (!Strings.isEmpty(vCardId)) {
@@ -380,7 +384,6 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
              * delete contacts - per convention, don't check last modification time when clearing a folder
              */
             deletedContacts = deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
-            deleteVCard(contextID, contacts);
             /*
              * commit
              */
@@ -1076,12 +1079,20 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 maxLastModified,
                 updatedMetadata,
                 updatedFields);
+
+            SearchIterator<Contact> contacts = this.getContacts(false, session, Integer.toString(folderID), Strings.convert(currentObjectIDs), null, new ContactField[] { ContactField.OBJECT_ID, ContactField.VCARD_ID }, null, null);
             /*
              * delete records in original tables
              */
             deletedContacts += executor.delete(connection, Table.CONTACTS, contextID, folderID, currentObjectIDs, maxLastModified);
             executor.delete(connection, Table.IMAGES, contextID, Integer.MIN_VALUE, currentObjectIDs, maxLastModified);
             executor.delete(connection, Table.DISTLIST, contextID, Integer.MIN_VALUE, currentObjectIDs);
+
+            List<Contact> contactsToRemoveVCard = new ArrayList<Contact>();
+            while (contacts.hasNext()) {
+                contactsToRemoveVCard.add(contacts.next());
+            }
+            this.deleteVCard(contextID, contactsToRemoveVCard);
         }
         return deletedContacts;
     }
@@ -1402,25 +1413,5 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         } catch (SQLException e) {
             throw ContactExceptionCodes.SQL_PROBLEM.create(e);
         }
-    }
-
-    @Override
-    public void delete(Session session, String folderId, Contact contact, Date lastRead) throws OXException {
-        List<Contact> contacts = new ArrayList<Contact>();
-        contacts.add(contact);
-        this.deleteVCard(session.getContextId(), contacts);
-
-        this.delete(session, folderId, Integer.toString(contact.getObjectID()), lastRead);
-    }
-
-    @Override
-    public void delete(Session session, String folderId, List<Contact> contacts, Date lastRead) throws OXException {
-        this.deleteVCard(session.getContextId(), contacts);
-
-        List<String> contactsToDelete = new ArrayList<String>();
-        for (Contact contact : contacts) {
-            contactsToDelete.add(Integer.toString(contact.getObjectID()));
-        }
-        this.delete(session, folderId, contactsToDelete.toArray(new String[contactsToDelete.size()]), lastRead);
     }
 }

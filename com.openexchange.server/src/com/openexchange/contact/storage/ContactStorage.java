@@ -378,17 +378,6 @@ public interface ContactStorage {
     void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
 
     /**
-     * Deletes a contact <b>and the VCard<b> related to the contact.
-     *
-     * @param session the session
-     * @param folderId the ID of the parent folder
-     * @param contact the contact to delete
-     * @param lastRead the time the object was last read from the storage
-     * @throws OXException
-     */
-    void delete(Session session, String folderId, Contact contact, Date lastRead) throws OXException;
-
-    /**
      * Deletes multiple contacts.
      *
      * @param session the session
@@ -400,18 +389,7 @@ public interface ContactStorage {
     void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException;
 
     /**
-     * Deletes multiple contacts <b>including persisted VCards</b>.
-     *
-     * @param session the session
-     * @param folderId the ID of the parent folder
-     * @param contacts the {@link Contact} to remove
-     * @param lastRead the time the objects were last read from the storage
-     * @throws OXException
-     */
-    void delete(Session session, String folderId, List<Contact> contacts, Date lastRead) throws OXException;
-
-    /**
-     * Deletes all contacts in a folder <b>including the persisted VCards</b> of the given contacts.
+     * Deletes all contacts in a folder.
      *
      * @param session the session
      * @param folderId the ID of the parent folder
