@@ -7,7 +7,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .
 Bundle-SymbolicName: com.openexchange.contact.vcard.storage.impl
-Import-Package: com.openexchange.contact.vcard.storage,
+Import-Package: com.openexchange.config,
+ com.openexchange.contact.vcard.storage,
  com.openexchange.exception,
  com.openexchange.filestore,
  com.openexchange.i18n,

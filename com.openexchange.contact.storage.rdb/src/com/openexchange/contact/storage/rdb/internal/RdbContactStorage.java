@@ -1169,7 +1169,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         try {
             Contact toDelete = executor.selectSingleGuestContact(con, Table.CONTACTS, contextId, userId,
-                new ContactField[] {ContactField.OBJECT_ID});
+                new ContactField[] { ContactField.OBJECT_ID });
             if (null != toDelete) {
                 executor.deleteSingle(con, Table.CONTACTS, contextId, toDelete.getObjectID(), lastRead.getTime());
             }
@@ -1229,7 +1229,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
         QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
         try {
-            Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] {ContactField.CREATED_BY});
+            Contact toUpdate = executor.selectSingle(con, Table.CONTACTS, contextId, contactId, new ContactField[] { ContactField.CREATED_BY });
             if (null == toUpdate) {
                 throw ContactExceptionCodes.CONTACT_NOT_FOUND.create(contactId, contextId);
             }
@@ -1301,7 +1301,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
             Contact c = executor.selectSingle(connection, Table.CONTACTS, contextId, contactId,
-                new ContactField[] {ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED});
+                new ContactField[] { ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED });
             if (!c.containsInternalUserId() || userId != c.getInternalUserId()) {
                 throw ContactExceptionCodes.NO_CHANGE_PERMISSION.create(contactId, contextId);
             }
@@ -1333,4 +1333,16 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
         }
     }
 
+    @Override
+    public boolean supports(ContactField... fields) {
+        try {
+            for (ContactField contactField : fields) {
+                Mappers.CONTACT.get(contactField);
+            }
+        } catch (OXException e) {
+            LOG.debug("Storage is unable to support provided fields.", e);
+            return false;
+        }
+        return true;
+    }
 }

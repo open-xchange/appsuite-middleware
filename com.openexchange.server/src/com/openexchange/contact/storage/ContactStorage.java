@@ -439,4 +439,15 @@ public interface ContactStorage {
      * @throws OXException
      */
     SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Returns if the provided {@link ContactField}s are supported by the storage. To 'support' the given field the storage should be able to set new values for it. If at least one of the provided fields is not supported <code>false</code> will be
+     * returned.
+     *
+     * @param fields The fields to check
+     * @return <code>true</code> if all provided fields are supported, otherwise <code>false</code>
+     * @throws OXException
+     */
+    boolean supports(ContactField... fields) throws OXException;
+
 }

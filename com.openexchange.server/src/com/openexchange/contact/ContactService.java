@@ -667,7 +667,8 @@ public interface ContactService {
     boolean containsForeignObjectInFolder(Session session, String folderID) throws OXException;
 
     /**
-     * Returns if the storage is able to persist the given fields.
+     * Returns if the provided {@link ContactField}s are supported by the storage. To 'support' the given field the storage should be able to set new values for it. If at least one of the provided fields is not supported <code>false</code> will be
+     * returned.
      *
      * @param session The session
      * @param folderID The ID of the folder to check

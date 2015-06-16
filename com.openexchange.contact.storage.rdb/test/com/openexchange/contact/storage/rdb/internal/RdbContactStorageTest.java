@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,56 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.test;
+package com.openexchange.contact.storage.rdb.internal;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
-import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
-import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link UnitTests}
+ * {@link RdbContactStorageTest}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-@RunWith(Suite.class)
-@SuiteClasses({
-    DeduplicatorTest.class,
-    RdbContactStorageTest.class
-})
-public class UnitTests {
+public class RdbContactStorageTest {
 
-    /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
+    private RdbContactStorage rdbContactStorage;
+
+    @Before
+    public void setUp() throws Exception {
+        rdbContactStorage = new RdbContactStorage();
+    }
+
+    @Test
+    public void testSupports_allSupported_returnTrue() {
+        boolean supports = rdbContactStorage.supports(ContactField.SUR_NAME, ContactField.TITLE);
+        assertTrue(supports);
+    }
+
+    @Test
+    public void testSupports_providedOneSupported_returnTrue() {
+        boolean supports = rdbContactStorage.supports(ContactField.CELLULAR_TELEPHONE1);
+        assertTrue(supports);
+    }
+
+    @Test
+    public void testSupports_providedOneNotSupported_returnFalse() {
+        boolean supports = rdbContactStorage.supports(ContactField.IMAGE1_URL);
+        assertFalse(supports);
+    }
+
+    @Test
+    public void testSupports_multipleProvidedOneNotSupported_returnFlase() {
+        boolean supports = rdbContactStorage.supports(ContactField.CELLULAR_TELEPHONE1, ContactField.CITY_HOME, ContactField.USERFIELD15, ContactField.TELEPHONE_CALLBACK, ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.DEFAULT_ADDRESS, ContactField.TELEPHONE_PRIMARY);
+        assertFalse(supports);
+    }
+
+    @Test
+    public void testSupports_allFieldsProvidedThatContainNotSupportedOnes_returnFalse() {
+        boolean supports = rdbContactStorage.supports(ContactField.values());
+        assertFalse(supports);
     }
 
 }

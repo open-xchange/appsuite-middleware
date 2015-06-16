@@ -1165,8 +1165,8 @@ public class ContactServiceImpl extends DefaultContactService {
      */
     @Override
     public boolean supports(Session session, String folderID, ContactField... fields) throws OXException {
-        // TODO Auto-generated method stub
-        return false;
-    }
+        final ContactStorage storage = Tools.getStorage(session, folderID);
 
+        return storage.supports(fields);
+    }
 }
