@@ -206,7 +206,8 @@ public class WebDAVClient {
 
     public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
         try {
-            Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(propFind));
+            int executeMethod = this.httpClient.executeMethod(propFind);
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod);
             return propFind.getResponseBodyAsMultiStatus().getResponses();
         } catch (final DavException e) {
             Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());

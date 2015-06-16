@@ -110,7 +110,7 @@ public class DefaultVCardService implements VCardService {
     @Override
     public InputStream exportContact(Contact contact, InputStream originalVCard, VCardParameters parameters) throws OXException {
         VCardParameters vCardParameters = getParametersOrDefault(parameters);
-        VCard original = null != originalVCard ? parseFirstVCard(originalVCard, null) : null;
+        VCard original = null != originalVCard ? parseFirstVCard(originalVCard, vCardParameters) : null;
         VCard exportedVCard = mapper.exportContact(contact, original, vCardParameters);
         return exportVCards(Collections.singletonList(exportedVCard), vCardParameters).getClosingStream();
     }
