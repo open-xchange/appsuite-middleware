@@ -102,14 +102,14 @@ public class SortTerm {
      * @throws NullPointerException If string representation is <code>null</code>
      */
     public SortTerm(String term) {
-    super();
-    if (null == term) {
-        throw new NullPointerException("Term is null.");
-    }
-	this.term = term;
+        super();
+        if (null == term) {
+            throw new NullPointerException("Term is null.");
+        }
+        this.term = term;
     }
 
     public String toString() {
-	return term;
+        return term;
     }
 }

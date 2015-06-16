@@ -69,6 +69,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Wed Jun 10 2015 Markus Wagner <markus.wagner@open-xchange.com>
+Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Markus Wagner <markus.wagner@open-xchange.com>
 Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Markus Wagner <markus.wagner@open-xchange.com>

@@ -32,7 +32,11 @@
  - Fix for bug 38553: Live connect against IMAP server to determine whether special folders are supposed to be used for standard mail folders
                       (e.g. through advertising SPECIAL-USE flags)
 
-* 2015-08-28 - jan.bauerdick@open-xchange.com
+* 2015-05-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
+
+* 2015-05-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38260: Include distribution list entries when searching in contact module
 
