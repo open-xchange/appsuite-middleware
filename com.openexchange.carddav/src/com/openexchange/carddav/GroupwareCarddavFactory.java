@@ -93,6 +93,7 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -129,19 +130,19 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private final OXContainerConverter converter;
     private VCardService vCardService;
     private VCardStorageService vCardStorage;
+    private ServiceLookup services;
 
-	public GroupwareCarddavFactory(FolderService folders, SessionHolder sessionHolder, ConfigViewFactory configs,
-			UserService users, ContactService contactService, VCardService vCardService, VCardStorageService vCardStorage) {
+	public GroupwareCarddavFactory(ServiceLookup services, SessionHolder sessionHolder) {
 		super();
-		this.folderService = folders;
+		this.folderService = services.getService(FolderService.class);
 		this.sessionHolder = sessionHolder;
-		this.configs = configs;
-		this.userService = users;
-		this.contactService = contactService;
+		this.configs = services.getService(ConfigViewFactory.class);
+		this.userService = services.getService(UserService.class);
+		this.contactService = services.getService(ContactService.class);
 		this.converter = new OXContainerConverter((TimeZone)null, (String)null);
 		this.converter.setSkipOxCTypeAttribute(true);
-		this.vCardService = vCardService;
-		this.vCardStorage = vCardStorage;
+		this.vCardService = services.getService(VCardService.class);
+		this.services = services;
 	}
 
 	@Override
@@ -227,7 +228,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 	
 	public VCardStorageService getVCardStorageService() {
-	    return vCardStorage;
+	    return services.getOptionalService(VCardStorageService.class);
 	}
 
     public String getConfigValue(String key, String defaultValue) throws OXException {

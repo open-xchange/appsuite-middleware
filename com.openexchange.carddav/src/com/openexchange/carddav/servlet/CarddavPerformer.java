@@ -161,10 +161,7 @@ public class CarddavPerformer implements SessionHolder {
         WebdavAction put;
         WebdavAction trace;
 
-        this.factory = new GroupwareCarddavFactory(services.getService(FolderService.class), this,
-        		services.getService(ConfigViewFactory.class), services.getService(UserService.class),
-        		services.getService(ContactService.class), services.getService(VCardService.class),
-        		services.getService(VCardStorageService.class));
+        this.factory = new GroupwareCarddavFactory(services, this);
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));
