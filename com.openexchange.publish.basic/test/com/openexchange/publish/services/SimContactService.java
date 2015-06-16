@@ -442,12 +442,7 @@ public class SimContactService implements ContactService {
     }
 
     @Override
-    public void createContact(Session session, String folderId, Contact contact, String vcard) throws OXException {
-        // Nothing to do
-    }
-
-    @Override
-    public void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException {
-        // Nothing to do
+    public boolean supports(Session session, String folderID, ContactField... fields) throws OXException {
+        return true;
     }
 }

@@ -47,14 +47,13 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.vcard.storage.impl;
 
 import java.io.InputStream;
 import org.apache.commons.lang.Validate;
 import com.openexchange.contact.vcard.storage.VCardStorageExceptionCodes;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;

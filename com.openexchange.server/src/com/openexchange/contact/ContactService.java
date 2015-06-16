@@ -482,17 +482,6 @@ public interface ContactService {
     void createContact(Session session, String folderId, Contact contact) throws OXException;
 
     /**
-     * Creates a new contact in a folder and tries to persist the given VCard. The underlying ContactStorage is responsible for a successful storage of the VCard.
-     *
-     * @param session the session
-     * @param folderId the ID of the parent folder
-     * @param contact the contact to create
-     * @param vCard the VCard to persist
-     * @throws OXException
-     */
-    void createContact(Session session, String folderId, Contact contact, String vCard) throws OXException;
-
-    /**
      * Updates a contact.
      *
      * @param session the session
@@ -503,19 +492,6 @@ public interface ContactService {
      * @throws OXException
      */
     void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead) throws OXException;
-
-    /**
-     * Updates a contact and the given VCard. The underlying ContactStorage is responsible for a successful storage of the VCard.
-     *
-     * @param session the session
-     * @param folderId the ID of the parent folder
-     * @param id the object ID
-     * @param contact the contact to update
-     * @param lastRead the time the object was last read from the storage
-     * @param vCard the VCard to persist
-     * @throws OXException
-     */
-    void updateContact(Session session, String folderId, String id, Contact contact, Date lastRead, String vCard) throws OXException;
 
     /**
      * Updates a user's contact data, ignoring the folder permissions of the
@@ -690,4 +666,14 @@ public interface ContactService {
      */
     boolean containsForeignObjectInFolder(Session session, String folderID) throws OXException;
 
+    /**
+     * Returns if the storage is able to persist the given fields.
+     *
+     * @param session The session
+     * @param folderID The ID of the folder to check
+     * @param fields the contact fields that should be checked for support
+     * @return <code>true</code> if all fields are supported; <code>false</code> if at least one is not supported
+     * @throws OXException
+     */
+    boolean supports(Session session, String folderID, ContactField... fields) throws OXException;
 }

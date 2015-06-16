@@ -47,58 +47,51 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.internal;
+package com.openexchange.contact.vcard.storage.impl.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link RdbServiceLookup} - Provides access to services.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * {@link ContactVCardStorageActivator}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class RdbServiceLookup {
+public class ContactVCardStorageActivator extends HousekeepingActivator {
+
+    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactVCardStorageActivator.class);
 
     /**
-     * Initializes a new {@link DBChatServiceLookup}.
+     * Initializes a new {@link ContactVCardStorageActivator}.
      */
-    private RdbServiceLookup() {
+    public ContactVCardStorageActivator() {
         super();
     }
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
-
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
-    public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
-        return RdbServiceLookup.getService(c, false);
-    }
+    @Override
+    protected void startBundle() throws Exception {
+        try {
+            LOG.info("starting bundle: com.openexchange.contact.vcard.storage.impl");
 
-    public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        final ServiceLookup serviceLookup = ref.get();
-        final S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+            registerService(VCardStorageService.class, new DefaultVCardStorageService());
+        } catch (Exception exception) {
+            LOG.error("error starting com.openexchange.contact.vcard.storage.impl", exception);
+            throw exception;
         }
-        return service;
     }
 
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(final ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
+    @Override
+    protected void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.contact.vcard.storage.impl");
 
+        super.stopBundle();
+    }
 }

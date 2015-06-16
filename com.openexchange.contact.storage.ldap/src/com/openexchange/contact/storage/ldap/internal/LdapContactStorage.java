@@ -575,4 +575,5 @@ public class LdapContactStorage extends DefaultContactStorage {
             throw LdapExceptionCodes.INVALID_FOLDER.create(folderID);
         }
     }
+
 }
