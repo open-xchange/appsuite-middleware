@@ -59,6 +59,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import liquibase.Liquibase;
 import liquibase.changelog.ChangeSet;
+import liquibase.exception.ValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.database.migration.DBMigration;
@@ -101,10 +102,15 @@ public class DBMigrationExecutor implements Runnable {
     @Override
     public void run() {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
-            if (false == needsUpdate(scheduledExecution)) {
-                LOG.info("No unrun liquibase changesets detected OR an error occurred while evaluating possible changesets! Skipping migration {}.", scheduledExecution.getMigration());
-                scheduledExecution.setDone(null);
-                notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
+            try {
+                if (false == needsUpdate(scheduledExecution)) {
+                    LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
+                    scheduledExecution.setDone(null);
+                    notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
+                    continue;
+                }
+            } catch (ValidationFailedException validationFailedException) {
+                LOG.error("MD5Sum validation failed. No more ChangeSets from file {} will be executed!", scheduledExecution.getMigration().getFileLocation(), validationFailedException);
                 continue;
             }
             Exception exception = null;
@@ -218,8 +224,9 @@ public class DBMigrationExecutor implements Runnable {
      *
      * @param scheduledExecution The scheduled execution
      * @return <code>true</code> if unrun changesets are signaled by liquibase or if the unrun changesets can't be evaluated, <code>false</code>, otherwise
+     * @throws ValidationFailedException
      */
-    private static boolean needsUpdate(ScheduledExecution scheduledExecution) {
+    private static boolean needsUpdate(ScheduledExecution scheduledExecution) throws ValidationFailedException {
         Liquibase liquibase = null;
         boolean releaseLocks = true;
         Connection connection = null;
@@ -232,8 +239,7 @@ public class DBMigrationExecutor implements Runnable {
                 return null != unrunChangeSets && 0 < unrunChangeSets.size();
             }
         } catch (liquibase.exception.ValidationFailedException e) {
-            LOG.error("MD5Sum validation failed. No more ChangeSets will be executed!", e);
-            return false;
+            throw e;
         } catch (Exception e) {
             LOG.warn("Error determining if liquibase update is required, assuming yes.", e);
         } finally {
