@@ -86,7 +86,8 @@ public class DefaultBasicPasswordChangeService extends BasicPasswordChangeServic
         }
         User user = userService.getUser(event.getSession().getUserId(), ctx);
         UserImpl updatedUser = new UserImpl(user);
-        updatedUser.setUserPassword(event.getNewPassword());
+        String encodedPassword = getEncodedPassword(user.getPasswordMech(), event.getNewPassword());
+        updatedUser.setUserPassword(encodedPassword);
 
         userService.updateUser(updatedUser, ctx);
 
