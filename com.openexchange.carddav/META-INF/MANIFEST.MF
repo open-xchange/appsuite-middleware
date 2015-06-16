@@ -9,6 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.authentication,
  com.openexchange.config.cascade,
  com.openexchange.contact,
+ com.openexchange.contact.vcard,
+ com.openexchange.contact.vcard.storage,
  com.openexchange.exception,
  com.openexchange.folderstorage,
  com.openexchange.folderstorage.database.contentType,

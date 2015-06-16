@@ -118,15 +118,15 @@ public class ShareServlet extends HttpServlet {
                     return;
                 }
 
-                try {
-                    share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
-                } catch (OXException e) {
+                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
+                if (null == share) {
                     LOG.debug("No share found at '{}'", pathInfo);
                     String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                     return;
                 }
+
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
                 if (1 < paths.length) {
                     target = share.resolveTarget(paths[1]);

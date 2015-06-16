@@ -47,61 +47,29 @@
  *
  */
 
-package com.openexchange.carddav.osgi;
+package com.openexchange.contact.vcard.storage.impl;
 
-import org.osgi.service.http.HttpService;
-import com.openexchange.carddav.servlet.CardDAV;
-import com.openexchange.carddav.servlet.CarddavPerformer;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-import com.openexchange.webdav.directory.PathRegistration;
-import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
-public class CarddavActivator extends HousekeepingActivator {
+/**
+ *
+ * {@link UnitTests}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
+ */
+@RunWith(Suite.class)
+@SuiteClasses({
+//    DefaultVCardStorageServiceTest.class
+})
+public class UnitTests {
 
-    private volatile OSGiPropertyMixin mixin;
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class, VCardService.class, VCardStorageService.class };
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
     }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            CardDAV.setServiceLookup(this);
-            CarddavPerformer.setServices(this);
-
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
-
-            CarddavPerformer performer = CarddavPerformer.getInstance();
-            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
-            performer.setGlobalMixins(mixin);
-            this.mixin = mixin;
-
-            registerService(PathRegistration.class, new PathRegistration("carddav"));
-
-            openTrackers();
-        } catch (Exception e) {
-            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        final OSGiPropertyMixin mixin = this.mixin;
-        if (null != mixin) {
-            mixin.close();
-            this.mixin = null;
-        }
-        super.stopBundle();
-    }
-
-
 }

@@ -57,6 +57,8 @@ import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -161,7 +163,8 @@ public class CarddavPerformer implements SessionHolder {
 
         this.factory = new GroupwareCarddavFactory(services.getService(FolderService.class), this,
         		services.getService(ConfigViewFactory.class), services.getService(UserService.class),
-        		services.getService(ContactService.class));
+        		services.getService(ContactService.class), services.getService(VCardService.class),
+        		services.getService(VCardStorageService.class));
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));

@@ -67,6 +67,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -125,9 +127,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private final UserService userService;
 	private final ContactService contactService;
 	private final OXContainerConverter converter;
+    private VCardService vCardService;
+    private VCardStorageService vCardStorage;
 
 	public GroupwareCarddavFactory(FolderService folders, SessionHolder sessionHolder, ConfigViewFactory configs,
-			UserService users, ContactService contactService) {
+			UserService users, ContactService contactService, VCardService vCardService, VCardStorageService vCardStorage) {
 		super();
 		this.folderService = folders;
 		this.sessionHolder = sessionHolder;
@@ -136,6 +140,8 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		this.contactService = contactService;
 		this.converter = new OXContainerConverter((TimeZone)null, (String)null);
 		this.converter.setSkipOxCTypeAttribute(true);
+		this.vCardService = vCardService;
+		this.vCardStorage = vCardStorage;
 	}
 
 	@Override
@@ -214,6 +220,14 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 	public State getState() {
 		return stateHolder.get();
+	}
+	
+	public VCardService getVCardService() {
+	    return vCardService;
+	}
+	
+	public VCardStorageService getVCardStorageService() {
+	    return vCardStorage;
 	}
 
     public String getConfigValue(String key, String defaultValue) throws OXException {
