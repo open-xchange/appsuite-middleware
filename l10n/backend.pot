@@ -1318,6 +1318,10 @@ msgstr ""
 msgid "Conversion failed for property \"%1$s\": %2$s"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.vcard/src/com/openexchange/contact/vcard/internal/VCardExceptionMessages.java:69
+msgid "The vCard exceeds the maximum allowed size and can't be imported."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:77
 msgid "contacts"
 msgstr ""
