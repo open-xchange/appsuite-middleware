@@ -123,7 +123,7 @@ public class ContactResource extends CardDAVResource {
 	            /*
 	             * Insert contact
 	             */
-		        this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact, this.getOriginalVCard());
+		        this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
 	            LOG.debug("{}: created.", this.getUrl());
 		    } else {
 	            /*
@@ -178,7 +178,7 @@ public class ContactResource extends CardDAVResource {
         	 * Update contact
         	 */
         	this.factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-        			Integer.toString(contact.getObjectID()), contact, contact.getLastModified(), this.getOriginalVCard());
+        			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
             LOG.debug("{}: saved.", this.getUrl());
         } catch (OXException e) {
         	if (handle(e)) {

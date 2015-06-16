@@ -110,11 +110,7 @@ public abstract class ContactImporter extends AbstractImporter {
         }
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
             try {
-                if (Strings.isEmpty(vCard)) {
-                    contactService.createContact(session, folderID, contact);
-                } else {
-                    contactService.createContact(session, folderID, contact, vCard);
-                }
+                contactService.createContact(session, folderID, contact);
                 return;
             } catch (OXException e) {
                 if (retryCount < MAX_RETRIES && handle(e, contact)) {
