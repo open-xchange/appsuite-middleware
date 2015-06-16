@@ -1152,6 +1152,9 @@ ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchang
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
 
+# SoftwareChange_Request-2429
+ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard.properties
+
 # SoftwareChange_Request-2442
 VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
 if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
@@ -1220,6 +1223,8 @@ exit 0
 %changelog
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2539)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>

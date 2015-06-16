@@ -24,6 +24,10 @@
  - Fix for bug 38553: Live connect against IMAP server to determine whether special folders are supposed to be used for standard mail folders
                       (e.g. through advertising SPECIAL-USE flags)
 
+* 2015-05-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
+
 * 2015-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 38502: Proper shut-down of DeferredActivator in case an error occurs on bundle start-up
@@ -71,6 +75,10 @@
  - Fix for bug 38068: Fold value for "References" header at linear whitespace so that each line is no longer than 76 characters
  - Fix for bug 38118: Disabled failure cache in IMAP authentication bundle
                       (configurable through "com.openexchange.authentication.imap.failureCacheExpirySeconds"; default is off)
+
+* 2015-05-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38187: Also consider infostore folders when checking if a folder can be shared
 
 * 2015-05-07 - martin.herfurth@open-xchange.com
 

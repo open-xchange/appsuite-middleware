@@ -58,8 +58,11 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.listener.MailTransportListener;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
+import com.openexchange.smtp.ListenerChain;
 import com.openexchange.smtp.SMTPProvider;
 import com.openexchange.smtp.SmtpReloadable;
 import com.openexchange.smtp.services.Services;
@@ -91,6 +94,10 @@ public final class SMTPActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
 
+            RankingAwareNearRegistryServiceTracker<MailTransportListener> listing = new RankingAwareNearRegistryServiceTracker<MailTransportListener>(context, MailTransportListener.class);
+            ListenerChain.initInstance(listing);
+            rememberTracker(listing);
+
             trackService(HostnameService.class);
             track(MailcapCommandMap.class, new MailcapServiceTracker(context));
             openTrackers();
@@ -110,6 +117,7 @@ public final class SMTPActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         try {
+            ListenerChain.releaseInstance();
             cleanUp();
             Services.setServiceLookup(null);
         } catch (final Throwable t) {

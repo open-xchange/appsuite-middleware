@@ -520,7 +520,11 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * The client request is not permitted. Details: %1$s
      */
-    REQUEST_NOT_PERMITTED("The client request is not permitted. Details: %1$s", MailExceptionStrings.REQUEST_NOT_PERMITTED_MSG, CATEGORY_PERMISSION_DENIED, 95)
+    REQUEST_NOT_PERMITTED("The client request is not permitted. Details: %1$s", MailExceptionStrings.REQUEST_NOT_PERMITTED_MSG, CATEGORY_PERMISSION_DENIED, 95),
+    /**
+     * Sending the message denied.
+     */
+    SEND_DENIED("Sending the message denied.", MailExceptionStrings.SEND_DENIED, CATEGORY_PERMISSION_DENIED, 96),
 
 
     ;
