@@ -61,8 +61,8 @@ public class ConsoleTestReportWriter extends AbstractTestReportWriter {
     /**
      * Initializes a new {@link ConsoleTestReportWriter}.
      */
-    public ConsoleTestReportWriter(TestReportFormatter formatter, String name) {
-        super(formatter, name);
+    public ConsoleTestReportWriter(TestReportFormatter formatter, String name, String path) {
+        super(formatter, name, path);
     }
     
     /*
