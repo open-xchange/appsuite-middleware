@@ -73,6 +73,7 @@ public class VCardParametersImpl implements VCardParameters {
     private Session session;
     private List<OXException> warnings;
     private boolean skipValidation;
+    private long maxVCardSize;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -195,6 +196,20 @@ public class VCardParametersImpl implements VCardParameters {
      */
     public void setSkipValidation(boolean skipValidation) {
         this.skipValidation = skipValidation;
+    }
+
+    @Override
+    public long getMaxVCardSize() {
+        return maxVCardSize;
+    }
+
+    /**
+     * Sets the maxVCardSize
+     *
+     * @param maxVCardSize The maxVCardSize to set
+     */
+    public void setMaxVCardSize(long maxVCardSize) {
+        this.maxVCardSize = maxVCardSize;
     }
 
 }

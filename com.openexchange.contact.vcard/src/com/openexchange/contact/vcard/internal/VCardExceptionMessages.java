@@ -66,6 +66,8 @@ public class VCardExceptionMessages implements LocalizableStrings {
 
     public static final String CONVERSION_FAILED_MSG = "Conversion failed for property \"%1$s\": %2$s";
 
+    public static final String MAXIMUM_SIZE_EXCEEDED_MSG = "The vCard exceeds the maximum allowed size and can't be imported.";
+
     /**
      * Initializes a new {@link VCardExceptionMessages}.
      */

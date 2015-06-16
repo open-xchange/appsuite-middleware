@@ -64,6 +64,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
+import com.openexchange.tools.io.SizeAwareInputStream;
 import ezvcard.Ezvcard;
 import ezvcard.Ezvcard.ParserChainTextReader;
 import ezvcard.Ezvcard.WriterChainText;
@@ -132,6 +133,18 @@ public class DefaultVCardService implements VCardService {
     }
 
     private VCard parseFirstVCard(InputStream inputStream, VCardParameters parameters) throws OXException {
+        final long maxSize = parameters.getMaxVCardSize();
+        if (0 < maxSize) {
+            inputStream = new SizeAwareInputStream(inputStream) {
+
+                @Override
+                public void size(long size) throws IOException {
+                    if (size > maxSize) {
+                        throw new IOException(VCardExceptionCodes.MAXIMUM_SIZE_EXCEEDED.create(Long.valueOf(maxSize)));
+                    }
+                }
+            };
+        }
         List<OXException> warnings = parameters.getWarnings();
         try {
             List<List<String>> parserWarnings = new ArrayList<List<String>>();
@@ -169,6 +182,9 @@ public class DefaultVCardService implements VCardService {
             }
             return vCard;
         } catch (IOException e) {
+            if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
+                throw (OXException) e.getCause();
+            }
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }

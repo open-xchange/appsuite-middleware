@@ -87,6 +87,11 @@ public enum VCardExceptionCodes implements DisplayableOXExceptionCode {
      * Conversion failed for property \"%1$s\": %2$s
      */
     CONVERSION_FAILED("Conversion failed for [%1$s]: %2$s", VCardExceptionMessages.CONVERSION_FAILED_MSG, Category.CATEGORY_WARNING, 5),
+    /**
+     * Maximum vCard size of %1$d bytes exceeded
+     * The vCard exceeds the maximum allowed size and can't be imported.
+     */
+    MAXIMUM_SIZE_EXCEEDED("Maximum vCard size of %1$d bytes exceeded", VCardExceptionMessages.MAXIMUM_SIZE_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 6),
 
     ;
 

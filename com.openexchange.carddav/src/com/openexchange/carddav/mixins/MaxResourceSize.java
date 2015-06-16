@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,83 +47,50 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.carddav.mixins;
 
-import java.awt.Dimension;
-import java.util.List;
+
+import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link VCardParameters}
+ * {@link MaxResourceSize}
+ *
+ * Provides a numeric value indicating the maximum size in
+ * octets of a resource that the server is willing to accept when an
+ * address object resource is stored in an address book collection.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardParameters {
+public class MaxResourceSize extends SingleXMLPropertyMixin {
+
+	protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MaxResourceSize.class);
+
+	private final GroupwareCarddavFactory factory;
 
     /**
-     * Gets the target version to use during export.
+     * Initializes a new {@link MaxResourceSize}.
      *
-     * @return The version
+     * @param factory A reference to the CardDAV factory
      */
-    VCardVersion getVersion();
+    public MaxResourceSize(GroupwareCarddavFactory factory) {
+        super("urn:ietf:params:xml:ns:carddav", "max-resource-size");
+        this.factory = factory;
+    }
 
-    /**
-     * Gets the dimensions for scaling contact images during export.
-     *
-     * @return The photo scale dimension, or <code>null</code> if no scaling should be done
-     */
-    Dimension getPhotoScaleDimension();
-    /**
-     * Gets a value indicating whether import and export is done in <i>strict</i> mode or not.
-     *
-     * @return <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
-     */
-    boolean isStrict();
-
-    /**
-     * Gets the underlying groupware session.
-     *
-     * @return The session, or <code>null</code> if not set
-     */
-    Session getSession();
-
-    /**
-     * Gets the maximum allowed size in bytes for contact images.
-     *
-     * @return The maximum allowed size
-     */
-    int getMaxContactImageSize();
-
-    /**
-     * Gets a value indicating whether e-mail addresses in contacts should by checked for validity or not.
-     *
-     * @return <code>true</code> to validate e-mail addresses, <code>false</code>, otherwise
-     */
-    boolean isValidateContactEMail();
-
-    /**
-     * Gets a list of warnings that occurred during import or export.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
-
-    /**
-     * Gets a value indicating whether vCards should be validated after parsing or not.
-     *
-     * @return <code>true</code> if additional validation is skipped, <code>false</code>, otherwise
-     */
-    boolean isSkipValidation();
-
-    /**
-     * Gets the maximum allowed size of a (single) vCard file in bytes. vCards larger than the configured maximum size are rejected and
-     * not parsed. A value of <code>0</code> or smaller is considered as unlimited.
-     *
-     * @return The maximum allowed size of a (single) vCard file in bytes, or <code>0</code> if not restricted
-     */
-    long getMaxVCardSize();
+    @Override
+    protected String getValue() {
+        long maxSize = 4194304;
+        try {
+            String value = factory.getConfigValue("com.openexchange.contact.maxVCardSize", String.valueOf(maxSize));
+            maxSize = Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            LOG.warn("Invalid value for \"com.openexchange.contact.maxVCardSize\", falling back to {}", maxSize, e);
+        } catch (OXException e) {
+            LOG.warn("Error getting value for \"com.openexchange.contact.maxVCardSize\", falling back to {}", maxSize, e);
+        }
+        return String.valueOf(maxSize);
+    }
 
 }

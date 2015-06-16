@@ -72,6 +72,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
     private boolean defaultValidateContactEMail;
     private boolean defaultStrict;
     private VCardVersion defaultVersion;
+    private long defaultMaxVCardSize;
 
     /**
      * Initializes a new {@link VCardParametersFactoryImpl}.
@@ -83,6 +84,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         defaultValidateContactEMail = true;
         defaultStrict = false;
         defaultVersion = VCardVersion.VERSION_3_0;
+        defaultMaxVCardSize = 4194304;
     }
 
     /**
@@ -108,6 +110,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         }
         defaultMaxContactImageSize = configService.getIntProperty("max_image_size", 4194304);
         defaultValidateContactEMail = configService.getBoolProperty("validate_contact_email", true);
+        defaultMaxVCardSize = configService.getIntProperty("com.openexchange.contact.maxVCardSize", 4194304);
     }
 
     @Override
@@ -120,6 +123,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         parameters.setMaxContactImageSize(defaultMaxContactImageSize);
         parameters.setValidateContactEMail(defaultValidateContactEMail);
         parameters.setWarnings(new ArrayList<OXException>());
+        parameters.setMaxVCardSize(defaultMaxVCardSize);
         return parameters;
     }
 
