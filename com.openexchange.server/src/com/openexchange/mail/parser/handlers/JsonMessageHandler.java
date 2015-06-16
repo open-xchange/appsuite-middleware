@@ -155,6 +155,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String VIRTUAL = "___VIRTUAL___";
     private static final String MULTIPART_ID = "___MP-ID___";
 
+    private static final int MAX_NESTED_MESSAGES_LEVELS = 10;
+
     private static final class PlainTextContent {
 
         final String id;
@@ -246,6 +248,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final int maxContentSize;
     private boolean doDeepParseForNestedMessage = true;
 
+    /**
+     * Defines the current level of mail message nesting (of a maximum of 10)
+     */
+    private int currentNestingLevel = 0;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -1045,7 +1051,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         final String keyContent = CONTENT;
                         final String keySize = SIZE;
                         boolean b = true;
-                        for (int i = len-1; b && i >= 0; i--) {
+                        for (int i = len - 1; b && i >= 0; i--) {
                             final JSONObject jObject = attachments.getJSONObject(i);
                             if (jObject.getString(keyContentType).startsWith("text/plain") && jObject.hasAndNotNull(keyContent)) {
                                 final String newContent = jObject.getString(keyContent) + sanitizeResult.getContent();
@@ -1226,7 +1232,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         ThresholdFileHolder backup = null;
         try {
             JSONObject nestedObject;
-            if (doDeepParseForNestedMessage) {
+            if (currentNestingLevel < MAX_NESTED_MESSAGES_LEVELS) {
                 MailMessage nestedMail;
                 {
                     Object content = mailPart.getContent();
@@ -1270,6 +1276,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.tokenMailId = tokenMailId;
                 msgHandler.exactLength = exactLength;
                 msgHandler.doDeepParseForNestedMessage = false;
+                msgHandler.currentNestingLevel++;
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
             } else {
