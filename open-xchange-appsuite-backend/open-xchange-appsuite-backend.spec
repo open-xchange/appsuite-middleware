@@ -79,7 +79,11 @@ ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates prin
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
+/opt/open-xchange/etc/as-config-defaults.yml
+%config(noreplace) /opt/open-xchange/etc/as-config.yml
+%config(noreplace) /opt/open-xchange/etc/manifests.properties
+%config(noreplace) /opt/open-xchange/etc/meta/appsuite.yaml
+%config(noreplace) /opt/open-xchange/etc/settings/appsuite.properties
 %dir /opt/open-xchange/templates/
 %config(noreplace) /opt/open-xchange/templates/*
 
