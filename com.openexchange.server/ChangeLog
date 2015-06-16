@@ -1,3 +1,7 @@
+* 2015-06-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38484: Apply "special" sorting for contact results by default
+
 * 2015-06-15 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38550: Make the iOS client use the default contact folder as first collection
