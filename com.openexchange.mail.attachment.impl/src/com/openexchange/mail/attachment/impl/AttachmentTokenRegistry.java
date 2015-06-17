@@ -185,24 +185,25 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
     }
 
     @Override
-    public AttachmentToken getToken(String tokenId) {
-        return getToken(tokenId, true);
+    public AttachmentToken getToken(String tokenId, boolean chunked) {
+        return getToken(tokenId, chunked, true);
     }
 
     /**
      * Gets the token
      *
      * @param tokenId The token identifier
+     * @param chunked <code>true</code> if a chunk-wise retrieval is performed; otherwise <code>false</code>
      * @param considerRemote Whether to perform look-up if locally absent
      * @return The token or <code>null</code>
      */
-    public AttachmentToken getToken(String tokenId, boolean considerRemote) {
+    public AttachmentToken getToken(String tokenId, boolean chunked, boolean considerRemote) {
         AttachmentToken attachmentToken = tokens.get(tokenId);
         if (null == attachmentToken) {
             if (considerRemote) {
                 HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
                 if (null != hzInstance) {
-                    return getFromRemote(tokenId, hzInstance);
+                    return getFromRemote(tokenId, chunked, hzInstance);
                 }
             }
             return null;
@@ -211,14 +212,14 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
             removeToken(tokenId);
             return null;
         }
-        if (attachmentToken.isOneTime()) {
+        if (attachmentToken.isOneTime() && !chunked) {
             removeToken(tokenId);
             return attachmentToken;
         }
         return attachmentToken.touch();
     }
 
-    private AttachmentToken getFromRemote(String tokenId, HazelcastInstance hzInstance) {
+    private AttachmentToken getFromRemote(String tokenId, boolean chunked, HazelcastInstance hzInstance) {
         // Get local member
         Cluster cluster = hzInstance.getCluster();
         Member localMember = cluster.getLocalMember();
@@ -232,7 +233,7 @@ public final class AttachmentTokenRegistry implements AttachmentTokenConstants, 
         }
 
         IExecutorService executor = hzInstance.getExecutorService("default");
-        Map<Member, Future<PortableAttachmentToken>> futureMap = executor.submitToMembers(new PortableCheckTokenExistence(tokenId), otherMembers);
+        Map<Member, Future<PortableAttachmentToken>> futureMap = executor.submitToMembers(new PortableCheckTokenExistence(tokenId, chunked), otherMembers);
         for (Entry<Member, Future<PortableAttachmentToken>> entry : futureMap.entrySet()) {
             Member member = entry.getKey();
             Future<PortableAttachmentToken> future = entry.getValue();

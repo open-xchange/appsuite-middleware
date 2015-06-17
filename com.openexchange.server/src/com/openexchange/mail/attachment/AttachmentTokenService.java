@@ -87,9 +87,10 @@ public interface AttachmentTokenService {
      * Gets the token for specified token identifier.
      *
      * @param tokenId The token identifier
+     * @param chunked <code>true</code> if a chunk-wise retrieval is performed; otherwise <code>false</code>
      * @return The token or <code>null</code> if absent or expired
      */
-    AttachmentToken getToken(String tokenId);
+    AttachmentToken getToken(String tokenId, boolean chunked);
 
     /**
      * Puts specified token into this registry.
