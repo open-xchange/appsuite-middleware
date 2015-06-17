@@ -67,7 +67,6 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.Mapping;
 import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -304,8 +303,6 @@ public class ContactResource extends CardDAVResource {
 		     * Take over new contact
 		     */
 		    this.contact = newContact;
-		} catch (ConverterException e) {
-			throw protocolException(e);
 		} catch (OXException e) {
 			throw protocolException(e);
 		}
@@ -348,7 +345,7 @@ public class ContactResource extends CardDAVResource {
         }
     }
 
-	private Contact deserializeAsContact(VersitObject versitObject) throws OXException, ConverterException {
+	private Contact deserializeAsContact(VersitObject versitObject) throws OXException {
 	    try (InputStream stream = new ByteArrayInputStream(getOriginalVCard().getBytes())) {
 	        return factory.getVCardService().importVCard(stream, null, null);	        
 	    } catch (IOException e) {

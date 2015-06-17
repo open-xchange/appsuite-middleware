@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -99,7 +98,6 @@ import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -127,9 +125,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private final ConfigViewFactory configs;
 	private final UserService userService;
 	private final ContactService contactService;
-	private final OXContainerConverter converter;
     private VCardService vCardService;
-    private VCardStorageService vCardStorage;
     private ServiceLookup services;
 
 	public GroupwareCarddavFactory(ServiceLookup services, SessionHolder sessionHolder) {
@@ -139,8 +135,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		this.configs = services.getService(ConfigViewFactory.class);
 		this.userService = services.getService(UserService.class);
 		this.contactService = services.getService(ContactService.class);
-		this.converter = new OXContainerConverter((TimeZone)null, (String)null);
-		this.converter.setSkipOxCTypeAttribute(true);
 		this.vCardService = services.getService(VCardService.class);
 		this.services = services;
 	}
@@ -197,10 +191,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 	public FolderService getFolderService() {
 		return folderService;
-	}
-
-	public OXContainerConverter getConverter() {
-	    return converter;
 	}
 
 	public Context getContext() {
