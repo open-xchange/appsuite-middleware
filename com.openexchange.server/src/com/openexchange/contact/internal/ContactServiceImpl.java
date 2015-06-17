@@ -474,7 +474,7 @@ public class ContactServiceImpl extends DefaultContactService {
          * check currently stored contact
          */
         final Contact storedContact = storage.get(session, folderID, objectID, new ContactField[] { ContactField.CREATED_BY,
-                ContactField.LAST_MODIFIED });
+                ContactField.LAST_MODIFIED, ContactField.VCARD_ID });
         Check.contactNotNull(storedContact, contextID, Tools.parse(objectID));
         if (storedContact.getCreatedBy() != userID) {
             Check.canDeleteAll(permission, session, folderID);
@@ -515,7 +515,7 @@ public class ContactServiceImpl extends DefaultContactService {
         List<Contact> storedContacts = new ArrayList<Contact>();
         try {
             searchIterator = storage.list(session, folderID, objectIDs, new ContactField[] { ContactField.CREATED_BY,
-                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID });
+                ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.VCARD_ID });
             while (searchIterator.hasNext()) {
                 Contact storedContact = searchIterator.next();
                 if (storedContact.getCreatedBy() != userID) {
@@ -575,7 +575,7 @@ public class ContactServiceImpl extends DefaultContactService {
         List<Contact> storedContacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
-            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID });
+            searchIterator = storage.all(session, folderID, new ContactField[] { ContactField.CREATED_BY, ContactField.OBJECT_ID, ContactField.VCARD_ID });
             if (null != searchIterator) {
                 while (searchIterator.hasNext()) {
                     Contact storedContact = searchIterator.next();

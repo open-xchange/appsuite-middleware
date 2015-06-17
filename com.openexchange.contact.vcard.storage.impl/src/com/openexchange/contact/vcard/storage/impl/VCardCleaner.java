@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,52 @@
  *
  */
 
-package com.openexchange.contact.vcard.storage.impl.osgi;
+package com.openexchange.contact.vcard.storage.impl;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.service.event.EventConstants;
+import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageService;
-import com.openexchange.contact.vcard.storage.impl.VCardCleaner;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.event.CommonEvent;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 
 /**
+ * {@link VCardCleaner}
  *
- * {@link ContactVCardStorageActivator}
- *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since 7.8.0
  */
-public class ContactVCardStorageActivator extends HousekeepingActivator {
+public class VCardCleaner implements EventHandler {
 
-    private static final String COM_OPENEXCHANGE_CONTACT_STORE_V_CARDS = "com.openexchange.contact.storeVCards";
+    public static final String EVENT_TOPIC = "com/openexchange/groupware/contact/delete";
 
-    private final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactVCardStorageActivator.class);
+    private final VCardStorageService vCardStorage;
 
     /**
-     * Initializes a new {@link ContactVCardStorageActivator}.
+     * Initializes a new {@link VCardCleaner}.
+     *
+     * @param vCardStorage The underlying vCard storage
      */
-    public ContactVCardStorageActivator() {
+    public VCardCleaner(VCardStorageService vCardStorage) {
         super();
+        this.vCardStorage = vCardStorage;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: com.openexchange.contact.vcard.storage.impl");
-            boolean enabled = getService(ConfigurationService.class).getBoolProperty(COM_OPENEXCHANGE_CONTACT_STORE_V_CARDS, true);
-
-            if (enabled) {
-                DefaultVCardStorageService vCardStorageService = new DefaultVCardStorageService();
-                registerService(VCardStorageService.class, vCardStorageService);
-                Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-                serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { VCardCleaner.EVENT_TOPIC });
-                registerService(EventHandler.class, new VCardCleaner(vCardStorageService), serviceProperties);
+    public void handleEvent(Event event) {
+        if (null != event && EVENT_TOPIC.equals(event.getTopic()) && false == event.containsProperty(CommonEvent.REMOTE_MARKER)) {
+            CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+            if (null != commonEvent && CommonEvent.DELETE == commonEvent.getAction()) {
+                int contextID = commonEvent.getContextId();
+                Contact contact = (Contact) commonEvent.getActionObj();
+                if (null != contact) {
+                    String vCardID = contact.getVCardId();
+                    if (false == Strings.isEmpty(vCardID)) {
+                        vCardStorage.deleteVCard(vCardID, contextID);
+                    }
+                }
             }
-        } catch (Exception exception) {
-            LOG.error("error starting com.openexchange.contact.vcard.storage.impl", exception);
-            throw exception;
         }
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.contact.vcard.storage.impl");
-
-        super.stopBundle();
-    }
 }
