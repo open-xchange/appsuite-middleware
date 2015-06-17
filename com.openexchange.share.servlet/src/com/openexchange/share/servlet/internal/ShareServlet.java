@@ -146,11 +146,7 @@ public class ShareServlet extends HttpServlet {
             // No appropriate ShareHandler available
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
         } catch (RateLimitedException e) {
-            response.setContentType("text/plain; charset=UTF-8");
-            if (0 < e.getRetryAfter()) {
-                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

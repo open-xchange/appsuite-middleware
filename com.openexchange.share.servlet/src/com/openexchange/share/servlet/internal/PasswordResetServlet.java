@@ -195,11 +195,7 @@ public class PasswordResetServlet extends HttpServlet {
                 }
             }
         } catch (RateLimitedException e) {
-            response.setContentType("text/plain; charset=UTF-8");
-            if (e.getRetryAfter() > 0) {
-                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
