@@ -212,11 +212,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	public State getState() {
 		return stateHolder.get();
 	}
-	
+
 	public VCardService getVCardService() {
 	    return vCardService;
 	}
-	
+
 	public VCardStorageService getVCardStorageService() {
 	    return services.getOptionalService(VCardStorageService.class);
 	}
@@ -275,7 +275,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 		private static final ContactField[] BASIC_FIELDS = {
 			ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.UID,
-			ContactField.FILENAME, ContactField.FOLDER_ID
+			ContactField.FILENAME, ContactField.FOLDER_ID, ContactField.VCARD_ID
 		};
 
 		private final GroupwareCarddavFactory factory;
