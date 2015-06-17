@@ -55,11 +55,20 @@ package com.openexchange.share.servlet.utils;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public enum MessageType {
-    
+
+    /**
+     * An ERROR message
+     */
     ERROR,
-    
+
+    /**
+     * A WARNING message
+     */
     WARNING,
-    
+
+    /**
+     * An INFO message
+     */
     INFO
 
 }

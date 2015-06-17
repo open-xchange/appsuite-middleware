@@ -70,9 +70,9 @@ import com.openexchange.tools.encoding.URLCoder;
 public class RedirectLocationBuilder {
 
     private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
-    
+
     private final List<Entry<String, String>> parameters;
-    
+
     /**
      * Initializes a new {@link RedirectLocationBuilder}
      */
@@ -80,47 +80,47 @@ public class RedirectLocationBuilder {
         super();
         parameters = new ArrayList<Entry<String,String>>();
     }
-    
+
     /**
      * Appends the login type suitable for the supplied authentication mode.
-     * 
+     *
      * @param authentication The authentication mode
      * @return The builder
      */
     public RedirectLocationBuilder loginType(AuthenticationMode authentication) {
         switch (authentication) {
             case ANONYMOUS_PASSWORD:
-                return parameter("login_type", "anonymous");        
+                return parameter("login_type", "anonymous");
             case GUEST_PASSWORD:
                 return parameter("login_type", "guest");
             default:
                 throw new UnsupportedOperationException("No login type for " + authentication);
         }
     }
-    
+
     /**
-     * Appends the (base) token of the accessed share. 
-     * 
+     * Appends the (base) token of the accessed share.
+     *
      * @param token The share token to append
      * @return The builder
      */
     public RedirectLocationBuilder share(String token) {
         return parameter("share", token);
     }
-    
+
     /**
      * Appends the path to a specific share target.
-     * 
+     *
      * @param target The share target to append, or <code>null</code> if not specified
      * @return The builder
      */
     public RedirectLocationBuilder target(ShareTarget target) {
         return null != target ? parameter("target", target.getPath()) : this;
     }
-    
+
     /**
      * Appends a message to pass to the client along with the redirect location.
-     * 
+     *
      * @param type The message type
      * @param message The message
      * @param status The message status
@@ -132,10 +132,10 @@ public class RedirectLocationBuilder {
         parameter("status", status);
         return this;
     }
-    
+
     /**
      * Builds and returns the relative redirect location, ready to use in the <code>Location</code> header of a HTTP response.
-     * 
+     *
      * @return The built redirect URL
      */
     public String build() {
@@ -146,16 +146,13 @@ public class RedirectLocationBuilder {
             for (int i = 1; i < parameters.size(); i++) {
                 stringBuilder.append('&').append(parameters.get(i).getKey()).append('=').append(URLCoder.encode(parameters.get(i).getValue(), Charsets.UTF_8));
             }
-            for (Entry<String, String> parameter : parameters) {
-                stringBuilder.append(parameter.getKey()).append('=').append(URLCoder.encode(parameter.getValue(), Charsets.UTF_8));
-            }
         }
         return stringBuilder.toString();
     }
-    
+
     /**
      * Adds an additional parameter to the builder instance.
-     * 
+     *
      * @param name The parameter name
      * @param value The parameter value
      * @return The builder
@@ -164,11 +161,11 @@ public class RedirectLocationBuilder {
         parameters.add(new AbstractMap.SimpleEntry<String, String>(name, value));
         return this;
     }
-    
+
     /**
-     * Gets the relative path to the login page as defined by the <code>com.openexchange.share.loginLink</code> and 
-     * <code>com.openexchange.UIWebPath</code> configuration properties. 
-     * 
+     * Gets the relative path to the login page as defined by the <code>com.openexchange.share.loginLink</code> and
+     * <code>com.openexchange.UIWebPath</code> configuration properties.
+     *
      * @return The relative login link, e.g. <code>/appsuite/ui</code>
      */
     private static String getLoginLink() {
@@ -177,7 +174,7 @@ public class RedirectLocationBuilder {
         String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite");
         return P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
     }
-    
+
     /**
      * Trims trailing and leading slashes from the supplied path.
      *
