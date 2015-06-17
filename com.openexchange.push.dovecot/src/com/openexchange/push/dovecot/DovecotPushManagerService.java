@@ -168,6 +168,11 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         }
     }
 
+    @Override
+    public boolean supportsPermanentListeners() {
+        return true;
+    }
+
     /**
      * Tries to look-up another valid session and injects a new listener for it (discarding the existing one bound to given <code>oldSession</code>)
      *
