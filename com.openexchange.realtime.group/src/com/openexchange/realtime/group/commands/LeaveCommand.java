@@ -80,12 +80,6 @@ public class LeaveCommand implements GroupCommand {
     @Override
     public void perform(final Stanza stanza, final GroupDispatcher groupDispatcher) throws RealtimeException {
         try {
-            ID realSender = getRealSender(stanza);
-            if (!groupDispatcher.isMember(realSender)) {
-                LOG.info("Refusing to send leave to GroupDispatcher. {} is no member of the GroupDispatcher {}.", realSender, groupDispatcher.getId());
-                doNotifyNotMember(stanza, groupDispatcher);
-                return;
-            }
             if (isSynchronous(stanza)) { // call:// surrogate sender in from, use getOnBehalf for real sender
                 if (shouldExecuteAsynchronously(groupDispatcher)) {
                     try {

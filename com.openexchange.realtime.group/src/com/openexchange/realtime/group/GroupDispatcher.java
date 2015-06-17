@@ -170,6 +170,7 @@ public class GroupDispatcher implements ComponentHandle {
     private void handleException(Stanza stanza, RealtimeException exception) {
         LOG.error("", exception);
         ID sender = stanza.getFrom();
+        stanza.setFrom(groupId);
         stanza.setError(exception);
         try {
             relayToID(stanza, sender);
@@ -386,6 +387,14 @@ public class GroupDispatcher implements ComponentHandle {
      * "da86ae8fc93340d389c51a1d92d6e997" payloads: [ { namespace: 'group', element: 'command', data: 'leave' } ], }
      */
     public void leave(ID id, Stanza stanza) throws OXException {
+        //check if the sender is a member at all
+        Set<ID> members = idsRef.get();
+        if(!members.contains(id)) {
+            if(members.isEmpty()) {
+                dispose();
+            }
+            throw RealtimeExceptionCodes.NOT_A_MEMBER.create(id);
+        }
         beforeLeave(id, stanza);
 
         LOG.debug("{} is leaving {}", id, groupId);
