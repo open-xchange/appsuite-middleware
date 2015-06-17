@@ -112,4 +112,7 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** ResponseChannel timed out while simulating synchronous behaviour. */
     public static final String RESPONSE_AWAIT_TIMEOUT_MSG = "ResponseChannel timed out while simulating synchronous behaviour.";
 
+    /** You are already a member of the GroupDispatcher %1$s */
+    public static final String ALREADY_MEMBER_MSG = "You are already a member of the GroupDispatcher %1$s";
+
 }

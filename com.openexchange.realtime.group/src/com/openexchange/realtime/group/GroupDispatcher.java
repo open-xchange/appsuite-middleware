@@ -340,8 +340,7 @@ public class GroupDispatcher implements ComponentHandle {
             throw RealtimeExceptionCodes.GROUP_DISPOSED.create(groupId);
         }
         if (idsRef.get().contains(id)) {
-            LOG.info("{} is already a member of {}.", id, groupId);
-            return;
+            throw RealtimeExceptionCodes.ALREADY_MEMBER.create(groupId);
         }
 
         beforeJoin(id, stanza);

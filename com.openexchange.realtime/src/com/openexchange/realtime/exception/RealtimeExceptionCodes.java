@@ -201,7 +201,11 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
    /** ResponseChannel timed out while simulating synchronous behaviour. */
    RESPONSE_AWAIT_TIMEOUT("ResponseChannel timed out while simulating synchronous behaviour.", CATEGORY_ERROR, 1014, RealtimeExceptionMessages.RESPONSE_AWAIT_TIMEOUT_MSG,
        null, null),
-    ;
+
+    /** You are already a member of the GroupDispatcher %1$s. */
+    ALREADY_MEMBER("You are already a member of the GroupDispatcher %1$s", CATEGORY_ERROR, 1015, RealtimeExceptionMessages.ALREADY_MEMBER_MSG,
+        null, null),
+     ;
 
     private int number;
 
