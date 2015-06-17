@@ -67,8 +67,10 @@ import com.openexchange.mail.attachment.impl.AttachmentTokenRegistry;
 public class PortableCheckTokenExistence extends AbstractCustomPortable implements Callable<PortableAttachmentToken> {
 
     private static final String FIELD_ID = "tokenId";
+    private static final String FIELD_CHUNKED = "chunked";
 
     private String tokenId;
+    private boolean chunked;
 
     /**
      * Initializes a new {@link PortableCheckTokenExistence}.
@@ -82,9 +84,10 @@ public class PortableCheckTokenExistence extends AbstractCustomPortable implemen
      *
      * @param tokenId The associated token identifier
      */
-    public PortableCheckTokenExistence(String tokenId) {
+    public PortableCheckTokenExistence(String tokenId, boolean chunked) {
         super();
         this.tokenId = tokenId;
+        this.chunked = chunked;
     }
 
     @Override
@@ -93,7 +96,7 @@ public class PortableCheckTokenExistence extends AbstractCustomPortable implemen
         if (null == registry) {
             return new PortableAttachmentToken(null);
         }
-        AttachmentToken token = registry.getToken(tokenId, false);
+        AttachmentToken token = registry.getToken(tokenId, chunked, false);
         return new PortableAttachmentToken(token);
     }
 
@@ -105,11 +108,13 @@ public class PortableCheckTokenExistence extends AbstractCustomPortable implemen
     @Override
     public void writePortable(PortableWriter writer) throws IOException {
         writer.writeUTF(FIELD_ID, tokenId);
+        writer.writeBoolean(FIELD_CHUNKED, chunked);
     }
 
     @Override
     public void readPortable(PortableReader reader) throws IOException {
         this.tokenId = reader.readUTF(FIELD_ID);
+        this.chunked = reader.readBoolean(FIELD_CHUNKED);
     }
 
 }
