@@ -135,22 +135,38 @@ public class ShareServlet extends HttpServlet {
                 }
             }
 
-            // Determine appropriate ShareHandler and handle the share
-            for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-                ShareHandlerReply reply = handler.handle(share, target, request, response);
-                if (ShareHandlerReply.NEUTRAL != reply) {
-                    return;
-                }
+            /*
+             * Determine appropriate ShareHandler and handle the share
+             */
+            if (false == handle(share, target, request, response)) {
+                // No appropriate ShareHandler available
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
             }
-
-            // No appropriate ShareHandler available
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
         } catch (RateLimitedException e) {
             e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * Passes the resolved share to the most appropriate handler and lets him serve the request.
+     *
+     * @param share The guest share
+     * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param request The associated HTTP request
+     * @param response The associated HTTP response
+     * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
+     */
+    private boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
+            ShareHandlerReply reply = handler.handle(share, target, request, response);
+            if (ShareHandlerReply.NEUTRAL != reply) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

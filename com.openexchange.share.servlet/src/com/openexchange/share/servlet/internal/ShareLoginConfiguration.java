@@ -75,6 +75,7 @@ public class ShareLoginConfiguration {
     private Integer shareCookieTTL;
     private boolean shareTransientSessions;
     private byte[] cookieHashSalt;
+    private int emptyGuestPasswords;
 
     /**
      * Initializes a new {@link ShareLoginConfiguration}.
@@ -152,6 +153,16 @@ public class ShareLoginConfiguration {
     }
 
     /**
+     * Gets the configured "empty guest password" setting. If set to <code>0</code> a password is required immediately, positive values
+     * represent the number of allowed logins without password, negative values means guest users do not need to set a password.
+     *
+     * @return The configured "empty guest password" setting
+     */
+    public int getEmptyGuestPasswords() {
+        return emptyGuestPasswords;
+    }
+
+    /**
      * (Re-)initializes the configuration.
      *
      * @param configService A reference to the configuration service
@@ -173,6 +184,7 @@ public class ShareLoginConfiguration {
         }
         this.shareTransientSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
         this.cookieHashSalt = configService.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+        this.emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
     }
 
     /**

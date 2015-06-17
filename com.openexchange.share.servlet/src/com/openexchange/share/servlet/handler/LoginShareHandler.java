@@ -55,7 +55,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
@@ -141,7 +140,7 @@ public class LoginShareHandler extends AbstractShareHandler {
                         throw LoginExceptionCodes.UNKNOWN.create(e);
                     }
                 }
-                int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
+                int emptyGuestPasswords = getShareLoginConfiguration().getEmptyGuestPasswords();
                 if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
                     if (emptyGuestPasswords - loginCount == 1) {
                         if (null != proxy) {
