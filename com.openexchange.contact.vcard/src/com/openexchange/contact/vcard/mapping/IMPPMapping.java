@@ -123,11 +123,11 @@ public class IMPPMapping extends AbstractMapping {
         URI uri = null;
         if (false == Strings.isEmpty(instantMessenger)) {
             try {
-                String encoded = URLCoder.encode(instantMessenger);
-                uri = new URI(encoded);
+                uri = new URI(null, instantMessenger, null);
             } catch (URISyntaxException e) {
                 try {
-                    uri = new URI(null, instantMessenger, null);
+                    String encoded = URLCoder.encode(instantMessenger);
+                    uri = new URI(encoded);
                 } catch (URISyntaxException e1) {
                     // no URI
                 }
