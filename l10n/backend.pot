@@ -4136,6 +4136,11 @@ msgstr ""
 msgid "ResponseChannel timed out while simulating synchronous behaviour."
 msgstr ""
 
+#. * You are already a member of the GroupDispatcher %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:116
+msgid "You are already a member of the GroupDispatcher %1$s"
+msgstr ""
+
 #. Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:63
 msgid "Invalid RSS URL or not well-formed XML content provided by URL: %1$s"
