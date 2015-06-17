@@ -255,6 +255,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
      * @throws OXException
      */
     private void resend(Stanza stanza) throws OXException {
+        stanza.setResendCount(stanza.getResendCount()+1);
         send(stanza);
     }
 

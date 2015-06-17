@@ -116,6 +116,8 @@ public abstract class Stanza implements Serializable {
 
     // Payloads carried by this Stanza as n-ary trees
     protected volatile Map<ElementPath, List<PayloadTree>> payloads;
+    
+    protected int resendCount = 0;
 
     /**
      * Initializes a new {@link Stanza}.
@@ -315,6 +317,24 @@ public abstract class Stanza implements Serializable {
             newPayloads.put(tree.getElementPath(), list);
         }
         payloads = newPayloads;
+    }
+    
+    /**
+     * Gets the resendCount
+     *
+     * @return The resendCount
+     */
+    public int getResendCount() {
+        return resendCount;
+    }
+    
+    /**
+     * Sets the resendCount
+     *
+     * @param resendCount The resendCount to set
+     */
+    public void setResendCount(int resendCount) {
+        this.resendCount = resendCount;
     }
 
     /**
