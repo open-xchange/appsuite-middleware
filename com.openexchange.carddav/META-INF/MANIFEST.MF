@@ -6,7 +6,8 @@ Bundle-Version: 7.8.0
 Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.authentication,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.authentication,
  com.openexchange.config.cascade,
  com.openexchange.contact,
  com.openexchange.contact.vcard,
@@ -44,7 +45,6 @@ Import-Package: com.openexchange.authentication,
  com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.tools.stream,
- com.openexchange.tools.versit,
  com.openexchange.tools.webdav,
  com.openexchange.user,
  com.openexchange.webdav,
