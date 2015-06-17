@@ -94,6 +94,10 @@ public enum PushExceptionCodes implements DisplayableOXExceptionCode {
      * Push user %1$s in context %2$s has no push registration.
      */
     NO_PUSH_REGISTRATION("Push user %1$s in context %2$s has no push registration.", Category.CATEGORY_PERMISSION_DENIED, 8, null),
+    /**
+     * Starting a permanent push listener is not supported.
+     */
+    PERMANENT_NOT_SUPPORTED("Starting a permanent push listener is not supported.", Category.CATEGORY_CONFIGURATION, 9, null)
     ;
 
     /** The exception code prefix */

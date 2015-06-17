@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushListenerService;
@@ -175,6 +176,13 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
             l.add(new PushUserInfo(new PushUser(key.userId, key.contextId), entry.getValue().isPermanent()));
         }
         return l;
+    }
+
+    @Override
+    public boolean supportsPermanentListeners() {
+        boolean defaultValue = false;
+        ConfigurationService service = services.getOptionalService(ConfigurationService.class);
+        return null == service ? defaultValue : service.getBoolProperty("com.openexchange.push.imapidle.supportsPermanentListeners", defaultValue);
     }
 
     @Override
