@@ -87,7 +87,7 @@ public class Bug21374Test extends CardDAVTest {
    				"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
 				"FN:" + firstName + " " + lastName + "\r\n" +
-				"TITLE:" + profession + "\r\n" +
+				"ROLE:" + profession + "\r\n" +
 				"UID:" + uid + "\r\n" +
 				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
 				"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
@@ -111,6 +111,6 @@ public class Bug21374Test extends CardDAVTest {
         assertEquals("N wrong", firstName, card.getGivenName());
         assertEquals("N wrong", lastName, card.getFamilyName());
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
-        assertEquals("TITLE wrong", profession, card.getVCard().getTitle().getTitle());
+        assertEquals("ROLE wrong", profession, card.getVCard().getRole().getRole());
 	}
 }
