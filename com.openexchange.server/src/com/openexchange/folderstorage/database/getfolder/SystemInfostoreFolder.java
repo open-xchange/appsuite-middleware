@@ -168,8 +168,7 @@ public final class SystemInfostoreFolder {
                         // Check if there are shared files -- discard if there are none
                         final TIntList subfolders = OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userPerm.getAccessibleModules(), ctx, null);
                         subfolders.remove(getDefaultInfoStoreFolderId(session, ctx));
-                        long count = new OXFolderAccess(ctx).getItemCount(fo, session, ctx);
-                        if (!subfolders.isEmpty() || count > 0) {
+                        if (!subfolders.isEmpty() || 0 < new OXFolderAccess(ctx).getItemCount(fo, session, ctx)) {
                             subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_FILES_FOLDER_NAME)));
                         }
                     } else if (altNames) {
