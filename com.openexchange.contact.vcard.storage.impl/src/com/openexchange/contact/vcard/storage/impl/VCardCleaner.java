@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,70 +47,52 @@
  *
  */
 
-package com.openexchange.dav.carddav.bugs;
+package com.openexchange.contact.vcard.storage.impl;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import com.openexchange.dav.StatusCodes;
-import com.openexchange.dav.carddav.CardDAVTest;
-import com.openexchange.dav.carddav.VCardResource;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventHandler;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 
 /**
- * {@link Bug21374Test}
- *
- * Changed Profession (vCard: "TITLE") not synchronized from addressbook client
+ * {@link VCardCleaner}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.8.0
  */
-public class Bug21374Test extends CardDAVTest {
+public class VCardCleaner implements EventHandler {
 
-	public Bug21374Test(String name) {
-		super(name);
-	}
+    public static final String EVENT_TOPIC = "com/openexchange/groupware/contact/delete";
 
-	public void testCreateWithProfession() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		final String syncToken = super.fetchSyncToken();
-		/*
-		 * create contact
-		 */
-    	final String uid = randomUID();
-    	final String firstName = "test";
-    	final String lastName = "jupp";
-    	final String profession = "profession?";
-        final String vCard =
-        		"BEGIN:VCARD" + "\r\n" +
-   				"VERSION:3.0" + "\r\n" +
-				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
-				"FN:" + firstName + " " + lastName + "\r\n" +
-				"ROLE:" + profession + "\r\n" +
-				"UID:" + uid + "\r\n" +
-				"REV:" + super.formatAsUTC(new Date()) + "\r\n" +
-				"PRODID:-//Apple Inc.//AddressBook 6.1//EN" + "\r\n" +
-				"END:VCARD" + "\r\n"
-		;
-        assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putVCard(uid, vCard));
-        /*
-         * verify contact on server
-         */
-        final Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);
-        assertEquals("uid wrong", uid, contact.getUid());
-        assertEquals("profession wrong", profession, contact.getProfession());
-        /*
-         * verify contact on client
-         */
-        final Map<String, String> eTags = super.syncCollection(syncToken);
-        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
-        final List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
-        final VCardResource card = assertContains(uid, addressData);
-        assertEquals("N wrong", firstName, card.getGivenName());
-        assertEquals("N wrong", lastName, card.getFamilyName());
-        assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
-        assertEquals("ROLE wrong", profession, card.getVCard().getRole().getRole());
-	}
+    private final VCardStorageService vCardStorage;
+
+    /**
+     * Initializes a new {@link VCardCleaner}.
+     *
+     * @param vCardStorage The underlying vCard storage
+     */
+    public VCardCleaner(VCardStorageService vCardStorage) {
+        super();
+        this.vCardStorage = vCardStorage;
+    }
+
+    @Override
+    public void handleEvent(Event event) {
+        if (null != event && EVENT_TOPIC.equals(event.getTopic()) && false == event.containsProperty(CommonEvent.REMOTE_MARKER)) {
+            CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
+            if (null != commonEvent && CommonEvent.DELETE == commonEvent.getAction()) {
+                int contextID = commonEvent.getContextId();
+                Contact contact = (Contact) commonEvent.getActionObj();
+                if (null != contact) {
+                    String vCardID = contact.getVCardId();
+                    if (false == Strings.isEmpty(vCardID)) {
+                        vCardStorage.deleteVCard(vCardID, contextID);
+                    }
+                }
+            }
+        }
+    }
+
 }

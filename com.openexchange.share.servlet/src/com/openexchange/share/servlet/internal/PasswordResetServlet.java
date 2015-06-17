@@ -58,7 +58,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -105,7 +104,6 @@ public class PasswordResetServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String mailAddress = "";
         try {
             // Create a new HttpSession if it is missing
             request.getSession(true);
@@ -175,7 +173,7 @@ public class PasswordResetServlet extends HttpServlet {
                     userService.invalidateUser(context, guestID);
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
                     String status = "require_password";
-                    int emptyGuestPasswords = ShareServiceLookup.getService(ConfigurationService.class).getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
+                    int emptyGuestPasswords = loginConfig.getEmptyGuestPasswords();
                     if (emptyGuestPasswords > 0) {
                         String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
                         int loginCount = null != count ? Integer.parseInt(count) : 0;
@@ -195,11 +193,7 @@ public class PasswordResetServlet extends HttpServlet {
                 }
             }
         } catch (RateLimitedException e) {
-            response.setContentType("text/plain; charset=UTF-8");
-            if (e.getRetryAfter() > 0) {
-                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

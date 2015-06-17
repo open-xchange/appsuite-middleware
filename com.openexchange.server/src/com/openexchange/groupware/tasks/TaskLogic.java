@@ -350,7 +350,7 @@ public final class TaskLogic {
             return;
         }
         // First simple checks on start and end date.
-        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType()) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType() || CalendarObject.NO_RECURRENCE != oldTask.getRecurrenceType()) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
                     throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
@@ -631,6 +631,10 @@ public final class TaskLogic {
      */
     public static boolean makeRecurrence(final Task task) throws OXException {
         if (task.containsOccurrence() && 0 == task.getOccurrence()) {
+            return false;
+        }
+        if (!task.containsStartDate() || null == task.getStartDate() || !task.containsEndDate() || null == task.getEndDate()) {
+            // Workaround for tasks that could have been created due to bug 38782 having a recurrence but lack start or end date.
             return false;
         }
         final Date[] newTaskDates = calculateRecurring(task);

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,74 +47,56 @@
  *
  */
 
-package com.openexchange.mail.attachment.impl.portable;
+package com.openexchange.contact.storage.rdb.internal;
 
-import java.io.IOException;
-import java.util.concurrent.Callable;
-import com.hazelcast.nio.serialization.PortableReader;
-import com.hazelcast.nio.serialization.PortableWriter;
-import com.openexchange.hazelcast.serialization.AbstractCustomPortable;
-import com.openexchange.mail.attachment.AttachmentToken;
-import com.openexchange.mail.attachment.impl.AttachmentTokenRegistry;
-
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link PortableCheckTokenExistence}
+ * {@link RdbContactStorageTest}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.2
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class PortableCheckTokenExistence extends AbstractCustomPortable implements Callable<PortableAttachmentToken> {
+public class RdbContactStorageTest {
 
-    private static final String FIELD_ID = "tokenId";
-    private static final String FIELD_CHUNKED = "chunked";
+    private RdbContactStorage rdbContactStorage;
 
-    private String tokenId;
-    private boolean chunked;
-
-    /**
-     * Initializes a new {@link PortableCheckTokenExistence}.
-     */
-    public PortableCheckTokenExistence() {
-        super();
+    @Before
+    public void setUp() throws Exception {
+        rdbContactStorage = new RdbContactStorage();
     }
 
-    /**
-     * Initializes a new {@link PortableCheckTokenExistence}.
-     *
-     * @param tokenId The associated token identifier
-     */
-    public PortableCheckTokenExistence(String tokenId, boolean chunked) {
-        super();
-        this.tokenId = tokenId;
-        this.chunked = chunked;
+    @Test
+    public void testSupports_allSupported_returnTrue() {
+        boolean supports = rdbContactStorage.supports(ContactField.SUR_NAME, ContactField.TITLE);
+        assertTrue(supports);
     }
 
-    @Override
-    public PortableAttachmentToken call() throws Exception {
-        AttachmentTokenRegistry registry = AttachmentTokenRegistry.getInstance();
-        if (null == registry) {
-            return new PortableAttachmentToken(null);
-        }
-        AttachmentToken token = registry.getToken(tokenId, chunked, false);
-        return new PortableAttachmentToken(token);
+    @Test
+    public void testSupports_providedOneSupported_returnTrue() {
+        boolean supports = rdbContactStorage.supports(ContactField.CELLULAR_TELEPHONE1);
+        assertTrue(supports);
     }
 
-    @Override
-    public int getClassId() {
-        return 107;
+    @Test
+    public void testSupports_providedOneNotSupported_returnFalse() {
+        boolean supports = rdbContactStorage.supports(ContactField.IMAGE1_URL);
+        assertFalse(supports);
     }
 
-    @Override
-    public void writePortable(PortableWriter writer) throws IOException {
-        writer.writeUTF(FIELD_ID, tokenId);
-        writer.writeBoolean(FIELD_CHUNKED, chunked);
+    @Test
+    public void testSupports_multipleProvidedOneNotSupported_returnFlase() {
+        boolean supports = rdbContactStorage.supports(ContactField.CELLULAR_TELEPHONE1, ContactField.CITY_HOME, ContactField.USERFIELD15, ContactField.TELEPHONE_CALLBACK, ContactField.LAST_MODIFIED_OF_NEWEST_ATTACHMENT, ContactField.DEFAULT_ADDRESS, ContactField.TELEPHONE_PRIMARY);
+        assertFalse(supports);
     }
 
-    @Override
-    public void readPortable(PortableReader reader) throws IOException {
-        this.tokenId = reader.readUTF(FIELD_ID);
-        this.chunked = reader.readBoolean(FIELD_CHUNKED);
+    @Test
+    public void testSupports_allFieldsProvidedThatContainNotSupportedOnes_returnFalse() {
+        boolean supports = rdbContactStorage.supports(ContactField.values());
+        assertFalse(supports);
     }
 
 }

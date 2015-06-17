@@ -53,6 +53,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
+import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
 
 /**
  * {@link UnitTests}
@@ -61,7 +62,8 @@ import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    DeduplicatorTest.class
+    DeduplicatorTest.class,
+    RdbContactStorageTest.class
 })
 public class UnitTests {
 

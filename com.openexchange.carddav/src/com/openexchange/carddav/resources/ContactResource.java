@@ -49,16 +49,13 @@
 
 package com.openexchange.carddav.resources;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
-import com.openexchange.carddav.mapping.CardDAVMapper;
+import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -66,11 +63,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
-import com.openexchange.groupware.tools.mappings.Mapping;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -83,357 +76,347 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class ContactResource extends CardDAVResource {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactResource.class);
-	private static final int MAX_RETRIES = 3;
+    private static final int MAX_RETRIES = 3;
 
     private boolean exists = false;
     private Contact contact = null;
-    private int retryCount = 0;
     private String parentFolderID = null;
-    private String vCardId;
+
+    private ThresholdFileHolder bodyFileHolder = null;
 
     /**
      * Creates a new {@link ContactResource} representing an existing contact.
      *
-     * @param contact the contact
-     * @param factory the CardDAV factory
-	 * @param url the WebDAV URL
+     * @param contact The contact
+     * @param factory The CardDAV factory
+     * @param url The WebDAV URL
      */
-	public ContactResource(Contact contact, GroupwareCarddavFactory factory, WebdavPath url) {
-		super(factory, url);
-		this.contact = contact;
-		this.exists = null != contact;
-	}
+    public ContactResource(Contact contact, GroupwareCarddavFactory factory, WebdavPath url) {
+        super(factory, url);
+        this.contact = contact;
+        this.exists = null != contact;
+    }
 
-	/**
-	 * Creates a new placeholder {@link ContactResource} at the specified URL.
-	 *
-     * @param factory the CardDAV factory
-	 * @param url the WebDAV URL
-	 * @param parentFolderID the ID of the parent folder
-	 * @throws WebdavProtocolException
-	 */
+    /**
+     * Creates a new placeholder {@link ContactResource} at the specified URL.
+     *
+     * @param factory The CardDAV factory
+     * @param url The WebDAV URL
+     * @param parentFolderID The ID of the parent folder
+     * @throws WebdavProtocolException
+     */
     public ContactResource(GroupwareCarddavFactory factory, WebdavPath url, String parentFolderID) throws WebdavProtocolException {
-    	this(null, factory, url);
-    	this.parentFolderID = parentFolderID;
+        this(null, factory, url);
+        this.parentFolderID = parentFolderID;
     }
 
-	@Override
-	public void create() throws WebdavProtocolException {
-		if (this.exists()) {
-			throw protocolException(HttpServletResponse.SC_CONFLICT);
-		} else if (null == this.contact) {
-			throw protocolException(HttpServletResponse.SC_NOT_FOUND);
-		}
-
+    @Override
+    public void create() throws WebdavProtocolException {
+        String vCardID = null;
+        boolean created = false;
         try {
-		    if (false == contact.getMarkAsDistribtuionlist()) {
-		        if (vCardId == null) {
-		            storeVCard();
-		        }
-	            /*
-	             * Insert contact
-	             */
-		        this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
-	            LOG.debug("{}: created.", this.getUrl());
-		    } else {
-	            /*
-	             * Insert & delete not supported contact (next sync cleans up the client)
-	             */
-                LOG.warn("{}: contact groups not supported, performing immediate deletion of this resource.", this.getUrl());
-		        contact.removeDistributionLists();
-		        contact.removeNumberOfDistributionLists();
-                this.factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
-                this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-                    Integer.toString(contact.getObjectID()), contact.getLastModified());
-		    }
-        } catch (OXException e) {
-        	if (handle(e)) {
-        		this.create();
-        	} else {
-                if (vCardId != null && contact.getObjectID() == 0) {
-                    factory.getVCardStorageService().deleteVCard(vCardId, factory.getSession().getContextId());
+            if (exists()) {
+                throw protocolException(HttpServletResponse.SC_CONFLICT);
+            } else if (null == contact) {
+                throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            }
+            if (contact.getMarkAsDistribtuionlist()) {
+                /*
+                 * insert & delete not supported contact group (next sync cleans up the client)
+                 */
+                try {
+                    LOG.warn("{}: contact groups not supported, performing immediate deletion of this resource.", this.getUrl());
+                    contact.removeDistributionLists();
+                    contact.removeNumberOfDistributionLists();
+                    factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
+                    factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
+                        Integer.toString(contact.getObjectID()), contact.getLastModified());
+                } catch (OXException e) {
+                    throw protocolException(e);
                 }
-        	}
-        }
-	}
-
-	@Override
-	public boolean exists() throws WebdavProtocolException {
-		return this.exists;
-	}
-
-	@Override
-	public void delete() throws WebdavProtocolException {
-		if (false == this.exists()) {
-			throw protocolException(HttpServletResponse.SC_NOT_FOUND);
-		}
-		
-		vCardId = contact.getVCardId();
-    	try {
-    		/*
-    		 * Delete contact
-    		 */
-        	this.factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-        			Integer.toString(contact.getObjectID()), contact.getLastModified());
-
-        	if (vCardId != null) {
-        	    factory.getVCardStorageService().deleteVCard(vCardId, factory.getSession().getContextId());
-        	}
-            LOG.debug("{}: deleted.", this.getUrl());
-            this.contact = null;
-        } catch (OXException e) {
-        	if (handle(e)) {
-        		delete();
-        	}
-        }
-    	
-	}
-
-	@Override
-	public void save() throws WebdavProtocolException {
-		if (false == this.exists()) {
-			throw protocolException(HttpServletResponse.SC_NOT_FOUND);
-		}
-		
-		String originalVCardId = contact.getVCardId();
-        try {
-            if (vCardId == null) {
-                storeVCard();
+            } else {
+                /*
+                 * store original vCard if possible
+                 */
+                ContactService contactService = factory.getContactService();
+                String folderID = Integer.toString(contact.getParentFolderID());
+                if (null != bodyFileHolder && contactService.supports(factory.getSession(), folderID, ContactField.VCARD_ID)) {
+                    VCardStorageService vCardStorage = factory.getVCardStorageService();
+                    if (null != vCardStorage) {
+                        vCardID = vCardStorage.saveVCard(bodyFileHolder.getStream(), factory.getSession().getContextId());
+                        LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
+                        contact.setVCardId(vCardID);
+                    }
+                }
+                /*
+                 * save contact, trying again in case of recoverable errors
+                 */
+                for (int i = 0; i <= MAX_RETRIES && false == created; i++) {
+                    try {
+                        factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
+                        LOG.debug("{}: created.", getUrl());
+                        created = true;
+                    } catch (OXException e) {
+                        if (false == handle(e)) {
+                            break;
+                        }
+                    }
+                }
             }
-        	/*
-        	 * Update contact
-        	 */
-        	this.factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-        			Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
-            LOG.debug("{}: saved.", this.getUrl());
         } catch (OXException e) {
-        	if (handle(e)) {
-        		save();
-        	} else {
-        	    if (originalVCardId != null) {
-        	        contact.setVCardId(originalVCardId);
-        	    }
-        	    if (vCardId != null) {
-                    factory.getVCardStorageService().deleteVCard(vCardId, factory.getSession().getContextId());
-        	    }
-        	}
+            throw protocolException(e);
         } finally {
-            if (vCardId != null && originalVCardId != null && !vCardId.equals(originalVCardId)) {
-                factory.getVCardStorageService().deleteVCard(originalVCardId, factory.getSession().getContextId());
+            closeBodyFileHolder();
+            if (null != vCardID && false == created) {
+                deleteVCard(vCardID);
             }
         }
-	}
+    }
 
-	@Override
-	public Date getCreationDate() throws WebdavProtocolException {
-		return null != this.contact ? contact.getCreationDate() : new Date(0);
-	}
+    @Override
+    public boolean exists() throws WebdavProtocolException {
+        return this.exists;
+    }
 
-	@Override
-	public Date getLastModified() throws WebdavProtocolException {
-		return null != this.contact ? contact.getLastModified() : new Date(0);
-	}
-
-	@Override
-	public String getDisplayName() throws WebdavProtocolException {
-		return null != this.contact ? this.contact.getDisplayName() : null;
-	}
-
-	@Override
-	public void setDisplayName(String displayName) throws WebdavProtocolException {
-		if (null != this.contact) {
-			this.contact.setDisplayName(displayName);
-		}
-	}
-
-	@Override
-	protected void applyVersitObject(VersitObject versitObject) throws WebdavProtocolException {
-		try {
-		    if (null == versitObject) {
-                return;
+    @Override
+    public void delete() throws WebdavProtocolException {
+        boolean deleted = false;
+        String vCardID = null != contact ? contact.getVCardId() : null;
+        try {
+            if (false == exists()) {
+                throw protocolException(HttpServletResponse.SC_NOT_FOUND);
             }
-			/*
-			 * Deserialize contact
-			 */
-			Contact newContact = isGroup(versitObject) ? deserializeAsTemporaryGroup(versitObject) : deserializeAsContact(versitObject);
-		    if (this.exists()) {
-		    	/*
-		    	 * Update previously set metadata
-		    	 */
-		        newContact.setParentFolderID(this.contact.getParentFolderID());
-		        newContact.setContextId(this.contact.getContextId());
-		        newContact.setLastModified(this.contact.getLastModified());
-                newContact.setObjectID(this.contact.getObjectID());
-                newContact.setVCardId(this.contact.getVCardId());
-		        /*
-		         * Check for property changes
-		         */
-				for (final Mapping<? extends Object, Contact> mapping : CardDAVMapper.getInstance().getMappings().values()) {
-					if (mapping.isSet(this.contact) && false == mapping.isSet(newContact)) {
-						// set this one explicitly so that the property gets removed during update
-						mapping.copy(newContact, newContact);
-					} else if (mapping.isSet(newContact) && mapping.equals(contact, newContact)) {
-						// this is no change, so ignore in update
-						mapping.remove(newContact);
-					}
-				}
-		        /*
-		         * Never update the UID
-		         */
-		        newContact.removeUid();
-		    } else {
-		    	/*
-		    	 * Apply default metadata
-		    	 */
-		        newContact.setContextId(this.factory.getSession().getContextId());
-		        newContact.setParentFolderID(Tools.parse(this.parentFolderID));
-	    		if (null != this.url) {
-	    			String extractedUID = Tools.extractUID(url);
-	    			if (null != extractedUID && false == extractedUID.equals(newContact.getUid())) {
-	                	/*
-	                	 * Always extract the UID from the URL; the Addressbook client in MacOS 10.6 uses different UIDs in
-	                	 * the WebDAV path and the UID field in the vCard, so we need to store this UID in the contact
-	                	 * resource, too, to recognize later updates on the resource.
-	                	 */
-	            		LOG.debug("{}: Storing WebDAV resource name in filename.", getUrl());
-	            		newContact.setFilename(extractedUID);
-	            	}
-	    		}
-		    }
-		    /*
-		     * Take over new contact
-		     */
-		    this.contact = newContact;
-		} catch (ConverterException e) {
-			throw protocolException(e);
-		} catch (OXException e) {
-			throw protocolException(e);
-		}
-	}
-
-	@Override
-	protected String generateVCard() throws WebdavProtocolException {
-		return serializeAsContact();
-	}
-
-	@Override
-	protected String getUID() {
-		return null != this.contact ? this.contact.getUid() : Tools.extractUID(getUrl());
-	}
-
-	/**
-	 * Stores the original vCard binary if the underlying contact service is capable of storing the reference.
-	 *
-	 * @return The vCard identifier of the VCardStorage or null if saving failed or is not possbible.
-	 * @throws OXException 
-	 */
-    private void storeVCard() throws OXException {
-        if (!factory.getContactService().supports(factory.getSession(), Integer.toString(contact.getParentFolderID()), ContactField.VCARD_ID)) {
-            return;
-        }
-
-        try (InputStream stream = new ByteArrayInputStream(getOriginalVCard().getBytes())) {
-            vCardId = factory.getVCardStorageService().saveVCard(stream, factory.getSession().getContextId());
-        } catch (IOException e) {
-            LOG.warn("Unable to store vcard.", e);
-        }
-
-        if (vCardId != null) {
-            contact.setVCardId(vCardId);
+            /*
+             * delete contact, trying again in case of recoverable errors
+             */
+            for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
+                try {
+                    factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
+                        Integer.toString(contact.getObjectID()), contact.getLastModified());
+                    LOG.debug("{}: deleted.", getUrl());
+                    deleted = true;
+                    contact = null;
+                    exists = false;
+                } catch (OXException e) {
+                    if (false == handle(e)) {
+                        break;
+                    }
+                }
+            }
+        } finally {
+            if (null != vCardID && deleted) {
+                deleteVCard(vCardID);
+            }
         }
     }
 
-	private Contact deserializeAsContact(VersitObject versitObject) throws OXException, ConverterException {
-	    try (InputStream stream = new ByteArrayInputStream(getOriginalVCard().getBytes())) {
-	        return factory.getVCardService().importVCard(stream, null, null);	        
-	    } catch (IOException e) {
-            throw super.protocolException(e);
+    @Override
+    public void save() throws WebdavProtocolException {
+        String vCardID = null;
+        String previousVCardID = null;
+        boolean saved = false;
+        try {
+            if (false == exists()) {
+                throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            }
+            /*
+             * store original vCard if possible
+             */
+            previousVCardID = contact.getVCardId();
+            ContactService contactService = factory.getContactService();
+            String folderID = Integer.toString(contact.getParentFolderID());
+            if (null != bodyFileHolder && contactService.supports(factory.getSession(), folderID, ContactField.VCARD_ID)) {
+                VCardStorageService vCardStorage = factory.getVCardStorageService();
+                if (null != vCardStorage) {
+                    vCardID = vCardStorage.saveVCard(bodyFileHolder.getStream(), factory.getSession().getContextId());
+                    LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
+                    contact.setVCardId(vCardID);
+                }
+            }
+            /*
+             * update contact, trying again in case of recoverable errors
+             */
+            for (int i = 0; i < MAX_RETRIES && false == saved; i++) {
+                try {
+                    factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
+                        Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
+                    LOG.debug("{}: saved.", getUrl());
+                    saved = true;
+                } catch (OXException e) {
+                    if (false == handle(e)) {
+                        break;
+                    }
+                }
+            }
+        } catch (OXException e) {
+            throw protocolException(e);
+        } finally {
+            closeBodyFileHolder();
+            if (saved) {
+                deleteVCard(previousVCardID);
+            } else if (null != vCardID) {
+                deleteVCard(vCardID);
+            }
         }
-	}
-
-    private Contact deserializeAsTemporaryGroup(VersitObject versitObject) throws OXException {
-        Contact contact = new Contact();
-        contact.setMarkAsDistributionlist(true);
-        String formattedName = versitObject.getProperty("FN").getValue().toString();
-        contact.setDisplayName(formattedName);
-        contact.setSurName(formattedName);
-        String uid = versitObject.getProperty("UID").getValue().toString();
-        if (null != uid && 0 < uid.length()) {
-            contact.setUid(uid);
-        }
-        return contact;
     }
 
-    private String serializeAsContact() throws WebdavProtocolException {
-        InputStream optVCard = null;
-        if (contact.containsVCardId() && contact.getVCardId() != null) {
-            optVCard = factory.getVCardStorageService().getVCard(contact.getVCardId(), contact.getContextId());
-        }
+    @Override
+    public Date getCreationDate() throws WebdavProtocolException {
+        return null != contact ? contact.getCreationDate() : new Date(0);
+    }
 
-        try (InputStream exportContact = factory.getVCardService().exportContact(contact, optVCard, null)) {
-            return IOUtils.toString(exportContact, "UTF-8");
-        } catch (OXException | IOException e) {
-            throw super.protocolException(e);
+    @Override
+    public Date getLastModified() throws WebdavProtocolException {
+        return null != contact ? contact.getLastModified() : new Date(0);
+    }
+
+    @Override
+    public String getDisplayName() throws WebdavProtocolException {
+        return null != contact ? contact.getDisplayName() : null;
+    }
+
+    @Override
+    public void setDisplayName(String displayName) throws WebdavProtocolException {
+        if (null != contact) {
+            contact.setDisplayName(displayName);
         }
     }
 
-	/**
-	 * Tries to handle an exception.
-	 *
-	 * @param e the exception to handle
-	 * @return <code>true</code>, if the operation should be retried,
-	 * <code>false</code>, otherwise.
-	 * @throws WebdavProtocolException
-	 */
-	private boolean handle(OXException e) throws WebdavProtocolException {
-		boolean retry = false;
-    	if (Tools.isImageProblem(e)) {
-    		/*
-    		 * image problem, handle by create without image
-    		 */
-        	LOG.warn("{}: {} - removing image and trying again.", this.getUrl(), e.getMessage());
-        	this.contact.removeImage1();
-        	retry = true;
+    @Override
+    public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
+        try {
+            /*
+             * park body in file holder for accessing the original vCard later before parsing
+             */
+            closeBodyFileHolder();
+            bodyFileHolder = new ThresholdFileHolder().write(body);
+            if (0 >= bodyFileHolder.getCount()) {
+                throw this.protocolException(HttpServletResponse.SC_BAD_REQUEST);
+            }
+            if (false == exists()) {
+                /*
+                 * import vCard as new contact
+                 */
+                contact = factory.getVCardService().importVCard(bodyFileHolder.getStream(), null, null);
+                if (null != url) {
+                    String extractedUID = Tools.extractUID(url);
+                    if (null != extractedUID && false == extractedUID.equals(contact.getUid())) {
+                        /*
+                         * Always extract the UID from the URL; the Addressbook client in MacOS 10.6 uses different UIDs in
+                         * the WebDAV path and the UID field in the vCard, so we need to store this UID in the contact
+                         * resource, too, to recognize later updates on the resource.
+                         */
+                        LOG.debug("{}: Storing WebDAV resource name in filename.", getUrl());
+                        contact.setFilename(extractedUID);
+                    }
+                }
+                contact.setContextId(factory.getSession().getContextId());
+                contact.setParentFolderID(Tools.parse(parentFolderID));
+            } else {
+                /*
+                 * import vCard and merge with existing contact, ensuring that some important properties don't change
+                 */
+                int parentFolderID = contact.getParentFolderID();
+                int contextID = contact.getContextId();
+                Date lastModified = contact.getLastModified();
+                int objectID = contact.getObjectID();
+                String vCardID = contact.getVCardId();
+                contact = factory.getVCardService().importVCard(bodyFileHolder.getStream(), contact, null);
+                contact.removeUid();
+                contact.setParentFolderID(parentFolderID);
+                contact.setContextId(contextID);
+                contact.setLastModified(lastModified);
+                contact.setObjectID(objectID);
+                contact.setVCardId(vCardID);
+            }
+        } catch (OXException e) {
+            throw protocolException(e, HttpServletResponse.SC_BAD_REQUEST);
+        } finally {
+            Streams.close(body);
+        }
+    }
+
+    @Override
+    public InputStream getBody() throws WebdavProtocolException {
+        /*
+         * retrieve an original vCard if available
+         */
+        InputStream originalVCard = null;
+        String vCardID = contact.getVCardId();
+        if (null != vCardID) {
+            VCardStorageService vCardStorage = factory.getVCardStorageService();
+            if (null != vCardStorage) {
+                originalVCard = vCardStorage.getVCard(vCardID, factory.getSession().getContextId());
+            }
+        }
+        /*
+         * export current contact data & return resulting vCard stream
+         */
+        try {
+            return factory.getVCardService().exportContact(contact, originalVCard, null);
+        } catch (OXException e) {
+            throw protocolException(e);
+        } finally {
+            Streams.close(originalVCard);
+        }
+    }
+
+    @Override
+    protected String getUID() {
+        return null != contact ? contact.getUid() : Tools.extractUID(getUrl());
+    }
+
+    /**
+     * Tries to handle an exception.
+     *
+     * @param e the exception to handle
+     * @return <code>true</code>, if the operation should be retried,
+     * <code>false</code>, otherwise.
+     * @throws WebdavProtocolException
+     */
+    private boolean handle(OXException e) throws WebdavProtocolException {
+        LOG.debug("Trying to handle exception: {}", e.getMessage(), e);
+        if (Tools.isImageProblem(e)) {
+            /*
+             * image problem, handle by create without image
+             */
+            LOG.warn("{}: {} - removing image and trying again.", getUrl(), e.getMessage());
+            contact.removeImage1();
+            return true;
         } else if (Tools.isDataTruncation(e)) {
             /*
              * handle by trimming truncated fields
              */
-            if (this.trimTruncatedAttributes(e)) {
-                LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
-                retry = true;
+            if (trimTruncatedAttributes(e)) {
+                LOG.warn("{}: {} - trimming fields and trying again.", getUrl(), e.getMessage());
+                return true;
             }
         } else if (Tools.isIncorrectString(e)) {
             /*
              * handle by removing incorrect characters
              */
-            if (this.replaceIncorrectStrings(e, "")) {
-                LOG.warn("{}: {} - removing incorrect characters and trying again.", this.getUrl(), e.getMessage());
-                retry = true;
+            if (replaceIncorrectStrings(e, "")) {
+                LOG.warn("{}: {} - removing incorrect characters and trying again.", getUrl(), e.getMessage());
+                return true;
             }
-    	} else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
-    		/*
-    		 * handle by overriding sync-token
-    		 */
-    		LOG.debug("{}: {}", this.getUrl(), e.getMessage());
-        	LOG.debug("{}: overriding next sync token for client recovery.", this.getUrl());
-			this.factory.overrideNextSyncToken();
-    	} else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
-    		throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
-    	} else {
-    		throw super.protocolException(e);
-    	}
-
-    	if (retry) {
-    		retryCount++;
-    		return retryCount <= MAX_RETRIES;
-    	} else {
-    		return false;
-    	}
-	}
+        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            /*
+             * handle by overriding sync-token
+             */
+            LOG.debug("{}: {}", this.getUrl(), e.getMessage());
+            LOG.debug("{}: overriding next sync token for client recovery.", this.getUrl());
+            this.factory.overrideNextSyncToken();
+        } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            throw super.protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else {
+            throw super.protocolException(e);
+        }
+        return false;
+    }
 
     private boolean trimTruncatedAttributes(OXException e) {
         try {
-            return MappedTruncation.truncate(e.getProblematics(), this.contact);
+            return MappedTruncation.truncate(e.getProblematics(), contact);
         } catch (OXException x) {
             LOG.warn("{}: error trying to handle truncated attributes", getUrl(), x);
             return false;
@@ -449,9 +432,28 @@ public class ContactResource extends CardDAVResource {
         }
     }
 
-    private static boolean isGroup(VersitObject versitObject) {
-        com.openexchange.tools.versit.Property property = versitObject.getProperty("X-ADDRESSBOOKSERVER-KIND");
-        return null != property  && "group".equals(property.getValue());
+    /**
+     * Silently closes the body file holder if set.
+     */
+    private void closeBodyFileHolder() {
+        if (null != bodyFileHolder) {
+            Streams.close(bodyFileHolder);
+            bodyFileHolder = null;
+        }
+    }
+
+    /**
+     * Deletes a vCard silently.
+     *
+     * @param vCardID The identifier of the vCard to delete, or <code>null</code> to do nothing
+     */
+    private void deleteVCard(String vCardID) {
+        if (null != vCardID) {
+            VCardStorageService vCardStorage = factory.getVCardStorageService();
+            if (null != vCardStorage) {
+                vCardStorage.deleteVCard(vCardID, factory.getSession().getContextId());
+            }
+        }
     }
 
 }

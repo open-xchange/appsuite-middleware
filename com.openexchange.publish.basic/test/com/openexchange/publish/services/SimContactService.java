@@ -443,6 +443,6 @@ public class SimContactService implements ContactService {
 
     @Override
     public boolean supports(Session session, String folderID, ContactField... fields) throws OXException {
-        return true;
+        return false;
     }
 }

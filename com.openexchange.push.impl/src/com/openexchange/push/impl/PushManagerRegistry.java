@@ -231,7 +231,7 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     private void startPermanentListenersFor(Collection<PushUser> pushUsers, PushManagerExtendedService extendedService, boolean allowPermanentPush) {
         // Always called when holding synchronized lock
-        if (allowPermanentPush) {
+        if (allowPermanentPush && extendedService.supportsPermanentListeners()) {
             for (PushUser pushUser : pushUsers) {
                 try {
                     PushListener pl = extendedService.startPermanentListener(pushUser);
@@ -362,16 +362,20 @@ public final class PushManagerRegistry implements PushListenerService {
                 for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                     PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
+                        PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
                         PermanentListenerRescheduler rescheduler = reschedulerRef.get();
                         if (null == rescheduler) {
-                            startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
+                            startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
                         } else {
-                            try {
-                                rescheduler.planReschedule(true);
-                            } catch (OXException e) {
-                                LOG.error("Failed to plan rescheduling", e);
+                            if (extendedService.supportsPermanentListeners()) {
+                                try {
+                                    rescheduler.planReschedule(true);
+                                } catch (OXException e) {
+                                    LOG.error("Failed to plan rescheduling", e);
+                                }
                             }
                         }
+
                     }
                 }
             } else {
@@ -388,6 +392,7 @@ public final class PushManagerRegistry implements PushListenerService {
                     }
                 }
             }
+
             return inserted;
         }
     }

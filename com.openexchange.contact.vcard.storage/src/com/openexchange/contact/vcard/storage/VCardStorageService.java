@@ -69,16 +69,6 @@ public interface VCardStorageService {
     String saveVCard(InputStream file, int contextId);
 
     /**
-     * Updates denoted VCard content with the given one
-     *
-     * @param file The stream to save as a file
-     * @param contextId The context identifier
-     * @param identifier The VCard identifier
-     * @return The new VCard identifier or <code>null</code> if an error occurred
-     */
-    String updateVCard(InputStream file, int contextId, String identifier);
-
-    /**
      * Gets denoted VCard content as a stream.
      *
      * @param identifier The VCard identifier

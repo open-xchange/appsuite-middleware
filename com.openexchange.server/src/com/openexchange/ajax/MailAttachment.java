@@ -94,7 +94,7 @@ public class MailAttachment extends AJAXServlet {
     }
 
     @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Tools.disableCaching(resp);
         /*
          * Get attachment
@@ -106,9 +106,12 @@ public class MailAttachment extends AJAXServlet {
                 return;
             }
 
+            // Check if client requests a range
+            boolean hasRangeHeader = com.openexchange.tools.servlet.http.Tools.hasRangeHeader(req);
+
             // Look-up attachment by token identifier
             AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
-            AttachmentToken token = service.getToken(id);
+            AttachmentToken token = service.getToken(id, hasRangeHeader);
             if (null == token) {
                 // No such attachment
                 Tools.sendErrorPage(resp, HttpServletResponse.SC_NOT_FOUND, MailExceptionCode.ATTACHMENT_EXPIRED.create().getDisplayMessage(Locale.US));

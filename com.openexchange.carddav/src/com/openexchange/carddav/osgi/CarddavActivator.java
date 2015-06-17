@@ -68,7 +68,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class, VCardService.class, VCardStorageService.class };
+        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class, VCardService.class };
     }
 
     @Override
@@ -85,6 +85,7 @@ public class CarddavActivator extends HousekeepingActivator {
             this.mixin = mixin;
 
             registerService(PathRegistration.class, new PathRegistration("carddav"));
+            trackService(VCardStorageService.class);
 
             openTrackers();
         } catch (Exception e) {

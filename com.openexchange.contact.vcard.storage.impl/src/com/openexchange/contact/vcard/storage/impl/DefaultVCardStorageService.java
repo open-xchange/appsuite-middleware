@@ -92,19 +92,6 @@ public class DefaultVCardStorageService implements VCardStorageService {
         return new SaveFileAction(getFileStorage(contextId), file, -1, false);
     }
 
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String updateVCard(InputStream file, int contextId, String identifier) {
-        Validate.notNull(file, "VCard InputStream might not be null!");
-
-        deleteVCard(identifier, contextId);
-        String saveVCard = saveVCard(file, contextId);
-        return saveVCard;
-    }
-
     /**
      * {@inheritDoc}
      */

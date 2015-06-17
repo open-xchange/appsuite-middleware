@@ -50,23 +50,21 @@
 package com.openexchange.dav.carddav.tests;
 
 import java.util.List;
-
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.w3c.dom.Node;
-
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.UserAgents;
 
 /**
  * {@link CollectionsTest}
- * 
- * Tests discovery of addressbook collections below the root collection. 
- * 
+ *
+ * Tests discovery of addressbook collections below the root collection.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class CollectionsTest extends CardDAVTest {
@@ -74,7 +72,7 @@ public class CollectionsTest extends CardDAVTest {
 	public CollectionsTest(String name) {
 		super(name);
 	}
-	
+
 	public void testMacOSClients() throws Exception {
 		for (String userAgent : UserAgents.MACOS_ALL) {
 			super.getWebDAVClient().setUserAgent(userAgent);
@@ -84,7 +82,7 @@ public class CollectionsTest extends CardDAVTest {
 			discoverGABCollection(false);
 		}
 	}
-	
+
 	public void testIOSClients() throws Exception {
 		for (String userAgent : UserAgents.IOS_ALL) {
 			super.getWebDAVClient().setUserAgent(userAgent);
@@ -94,7 +92,7 @@ public class CollectionsTest extends CardDAVTest {
 			discoverGABCollection(true);
 		}
 	}
-	
+
 	public void testOtherClients() throws Exception {
 		for (String userAgent : UserAgents.OTHER_ALL) {
 			super.getWebDAVClient().setUserAgent(userAgent);
@@ -104,13 +102,13 @@ public class CollectionsTest extends CardDAVTest {
 			discoverGABCollection(true);
 		}
 	}
-	
+
 	private void discoverRoot() throws Exception {
 		DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/", 
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
     	Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
@@ -134,7 +132,7 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", 
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         MultiStatusResponse aggregatedCollectionResponse = null;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
@@ -152,7 +150,7 @@ public class CollectionsTest extends CardDAVTest {
 	        assertNull("Aggregated collection found at /carddav/Contacts", aggregatedCollectionResponse);
         }
 	}
-	
+
 	private void discoverContactsCollection(boolean shouldExist) throws Exception {
 		String folderName = super.getDefaultFolder().getFolderName();
 		DavPropertyNameSet props = new DavPropertyNameSet();
@@ -171,15 +169,18 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", 
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         boolean found = false;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
         	String displayName = super.extractTextContent(DavPropertyName.DISPLAYNAME, response);
+        	if (null != displayName && 0 < displayName.length() && "\u200A".equals(displayName.substring(0, 1))) {
+        	    displayName = displayName.substring(1);
+        	}
         	if (folderName.equals(displayName)) {
         		found = true;
         		break;
-        	}        	
+        	}
         }
         if (shouldExist) {
         	assertTrue("Default contact folder collection not found below /carddav/", found);
@@ -187,7 +188,7 @@ public class CollectionsTest extends CardDAVTest {
         	assertFalse("Default contact folder collection found below /carddav/", found);
         }
 	}
-	
+
 	private void discoverGABCollection(boolean shouldExist) throws Exception {
 		String folderName = super.getGABFolder().getFolderName();
 		DavPropertyNameSet props = new DavPropertyNameSet();
@@ -206,7 +207,7 @@ public class CollectionsTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCETYPE);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         props.add(PropertyNames.SYNC_TOKEN);
-        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/", 
+        PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/carddav/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_1);
         boolean found = false;
         for (MultiStatusResponse response : super.getWebDAVClient().doPropFind(propFind)) {
@@ -214,7 +215,7 @@ public class CollectionsTest extends CardDAVTest {
         	if (folderName.equals(displayName)) {
         		found = true;
         		break;
-        	}        	
+        	}
         }
         if (shouldExist) {
         	assertTrue("GAB folder collection not found below /carddav/", found);

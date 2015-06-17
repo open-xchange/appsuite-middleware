@@ -73,11 +73,13 @@ import com.openexchange.tools.webdav.OXServlet;
 public class CardDAV extends OXServlet {
 
 	private static final long serialVersionUID = -6381396333467867154L;
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAV.class);
-
     private static volatile ServiceLookup services;
 
+    /**
+     * Sets the service lookup reference.
+     *
+     * @param serviceLookup The service lookup
+     */
     public static void setServiceLookup(ServiceLookup serviceLookup) {
         services = serviceLookup;
     }

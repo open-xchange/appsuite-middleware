@@ -55,17 +55,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.user.UserService;
 import com.openexchange.webdav.InfostorePerformer;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
@@ -161,10 +155,7 @@ public class CarddavPerformer implements SessionHolder {
         WebdavAction put;
         WebdavAction trace;
 
-        this.factory = new GroupwareCarddavFactory(services.getService(FolderService.class), this,
-        		services.getService(ConfigViewFactory.class), services.getService(UserService.class),
-        		services.getService(ContactService.class), services.getService(VCardService.class),
-        		services.getService(VCardStorageService.class));
+        this.factory = new GroupwareCarddavFactory(services, this);
 
         unlock = prepare(new WebdavUnlockAction(), true, true, new WebdavIfAction(0, false, false));
         propPatch = prepare(new WebdavProppatchAction(protocol), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, false));

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
@@ -679,12 +678,7 @@ public class LoginServlet extends AJAXServlet {
                 return;
             }
         } catch (RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            int retryAfter = e.getRetryAfter();
-            if (retryAfter > 0) {
-                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(resp);
         } finally {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }
