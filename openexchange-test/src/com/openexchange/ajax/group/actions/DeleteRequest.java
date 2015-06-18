@@ -84,6 +84,10 @@ public final class DeleteRequest extends AbstractGroupRequest<DeleteResponse> {
         this(group.getIdentifier(), group.getLastModified(), failOnError);
     }
 
+    public DeleteRequest(Group group) {
+        this(group, true);
+    }
+
     @Override
     public Object getBody() throws JSONException {
         final JSONObject json = new JSONObject();
