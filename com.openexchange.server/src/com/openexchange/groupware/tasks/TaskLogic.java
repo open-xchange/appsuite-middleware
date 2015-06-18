@@ -67,6 +67,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupStorage;
@@ -342,15 +343,15 @@ public final class TaskLogic {
      * This method checks if the necessary fields for a recurring task are defined.
      *
      * @param task Recurring task.
-     * @param oldTask Original recurring task on update.
+     * @param oldTask Original recurring task on update. Is <code>null</code> when a task is created.
      * @throws OXException if a necessary recurrence attribute is missing.
      */
-    private static void checkRecurrence(final Task task, final Task oldTask) throws OXException {
+    private static void checkRecurrence(Task task, @Nullable Task oldTask) throws OXException {
         if (CalendarObject.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && CalendarObject.NO_RECURRENCE == oldTask.getRecurrenceType()) {
             return;
         }
         // First simple checks on start and end date.
-        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType() || CalendarObject.NO_RECURRENCE != oldTask.getRecurrenceType()) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType() || (null != oldTask && CalendarObject.NO_RECURRENCE != oldTask.getRecurrenceType())) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
                     throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
