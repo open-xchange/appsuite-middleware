@@ -150,13 +150,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    void updateInternal(final Context ctx, final Connection con,
-        final int taskId, final Set<InternalParticipant> participants,
-        final StorageType type) throws OXException {
+    void updateInternal(Context ctx, Connection con, int taskId, Set<InternalParticipant> participants, StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
             // UPDATE table SET group_id=?, accepted=?, description=? WHERE cid=? AND task=? AND user=?
