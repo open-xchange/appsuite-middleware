@@ -56,7 +56,7 @@ import com.openexchange.java.Streams;
 /**
  * {@link Bug15241Test}
  *
- * vcf import failed
+ * Unable to import vcards from Apple Address Book
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */

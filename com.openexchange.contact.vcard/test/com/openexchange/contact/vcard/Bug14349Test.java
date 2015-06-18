@@ -47,57 +47,49 @@
  *
  */
 
-package com.openexchange.groupware.vcard;
+package com.openexchange.contact.vcard;
 
-import java.io.IOException;
-import java.util.List;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
- * Bug 14350
+ * {@link Bug14349Test}
  *
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * vcard: Nickname is imported with brackets around it
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MissingAddressesAfterImportTest extends AbstractVCardUnitTest {
+public class Bug14349Test extends VCardTest {
 
-    public String vcard =
-        "BEGIN:VCARD\n" +
-        "VERSION:3.0\n" +
-        "PRODID:OPEN-XCHANGE\n" +
-        "FN:Prinz\\, Tobias\n" +
-        "N:Prinz;Tobias;;;\n" +
-        "NICKNAME:Tierlieb\n" +
-        "BDAY:19810501\n" +
-        "ADR;TYPE=work:;;Broadway 3131 / 5th Ave;T\u00fcbingen;Baden-W\u00fcrttemberg;57621;Germany\n" +
-        "ADR;TYPE=home:;;Testroad 4711;Port de la V\u00e9rde;Skol-upon-sea;37542;France\n" +
-        "ORG:- deactivated -\n" +
-        "REV:20061204T160750.018Z\n" +
-        "UID:80@ox6.netline.de\n" +
-        "END:VCARD\n";
-
-    public void testBug14350() throws ConverterException, IOException {
-        checkAdresses(performTest("Test with mime type " + mime1, vcard, mime1));
+    /**
+     * Initializes a new {@link Bug14349Test}.
+     */
+    public Bug14349Test() {
+        super();
     }
 
-    public void testBug14350_2() throws ConverterException, IOException {
-        checkAdresses(performTest("Test with mime type " + mime2, vcard, mime2));
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "PRODID:OPEN-XCHANGE\n" +
+            "FN:Nachname, Vorname\n" +
+            "N:Nachname;Vorname;;;\n" +
+            "NICKNAME:Spitzname\n" +
+            "ADR;TYPE=work:;;;;;;\n" +
+            "ADR;TYPE=home:;;;;;;\n" +
+            "REV:20090902T125118.045Z\n" +
+            "UID:39614@192.168.33.100\n" +
+            "END:VCARD\n"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("Spitzname", contact.getNickname());
     }
 
-    private void checkAdresses(List<Contact> list) {
-        assertEquals("Should have parsed one contact", 1, list.size());
-        Contact actual = list.get(0);
-
-        assertEquals("Broadway 3131 / 5th Ave", actual.getStreetBusiness());
-        assertEquals("T\u00fcbingen", actual.getCityBusiness());
-        assertEquals("Baden-W\u00fcrttemberg", actual.getStateBusiness());
-        assertEquals("57621", actual.getPostalCodeBusiness());
-        assertEquals("Germany", actual.getCountryBusiness());
-
-        assertEquals("Testroad 4711", actual.getStreetHome());
-        assertEquals("Port de la V\u00e9rde", actual.getCityHome());
-        assertEquals("Skol-upon-sea", actual.getStateHome());
-        assertEquals("37542", actual.getPostalCodeHome());
-        assertEquals("France", actual.getCountryHome());
-    }
 }
