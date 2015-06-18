@@ -83,7 +83,7 @@ public class BasicTest extends VCardTest {
             "FN:Erika Mustermann\r\n"+
             "ORG:Wikipedia\r\n"+
             "TITLE:Oberleutnant\r\n"+
-            "PHOTO;JPEG:http://upload.wikimedia.org/wikipedia/commons/3/3d/Erika_Mustermann_2010.jpg\r\n"+
+            "PHOTO;JPEG:https://upload.wikimedia.org/wikipedia/commons/3/3d/Erika_Mustermann_2010.jpg\r\n"+
             "TEL;WORK;VOICE:(0221) 9999123\r\n"+
             "TEL;HOME;VOICE:(0221) 1234567\r\n"+
             "ADR;HOME:;;Heidestrasse 17;Koeln;;51147;Deutschland\r\n"+
@@ -127,7 +127,7 @@ public class BasicTest extends VCardTest {
             "FN:Erika Mustermann\r\n"+
             "ORG:Wikipedia\r\n"+
             "TITLE:Oberleutnant\r\n"+
-            "PHOTO;VALUE=URL;TYPE=JPEG:http://upload.wikimedia.org/wikipedia/commons/3/3d/Erika_Mustermann_2010.jpg\r\n"+
+            "PHOTO;VALUE=URL;TYPE=JPEG:https://upload.wikimedia.org/wikipedia/commons/3/3d/Erika_Mustermann_2010.jpg\r\n"+
             "TEL;TYPE=WORK,VOICE:+49 221 9999123\r\n"+
             "TEL;TYPE=HOME,VOICE:+49 221 1234567\r\n"+
             "ADR;TYPE=HOME:;;Heidestra\u00dfe 17;K\u00f6ln;;51147;Germany\r\n"+
@@ -173,7 +173,7 @@ public class BasicTest extends VCardTest {
             "FN:Erika Mustermann\r\n"+
             "ORG:Wikipedia\r\n"+
             "TITLE:Oberleutnant\r\n"+
-            "PHOTO;MEDIATYPE=image/jpeg:http://upload.wikimedia.org/wikipedia/commons/3/3d/Erika_Mustermann_2010.jpg\r\n"+
+            "PHOTO;MEDIATYPE=image/jpeg:https://upload.wikimedia.org/wikipedia/commons/3/3d/Erika_Mustermann_2010.jpg\r\n"+
             "TEL;TYPE=work,voice;VALUE=uri:tel:+49-221-9999123\r\n"+
             "TEL;TYPE=home,voice;VALUE=uri:tel:+49-221-1234567\r\n"+
             "ADR;TYPE=home;LABEL=\"Heidestra\u00dfe 17\\n51147 K\u00f6ln\\nDeutschland\"\r\n"+
@@ -285,7 +285,7 @@ public class BasicTest extends VCardTest {
             "EMAIL;TYPE=INTERNET:example@example.com\r\n" +
             "ADR;TYPE=HOME:;;42 Plantation St.;Baytown;LA;30314;United States of America\r\n" +
             "URL:https://www.google.com/\r\n" +
-            "PHOTO;VALUE=URL;TYPE=PNG:http://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Example_svg.svg/200px-Example_svg.svg.png\r\n" +
+            "PHOTO;VALUE=URL;TYPE=PNG:https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Example_svg.svg/200px-Example_svg.svg.png\r\n" +
             "AGENT:BEGIN:VCARD\r\n" +
             " VERSION:3.0\r\n" +
             " N:Doe;John;Q.,Public\r\n" +
@@ -295,7 +295,7 @@ public class BasicTest extends VCardTest {
             " TEL;TYPE=HOME,TYPE=VOICE:(404) 555-1213\r\n" +
             " EMAIL;TYPE=PREF,INTERNET:forrestgump@example.com\r\n" +
             " EMAIL;TYPE=INTERNET:example@example.com\r\n" +
-            " PHOTO;VALUE=URL;TYPE=PNG:http://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Example_svg.svg/200px-Example_svg.svg.png\r\n" +
+            " PHOTO;VALUE=URL;TYPE=PNG:https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Example_svg.svg/200px-Example_svg.svg.png\r\n" +
             " END:VCARD\r\n" +
             "END:VCARD"
         ;
