@@ -69,8 +69,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.LoginStep;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements LoginStep {
 
@@ -230,7 +230,7 @@ public class FacebookAPIStep extends AbstractStep<Contact[], Object> implements 
                 // add the image from a url to the contact
                 if (user.getPic() != null) {
                     try {
-                        OXContainerConverter.loadImageFromURL(contact, user.getPic().getValue());
+                        HTTPToolkit.loadImageFromURL(contact, user.getPic().getValue());
                     } catch (final ConverterException e) {
                         LOG.error("No valid picture could be found at this URL : {}", user.getPic().getValue());
                     }

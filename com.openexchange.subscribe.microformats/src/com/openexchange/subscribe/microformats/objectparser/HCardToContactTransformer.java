@@ -61,9 +61,9 @@ import org.microformats.hCard.HCard.Tel;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.encoding.Base64;
 import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 
 /**
@@ -208,7 +208,7 @@ public class HCardToContactTransformer {
             return;
         }
         try {
-            OXContainerConverter.loadImageFromURL(c, uri.toString());
+            HTTPToolkit.loadImageFromURL(c, uri.toString());
         } catch (final ConverterException e) {
             // log error, but don't fail. Simply don't store an image
             final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HCardToContactTransformer.class);

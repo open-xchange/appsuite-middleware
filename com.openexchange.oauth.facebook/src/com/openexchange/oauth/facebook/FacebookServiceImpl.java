@@ -71,9 +71,9 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.session.Session;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link FacebookServiceImpl}
@@ -271,7 +271,7 @@ public class FacebookServiceImpl implements FacebookService {
             final String imageUrl = connection.optString("pic_big", null);
             if (isValid(imageUrl)) {
                 try {
-                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                    HTTPToolkit.loadImageFromURL(contact, imageUrl);
                 } catch (final Exception e) {
                     LOG.error("", e);
                 }

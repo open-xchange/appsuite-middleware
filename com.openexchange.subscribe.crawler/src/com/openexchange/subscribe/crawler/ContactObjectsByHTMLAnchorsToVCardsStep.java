@@ -61,6 +61,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.versit.Versit;
 import com.openexchange.tools.versit.VersitDefinition;
 import com.openexchange.tools.versit.VersitException;
@@ -128,7 +129,7 @@ public class ContactObjectsByHTMLAnchorsToVCardsStep extends AbstractStep<Contac
 
                 // add the image from a url to the contact
                 if (!imageUrl.equals("")) {
-                    OXContainerConverter.loadImageFromURL(contact, imageUrl);
+                    HTTPToolkit.loadImageFromURL(contact, imageUrl);
                 }
 
                 SANITIZER.sanitize(contact);

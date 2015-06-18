@@ -53,9 +53,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.Locale;
 import java.util.Map;
+import javax.activation.FileTypeMap;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpContentTooLargeException;
@@ -68,8 +72,12 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.groupware.contact.ContactConfig;
+import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
+import com.openexchange.tools.ImageTypeDetector;
+import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * {@link HTTPToolkit}
@@ -220,6 +228,89 @@ public class HTTPToolkit {
                 throw new HttpContentTooLargeException(new StringBuilder("Content-Length is ").append(length).toString(), maxLen);
             }
         }
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
+     *
+     * @param contact The contact container to fill
+     * @param url The URI parameter's value
+     * @throws ConverterException If converting image's data fails
+     */
+    public static void loadImageFromURL(final Contact contact, final String url) throws ConverterException {
+        try {
+            loadImageFromURL(contact, new URL(url));
+        } catch (final MalformedURLException e) {
+            throw new ConverterException("Image URL is not wellformed.", e);
+        }
+    }
+
+    /**
+     * Open a new {@link URLConnection URL connection} to specified parameter's value which indicates to be an URI/URL. The image's data and
+     * its MIME type is then read from opened connection and put into given {@link Contact contact container}.
+     *
+     * @param contact The contact container to fill
+     * @param url The image URL
+     * @throws ConverterException If converting image's data fails
+     */
+    private static void loadImageFromURL(final Contact contact, final URL url) throws ConverterException {
+        String mimeType = null;
+        byte[] bytes = null;
+        try {
+            final URLConnection urlCon = url.openConnection();
+            urlCon.setConnectTimeout(2500);
+            urlCon.setReadTimeout(2500);
+            urlCon.connect();
+            mimeType = urlCon.getContentType();
+            InputStream in = null;
+            try {
+                in = urlCon.getInputStream();
+                bytes = Streams.stream2bytes(in);
+                // In case the configuration file was not read (yet) the default value is given here
+                final long maxSize = ContactConfig.getInstance().getMaxImageSize();
+                if (maxSize > 0 && bytes.length > maxSize) {
+                    final ConverterException e = new ConverterException("Contact image is " + bytes.length + " bytes large and limit is " + maxSize + " bytes. Image is therefore ignored.");
+                    org.slf4j.LoggerFactory.getLogger(HTTPToolkit.class).warn("", e);
+                    bytes = null;
+                }
+            } finally {
+                Streams.close(in);
+            }
+        } catch (final SocketTimeoutException e) {
+            throw new ConverterException("Timeout reading \"" + url.toString() + "\"", e);
+        } catch (final IOException e) {
+            throw new ConverterException("IO problem while reading \"" + url.toString() + "\"", e);
+        }
+        if (mimeType == null) {
+            mimeType = ImageTypeDetector.getMimeType(bytes);
+            if ("application/octet-stream".equals(mimeType)) {
+                mimeType = getMimeType(url.toString());
+            }
+        }
+        if (bytes != null && isValidImage(bytes)) {
+            // Mime type should be of image type. Otherwise web server send some error page instead of 404 error code.
+            contact.setImage1(bytes);
+            contact.setImageContentType(mimeType);
+        }
+    }
+
+    private static boolean isValidImage(final byte[] data) {
+        InputStream inputStream = null;
+        java.awt.image.BufferedImage bimg = null;
+        try {
+            inputStream = Streams.newByteArrayInputStream(data);
+            bimg = javax.imageio.ImageIO.read(inputStream);
+        } catch (final Exception e) {
+            return false;
+        } finally {
+            Streams.close(inputStream);
+        }
+        return (bimg != null);
+    }
+
+    private static String getMimeType(final String filename) {
+        return FileTypeMap.getDefaultFileTypeMap().getContentType(filename);
     }
 
 }

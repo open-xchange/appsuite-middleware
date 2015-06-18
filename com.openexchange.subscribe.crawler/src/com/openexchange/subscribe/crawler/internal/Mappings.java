@@ -54,8 +54,8 @@ import java.util.Map;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
+import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link Mappings}
@@ -356,7 +356,7 @@ public class Mappings {
         // add the image from a url to the contact
         tmp = map.get("image");
         if (!isEmpty(tmp)) {
-            OXContainerConverter.loadImageFromURL(contact, tmp);
+            HTTPToolkit.loadImageFromURL(contact, tmp);
         }
 
         return contact;
