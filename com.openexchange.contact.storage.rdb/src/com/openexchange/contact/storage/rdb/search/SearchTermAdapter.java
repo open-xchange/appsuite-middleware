@@ -130,25 +130,62 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
     private void appendDistributionListTerm(SingleSearchTerm term) throws OXException {
         Operand<?>[] operands = term.getOperands();
         Operation operation = term.getOperation();
-        if (!operation.equalsOperation("<>") && !operation.equalsOperation("=")) {
-            throw new IllegalArgumentException("Illegal operation " + operation.getOperation());
+
+        boolean not = operation.equalsOperation("<>");
+        String search = null;
+        String value = null;
+        String operator = null;
+        for (int i = 0; i < operands.length; i++) {
+            if (Operand.Type.COLUMN.equals(operands[i].getType())) {
+                // nothing to do
+            } else if (Operand.Type.CONSTANT.equals(operands[i].getType()) && null == value) {
+                value = operands[i].getValue().toString();
+                search = StringCollection.prepareForSearch(value, false, true);
+                if (not) {
+                    this.stringBuilder.append("NOT (");
+                }
+                if (containsWildcards(search)) {
+                    operator = " LIKE ";
+                } else {
+                    operator = operation.getSqlRepresentation();
+                }
+            } else {
+                throw new IllegalArgumentException("unknown type in operand: " + operands[i].getType());
+            }
         }
-        String not = operation.equalsOperation("<>") ? " NOT " : "";
-        String value = (String) operands[1].getValue();
-        if (null == value) {
+        boolean appended = false;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < operands.length; i++) {
+            if (OperationPosition.BEFORE.equals(operation.getSqlPosition()) && !appended) {
+                sb.append(operator);
+                appended = true;
+            }
+            if (OperationPosition.AFTER.equals(operation.getSqlPosition()) && !appended) {
+                sb.append(' ').append(operator);
+                appended = true;
+            } else if (OperationPosition.BETWEEN.equals(operation.getSqlPosition()) && i != operands.length - 1 && !appended) {
+                //don't place an operator after the last operand here
+                sb.append(' ').append(operator).append(' ');
+                appended = true;
+            }
+        }
+        if (null == search) {
             throw new IllegalArgumentException("Operand contains no value.");
         }
-        value = value.replace("*", "%");
-        parameters.add(value);
-        parameters.add(value);
+
+        parameters.add(search);
+        parameters.add(search);
         this.stringBuilder.append(" ( ");
         this.stringBuilder.append("intfield02 > 0 AND ");
         this.stringBuilder.append(" EXISTS (SELECT 1 FROM ").append(Table.DISTLIST.getName())
             .append(" WHERE ").append(Table.DISTLIST.getName()).append(".").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel()).append("=")
             .append(Table.CONTACTS.getName()).append(".").append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel())
             .append(" AND (").append(Table.DISTLIST.getName()).append(".").append(Mappers.DISTLIST.get(DistListMemberField.MAIL).getColumnLabel())
-            .append(not).append(" LIKE ? OR ").append(Table.DISTLIST.getName()).append(".").append(Mappers.DISTLIST.get(DistListMemberField.DISPLAY_NAME).getColumnLabel())
-            .append(not).append(" LIKE ?").append(")))");
+            .append(sb.toString()).append(" ? OR ").append(Table.DISTLIST.getName()).append(".").append(Mappers.DISTLIST.get(DistListMemberField.DISPLAY_NAME).getColumnLabel())
+            .append(sb.toString()).append(" ?").append(")))");
+        if (not) {
+            this.stringBuilder.append(")");
+        }
     }
 
     private void append(SingleSearchTerm term) throws OXException {
