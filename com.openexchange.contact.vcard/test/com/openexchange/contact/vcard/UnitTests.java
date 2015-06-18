@@ -78,6 +78,7 @@ public class UnitTests {
         tests.addTestSuite(Bug15008Test.class);
         tests.addTestSuite(Bug18226Test.class);
         tests.addTestSuite(Bug21656Test.class);
+        tests.addTestSuite(Bug15241Test.class);
         return tests;
     }
 }
