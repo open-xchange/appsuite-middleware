@@ -76,8 +76,8 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -400,7 +400,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      */
     protected static boolean mayWriteViaOAuthRequest(ContentType contentType, OAuthGrant grant) {
         String scope = OAuthContentTypes.writeScopeForContentType(contentType);
-        if (scope != null && grant.getScopes().has(scope)) {
+        if (scope != null && grant.getScope().has(scope)) {
             return true;
         }
 
@@ -420,7 +420,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
 
         String scope = OAuthContentTypes.readScopeForContentType(contentType);
-        if (scope != null && grant.getScopes().has(scope)) {
+        if (scope != null && grant.getScope().has(scope)) {
             return true;
         }
 
@@ -436,7 +436,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     protected static Set<ContentType> getReadableContentTypesForOAuthRequest(OAuthGrant grant) {
         Set<ContentType> contentTypes = new HashSet<>();
         contentTypes.add(SystemContentType.getInstance());
-        for (String scope : grant.getScopes().get()) {
+        for (String scope : grant.getScope().get()) {
             ContentType contentType = OAuthContentTypes.contentTypeForReadScope(scope);
             if (contentType != null) {
                 contentTypes.add(contentType);
@@ -459,7 +459,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         if (null == string) {
             return defaultValue;
         }
-        return TRUES.contains(toLowerCase(string).trim());
+        return TRUES.contains(com.openexchange.java.Strings.toLowerCase(string).trim());
     }
 
     protected Map<String, Object> parametersFor(final Object... objects) {
@@ -479,19 +479,4 @@ public abstract class AbstractFolderAction implements AJAXActionService {
         }
         return ret;
     }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

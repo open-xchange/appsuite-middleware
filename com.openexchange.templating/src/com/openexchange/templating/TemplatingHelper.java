@@ -59,4 +59,5 @@ import com.openexchange.exception.OXException;
 public interface TemplatingHelper {
 
     public String include(String templateName) throws OXException;
+    
 }

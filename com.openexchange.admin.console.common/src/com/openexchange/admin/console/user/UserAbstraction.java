@@ -939,7 +939,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true","1","yes","y","on")));
 
     private static boolean parseBool(final String parameter) {
-        return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
+        return (null != parameter) && BOOL_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
     }
 
     protected static Credentials getCreds(final String[] nextLine, final int[] idarray) {
@@ -1916,7 +1916,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return null;
         }
         final String tmp = object.toString().trim();
-        return isEmpty(tmp) ? null : tmp;
+        return com.openexchange.java.Strings.isEmpty(tmp) ? null : tmp;
     }
 
     public Long parseAndSetQuotaValue(final AdminParser parser) throws InvalidDataException {
@@ -1957,7 +1957,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {
         String s = (String) parser.getOptionValue(cliOption);
-        if (isEmpty(s)) {
+        if (com.openexchange.java.Strings.isEmpty(s)) {
             return Collections.emptySet();
         }
         s = s.trim();
@@ -1966,7 +1966,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 return Collections.emptySet();
             }
             s = s.substring(1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -1975,7 +1975,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 return Collections.emptySet();
             }
             s = s.substring(0, s.length() - 1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -1984,8 +1984,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final Set<String> set = new HashSet<String>(arr.length);
         for (String element : arr) {
             final String cap = element;
-            if (!isEmpty(cap)) {
-                set.add(toLowerCase(cap));
+            if (!com.openexchange.java.Strings.isEmpty(cap)) {
+                set.add(com.openexchange.java.Strings.toLowerCase(cap));
             }
         }
         return set;
@@ -3438,32 +3438,5 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         checkRequired(idarray);
         return idarray;
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

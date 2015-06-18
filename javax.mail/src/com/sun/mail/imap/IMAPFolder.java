@@ -1208,7 +1208,7 @@ public class IMAPFolder extends Folder implements UIDFolder, ResponseHandler {
 	}
 
     // Special fetch items
-    boolean xdovecot = ((IMAPStore) store).getCapabilities().containsKey("XDOVECOT");
+    boolean xdovecot = protocol.getCapabilities().containsKey("XDOVECOT");
     for (FetchProfile.Item item : fp.getItems()) {
         if ("ORIGINAL-MAILBOX".equals(item.name())) {
             if (xdovecot) {

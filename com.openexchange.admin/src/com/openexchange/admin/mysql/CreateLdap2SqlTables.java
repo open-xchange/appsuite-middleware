@@ -202,7 +202,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
        + "PRIMARY KEY (cid, id)"
      + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-    private static final String createAliasTable = "CREATE TABLE user_alias ( "
+    private static final String createAliasTable = "CREATE TABLE user_alias ( " // ---> Also specified in com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask
         + "cid INT4 UNSIGNED NOT NULL, "
         + "user INT4 UNSIGNED NOT NULL, "
         + "alias VARCHAR(255) NOT NULL, "

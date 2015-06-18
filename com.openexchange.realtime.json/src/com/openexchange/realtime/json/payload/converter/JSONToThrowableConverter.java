@@ -77,7 +77,7 @@ public class JSONToThrowableConverter extends AbstractJSONConverter {
         try {
             JSONObject throwableJSON = (JSONObject) data;
             
-            String message = throwableJSON.getString("message");
+            String message = throwableJSON.optString("message");
             JSONArray traceElements = (JSONArray) throwableJSON.get("stackTrace");
             Throwable throwable = new Throwable(message);
             throwable.setStackTrace(jsonToStackTraceElementArray(traceElements, converter));

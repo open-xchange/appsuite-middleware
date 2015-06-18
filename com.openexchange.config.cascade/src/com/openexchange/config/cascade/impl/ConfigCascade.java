@@ -87,6 +87,12 @@ public class ConfigCascade implements ConfigViewFactory {
 
     @Override
     public ConfigView getView(final int user, final int context) {
+        if (user < 1) {
+            if (context < 1) {
+                return getView();
+            }
+            return new View(-1, context);
+        }
         return new View(user, context);
     }
 

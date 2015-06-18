@@ -63,6 +63,8 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
 @SuiteClasses({
     com.openexchange.ajax.ProcessUploadStaticTest.class,
     com.openexchange.ajax.parser.TaskLastModifiedTest.class,
+    com.openexchange.ajax.writer.DataWriterTest.class,
+    com.openexchange.ajax.writer.TaskWriterTest.class,
     com.openexchange.ajax.LoginAddFragmentTest.class,
     com.openexchange.groupware.ldap.UserAttributeDiffTest.class,
     com.openexchange.groupware.ldap.Bug33891Test.class,
@@ -75,7 +77,6 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.tools.net.URIParserTest.class,
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
     com.openexchange.groupware.update.tasks.MakeFolderIdPrimaryForDelContactsTableTest.class,
-    com.openexchange.ajax.MailAttachmentTest.class,
     com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRendererTest.class,
     com.openexchange.groupware.userconfiguration.AllowAllUserConfigurationTest.class,
     com.openexchange.groupware.userconfiguration.UserConfigurationTest.class,

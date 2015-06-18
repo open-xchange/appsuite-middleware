@@ -117,7 +117,7 @@ public class ConsistencyCheck {
 
     /**
      * Main method used for checkconsistency clt
-     * 
+     *
      * @param args - arguments provided by clt
      */
     public static void main(final String[] args) {
@@ -125,7 +125,8 @@ public class ConsistencyCheck {
         final Configuration config = new Configuration();
 
         lexer.noise("in");
-        if(lexer.consume("host")) {
+
+        if (lexer.consume("host")) {
             final String hostname = lexer.getCurrent();
             final String[] hostAndPort = hostname.split(":");
             config.setHost(hostAndPort[0]);
@@ -136,6 +137,14 @@ public class ConsistencyCheck {
         } else {
             config.setHost(LOCALHOST);
         }
+
+        int responseTimeoutMillis = 0;
+        if (lexer.consume("responsetimeout")) {
+            final String value = lexer.getCurrent();
+            responseTimeoutMillis = Integer.parseInt(value) * 1000;
+            lexer.advance();
+        }
+        config.setResponseTimeoutMillis(responseTimeoutMillis);
 
         if (lexer.consume(ACTION_REPAIR)) {
             config.setAction(ACTION_REPAIR);
@@ -339,6 +348,16 @@ public class ConsistencyCheck {
 
     private static final class Configuration {
 
+        private String host;
+        private int port = 9999 ;
+        private String action;
+        private String source;
+        private int sourceId;
+        private final Map<String, String> policies = new HashMap<String,String>();
+        private ConsistencyMBean consistency;
+        private JMXConnector jmxConnector;
+        private int responseTimeoutMillis = 0;
+
         /**
          * Initializes a new {@link ConsistencyCheck.Configuration}.
          */
@@ -350,14 +369,9 @@ public class ConsistencyCheck {
             return action;
         }
 
-        private String host;
-        private int port = 9999 ;
-        private String action;
-        private String source;
-        private int sourceId;
-        private final Map<String, String> policies = new HashMap<String,String>();
-        private ConsistencyMBean consistency;
-        private JMXConnector jmxConnector;
+        public void setResponseTimeoutMillis(int responseTimeoutMillis) {
+            this.responseTimeoutMillis = responseTimeoutMillis;
+        }
 
         public void setHost(final String host) {
             this.host = host;
@@ -423,7 +437,7 @@ public class ConsistencyCheck {
         }
 
         private void repair() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
-            if(policies.isEmpty()) {
+            if (policies.isEmpty()) {
                 System.out.println("Please specify a policy (either \"missing_entry_for_file\" or \"missing_file_for_attachment\" or \"missing_file_for_infoitem\").");
                 return;
             }
@@ -463,14 +477,24 @@ public class ConsistencyCheck {
         }
 
         private void connect() throws IOException, MalformedObjectNameException, NullPointerException {
-            final JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://"
-                + host + ":" + port + "/server");
-
+            if (responseTimeoutMillis > 0) {
+                /*
+                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
+                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
+                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
+                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
+                 *
+                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
+                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
+                 * zero indicates an infinite timeout. The default value is zero (no timeout).
+                 */
+                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeoutMillis));
+            }
+            JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
             jmxConnector = JMXConnectorFactory.connect(url, null);
 
-            final MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
-
-            final ObjectName name = MBeanNamer.getName();
+            MBeanServerConnection mbsc = jmxConnector.getMBeanServerConnection();
+            ObjectName name = MBeanNamer.getName();
 
             consistency = new MBeanConsistency(mbsc, name);
         }

@@ -173,7 +173,7 @@ public class DbIDResolver extends DefaultLdapIDResolver {
             databaseService.backReadOnly(contextID, connection);
         }
         if (null != contactIDs) {
-            this.ldapIDs = new ConcurrentHashMap<Integer, String>(contactIDs.size());
+            this.ldapIDs = new ConcurrentHashMap<Integer, String>(contactIDs.size(), 0.9f, 1);
             for (Entry<String, Integer> entry : contactIDs.entrySet()) {
                 ldapIDs.put(entry.getValue(), entry.getKey());
             }

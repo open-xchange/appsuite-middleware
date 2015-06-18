@@ -49,7 +49,7 @@
 
 package com.openexchange.ajax.infostore.thirdparty;
 
-import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
+import com.openexchange.ajax.oauth.client.actions.OAuthService;
 
 
 /**
@@ -58,14 +58,14 @@ import com.openexchange.ajax.oauth.provider.actions.AuthenticationProvider;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public class ProviderIdMapper {
-    private AuthenticationProvider authProvider;
+    private OAuthService authProvider;
     private String infostoreId;
 
-    public AuthenticationProvider getAuthProvider() {
+    public OAuthService getAuthProvider() {
         return authProvider;
     }
 
-    public void setAuthProvider(AuthenticationProvider authProvider) {
+    public void setAuthProvider(OAuthService authProvider) {
         this.authProvider = authProvider;
     }
 

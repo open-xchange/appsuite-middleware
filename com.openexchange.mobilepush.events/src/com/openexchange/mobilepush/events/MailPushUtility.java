@@ -49,10 +49,7 @@
 
 package com.openexchange.mobilepush.events;
 
-import java.util.List;
 import java.util.Map;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
-import com.openexchange.mobilepush.events.storage.UserToken;
 
 /**
  * {@link MailPushUtility}
@@ -86,25 +83,6 @@ public class MailPushUtility {
             bytes = payload.toString().getBytes();
         }
         return bytes.length;
-    }
-
-    /**
-     *
-     * @param contextUsers
-     * @param registrationId
-     * @return
-     */
-    public static int getContextIdForToken(List<ContextUsers> contextUsers, String registrationId) {
-        if (contextUsers != null && false == contextUsers.isEmpty()) {
-            for (ContextUsers cu : contextUsers) {
-                for (UserToken ut : cu.getUserTokens()) {
-                    if (ut.getToken().equals(registrationId)) {
-                        return cu.getContextId();
-                    }
-                }
-            }
-        }
-        return -1;
     }
 
     /**

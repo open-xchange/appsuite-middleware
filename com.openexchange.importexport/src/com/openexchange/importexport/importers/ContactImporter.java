@@ -57,6 +57,7 @@ import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -67,7 +68,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ContactImporter extends AbstractImporter {
-
 
     protected ContactImporter(ServiceLookup services) {
         super(services);
@@ -90,6 +90,20 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID) throws OXException {
+        this.createContact(session, contact, folderID, null);
+    }
+
+    /**
+     * Creates a new contact, implicitly trying again with trimmed values in
+     * case of truncation errors.
+     *
+     * @param session the current session
+     * @param contact the contact to create
+     * @param folderID the target folder ID
+     * @param vCard the VCard to persist or null if not available
+     * @throws OXException
+     */
+    protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
         ContactService contactService = ImportExportServices.getContactService();
         if (null == contactService) {
             throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
@@ -103,10 +117,9 @@ public abstract class ContactImporter extends AbstractImporter {
                     // try again
                     LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
                     continue;
-                } else {
-                    // re-throw
-                    throw e;
                 }
+                // re-throw
+                throw e;
             }
         }
     }

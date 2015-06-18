@@ -51,12 +51,15 @@ package com.openexchange.messaging.facebook.parser.stream;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.json.JSONArray;
@@ -114,6 +117,14 @@ public final class FacebookFQLStreamJsonParser {
             }
         }
         return b.booleanValue();
+    }
+
+    /** The Facebook date time format; e.g. <code>"2012-08-15T16:44:01+0000"</code> */
+    protected static final SimpleDateFormat FACEBOOK_TIME_FORMAT;
+    static {
+        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD'T'hh:mm:ssZ", Locale.US);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        FACEBOOK_TIME_FORMAT = sdf;
     }
 
     /**
@@ -184,7 +195,23 @@ public final class FacebookFQLStreamJsonParser {
 
                 @Override
                 public void handleItem(final JSONObject streamInformation, final FacebookMessagingMessage message) throws OXException, JSONException {
-                    final long time = streamInformation.getLong("created_time") * 1000L;
+                    if (streamInformation.isNull("created_time")) {
+                        return;
+                    }
+                    long time;
+                    try {
+                        time = streamInformation.getLong("created_time") * 1000L;
+                    } catch (Exception e) {
+                        // Expect something like "2012-08-15T16:44:01+0000"
+                        synchronized (FACEBOOK_TIME_FORMAT) {
+                            try {
+                                time = FACEBOOK_TIME_FORMAT.parse(streamInformation.get("created_time").toString()).getTime();
+                            } catch (ParseException x) {
+                                return;
+                            }
+                        }
+                    }
+
                     message.setHeader(new MimeDateMessagingHeader(MessagingHeader.KnownHeader.DATE.toString(), time));
                     message.setReceivedDate(time);
                 }
@@ -193,7 +220,23 @@ public final class FacebookFQLStreamJsonParser {
 
                 @Override
                 public void handleItem(final JSONObject streamInformation, final FacebookMessagingMessage message) throws OXException, JSONException {
-                    final long time = streamInformation.getLong("updated_time") * 1000L;
+                    if (streamInformation.isNull("updated_time")) {
+                        return;
+                    }
+                    long time;
+                    try {
+                        time = streamInformation.getLong("updated_time") * 1000L;
+                    } catch (Exception e) {
+                        // Expect something like "2012-08-15T16:44:01+0000"
+                        synchronized (FACEBOOK_TIME_FORMAT) {
+                            try {
+                                time = FACEBOOK_TIME_FORMAT.parse(streamInformation.get("updated_time").toString()).getTime();
+                            } catch (ParseException x) {
+                                return;
+                            }
+                        }
+                    }
+
                     message.setHeader(new MimeDateMessagingHeader("X-Facebook-Updated-Time", time));
                 }
             });

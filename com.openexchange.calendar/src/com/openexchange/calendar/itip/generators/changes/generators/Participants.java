@@ -220,9 +220,10 @@ public class Participants implements ChangeDescriptionGenerator{
             if (changeType == null) {
                 continue;
             }
-            if (STATE_CHANGES.contains(changeType) && !stateChanges) {
-            	continue;
-            }
+//            Does this check make sense here? If we are already creating a mail, we should include all given changes...
+//            if (STATE_CHANGES.contains(changeType) && !stateChanges) {
+//            	continue;
+//            }
             switch (changeType) {
             case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT)); break;
             case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
@@ -238,9 +239,10 @@ public class Participants implements ChangeDescriptionGenerator{
             if (changeType == null) {
                 continue;
             }
-            if (STATE_CHANGES.contains(changeType) && !stateChanges) {
-            	continue;
-            }
+//            Does this check make sense here? If we are already creating a mail, we should include all given changes...
+//            if (STATE_CHANGES.contains(changeType) && !stateChanges) {
+//            	continue;
+//            }
             switch (changeType) {
             case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT)); break;
             case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;

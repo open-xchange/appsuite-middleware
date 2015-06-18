@@ -93,7 +93,7 @@ public final class CompositionSpaces {
         CompositionSpaceRegistry registry = CompositionSpace.getRegistry(session);
         CompositionSpace space = registry.removeCompositionSpace(csid);
         if (null != space) {
-            Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+            Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
             try {
 
                 // Delete clean-ups
@@ -138,7 +138,7 @@ public final class CompositionSpaces {
      * @param session The session
      */
     public static void destroyFor(Session session) {
-        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             for (CompositionSpace space : CompositionSpace.getRegistry(session).removeAllCompositionSpaces()) {
 
@@ -185,7 +185,7 @@ public final class CompositionSpaces {
      * @param session The associated session
      */
     static void destroy(CompositionSpaceRegistry registry, Session session) {
-        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             for (CompositionSpace space : registry.removeAllCompositionSpaces()) {
 
@@ -246,7 +246,7 @@ public final class CompositionSpaces {
             return;
         }
 
-        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4);
+        Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
         try {
             {
                 final MailPath replyFor = space.getReplyFor();

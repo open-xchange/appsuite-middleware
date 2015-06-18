@@ -112,7 +112,7 @@ public class ModuleSupportImpl implements ModuleSupport {
                 UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
                 return new FolderTargetProxy(userizedFolder, user);
             } else {
-                return new VirtualTargetProxy(user, target);
+                return new VirtualTargetProxy(target);
             }
         } else {
             return handlers.get(target.getModule()).loadTarget(target, session);
@@ -170,11 +170,12 @@ public class ModuleSupportImpl implements ModuleSupport {
     }
 
     @Override
-    public TargetProxy loadAsAdmin(int contextID, ShareTarget target) throws OXException {
+    public TargetProxy loadAsAdmin(ShareTarget target, int contextID) throws OXException {
         if (null == target) {
             return null;
         }
         Context context = services.getService(ContextService.class).getContext(contextID);
+        target = adjustTarget(target, contextID, context.getMailadmin(), false);
         if (target.isFolder()) {
             int folderID;
             try {
@@ -182,9 +183,13 @@ public class ModuleSupportImpl implements ModuleSupport {
             } catch (NumberFormatException e) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
-            FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
-            return new AdministrativeFolderTargetProxy(folder);
-        } else {
+            if (null != Module.getForFolderConstant(target.getModule())) {
+                FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
+                return new AdministrativeFolderTargetProxy(folder);
+            } else {
+                return new VirtualTargetProxy(target);
+            }
+        } else {            
             return handlers.get(target.getModule()).loadTarget(target, context);
         }
     }

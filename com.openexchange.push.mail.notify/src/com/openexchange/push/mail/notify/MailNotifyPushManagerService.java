@@ -56,6 +56,7 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.mail.notify.osgi.Services;
 import com.openexchange.session.Session;
 
@@ -108,8 +109,13 @@ public final class MailNotifyPushManagerService implements PushManagerExtendedSe
     // --------------------------------------------------------------------------------------------------------------------------------
 
     @Override
-    public List<PushUser> getAvailablePushUsers() throws OXException {
+    public List<PushUserInfo> getAvailablePushUsers() throws OXException {
         return registry.getAvailablePushUsers();
+    }
+
+    @Override
+    public boolean supportsPermanentListeners() {
+        return true;
     }
 
     @Override

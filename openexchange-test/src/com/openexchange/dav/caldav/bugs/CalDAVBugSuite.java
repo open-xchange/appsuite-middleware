@@ -90,6 +90,7 @@ public final class CalDAVBugSuite {
         suite.addTestSuite(Bug31490Test.class);
         suite.addTestSuite(Bug36943Test.class);
         suite.addTestSuite(Bug37112Test.class);
+        suite.addTestSuite(Bug37887Test.class);
         return suite;
     }
 }

@@ -105,7 +105,7 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
             synchronized (LOG) {
                 if (null == fullNameChecker) {
                     final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
-                    if (isEmptyString(notifierFullNames)) {
+                    if (com.openexchange.java.Strings.isEmpty(notifierFullNames)) {
                         fullNameChecker = new FullNameChecker() {
 
                             @Override
@@ -177,24 +177,6 @@ public final class IMAPNotifierMessageRecentListener implements MessageRecentLis
                 return null;
             }
         });
-    }
-
-    /**
-     * Checks if specified string is empty.
-     *
-     * @param str The string to check
-     * @return <code>true</code> if string is considered empty; otherwise <code>false</code>
-     */
-    protected static boolean isEmptyString(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**

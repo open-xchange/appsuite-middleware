@@ -50,7 +50,10 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -65,7 +68,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAccountAccess implements FileStorageAccountAccess {
+public class InfostoreAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 
     private final ServerSession session;
     private final InfostoreFileStorageService service;
@@ -75,6 +78,11 @@ public class InfostoreAccountAccess implements FileStorageAccountAccess {
     public InfostoreAccountAccess(final Session session, final InfostoreFileStorageService service) throws OXException {
         this.session = ServerSessionAdapter.valueOf(session);
         this.service = service;
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(InfostoreAdapterFileAccess.class, capability);
     }
 
     @Override

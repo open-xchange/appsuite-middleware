@@ -63,7 +63,8 @@ public class UpdateRequest extends InsertRequest {
 
     private final FolderObject folder;
     private boolean handDown;
-    private boolean cascade;
+    private Boolean cascade;
+    private Boolean ignoreWarnings;
 
     public UpdateRequest(API api, FolderObject folder, boolean failOnError) {
         super(api, folder, failOnError);
@@ -83,6 +84,11 @@ public class UpdateRequest extends InsertRequest {
         this.cascade = cascade;
         return this;
     }
+    
+    public UpdateRequest setIgnoreWarnings(boolean ignoreWarnings) {
+        this.ignoreWarnings = ignoreWarnings;
+        return this;
+    }
 
     @Override
     protected void addParameters(List<Parameter> params) {
@@ -93,8 +99,11 @@ public class UpdateRequest extends InsertRequest {
         if (handDown) {
             params.add(new Parameter("permissions", "inherit"));
         }
-        if (cascade) {
+        if (cascade != null) {
             params.add(new Parameter("cascadePermissions", cascade));
+        }
+        if (ignoreWarnings != null) {
+            params.add(new Parameter("ignoreWarnings", ignoreWarnings));
         }
     }
 }

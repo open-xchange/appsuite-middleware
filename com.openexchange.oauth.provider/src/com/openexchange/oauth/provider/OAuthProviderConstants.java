@@ -61,22 +61,17 @@ public interface OAuthProviderConstants {
     /**
      * Servlet alias of the authorization endpoint without leading and trailing slashes
      */
-    public static final String AUTHORIZATION_SERVLET_ALIAS = "o/oauth2/authorization";
+    public static final String AUTHORIZATION_SERVLET_ALIAS = "oauth/provider/authorization";
 
     /**
      * Servlet alias of the access token endpoint without leading and trailing slashes
      */
-    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "o/oauth2/accessToken";
+    public static final String ACCESS_TOKEN_SERVLET_ALIAS = "oauth/provider/accessToken";
 
     /**
      * Servlet alias of the endpoint for grant revocation by client applications
      */
-    public static final String REVOKE_SERVLET_ALIAS = "o/oauth2/revoke";
-
-    /**
-     * Servlet alias of the endpoint for client icons
-     */
-    public static final String CLIENT_ICON_SERVLET_ALIAS = "o/oauth2/icon";
+    public static final String REVOKE_SERVLET_ALIAS = "oauth/provider/revoke";
 
     // -------------------------------------------------------------------------------------------------------
 
@@ -85,9 +80,9 @@ public interface OAuthProviderConstants {
      */
     public static final long DEFAULT_EXPIRATION = TimeUnit.HOURS.toMillis(1L);
 
-    // -------------------------------------------------------------------------------------------------------
+    // ---------------- Parameters ---------------------------------------------------------------------------
 
-    /** Required. Value is always <b><code>code</code></b> */
+    /** Required. See {@link #RESPONSE_TYPE_AUTH_CODE} */
     public static final String PARAM_RESPONSE_TYPE = "response_type";
 
     /** Required. Value of your <b>API Key</b> given when you registered your application */
@@ -120,6 +115,9 @@ public interface OAuthProviderConstants {
     /** Required. The user password */
     public static final String PARAM_USER_PASSWORD = "user_password";
 
+    /** Required. The session ID */
+    public static final String PARAM_SESSION = "session";
+
     /** Required. The user password */
     public static final String PARAM_ACCESS_DENIED = "access_denied";
 
@@ -132,5 +130,18 @@ public interface OAuthProviderConstants {
     /** The error description */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
 
+    /** The language parameter defining a locale for i18n */
+    public static final String PARAM_LANGUAGE = "language";
+
+    // ---------------- Common parameter values --------------------------------------------------------------
+
+    /** Response type <b><code>code</code></b> */
+    public static final String RESPONSE_TYPE_AUTH_CODE = "code";
+
+    /** Grant type <b><code>refresh_token</code></b> */
+    public static final String GRANT_TYPE_REFRESH_TOKEN = "refresh_token";
+
+    /** Grant type <b><code>authorization_code</code></b> */
+    public static final String GRANT_TYPE_AUTH_CODE = "authorization_code";
 
 }

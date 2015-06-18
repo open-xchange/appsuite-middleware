@@ -651,19 +651,6 @@ public final class Tools {
         return new AuthCookie(cookie);
     }
 
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
     /**
      * Sends an error response having a JSON body using given HTTP response
      *
@@ -671,6 +658,7 @@ public final class Tools {
      * @param statusCode The HTTP status code
      * @param body The associated JSON body
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
         sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
@@ -684,6 +672,7 @@ public final class Tools {
      * @param additionalHeaders Optional additional headers to apply to HTTP response
      * @param body The associated JSON body
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
         httpResponse.reset();
@@ -705,6 +694,7 @@ public final class Tools {
      * @param httpResponse The HTTP response
      * @param statusCode The HTTP status code
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
         sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
@@ -717,6 +707,7 @@ public final class Tools {
      * @param statusCode The HTTP status code
      * @param additionalHeaders Optional additional headers to apply to HTTP response
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
         httpResponse.reset();
@@ -735,6 +726,7 @@ public final class Tools {
      * @param desc The error description
      *
      * @throws IOException If an I/O error occurs
+     * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorPage(HttpServletResponse httpResponse, int statusCode, String desc) throws IOException {
         httpResponse.reset();

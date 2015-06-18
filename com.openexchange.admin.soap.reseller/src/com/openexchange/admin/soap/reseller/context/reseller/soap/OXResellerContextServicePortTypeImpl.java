@@ -217,7 +217,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
     public java.util.List<com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext> list(java.lang.String searchPattern,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.Context[] contexts = contextInterface.list(com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == contexts) {
                 return Collections.emptyList();
             }
@@ -1132,7 +1132,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         Integer i = soapUser.getImapPort();
         if (i != null) {
             final String s = user.getImapServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.IMAP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -1322,7 +1322,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         i = soapUser.getSmtpPort();
         if (i != null) {
             final String s = user.getSmtpServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.SMTP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -2268,17 +2268,4 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
         }
         return restrictions;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

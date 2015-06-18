@@ -55,6 +55,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -164,42 +165,39 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 		return status;
 	}
 
-	public Element marshalProperty(final WebdavProperty property, Protocol protocol) {
-		final Element propertyElement = new Element(property.getName(), getNamespace(property));
-		if(property.getValue() == null) {
+	public Element marshalProperty(WebdavProperty property, Protocol protocol) {
+		Element propertyElement = new Element(property.getName(), getNamespace(property));
+		if (null == property.getValue()) {
 			return propertyElement;
 		}
-		if(property.isXML()) {
+		if (property.isXML()) {
 			try {
-				String asXML = null;
-				if("DAV:".equals(property.getNamespace())) {
-					StringBuilder xmlBuilder = new StringBuilder("<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns:D=\"DAV:\"");
-                    List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-                    for (Namespace namespace : namespaces) {
-                        xmlBuilder.append(" xmlns:").append(namespace.getPrefix()).append("=\"").append(namespace.getURI()).append('"');
-                    }
-                    xmlBuilder.append('>').append(property.getValue()).append("</FKR:fakeroot>");
-                    asXML = xmlBuilder.toString();
-				} else {
-					StringBuilder xmlBuilder = new StringBuilder("<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns:D=\"DAV:\" xmlns=\"").append(property.getNamespace()).append('"');
-					List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-					for (Namespace namespace : namespaces) {
-                        xmlBuilder.append(" xmlns:").append(namespace.getPrefix()).append("=\"").append(namespace.getURI()).append('"');
-                    }
-					xmlBuilder.append('>').append(property.getValue()).append("</FKR:fakeroot>");
-					asXML = xmlBuilder.toString();
-				}
-				final Document doc = new SAXBuilder().build(new StringReader(asXML));
+                StringBuilder xmlBuilder = new StringBuilder("<FKR:fakeroot xmlns:FKR=\"http://www.open-xchange.com/webdav/fakeroot\" xmlns:D=\"DAV:\"");
+                if (false == "DAV:".equals(property.getNamespace())) {
+                    xmlBuilder.append(" xmlns=\"").append(property.getNamespace()).append('"');
+                }
+                List<Namespace> namespaces = protocol.getAdditionalNamespaces();
+                for (Namespace namespace : namespaces) {
+                    xmlBuilder.append(" xmlns:").append(namespace.getPrefix()).append("=\"").append(namespace.getURI()).append('"');
+                }
+                xmlBuilder.append('>').append(property.getValue()).append("</FKR:fakeroot>");
+				final Document doc = new SAXBuilder().build(new StringReader(xmlBuilder.toString()));
 				propertyElement.setContent(doc.getRootElement().cloneContent());
-			} catch (final JDOMException e) {
+                Map<String, String> attributes = property.getAttributes();
+                if (null != attributes) {
+                    for (Map.Entry<String, String> attribute : attributes.entrySet()) {
+                        propertyElement.setAttribute(attribute.getKey(), attribute.getValue());
+                    }
+                }
+			} catch (JDOMException e) {
 				// NO XML
 				LOG.error(e.toString());
 				propertyElement.setText(property.getValue());
-			} catch (final IOException e) {
+			} catch (IOException e) {
 				LOG.error("", e);
 			}
 		} else {
-			if(property.isDate()) {
+			if (property.isDate()) {
 				propertyElement.setAttribute("dt", "dateTime.tz", DATE_NS);
 			}
 			propertyElement.setText(property.getValue());

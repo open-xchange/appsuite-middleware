@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OAuth Provider RMI Implementation
+Bundle-SymbolicName: com.openexchange.oauth.provider.rmi.impl
+Bundle-Version: 7.8.0
+Bundle-Activator: com.openexchange.oauth.provider.rmi.impl.osgi.OAuthProviderRMIActivator
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.google.common.io;version="18.0.0",
+ com.openexchange.admin.rmi.dataobjects,
+ com.openexchange.admin.rmi.exceptions,
+ com.openexchange.admin.rmi.impl,
+ com.openexchange.oauth.provider,
+ com.openexchange.oauth.provider.client,
+ com.openexchange.oauth.provider.rmi.client,
+ com.openexchange.oauth.provider.scope,
+ org.osgi.framework;version="1.3.0",
+ org.osgi.util.tracker;version="1.5.1",
+ org.slf4j;version="1.7.5"
+Bundle-ActivationPolicy: lazy

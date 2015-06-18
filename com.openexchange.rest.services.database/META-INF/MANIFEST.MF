@@ -3,34 +3,31 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Database REST Service
 Bundle-SymbolicName: com.openexchange.rest.services.database
 Bundle-Version: 7.8.0
-Bundle-Activator: com.openexchange.rest.services.database.osgi.DatabaseRESTActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.fasterxml.jackson.core,
- com.fasterxml.jackson.core.base,
- com.fasterxml.jackson.core.format,
- com.fasterxml.jackson.core.io,
- com.fasterxml.jackson.core.json,
- com.fasterxml.jackson.core.sym,
- com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
- com.google.common.cache,
+Import-Package: com.google.common.cache,
  com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.tools,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware.update,
- com.openexchange.i18n,
  com.openexchange.java.util,
- com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.rest.services,
- com.openexchange.rest.services.annotations,
- com.openexchange.rest.services.osgiservice,
  com.openexchange.server,
  com.openexchange.timer,
  com.openexchange.tools.servlet,
  com.openexchange.tools.sql,
+ javax.inject,
+ javax.servlet.http,
+ javax.ws.rs;version="[2.0.0,3.0.0)",
+ javax.ws.rs.core;version="[2.0.0,3.0.0)",
+ jersey.repackaged.com.google.common.base;version="[2.3.0,3.0.0)",
+ org.glassfish.hk2.utilities;version="2.4.0",
+ org.glassfish.hk2.utilities.cache;version="2.4.0",
+ org.glassfish.jersey.internal;version="[2.3.0,3.0.0)",
  org.json,
+ org.jvnet.hk2.external.generator;version="2.4.0",
  org.osgi.framework,
  org.slf4j
+Bundle-Activator: com.openexchange.rest.services.database.osgi.DatabaseRESTActivator

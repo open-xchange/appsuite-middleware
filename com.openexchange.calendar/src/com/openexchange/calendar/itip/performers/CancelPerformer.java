@@ -96,6 +96,9 @@ public class CancelPerformer extends AbstrakterDingeMacher {
 
         for (ITipChange change : changes) {
             Appointment appointment = change.getDeletedAppointment();
+            if (appointment == null) {
+                continue;
+            }
             appointment.setNotification(true);
             if (change.getType() == ITipChange.Type.CREATE_DELETE_EXCEPTION) {
                 appointment = change.getCurrentAppointment();

@@ -118,7 +118,7 @@ public final class MessageInfo {
      * @return The message identifier
      */
     public static MessageInfo valueOf(final String msgId, final int off, final int len) {
-        if (isEmpty(msgId)) {
+        if (com.openexchange.java.Strings.isEmpty(msgId)) {
             return null;
         }
         int pos = off;
@@ -141,18 +141,6 @@ public final class MessageInfo {
         }
         final MessageInfo messageId = new MessageInfo().setAccountId(accId).setSlen(len);
         return messageId.setFullName(firstPart.substring(firstSep + 1)).setMessageNumber(getUnsignedInteger(msgId.substring(sepPos + 1, end)));
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private int messageNumber;

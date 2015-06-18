@@ -61,6 +61,16 @@ import com.openexchange.exception.OXException;
 public interface PushManagerExtendedService extends PushManagerService {
 
     /**
+     * Whether permanent listeners are supported.
+     * <p>
+     * If not supported, calling {@link #startPermanentListener(PushUser)} will return the {@link PushExceptionCodes#PERMANENT_NOT_SUPPORTED} error.
+     *
+     * @return <code>true</code> if supported; otherwise <code>false</code>
+     * @throws OXException If checking for support fails
+     */
+    boolean supportsPermanentListeners();
+
+    /**
      * Starts a permanent listener for specified push user.
      * <p>
      * The push manager is supposed to keep track of started listeners; e.g. only one listener per session or per user-context-pair exists.
@@ -87,6 +97,6 @@ public interface PushManagerExtendedService extends PushManagerService {
      * @return The currently available push users
      * @throws OXException If push users cannot be returned
      */
-    List<PushUser> getAvailablePushUsers() throws OXException;
+    List<PushUserInfo> getAvailablePushUsers() throws OXException;
 
 }

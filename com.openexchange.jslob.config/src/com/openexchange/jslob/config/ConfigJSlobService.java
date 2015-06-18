@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
@@ -86,6 +85,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.SequentialCompletionService;
 import com.openexchange.java.Streams;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONPathElement;
@@ -101,7 +101,6 @@ import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -150,9 +149,9 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
         if (null == file) {
-            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2);
+            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2, 0.9f, 1);
         } else {
-            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48);
+            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
             readPerfMap(file, configTreeEquivalents);
             this.configTreeEquivalents = configTreeEquivalents;
         }
@@ -176,7 +175,7 @@ public final class ConfigJSlobService implements JSlobService {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
             for (String line = reader.readLine(); null != line; line = reader.readLine()) {
                 line = line.trim();
-                if (!isEmpty(line) && '#' != line.charAt(0)) {
+                if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
                     final int pos = line.indexOf('>');
                     if (pos > 0) {
                         final String configTreePath = line.substring(0, pos).trim();
@@ -220,7 +219,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param jslobPath The associated jslob path
      */
     public void addConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -255,7 +254,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param jslobPath The associated jslob path
      */
     public void removeConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -323,6 +322,29 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(SessiondService.class);
     }
 
+    private void mergeWithSharedJSlobs(String id, JSlob jsonJSlob, Map<String, SharedJSlobService> sharedJSlobs, Session session) throws OXException {
+        for (Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
+            String sharedId = entry.getKey();
+            if (sharedId.startsWith(id)) {
+                try {
+                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
+                    JSONObject jsonObject = jsonJSlob.getJsonObject();
+                    if (sharedId.equals(id)) {
+                        JSONObject sharedJsonObject = sharedJSlob.getJsonObject();
+                        for (Entry<String,Object> sharedEntry : sharedJsonObject.entrySet()) {
+                            jsonObject.put(sharedEntry.getKey(), sharedEntry.getValue());
+                        }
+                    } else {
+                        String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                        jsonObject.put(newId, sharedJSlob.getJsonObject());
+                    }
+                } catch (JSONException e) {
+                    // should not happen
+                }
+            }
+        }
+    }
+
     @Override
     public Collection<JSlob> get(final Session session) throws OXException {
         final int userId = session.getUserId();
@@ -363,24 +385,12 @@ public final class ConfigJSlobService implements JSlobService {
             addConfigTreeToJslob(session, jSlob);
         }
 
-        for (JSlob jSlob : ret) {
-            String id = jSlob.getId().getId();
-            for (String sharedId : sharedJSlobs.keySet()) {
-                if (sharedId.startsWith(id)) {
-                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                    JSONObject jsonObject = jSlob.getJsonObject();
-                    JSONObject sharedObject = sharedJSlob.getJsonObject();
-                    for (String key : sharedObject.keySet()) {
-                        if (sharedObject.hasAndNotNull(key)) {
-                            try {
-                                jsonObject.put(newId, sharedObject);
-                            } catch (JSONException e) {
-                                // should not happen
-                            }
-                        }
-                    }
-                }
+        // Search for shared jslobs and merge them if necessary
+        Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        if (!sharedJSlobs.isEmpty()) {
+            for (JSlob jSlob : ret) {
+                String id = jSlob.getId().getId();
+                mergeWithSharedJSlobs(id, jSlob, sharedJSlobs, session);
             }
         }
         return ret;
@@ -425,19 +435,7 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
         // Search for shared jslobs and merge them if necessary
-        final Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
-        for (final Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
-            final String sharedId = entry.getKey();
-            if (sharedId.startsWith(id)) {
-                try {
-                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
-                    String newId = id.length() < sharedId.length() ? sharedId.substring(id.length() + 1, sharedId.length()) : sharedId;
-                    jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
-                } catch (JSONException e) {
-                    // should not happen
-                }
-            }
-        }
+        mergeWithSharedJSlobs(id, jsonJSlob, this.sharedJSlobs, session);
 
         return jsonJSlob;
     }
@@ -486,25 +484,12 @@ public final class ConfigJSlobService implements JSlobService {
             ret.add(jsonJSlob);
         }
 
-        for (JSlob jslob : ret) {
-            String id = jslob.getId().getId();
-            // Search for shared jslobs and merge them if neccessary
-            for (String sharedId : sharedJSlobs.keySet()) {
-                if (sharedId.startsWith(id)) {
-                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                    JSONObject jsonObject = jslob.getJsonObject();
-                    JSONObject sharedObject = sharedJSlob.getJsonObject();
-                    for (String key : sharedObject.keySet()) {
-                        if (sharedObject.hasAndNotNull(key)) {
-                            try {
-                                jsonObject.put(newId, sharedObject);
-                            } catch (JSONException e) {
-                                // should not happen
-                            }
-                        }
-                    }
-                }
+        // Search for shared jslobs and merge them if necessary
+        Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        if (!sharedJSlobs.isEmpty()) {
+            for (JSlob jslob : ret) {
+                String id = jslob.getId().getId();
+                mergeWithSharedJSlobs(id, jslob, sharedJSlobs, session);
             }
         }
 
@@ -646,28 +631,35 @@ public final class ConfigJSlobService implements JSlobService {
             }
             // Remember the paths to purge
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
-            // Config Tree Values first
 
-            final CompletionServiceReference cr = new CompletionServiceReference();
+            // Config Tree Values first
             {
-                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
-                if (equiv != null) {
-                    session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
-                    try {
-                        final SettingStorage stor = SettingStorage.getInstance(session);
-                        final ConfigTree configTree = ConfigTree.getInstance();
-                        final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
-                        // Update setting
-                        updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
-                    } finally {
-                        session.setParameter("__serverUserSetting", null);
+                final CompletionServiceReference cr = new CompletionServiceReference();
+                try {
+                    final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                    if (equiv != null) {
+                        session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
+                        try {
+                            final SettingStorage stor = SettingStorage.getInstance(session);
+                            final ConfigTree configTree = ConfigTree.getInstance();
+                            final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+                            // Update setting
+                            updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
+                        } finally {
+                            session.setParameter("__serverUserSetting", null);
+                        }
+                    }
+
+                    // Check completion service
+                    if (cr.num > 0) {
+                        ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
+                    }
+                } finally {
+                    SequentialCompletionService<Void> completionService = cr.completionService;
+                    if (null != completionService) {
+                        completionService.close();
                     }
                 }
-            }
-
-            // Check completion service
-            if (cr.num > 0) {
-                ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
             }
 
             // Set (or replace) JSlob
@@ -702,9 +694,9 @@ public final class ConfigJSlobService implements JSlobService {
         }
     }
 
-    private void updateConfigTreeSetting(final String prefix, final JSONObject jObject, final ConfigTree configTree, final Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, final List<List<JSONPathElement>> pathsToPurge, final CompletionServiceReference cr) throws OXException {
+    private void updateConfigTreeSetting(String prefix, JSONObject jObject, final ConfigTree configTree, Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, List<List<JSONPathElement>> pathsToPurge, CompletionServiceReference cr) throws OXException {
         for (final Entry<String, Object> entry : jObject.entrySet()) {
-            final String key = prefix + entry.getKey();
+            String key = prefix + entry.getKey();
             final Object value = entry.getValue();
             String path = attribute2ConfigTreeMap.get(key);
             if (path != null) {
@@ -716,12 +708,12 @@ public final class ConfigJSlobService implements JSlobService {
                     path = path.substring(0, path.length() - 1);
                 }
                 final String _path = path;
-                final Callable<Void> task = new Callable<Void>() {
+                Callable<Void> task = new Callable<Void>() {
 
                     @Override
                     public Void call() throws Exception {
                         try {
-                            final Setting setting = configTree.optSettingByPath(_path);
+                            Setting setting = configTree.optSettingByPath(_path);
                             if (null != setting) {
                                 setting.setSingleValue(value);
                                 saveSettingWithSubs(stor, setting);
@@ -737,7 +729,7 @@ public final class ConfigJSlobService implements JSlobService {
                 };
 
                 if (null == cr.completionService) {
-                    cr.completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                    cr.completionService = new SequentialCompletionService<Void>(ThreadPools.getThreadPool().getExecutor());
                 }
                 cr.completionService.submit(task);
                 cr.num++;
@@ -764,13 +756,13 @@ public final class ConfigJSlobService implements JSlobService {
      * @param setting actual setting.
      * @throws OXException If an error occurs.
      */
-    protected void saveSettingWithSubs(final SettingStorage storage, final Setting setting) throws OXException {
+    protected void saveSettingWithSubs(SettingStorage storage, Setting setting) throws OXException {
         try {
             if (setting.isLeaf()) {
-                final String value = setting.getSingleValue().toString();
+                String value = setting.getSingleValue().toString();
                 if (null != value && value.length() > 0 && '[' == value.charAt(0)) {
-                    final JSONArray array = asJsonArray(value);
-                    if(array != null) {
+                    JSONArray array = asJsonArray(value);
+                    if (array != null) {
                         if (array.length() == 0) {
                             setting.setEmptyMultiValue();
                         } else {
@@ -783,37 +775,37 @@ public final class ConfigJSlobService implements JSlobService {
                 }
                 storage.save(setting);
             } else {
-                final JSONObject json;
+                // Construct JSON object
+                JSONObject json;
                 {
-                    final Object singleValue = setting.getSingleValue();
-                    if (singleValue instanceof JSONObject) {
-                        json = new JSONObject((JSONObject) singleValue);
-                    } else {
-                        json = new JSONObject(singleValue.toString());
-                    }
+                    Object singleValue = setting.getSingleValue();
+                    json = singleValue instanceof JSONObject ? new JSONObject((JSONObject) singleValue) : new JSONObject(singleValue.toString());
                 }
-                final Iterator<String> iter = json.keys();
+
+                // Save it
                 OXException exc = null;
-                while (iter.hasNext()) {
-                    final String key = iter.next();
-                    Setting sub = ConfigTree.optSettingByPath(setting, new String[] { key });
-                    if (null != sub) {
-                        sub.setSingleValue(json.getString(key));
+                for (Iterator<String> iter = json.keys(); iter.hasNext();) {
+                    String key = iter.next();
+                    Setting subSetting = ConfigTree.optSettingByPath(setting, new String[] { key });
+                    if (null != subSetting) {
+                        subSetting.setSingleValue(json.getString(key));
                         try {
                             // Catch single exceptions if GUI writes not writable fields.
-                            saveSettingWithSubs(storage, sub);
-                        } catch (final OXException e) {
+                            saveSettingWithSubs(storage, subSetting);
+                        } catch (OXException e) {
                             exc = e;
                         }
                     }
                 }
+
+                // Check for exception
                 if (null != exc) {
                     throw exc;
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }
     }
@@ -1208,21 +1200,9 @@ public final class ConfigJSlobService implements JSlobService {
         }
     } // End of class AttributedProperty
 
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     private static final class CompletionServiceReference {
 
-        CompletionService<Void> completionService = null;
+        SequentialCompletionService<Void> completionService = null;
         int num = 0;
 
         /**

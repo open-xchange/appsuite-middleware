@@ -38,6 +38,9 @@ postFix() {
     if ox_exists_property com.openexchange.push.imapidle.debug $PFILE; then
         ox_remove_property com.openexchange.push.imapidle.debug $PFILE
     fi
+
+    # SoftwareChange_Request-2572
+    ox_add_property com.openexchange.push.imapidle.supportsPermanentListeners false $PFILE
 }
 
 case "$1" in

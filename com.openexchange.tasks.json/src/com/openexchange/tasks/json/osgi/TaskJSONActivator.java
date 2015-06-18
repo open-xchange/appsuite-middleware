@@ -55,8 +55,8 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.LocalizableStrings;
-import com.openexchange.oauth.provider.AbstractScopeProvider;
-import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.converters.TaskIcalResultConverter;
 import com.openexchange.tasks.json.converters.TaskResultConverter;
@@ -96,9 +96,9 @@ public class TaskJSONActivator extends AJAXModuleActivator {
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
         // Application 'xyz' requires following permissions:
-        //  - See all your tasks.
+        //  - Read all your tasks.
         //  - ...
-        public static final String READ_ONLY = "See all your tasks.";
+        public static final String READ_ONLY = "Read all your tasks.";
 
         // Application 'xyz' requires following permissions:
         //  - Create, modify and delete tasks.

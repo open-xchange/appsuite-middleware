@@ -66,12 +66,11 @@ import com.openexchange.http.client.exceptions.OxHttpClientExceptionCodes;
 
 public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 
-	private ManagedFileManagement fileManager;
+	private final ManagedFileManagement fileManager;
 
 	public ApacheHTTPClient(ManagedFileManagement fileManager) {
 		this.fileManager = fileManager;
 	}
-
 
 	public String extractString(HttpMethodBase method) throws OXException {
 		try {
@@ -116,7 +115,7 @@ public class ApacheHTTPClient extends AbstractHTTPClient implements HTTPClient {
 				}
 			}
 		}
-		
+
 		throw OxHttpClientExceptionCodes.APACHE_CLIENT_ERROR.create();
 	}
 

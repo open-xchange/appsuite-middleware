@@ -65,8 +65,8 @@ import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.OAuthAction;
-import com.openexchange.oauth.provider.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

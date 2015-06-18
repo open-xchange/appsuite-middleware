@@ -55,6 +55,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.writer.ReminderWriter;
@@ -67,9 +68,11 @@ import com.openexchange.groupware.reminder.ReminderHandler;
 import com.openexchange.groupware.reminder.ReminderObject;
 import com.openexchange.groupware.reminder.json.ReminderAJAXRequest;
 import com.openexchange.groupware.reminder.json.ReminderActionFactory;
-import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -83,6 +86,8 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "")
 @OAuthAction(ReminderActionFactory.OAUTH_READ_SCOPE)
 public final class UpdatesAction extends AbstractReminderAction {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesAction.class);
 
     /**
      * Initializes a new {@link UpdatesAction}.
@@ -126,18 +131,24 @@ public final class UpdatesAction extends AbstractReminderAction {
                     // }
                 }
 
-                if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
-                    final JSONObject jsonReminderObj = new JSONObject();
-                    reminderWriter.writeObject(reminder, jsonReminderObj);
-                    jsonResponseArray.put(jsonReminderObj);
+                try {
+                    if (hasModulePermission(reminder, session) && stillAccepted(reminder, session)) {
+                        final JSONObject jsonReminderObj = new JSONObject(12);
+                        reminderWriter.writeObject(reminder, jsonReminderObj);
+                        jsonResponseArray.put(jsonReminderObj);
+                    }
+                } catch (OXException e) {
+                    if (!OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                        throw e;
+                    }
+                    LOG.warn("Cannot load target object of this reminder.", e);
+                    deleteReminderSafe(reminder, session.getUserId(), reminderSql);
                 }
             }
 
             return new AJAXRequestResult(jsonResponseArray, timestamp, "json");
         } finally {
-            if (null != it) {
-                it.close();
-            }
+            SearchIterators.close(it);
         }
     }
 

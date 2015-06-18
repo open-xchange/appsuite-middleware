@@ -117,10 +117,16 @@ public interface CustomPortable extends Portable {
      *
      *
      * <li><code>  101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
-     * <li><code>  102</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser</li>
-     * <li><code>  103</code>: com.openexchange.push.impl.balancing.PortableCheckForExtendedServiceCallable</li>
-     * <li><code>  104</code>: com.openexchange.push.impl.balancing.PortableDropPermanentListenerCallable</li>
-     * <li><code>  105</code>: com.openexchange.push.impl.balancing.PortablePlanRescheduleCallable</li>
+     * <li><code>  102</code>: com.openexchange.push.impl.portable.PortablePushUser</li>
+     * <li><code>  103</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableCheckForExtendedServiceCallable</li>
+     * <li><code>  104</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortableDropPermanentListenerCallable</li>
+     * <li><code>  105</code>: com.openexchange.push.impl.balancing.reschedulerpolicy.portable.PortablePlanRescheduleCallable</li>
+     * <li><code>  106</code>: com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwner</li>
+     * <li><code>  107</code>: com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken</li>
+     * <li><code>  108</code>: com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken</li>
+     *
+     * <li><code>  200</code>: com.openexchange.office.hazelcast.serialization.PortableID</li>
+     * <li><code>  201</code>: com.openexchange.office.hazelcast.serialization.PortableDocumentState</li>
      * </ul>
      *
      * @return The class ID

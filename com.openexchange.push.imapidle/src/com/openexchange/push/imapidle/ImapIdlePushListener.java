@@ -60,6 +60,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 import javax.mail.FetchProfile;
+import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.MessagingException;
@@ -93,6 +94,7 @@ import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
+import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -309,7 +311,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                     // Refresh lock prior to entering IMAP-IDLE
                     if (doRefreshLock()) {
-                        ImapIdlePushManagerService.getInstance().refreshLock(session);
+                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent));
                     }
 
                     // Are there already new messages?
@@ -567,7 +569,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                 }
             }
 
-            // Cancel time task
+            // Cancel timer task
             ScheduledTimerTask timerTask = this.timerTask;
             if (null != timerTask) {
                 this.timerTask = null;
@@ -581,7 +583,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     // No other listener available
                     // Give up lock and return
                     try {
-                        instance.releaseLock(session);
+                        instance.releaseLock(new SessionInfo(session, permanent));
                     } catch (Exception e) {
                         LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                     }
@@ -593,7 +595,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                         LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                         // Give up lock and return
                         try {
-                            instance.releaseLock(session);
+                            instance.releaseLock(new SessionInfo(session, permanent));
                         } catch (Exception x) {
                             LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
                         }
@@ -709,7 +711,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private Container<MailMessage> fetchMessageInfoFor(long[] uids, IMAPFolder imapFolder) throws MessagingException {
         try {
             int unread = imapFolder.getUnreadMessageCount();
-
             Message[] messages = imapFolder.getMessagesByUID(uids);
             imapFolder.fetch(messages, FETCH_PROFILE_MSG_INFO);
 
@@ -747,6 +748,33 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         mailMessage.addFrom(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_FROM, im));
         mailMessage.addTo(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_TO, im));
         mailMessage.addCc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_CC, im));
+
+        final Flags msgFlags = im.getFlags();
+        int flags = 0;
+        if (msgFlags.contains(Flags.Flag.ANSWERED)) {
+            flags |= MailMessage.FLAG_ANSWERED;
+        }
+        if (msgFlags.contains(Flags.Flag.DELETED)) {
+            flags |= MailMessage.FLAG_DELETED;
+        }
+        if (msgFlags.contains(Flags.Flag.DRAFT)) {
+            flags |= MailMessage.FLAG_DRAFT;
+        }
+        if (msgFlags.contains(Flags.Flag.FLAGGED)) {
+            flags |= MailMessage.FLAG_FLAGGED;
+        }
+        if (msgFlags.contains(Flags.Flag.RECENT)) {
+            flags |= MailMessage.FLAG_RECENT;
+        }
+        if (msgFlags.contains(Flags.Flag.SEEN)) {
+            flags |= MailMessage.FLAG_SEEN;
+        }
+        if (msgFlags.contains(Flags.Flag.USER)) {
+            flags |= MailMessage.FLAG_USER;
+        }
+
+        mailMessage.setFlags(flags);
+
         mailMessage.addBcc(MimeMessageConverter.getAddressHeader(MessageHeaders.HDR_BCC, im));
         {
             String[] tmp = im.getHeader(MessageHeaders.HDR_CONTENT_TYPE);

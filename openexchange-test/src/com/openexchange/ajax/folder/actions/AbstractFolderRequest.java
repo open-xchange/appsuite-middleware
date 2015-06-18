@@ -60,6 +60,7 @@ import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
 import com.openexchange.ajax.framework.Header;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
@@ -147,6 +148,9 @@ abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements 
         }
         if (folder.containsParentFolderID()) {
             jsonFolder.put(FolderFields.FOLDER_ID, folder.getParentFolderID());
+        }
+        if (folder.containsMeta()) {
+            jsonFolder.put(FolderFields.META, JSONCoercion.coerceToJSON(folder.getMeta()));
         }
 
         return jsonFolder;

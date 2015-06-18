@@ -110,7 +110,7 @@ public final class FunctionTest extends AbstractAJAXSession {
     public void testSearch() throws Throwable {
         SearchResponse response = getClient().execute(new SearchRequest("*"));
         final Group[] groups = response.getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
 
@@ -120,13 +120,13 @@ public final class FunctionTest extends AbstractAJAXSession {
 
     public void testRealSearch() throws Throwable {
         final Group[] groups = getClient().execute(new SearchRequest("*l*")).getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertNotNull(groups);
     }
 
     public void testList() throws Throwable {
         Group[] groups = getClient().execute(new SearchRequest("*")).getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         final int[] groupIds = new int[groups.length];
@@ -136,7 +136,7 @@ public final class FunctionTest extends AbstractAJAXSession {
         AbstractGroupResponse listResponse = getClient().execute(new ListRequest(groupIds));
         groups = listResponse
             .getGroups();
-        LOG.info("Listed " + groups.length + " groups.");
+        LOG.trace("Listed " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         assertEquals("Size of requested groups and listed groups should be equal.",
@@ -238,14 +238,14 @@ public final class FunctionTest extends AbstractAJAXSession {
 
     public void testGet() throws Throwable {
         final Group groups[] = getClient().execute(new SearchRequest("*")).getGroups();
-        LOG.info("Found " + groups.length + " groups.");
+        LOG.trace("Found " + groups.length + " groups.");
         assertTrue("Size of group array should be more than 0.",
             groups.length > 0);
         final int pos = new Random(System.currentTimeMillis()).nextInt(groups
             .length);
         GetResponse response = getClient().execute(new GetRequest(groups[pos].getIdentifier()));
         final Group group = response.getGroup();
-        LOG.info("Loaded group: " + group.toString());
+        LOG.trace("Loaded group: " + group.toString());
         JSONObject entry = (JSONObject) response.getData();
         assertTrue(entry.has("last_modified_utc"));
     }
@@ -265,11 +265,11 @@ public final class FunctionTest extends AbstractAJAXSession {
             final CreateResponse response = client1.execute(request);
             group.setIdentifier(response.getId());
             group.setLastModified(response.getTimestamp());
-            LOG.info("Created group with identifier: " + group.getIdentifier());
+            LOG.trace("Created group with identifier: " + group.getIdentifier());
             final ChangeRequest change = new ChangeRequest(group);
             final ChangeResponse changed = client1.execute(change);
             group.setLastModified(changed.getTimestamp());
-            LOG.info("Changed group with identifier: " + group.getIdentifier());
+            LOG.trace("Changed group with identifier: " + group.getIdentifier());
         } finally {
             if (-1 != group.getIdentifier()) {
                 client1.execute(new DeleteRequest(

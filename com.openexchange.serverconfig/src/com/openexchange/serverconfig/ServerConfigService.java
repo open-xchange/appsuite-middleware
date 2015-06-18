@@ -49,10 +49,7 @@
 
 package com.openexchange.serverconfig;
 
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ServerConfigService}
@@ -65,10 +62,13 @@ public interface ServerConfigService {
     /**
      * Get the computed server config
      * 
+     * @param hostname The hostname to use when building the {@link ServerConfig} 
+     * @param userID The userID when building the {@link ServerConfig}
+     * @param contextID The contextID when building the {@link ServerConfig}
      * @return the computed server config
      * @throws OXException if computing the server config fails
      */
-    public JSONObject getServerConfig(AJAXRequestData requestData, ServerSession sessions) throws OXException;
+    public ServerConfig getServerConfig(String hostname, int userID, int contextID) throws OXException;
 
     /**
      * Get the {@link ServerConfigServicesLookup} that is used when computing the server config.

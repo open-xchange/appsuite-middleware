@@ -158,7 +158,7 @@ public abstract class AbstractIMAPCommand<T> {
                         imapCmd,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
-                    final String error = toLowerCase(response.toString());
+                    final String error = com.openexchange.java.Strings.toLowerCase(response.toString());
                     if (MimeMailException.isOverQuotaException(error)) {
                         /*
                          * Assume a quota exceeded exception
@@ -187,20 +187,6 @@ public abstract class AbstractIMAPCommand<T> {
                 throw pe;
             }
         }
-    }
-
-    /** ASCII-wise to lower-case */
-    protected static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     public final T doCommand() throws MessagingException {

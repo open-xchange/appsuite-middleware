@@ -52,7 +52,6 @@ package com.openexchange.ajax.share.actions;
 import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONException;
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
@@ -122,10 +121,7 @@ public class PasswordResetServletRequest extends AbstractResetPasswordServletReq
 
         @Override
         protected Response getResponse(String body) throws JSONException {
-            if (Strings.isNullOrEmpty(body)) {
-                body = "{}";
-            }
-            return super.getResponse(body);
+            return super.getResponse("{})</script>");
         }
     }
 

@@ -51,6 +51,8 @@ package com.openexchange.oauth.provider;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.osgi.annotation.SingletonService;
 
 

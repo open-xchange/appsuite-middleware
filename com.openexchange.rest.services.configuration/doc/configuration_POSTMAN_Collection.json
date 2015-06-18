@@ -1,0 +1,111 @@
+{
+  "id": "e80e9463-1461-7081-a309-a2d148a854fb",
+  "name": "REST Configuration",
+  "timestamp": 1425386893996,
+  "requests": [
+    {
+      "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
+      "id": "038fb14a-6ac6-35da-dd0c-51f8456025cd",
+      "name": "Get MAX_UPLOAD_SIZE",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/configuration/v1/property/MAX_UPLOAD_SIZE",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+      "data": [
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        },
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        }
+      ],
+      "dataMode": "params",
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
+      "id": "39d7bbc3-0fb3-e492-270d-9478a64ef25c",
+      "name": "Get Find Config (all with prefix)",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/configuration/v1/withPrefix/com.openexchange.find",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+      "data": [
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        },
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        }
+      ],
+      "dataMode": "params",
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
+      "id": "5f2cf74e-b1b2-4a85-9409-265e591e8972",
+      "name": "Get MAX_UPLOAD_SIZE For User",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/configuration/v1/property/MAX_UPLOAD_SIZE/424242669/4126",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+      "data": [
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        },
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        }
+      ],
+      "dataMode": "params",
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "e80e9463-1461-7081-a309-a2d148a854fb",
+      "id": "79480f9d-c4d4-8f63-e4b0-8b12eca63996",
+      "name": "Get ServerName",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/configuration/v1/property/SERVER_NAME",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+      "data": [
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        },
+        {
+          "key": "file",
+          "value": "",
+          "type": "file"
+        }
+      ],
+      "dataMode": "params",
+      "responses": [
+        
+      ],
+      "version": 2
+    }
+  ]
+}

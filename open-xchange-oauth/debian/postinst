@@ -50,9 +50,11 @@ postFix() {
     PFILE=/opt/open-xchange/etc/xingoauth.properties
     ox_add_property com.openexchange.oauth.xing.consumerKey REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_KEY $PFILE
     ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET $PFILE
-    VALUE=$(ox_read_property com.openexchange.oauth.xing $PFILE)
-    if [ "$VALUE" = "false" ]; then
-        ox_set_property com.openexchange.oauth.xing true $PFILE
+    if dpkg --compare-versions "7.6.1-0" gt-nl "$1"; then
+        VALUE=$(ox_read_property com.openexchange.oauth.xing $PFILE)
+        if [ "$VALUE" = "false" ]; then
+            ox_set_property com.openexchange.oauth.xing true $PFILE
+        fi
     fi
 
     # SoftwareChange_Request-2275
@@ -83,6 +85,12 @@ postFix() {
             ox_remove_property ${OLDNAMES[$I-1]} $PFILE
         fi
     done
+
+    # SoftwareChange_Request-2532
+    VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
+    if dpkg --compare-versions "7.8.0" gt-nl "$1"; then
+        ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
+    fi
 }
 
 setConfigFilePermissions() {

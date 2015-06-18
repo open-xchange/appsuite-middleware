@@ -269,7 +269,7 @@ public final class ConfigTree {
                 LOG.warn("", e);
             } else {
                 final String message = e.getMessage();
-                if (toLowerCase(message).indexOf("/io.ox/") < 0) {
+                if (com.openexchange.java.Strings.toLowerCase(message).indexOf("/io.ox/") < 0) {
                     LOG.warn(message);
                 }
             }
@@ -476,19 +476,5 @@ public final class ConfigTree {
             LOG.error("", se);
         }
         tree = null;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

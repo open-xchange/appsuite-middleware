@@ -75,7 +75,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.oauth.provider.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.tasks.json.TaskRequest;
@@ -119,7 +119,7 @@ public class SearchAction extends TaskAction {
             searchObj.addFolder(DataParser.parseInt(jData, AJAXServlet.PARAMETER_INFOLDER));
         }
 
-        int orderBy = req.optInt(AJAXServlet.PARAMETER_SORT);
+        int orderBy = getOrderBy(req);
         Order order = OrderFields.parse(req.getParameter(AJAXServlet.PARAMETER_ORDER));
 
         //if (jsonObj.has("limit")) {

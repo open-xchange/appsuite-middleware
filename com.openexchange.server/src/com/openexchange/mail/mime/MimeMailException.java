@@ -201,7 +201,7 @@ public class MimeMailException extends OXException {
                 if (null != mailConfig && MailAccount.DEFAULT_ID == mailConfig.getAccountId()) {
                     return MimeMailExceptionCode.LOGIN_FAILED.create(e, mailConfig.getServer(), mailConfig.getLogin());
                 }
-                if ((e.getMessage() != null) && ERR_TMP.equals(toLowerCase(e.getMessage()))) {
+                if ((e.getMessage() != null) && ERR_TMP.equals(com.openexchange.java.Strings.toLowerCase(e.getMessage()))) {
                     return MimeMailExceptionCode.LOGIN_FAILED.create(
                         e,
                         mailConfig == null ? STR_EMPTY : mailConfig.getServer(),
@@ -361,7 +361,7 @@ public class MimeMailException extends OXException {
                 /*
                  * Default case
                  */
-                final String message = toLowerCase(e.getMessage());
+                final String message = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                 if ("failed to load imap envelope".equals(message)) {
                     return MimeMailExceptionCode.MESSAGE_NOT_DISPLAYED.create(e);
                 }
@@ -423,88 +423,88 @@ public class MimeMailException extends OXException {
             } else if (nextException instanceof com.openexchange.mail.mime.QuotaExceededException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.QUOTA_EXCEEDED_EXT.create(
-                        e,
+                        nextException,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
                         appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
-                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                return MimeMailExceptionCode.QUOTA_EXCEEDED.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.CommandFailedException) {
                 // Check for in-use error
-                final String msg = toLowerCase(nextException.getMessage());
+                final String msg = com.openexchange.java.Strings.toLowerCase(nextException.getMessage());
                 if (isInUseException(msg)) {
                     // Too many sessions in use
                     if (null != mailConfig && null != session) {
                         return MimeMailExceptionCode.IN_USE_ERROR_EXT.create(
-                            e,
+                            nextException,
                             mailConfig.getServer(),
                             mailConfig.getLogin(),
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()),
                             appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                     }
-                    return MimeMailExceptionCode.IN_USE_ERROR.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                    return MimeMailExceptionCode.IN_USE_ERROR.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
                 if (isOverQuotaException(msg)) {
                     // Over quota
                     if (null != mailConfig && null != session) {
                         return MimeMailExceptionCode.QUOTA_EXCEEDED_EXT.create(
-                            e,
+                            nextException,
                             mailConfig.getServer(),
                             mailConfig.getLogin(),
                             Integer.valueOf(session.getUserId()),
                             Integer.valueOf(session.getContextId()),
                             appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                     }
-                    return MimeMailExceptionCode.QUOTA_EXCEEDED.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                    return MimeMailExceptionCode.QUOTA_EXCEEDED.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
                 // Regular processing error cause by arbitrary CommandFailedException
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_WE_EXT.create(
-                        e,
+                        nextException,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
                         appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(e, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
+                return MimeMailExceptionCode.PROCESSING_ERROR_WE.create(nextException, appendInfo(getInfo(skipTag(nextException.getMessage())), folder));
             } else if (nextException instanceof com.sun.mail.iap.BadCommandException) {
                 Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
-                if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
+                if (com.openexchange.java.Strings.toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
                     category = CATEGORY_USER_INPUT;
                 }
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
-                        e,
+                        nextException,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
                         appendInfo(nextException.getMessage(), folder)).setCategory(category);
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder)).setCategory(category);
+                return MimeMailExceptionCode.PROCESSING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder)).setCategory(category);
             } else if (nextException instanceof com.sun.mail.iap.ProtocolException) {
                 Category category = MimeMailExceptionCode.PROCESSING_ERROR.getCategory();
-                if (toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
+                if (com.openexchange.java.Strings.toLowerCase(e.getMessage()).indexOf("[inuse]") >= 0) {
                     category = CATEGORY_USER_INPUT;
                 }
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.PROCESSING_ERROR_EXT.create(
-                        e,
+                        nextException,
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
                         Integer.valueOf(session.getUserId()),
                         Integer.valueOf(session.getContextId()),
                         appendInfo(nextException.getMessage(), folder)).setCategory(category);
                 }
-                return MimeMailExceptionCode.PROCESSING_ERROR.create(e, appendInfo(nextException.getMessage(), folder)).setCategory(category);
+                return MimeMailExceptionCode.PROCESSING_ERROR.create(nextException, appendInfo(nextException.getMessage(), folder)).setCategory(category);
             } else if (nextException instanceof java.io.IOException) {
                 if (null != mailConfig && null != session) {
                     return MimeMailExceptionCode.IO_ERROR_EXT.create(
-                        e,
+                        nextException,
                         appendInfo(nextException.getMessage(), folder),
                         mailConfig.getServer(),
                         mailConfig.getLogin(),
@@ -554,7 +554,7 @@ public class MimeMailException extends OXException {
         if (null == info) {
             return info;
         }
-        final int pos = toLowerCase(info).indexOf("error message: ");
+        final int pos = com.openexchange.java.Strings.toLowerCase(info).indexOf("error message: ");
         return pos < 0 ? info : info.substring(pos + 15);
     }
 
@@ -600,7 +600,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        final String m = toLowerCase(msg);
+        final String m = com.openexchange.java.Strings.toLowerCase(msg);
         return (m.indexOf("alreadyexists") >= 0);
     }
 
@@ -621,7 +621,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        final String m = toLowerCase(msg);
+        final String m = com.openexchange.java.Strings.toLowerCase(msg);
         return (m.indexOf("quota") >= 0 || m.indexOf("limit") >= 0);
     }
 
@@ -632,7 +632,7 @@ public class MimeMailException extends OXException {
         if (null == e) {
             return false;
         }
-        return isInUseException(toLowerCase(e.getMessage()));
+        return isInUseException(com.openexchange.java.Strings.toLowerCase(e.getMessage()));
     }
 
     /**
@@ -642,7 +642,7 @@ public class MimeMailException extends OXException {
         if (null == msg) {
             return false;
         }
-        return (toLowerCase(msg).indexOf("[inuse]") >= 0);
+        return (com.openexchange.java.Strings.toLowerCase(msg).indexOf("[inuse]") >= 0);
     }
 
     /**
@@ -666,11 +666,6 @@ public class MimeMailException extends OXException {
 
     private static String getSmtpInfo(SMTPSenderFailedException sendFailedError) {
         return null == sendFailedError ? "" : new StringBuilder(64).append(sendFailedError.getReturnCode()).append(" - ").append(sendFailedError.getMessage()).toString();
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        return toLowerCase(chars, null);
     }
 
     /** ASCII-wise to lower-case */

@@ -144,8 +144,8 @@ public final class MimeType2ExtMap {
                     return;
                 }
                 try {
-                    typeMap = new ConcurrentHashMap<String, String>(1024);
-                    extMap = new ConcurrentHashMap<String, List<String>>(1024);
+                    typeMap = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
+                    extMap = new ConcurrentHashMap<String, List<String>>(1024, 0.9f, 1);
                     StringBuilder sb = new StringBuilder(128);
                     boolean debugEnabled = LOG.isDebugEnabled();
                     {

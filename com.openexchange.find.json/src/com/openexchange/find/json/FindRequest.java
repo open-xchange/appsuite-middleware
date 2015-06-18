@@ -217,7 +217,7 @@ public class FindRequest {
                     throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
                 }
 
-                String valueId = getValueId(jFacet.get("value"));
+                String valueId = getValueId(jFacet.optString("value", null));
                 if (valueId == null) {
                     // ignore invalid facets
                     continue;

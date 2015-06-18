@@ -118,6 +118,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug12926Test.class);
         tests.addTestSuite(Bug13173Test.class);
         tests.addTestSuite(Bug14002Test.class);
+        tests.addTest(new JUnit4TestAdapter(Bug15291Test.class));
         tests.addTestSuite(Bug15580Test.class);
         tests.addTestSuite(Bug15897Test.class);
         tests.addTestSuite(Bug15937Test.class);
@@ -135,7 +136,10 @@ public final class TaskTestSuite {
         tests.addTest(new JUnit4TestAdapter(Bug33258Test.class));
         tests.addTest(new JUnit4TestAdapter(Bug35992Test.class));
         tests.addTest(new JUnit4TestAdapter(Bug36943Test.class));
+        tests.addTest(new JUnit4TestAdapter(Bug37002Test.class));
         tests.addTest(new JUnit4TestAdapter(Bug37424Test.class));
+        tests.addTest(new JUnit4TestAdapter(Bug37927Test.class));
+        tests.addTest(new JUnit4TestAdapter(Bug38782Test.class));
         return tests;
     }
 }

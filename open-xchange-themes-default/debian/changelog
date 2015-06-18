@@ -4,6 +4,36 @@ open-xchange-themes-default (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:41:24 +0100
 
+open-xchange-themes-default (7.6.2-19) stable; urgency=medium
+
+  * Build for patch 2015-06-08 (2540)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 10 Jun 2015 15:33:30 +0200
+
+open-xchange-themes-default (7.6.2-18) stable; urgency=medium
+
+  * Build for patch 2015-05-26 (2521)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 18 May 2015 11:46:13 +0200
+
+open-xchange-themes-default (7.6.2-17) stable; urgency=medium
+
+  * Build for patch 2015-05-15 (2529)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 15 May 2015 10:19:24 +0200
+
+open-xchange-themes-default (7.6.2-16) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2496)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Apr 2015 12:30:18 +0200
+
+open-xchange-themes-default (7.6.2-15) stable; urgency=medium
+
+  * Build for patch 2015-09-09 (2495)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 24 Apr 2015 09:51:24 +0200
+
 open-xchange-themes-default (7.6.2-14) stable; urgency=medium
 
   * Build for patch 2015-04-13 (2474)
@@ -93,6 +123,24 @@ open-xchange-themes-default (7.6.2-0) unstable; urgency=medium
   * prepare for 7.6.2 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:36:41 +0200
+
+open-xchange-themes-default (7.6.1-29) stable; urgency=medium
+
+  * Build for patch 2015-06-08 (2539)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 10 Jun 2015 15:37:31 +0200
+
+open-xchange-themes-default (7.6.1-28) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2497)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Thu, 30 Apr 2015 10:16:37 +0200
+
+open-xchange-themes-default (7.6.1-27) stable; urgency=medium
+
+  * Build for patch 2015-05-04 (2505)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Tue, 28 Apr 2015 12:15:06 +0200
 
 open-xchange-themes-default (7.6.1-26) stable; urgency=medium
 

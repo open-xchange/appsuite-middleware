@@ -685,7 +685,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
             update.clear();
             for (final String field : secretProperties) {
                 final String encrypted = (String) content.get(field);
-                if (!isEmpty(encrypted)) {
+                if (!com.openexchange.java.Strings.isEmpty(encrypted)) {
                     try {
                         // Try using the new secret. Maybe this account doesn't need the migration
                         cryptoService.decrypt(encrypted, newSecret);
@@ -753,7 +753,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 final String field = entry.getKey();
                 if (secretProperties.contains(field)) {
                     final String encrypted = entry.getValue().toString();
-                    if (!isEmpty(encrypted)) {
+                    if (!com.openexchange.java.Strings.isEmpty(encrypted)) {
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
@@ -793,7 +793,7 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
                 final String field = entry.getKey();
                 if (secretProperties.contains(field)) {
                     final String encrypted = entry.getValue().toString();
-                    if (!isEmpty(encrypted)) {
+                    if (!com.openexchange.java.Strings.isEmpty(encrypted)) {
                         try {
                             // Check it
                             cryptoService.decrypt(encrypted, secret);
@@ -815,19 +815,4 @@ public class RdbMessagingAccountStorage implements MessagingAccountStorage, Secr
 
         deleteAccounts(serviceId, accountsToDelete.toArray(new MessagingAccount[accountsToDelete.size()]), confIdsToDelete.toArray(), session, null);
     }
-
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-
 }

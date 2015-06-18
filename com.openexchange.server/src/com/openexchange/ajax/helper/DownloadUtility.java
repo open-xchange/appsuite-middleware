@@ -146,7 +146,7 @@ public final class DownloadUtility {
      * @throws OXException If checking download fails
      */
     public static CheckedDownload checkInlineDownload(Readable inputStream, long size, String fileName, String sContentType, String overridingDisposition, String userAgent, ServerSession session) throws OXException {
-        return checkInlineDownload(inputStream, size, fileName, sContentType, overridingDisposition, userAgent, session.getUser().getLocale());
+        return checkInlineDownload(inputStream, size, fileName, sContentType, overridingDisposition, userAgent, null == session ? Locale.US : session.getUser().getLocale());
     }
 
     private static final String MIME_APPL_OCTET = MimeTypes.MIME_APPL_OCTET;

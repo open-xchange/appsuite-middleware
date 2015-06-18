@@ -1,4 +1,5 @@
 opt/open-xchange/etc/hazelcast/serverTokenHz.properties
+opt/open-xchange/etc/hazelcast/credentials.properties
 opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf
@@ -65,3 +66,4 @@ opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/webdav-disabled-message.txt
 opt/open-xchange/etc/tokenlogin-secrets
+opt/open-xchange/etc/globaldb.yml

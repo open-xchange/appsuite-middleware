@@ -173,6 +173,9 @@ postFix() {
 
     # SoftwareChange_Request-2382
     ox_add_property MASTER_ACCOUNT_OVERRIDE false /opt/open-xchange/etc/AdminDaemon.properties
+
+    # SoftwareChange_Request-2535
+    ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
 }
 
 setConfigFilePermissions() {

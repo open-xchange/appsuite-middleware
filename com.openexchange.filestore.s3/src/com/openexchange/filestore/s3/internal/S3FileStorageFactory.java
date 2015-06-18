@@ -173,7 +173,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
     /**
      * Initializes an {@link AmazonS3Client} as configured by the referenced authority part of the supplied URI.
      *
-     * @param uri The filestore ID
+     * @param filestoreID The filestore ID
      * @return The client
      * @throws OXException
      */

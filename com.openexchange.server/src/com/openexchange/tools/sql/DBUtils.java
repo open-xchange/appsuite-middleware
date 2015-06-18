@@ -394,6 +394,26 @@ public final class DBUtils {
         return retval;
     }
 
+    /**
+     * Finds out whether a table listed exist in the given database
+     * @param con The connection to the database in which to check for the tables
+     * @param table The table name to check for.
+     * @return A set with all the tables that exist of those to be checked for
+     * @throws SQLException If something goes wrong
+     */
+    public static boolean procedureExists(final Connection con, final String procedure) throws SQLException {
+        final DatabaseMetaData metaData = con.getMetaData();
+        ResultSet rs = null;
+        boolean retval = false;
+        try {
+            rs = metaData.getProcedures(null, null, procedure);
+            retval = (rs.next() && rs.getString("PROCEDURE_NAME").equals(procedure));
+        } finally {
+            closeSQLStuff(rs);
+        }
+        return retval;
+    }
+
     public static String forSQLCommand(final Order order) {
         if (order != null) {
             switch (order) {

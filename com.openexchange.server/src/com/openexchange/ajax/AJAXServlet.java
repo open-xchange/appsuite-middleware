@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -529,12 +528,7 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
                 super.service(new CountingHttpServletRequest(req), resp);
             }
         } catch (RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            int retryAfter = e.getRetryAfter();
-            if (retryAfter > 0) {
-                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(resp);
         } catch (RuntimeException e) {
             OXException oxe = new OXException(e);
             LOG.error("", oxe);

@@ -60,8 +60,8 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.LocalizableStrings;
-import com.openexchange.oauth.provider.AbstractScopeProvider;
-import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.user.UserService;
 
 /**
@@ -102,9 +102,9 @@ public class AppointmentJSONActivator extends AJAXModuleActivator {
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
         // Application 'xyz' requires following permissions:
-        //  - See all your appointments.
+        //  - Read all your appointments.
         //  - ...
-        public static final String READ_ONLY = "See all your appointments.";
+        public static final String READ_ONLY = "Read all your appointments.";
 
         // Application 'xyz' requires following permissions:
         //  - Create, modify and delete appointments.

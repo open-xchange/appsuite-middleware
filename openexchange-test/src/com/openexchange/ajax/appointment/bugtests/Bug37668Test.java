@@ -52,6 +52,7 @@ package com.openexchange.ajax.appointment.bugtests;
 import static com.openexchange.groupware.calendar.TimeTools.D;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.test.CalendarTestManager;
@@ -65,7 +66,13 @@ import com.openexchange.test.CalendarTestManager;
 public class Bug37668Test extends AbstractAJAXSession {
 
     private CalendarTestManager ctm;
-    private Appointment app;
+    private Appointment appSimple;
+    private TimeZone timeZone;
+    private TimeZone utc = TimeZone.getTimeZone("UTC");
+    private Appointment app23h;
+    private Appointment app25h;
+    private Appointment fulltime;
+    private Appointment fulltime2days;
 
     /**
      * Initializes a new {@link Bug37668Test}.
@@ -81,14 +88,61 @@ public class Bug37668Test extends AbstractAJAXSession {
         super.setUp();
 
         ctm = new CalendarTestManager(client);
-        app = new Appointment();
-        app.setStartDate(D("14.01.2015 16:00"));
-        app.setEndDate(D("14.01.2015 17:00"));
-        app.setRecurrenceType(Appointment.YEARLY);
-        app.setInterval(1);
-        app.setDayInMonth(27);
-        app.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
-        app.setIgnoreConflicts(true);
+        timeZone = getClient().getValues().getTimeZone();
+        
+        appSimple = new Appointment();
+        appSimple.setStartDate(D("14.01.2015 16:00", timeZone));
+        appSimple.setEndDate(D("14.01.2015 17:00", timeZone));
+        appSimple.setRecurrenceType(Appointment.YEARLY);
+        appSimple.setInterval(1);
+        appSimple.setDayInMonth(22);
+        appSimple.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        appSimple.setIgnoreConflicts(true);
+        appSimple.setTimezone(timeZone.getID());
+        
+        
+        app23h = new Appointment();
+        app23h.setStartDate(D("14.01.2015 16:00", timeZone));
+        app23h.setEndDate(D("15.01.2015 15:00", timeZone));
+        app23h.setRecurrenceType(Appointment.YEARLY);
+        app23h.setInterval(1);
+        app23h.setDayInMonth(22);
+        app23h.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app23h.setIgnoreConflicts(true);
+        app23h.setTimezone(timeZone.getID());
+        
+        
+        app25h = new Appointment();
+        app25h.setStartDate(D("14.01.2015 16:00", timeZone));
+        app25h.setEndDate(D("15.01.2015 17:00", timeZone));
+        app25h.setRecurrenceType(Appointment.YEARLY);
+        app25h.setInterval(1);
+        app25h.setDayInMonth(22);
+        app25h.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        app25h.setIgnoreConflicts(true);
+        app25h.setTimezone(timeZone.getID());
+
+        fulltime = new Appointment();
+        fulltime.setStartDate(D("14.01.2015 16:00", timeZone));
+        fulltime.setEndDate(D("14.01.2015 17:00", timeZone));
+        fulltime.setRecurrenceType(Appointment.YEARLY);
+        fulltime.setInterval(1);
+        fulltime.setDayInMonth(22);
+        fulltime.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        fulltime.setIgnoreConflicts(true);
+        fulltime.setTimezone(timeZone.getID());
+        fulltime.setFullTime(true);
+
+        fulltime2days = new Appointment();
+        fulltime2days.setStartDate(D("14.01.2015 10:00", timeZone));
+        fulltime2days.setEndDate(D("16.01.2015 10:00", timeZone));
+        fulltime2days.setRecurrenceType(Appointment.YEARLY);
+        fulltime2days.setInterval(1);
+        fulltime2days.setDayInMonth(22);
+        fulltime2days.setParentFolderID(client.getValues().getPrivateAppointmentFolder());
+        fulltime2days.setIgnoreConflicts(true);
+        fulltime2days.setTimezone(timeZone.getID());
+        fulltime2days.setFullTime(true);
     }
 
     public void testBug37668_JAN() throws Exception {
@@ -140,20 +194,79 @@ public class Bug37668Test extends AbstractAJAXSession {
     }
 
     private void doTest(int month) throws Exception {
-        app.setMonth(month);
-        app.setTitle("Bug 37668 Test (" + (month + 1) + ")");
+        appSimple.setMonth(month);
+        appSimple.setTitle("Bug 37668 Test (" + (month + 1) + ") simple.");
 
-        ctm.insert(app);
+        app23h.setMonth(month);
+        app23h.setTitle("Bug 37668 Test (" + (month + 1) + ") 23h.");
+
+        app25h.setMonth(month);
+        app25h.setTitle("Bug 37668 Test (" + (month + 1) + ") 25h.");
+        
+        fulltime.setMonth(month);
+        fulltime.setTitle("Bug 37668 Test (" + (month + 1) + ") fulltime.");
+        
+        fulltime2days.setMonth(month);
+        fulltime2days.setTitle("Bug 37668 Test (" + (month + 1) + ") fulltime 2 days.");
+
+        ctm.insert(appSimple);
+        ctm.insert(app23h);
+        ctm.insert(app25h);
+        ctm.insert(fulltime);
+        ctm.insert(fulltime2days);
+        
         Appointment delete = new Appointment();
-        delete.setObjectID(app.getObjectID());
-        delete.setParentFolderID(app.getParentFolderID());
+        delete.setObjectID(appSimple.getObjectID());
+        delete.setParentFolderID(appSimple.getParentFolderID());
         delete.setRecurrencePosition(1);
         delete.setLastModified(new Date(Long.MAX_VALUE));
-
+        ctm.delete(delete);
+        
+        delete.setObjectID(app25h.getObjectID());
+        delete.setParentFolderID(app25h.getParentFolderID());
+        ctm.delete(delete);
+        
+        delete.setObjectID(app23h.getObjectID());
+        delete.setParentFolderID(app23h.getParentFolderID());
+        ctm.delete(delete);
+        
+        delete.setObjectID(fulltime.getObjectID());
+        delete.setParentFolderID(fulltime.getParentFolderID());
+        ctm.delete(delete);
+        
+        delete.setObjectID(fulltime2days.getObjectID());
+        delete.setParentFolderID(fulltime2days.getParentFolderID());
         ctm.delete(delete);
 
-        Appointment load = ctm.get(app.getParentFolderID(), app.getObjectID());
-        assertEquals("Wrong date.", D("27." + (month + 1) + ".2015 17:00"), load.getEndDate());
+        Appointment loadSimple = ctm.get(appSimple.getParentFolderID(), appSimple.getObjectID());
+        assertEquals("Wrong start date. (" + loadSimple.getTitle() + ")", D("22." + (month + 1) + ".2015 16:00", timeZone), loadSimple.getStartDate());
+        assertEquals("Wrong end date. (" + loadSimple.getTitle() + ")", D("22." + (month + 1) + ".2015 17:00", timeZone), loadSimple.getEndDate());
+        assertNotNull("Expected a delete Exception.", loadSimple.getDeleteException());
+        assertEquals("Expected a delete Exception.", 1, loadSimple.getDeleteException().length);
+
+        Appointment load23h = ctm.get(app23h.getParentFolderID(), app23h.getObjectID());
+        assertEquals("Wrong start date. (" + load23h.getTitle() + ")", D("22." + (month + 1) + ".2015 16:00", timeZone), load23h.getStartDate());
+        assertEquals("Wrong end date. (" + load23h.getTitle() + ")", D("23." + (month + 1) + ".2015 15:00", timeZone), load23h.getEndDate());
+        assertNotNull("Expected a delete Exception.", load23h.getDeleteException());
+        assertEquals("Expected a delete Exception.", 1, load23h.getDeleteException().length);
+
+        Appointment load25h = ctm.get(app25h.getParentFolderID(), app25h.getObjectID());
+        assertEquals("Wrong start date. (" + load25h.getTitle() + ")", D("22." + (month + 1) + ".2015 16:00", timeZone), load25h.getStartDate());
+        assertEquals("Wrong end date. (" + load25h.getTitle() + ")", D("23." + (month + 1) + ".2015 17:00", timeZone), load25h.getEndDate());
+        assertNotNull("Expected a delete Exception.", load25h.getDeleteException());
+        assertEquals("Expected a delete Exception.", 1, load25h.getDeleteException().length);
+
+        Appointment loadFulltime = ctm.get(fulltime.getParentFolderID(), fulltime.getObjectID());
+        assertEquals("Wrong start date. (" + loadFulltime.getTitle() + ")", D("22." + (month + 1) + ".2015 00:00", utc), loadFulltime.getStartDate());
+        assertEquals("Wrong end date. (" + loadFulltime.getTitle() + ")", D("23." + (month + 1) + ".2015 00:00", utc), loadFulltime.getEndDate());
+        assertNotNull("Expected a delete Exception.", loadFulltime.getDeleteException());
+        assertEquals("Expected a delete Exception.", 1, loadFulltime.getDeleteException().length);
+
+        Appointment loadFulltime2days = ctm.get(fulltime2days.getParentFolderID(), fulltime2days.getObjectID());
+        assertEquals("Wrong start date. (" + loadFulltime2days.getTitle() + ")", D("22." + (month + 1) + ".2015 00:00", utc), loadFulltime2days.getStartDate());
+        assertEquals("Wrong end date. (" + loadFulltime2days.getTitle() + ")", D("24." + (month + 1) + ".2015 00:00", utc), loadFulltime2days.getEndDate());
+        assertNotNull("Expected a delete Exception.", loadFulltime2days.getDeleteException());
+        assertEquals("Expected a delete Exception.", 1, loadFulltime2days.getDeleteException().length);
     }
 
     @Override

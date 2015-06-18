@@ -80,7 +80,7 @@ public final class PushClientWhitelist {
      */
     private PushClientWhitelist() {
         super();
-        map = new ConcurrentHashMap<Pattern, Pattern>(4);
+        map = new ConcurrentHashMap<Pattern, Pattern>(4, 0.9f, 1);
     }
 
     /**

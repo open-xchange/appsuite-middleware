@@ -69,6 +69,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.ArrayIterator;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 
 /**
  * This class implements the methods needed by the tasks interface of the API version 2.
@@ -109,6 +111,9 @@ public class TasksSQLImpl implements TasksSQLInterface {
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
             throw e;
         }
         try {
@@ -127,17 +132,23 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
     @Override
     public Task getTaskById(final int taskId, final int folderId) throws OXException {
-        final Context ctx;
-        final int userId = session.getUserId();
-        final User user;
-        final UserPermissionBits permissionBits;
+        Context ctx = Tools.getContext(session.getContextId());
+        int userId = session.getUserId();
+        User user = Tools.getUser(ctx, userId);
+        UserPermissionBits permissionBits = Tools.getUserPermissionBits(ctx, userId);
         try {
-            ctx = Tools.getContext(session.getContextId());
-            user = Tools.getUser(ctx, userId);
-            permissionBits = Tools.getUserPermissionBits(ctx, userId);
-            final GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
+            GetTask get = new GetTask(ctx, user, permissionBits, folderId, taskId, StorageType.ACTIVE);
             return get.loadAndCheck();
         } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                // Parent folder does no more exist
+                try {
+                    DeleteData deleteData = new DeleteData(ctx, user, permissionBits, null, taskId, null);
+                    deleteData.doDeleteHard(session, folderId, StorageType.ACTIVE);
+                } catch (Exception x) {
+                    // Ignore
+                }
+            }
             throw e;
         }
     }
@@ -154,6 +165,9 @@ public class TasksSQLImpl implements TasksSQLInterface {
             permissionBits = Tools.getUserPermissionBits(ctx, userId);
             folder = Tools.getFolder(ctx, folderId);
         } catch (final OXException e) {
+            if (OXFolderExceptionCode.NOT_EXISTS.equals(e)) {
+                return SearchIteratorAdapter.emptyIterator();
+            }
             throw e;
         }
         boolean onlyOwn;

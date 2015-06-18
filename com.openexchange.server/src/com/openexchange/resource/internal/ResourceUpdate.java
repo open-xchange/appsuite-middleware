@@ -60,7 +60,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.resource.Resource;
 import com.openexchange.resource.ResourceEventConstants;
 import com.openexchange.resource.ResourceExceptionCode;
@@ -196,7 +195,7 @@ public final class ResourceUpdate {
             throw ResourceExceptionCode.CONCURRENT_MODIFICATION.create(resource.getSimpleName());
         }
         if (resource.isSimpleNameSet()) {
-            if (isEmpty(resource.getSimpleName())) {
+            if (com.openexchange.java.Strings.isEmpty(resource.getSimpleName())) {
                 throw ResourceExceptionCode.MANDATORY_FIELD.create();
             }
             if (!ResourceTools.validateResourceIdentifier(resource.getSimpleName())) {
@@ -210,7 +209,7 @@ public final class ResourceUpdate {
             }
         }
         if (resource.isMailSet()) {
-            if (isEmpty(resource.getMail())) {
+            if (com.openexchange.java.Strings.isEmpty(resource.getMail())) {
                 throw ResourceExceptionCode.MANDATORY_FIELD.create();
             }
             if (!ResourceTools.validateResourceEmail(resource.getMail())) {
@@ -268,19 +267,6 @@ public final class ResourceUpdate {
          */
         resource.fill(getOrig());
         storage.updateResource(ctx, con, resource);
-    }
-
-    private static boolean isEmpty(final String s) {
-        if (null == s || s.length() == 0) {
-            return true;
-        }
-        final char[] chars = s.toCharArray();
-        for (final char c : chars) {
-            if (!Strings.isWhitespace(c)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void sentEvent() {

@@ -61,6 +61,9 @@ import org.apache.commons.cli.Options;
  */
 public abstract class AbstractCLI {
 
+    /** The associated options */
+    protected Options options;
+
     /**
      * Initializes a new {@link AbstractCLI}.
      */
@@ -68,6 +71,16 @@ public abstract class AbstractCLI {
         super();
     }
 
+    /**
+     * Creates an initially empty {@link ReservedOptions} instance.
+     *
+     * @return The new options
+     */
+    protected ReservedOptions newOptions() {
+        ReservedOptions options = new ReservedOptions();
+        this.options = options;
+        return options;
+    }
 
     /**
      * Checks other mandatory options.
@@ -93,6 +106,18 @@ public abstract class AbstractCLI {
      * @return <code>true</code> for administrative permission; otherwise <code>false</code>
      */
     protected abstract boolean requiresAdministrativePermission();
+
+    /**
+     * Prints the <code>--help</code> text.
+     *
+     * @param options The help output
+     */
+    protected void printHelp() {
+        Options options = this.options;
+        if (null != options) {
+            printHelp(options);
+        }
+    }
 
     /**
      * Prints the <code>--help</code> text.
@@ -167,6 +192,33 @@ public abstract class AbstractCLI {
         int i = defaultValue;
         // Check option & parse if present
         final String sInt = cmd.getOptionValue(opt);
+        if (null != sInt) {
+            try {
+                i = Integer.parseInt(sInt.trim());
+            } catch (final NumberFormatException e) {
+                System.err.println("Integer parameter is not a number: " + sInt);
+                printHelp(options);
+                System.exit(1);
+            }
+        }
+        return i;
+    }
+
+    /**
+     * Parses & validates the <code>int</code> value for given option.
+     * <p>
+     * Exits gracefully if <code>int</code> value is invalid.
+     *
+     * @param longOpt The long option name
+     * @param defaultValue The default value
+     * @param cmd The command line
+     * @param options The options
+     * @return The <code>int</code> value
+     */
+    protected int parseInt(final String longOpt, final int defaultValue, final CommandLine cmd, final Options options) {
+        int i = defaultValue;
+        // Check option & parse if present
+        final String sInt = cmd.getOptionValue(longOpt);
         if (null != sInt) {
             try {
                 i = Integer.parseInt(sInt.trim());

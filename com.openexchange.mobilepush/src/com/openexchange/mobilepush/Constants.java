@@ -67,9 +67,9 @@ public class Constants {
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * The client identifier for the mobile application.
+     * The client identifier for the mobile application: <code>"open-xchange-mobileapp"</code>
      */
-    public static final String CLIENT_ID = "open-xchange-mailapp";
+    public static final String CLIENT_ID = com.openexchange.ajax.Client.MOBILE_APP.getClientId();
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 

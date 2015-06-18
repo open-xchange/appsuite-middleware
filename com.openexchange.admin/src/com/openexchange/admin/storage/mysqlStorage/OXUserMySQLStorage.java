@@ -1178,6 +1178,9 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         cache.remove(key);
                         cache = cacheService.getCache("Capabilities");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
+                        cache = cacheService.getCache("MailAccount");
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                        cache.invalidateGroup(ctx.getId().toString());
                         cache = cacheService.getCache("QuotaFileStorages");
                         cache.removeFromGroup(Integer.valueOf(userId), ctx.getId().toString());
                         if (displayNameUpdate) {
@@ -1771,10 +1774,11 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
 
                 // add user to login2user table with the internal id
+                boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
                 stmt = con.prepareStatement("INSERT INTO login2user (cid,id,uid) VALUES (?,?,?)");
                 stmt.setInt(1, contextId);
                 stmt.setInt(2, userId);
-                stmt.setString(3, usrdata.getName());
+                stmt.setString(3, autoLowerCase ? usrdata.getName().toLowerCase() : usrdata.getName());
                 stmt.executeUpdate();
                 stmt.close();
 
@@ -2319,6 +2323,89 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
+    public String[] getDisplayNames(Context ctx, User[] users) throws StorageException {
+        if (null == users || users.length <= 0) {
+            return new String[0];
+        }
+
+        int contextId = i(ctx.getId());
+        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
+
+        Connection con = null;
+        PreparedStatement stmtMain = null;
+        PreparedStatement stmtUserName = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+
+            stmtMain = con.prepareStatement(new StringBuilder(128).append("SELECT ").append(Mapper.method2field.get("Display_name")).append(" FROM prg_contacts WHERE prg_contacts.cid=? AND prg_contacts.userid=?").toString());
+            stmtMain.setInt(1, contextId);
+
+            String[] displayNames = new String[users.length];
+            for (int j = 0; j < users.length; j++) {
+                User user = users[j];
+                if (null == user) {
+                    displayNames[j] = null;
+                } else {
+                    ResultSet rs = null;
+
+                    int userId = user.getId().intValue();
+                    if (userId > 0) {
+                        stmtMain.setInt(2, userId);
+                    } else if (null != user.getName()) {
+                        // Determine user ID by name
+                        {
+                            if (null == stmtUserName) {
+                                stmtUserName = con.prepareStatement("SELECT id FROM login2user WHERE cid = ? AND uid = ?");
+                                stmtUserName.setInt(1, contextId);
+                            }
+                            String name = autoLowerCase ? user.getName().toLowerCase() : user.getName();
+                            stmtUserName.setString(2, name);
+                            rs = stmtUserName.executeQuery();
+                            if (rs.next()) {
+                                userId = rs.getInt(1);
+                            }
+                            rs.close();
+                            rs = null;
+                        }
+
+                        stmtMain.setInt(2, userId);
+                    } else {
+                        throw new StorageException("Neither user name nor user id given");
+                    }
+
+                    rs = stmtMain.executeQuery();
+                    displayNames[j] = (rs.next() ? rs.getString(1) : null);
+                    rs.close();
+                    rs = null;
+                }
+            }
+
+            return displayNames;
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (IllegalArgumentException e) {
+            log.error("Error", e);
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } finally {
+            Databases.closeSQLStuff(stmtMain, stmtUserName);
+            if (con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(contextId, con);
+                } catch (final PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
+                }
+            }
+        }
+    }
+
+    @Override
     public User[] getData(Context ctx, User[] users) throws StorageException {
         final int contextId = i(ctx.getId());
         final Class<User> c = User.class;
@@ -2335,7 +2422,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         notallowed.add("setMailFolderConfirmedHam");
 
         // TODO: load data for guests too
-        final StringBuilder query = new StringBuilder("SELECT ");
+        final StringBuilder query = new StringBuilder(2048).append("SELECT ");
 
         for (final Method method : theMethods) {
             final String methodname = method.getName();
@@ -2410,7 +2497,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 }
 
                 if (-1 != user_id) {
-                    // TODO: Why do we make this clause?
                     if (null == username) {
                         stmt.setInt(2, user_id);
                         rs = stmt.executeQuery();
@@ -2432,7 +2518,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                     stmt2.setInt(1, user_id);
                 } else {
-                    throw new StorageException("No user name oder user id given");
+                    throw new StorageException("Neither user name nor user id given");
                 }
                 newuser.setName(username);
 

@@ -66,6 +66,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
+import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
@@ -357,11 +358,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                          */
                         if (cascadePermissions) {
                             // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
+                            boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+                            
                             decorator.put("cascadePermissions", false);
                             checkOpenedStorage(realStorage, openedStorages);
                             List<String> ids = new ArrayList<String>();
-                            gatherSubfolders(folder, realStorage, treeId, ids);
-                            cascadeFolderPermissions(folder, realStorage, treeId, ids);
+                            gatherSubfolders(folder, realStorage, treeId, ids, ignoreWarnings);
+                            
+                            if (ignoreWarnings) {
+                                cascadeFolderPermissions(folder, realStorage, treeId, ids);
+                            }
                         }
                         if (storage.equals(realStorage)) {
                             storage.updateFolder(folder, storageParameters);
@@ -453,18 +459,24 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
      * @param storage The folder storage
      * @param treeId The tree identifier
      * @param ids The already gathered sub-folders
+     * @param ignoreWarnings Whether or not the warnings are going to be ignored
      * @throws OXException if the current user does not have administrative rights.
      */
-    private void gatherSubfolders(Folder folder, FolderStorage storage, String treeId, List<String> ids) throws OXException {
+    private void gatherSubfolders(Folder folder, FolderStorage storage, String treeId, List<String> ids, final boolean ignoreWarnings) throws OXException {
         SortableId[] sortableIds = storage.getSubfolders(treeId, folder.getID(), storageParameters);
         for (SortableId id : sortableIds) {
             Folder f = storage.getFolder(treeId, id.getId(), storageParameters);
             Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
             if (!permission.isAdmin()) {
-                throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
+                if (!ignoreWarnings) {
+                    OXException noAdminAccess = OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
+                    storageParameters.addWarning(noAdminAccess);
+                    throw noAdminAccess;
+                }
+            } else {
+                ids.add(f.getID());
+                gatherSubfolders(f, storage, treeId, ids, ignoreWarnings);
             }
-            ids.add(f.getID());
-            gatherSubfolders(f, storage, treeId, ids);
         }
     }
 

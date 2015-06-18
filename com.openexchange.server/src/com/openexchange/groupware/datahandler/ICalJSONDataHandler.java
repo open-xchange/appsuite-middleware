@@ -369,7 +369,7 @@ public final class ICalJSONDataHandler implements DataHandler {
 
         private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-        private static final String FILE_PREFIX = "openexchange";
+        private static final String FILE_PREFIX = "openexchange-icaljson-";
 
         private byte[] bytes;
 

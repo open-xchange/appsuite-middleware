@@ -83,6 +83,8 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String SHARING_FOLDERS_NOT_SUPPORTED = "Module %1$s does not support sharing of folders.";
 
+    public static final String NO_SHARING_WITH_YOURSELF = "You can't share with yourself.";
+
     /**
      * Prevent instantiation.
      */

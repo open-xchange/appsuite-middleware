@@ -1048,10 +1048,6 @@ ox_add_property com.openexchange.mail.enforceSecureConnection false /opt/open-xc
 
 # SoftwareChange_Request-2171
 PFILE=/opt/open-xchange/etc/server.properties
-VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.login $PFILE)
-if [ "open-xchange" = "$VALUE" ]; then
-    ox_set_property com.openexchange.rest.services.basic-auth.login "" $PFILE
-fi
 VALUE=$(ox_read_property com.openexchange.rest.services.basic-auth.password $PFILE)
 if [ "secret" = "$VALUE" ]; then
     ox_set_property com.openexchange.rest.services.basic-auth.password "" $PFILE
@@ -1190,6 +1186,27 @@ ox_add_property com.openexchange.hazelcast.shutdownOnOutOfMemory false /opt/open
 ox_add_property com.openexchange.publish.createModifyEnabled false /opt/open-xchange/etc/publications.properties
 ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-xchange/etc/subscribe.properties
 
+# SoftwareChange_Request-2530
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+
+# SoftwareChange_Request-2546
+VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
+    ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" /opt/open-xchange/etc/mail-push.properties
+fi
+ox_add_property com.openexchange.push.allowPermanentPush true /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.enabled false /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.passcrypt "" /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.rdb false /opt/open-xchange/etc/mail-push.properties
+
+# SoftwareChange_Request-2549
+VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
+if [ "" = "$VALUE" ]; then
+    ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
+fi
+
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1230,6 +1247,22 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
+* Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-26 (2521)
+* Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2505)
+* Fri Apr 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2473)
 * Wed Apr 08 2015 Marcus Klein <marcus.klein@open-xchange.com>

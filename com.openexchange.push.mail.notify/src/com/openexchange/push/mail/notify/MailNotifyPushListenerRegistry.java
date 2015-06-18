@@ -67,6 +67,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.mail.notify.osgi.Services;
 import com.openexchange.push.mail.notify.util.DelayedNotification;
@@ -104,7 +105,7 @@ public final class MailNotifyPushListenerRegistry {
      */
     public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) {
         super();
-        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048);
+        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048, 0.9f, 1);
         this.useOXLogin = useOXLogin;
         this.useEmailAddress = useEmailAddress;
         notificationsQueue = new MailNotifyDelayQueue();
@@ -264,13 +265,13 @@ public final class MailNotifyPushListenerRegistry {
      *
      * @return The push users
      */
-    public List<PushUser> getAvailablePushUsers() {
-        Set<PushUser> set = new HashSet<PushUser>();
+    public List<PushUserInfo> getAvailablePushUsers() {
+        Set<PushUserInfo> set = new HashSet<PushUserInfo>();
         for (MailNotifyPushListener listener : mboxId2Listener.values()) {
             Session ses = listener.getSession();
-            set.add(new PushUser(ses.getUserId(), ses.getContextId()));
+            set.add(new PushUserInfo(new PushUser(ses.getUserId(), ses.getContextId()), listener.isPermanent()));
         }
-        return new LinkedList<PushUser>(set);
+        return new LinkedList<PushUserInfo>(set);
     }
 
     /**

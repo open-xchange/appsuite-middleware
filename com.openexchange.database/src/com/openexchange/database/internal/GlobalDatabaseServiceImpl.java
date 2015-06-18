@@ -57,8 +57,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import liquibase.changelog.ChangeSet;
 import org.osgi.framework.FrameworkUtil;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GlobalDatabaseService;
@@ -83,23 +85,64 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
     private final Pools pools;
     private final ReplicationMonitor monitor;
-    private final Map<String, GlobalDbConfig> globalDbConfigs;
+    private Map<String, GlobalDbConfig> globalDbConfigs;
     private final ConfigViewFactory configViewFactory;
+    private final ConfigDatabaseServiceImpl configDatabaseService;
 
     /**
      * Initializes a new {@link GlobalDatabaseServiceImpl}.
      *
      * @param pools A reference to the connection pool
      * @param monitor The replication monitor
+     * @param configDatabaseService
+     * @param configurationService
      * @param globalDbConfigs The known global database configurations
      * @param configViewFactory The config view factory
+     * @throws OXException
      */
-    public GlobalDatabaseServiceImpl(Pools pools, ReplicationMonitor monitor, Map<String, GlobalDbConfig> globalDbConfigs, ConfigViewFactory configViewFactory) {
+    public GlobalDatabaseServiceImpl(Pools pools, ReplicationMonitor monitor, ConfigurationService configurationService, ConfigDatabaseServiceImpl configDatabaseService, ConfigViewFactory configViewFactory) throws OXException {
         super();
         this.pools = pools;
         this.monitor = monitor;
-        this.globalDbConfigs = globalDbConfigs;
         this.configViewFactory = configViewFactory;
+        this.configDatabaseService = configDatabaseService;
+
+        Map<String, GlobalDbConfig> loadGlobalDbConfigs = this.loadGlobalDbConfigs(configurationService);
+        this.setGlobalDbConfigs(loadGlobalDbConfigs);
+    }
+
+    /**
+     * Returns the up to date configuration for global databases from the globaldb.yml file. To apply the returned configuration you have to call com.openexchange.database.internal.GlobalDatabaseServiceImpl.setGlobalDbConfigs(Map<String, GlobalDbConfig>)
+     *
+     * @param configurationService
+     * @throws OXException
+     */
+    public Map<String, GlobalDbConfig> loadGlobalDbConfigs(ConfigurationService configurationService) throws OXException {
+        Map<String, GlobalDbConfig> lGlobalDbConfigs = new ConcurrentHashMap<String, GlobalDbConfig>();
+
+        if ((this.globalDbConfigs != null) && (!this.globalDbConfigs.isEmpty())) {
+            lGlobalDbConfigs.putAll(this.globalDbConfigs);
+        }
+
+        Map<String, GlobalDbConfig> newGlobalDbConfigs = GlobalDbInit.init(configurationService, configDatabaseService, pools, monitor);
+        lGlobalDbConfigs.putAll(newGlobalDbConfigs);
+
+        for (String filename : lGlobalDbConfigs.keySet()) {
+            if (!newGlobalDbConfigs.containsKey(filename)) {
+                lGlobalDbConfigs.remove(filename);
+            }
+        }
+
+        return lGlobalDbConfigs;
+    }
+
+    /**
+     * Sets the globalDbConfigs
+     *
+     * @param globalDbConfigs The globalDbConfigs to set
+     */
+    public void setGlobalDbConfigs(Map<String, GlobalDbConfig> globalDbConfigs) {
+        this.globalDbConfigs = globalDbConfigs;
     }
 
     /**
@@ -109,14 +152,26 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
      * @return The scheduled migrations
      */
     public List<DBMigrationState> scheduleMigrations(DBMigrationExecutorService migrationService) throws OXException {
-        if (null == globalDbConfigs || 0 == globalDbConfigs.size()) {
+        return this.scheduleMigrations(migrationService, globalDbConfigs);
+    }
+
+    /**
+     * Schedules pending migrations for all global databases provided within the {@link Map<String, GlobalDbConfig>} parameter.
+     *
+     * @param migrationService The database migration service
+     * @param newGlobalDbConfigs The configuration to schedule migrations for
+     *
+     * @return The scheduled migrations
+     */
+    public List<DBMigrationState> scheduleMigrations(DBMigrationExecutorService migrationService, Map<String, GlobalDbConfig> newGlobalDbConfigs) throws OXException {
+        if (null == newGlobalDbConfigs || 0 == newGlobalDbConfigs.size()) {
             return Collections.emptyList();
         }
         /*
          * use appropriate connection provider per global database & a local resource accessor for the changeset file
          */
         BundleResourceAccessor localResourceAccessor = new BundleResourceAccessor(FrameworkUtil.getBundle(GlobalDbInit.class));
-        Set<GlobalDbConfig> dbConfigs = new HashSet<GlobalDbConfig>(globalDbConfigs.values());
+        Set<GlobalDbConfig> dbConfigs = new HashSet<GlobalDbConfig>(newGlobalDbConfigs.values());
         List<DBMigrationState> migrationStates = new ArrayList<DBMigrationState>(dbConfigs.size());
         for (GlobalDbConfig dbConfig : dbConfigs) {
             /*
@@ -178,7 +233,7 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
     }
 
     @Override
-    public boolean isGlobalDatabaseAvailable(String group) throws OXException {
+    public boolean isGlobalDatabaseAvailable(String group) {
         String name = Strings.isEmpty(group) ? GlobalDbConfig.DEFAULT_GROUP : group;
         return globalDbConfigs.containsKey(name);
     }

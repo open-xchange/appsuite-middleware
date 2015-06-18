@@ -51,21 +51,24 @@ package com.openexchange.oauth.provider.json;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.Iterator;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.oauth.provider.GrantView;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.OAuthScopeProvider;
-import com.openexchange.oauth.provider.Scopes;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.grant.GrantView;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -78,6 +81,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.0
  */
 public class GrantViewJSONConverter {
+
+    private static final Logger LOG = LoggerFactory.getLogger(GrantViewJSONConverter.class);
 
     private final ServerSession session;
 
@@ -110,24 +115,27 @@ public class GrantViewJSONConverter {
     private JSONObject convertGrantView(GrantView grant) throws JSONException, OXException {
         JSONObject json = new JSONObject();
         json.put("client", convertClient(grant.getClient()));
-        json.put("scopes", convertScopes(grant.getScopes()));
+        json.put("scopes", convertScope(grant.getScope()));
         json.put("date", grant.getLatestGrantDate().getTime());
         return json;
     }
 
-    private JSONArray convertScopes(Scopes scopes) throws JSONException {
-        JSONArray json = new JSONArray();
-        for (String scope : scopes.get()) {
-            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(scope);
+    private JSONObject convertScope(Scope scope) throws JSONException {
+        JSONObject jScopes = new JSONObject();
+        Set<String> scopeTokens = scope.get();
+        for (String token : scopeTokens) {
+            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
+            String description;
             if (scopeProvider == null) {
-                json.put(scope);
+                LOG.warn("No scope provider available for token {}", token);
+                description = token;
             } else {
-                String description = translator.translate(scopeProvider.getDescription());
-                json.put(description);
+                description = translator.translate(scopeProvider.getDescription());
             }
+            jScopes.put(token, description);
         }
 
-        return json;
+        return jScopes;
     }
 
     private JSONObject convertClient(Client client) throws JSONException, OXException {
@@ -141,7 +149,7 @@ public class GrantViewJSONConverter {
     }
 
     private String buildIconURL(Icon icon) throws OXException  {
-        ManagedFile managedFile = managedFileManagement.createManagedFile(icon.getInputStream());
+        ManagedFile managedFile = managedFileManagement.createManagedFile(icon.getData());
         managedFile.setContentType(icon.getMimeType());
         managedFile.setFileName(MimeType2ExtMap.getFileExtension(icon.getMimeType()));
         return managedFile.constructURL(session);

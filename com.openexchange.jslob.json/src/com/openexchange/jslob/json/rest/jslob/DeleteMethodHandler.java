@@ -80,7 +80,7 @@ public final class DeleteMethodHandler extends AbstractMethodHandler {
     @Override
     protected void parseByPathInfo(final AJAXRequestData requestData, final String pathInfo, final HttpServletRequest req) throws IOException, OXException {
         // E.g. pathInfo="11" (preceding "jslob" removed)
-        if (isEmpty(pathInfo)) {
+        if (com.openexchange.java.Strings.isEmpty(pathInfo)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
         final String[] pathElements = SPLIT_PATH.split(pathInfo);

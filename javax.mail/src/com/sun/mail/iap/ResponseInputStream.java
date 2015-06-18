@@ -57,6 +57,7 @@ public class ResponseInputStream {
     private static final int minIncrement = 256;
     private static final int maxIncrement = 256 * 1024;
     private static final int incrementSlop = 16;
+    private static final int bufsize = 2 * 1024;
 
     // where we read from
     private BufferedInputStream bin;
@@ -65,7 +66,7 @@ public class ResponseInputStream {
      * Constructor.
      */
     public ResponseInputStream(InputStream in) {
-	bin = new BufferedInputStream(in, 2 * 1024);
+	bin = new BufferedInputStream(in, bufsize);
     }
 
     /**
@@ -80,9 +81,8 @@ public class ResponseInputStream {
      * Read a Response from the InputStream.
      * @return ByteArray that contains the Response
      */
-    public ByteArray readResponse(ByteArray ba) throws IOException {
-	if (ba == null)
-	    ba = new ByteArray(new byte[4096], 0, 4096);
+    public ByteArray readResponse(ByteArray byteArray) throws IOException {
+    ByteArray ba = null == byteArray ? new ByteArray(new byte[2048], 0, 2048) : byteArray;
 
 	byte[] buffer = ba.getBytes();
 	int idx = 0;
@@ -99,10 +99,7 @@ public class ResponseInputStream {
 			gotCRLF = true;
 		}
 		if (idx >= buffer.length) {
-		    int incr = buffer.length;
-		    if (incr > maxIncrement)
-			incr = maxIncrement;
-		    ba.grow(incr);
+		    ba.growMin(buffer.length + 1);
 		    buffer = ba.getBytes();
 		}
 		buffer[idx++] = (byte)b;

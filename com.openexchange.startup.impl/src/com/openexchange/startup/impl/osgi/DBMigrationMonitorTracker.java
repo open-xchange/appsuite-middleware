@@ -107,15 +107,15 @@ public class DBMigrationMonitorTracker implements ServiceTrackerCustomizer<DBMig
                                 LockSupport.parkNanos(waitNanos);
                                 dbUpdateInProgress = !migrationMonitor.getScheduledFiles().isEmpty();
                                 if (++countLoops % 10 == 0) {
-                                    LOG.info("Still updating configdb.");
+                                    LOG.info("Still updating configdb/globaldb.");
                                 }
                             } while (dbUpdateInProgress);
-                            LOG.info("Finished configdb update. Time elapsed: {}ms", Integer.valueOf(countLoops * 1000));
+                            LOG.info("Finished configdb/globaldb update. Time elapsed: {}ms", Integer.valueOf(countLoops * 1000));
                         } else {
-                            LOG.debug("No configdb update in progress.");
+                            LOG.debug("No configdb/globaldb update in progress.");
                         }
                     } catch (Exception e) {
-                        LOG.error("Error while waiting for configdb changes.", e);
+                        LOG.error("Error while waiting for configdb/globaldb changes.", e);
                     }
                     serviceRegistrationRef.set(context.registerService(SignalStartedService.class, new SignalStartedServiceImpl(), null));
                     LOG.info("Open-Xchange Server initialized. The server should be up and running...");

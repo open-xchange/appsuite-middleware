@@ -58,7 +58,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -574,16 +573,6 @@ public final class StringCollection {
             i[a] = Integer.parseInt(s[a]);
         }
         return i;
-    }
-
-    public static boolean isEmpty(final String s) {
-        final int length = s.length();
-        for (int a = 0; a < length; a++) {
-            if (!Strings.isWhitespace(s.charAt(a))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     public static String convertArraytoString(final Object[] o) {

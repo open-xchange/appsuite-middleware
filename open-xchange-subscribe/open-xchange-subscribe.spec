@@ -179,13 +179,32 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
-%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%config(noreplace) /opt/open-xchange/etc/crawler.properties
 %config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
+%config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
 %doc docs/
 
 %changelog
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
+* Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-26 (2521)
+* Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2505)
+* Fri Apr 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2473)
 * Wed Apr 08 2015 Marcus Klein <marcus.klein@open-xchange.com>

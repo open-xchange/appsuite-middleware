@@ -68,7 +68,7 @@ import com.sun.mail.util.MailLogger;
 public class CountingIMAPProtocol extends IMAPProtocol {
 
     /** Mapping for the login-permitting semaphores */
-    private static final ConcurrentMap<URLName, AtomicInteger> COUNTERS = new ConcurrentHashMap<URLName, AtomicInteger>(16);
+    private static final ConcurrentMap<URLName, AtomicInteger> COUNTERS = new ConcurrentHashMap<URLName, AtomicInteger>(16, 0.9f, 1);
 
     private static AtomicInteger initCounter(final URLName url) {
         AtomicInteger s = COUNTERS.get(url);

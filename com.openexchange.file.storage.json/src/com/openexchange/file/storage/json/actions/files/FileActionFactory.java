@@ -79,7 +79,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
      */
     protected FileActionFactory() {
         super();
-        final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(24);
+        final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(24, 0.9f, 1);
         actions.put("new", new NewAction());
         actions.put("update", new UpdateAction());
         actions.put("delete", new DeleteAction());

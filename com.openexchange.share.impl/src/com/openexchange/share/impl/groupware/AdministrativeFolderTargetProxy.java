@@ -57,7 +57,9 @@ import java.util.Set;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxyType;
 
 
 /**
@@ -156,6 +158,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     @Override
     public String toString() {
         return "AdministrativeFolderTargetProxy [folder=" + folder + "]";
+    }
+    
+    @Override
+    public TargetProxyType getProxyType() {
+        return DriveTargetProxyType.FOLDER;
     }
 
     private static class OCLPermissionConverter implements PermissionConverter<OCLPermission> {

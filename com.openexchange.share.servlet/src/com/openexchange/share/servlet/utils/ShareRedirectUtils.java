@@ -112,7 +112,7 @@ public class ShareRedirectUtils {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
         String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite");
         StringBuilder url = new StringBuilder(getLoginPageUrl(uiWebPath));
-        url.append("#");
+        url.append("#&login_type=guest");
         if (!Strings.isEmpty(message) && !Strings.isEmpty(status)) {
             url.append("&message=").append(message).append("&message_type=").append("ERROR").append("&status=").append(status);
         }

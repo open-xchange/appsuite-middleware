@@ -1,0 +1,430 @@
+{
+	"id": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+	"name": "JAX-RS Jersey",
+	"description": "",
+	"order": [],
+	"folders": [
+		{
+			"id": "545dd0f3-a898-43da-5a9c-ac0738eaa6a1",
+			"name": "Configuration Service",
+			"description": "",
+			"order": [
+				"d9df94f4-5933-1adb-02da-9217bc82a3fd",
+				"826c8ca5-31e2-bbd9-6a21-91e1cad8ec84",
+				"72922944-9eb6-a877-0257-32f0dd97e56a",
+				"90f249a9-f073-151c-06a7-dc2a13c416a7"
+			],
+			"collection_name": "JAX-RS Jersey",
+			"collection_id": "bf648255-2a92-c3a9-0de7-8c15ead534c3"
+		},
+		{
+			"id": "e64000c5-2dd8-470f-2277-23e7b5236145",
+			"name": "Example Service 2",
+			"description": "",
+			"order": [
+				"30a69405-8675-8e9a-e3d7-1d3921207546",
+				"e2c2da34-58ed-a9a4-dbef-cddbfa4d6b92",
+				"861cb29a-87be-52ca-8a63-fb98a32d9533",
+				"dad2512b-eb4e-e12f-9d6a-49f395f76835"
+			],
+			"collection_name": "JAX-RS Jersey",
+			"collection_id": "bf648255-2a92-c3a9-0de7-8c15ead534c3"
+		},
+		{
+			"id": "35e4d410-d916-9676-f93d-8510208edce8",
+			"name": "Example Service",
+			"description": "",
+			"order": [
+				"14fbcdb3-9bac-e986-d12d-fe29e6db7cd8",
+				"7636e745-e51a-4555-1816-4dabe18295e9",
+				"ab296355-65ee-bce0-cd4b-cb14b7d1d5d0",
+				"e71038ad-b4fa-f887-ce9c-d26783a2090c"
+			],
+			"collection_name": "JAX-RS Jersey",
+			"collection_id": "bf648255-2a92-c3a9-0de7-8c15ead534c3"
+		},
+		{
+			"id": "ebca63da-8d58-122f-1438-364a1dad48b0",
+			"name": "Html Service",
+			"description": "",
+			"order": [
+				"62f6cd7a-ccd1-cb7b-6fb6-06b20698a976",
+				"f18c894b-15c4-c18c-301d-7bf4b0deb8ad",
+				"25ddd73b-f4e9-a74b-74b4-52d9b3c348fc",
+				"bd9be914-1171-33ce-c7eb-fb7ce5b9a037"
+			],
+			"collection_name": "JAX-RS Jersey",
+			"collection_id": "bf648255-2a92-c3a9-0de7-8c15ead534c3"
+		}
+	],
+	"timestamp": 1410868429641,
+	"synced": false,
+	"requests": [
+		{
+			"id": "14fbcdb3-9bac-e986-d12d-fe29e6db7cd8",
+			"headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: text/plain\nContent-Type: text/plain\n",
+			"url": "http://localhost:8009/rest/example/shuffle",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"name": "Shuffle Plaintext",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1410789983652,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"synced": false,
+			"rawModeData": "I am a sentence. Shuffle me!"
+		},
+		{
+			"id": "25ddd73b-f4e9-a74b-74b4-52d9b3c348fc",
+			"headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+			"url": "http://localhost:8009/rest/htmlproc/v1/sanitize",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410784392787,
+			"name": "Sanitize Html (JSON)",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "{\"content\":\"<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\\\"http://lorempixel.com/400/200/\\\" />\"}"
+		},
+		{
+			"id": "30a69405-8675-8e9a-e3d7-1d3921207546",
+			"headers": "Accept: text/plain\nContent-Type: text/plain\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/example2/shuffle",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410852744016,
+			"name": "Shuffle Plaintext",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "I am a sentence. Shuffle me!"
+		},
+		{
+			"id": "62f6cd7a-ccd1-cb7b-6fb6-06b20698a976",
+			"headers": "Content-Type: text/html\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: text/html\n",
+			"url": "http://localhost:8009/rest/htmlproc/v1/sanitize",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410784495611,
+			"name": "Sanitize Html",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\"http://lorempixel.com/400/200/\" />"
+		},
+		{
+			"id": "72922944-9eb6-a877-0257-32f0dd97e56a",
+			"headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/configuration/v1/property/com.openexchange.quota.contact",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				},
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1410868908038,
+			"name": "Get Contacts Quota",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "7636e745-e51a-4555-1816-4dabe18295e9",
+			"headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://localhost:8009/rest/example/shuffle",
+			"pathVariables": {},
+			"preRequestScript": "",
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"name": "Shuffle JSON Object",
+			"description": "",
+			"descriptionFormat": "html",
+			"time": 1410790044127,
+			"version": 2,
+			"responses": [],
+			"tests": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"synced": false,
+			"rawModeData": "{\"text\":\"I am a sentence. Shuffle me!\"}"
+		},
+		{
+			"id": "826c8ca5-31e2-bbd9-6a21-91e1cad8ec84",
+			"headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/configuration/v1/withPrefix/com.openexchange.find",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				},
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1410868645695,
+			"name": "Get Find Config",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "861cb29a-87be-52ca-8a63-fb98a32d9533",
+			"headers": "Accept: application/json\nContent-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/example2/shuffle",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410852757178,
+			"name": "Shuffle JSON Array",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "[\"I am a sentence. Shuffle me!\", \"I am another sentence...\"]"
+		},
+		{
+			"id": "90f249a9-f073-151c-06a7-dc2a13c416a7",
+			"headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/configuration/v1/property/com.openexchange.quota.contact/424242669/84",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				},
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1410868939086,
+			"name": "Get Contacts Quota For User",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "ab296355-65ee-bce0-cd4b-cb14b7d1d5d0",
+			"headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nContent-Type: application/json\n",
+			"url": "http://localhost:8009/rest/example/shuffle",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410790076367,
+			"name": "Shuffle JSON Array",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "[\"I am a sentence. Shuffle me!\", \"I am another sentence...\"]"
+		},
+		{
+			"id": "bd9be914-1171-33ce-c7eb-fb7ce5b9a037",
+			"headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+			"url": "http://localhost:8009/rest/htmlproc/v1/sanitizeKeepImages",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410784505708,
+			"name": "Sanitize Html (JSON) With Images",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "{\"content\":\"<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\\\"http://lorempixel.com/400/200/\\\" />\"}"
+		},
+		{
+			"id": "d9df94f4-5933-1adb-02da-9217bc82a3fd",
+			"headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/configuration/v1/property/SERVER_NAME",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "GET",
+			"data": [
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				},
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1410868610595,
+			"name": "Get ServerName",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "dad2512b-eb4e-e12f-9d6a-49f395f76835",
+			"headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/example2/zip",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "file",
+					"value": "vmnet313.patch",
+					"type": "file"
+				},
+				{
+					"key": "file",
+					"value": "examples.desktop",
+					"type": "file"
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1410857129405,
+			"name": "Zip Files",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "e2c2da34-58ed-a9a4-dbef-cddbfa4d6b92",
+			"headers": "Accept: application/json\nContent-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/example2/shuffle",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410852753073,
+			"name": "Shuffle JSON Object",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "{\"text\":\"I am a sentence. Shuffle me!\"}"
+		},
+		{
+			"id": "e71038ad-b4fa-f887-ce9c-d26783a2090c",
+			"headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\n",
+			"url": "http://localhost:8009/rest/example/zip",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "POST",
+			"data": [
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				},
+				{
+					"key": "file",
+					"value": "",
+					"type": "file"
+				}
+			],
+			"dataMode": "params",
+			"version": 2,
+			"tests": "",
+			"time": 1410857132484,
+			"name": "Zip Files",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false
+		},
+		{
+			"id": "f18c894b-15c4-c18c-301d-7bf4b0deb8ad",
+			"headers": "Content-Type: text/html\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: text/html\n",
+			"url": "http://localhost:8009/rest/htmlproc/v1/sanitizeKeepImages",
+			"preRequestScript": "",
+			"pathVariables": {},
+			"method": "PUT",
+			"data": [],
+			"dataMode": "raw",
+			"version": 2,
+			"tests": "",
+			"time": 1410784499789,
+			"name": "Sanitize Html With Images",
+			"description": "",
+			"collectionId": "bf648255-2a92-c3a9-0de7-8c15ead534c3",
+			"responses": [],
+			"synced": false,
+			"rawModeData": "<script>alert('Hello World!');</script><p>Hier steht Text</p><img src=\"http://lorempixel.com/400/200/\" />"
+		}
+	]
+}

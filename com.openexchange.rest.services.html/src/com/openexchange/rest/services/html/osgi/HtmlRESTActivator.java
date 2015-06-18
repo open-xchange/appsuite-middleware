@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,70 +49,25 @@
 
 package com.openexchange.rest.services.html.osgi;
 
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.html.HtmlService;
-import com.openexchange.rest.services.OXRESTService;
+import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.html.HtmlRESTService;
-import com.openexchange.rest.services.osgiservice.OXRESTActivator;
 
 /**
- * {@link HtmlRESTActivator}
+ * {@link ConfigurationRESTActivator}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public final class HtmlRESTActivator extends OXRESTActivator {
-
-    /**
-     * Initializes a new {@link HtmlRESTActivator}.
-     */
-    public HtmlRESTActivator() {
-        super();
-    }
+public class HtmlRESTActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { HtmlService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        final BundleContext context = this.context;
-        ServiceTrackerCustomizer<HtmlService, HtmlService> customizer = new ServiceTrackerCustomizer<HtmlService, HtmlService>() {
-
-            @Override
-            public HtmlService addingService(ServiceReference<HtmlService> reference) {
-                HtmlService service = context.getService(reference);
-
-                registerWebService(HtmlRESTService.class, service);
-
-                return service;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<HtmlService> reference, HtmlService service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(ServiceReference<HtmlService> reference, HtmlService service) {
-                unregisterWebService(HtmlRESTService.class);
-                context.ungetService(reference);
-            }
-        };
-        track(HtmlService.class, customizer);
-        openTrackers();
-    }
-
-    @Override
-    public <T> void registerWebService(Class<? extends OXRESTService<T>> serviceClass, T context) {
-        super.registerWebService(serviceClass, context);
-    }
-
-    @Override
-    public <T> void unregisterWebService(Class<? extends OXRESTService<T>> serviceClass) {
-        super.unregisterWebService(serviceClass);
+        registerService(HtmlRESTService.class, new HtmlRESTService(getService(HtmlService.class)));
     }
 
 }

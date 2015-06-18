@@ -208,6 +208,9 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
                 title = rs.getString(6);
                 fid = rs.getInt(7);
                 pflag = rs.getInt(8);
+                if (!rs.wasNull()) {
+                    cdao.setPrivateFlag(pflag == 1);
+                }
                 owner = rs.getInt(9);
                 colorLabel = rs.getInt(17); // SQL NULL would return zero which is no color label
                 categories = rs.getString(18); // SQL NULL would return null

@@ -147,6 +147,10 @@ public final class LogProperties {
          */
         GRIZZLY_QUERY_STRING("com.openexchange.grizzly.queryString"),
         /**
+         * com.openexchange.grizzly.method
+         */
+        GRIZZLY_METHOD("com.openexchange.grizzly.method"),
+        /**
          * com.openexchange.grizzly.servletPath
          * <p>
          * The part of this request's URL that calls the servlet. This path starts with a "/" character and includes either the servlet name
@@ -319,7 +323,7 @@ public final class LogProperties {
         super();
     }
 
-    private static final ConcurrentMap<Class<? extends MDCAdapter>, Field> FIELD_CACHE = new ConcurrentHashMap<Class<? extends MDCAdapter>, Field>(4);
+    private static final ConcurrentMap<Class<? extends MDCAdapter>, Field> FIELD_CACHE = new ConcurrentHashMap<Class<? extends MDCAdapter>, Field>(4, 0.9f, 1);
 
     @SuppressWarnings("unchecked")
     private static InheritableThreadLocal<Map<String, String>> getPropertiesMap(final MDCAdapter mdcAdapter) throws OXException {
@@ -494,8 +498,9 @@ public final class LogProperties {
         if (null == tempFilePath) {
             return;
         }
-        String prev = MDC.get(Name.TEMP_FILE.getName());
-        MDC.put(Name.TEMP_FILE.getName(), null == prev ? tempFilePath : new StringBuffer(prev).append(',').append(tempFilePath).toString());
+        String sName = Name.TEMP_FILE.getName();
+        String prev = MDC.get(sName);
+        MDC.put(sName, null == prev ? tempFilePath : new StringBuilder(prev).append(',').append(tempFilePath).toString());
     }
 
     /**
@@ -507,8 +512,9 @@ public final class LogProperties {
         if (null == name || null == value) {
             return;
         }
-        String prev = MDC.get(name.getName());
-        MDC.put(name.getName(), null == prev ? value : new StringBuffer(prev).append(',').append(value).toString());
+        String sName = name.getName();
+        String prev = MDC.get(sName);
+        MDC.put(sName, null == prev ? value : new StringBuilder(prev).append(',').append(value).toString());
     }
 
     /**

@@ -54,17 +54,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Languages}
@@ -74,9 +70,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class Languages implements ComputedServerConfigValueService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Languages.class);
-
-    private final JSONArray allLanguages;
+    List<SimpleEntry<String, String>> languages;
 
     /**
      * Initializes a new {@link Languages}.
@@ -89,7 +83,7 @@ public class Languages implements ComputedServerConfigValueService {
         ConfigurationService config = services.getService(ConfigurationService.class);
         Properties properties = config.getPropertiesInFolder("languages/appsuite");
 
-        List<SimpleEntry<String, String>> languages = new ArrayList<SimpleEntry<String,String>>();
+        languages = new ArrayList<SimpleEntry<String,String>>();
         for (Object key : properties.keySet()) {
             String propName = (String) key;
             String languageName = properties.getProperty(propName);
@@ -123,19 +117,14 @@ public class Languages implements ComputedServerConfigValueService {
             }
         });
 
-        final JSONArray allLanguages = new JSONArray(languages.size());
-        for (SimpleEntry<String, String> language : languages) {
-            allLanguages.put(new JSONArray(2).put(language.getKey()).put(language.getValue()));
-        }
-        this.allLanguages = allLanguages;
     }
 
     @Override
-    public void addValue(JSONObject serverConfig, AJAXRequestData request, ServerSession session) throws JSONException {
+    public void addValue(Map<String, Object> serverConfig, String hostName, int userID, int contextID) {
 
-        Object languages = serverConfig.opt("languages");
-        if (languages == null || languages.equals("all")) {
-            serverConfig.put("languages", allLanguages);
+        String existingLanguages = String.class.cast(serverConfig.get("languages"));
+        if (existingLanguages == null || existingLanguages.equals("all")) {
+            serverConfig.put("languages", languages);
         }
     }
 

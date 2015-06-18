@@ -54,6 +54,8 @@ import com.openexchange.carddav.servlet.CardDAV;
 import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -66,7 +68,7 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class };
+        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class, VCardService.class };
     }
 
     @Override
@@ -83,6 +85,7 @@ public class CarddavActivator extends HousekeepingActivator {
             this.mixin = mixin;
 
             registerService(PathRegistration.class, new PathRegistration("carddav"));
+            trackService(VCardStorageService.class);
 
             openTrackers();
         } catch (Exception e) {

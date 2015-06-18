@@ -87,6 +87,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -100,7 +101,6 @@ import com.openexchange.userconf.UserPermissionService;
 public class ShareTool {
 
     public static final String SHARE_SERVLET = "share";
-    public static final String INITIAL_GUEST_PASSWORD = " ";
 
     /**
      * Extracts the first value of a specific attribute from a user.
@@ -293,14 +293,15 @@ public class ShareTool {
             return prepareGuestUser(sharingUser, copiedUser);
         }
         /*
-         * prepare new guest user for recipient
+         * prepare new guest user for recipient & set "was created" marker
          */
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName(recipient.getDisplayName());
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        guestUser.setUserPassword(ShareTool.INITIAL_GUEST_PASSWORD);
+        guestUser.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
+        recipient.setWasCreated(true);
         return guestUser;
     }
 

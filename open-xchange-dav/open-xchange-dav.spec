@@ -89,6 +89,22 @@ fi
 %config(noreplace) /opt/open-xchange/etc/contextSets/*
 
 %changelog
+* Wed Jun 10 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
+* Wed Jun 10 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
+* Mon May 18 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-26 (2521)
+* Fri May 15 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
+* Thu Apr 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2505)
+* Fri Apr 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2473)
 * Wed Apr 08 2015 Steffen Templin <marcus.klein@open-xchange.com>

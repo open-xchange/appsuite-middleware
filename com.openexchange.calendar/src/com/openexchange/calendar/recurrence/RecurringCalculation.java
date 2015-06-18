@@ -67,7 +67,6 @@ import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.java.Strings;
 
-
 /**
  * RecurringCalculation
  * @author <a href="mailto:martin.kauss@open-xchange.org">Martin Kauss</a>
@@ -380,10 +379,10 @@ public class RecurringCalculation {
 
     private void checkValues() {
 		if (!contains_until) {
-		    Calendar tmp = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
-		    tmp.setTimeInMillis(start_of_series);
-		    tmp.add(Calendar.YEAR, recurring_type == CalendarObject.YEARLY ? CalendarCollectionService.MAX_OCCURRENCESE : 99);
-		    end_of_series = tmp.getTimeInMillis();
+			Calendar tmp = Calendar.getInstance(TimeZone.getTimeZone(calc_timezone));
+			tmp.setTimeInMillis(start_of_series);
+			tmp.add(Calendar.YEAR, recurring_type == CalendarObject.YEARLY ? CalendarCollectionService.MAX_OCCURRENCESE : 99);
+			end_of_series = tmp.getTimeInMillis();
 			this.until = end_of_series;
 		}
 	}
@@ -417,7 +416,7 @@ public class RecurringCalculation {
      *
      * @return The calculated occurrences kept by returned instance of {@link RecurringResults} or <code>null</code> if recurrence type is
      *         unknown.
-     * @throws OXException 
+     * @throws OXException
      */
     public RecurringResults calculateRecurrence() throws OXException {
 

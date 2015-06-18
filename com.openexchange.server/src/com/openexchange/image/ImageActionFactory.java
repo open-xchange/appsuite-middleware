@@ -70,9 +70,9 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
 
     private final Map<String, AJAXActionService> actions;
 
-    public static final ConcurrentMap<String, String> regName2Alias = new ConcurrentHashMap<String, String>();
+    public static final ConcurrentMap<String, String> regName2Alias = new ConcurrentHashMap<String, String>(8, 0.9f, 1);
 
-    public static final ConcurrentMap<String, String> alias2regName = new ConcurrentHashMap<String, String>();
+    public static final ConcurrentMap<String, String> alias2regName = new ConcurrentHashMap<String, String>(8, 0.9f, 1);
 
     /**
      * The image servlet's alias

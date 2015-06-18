@@ -1603,16 +1603,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     @Override
     public void primaryMailExists(Context ctx, String mail) throws StorageException, InvalidDataException {
         int context_id = ctx.getId().intValue();
-
-        final Connection con;
+        Connection con = null;
         try {
             con = cache.getConnectionForContext(context_id);
+            primaryMailExists(con, ctx, mail);
         } catch (PoolException e) {
             log.error("Pool Error", e);
             throw new StorageException(e);
-        }
-        try {
-            primaryMailExists(con, ctx, mail);
         } finally {
             if (null != con) {
                 try {
@@ -1625,15 +1622,17 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private void primaryMailExists(Connection con, Context ctx, String mail) throws StorageException, InvalidDataException {
+        int contextId = ctx.getId().intValue();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT mail FROM user WHERE cid=? AND mail=?");
-            stmt.setInt(1, ctx.getId().intValue());
+            stmt = con.prepareStatement("SELECT mail, id FROM user WHERE cid=? AND mail=?");
+            stmt.setInt(1, contextId);
             stmt.setString(2, mail);
             result = stmt.executeQuery();
             if (result.next()) {
-                throw new InvalidDataException("Primary mail address already exists in this context.");
+                int userId = result.getInt(2);
+                throw new InvalidDataException("Primary mail address \"" + mail + "\" already exists in context " + contextId + " (Already assigned to user " + userId + ").");
             }
         } catch (SQLException e) {
             log.error("SQL Error", e);
@@ -2542,29 +2541,29 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        final Database retval;
         try {
             stmt = con.prepareStatement("SELECT url,driver,login,password,name,read_db_pool_id,weight,max_units FROM db_pool JOIN db_cluster ON write_db_pool_id=db_pool_id WHERE db_pool_id=?");
             stmt.setInt(1, id);
             rs = stmt.executeQuery();
-            if (rs.next()) {
-                retval = new Database();
-                int pos = 1;
-                retval.setId(I(id));
-                retval.setUrl(rs.getString(pos++));
-                retval.setDriver(rs.getString(pos++));
-                retval.setLogin(rs.getString(pos++));
-                retval.setPassword(rs.getString(pos++));
-                retval.setName(rs.getString(pos++));
-                final int slaveId = rs.getInt(pos++);
-                if (slaveId > 0) {
-                    retval.setRead_id(I(slaveId));
-                }
-                retval.setClusterWeight(I(rs.getInt(pos++)));
-                retval.setMaxUnits(I(rs.getInt(pos++)));
-            } else {
+            if (!rs.next()) {
                 throw new StorageException("Database with identifer " + id + " does not exist.");
             }
+
+            Database retval = new Database();
+            int pos = 1;
+            retval.setId(I(id));
+            retval.setUrl(rs.getString(pos++));
+            retval.setDriver(rs.getString(pos++));
+            retval.setLogin(rs.getString(pos++));
+            retval.setPassword(rs.getString(pos++));
+            retval.setName(rs.getString(pos++));
+            final int slaveId = rs.getInt(pos++);
+            if (slaveId > 0) {
+                retval.setRead_id(I(slaveId));
+            }
+            retval.setClusterWeight(I(rs.getInt(pos++)));
+            retval.setMaxUnits(I(rs.getInt(pos++)));
+            return retval;
         } catch (SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
@@ -2575,6 +2574,6 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 log.error("Error pushing connection to pool!", e);
             }
         }
-        return retval;
     }
+
 }

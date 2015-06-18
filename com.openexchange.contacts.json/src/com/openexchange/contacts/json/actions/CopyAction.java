@@ -53,6 +53,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -66,6 +67,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -83,6 +85,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 @Action(method = RequestMethod.PUT, name = "copy", description = "", parameters = {},
 requestBody = "",
 responseDescription = "")
+@OAuthAction(ContactActionFactory.OAUTH_WRITE_SCOPE)
 public class CopyAction extends ContactAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyAction.class);

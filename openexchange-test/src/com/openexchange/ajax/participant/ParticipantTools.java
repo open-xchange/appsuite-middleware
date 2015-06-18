@@ -135,6 +135,10 @@ public final class ParticipantTools {
         return participants;
     }
 
+    public static Participant getSomeParticipant(AJAXClient client) throws OXException, IOException, SAXException, JSONException {
+        return getParticipants(client, 1, client.getValues().getUserId()).get(0);
+    }
+
     public static List<Participant> getParticipants(final AJAXClient client, final int count, final int creatorId) throws OXException, IOException, SAXException, JSONException {
         List<Participant> participants = getParticipants(client);
         if (-1 != creatorId) {

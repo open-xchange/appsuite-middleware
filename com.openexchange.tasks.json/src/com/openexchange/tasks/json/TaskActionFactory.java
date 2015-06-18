@@ -56,7 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthModule;
+import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tasks.json.actions.AllAction;
 import com.openexchange.tasks.json.actions.ConfirmAction;
@@ -84,7 +84,7 @@ public class TaskActionFactory implements AJAXActionServiceFactory {
 
     public static final String OAUTH_WRITE_SCOPE = "write_tasks";
 
-    private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
+    private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10, 0.9f, 1);
 
     /**
      * Initializes a new {@link TaskActionFactory}.

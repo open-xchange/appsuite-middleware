@@ -49,9 +49,13 @@
 
 package com.openexchange.rest.services.database.transactions;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import java.sql.SQLException;
 import org.junit.Test;
-import static org.mockito.Mockito.*;
+import com.openexchange.rest.services.database.transactions.Transaction;
+import com.openexchange.rest.services.database.transactions.TransactionKeeper;
 
 /**
  * {@link TransactionTest}
@@ -59,15 +63,15 @@ import static org.mockito.Mockito.*;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class TransactionTest {
-    
+
     @Test
     public void testTimeOut() throws SQLException {
         TransactionKeeper txKeeper = mock(TransactionKeeper.class);
-        
+
         Transaction tx = new Transaction(null, txKeeper);
         tx.tick(System.currentTimeMillis() + 1 * 60 * 1000);
         verifyZeroInteractions(txKeeper);
-        
+
         tx.tick(System.currentTimeMillis() + 3 * 60 * 1000);
         verify(txKeeper).rollback(tx.getID());
     }

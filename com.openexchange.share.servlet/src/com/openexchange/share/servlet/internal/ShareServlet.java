@@ -50,7 +50,6 @@
 package com.openexchange.share.servlet.internal;
 
 import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import java.util.Locale;
 import javax.servlet.http.HttpServlet;
@@ -65,7 +64,8 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
-import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.share.servlet.utils.MessageType;
+import com.openexchange.share.servlet.utils.RedirectLocationBuilder;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
@@ -109,60 +109,78 @@ public class ShareServlet extends HttpServlet {
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
-                Locale locale = request.getLocale();
                 if (paths == null || paths.length == 0) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
-                    response.setStatus(HttpServletResponse.SC_FOUND);
-                    response.sendRedirect(redirectUrl);
+                    sendNotFound(response, request.getLocale());
+                    return;
+                }
+                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
+                if (null == share) {
+                    LOG.debug("No share with token '{}' found at '{}'", paths[0], pathInfo);
+                    sendNotFound(response, request.getLocale());
                     return;
                 }
 
-                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
-                if (null == share) {
-                    LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
-                    response.setStatus(HttpServletResponse.SC_FOUND);
-                    response.sendRedirect(redirectUrl);
-                    return;
-                }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
                 if (1 < paths.length) {
                     target = share.resolveTarget(paths[1]);
                     if (null == target) {
                         //TODO: fallback to share without target?
-                        LOG.debug("No share target found at '{}'", pathInfo);
-                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(urlEncode(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
-                        response.setStatus(HttpServletResponse.SC_FOUND);
-                        response.sendRedirect(redirectUrl);
+                        LOG.debug("Share target '{}' not found in share '{}' at '{}'", paths[1], paths[0], pathInfo);
+                        sendNotFound(response, request.getLocale());
                         return;
                     }
                 } else {
                     target = null;
                 }
-//                target = 1 < paths.length ? share.resolveTarget(paths[1]) : null;
             }
 
-            // Determine appropriate ShareHandler and handle the share
-            for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-                ShareHandlerReply reply = handler.handle(share, target, request, response);
-                if (ShareHandlerReply.NEUTRAL != reply) {
-                    return;
-                }
+            /*
+             * Determine appropriate ShareHandler and handle the share
+             */
+            if (false == handle(share, target, request, response)) {
+                // No appropriate ShareHandler available
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
             }
-
-            // No appropriate ShareHandler available
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
         } catch (RateLimitedException e) {
-            response.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         }
+    }
+
+    /**
+     * Passes the resolved share to the most appropriate handler and lets him serve the request.
+     *
+     * @param share The guest share
+     * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param request The associated HTTP request
+     * @param response The associated HTTP response
+     * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
+     */
+    private boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
+            ShareHandlerReply reply = handler.handle(share, target, request, response);
+            if (ShareHandlerReply.NEUTRAL != reply) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sends a redirect with an appropriate error message for a not found share.
+     *
+     * @param response The HTTP servlet response to redirect
+     * @param locale The locale
+     */
+    private static void sendNotFound(HttpServletResponse response, Locale locale) throws IOException, OXException {
+        String redirectUrl = new RedirectLocationBuilder()
+            .message(MessageType.ERROR, translate(ShareServletStrings.SHARE_NOT_FOUND, locale), "not_found").build();
+        response.setStatus(HttpServletResponse.SC_FOUND);
+        response.sendRedirect(redirectUrl);
+        return;
     }
 
 }

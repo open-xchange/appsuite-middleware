@@ -96,4 +96,54 @@
         <tagDatabase tag="7.6.2:milestone" />
     </changeSet>
 
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.8.0 starts here ************** -->
+    <!-- ******************************************************* -->
+
+     <changeSet id="7.8.0:drop_stored_procedure_configdb_id" author="lars.hoogestraat@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select COUNT(1) from mysql.proc WHERE name='get_configdb_id'</sqlCheck>
+        </preConditions>
+        <comment>Removes the unused stored procedure 'get_configdb_id' in the configdb</comment>
+        <sql>
+            DROP PROCEDURE get_configdb_id;
+        </sql>
+        <rollback>
+          <createProcedure>
+              CREATE PROCEDURE get_configdb_id() NOT DETERMINISTIC MODIFIES SQL DATA
+              BEGIN
+                  DECLARE identifier INT4 UNSIGNED;
+                  SET identifier = 0;
+                  SELECT id INTO identifier FROM configdb_sequence FOR UPDATE;
+                  IF 0 = identifier THEN
+                      INSERT INTO configdb_sequence (id) VALUES (identifier);
+                  END IF;
+                  SET identifier = identifier + 1;
+                  UPDATE configdb_sequence SET id = identifier;
+                  SELECT identifier;
+              END;
+          </createProcedure>
+        </rollback>
+    </changeSet>
+
+     <changeSet id="7.8.0:drop_stored_procedure_context_id" author="lars.hoogestraat@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select COUNT(1) from mysql.proc WHERE name='get_context_id'</sqlCheck>
+        </preConditions>
+        <comment>Removes the unused stored procedure 'get_context_id' in the configdb</comment>
+        <sql>
+            DROP PROCEDURE get_context_id;
+        </sql>
+        <rollback>
+          <createProcedure>
+            CREATE PROCEDURE get_context_id() NOT DETERMINISTIC MODIFIES SQL DATA
+              BEGIN
+                START TRANSACTION;
+                    UPDATE sequence_context SET id=id+1 WHERE cid=0;
+                    SELECT id FROM sequence_context WHERE cid=0;
+                COMMIT;
+              END;
+          </createProcedure>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>

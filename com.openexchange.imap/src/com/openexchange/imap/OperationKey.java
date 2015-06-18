@@ -213,7 +213,7 @@ public final class OperationKey implements Serializable {
             final PutIfAbsent psession = (PutIfAbsent) session;
             ConcurrentMap<OperationKey, Object> map = (ConcurrentMap<OperationKey, Object>) psession.getParameter(IMAP_OPERATIONS);
             if (null == map) {
-                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16);
+                final ConcurrentMap<OperationKey, Object> newMap = new ConcurrentHashMap<OperationKey, Object>(16, 0.9f, 1);
                 map = (ConcurrentMap<OperationKey, Object>) psession.setParameterIfAbsent(IMAP_OPERATIONS, newMap);
                 if (null == map) {
                     map = newMap;

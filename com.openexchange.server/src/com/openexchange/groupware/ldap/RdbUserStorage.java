@@ -82,6 +82,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -358,12 +359,15 @@ public class RdbUserStorage extends UserStorage {
     }
 
     private static void writeLoginInfo(Connection con, User user, Context context, int userId) throws SQLException {
+        ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        boolean autoLowerCase = null == service ? false : service.getBoolProperty("AUTO_TO_LOWERCASE_UID", false);
+
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_LOGIN_INFO);
             stmt.setInt(1, context.getContextId());
             stmt.setInt(2, userId);
-            stmt.setString(3, user.getLoginInfo());
+            stmt.setString(3, autoLowerCase ? user.getLoginInfo().toLowerCase() : user.getLoginInfo());
 
             stmt.executeUpdate();
         } finally {
@@ -484,7 +488,9 @@ public class RdbUserStorage extends UserStorage {
                         if (false == user.isGuest()) {
                             regularUsers.put(user.getId(), user);
                         } else if (Strings.isEmpty(user.getMail()) && Strings.isEmpty(user.getDisplayName())) {
-                            user.setDisplayName(StringHelper.valueOf(user.getLocale()).getString(Users.GUEST));
+                            String guest = StringHelper.valueOf(user.getLocale()).getString(Users.GUEST);
+                            user.setDisplayName(guest);
+                            user.setLoginInfo(guest);
                         }
                     }
                 } finally {

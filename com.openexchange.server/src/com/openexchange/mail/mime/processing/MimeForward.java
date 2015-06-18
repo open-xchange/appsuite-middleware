@@ -286,7 +286,7 @@ public final class MimeForward {
             {
                 final MailMessage omm = origMsgs[0];
                 final ContentType contentType = omm.getContentType();
-                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(toLowerCase("type"))))) {
+                if (contentType.startsWith("multipart/related") && ("application/smil".equals(contentType.getParameter(com.openexchange.java.Strings.toLowerCase("type"))))) {
                     originalMsg = MimeSmilFixer.getInstance().process(omm);
                 } else {
                     originalMsg = omm;
@@ -887,47 +887,4 @@ public final class MimeForward {
         }
         return sb.toString();
     }
-
-    /*-
-     *
-    private static void addNonInlineParts(final MimeMessage originalMsg, final CompositeMailMessage forwardMail) throws OXException {
-        final MailMessage originalMail = MIMEMessageConverter.convertMessage(originalMsg);
-        final NonInlineForwardPartHandler handler = new NonInlineForwardPartHandler();
-        new MailMessageParser().parseMailMessage(originalMail, handler);
-        final List<MailPart> nonInlineParts = handler.getNonInlineParts();
-        for (final MailPart mailPart : nonInlineParts) {
-            forwardMail.addAdditionalParts(mailPart);
-        }
-    }
-     */
-
-    private static User getUserFrom(Session session) {
-        try {
-            if (null == session) {
-                return null;
-            }
-            if (session instanceof ServerSession) {
-                return ((ServerSession) session).getUser();
-            }
-            final Context ctx = ContextStorage.getStorageContext(session.getContextId());
-            return UserStorage.getInstance().getUser(session.getUserId(), ctx);
-        } catch (final Exception e) {
-            // Ignore
-            return null;
-        }
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

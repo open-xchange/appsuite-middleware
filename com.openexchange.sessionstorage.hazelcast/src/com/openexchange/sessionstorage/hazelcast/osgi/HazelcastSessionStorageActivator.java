@@ -49,15 +49,11 @@
 
 package com.openexchange.sessionstorage.hazelcast.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.hazelcast.config.Config;
@@ -67,13 +63,12 @@ import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.HazelcastSessionStorageService;
 import com.openexchange.sessionstorage.hazelcast.Unregisterer;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
@@ -123,11 +118,10 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                 final BundleContext context = this.context;
                 final Unregisterer unregisterer = this;
                 trackService(SessiondService.class);
-                final ServiceLookup services = this;
                 ServiceTracker<HazelcastInstance, HazelcastInstance> hzSessionStorageRegistrationTracker = new ServiceTracker<HazelcastInstance, HazelcastInstance>(context, HazelcastInstance.class, new ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance>() {
 
                     private volatile ServiceRegistration<SessionStorageService> sessionStorageRegistration;
-                    private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
+                    private volatile ScheduledTimerTask sessionToucherTask; 
 
                     @Override
                     public HazelcastInstance addingService(final ServiceReference<HazelcastInstance> reference) {
@@ -140,12 +134,10 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                         final HazelcastSessionStorageService sessionStorage = new HazelcastSessionStorageService(sessionsMapName, unregisterer);
                         sessionStorageRegistration = context.registerService(SessionStorageService.class, sessionStorage, null);
                         /*
-                         * create & register event handler
+                         * schedule timer task to touch active sessions regularly
                          */
-                        final EventHandler eventHandler = new EventHandlerImpl(sessionStorage, services);
-                        Dictionary<String, String> properties = new Hashtable<String, String>(1);
-                        properties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.TOPIC_TOUCH_SESSION);
-                        eventHandlerRegistration = context.registerService(EventHandler.class, eventHandler, properties);
+                        long period = SessionToucher.getTouchPeriod(getService(ConfigurationService.class));
+                        sessionToucherTask = getService(TimerService.class).scheduleAtFixedRate(new SessionToucher(sessionStorage), period, period); 
                         return hazelcastInstance;
                     }
 
@@ -157,13 +149,13 @@ public class HazelcastSessionStorageActivator extends HousekeepingActivator impl
                     @Override
                     public void removedService(final ServiceReference<HazelcastInstance> reference, final HazelcastInstance service) {
                         /*
-                         * remove event handler registration
+                         * cancel session toucher timer task
                          */
-                        ServiceRegistration<EventHandler> eventHandlerRegistration = this.eventHandlerRegistration;
-                        if (null != eventHandlerRegistration) {
-                            eventHandlerRegistration.unregister();
-                            this.sessionStorageRegistration = null;
-                        }
+                        ScheduledTimerTask sessionToucherTask = this.sessionToucherTask;
+                        if (null != sessionToucherTask) {
+                            sessionToucherTask.cancel();
+                            this.sessionToucherTask = null;
+                        }                        
                         /*
                          * remove session storage registration
                          */

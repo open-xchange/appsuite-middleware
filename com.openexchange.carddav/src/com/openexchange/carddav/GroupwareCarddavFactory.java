@@ -58,7 +58,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -67,6 +66,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -91,12 +92,12 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -124,18 +125,18 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private final ConfigViewFactory configs;
 	private final UserService userService;
 	private final ContactService contactService;
-	private final OXContainerConverter converter;
+    private VCardService vCardService;
+    private ServiceLookup services;
 
-	public GroupwareCarddavFactory(FolderService folders, SessionHolder sessionHolder, ConfigViewFactory configs,
-			UserService users, ContactService contactService) {
+	public GroupwareCarddavFactory(ServiceLookup services, SessionHolder sessionHolder) {
 		super();
-		this.folderService = folders;
+		this.folderService = services.getService(FolderService.class);
 		this.sessionHolder = sessionHolder;
-		this.configs = configs;
-		this.userService = users;
-		this.contactService = contactService;
-		this.converter = new OXContainerConverter((TimeZone)null, (String)null);
-		this.converter.setSkipOxCTypeAttribute(true);
+		this.configs = services.getService(ConfigViewFactory.class);
+		this.userService = services.getService(UserService.class);
+		this.contactService = services.getService(ContactService.class);
+		this.vCardService = services.getService(VCardService.class);
+		this.services = services;
 	}
 
 	@Override
@@ -192,10 +193,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		return folderService;
 	}
 
-	public OXContainerConverter getConverter() {
-	    return converter;
-	}
-
 	public Context getContext() {
 		return sessionHolder.getContext();
 	}
@@ -214,6 +211,14 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 	public State getState() {
 		return stateHolder.get();
+	}
+
+	public VCardService getVCardService() {
+	    return vCardService;
+	}
+
+	public VCardStorageService getVCardStorageService() {
+	    return services.getOptionalService(VCardStorageService.class);
 	}
 
     public String getConfigValue(String key, String defaultValue) throws OXException {
@@ -270,7 +275,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 
 		private static final ContactField[] BASIC_FIELDS = {
 			ContactField.OBJECT_ID, ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.UID,
-			ContactField.FILENAME, ContactField.FOLDER_ID
+			ContactField.FILENAME, ContactField.FOLDER_ID, ContactField.VCARD_ID
 		};
 
 		private final GroupwareCarddavFactory factory;

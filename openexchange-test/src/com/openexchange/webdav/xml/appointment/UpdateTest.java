@@ -121,8 +121,7 @@ public class UpdateTest extends AppointmentTest {
 		participants[0].setIdentifier(userId);
 		participants[1] = new UserParticipant();
 		participants[1].setIdentifier(userParticipantId);
-		participants[2] = new GroupParticipant();
-		participants[2].setIdentifier(groupParticipantId);
+		participants[2] = new GroupParticipant(groupParticipantId);
 		participants[3] = new ResourceParticipant();
 		participants[3].setIdentifier(resourceParticipantId);
 

@@ -2,6 +2,7 @@
 <psf version="2.0">
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.rmi"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.rmi.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.soap"/>
 </provider>
 </psf>

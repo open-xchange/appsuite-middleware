@@ -49,15 +49,22 @@
 
 package com.openexchange.contact.storage.rdb.test;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
+import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    DeduplicatorTest.class,
+    RdbContactStorageTest.class
+})
 public class UnitTests {
 
     /**
@@ -67,14 +74,4 @@ public class UnitTests {
         super();
     }
 
-    /**
-     * Creates the unit test suite.
-     *
-     * @return The test suite
-     */
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(DeduplicatorTest.class);
-        return tests;
-    }
 }

@@ -66,12 +66,14 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.user.UserService;
@@ -120,7 +122,7 @@ public final class ShareServletUtils {
          * parse login request
          */
         String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
-        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
+        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, getLogin(user), user.getUserPassword(), false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
         loginRequest.setTransient(tranzient);
         /*
@@ -146,6 +148,24 @@ public final class ShareServletUtils {
             guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID(), loginResult.getSession().getSessionID());
         loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
+    }
+
+    /**
+     * Determines the most appropriate login name for a guest user, falling back to the generic "Guest" name for anonymous guest.
+     *
+     * @param guestUser The guest user to get the login for
+     * @return The login
+     */
+    private static String getLogin(User guestUser) {
+        if (false == Strings.isEmpty(guestUser.getLoginInfo())) {
+            return guestUser.getLoginInfo();
+        }
+        if (false == Strings.isEmpty(guestUser.getMail())) {
+            return guestUser.getMail();
+        }
+        String guest = ShareServletStrings.GUEST;
+        TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class);
+        return null != factory ? factory.translatorFor(guestUser.getLocale()).translate(guest) : guest;
     }
 
     /**

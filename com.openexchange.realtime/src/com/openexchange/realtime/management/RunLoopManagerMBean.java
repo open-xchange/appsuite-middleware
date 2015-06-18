@@ -49,6 +49,7 @@
 
 package com.openexchange.realtime.management;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -66,5 +67,19 @@ public interface RunLoopManagerMBean {
      * @return the map
      */
     public Map<String, Map<String, String>> getComponentHandleMappings();
+    
+    /**
+     * Get the fill status of each {@link RunLoop} that is currently managed
+     * 
+     * @return an ordered list of RunLoop fill status (name = number of entries)
+     */
+    public List<String> getRunLoopFillStatus();
+
+    /**
+     * Get the sum of elements in all RunLoops per component.
+     *   
+     * @return A map from component to sum of elements
+     */
+    Map<String, Long> getRunLoopFillSum();
 
 }

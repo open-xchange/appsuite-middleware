@@ -54,7 +54,6 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -74,11 +73,7 @@ import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
 import com.openexchange.file.storage.boxcom.access.BoxAccess;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
 /**
@@ -86,7 +81,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxFileStorageService implements AccountAware, OAuthUtilizerCreator, OAuthAccountDeleteListener {
+public final class BoxFileStorageService implements AccountAware, OAuthAccountDeleteListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(BoxFileStorageService.class);
 
@@ -208,41 +203,6 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
         }
     }
 
-    @Override
-    public API getApplicableApi() {
-        return API.BOX_COM;
-    }
-
-    @Override
-    public String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException {
-        if (false == API.BOX_COM.equals(oauthAccount.getAPI())) {
-            return null;
-        }
-
-        if (false == getAccounts0(session, false).isEmpty()) {
-            return null;
-        }
-
-        // Acquire account manager
-        FileStorageAccountManager accountManager = getAccountManager();
-
-        // Create file storage account instance
-        DefaultFileStorageAccount fileStorageAccount = new DefaultFileStorageAccount();
-        fileStorageAccount.setDisplayName("Box.com");
-        fileStorageAccount.setFileStorageService(this);
-        fileStorageAccount.setServiceId(SERVICE_ID);
-
-        // Set its configuration
-        Map<String, Object> configuration = new HashMap<String, Object>(2);
-        configuration.put("account", Integer.toString(oauthAccount.getId()));
-        fileStorageAccount.setConfiguration(configuration);
-
-        // Add that account
-        String accountId = accountManager.addAccount(fileStorageAccount, session);
-        LOG.info("Created Box.com account with ID {} for user {} in context {}", accountId, session.getUserId(), session.getContextId());
-        return accountId;
-    }
-
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
     @Override
@@ -359,7 +319,7 @@ public final class BoxFileStorageService implements AccountAware, OAuthUtilizerC
             this.password = password;
             this.userId = userId;
             this.contextId = contextId;
-            parameters = new ConcurrentHashMap<String, Object>(8);
+            parameters = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
         }
 
         @Override

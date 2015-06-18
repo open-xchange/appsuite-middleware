@@ -50,11 +50,11 @@
 package com.openexchange.mobilepush.events.mail.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.regex.Pattern;
 import javax.mail.internet.InternetAddress;
 import org.osgi.service.event.Event;
 import com.openexchange.event.CommonEvent;
@@ -73,8 +73,6 @@ import com.openexchange.mobilepush.events.MobilePushEvent;
 import com.openexchange.mobilepush.events.MobilePushEventService;
 import com.openexchange.mobilepush.events.MobilePushPublisher;
 import com.openexchange.mobilepush.events.osgi.Services;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
-import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.push.Container;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.session.Session;
@@ -181,7 +179,12 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      */
     private List<Map<String, Object>> handleEvents(Event event, Session session) {
         Boolean isDeleted = (Boolean) event.getProperty(PushEventConstants.PROPERTY_DELETED);
-        return null != isDeleted && isDeleted.booleanValue() ? getDeleteMailPayload() : getNewMailProperties(event, session);
+        if (null != isDeleted && isDeleted.booleanValue()) {
+            // TODO: Suppress?
+            return getDeleteMailPayload();
+        } else {
+            return getNewMailProperties(event, session);
+        }
     }
 
     private List<Map<String, Object>> getNewMailProperties(Event event, Session session) {
@@ -194,15 +197,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 @SuppressWarnings("unchecked")
                 Container<MailMessage> messageInfos = (Container<MailMessage>) event.getProperty(PushEventConstants.PROPERTY_CONTAINER);
                 for (MailMessage mm : messageInfos) {
-                    String subject = mm.getSubject();
-                    String[] senderInfo = getSenderInfo(mm);
-
-                    Map<String, Object> map = new HashMap<String, Object>(6);
-                    map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
-                    map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
-                    map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
-                    map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(mm.getUnreadMessages()));
-                    props.add(map);
+                    addNewMailProperties(mm, accountId, -1, props);
                 }
             } else if (event.containsProperty(PushEventConstants.PROPERTY_IDS)) {
                 // Check if its a new mail event
@@ -217,15 +212,7 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                         int unread = mailAccess.getUnreadMessagesCount(INBOX);
                         if (mms != null) {
                             for (MailMessage mm : mms) {
-                                String subject = mm.getSubject();
-                                String[] senderInfo = getSenderInfo(mm);
-
-                                Map<String, Object> map = new HashMap<String, Object>(6);
-                                map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
-                                map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
-                                map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
-                                map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread));
-                                props.add(map);
+                                addNewMailProperties(mm, accountId, unread, props);
                             }
                         }
                     } catch (OXException e) {
@@ -243,6 +230,18 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
             }
         }
         return props;
+    }
+
+    private void addNewMailProperties(MailMessage mm, int accountId, int unread, List<Map<String, Object>> props) {
+        String subject = mm.getSubject();
+        String[] senderInfo = getSenderInfo(mm);
+
+        Map<String, Object> map = new HashMap<String, Object>(6);
+        map.put(MailPushUtility.KEY_CID, generateCidFor(mm, accountId));
+        map.put(MailPushUtility.KEY_SUBJECT, Strings.isEmpty(subject) ? "(no subject)" : subject);
+        map.put(MailPushUtility.KEY_SENDER, Strings.isEmpty(senderInfo[0]) ? senderInfo[1] : senderInfo[0]);
+        map.put(MailPushUtility.KEY_UNREAD, Integer.valueOf(unread < 0 ? mm.getUnreadMessages() : unread));
+        props.add(map);
     }
 
     private String[] getSenderInfo(MailMessage m) {
@@ -271,26 +270,19 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
      * @throws OXException
      */
     private MailMessage[] fetchMessageInformation(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, String mailIds) throws OXException {
-        MailField[] fields = new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM };
+        MailField[] fields = new MailField[] { MailField.ID, MailField.FOLDER_ID, MailField.SUBJECT, MailField.FROM, MailField.FLAGS };
         return mailAccess.getMessageStorage().getMessages(INBOX, getMailIds(mailIds), fields);
     }
 
-    private final static Pattern COMMA_SEPERATED_PATTERN = Pattern.compile("\\s*,\\s*");
-
     private String[] getMailIds(String mailId) {
-        if (mailId != null) {
-            return COMMA_SEPERATED_PATTERN.split(mailId);
-        }
-        return null;
+        return mailId == null ? null : Strings.splitByComma(mailId);
     }
 
     private List<Map<String, Object>> getDeleteMailPayload() {
-        List<Map<String, Object>> props = new ArrayList<Map<String, Object>>(1);
         Map<String, Object> map = new HashMap<String, Object>(4);
         map.put("SYNC_EVENT", "MAIL");
         map.put("message", "refresh");
-        props.add(map);
-        return props;
+        return Collections.singletonList(map);
     }
 
     @Override
@@ -315,30 +307,6 @@ public class MobilePushMailEventImpl implements org.osgi.service.event.EventHand
                 publisher.publish(event);
             }
         }
-    }
-
-    @Override
-    public void notifyLogin(final List<ContextUsers> contextUsers) throws OXException {
-        MobilePushStorageService mnss = Services.getService(MobilePushStorageService.class, true);
-
-        //Currently blocked for seven days (configurable?)
-        long timeToWait = 1000 * 60 * 60 * 24 * 7;
-        mnss.blockLoginPush(contextUsers, timeToWait);
-
-        Map<String, Object> props = getLoginMessagePayload();
-        MobilePushMailEvent loginEvent = new MobilePushMailEvent(contextUsers, props);
-        // GCM specific key
-        loginEvent.setCollapseKey("LOGIN");
-        for (MobilePushPublisher publisher : publishers) {
-            LOG.debug("Publishing new login event: {}", contextUsers);
-            publisher.multiPublish(loginEvent);
-        }
-    }
-
-    private Map<String, Object> getLoginMessagePayload() {
-        Map<String, Object> props = new HashMap<String, Object>(2);
-        props.put("message", "You've received a new login");
-        return props;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------

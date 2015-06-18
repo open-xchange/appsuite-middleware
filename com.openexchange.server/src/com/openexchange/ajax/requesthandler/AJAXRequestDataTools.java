@@ -63,6 +63,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.osgi.BodyParserRegistry;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
@@ -274,7 +275,7 @@ public class AJAXRequestDataTools {
         if (null == value) {
             return defaultValue;
         }
-        return TRUE_VALS.contains(toLowerCase(value.trim()));
+        return TRUE_VALS.contains(com.openexchange.java.Strings.toLowerCase(value.trim()));
     }
 
     private static final Set<String> TRUE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true", "1", "yes", "y", "on")));
@@ -289,7 +290,7 @@ public class AJAXRequestDataTools {
      * @return The parsed <tt>boolean</tt> value (<code>false</code> on absence)
      */
     public static boolean parseBoolParameter(final String parameter) {
-        return (null != parameter) && TRUE_VALS.contains(toLowerCase(parameter.trim()));
+        return (null != parameter) && TRUE_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
     }
 
     private static final Set<String> FALSE_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("false", "0", "no", "n", "off")));
@@ -307,7 +308,7 @@ public class AJAXRequestDataTools {
         if (null == parameter) {
             return null;
         }
-        return FALSE_VALS.contains(toLowerCase(parameter.trim())) ? Boolean.FALSE : null;
+        return FALSE_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim())) ? Boolean.FALSE : null;
     }
 
     /**
@@ -434,36 +435,9 @@ public class AJAXRequestDataTools {
     public String getAction(final HttpServletRequest req) {
         final String action = req.getParameter(PARAMETER_ACTION);
         if (null == action) {
-            return toUpperCase(req.getMethod());
+            return Strings.toUpperCase(req.getMethod());
         }
         return action;
 
-    }
-
-    /** ASCII-wise upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

@@ -97,7 +97,7 @@ public final class SMTPActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
 
-            RankingAwareNearRegistryServiceTracker<MailTransportListener> listing = new RankingAwareNearRegistryServiceTracker<>(context, MailTransportListener.class);
+            RankingAwareNearRegistryServiceTracker<MailTransportListener> listing = new RankingAwareNearRegistryServiceTracker<MailTransportListener>(context, MailTransportListener.class);
             ListenerChain.initInstance(listing);
             rememberTracker(listing);
 

@@ -57,8 +57,8 @@ import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.LocalizableStrings;
-import com.openexchange.oauth.provider.AbstractScopeProvider;
-import com.openexchange.oauth.provider.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.
@@ -93,9 +93,9 @@ public class ContactJSONActivator extends AJAXModuleActivator {
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
         // Application 'xyz' requires following permissions:
-        //  - See all your contacts.
+        //  - Read all your contacts.
         //  - ...
-        public static final String READ_ONLY = "See all your contacts.";
+        public static final String READ_ONLY = "Read all your contacts.";
 
         // Application 'xyz' requires following permissions:
         //  - Create, modify and delete contacts.

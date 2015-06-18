@@ -95,6 +95,7 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -700,11 +701,8 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
             // Check for content
             String content;
-            Set<String> contentIds;
             if (properties.contains(Property.CONTENT)) {
                 content = snippet.getContent();
-                contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
-                contentIds.addAll(extractContentIDs(content));
             } else {
                 final MimePart textPart;
                 final ContentType ct;
@@ -717,9 +715,11 @@ public final class MimeSnippetManagement implements SnippetManagement {
                     ct = storageContentType;
                 }
                 content = MessageUtility.readMimePart(textPart, ct);
-                contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
-                contentIds.addAll(extractContentIDs(content));
             }
+
+            // Extract image identifiers
+            Set<String> contentIds = new HashSet<String>(MimeMessageUtility.getContentIDs(content));
+            contentIds.addAll(extractContentIDs(content));
 
             // Check for misc
             MimePart miscPart;
@@ -773,7 +773,7 @@ public final class MimeSnippetManagement implements SnippetManagement {
                             } else {
                                 String disp = MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, null, bodyPart);
                                 if (null != disp && Strings.asciiLowerCase(disp).trim().startsWith("inline")) {
-                                    // Still referenced to in HTML content
+                                    // Still referenced in HTML content
                                     if (contentIds.contains(MimeMessageUtility.trimContentId(optContentId))) {
                                         attachmentParts.add(bodyPart);
                                     }
@@ -945,18 +945,28 @@ public final class MimeSnippetManagement implements SnippetManagement {
         }
     }
 
-    private static Set<String> extractContentIDs(String htmlContent) {
+    /**
+     * Extracts image identifiers from given HTML content
+     *
+     * @param htmlContent The HTML content
+     * @return The extracted image identifiers
+     */
+    protected static Set<String> extractContentIDs(String htmlContent) {
         Matcher matcher = MimeMessageUtility.PATTERN_SRC.matcher(htmlContent);
         if (!matcher.find()) {
             return Collections.emptySet();
         }
+
         Set<String> set = new HashSet<String>(2);
         do {
             String imageUri = matcher.group(1);
             if (!imageUri.startsWith("cid:")) {
-                String imageId = ImageUtility.parseImageLocationFrom(imageUri).getImageId();
-                if (null != imageId) {
-                    set.add(imageId);
+                ImageLocation imageLocation = ImageUtility.parseImageLocationFrom(imageUri);
+                if (null != imageLocation) {
+                    String imageId = imageLocation.getImageId();
+                    if (null != imageId) {
+                        set.add(imageId);
+                    }
                 }
             }
         } while (matcher.find());

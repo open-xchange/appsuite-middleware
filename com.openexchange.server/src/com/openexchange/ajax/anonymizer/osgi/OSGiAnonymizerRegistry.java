@@ -75,7 +75,7 @@ public final class OSGiAnonymizerRegistry extends ServiceTracker<AnonymizerServi
      */
     public OSGiAnonymizerRegistry(BundleContext context) {
         super(context, AnonymizerService.class.getName(), null);
-        anonymizers = new ConcurrentHashMap<Module, AnonymizerChain<?>>(8);
+        anonymizers = new ConcurrentHashMap<Module, AnonymizerChain<?>>(8, 0.9f, 1);
     }
 
     @Override

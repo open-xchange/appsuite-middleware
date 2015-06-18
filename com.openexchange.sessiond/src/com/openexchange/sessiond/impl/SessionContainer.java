@@ -474,4 +474,14 @@ final class SessionContainer {
         return sessionMap.values();
     }
 
+    /**
+     * Returns a collection view of the session identifiers contained in this container. The collection is <b><small>not</small></b> 
+     * backed by the container, so changes to the map are not reflected in the container.
+     *
+     * @return A collection view of the session identifiers contained in this container.
+     */
+    protected Collection<String> getSessionIDs() {
+        return sessionMap.keys();
+    }
+
 }

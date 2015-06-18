@@ -92,7 +92,7 @@ public class OSGIMessagingServiceRegistry implements MessagingServiceRegistry {
      */
     public OSGIMessagingServiceRegistry() {
         super();
-        map = new ConcurrentHashMap<String, MessagingService>(8);
+        map = new ConcurrentHashMap<String, MessagingService>(8, 0.9f, 1);
     }
 
     /**

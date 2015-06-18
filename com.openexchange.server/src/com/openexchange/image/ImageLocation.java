@@ -134,7 +134,7 @@ public final class ImageLocation {
      */
     protected ImageLocation(final Builder builder) {
         super();
-        properties = new ConcurrentHashMap<String, Object>(2);
+        properties = new ConcurrentHashMap<String, Object>(2, 0.9f, 1);
         this.accountId = builder.accountId;
         this.folder = builder.folder;
         this.id = builder.id;

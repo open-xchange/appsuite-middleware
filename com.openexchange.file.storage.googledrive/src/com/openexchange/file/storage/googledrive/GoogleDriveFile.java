@@ -141,7 +141,7 @@ public final class GoogleDriveFile extends DefaultFile {
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     String contentType = file.getMimeType();
-                    if (isEmpty(contentType)) {
+                    if (com.openexchange.java.Strings.isEmpty(contentType)) {
                         final MimeTypeMap map = Services.getService(MimeTypeMap.class);
                         contentType = map.getContentType(name);
                     }
@@ -204,7 +204,7 @@ public final class GoogleDriveFile extends DefaultFile {
                 }
                 if (set.contains(Field.FILE_MIMETYPE)) {
                     String contentType = revision.getMimeType();
-                    if (isEmpty(contentType)) {
+                    if (com.openexchange.java.Strings.isEmpty(contentType)) {
                         final MimeTypeMap map = Services.getService(MimeTypeMap.class);
                         contentType = map.getContentType(name);
                     }
@@ -227,17 +227,5 @@ public final class GoogleDriveFile extends DefaultFile {
             }
         }
         return this;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

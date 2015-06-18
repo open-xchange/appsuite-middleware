@@ -198,23 +198,4 @@ public abstract class AbstractMethodHandler implements MethodHandler {
             Streams.close(reader);
         }
     }
-
-    /**
-     * Checks if specified string is empty.
-     *
-     * @param string The string
-     * @return <code>true</code> if empty; else <code>false</code>
-     */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

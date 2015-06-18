@@ -50,38 +50,30 @@
 package com.openexchange.share.servlet.internal;
 
 import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.urlEncode;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.notification.DefaultLinkProvider;
-import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotification;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.mail.MailNotifications;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
-import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -112,7 +104,6 @@ public class PasswordResetServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String mailAddress = "";
         try {
             // Create a new HttpSession if it is missing
             request.getSession(true);
@@ -146,29 +137,27 @@ public class PasswordResetServlet extends HttpServlet {
 
             GuestService guestService = ShareServiceLookup.getService(GuestService.class);
             if ((guestService != null) && (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) && (storageUser.isGuest()) && (guestService.isCrossContextGuestHandlingEnabled())) {
-                guestService.alignUserWithGuest(storageUser, context.getContextId());
+                storageUser = guestService.alignUserWithGuest(storageUser, context.getContextId());
             }
 
             String hash = getHash(storageUser.getUserPassword());
             if (null == confirm) {
                 // Generate hash and send link to confirm
                 GuestShare guestShare = shareService.resolveToken(token);
-                User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-                LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
-                mailAddress = guestShare.getGuest().getEmailAddress();
-                ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
-                    .setTransportInfo(new InternetAddress(mailAddress, true))
-                    .setLinkProvider(linkProvider)
-                    .setContext(guestInfo.getContextID())
-                    .setLocale(guest.getLocale())
-                    .setShareToken(token)
-                    .setConfirm(hash)
-                    .build();
-                notificationService.send(notification);
+
+                /*
+                 * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
+                 */
+                ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
+                String protocol = com.openexchange.tools.servlet.http.Tools.getProtocol(request);
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, token, request.getServerName(), protocol, hash);
+
+                /*
+                 * Redirect after notification was sent.
+                 */
                 String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                    urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                    "resetPassword");
+                    URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                    "reset_password");
                 response.setStatus(HttpServletResponse.SC_FOUND);
                 response.sendRedirect(redirectUrl);
             } else {
@@ -176,27 +165,25 @@ public class PasswordResetServlet extends HttpServlet {
                 if (confirm.equals(hash)) {
                     GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                    ShareNotificationService notificationService = ShareServiceLookup.getService(ShareNotificationService.class, true);
-                    LinkProvider linkProvider = new DefaultLinkProvider(Tools.getProtocol(request), request.getServerName(), DispatcherPrefixService.DEFAULT_PREFIX, token); // FIXME
-                    mailAddress = guestShare.getGuest().getEmailAddress();
-                    ShareNotification<InternetAddress> notification = MailNotifications.passwordReset()
-                        .setTransportInfo(new InternetAddress(mailAddress, true))
-                        .setLinkProvider(linkProvider)
-                        .setContext(guestInfo.getContextID())
-                        .setLocale(guest.getLocale())
-                        .setUsername(guestInfo.getEmailAddress())
-                        .build();
-                    notificationService.send(notification);
 
-                    UserImpl user = new UserImpl();
-                    user.setId(guestID);
+                    UserImpl user = new UserImpl(guest);
                     user.setPasswordMech(guest.getPasswordMech());
-                    user.setUserPassword(PasswordMech.BCRYPT.encode(" "));
+                    user.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
+                    userService.updateUser(user, context);
+                    userService.invalidateUser(context, guestID);
                     ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
-
+                    String status = "require_password";
+                    int emptyGuestPasswords = loginConfig.getEmptyGuestPasswords();
+                    if (emptyGuestPasswords > 0) {
+                        String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
+                        int loginCount = null != count ? Integer.parseInt(count) : 0;
+                        if (emptyGuestPasswords > loginCount) {
+                            status = "ask_password";
+                        }
+                    }
                     String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                        urlEncode(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                        "resetPassword");
+                        URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                        status);
                     response.setStatus(HttpServletResponse.SC_FOUND);
                     response.sendRedirect(redirectUrl);
                 } else {
@@ -206,21 +193,13 @@ public class PasswordResetServlet extends HttpServlet {
                 }
             }
         } catch (RateLimitedException e) {
-            response.setContentType("text/plain; charset=UTF-8");
-            if (e.getRetryAfter() > 0) {
-                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-        } catch (AddressException e) {
-            OXException oxe = ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
-            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), oxe.getMessage(), oxe);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, oxe.getMessage());
         }
     }
 

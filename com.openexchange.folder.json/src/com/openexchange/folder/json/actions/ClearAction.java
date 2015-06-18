@@ -64,9 +64,9 @@ import com.openexchange.folder.json.services.ServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.OAuthAction;
-import com.openexchange.oauth.provider.OAuthGrant;
-import com.openexchange.oauth.provider.OAuthScopeCheck;
+import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

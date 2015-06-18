@@ -28,6 +28,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.storage.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contacts.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation.json"/>
@@ -98,6 +100,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.attachment.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management.impl"/>
@@ -109,6 +112,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.monitoring"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.ms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.net"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.notification"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.osgi"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oxscripts.clt"/>
@@ -143,6 +147,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.notification"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.storage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share.handler.ical"/>

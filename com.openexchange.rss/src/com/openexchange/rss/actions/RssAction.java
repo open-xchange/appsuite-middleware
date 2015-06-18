@@ -268,7 +268,7 @@ public class RssAction implements AJAXActionService {
     }
 
     private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
-        if (isEmpty(urlString)) {
+        if (com.openexchange.java.Strings.isEmpty(urlString)) {
             return urlString;
         }
         try {
@@ -289,7 +289,7 @@ public class RssAction implements AJAXActionService {
      * @throws MalformedURLException If URL string is invalid
      */
     private static String checkUrl(final String sUrl) throws MalformedURLException {
-        if (isEmpty(sUrl)) {
+        if (com.openexchange.java.Strings.isEmpty(sUrl)) {
             // Nothing to check
             return sUrl;
         }
@@ -317,7 +317,7 @@ public class RssAction implements AJAXActionService {
     }
 
     private static String prepareUrlString(final String urlString) {
-        if (isEmpty(urlString)) {
+        if (com.openexchange.java.Strings.isEmpty(urlString)) {
             return urlString;
         }
         final String tmp = urlString.toLowerCase(Locale.US);
@@ -326,18 +326,5 @@ public class RssAction implements AJAXActionService {
             pos = tmp.indexOf("https://");
         }
         return pos > 0 ? urlString.substring(pos) : urlString;
-    }
-
-    /** Checks for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

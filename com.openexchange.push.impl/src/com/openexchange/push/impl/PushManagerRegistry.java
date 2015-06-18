@@ -71,13 +71,14 @@ import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerExtendedService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.PushUser;
+import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.credstorage.CredentialStorage;
 import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.PushDbUtils.DeleteResult;
-import com.openexchange.push.impl.balancing.PermanentListenerRescheduler;
+import com.openexchange.push.impl.balancing.reschedulerpolicy.PermanentListenerRescheduler;
 import com.openexchange.push.impl.osgi.Services;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -200,8 +201,8 @@ public final class PushManagerRegistry implements PushListenerService {
      *
      * @return The push users
      */
-    public List<PushUser> listPermanentPushUsers() {
-        Set<PushUser> pushUsers = new HashSet<PushUser>(256);
+    public List<PushUserInfo> listPermanentPushUsers() {
+        Set<PushUserInfo> pushUsers = new HashSet<PushUserInfo>(256);
 
         for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
             PushManagerService pushManager = pushManagersIterator.next();
@@ -214,7 +215,7 @@ public final class PushManagerRegistry implements PushListenerService {
             }
         }
 
-        List<PushUser> list = new ArrayList<PushUser>(pushUsers);
+        List<PushUserInfo> list = new ArrayList<PushUserInfo>(pushUsers);
         Collections.sort(list);
         return list;
     }
@@ -230,7 +231,7 @@ public final class PushManagerRegistry implements PushListenerService {
      */
     private void startPermanentListenersFor(Collection<PushUser> pushUsers, PushManagerExtendedService extendedService, boolean allowPermanentPush) {
         // Always called when holding synchronized lock
-        if (allowPermanentPush) {
+        if (allowPermanentPush && extendedService.supportsPermanentListeners()) {
             for (PushUser pushUser : pushUsers) {
                 try {
                     PushListener pl = extendedService.startPermanentListener(pushUser);
@@ -344,6 +345,7 @@ public final class PushManagerRegistry implements PushListenerService {
             boolean inserted = PushDbUtils.insertPushRegistration(userId, contextId, clientId);
 
             if (inserted) {
+                // Not registered
                 CredentialStorage credentialStorage = optCredentialStorage();
                 if (null != credentialStorage) {
                     try {
@@ -360,19 +362,37 @@ public final class PushManagerRegistry implements PushListenerService {
                 for (Iterator<PushManagerService> pushManagersIterator = map.values().iterator(); pushManagersIterator.hasNext();) {
                     PushManagerService pushManager = pushManagersIterator.next();
                     if (pushManager instanceof PushManagerExtendedService) {
+                        PushManagerExtendedService extendedService = (PushManagerExtendedService) pushManager;
                         PermanentListenerRescheduler rescheduler = reschedulerRef.get();
                         if (null == rescheduler) {
-                            startPermanentListenersFor(toStart, (PushManagerExtendedService) pushManager, allowPermanentPush);
+                            startPermanentListenersFor(toStart, extendedService, allowPermanentPush);
                         } else {
-                            try {
-                                rescheduler.planReschedule(true);
-                            } catch (OXException e) {
-                                LOG.error("Failed to plan rescheduling", e);
+                            if (extendedService.supportsPermanentListeners()) {
+                                try {
+                                    rescheduler.planReschedule(true);
+                                } catch (OXException e) {
+                                    LOG.error("Failed to plan rescheduling", e);
+                                }
                             }
                         }
+
+                    }
+                }
+            } else {
+                // Already registered a permanent listener for the client
+                CredentialStorage credentialStorage = optCredentialStorage();
+                if (null != credentialStorage) {
+                    try {
+                        if (null == credentialStorage.getCredentials(userId, contextId)) {
+                            // No credentials stored, yet
+                            credentialStorage.storeCredentials(new DefaultCredentials(session));
+                        }
+                    } catch (OXException e) {
+                        LOG.error("Failed to check credentials for push user {} in context {}.", Integer.valueOf(userId), Integer.valueOf(contextId), e);
                     }
                 }
             }
+
             return inserted;
         }
     }

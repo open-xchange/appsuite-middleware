@@ -49,19 +49,23 @@
 
 package com.openexchange.rest.services.configuration;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.NotFoundException;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.rest.services.OXRESTService.HALT;
+import com.openexchange.rest.services.configuration.ConfigurationRESTService;
 import com.openexchange.server.MockingServiceLookup;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 
 /**
  * {@link ConfigRESTServiceTest}
@@ -69,84 +73,86 @@ import static org.mockito.Mockito.*;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class ConfigRESTServiceTest {
-    
+
     private MockingServiceLookup services = null;
     private ConfigView configView = null;
-    private ConfigRESTService configService = null;
-    
+    private ConfigurationRESTService configService = null;
+
     @Before
     public void setup() throws OXException {
         services = new MockingServiceLookup();
         configView = mock(ConfigView.class);
-        configService = new ConfigRESTService();
-        configService.setServices(services);
-        
+        configService = new ConfigurationRESTService(services);
+
         ConfigViewFactory mock = services.mock(ConfigViewFactory.class);
         when(mock.getView(12, 42)).thenReturn(configView);
     }
-    
+
     @Test
-    public void testRetrieveProperty() throws OXException {
-        
+    @SuppressWarnings("unchecked")
+    public void testRetrieveProperty() throws OXException, JSONException {
+
         ComposedConfigProperty<String> prop = mock(ComposedConfigProperty.class);
         when(prop.isDefined()).thenReturn(true);
         when(prop.get()).thenReturn("myValue");
-        
+
         when(configView.property("myProperty", String.class)).thenReturn(prop);
-        
+
         Object property = configService.getProperty("myProperty", 42, 12);
-        
-        Map<String, Object> result = (Map<String, Object>) property;
-        assertEquals(1, result.size());
-        assertEquals("myValue", result.get("myProperty"));
+
+        JSONObject result = (JSONObject) property;
+        assertEquals(1, result.length());
+        assertEquals("myValue", result.getString("myProperty"));
     }
-    
+
     @Test
+    @SuppressWarnings("unchecked")
     public void retrieveUnknownProperty() throws OXException {
         ComposedConfigProperty<String> prop = mock(ComposedConfigProperty.class);
         when(prop.isDefined()).thenReturn(false);
-        
+
         when(configView.property("myProperty", String.class)).thenReturn(prop);
         try {
             configService.getProperty("myProperty", 42, 12);
             fail("Should have halted prematurely");
-        } catch (HALT h) {
-            assertEquals(404, configService.getResponse().getStatus());
+        } catch (NotFoundException e) {
+            assertEquals(404, e.getResponse().getStatus());
         }
     }
-    
+
     @Test
-    public void testRetrieveAllPropertiesWithACertainPrefix() throws OXException {
+    @SuppressWarnings("unchecked")
+    public void testRetrieveAllPropertiesWithACertainPrefix() throws OXException, JSONException {
         ComposedConfigProperty<String> prop1 = mock(ComposedConfigProperty.class);
         when(prop1.get()).thenReturn("v1");
-        
+
         ComposedConfigProperty<String> prop2 = mock(ComposedConfigProperty.class);
         when(prop2.get()).thenReturn("v2");
-        
+
         ComposedConfigProperty<String> prop3 = mock(ComposedConfigProperty.class);
         when(prop3.get()).thenReturn("v3");
-        
+
         ComposedConfigProperty<String> prop4 = mock(ComposedConfigProperty.class);
         when(prop4.get()).thenReturn("v4");
-        
+
         ComposedConfigProperty<String> prop5 = mock(ComposedConfigProperty.class);
         when(prop5.get()).thenReturn("v5");
-        
+
         Map<String, ComposedConfigProperty<String>> map = new HashMap<String, ComposedConfigProperty<String>>();
         map.put("com.openexchange.prefix.p1", prop1);
         map.put("com.openexchange.prefix.p2", prop2);
-        
+
         map.put("com.openexchange.otherPrefix.p3", prop3);
         map.put("com.openexchange.otherPrefix.p4", prop4);
-        
+
         map.put("com.openexchange.yetAnotherPrefix.p5", prop5);
-        
+
         when(configView.all()).thenReturn(map);
-        
-        Map<String, Object> values = configService.getWithPrefix("com.openexchange.prefix", 42, 12);
-        assertEquals(2, values.size());
-        assertEquals("v1", values.get("com.openexchange.prefix.p1"));
-        assertEquals("v2", values.get("com.openexchange.prefix.p2"));
-        
+
+        JSONObject object = configService.getWithPrefix("com.openexchange.prefix", 42, 12);
+        assertEquals(2, object.length());
+        assertEquals("v1", object.getString("com.openexchange.prefix.p1"));
+        assertEquals("v2", object.getString("com.openexchange.prefix.p2"));
+
     }
 }

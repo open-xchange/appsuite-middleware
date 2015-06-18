@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
 import com.google.common.base.CharMatcher;
 import com.openexchange.config.ConfigurationService;
@@ -76,6 +77,8 @@ public class GlobalDbInit {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDbInit.class);
 
+    public static final String CONFIGFILE = "globaldb.yml";
+
     /**
      * Parses configuration settings for the global database from the configuration file <code>globaldb.yml</code> and performs initial
      * initialization steps, preparing the global database schemas and initial table layouts on demand.
@@ -86,13 +89,12 @@ public class GlobalDbInit {
      * @param monitor The replication monitor
      * @return The global db configurations, mapped by their assigned group names, or an empty map if none are defined
      */
-    static Map<String, GlobalDbConfig> init(ConfigurationService configService, ConfigDatabaseServiceImpl configDatabaseService, Pools pools, ReplicationMonitor monitor) throws OXException {
+    static Map<String, GlobalDbConfig> init(ConfigurationService configService, ConfigDatabaseService configDatabaseService, Pools pools, ReplicationMonitor monitor) throws OXException {
         /*
          * parse configs & read out associated connection settings
          */
-        String fileName = "globaldb.yml";
         Map<String, GlobalDbConfig> configs = null;
-        Object yaml = configService.getYaml(fileName);
+        Object yaml = configService.getYaml(CONFIGFILE);
 
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
@@ -101,11 +103,11 @@ public class GlobalDbInit {
             }
         }
         if (null == configs || 0 == configs.size()) {
-            LOG.warn("No global database settings configured at \"{}\", global database features are not available.", fileName);
+            LOG.warn("No global database settings configured at \"{}\", global database features are not available.", CONFIGFILE);
             return Collections.emptyMap();
         }
         if (false == configs.containsKey(GlobalDbConfig.DEFAULT_GROUP)) {
-            LOG.warn("No global database settings for group \"{}\" configured at \"{}\", no global fallback database available.", GlobalDbConfig.DEFAULT_GROUP, fileName);
+            LOG.warn("No global database settings for group \"{}\" configured at \"{}\", no global fallback database available.", GlobalDbConfig.DEFAULT_GROUP, CONFIGFILE);
         }
         /*
          * ensure target schemas for global databases exist before returning the configs
@@ -201,7 +203,7 @@ public class GlobalDbInit {
             Integer poolID = entry.getKey();
             GlobalDbConfig dbConfig = configsByPool.get(poolID);
             if (null == dbConfig) {
-                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier {} found.", poolID);
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier "+ poolID +" found.");
             }
             for (String group : entry.getValue()) {
                 if (null != dbConfigs.put(group, dbConfig)) {
@@ -328,7 +330,7 @@ public class GlobalDbInit {
         /*
          * execute query & read out configs
          */
-        Map<Integer, GlobalDbConfig> dbConfigs = new HashMap<Integer, GlobalDbConfig>(poolIDs.size());
+        Map<Integer, GlobalDbConfig> dbConfigs = new ConcurrentHashMap<Integer, GlobalDbConfig>(poolIDs.size(), 0.9f, 1);
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {

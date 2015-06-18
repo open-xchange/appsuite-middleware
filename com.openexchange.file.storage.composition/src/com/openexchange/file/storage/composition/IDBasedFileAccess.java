@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.Range;
@@ -217,7 +218,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     Document getDocumentAndMetadata(String id, String version, String clientEtag) throws OXException;
 
     /**
-     * Saves file metadata and binary content. 
+     * Saves file metadata and binary content.
      * <p/>
      * <b>Notes:</b>
      * <ul>
@@ -228,7 +229,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      *
      * @param document The metadata to save
      * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass 
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
      *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
      *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @return The (fully qualified) unique identifier of the saved file
@@ -237,7 +238,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     String saveDocument(File document, InputStream data, long sequenceNumber) throws OXException ;
 
     /**
-     * Saves file metadata and binary content. 
+     * Saves file metadata and binary content.
      * <p/>
      * <b>Notes:</b>
      * <ul>
@@ -248,7 +249,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      *
      * @param document The metadata to save
      * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass 
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
      *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
      *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
@@ -258,7 +259,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException ;
 
     /**
-     * Saves file metadata and binary content, optionally without creating a new version. 
+     * Saves file metadata and binary content, optionally without creating a new version.
      * <p/>
      * <b>Notes:</b>
      * <ul>
@@ -271,7 +272,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      *
      * @param document The metadata to save
      * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass 
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
      *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
      *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored
@@ -282,7 +283,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     String saveDocument(File document, InputStream data, long sequenceNumber, List<File.Field> modifiedColumns, boolean ignoreVersion) throws OXException;
 
     /**
-     * Saves file metadata and binary content, optionally without creating a new version. 
+     * Saves file metadata and binary content, optionally without creating a new version.
      * <p/>
      * <b>Notes:</b>
      * <ul>
@@ -295,7 +296,7 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      *
      * @param document The metadata to save
      * @param data The binary content
-     * @param sequenceNumber The sequence number to catch concurrent modification. May pass 
+     * @param sequenceNumber The sequence number to catch concurrent modification. May pass
      *        {@link FileStorageFileAccess#UNDEFINED_SEQUENCE_NUMBER} for new files or
      *        {@link FileStorageFileAccess#DISTANT_FUTURE} to circumvent the check
      * @param modifiedColumns The fields to save. All other fields will be ignored

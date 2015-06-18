@@ -116,7 +116,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public void changeQuota(final Context ctx, final String sModule, final long quotaValue, final Credentials credentials) throws RemoteException, InvalidCredentialsException, NoSuchContextException, StorageException, InvalidDataException {
-        if (isEmpty(sModule)) {
+        if (com.openexchange.java.Strings.isEmpty(sModule)) {
             throw new InvalidDataException("No valid module specified.");
         }
 
@@ -1541,18 +1541,5 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     @Override
     public boolean checkExists(final Context ctx, final Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException {
         return exists(ctx, credentials);
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 }

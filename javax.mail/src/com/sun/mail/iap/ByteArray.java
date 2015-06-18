@@ -50,6 +50,15 @@ import java.io.ByteArrayInputStream;
  */
 
 public class ByteArray {
+
+    /**
+     * The maximum size of array to allocate.
+     * Some VMs reserve some header words in an array.
+     * Attempts to allocate larger arrays may result in
+     * OutOfMemoryError: Requested array size exceeds VM limit
+     */
+    private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+
     private byte[] bytes; // the byte array
     private int start;	  // start position
     private int count;	  // count of bytes
@@ -136,4 +145,39 @@ public class ByteArray {
 	System.arraycopy(bytes, 0, nbuf, 0, bytes.length);
 	bytes = nbuf;
     }
+
+    /**
+     * Grow the byte array to have its size least set to specified <code>minCapacity</code>.
+     *
+     * @param minCapacity The minimum capacity to set
+     */
+    public void growMin(int minCapacity) {
+        // overflow-conscious code
+        if (minCapacity - bytes.length > 0) {
+            int oldCapacity = bytes.length;
+            int newCapacity = oldCapacity + (oldCapacity >> 1);
+            if (newCapacity - minCapacity < 0)
+                newCapacity = minCapacity;
+            if (newCapacity - MAX_ARRAY_SIZE > 0)
+                newCapacity = hugeCapacity(minCapacity);
+            // minCapacity is usually close to size, so this is a win:
+            byte[] nbuf = new byte[newCapacity];
+            System.arraycopy(bytes, 0, nbuf, 0, bytes.length);
+            bytes = nbuf;
+        }
+    }
+
+    private static int hugeCapacity(int minCapacity) {
+        if (minCapacity < 0) // overflow
+            throw new OutOfMemoryError();
+        return (minCapacity > MAX_ARRAY_SIZE) ?
+            Integer.MAX_VALUE :
+            MAX_ARRAY_SIZE;
+    }
+
+    @Override
+    public String toString() {
+        return new String(bytes);
+    }
+
 }

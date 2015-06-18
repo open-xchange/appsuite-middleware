@@ -118,6 +118,13 @@ public interface GuestInfo {
     int getCreatedBy();
 
     /**
+     * Gets the display name of the underlying guest user.
+     *
+     * @return The display name or <code>null</code> if the guest is anonymous or none is set.
+     */
+    String getDisplayName();
+
+    /**
      * Gets the guest user's configured locale.
      *
      * @return The locale
@@ -126,7 +133,7 @@ public interface GuestInfo {
 
     /**
      * Checks if guest's password is set
-     * 
+     *
      * @return
      */
     boolean isPasswordSet();

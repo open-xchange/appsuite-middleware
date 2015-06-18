@@ -118,10 +118,10 @@ public class FileCache {
         }
     }
 
+    // ---------------------------------------------------------------------------------------------------------------------
+
     private final Map<String, CacheEntry> cache = new ConcurrentHashMap<String, CacheEntry>();
-
     private final File[] roots;
-
     private final String[] prefixes;
 
     public FileCache(File root) throws IOException {

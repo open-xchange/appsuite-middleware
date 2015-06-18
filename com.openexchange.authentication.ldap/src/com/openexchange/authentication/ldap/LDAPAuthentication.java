@@ -108,7 +108,8 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         UID_ATTRIBUTE("uidAttribute"),
         LDAP_RETURN_FIELD("ldapReturnField"),
         ADS_NAME_BIND("adsBind"),
-        SUBTREE_SEARCH("subtreeSearch"),
+        BIND_ONLY("bindOnly"),
+        LDAP_SCOPE("ldapScope"),
         SEARCH_FILTER("searchFilter"),
         BIND_DN("bindDN"),
         BIND_DN_PASSWORD("bindDNPassword"),
@@ -134,11 +135,13 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
     /**
      * attribute name and base DN.
      */
-    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral;
+    private String uidAttribute, baseDN, ldapReturnField, searchFilter, bindDN, bindDNPassword, proxyUser, proxyDelimiter, referral, ldapScope;
 
-    private boolean subtreeSearch, useFullLoginInfo;
+    private boolean bindOnly, useFullLoginInfo;
 
     private boolean adsbind;
+    
+    private int searchScope = SearchControls.SUBTREE_SCOPE;
 
     /**
      * Default constructor.
@@ -199,8 +202,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
         }
         try {
             String samAccountName = null;
-            // We need to really search if attribute can be in a subtree or we search for anything but uid
-            if (subtreeSearch || ! uidAttribute.equals("uid")) {
+            if (!bindOnly) {
                 // get user dn from user
                 final Properties aprops = (Properties)props.clone();
                 aprops.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -216,7 +218,7 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
                 LOG.debug("Using filter={}", filter);
                 LOG.debug("BaseDN      ={}", baseDN);
                 SearchControls cons = new SearchControls();
-                cons.setSearchScope(SearchControls.SUBTREE_SCOPE);
+                cons.setSearchScope(searchScope);
                 cons.setCountLimit(0);
                 cons.setReturningAttributes(new String[]{"dn"});
                 NamingEnumeration<SearchResult> res = null;
@@ -353,10 +355,24 @@ public class LDAPAuthentication implements AuthenticationService, Reloadable {
 
         this.adsbind = Boolean.parseBoolean(props.getProperty(PropertyNames.ADS_NAME_BIND.name));
 
-        if (!props.containsKey(PropertyNames.SUBTREE_SEARCH.name)) {
-            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.SUBTREE_SEARCH.name);
+        if (!props.containsKey(PropertyNames.BIND_ONLY.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.BIND_ONLY.name);
         }
-        subtreeSearch = Boolean.parseBoolean(props.getProperty(PropertyNames.SUBTREE_SEARCH.name));
+        bindOnly = Boolean.parseBoolean(props.getProperty(PropertyNames.BIND_ONLY.name));
+
+        if (!props.containsKey(PropertyNames.LDAP_SCOPE.name)) {
+            throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.LDAP_SCOPE.name);
+        }
+        ldapScope = props.getProperty(PropertyNames.LDAP_SCOPE.name);
+        if( "subtree".equals(ldapScope) ) {
+            searchScope = SearchControls.SUBTREE_SCOPE;
+        } else if( "onelevel".equals(ldapScope) ) {
+            searchScope = SearchControls.ONELEVEL_SCOPE;
+        } else if( "base".equals(ldapScope) ) {
+            searchScope = SearchControls.OBJECT_SCOPE;
+        } else {
+            throw LoginExceptionCodes.UNKNOWN.create(PropertyNames.LDAP_SCOPE.name + " must be one of subtree, onelevel or base");
+        }
 
         if (!props.containsKey(PropertyNames.SEARCH_FILTER.name)) {
             throw LoginExceptionCodes.MISSING_PROPERTY.create(PropertyNames.SEARCH_FILTER.name);

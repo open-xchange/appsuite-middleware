@@ -54,6 +54,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.ServletException;
@@ -70,12 +71,10 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AppsLoadServlet} - Provides App Suite data for loading applciations.
- * 
+ *
  * @author <a href="mailto:viktor.pracht@open-xchange.com">Viktor Pracht</a>
  */
 public class AppsLoadServlet extends SessionServlet {
-    
-    public static FileContributor contributors = null;
 
     private static final long serialVersionUID = -8909104490806162791L;
 
@@ -83,18 +82,232 @@ public class AppsLoadServlet extends SessionServlet {
 
     private static String ZONEINFO = "io.ox/core/date/tz/zoneinfo/";
 
-    private final FileCache appCache, tzCache;
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    private final AtomicReference<FileCache> appCacheReference;
+    private final AtomicReference<FileCache> tzCacheReference;
+    private final AtomicReference<FileContributor> fileContributorReference;
 
     /**
      * Initializes a new {@link AppsLoadServlet}.
-     * 
-     * @throws IOException
+     *
+     * @param roots The app roots
+     * @param zoneinfo The zone information
+     * @param contributor The (composite) file contributor.
+     * @throws IOException If canonical path names of given files cannot be determined
      */
-    public AppsLoadServlet(final File[] roots, final File zoneinfo) throws IOException {
+    public AppsLoadServlet(File[] roots, File zoneinfo, FileContributor contributor) throws IOException {
         super();
-        appCache = new FileCache(roots);
-        tzCache = new FileCache(zoneinfo);
+        fileContributorReference = new AtomicReference<FileContributor>(contributor);
+        appCacheReference = new AtomicReference<FileCache>(new FileCache(roots));
+        tzCacheReference = new AtomicReference<FileCache>(new FileCache(zoneinfo));
     }
+
+    /**
+     * Reinitializes this Servlet using given arguments
+     *
+     * @param roots The app roots
+     * @param zoneinfo The zone information
+     * @throws IOException If canonical path names of given files cannot be determined
+     */
+    public void reinitialize(File[] roots, File zoneinfo) throws IOException {
+        appCacheReference.set(new FileCache(roots));
+        tzCacheReference.set(new FileCache(zoneinfo));
+    }
+
+    private String escapeName(String name) {
+        if (name.length() > 256) {
+            name = name.substring(0, 256);
+        }
+        final StringBuffer sb = new StringBuffer();
+        escape(name, sb);
+        return sb.toString();
+    }
+
+    @Override
+    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        // create a new HttpSession if it's missing
+        req.getSession(true);
+        super.service(req, resp);
+    }
+
+    /*
+     * Errors must not be cached. Since this is controlled by the "Expires" header at the start, data must be buffered until either an error
+     * is found or the end of the data is reached. Since non-error data is cached in RAM anyway, the only overhead is an array of pointers.
+     */
+    private class ErrorWriter {
+
+        private boolean buffering = true;
+        private final HttpServletResponse resp;
+        private OutputStream out;
+        private byte[][] buffer;
+        private int count = 0;
+
+        ErrorWriter(HttpServletResponse resp, int length) {
+            super();
+            this.resp = resp;
+            this.buffer = new byte[length][];
+        }
+
+        private void stopBuffering() throws IOException {
+            buffering = false;
+            out = resp.getOutputStream();
+            for (int i = 0; i < count; i++) {
+                write(buffer[i]);
+            }
+            buffer = null;
+        }
+
+        public void write(byte[] data) throws IOException {
+            write(data, null);
+        }
+
+        public void write(byte[] data, String options) throws IOException {
+
+            if (buffering) {
+                data = new StringBuilder(new String(data, "UTF-8")).append("\n\n/* :oxoptions: " + options + " :/oxoptions: */").toString().getBytes("UTF-8");
+                buffer[count++] = data;
+            } else {
+                out.write(data);
+                if (options != null) {
+                    out.write(("\n// :oxoptions: " + options + " :/oxoptions: \n").getBytes("UTF-8"));
+                }
+                out.write(SUFFIX);
+                out.flush();
+            }
+        }
+
+        public void error(byte[] data) throws IOException {
+            if (buffering) {
+                resp.setHeader("Expires", "0");
+                stopBuffering();
+            }
+            write(data);
+        }
+
+        public void done() throws IOException {
+            if (!buffering) {
+                return;
+            }
+            resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
+            stopBuffering();
+        }
+    }
+
+    @Override
+    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        ServerSession session = getSessionObject(req, true);
+
+        final String[] modules = Strings.splitByComma(req.getPathInfo());
+        if (null == modules) {
+            return; // no actual files requested
+        }
+        final int length = modules.length;
+        if (length < 2) {
+            return; // no actual files requested
+        }
+        resp.setContentType("text/javascript;charset=UTF-8");
+        ErrorWriter ew = new ErrorWriter(resp, length);
+        for (int i = 1; i < length; i++) {
+            final String module = modules[i].replace(' ', '+');
+            // Module names may only contain letters, digits, '_', '-', '/' and
+            // '.', but not "..".
+            final Matcher m = moduleRE.matcher(module);
+            if (!m.matches()) {
+                final String escapedName = escapeName(module);
+                LOG.debug("Invalid module name: '{}'", escapedName);
+                ew.error(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
+                continue;
+            }
+
+            // Map module name to file name
+            final String format = m.group(1);
+            String name = m.group(2);
+            boolean isTZ = name.startsWith(ZONEINFO);
+            final String resolved = isTZ ? name.substring(ZONEINFO.length()) : name;
+
+            FileCache cache = isTZ ? tzCacheReference.get() : appCacheReference.get();
+            byte[] data = cache.get(module, new FileCache.Filter() {
+
+                @Override
+                public String resolve(String path) {
+                    return resolved;
+                }
+
+                @Override
+                @SuppressWarnings("deprecation")
+                public byte[] filter(ByteArrayOutputStream baos) {
+                    if (format == null) {
+                        return baos.toByteArray();
+                    }
+
+                    // Special cases for JavaScript-friendly reading of raw files:
+                    // /text;* returns the file as a UTF-8 string
+                    // /raw;* maps every byte to [u+0000..u+00ff]
+                    final StringBuffer sb = new StringBuffer();
+                    sb.append("define('").append(module).append("','");
+                    try {
+                        escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
+                    } catch (UnsupportedEncodingException e) {
+                        // everybody should have UTF-8
+                    }
+                    sb.append("');\n");
+                    return sb.toString().getBytes(Charsets.UTF_8);
+                }
+            });
+
+            if (data != null) {
+                ew.write(data);
+            } else {
+                // Try external sources
+                String options = "{}";
+                FileContributor contributors = fileContributorReference.get();
+                if (contributors != null) {
+                    try {
+                        FileContribution contribution = contributors.getData(ServerSessionAdapter.valueOf(session), module);
+                        if (contribution != null) {
+                            data = contribution.getData();
+                            JSONObject optionsO = new JSONObject();
+                            try {
+                                optionsO.put("cache", !contribution.isCachingDisabled());
+                                options = optionsO.toString();
+                            } catch (JSONException e) {
+                                // Doesn't happen
+                            }
+                        }
+                    } catch (OXException e) {
+                        int len = module.length() - 3;
+                        String moduleName = module;
+                        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
+                            moduleName = module.substring(0, len);
+                        }
+                        name = escapeName(name);
+                        ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
+                                  "    if (ox.debug) console.log(\"Could not read '" + name + "': " + e.toString() + "\");\n" +
+                                  "    throw new Error(\"Could not read '" + name + "'\");\n" +
+                                  "});\n").getBytes(Charsets.UTF_8));
+                    }
+                }
+                if (data != null) {
+                    ew.write(data, options);
+                } else {
+                    int len = module.length() - 3;
+                    String moduleName = module;
+                    if (format == null && len > 0 && ".js".equals(module.substring(len))) {
+                        moduleName = module.substring(0, len);
+                    }
+                    name = escapeName(name);
+                    ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
+                              "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
+                              "    throw new Error(\"Could not read '" + name + "'\");\n" +
+                              "});\n").getBytes(Charsets.UTF_8));
+                }
+            }
+        }
+        ew.done();
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------
 
     private static Pattern moduleRE = Pattern.compile("(?:/(text|raw);)?([\\w/+-]+(?:\\.[\\w/+-]+)*)");
 
@@ -140,197 +353,4 @@ public class AppsLoadServlet extends SessionServlet {
         e.appendTail(sb);
     }
 
-    private String escapeName(String name) {
-        if (name.length() > 256) {
-            name = name.substring(0, 256);
-        }
-        final StringBuffer sb = new StringBuffer();
-        escape(name, sb);
-        return sb.toString();
-    }
-
-    @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        // create a new HttpSession if it's missing
-        req.getSession(true);
-        super.service(req, resp);
-    }
-
-    /*
-     * Errors must not be cached. Since this is controlled by the "Expires" header at the start, data must be buffered until either an error
-     * is found or the end of the data is reached. Since non-error data is cached in RAM anyway, the only overhead is an array of pointers.
-     */
-    private class ErrorWriter {
-
-        private boolean buffering = true;
-
-        private final HttpServletResponse resp;
-
-        private OutputStream out;
-
-        private byte[][] buffer;
-
-        private int count = 0;
-
-        public ErrorWriter(HttpServletResponse resp, int length) {
-            this.resp = resp;
-            this.buffer = new byte[length][];
-        }
-
-        private void stopBuffering() throws IOException {
-            buffering = false;
-            out = resp.getOutputStream();
-            for (int i = 0; i < count; i++) {
-                write(buffer[i]);
-            }
-            buffer = null;
-        }
-        
-        public void write(byte[] data) throws IOException {
-            write(data, null);
-        }
-
-        public void write(byte[] data, String options) throws IOException {
-            
-            if (buffering) {
-                data = new StringBuilder(new String(data, "UTF-8")).append("\n\n/* :oxoptions: " + options + " :/oxoptions: */").toString().getBytes("UTF-8");
-                buffer[count++] = data;
-            } else {
-                out.write(data);
-                if (options != null) {
-                    out.write(("\n// :oxoptions: " + options + " :/oxoptions: \n").getBytes("UTF-8"));
-                }
-                out.write(SUFFIX);
-                out.flush();
-            }
-        }
-
-        public void error(byte[] data) throws IOException {
-            if (buffering) {
-                resp.setHeader("Expires", "0");
-                stopBuffering();
-            }
-            write(data);
-        }
-
-        public void done() throws IOException {
-            if (!buffering) {
-                return;
-            }
-            resp.setDateHeader("Expires", System.currentTimeMillis() + (long) 3e10); // + almost a year
-            stopBuffering();
-        }
-    }
-
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        ServerSession session = getSessionObject(req, true);
-        
-        final String[] modules = Strings.splitByComma(req.getPathInfo());
-        if (null == modules) {
-            return; // no actual files requested
-        }
-        final int length = modules.length;
-        if (length < 2) {
-            return; // no actual files requested
-        }
-        resp.setContentType("text/javascript;charset=UTF-8");
-        ErrorWriter ew = new ErrorWriter(resp, length);
-        for (int i = 1; i < length; i++) {
-            final String module = modules[i].replace(' ', '+');
-            // Module names may only contain letters, digits, '_', '-', '/' and
-            // '.', but not "..".
-            final Matcher m = moduleRE.matcher(module);
-            if (!m.matches()) {
-                final String escapedName = escapeName(module);
-                LOG.debug("Invalid module name: '{}'", escapedName);
-                ew.error(("console.error('Invalid module name: \\'" + escapedName + "\\'');\n").getBytes("UTF-8"));
-                continue;
-            }
-
-            // Map module name to file name
-            final String format = m.group(1);
-            String name = m.group(2);
-            boolean isTZ = name.startsWith(ZONEINFO);
-            final String resolved = isTZ ? name.substring(ZONEINFO.length()) : name;
-
-            FileCache cache = isTZ ? tzCache : appCache;
-            byte[] data = cache.get(module, new FileCache.Filter() {
-
-                @Override
-                public String resolve(String path) {
-                    return resolved;
-                }
-
-                @Override
-                @SuppressWarnings("deprecation")
-                public byte[] filter(ByteArrayOutputStream baos) {
-                    if (format == null) {
-                        return baos.toByteArray();
-                    }
-
-                    // Special cases for JavaScript-friendly reading of raw files:
-                    // /text;* returns the file as a UTF-8 string
-                    // /raw;* maps every byte to [u+0000..u+00ff]
-                    final StringBuffer sb = new StringBuffer();
-                    sb.append("define('").append(module).append("','");
-                    try {
-                        escape("raw".equals(format) ? baos.toString(0) : baos.toString(Charsets.UTF_8_NAME), sb);
-                    } catch (UnsupportedEncodingException e) {
-                        // everybody should have UTF-8
-                    }
-                    sb.append("');\n");
-                    return sb.toString().getBytes(Charsets.UTF_8);
-                }
-            });
-
-            if (data != null) {
-                ew.write(data);
-            } else {
-                // Try external sources
-                String options = "{}";
-                if (contributors != null) {
-                    try {
-                        FileContribution contribution = contributors.getData(ServerSessionAdapter.valueOf(session), module);
-                        if (contribution != null) {
-                            data = contribution.getData();
-                            JSONObject optionsO = new JSONObject();
-                            try {
-                                optionsO.put("cache", !contribution.isCachingDisabled());
-                                options = optionsO.toString();
-                            } catch (JSONException e) {
-                                // Doesn't happen
-                            }
-                        }
-                    } catch (OXException e) {
-                        int len = module.length() - 3;
-                        String moduleName = module;
-                        if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                            moduleName = module.substring(0, len);
-                        }
-                        name = escapeName(name);
-                        ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                                  "    if (ox.debug) console.log(\"Could not read '" + name + "': " + e.toString() + "\");\n" +
-                                  "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                                  "});\n").getBytes(Charsets.UTF_8));
-                    }
-                }
-                if (data != null) {
-                    ew.write(data, options);
-                } else {
-                    int len = module.length() - 3;
-                    String moduleName = module;
-                    if (format == null && len > 0 && ".js".equals(module.substring(len))) {
-                        moduleName = module.substring(0, len);
-                    }
-                    name = escapeName(name);
-                    ew.error(("define('" + escapeName(moduleName) + "', function () {\n" +
-                              "    if (ox.debug) console.log(\"Could not read '" + name + "'\");\n" +
-                              "    throw new Error(\"Could not read '" + name + "'\");\n" +
-                              "});\n").getBytes(Charsets.UTF_8));
-                }
-            }
-        }
-        ew.done();
-    }
 }

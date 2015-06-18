@@ -116,7 +116,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
             final DropboxAPI<WebAuthSession> dropboxAPI =
                 new DropboxAPI<WebAuthSession>(new TrustAllWebAuthSession(appKeys, AccessType.DROPBOX));
             final StringBuilder authUrl = new StringBuilder(dropboxAPI.getSession().getAuthInfo().url);
-            if (!isEmpty(callbackUrl)) {
+            if (!Strings.isEmpty(callbackUrl)) {
                 authUrl.append('&').append(OAuthConstants.URLPARAM_OAUTH_CALLBACK).append('=').append(urlEncode(callbackUrl)).toString();
             }
             final String sAuthUrl = authUrl.toString();
@@ -215,18 +215,6 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
     @Override
     public OAuthToken getOAuthToken(final Map<String, Object> arguments) throws OXException {
         return (OAuthToken) arguments.get(OAuthConstants.ARGUMENT_REQUEST_TOKEN);
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override

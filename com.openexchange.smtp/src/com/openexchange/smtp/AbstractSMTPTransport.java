@@ -386,6 +386,12 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         smtpProps.put("mail.smtp.connectiontimeout", Integer.toString(smtpProperties.getSmtpConnectionTimeout()));
                     }
                     /*
+                     * Send partial or abort?
+                     */
+                    if (smtpProperties.isSendPartial()) {
+                        smtpProps.put("mail.smtp.sendpartial", "true");
+                    }
+                    /*
                      * Check if a secure SMTP connection should be established
                      */
                     final String sPort = String.valueOf(smtpConfig.getPort());
@@ -533,9 +539,18 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    protected void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
+     * <p>
+     * Aligns <i>Message-Id</i> header to given host name.
+     *
+     * @param mimeMessage The MIME message
+     * @param keepMessageIdIfPresent Whether to keep a possibly available <i>Message-ID</i> header or to generate a new (unique) one
+     * @throws OXException If operation fails
+     */
+    protected void saveChangesSafe(MimeMessage mimeMessage, boolean keepMessageIdIfPresent) throws OXException {
         String hostName = getHostName();
-        MimeMessageConverter.saveChanges(mimeMessage, hostName);
+        MimeMessageUtility.saveChanges(mimeMessage, hostName, keepMessageIdIfPresent);
         // Check whether to remove MIME-Version headers from sub-parts
         if (TransportProperties.getInstance().isRemoveMimeVersionInSubParts()) {
             /*-
@@ -798,14 +813,14 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             processAddressHeader(mimeMessage);
             final boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
-                saveChangesSafe(mimeMessage);
+                saveChangesSafe(mimeMessage, true);
             } else {
                 try {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
                     try {
                         connectTransport(transport, smtpConfig);
-                        saveChangesSafe(mimeMessage);
+                        saveChangesSafe(mimeMessage, true);
                         transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {

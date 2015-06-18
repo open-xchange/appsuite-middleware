@@ -51,27 +51,30 @@ package com.openexchange.share.impl.groupware;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.groupware.TargetProxyType;
+import com.openexchange.share.groupware.VirtualTargetProxyType;
 
 
 /**
- * {@link VirtualTargetProxy}
+ * {@link VirtualTargetProxy} - A {@link TargetProxy} for non groupware modules aka. third party plugins like e.g. messenger. This
+ * {@link TargetProxy} only contains the minimum set of infos.  
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
 public class VirtualTargetProxy extends AbstractTargetProxy {
 
-    private final User user;
     private final String folderId;
     private final String item;
     private final String title;
+    private final int ownedBy;
 
-    public VirtualTargetProxy(User user, String folderId, String item, String title) {
+    public VirtualTargetProxy(int ownedBy, String folderId, String item, String title) {
         super();
-        this.user = user;
+        this.ownedBy = ownedBy;
         this.folderId = folderId;
         this.item = item;
         this.title = title;
@@ -80,11 +83,20 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     /**
      * Initializes a new {@link VirtualTargetProxy}.
      *
-     * @param user The current session's user
      * @param target The target
      */
-    public VirtualTargetProxy(User user, ShareTarget target) {
-        this(user, target.getFolder(), target.getItem(), getTitle(target));
+    public VirtualTargetProxy(ShareTarget target) {
+        this(target.getOwnedBy(), target);
+    }
+
+    /**
+     * Initializes a new {@link VirtualTargetProxy}.
+     *
+     * @param ownedBy The identifier of the user that is considered as owner of the target
+     * @param target The target
+     */
+    public VirtualTargetProxy(int ownedBy, ShareTarget target) {
+        this(ownedBy, target.getFolder(), target.getItem(), getTitle(target));
     }
 
     @Override
@@ -99,7 +111,7 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
 
     @Override
     public int getOwner() {
-        return user.getId();
+        return ownedBy;
     }
 
     @Override
@@ -116,6 +128,11 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     public void removePermissions(List<TargetPermission> permissions) {
         //
     }
+    
+    @Override
+    public TargetProxyType getProxyType() {
+        return VirtualTargetProxyType.getInstance();
+    }
 
     private static String getTitle(ShareTarget target) {
         Map<String, Object> meta = target.getMeta();
@@ -124,4 +141,5 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
         }
         return target.toString();
     }
+
 }

@@ -51,7 +51,6 @@ package com.openexchange.oauth.provider.client;
 
 import java.io.Serializable;
 import java.util.Set;
-import com.openexchange.oauth.provider.Scopes;
 
 /**
  * DTO class for the client management API.
@@ -72,7 +71,7 @@ public class ClientData implements Serializable {
     private String description;
     private boolean bDescription;
 
-    private Scopes defaultScope;
+    private String defaultScope;
     private boolean bDefaultScope;
 
     private Set<String> redirectURIs;
@@ -116,11 +115,11 @@ public class ClientData implements Serializable {
         bDescription = true;
     }
 
-    public Scopes getDefaultScope() {
+    public String getDefaultScope() {
         return defaultScope;
     }
 
-    public void setDefaultScope(Scopes defaultScope) {
+    public void setDefaultScope(String defaultScope) {
         this.defaultScope = defaultScope;
         bDefaultScope = true;
     }

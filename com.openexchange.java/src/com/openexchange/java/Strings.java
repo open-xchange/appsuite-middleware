@@ -192,22 +192,22 @@ public class Strings {
      */
     public static boolean isWhitespace(final char c) {
         switch (c) {
-        case 9: // 'unicode: 0009
-        case 10: // 'unicode: 000A'
-        case 11: // 'unicode: 000B'
-        case 12: // 'unicode: 000C'
-        case 13: // 'unicode: 000D'
-        case 28: // 'unicode: 001C'
-        case 29: // 'unicode: 001D'
-        case 30: // 'unicode: 001E'
-        case 31: // 'unicode: 001F'
-        case ' ': // Space
-            // case Character.SPACE_SEPARATOR:
-            // case Character.LINE_SEPARATOR:
-        case Character.PARAGRAPH_SEPARATOR:
-            return true;
-        default:
-            return false;
+            case 9: // 'unicode: 0009
+            case 10: // 'unicode: 000A'
+            case 11: // 'unicode: 000B'
+            case 12: // 'unicode: 000C'
+            case 13: // 'unicode: 000D'
+            case 28: // 'unicode: 001C'
+            case 29: // 'unicode: 001D'
+            case 30: // 'unicode: 001E'
+            case 31: // 'unicode: 001F'
+            case ' ': // Space
+                // case Character.SPACE_SEPARATOR:
+                // case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -218,19 +218,19 @@ public class Strings {
      */
     public static boolean isDigit(final char c) {
         switch (c) {
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            return true;
-        default:
-            return false;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -526,6 +526,16 @@ public class Strings {
     }
 
     /**
+     * Checks for a non-empty string.
+     *
+     * @param string The string
+     * @return <code>true</code> if input is a non-empty string; else <code>false</code>
+     */
+    public static boolean isNotEmpty(final String string) {
+        return !isEmpty(string);
+    }
+
+    /**
      * Fixes possible charset problem in given string.
      * <p>
      * E.g.:&nbsp;&quot;&#195;&#164&quot; instead of &quot;&auml;&quot;
@@ -709,8 +719,8 @@ public class Strings {
      * </p>
      *
      * <pre>
-     * StringUtils.abbreviate(null, *)      = null
-     * StringUtils.abbreviate("", 4)        = ""
+     * StringUtils.abbreviate(null, *) = null
+     * StringUtils.abbreviate("", 4) = ""
      * StringUtils.abbreviate("abcdefg", 6) = "abc..."
      * StringUtils.abbreviate("abcdefg", 7) = "abcdefg"
      * StringUtils.abbreviate("abcdefg", 8) = "abcdefg"
@@ -737,19 +747,19 @@ public class Strings {
      * In no case will it return a String of length greater than <code>maxWidth</code>.
      *
      * <pre>
-     * StringUtils.abbreviate(null, *, *)                = null
-     * StringUtils.abbreviate("", 0, 4)                  = ""
+     * StringUtils.abbreviate(null, *, *) = null
+     * StringUtils.abbreviate("", 0, 4) = ""
      * StringUtils.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
-     * StringUtils.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
-     * StringUtils.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
+     * StringUtils.abbreviate("abcdefghijklmno", 0, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 1, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 4, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 5, 10) = "...fghi..."
+     * StringUtils.abbreviate("abcdefghijklmno", 6, 10) = "...ghij..."
+     * StringUtils.abbreviate("abcdefghijklmno", 8, 10) = "...ijklmno"
      * StringUtils.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
      * StringUtils.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
-     * StringUtils.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefghij", 0, 3) = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefghij", 5, 6) = IllegalArgumentException
      * </pre>
      *
      * @param str The String to check, may be null
@@ -1181,7 +1191,7 @@ public class Strings {
      * @param trimChars The characters to remove
      * @return The trimmed string
      */
-    public static String trimStart(String string, char...trimChars) {
+    public static String trimStart(String string, char... trimChars) {
         if (null != string && null != trimChars && 0 < trimChars.length) {
             while (0 < string.length() && contains(string.charAt(0), trimChars)) {
                 string = string.substring(1, string.length() - 1);
@@ -1197,7 +1207,7 @@ public class Strings {
      * @param trimChars The characters to remove
      * @return The trimmed string
      */
-    public static String trimEnd(String string, char...trimChars) {
+    public static String trimEnd(String string, char... trimChars) {
         if (null != string && null != trimChars && 0 < trimChars.length) {
             while (0 < string.length() && contains(string.charAt(string.length() - 1), trimChars)) {
                 string = string.substring(0, string.length() - 1);
@@ -1233,6 +1243,19 @@ public class Strings {
         return (s.toString());
     }
 
+    /**
+     * Converts int[] to String[]
+     *
+     * @param arr int[] that should be converted
+     * @return String[] ints as String
+     */
+    public static String[] convert(final int[] arr) {
+        String connector = ";";
+        StringBuilder builder = new StringBuilder();
+        Strings.join(arr, connector, builder);
+        return builder.toString().split(connector);
+    }
+
     private static boolean contains(char c, char[] charArray) {
         for (char character : charArray) {
             if (c == character) {
@@ -1241,6 +1264,39 @@ public class Strings {
         }
         return false;
 
+    }
+
+    /**
+     * Omits leading and trailing whitespaces in given <code>StringBuilder</code> instance.
+     *
+     * @param sb The <code>StringBuilder</code> instance
+     * @return The <code>StringBuilder</code> instance with leading and trailing whitespaces omitted
+     */
+    public static StringBuilder trim(StringBuilder sb) {
+        if (null == sb) {
+            return null;
+        }
+
+        int len = sb.length();
+        int st = 0;
+
+        while ((st < len) && (sb.charAt(st) <= ' ')) {
+            st++;
+        }
+        while ((st < len) && (sb.charAt(len - 1) <= ' ')) {
+            len--;
+        }
+
+        if ((st > 0) || (len < sb.length())) {
+            for (int i = sb.length(); i > len; i--) {
+                sb.deleteCharAt(i - 1);
+            }
+            for (int i = st; i-- > 0;) {
+                sb.deleteCharAt(0);
+            }
+        }
+
+        return sb;
     }
 
 }

@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.internal.performers.DeletePerformer;
 import com.openexchange.folderstorage.internal.performers.GetPerformer;
 import com.openexchange.folderstorage.internal.performers.ListPerformer;
 import com.openexchange.folderstorage.internal.performers.PathPerformer;
+import com.openexchange.folderstorage.internal.performers.ReinitializePerformer;
 import com.openexchange.folderstorage.internal.performers.SubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UnsubscribePerformer;
 import com.openexchange.folderstorage.internal.performers.UpdatePerformer;
@@ -99,6 +100,12 @@ public final class FolderServiceImpl implements FolderService {
      */
     public FolderServiceImpl() {
         super();
+    }
+
+    @Override
+    public void reinitialize(String treeId, Session session) throws OXException {
+        ReinitializePerformer performer = new ReinitializePerformer(ServerSessionAdapter.valueOf(session));
+        performer.doReinitialize(treeId);
     }
 
     @Override

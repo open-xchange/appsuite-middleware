@@ -1,6 +1,181 @@
+* 2015-06-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37002: Retain task user confirmation status even if client is sending always the full participant array.
+
+* 2015-06-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 38787: Properly dispose GroupDispatcher
+ - Fix for bug 38231: Don't allow client to join a GroupDispatcher twice
+
+* 2015-06-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38782: Do not allow tasks anymore having a recurrence but lacking of start or end date.
+
+* 2015-06-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38484: Apply "special" sorting for contact results by default
+
+* 2015-06-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38550: Make the iOS client use the default contact folder as first collection
+
+* 2015-06-12 - marc.arens@open-xchange.com
+
+ - Fix for bug 38634: Improve RealtimeExceptionsCodes and handling
+
+* 2015-06-10 - thorben.betten@open-xchange.com
+
+ - Fix for bug 21064: Support display of S/MIME signed messages
+
+* 2015-06-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 38632: Enhance RunLoopManagerMBean to monitor fill status of loop clusters
+
+* 2015-06-09 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38079: Series breaks if the start of a series does not match the pattern.
+
+* 2015-06-09 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38616: Fixed various null dereferences
+ - Fix for bug 38605: Introduced separate method to OXUserInterface to retrieve only users' display names
+
+* 2015-06-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38600: Proper check if non-infostore file storage supports the "SEARCH_BY_TERM" capability
+ - Fix for bug 38603: Added option "com.openexchange.smtp.sendPartial" to allow partial send in case one or more (but not all) recipients are considered to be invalid on message
+                      transport
+ - Fix for bug 38604: Aligned .yml configuration file to current T-Online page layout for contact subscription
+
+* 2015-06-02 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38571: Added debug logging to track down unwanted notification mails.
+
+* 2015-06-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
+ - Fix for bug 38553: Live connect against IMAP server to determine whether special folders are supposed to be used for standard mail folders
+                      (e.g. through advertising SPECIAL-USE flags)
+
+* 2015-05-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
+
+* 2015-05-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38260: Include distribution list entries when searching in contact module
+
+* 2015-05-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38502: Proper shut-down of DeferredActivator in case an error occurs on bundle start-up
+
+* 2015-05-28 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38503: Avoid NPE.
+
+* 2015-05-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38469: Execute update of config-tree settings sequentially one-by-one in a separate thread (from thread pool) to avoid excessive concurrent row locking leading to MySQL deadlocks
+ - Fix for bug 38434: Check length of passed JSON array in request body to be greater than zero
+ - Fix for bug 38432: Null guard for Connection instance
+ - Fix for bug 38431: Safe access to Servlet's PrintWriter
+ - Fix for bug 38430: Null guard when accessing SessiondService OSGi service
+ - Fix for bug 38427: Turn column identifiers to mail field guaranteed not to hold any null values
+ - Fix for bug 38425: Null guard when accessing optional session parameter
+
+* 2015-05-22 - marc.arens@open-xchange.com
+
+ - Fix for bug 38380: Don't let malformed Cookies break request processing
+
+* 2015-05-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37576: Check for "denied" parameter when receiving call-back from Twitter
+ - Fix for bug 38365: Properly handle escape sequences in personal part of an E-Mail address
+ - Fix for bug 37062: Do not access IMAPFolder instance if failed to instantiate it
+ - Fix for bug 37296: Ensure thrown upload-quota error passes the translation
+
+* 2015-05-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38189: More robust handling in case invalid/insufficient JSON data was received from client that could not be parsed to a message
+ - Fix for bug 38327: Do not signal file size when storing a mail attachment in Drive App as mail server's size might not be exact
+
+* 2015-05-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38201: Fixed parsing HTML content for possible referenced/inlined images
+ - Fix for bug 38239: Do not pass left-hand/right-hand limit to storage layer if internal sorting is supposed to be performed
+ - Fix for bug 38277: Fixed wrong "java.sql.ResultSet" usage
+ - Fix for bug 38282: Return write-pool identifier in case read-pool one is not set as it hints to a pool w/o a slave
+ - Fix for bug 38291: Proper precondition check for participant state changes
+ - Fix for bug 38295: Only check for delete exceptions if available in calendar object
+
+* 2015-05-18 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38296: Added null guard and throwing an appropriate error message once required arguments are missing
+ - Fix for bug 38293: Proper extraction of IDs from a MailMessage array with attention to possible null references
+ - Fix for bug 38290: Improved OXException handling
+
+* 2015-05-12 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38097: Store contact with invalid/non-supported E-Mail addresses with affected address fields set to empty string
+
+* 2015-05-11 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38207: Accept new URL parameter "new" that signals that a new "Message-ID" header is supposed to be generated for incoming message
+ - Fix for bug 38067: Use proper quoting routine when passing a string literal to "java.lang.String.replaceFirst(String, String)" method
+ - Fix for bug 38068: Fold value for "References" header at linear whitespace so that each line is no longer than 76 characters
+ - Fix for bug 38118: Disabled failure cache in IMAP authentication bundle
+                      (configurable through "com.openexchange.authentication.imap.failureCacheExpirySeconds"; default is off)
+
+* 2015-05-08 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38187: Also consider infostore folders when checking if a folder can be shared
+
+* 2015-05-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38178: Added json itip capability.
+
+* 2015-04-30 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38015: Do not remove REST API login if it is still configured to the once shipped default one. Only the password is removed.
+
+* 2015-04-30 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 37664: Set a configurable socket time out for the logstash appender
+
+* 2015-04-29 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37660: Added package for Norwegian Bokmal translation.
+
+* 2015-04-28 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37978: Cleanse reminders that do miss a folder reference
+
+* 2015-04-28 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37997: Ensure parent visibility for all folders of module "infostore"
+
+* 2015-04-27 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 37887: No longer include 'calendar-color' property on CalDAV collections
+ - Fix for bug 37927: Map virtual columns to their corresponding database columns for sorting
+
+* 2015-04-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 37797: Series gets broken on participant accept request.
+
+* 2015-04-23 - martin.schneider@open-xchange.com
+
+ - Fix for bug 37907: Only call PasswordChangeService once
+
+* 2015-04-23 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37889: Switch boolean values in post installation script only at a certain version upgrade.
+
 * 2015-04-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 37808: Perform chunk-wise FETCH in case previous FETCH command was quit with a "NO" error response from IMAP server
+ - Fix for bug 37641: Drop possible duplicate entries from "genconf_attributes_strings" and "genconf_attributes_bools" tables prior to defining "uuid" column as PRIMARY KEY
+                      Drop orphaned entries from "user_setting_server" and "user_attribute" tables prior to defining "uuid" column as PRIMARY KEY
 
 * 2015-04-21 - thorben.betten@open-xchange.com
 
@@ -28,6 +203,7 @@
 
  - Fix for bug 37083: Make maximum allowed contact image size available via JSlob / config tree
  - Fix for bug 37619: Use more intelligent filename reservation
+ - Fix for bug 37340: Introduced checks for future database table layout
 
 * 2015-04-13 - tobias.friedrich@open-xchange.com
 
@@ -90,6 +266,10 @@
 * 2015-03-20 - marcus.klein@open-xchange.com
 
  - Fix for bug 37282: Added support for startup with Java 9.
+
+* 2015-04-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37809: Added null guards as null is a valid value inside returned MailMessage[] array
 
 * 2015-03-20 - thorben.betten@open-xchange.com
 

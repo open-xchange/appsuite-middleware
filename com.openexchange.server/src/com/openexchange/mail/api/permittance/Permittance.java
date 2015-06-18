@@ -113,7 +113,7 @@ public class Permittance {
         super();
     }
 
-    private static final ConcurrentMap<PermitterKey, PermitterImpl> SYNCHRONIZER = new ConcurrentHashMap<PermitterKey, PermitterImpl>(256);
+    private static final ConcurrentMap<PermitterKey, PermitterImpl> SYNCHRONIZER = new ConcurrentHashMap<PermitterKey, PermitterImpl>(256, 0.9f, 1);
 
     /**
      * Acquires a permitter for given key

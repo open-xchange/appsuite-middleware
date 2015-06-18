@@ -60,9 +60,29 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ShareServletStrings implements LocalizableStrings {
 
-    public static final String NEW_SHARE = "%1$s would like you to view %2$s";
+    public static final String GUEST = "guest";
 
-    public static final String SET_NEW_PASSWORD = "To access %1$s you have to set a password.";
+    public static final String FILE = "file";
+
+    public static final String FOLDER = "folder";
+
+    public static final String UNLIMITED = "unlimited";
+
+    public static final String SHARE_WITH_TARGET = "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. ";
+
+    public static final String SHARE_WITHOUT_TARGET = "Files have been shared with you. Please log in to view them. ";
+
+    public static final String SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME = "%1$s has shared some files with you. ";
+
+    public static final String ASK_PASSWORD_WITH_TARGET = "Please create a password to continue accessing it. ";
+
+    public static final String ASK_PASSWORD_WITHOUT_TARGET = "Please create a password to continue accessing them. ";
+
+    public static final String ASK_PASSWORD = "For additional security you can create a password.";
+
+    public static final String REQUIRE_PASSWORD_WITH_TARGET = "Please create a password to log in and view it.";
+
+    public static final String REQUIRE_PASSWORD_WITHOUT_TARGET = "Please create a password to log in and view them.";
 
     public static final String RESET_PASSWORD = "Email sent to %1$s with further instructions on how to reset your password.";
 

@@ -77,12 +77,12 @@ public class SecretRecoveryActionFactory implements AJAXActionServiceFactory {
      * Initializes a new {@link SecretRecoveryActionFactory}.
      *
      * @param services The service look-up
-     * @param cleanUpServices 
-     * @param secretMigrators 
+     * @param cleanUpServices
+     * @param secretMigrators
      */
     public SecretRecoveryActionFactory(final ServiceLookup services, Set<SecretMigrator> secretMigrators, Set<EncryptedItemCleanUpService> cleanUpServices) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(3);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(3, 0.9f, 1);
         actions.put("check", new CheckAction(services));
         actions.put("migrate", new MigrateAction(services, secretMigrators));
         actions.put("clean_up", new CleanUpAction(services, cleanUpServices));

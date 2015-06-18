@@ -67,6 +67,7 @@ import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
@@ -88,10 +89,6 @@ import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
-import com.openexchange.share.impl.notification.DefaultNotificationService;
-import com.openexchange.share.impl.notification.mail.MailNotificationHandler;
-import com.openexchange.share.notification.ShareNotificationHandler;
-import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -122,7 +119,8 @@ public class ShareActivator extends HousekeepingActivator {
             UserService.class, ContextService.class, TemplateService.class, ShareStorage.class, ConfigurationService.class,
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
-            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class };
+            QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
+            DispatcherPrefixService.class};
     }
 
     @Override
@@ -189,37 +187,10 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-        // Initialize share notification service
-        final DefaultNotificationService defaultNotificationService = new DefaultNotificationService();
 
-        // Add in-place handlers
-        defaultNotificationService.add(new MailNotificationHandler(this));
-
-        // track additional share notification handlers
-        track(ShareNotificationHandler.class, new ServiceTrackerCustomizer<ShareNotificationHandler, ShareNotificationHandler>() {
-
-            @Override
-            public ShareNotificationHandler addingService(ServiceReference<ShareNotificationHandler> reference) {
-                ShareNotificationHandler handler = context.getService(reference);
-                defaultNotificationService.add(handler);
-                return handler;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ShareNotificationHandler> reference, ShareNotificationHandler service) {
-                // Ignore
-            }
-
-            @Override
-            public void removedService(ServiceReference<ShareNotificationHandler> reference, ShareNotificationHandler service) {
-                defaultNotificationService.remove(service);
-                context.ungetService(reference);
-            }
-        });
 
         ModuleSupport moduleSupport = new ModuleSupportImpl(this);
         registerService(ModuleSupport.class, moduleSupport);
-        registerService(ShareNotificationService.class, defaultNotificationService);
         registerService(QuotaProvider.class, new ShareQuotaProvider(this));
 
         trackService(ContactCollectorService.class);

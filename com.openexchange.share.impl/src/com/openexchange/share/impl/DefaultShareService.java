@@ -99,6 +99,7 @@ import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.share.storage.ShareStorage;
@@ -173,7 +174,7 @@ public class DefaultShareService implements ShareService {
         shares = removeExpired(contextID, shares);
         if (guest.getId() == session.getUserId()) {
             /*
-             * implicitly adjust share targets if the sesssion's user is the guest himself
+             * implicitly adjust share targets if the session's user is the guest himself
              */
             return ShareTool.toShareInfos(services, contextID, shares, true);
 
@@ -190,8 +191,8 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public ShareInfo getShare(Session session, String token, String path) throws OXException {
-        List<ShareInfo> sharesInfos = getShares(session, token);
-        for (ShareInfo shareInfo : sharesInfos) {
+        List<ShareInfo> shareInfos = getShares(session, token);
+        for (ShareInfo shareInfo : shareInfos) {
             ShareTarget target = shareInfo.getShare().getTarget();
             if (null != target && path.equals(target.getPath())) {
                 return shareInfo;
@@ -258,16 +259,22 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
             List<Share> sharesToStore = new ArrayList<Share>(expectedShares);
             for (ShareRecipient recipient : recipients) {
+                if (InternalRecipient.class.isInstance(recipient)) {
+                    InternalRecipient internal = (InternalRecipient) recipient;
+                    if (internal.getEntity() == session.getUserId()) {
+                        throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                    }
+                }
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
                 User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
                 List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
                 /*
-                 * prepare shares for each target, remember new guest shares for storing 
+                 * prepare shares for each target, remember new guest shares for storing
                  */
                 for (ShareTarget target : targets) {
                     Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
                     if (guestUser.isGuest()) {
-                        sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));    
+                        sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));
                         sharesToStore.add(share);
                     } else {
                         sharesForGuest.add(new InternalUserShareInfo(contextID, guestUser, share));
@@ -651,14 +658,14 @@ public class DefaultShareService implements ShareService {
      * cleaning up guest users as needed.
      *
      * @param contextID The context identifier
-     * @param share The shares
+     * @param shares The shares
      * @return The filtered shares, which may be an empty list if all shares were expired
      * @throws OXException
      */
     private List<Share> removeExpired(int contextID, List<Share> shares) throws OXException {
         List<Share> expiredShares = ShareTool.filterExpiredShares(shares);
         if (null != expiredShares && 0 < expiredShares.size()) {
-            int affectedShares = 0;
+            int affectedShares;
             ShareStorage shareStorage = services.getService(ShareStorage.class);
             ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
             try {
@@ -684,7 +691,7 @@ public class DefaultShareService implements ShareService {
      * cleaning up guest users as needed.
      *
      * @param session The session
-     * @param share The shares
+     * @param shares The shares
      * @return The filtered shares, which may be an empty list if all shares were expired
      */
     private List<Share> removeInaccessible(Session session, List<Share> shares) throws OXException {
@@ -711,7 +718,7 @@ public class DefaultShareService implements ShareService {
      *
      * @param session The session, or <code>null</code> to perform an administrative update
      * @param connectionHelper A (started) connection helper
-     * @param shares The share to remove the associated permissions for
+     * @param shares The shares to remove the associated permissions for
      * @throws OXException
      */
     private void removeTargetPermissions(Session session, ConnectionHelper connectionHelper, List<Share> shares) throws OXException {
@@ -741,7 +748,7 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Gets a guest user for a new share. A new guest user is created if no matching one exists, the permission bits are applied as needed.
-     * In case the guest recipient denotes an already existing, internal user, this user is returned. 
+     * In case the guest recipient denotes an already existing, internal user, this user is returned.
      *
      * @param connection A (writable) connection to the database
      * @param context The context
@@ -754,7 +761,7 @@ public class DefaultShareService implements ShareService {
         UserService userService = services.getService(UserService.class);
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
-             * re-use existing, non-anonymous guest user if possible
+             * re-use existing, non-anonymous guest user from this context if possible
              */
             GuestRecipient guestRecipient = (GuestRecipient) recipient;
             User existingUser = null;
@@ -782,14 +789,18 @@ public class DefaultShareService implements ShareService {
                     /*
                      * guest recipient points to internal user
                      */
-                    LOG.debug("Guest recipient {} points to internal user {} in context {}: {}", 
+                    LOG.debug("Guest recipient {} points to internal user {} in context {}: {}",
                         guestRecipient.getEmailAddress(), existingUser.getLoginInfo(), context.getContextId(), existingUser.getId());
                 }
                 return existingUser;
             }
+        } else if (InternalRecipient.class.isInstance(recipient)) {
+            InternalRecipient internalRecipient = (InternalRecipient) recipient;
+            User user = userService.getUser(internalRecipient.getEntity(), context);
+            return user;
         }
         /*
-         * create new guest user & contact
+         * create new guest user & contact in this context
          */
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
         UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient);

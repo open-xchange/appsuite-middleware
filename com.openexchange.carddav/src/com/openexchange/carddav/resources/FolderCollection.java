@@ -52,14 +52,15 @@ package com.openexchange.carddav.resources;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
-
-
+import java.util.regex.Pattern;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -125,6 +126,17 @@ public class FolderCollection extends CardDAVCollection {
 	public String getDisplayName() throws WebdavProtocolException {
     	Locale locale = this.factory.getUser().getLocale();
     	String name = null != locale ? this.folder.getLocalizedName(locale) : this.folder.getName();
+    	if (PrivateType.getInstance().equals(folder.getType()) && folder.isDefault() && isIOSClient()) {
+    	    UserizedFolder defaultFolder = null;
+    	    try {
+    	        defaultFolder = factory.getState().getDefaultFolder();
+    	        if (null != defaultFolder && defaultFolder.getID().equals(folder.getID())) {
+    	            name = "\u200A" + name;
+    	        }
+    	    } catch (OXException e) {
+    	        LOG.warn("Error getting default folder", e);
+    	    }
+    	}
     	if (SharedType.getInstance().equals(this.folder.getType())) {
     		String ownerName = null;
             for (Permission permission : this.folder.getPermissions()) {
@@ -164,5 +176,16 @@ public class FolderCollection extends CardDAVCollection {
 	public void save() throws WebdavProtocolException {
 		// no
 	}
+
+	/**
+	 * Gets a value indicating whether the request's user agent is assumed to represent an iOS client or not.
+	 *
+	 * @return <code>true</code> if the request originates in an iOS client, <code>false</code>, otherwise
+	 */
+    private boolean isIOSClient() {
+        String userAgent = (String) factory.getSession().getParameter("user-agent");
+        return false == Strings.isEmpty(userAgent) &&
+            Pattern.matches(".*iOS.*dataaccessd.*", userAgent) && false == userAgent.contains("Android");
+    }
 
 }

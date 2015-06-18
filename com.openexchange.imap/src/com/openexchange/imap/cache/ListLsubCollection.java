@@ -2321,7 +2321,7 @@ final class ListLsubCollection implements Serializable {
         if (String.valueOf(separator).equals(fullName)) {
             return ROOT_FULL_NAME;
         }
-        final String upperCase = toUpperCase(fullName);
+        final String upperCase = Strings.toUpperCase(fullName);
         if (INBOX.equals(upperCase)) {
             return INBOX;
         }
@@ -2330,19 +2330,4 @@ final class ListLsubCollection implements Serializable {
         }
         return fullName;
     }
-
-    /** ASCII-wise to upper-case */
-    private static String toUpperCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'a') && (c <= 'z') ? (char) (c & 0x5f) : c);
-        }
-        return builder.toString();
-    }
-
 }

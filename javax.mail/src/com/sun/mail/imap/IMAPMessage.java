@@ -255,7 +255,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		if (ms != null)
 		    modseq = ms.modseq;
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -295,7 +295,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    try {
 		getProtocol().noop();
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		// ignore it
 	    }
@@ -741,7 +741,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 			is = rd.getByteArrayInputStream();
 		}
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -838,7 +838,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 			is = rd.getByteArrayInputStream();
 		}
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -915,7 +915,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 			is = rd.getByteArrayInputStream();
 		}
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1056,7 +1056,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		checkExpunged(); // Insure that this message is not expunged
 		p.storeFlags(getSequenceNumber(), flag, set);
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    }
@@ -1389,7 +1389,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		p.notifyResponseHandlers(r);
 		p.handleResult(r[r.length - 1]);
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1504,7 +1504,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		p.notifyResponseHandlers(r);
 		p.handleResult(r[r.length - 1]);
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1558,7 +1558,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		long uid = getUID();
 		bs = uid < 0 ? p.fetchBodyStructure(getSequenceNumber()) : p.fetchBodyStructure(uid);
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1603,7 +1603,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 			is = rd.getByteArrayInputStream();
 		}
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);
@@ -1638,7 +1638,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		if (flags == null)
 		    flags = new Flags();
 	    } catch (ConnectionException cex) {
-		throw new FolderClosedException(folder, cex.getMessage());
+		throw new FolderClosedException(folder, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		forceCheckExpunged();
 		throw new MessagingException(pex.getMessage(), pex);

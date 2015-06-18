@@ -77,7 +77,7 @@ public class GroupActionFactory implements AJAXActionServiceFactory {
      */
     public GroupActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractGroupAction>(5);
+        actions = new ConcurrentHashMap<String, AbstractGroupAction>(5, 0.9f, 1);
         actions.put("get", new com.openexchange.group.json.actions.GetAction(services));
         actions.put("all", new com.openexchange.group.json.actions.AllAction(services));
         actions.put("list", new com.openexchange.group.json.actions.ListAction(services));

@@ -56,7 +56,6 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.oauth.OAuthHTTPClientFactory;
 import com.openexchange.oauth.OAuthService;
-import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.oauth.json.AbstractOAuthAJAXActionService;
 import com.openexchange.oauth.json.Services;
 import com.openexchange.oauth.json.oauthaccount.actions.AccountActionFactory;
@@ -105,8 +104,6 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
             getService(CapabilityService.class).declareCapability("oauth");
 
             trackService(HostnameService.class);
-            UtilizerRegistry registry = UtilizerRegistry.initInstance(context);
-            track(OAuthUtilizerCreator.class, registry);
 
             openTrackers();
         } catch (final Exception e) {
@@ -129,7 +126,6 @@ public class OAuthJSONActivator extends AJAXModuleActivator {
                 oAuthService.stop();
                 this.oAuthService = null;
             }
-            UtilizerRegistry.freeInstance();
             AbstractOAuthAJAXActionService.setOAuthService(null);
             AbstractOAuthAJAXActionService.PREFIX.set(null);
             Services.setServiceLookup(null);

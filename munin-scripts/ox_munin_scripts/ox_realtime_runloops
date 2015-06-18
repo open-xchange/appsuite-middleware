@@ -1,0 +1,54 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$showruntimestats="/opt/open-xchange/sbin/showruntimestats";
+$showexec="$showruntimestats -R";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    if (-e "/opt/open-xchange/bundles/com.openexchange.realtime.jar") {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title Enqueued Stanzas\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel Number\n";   
+
+    print "text.label text\n";
+    print "text.draw LINE1\n";
+    print "text.type GAUGE\n";
+    print "text.min 0\n";
+    
+    print "spreadsheet.label spreadsheet\n";
+    print "spreadsheet.draw LINE1\n";
+    print "spreadsheet.type GAUGE\n";
+    print "spreadsheet.min 0\n";
+    
+    exit 0
+}
+
+open(SHOWRUNTIME,"$showexec |") || die "can not read monitoring output";
+
+while (<SHOWRUNTIME>) {
+    if ( $_ =~ /RunLoopFillSum,spreadsheet/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "spreadsheet.value $val\n";
+        next;
+    }
+
+    if ( $_ =~ /RunLoopFillSum,text/) {
+        s/.*\=//;
+        $val=$_+0;
+        print "text.value $val\n";
+        next;
+    }
+
+}

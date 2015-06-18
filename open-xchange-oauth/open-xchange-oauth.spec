@@ -121,6 +121,10 @@ if [ ${1:-0} -eq 2 ]; then
             ox_remove_property ${OLDNAMES[$I-1]} $PFILE
         fi
     done
+
+    # SoftwareChange_Request-2532
+    VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
+    ox_set_property com.openexchange.oauth.google.redirectUrl "$VALUE" /opt/open-xchange/etc/googleoauth.properties
 fi
 
 %clean
@@ -148,6 +152,22 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/settings/tumblroauth.properties
 
 %changelog
+* Wed Jun 10 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
+* Wed Jun 10 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
+* Mon May 18 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-26 (2521)
+* Fri May 15 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
+* Thu Apr 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2505)
+* Fri Apr 24 2015 Steffen Templin <marcus.klein@open-xchange.com>
+Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Steffen Templin <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2473)
 * Wed Apr 08 2015 Steffen Templin <marcus.klein@open-xchange.com>

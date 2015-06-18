@@ -86,7 +86,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         super();
         map = new NonBlockingHashMap<Key, ConcurrentMap<Integer, IMAPNotifierTask>>();
         final String notifierFullNames = IMAPProperties.getInstance().getNotifyFullNames();
-        if (isEmpty(notifierFullNames)) {
+        if (com.openexchange.java.Strings.isEmpty(notifierFullNames)) {
             fullNames = null;
         } else {
             fullNames = Pattern.compile(" *, *").split(notifierFullNames);
@@ -135,18 +135,6 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
         }
         task = newtask.addFullNames(fullNames);
         return task.startUp();
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override

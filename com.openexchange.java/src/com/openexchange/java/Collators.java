@@ -110,7 +110,7 @@ public final class Collators {
     /**
      * The collator cache.
      */
-    private static final ConcurrentMap<CollatorKey, Collator> CACHE = new ConcurrentHashMap<CollatorKey, Collator>(24);
+    private static final ConcurrentMap<CollatorKey, Collator> CACHE = new ConcurrentHashMap<CollatorKey, Collator>(24, 0.9f, 1);
 
     /**
      * No instantiation

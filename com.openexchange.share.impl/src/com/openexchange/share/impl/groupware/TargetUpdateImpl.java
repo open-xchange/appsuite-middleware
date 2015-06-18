@@ -170,8 +170,8 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
                 foldersById.put(folder.getID(), folder);
                 proxies.put(folderTarget, proxy);
             } else {
-                VirtualTargetProxy proxy = new VirtualTargetProxy(parameters.getUser(), folderTarget);
-                proxies.put(folderTarget, proxy);
+                int ownedBy = parameters.getUser().getId();
+                proxies.put(folderTarget, new VirtualTargetProxy(ownedBy, folderTarget));
             }
         }
 
@@ -183,7 +183,7 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
     }
 
     private boolean canShareObject(UserizedFolder folder, TargetProxy proxy, ModuleHandler handler) {
-        return handler.canShare(canShareFolder(folder), proxy, parameters);
+        return canShareFolder(folder) ? true : handler.canShare(proxy, parameters);
     }
 
     private UserService getUserService() throws OXException {

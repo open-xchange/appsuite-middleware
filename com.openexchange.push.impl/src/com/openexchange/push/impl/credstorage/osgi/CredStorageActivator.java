@@ -78,13 +78,13 @@ import com.openexchange.push.credstorage.CredentialStorageProvider;
 import com.openexchange.push.impl.credstorage.OSGiCredentialStorageProvider;
 import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.HazelcastCredentialStorage;
-import com.openexchange.push.impl.credstorage.inmemory.HazelcastInstanceNotActiveExceptionHandler;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentialsFactory;
-import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUserFactory;
 import com.openexchange.push.impl.credstorage.rdb.RdbCredentialStorage;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CreateCredStorageTable;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageCreateTableTask;
 import com.openexchange.push.impl.credstorage.rdb.groupware.CredStorageDeleteListener;
+import com.openexchange.push.impl.portable.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.push.impl.portable.PortablePushUserFactory;
 
 
 /**

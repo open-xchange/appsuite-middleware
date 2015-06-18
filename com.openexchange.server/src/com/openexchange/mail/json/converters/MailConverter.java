@@ -552,20 +552,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
         JSONObject jMail;
         try {
-            jMail = MessageWriter.writeMailMessage(
-                mail.getAccountId(),
-                mail,
-                displayMode,
-                embedded,
-                session,
-                usmNoSave,
-                warnings,
-                token,
-                ttlMillis,
-                mimeFilter,
-                timeZone,
-                exactLength,
-                maxContentSize);
+            jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, token, ttlMillis, mimeFilter, timeZone, exactLength, maxContentSize);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();

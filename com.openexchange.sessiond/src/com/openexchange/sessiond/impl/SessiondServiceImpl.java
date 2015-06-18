@@ -212,6 +212,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public List<String> getActiveSessionIDs() {
+        return SessionHandler.getActiveSessionIDs();
+    }
+
+    @Override
     public Session getSessionByAlternativeId(String altId) {
         return getSessionByAlternativeId(altId, false);
     }

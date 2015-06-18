@@ -67,7 +67,7 @@ public class TraceInputStream extends FilterInputStream {
     public TraceInputStream(InputStream in, MailLogger logger) {
 	super(in);
 	this.trace = logger.isLoggable(Level.FINEST);
-	this.traceOut = new LogOutputStream(logger);
+    this.traceOut = this.trace ? new LogOutputStream(logger) : null;
     }
 
     /**

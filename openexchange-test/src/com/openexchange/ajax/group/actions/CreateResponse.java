@@ -51,18 +51,20 @@ package com.openexchange.ajax.group.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.CommonInsertResponse;
+import com.openexchange.group.Group;
 
 /**
- *
+ * Server response when creating a group.
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class CreateResponse extends CommonInsertResponse {
 
-    /**
-     * @param response
-     */
     public CreateResponse(final Response response) {
         super(response);
     }
 
+    public void fillGroup(Group group) {
+        group.setIdentifier(getId());
+        group.setLastModified(getTimestamp());
+    }
 }

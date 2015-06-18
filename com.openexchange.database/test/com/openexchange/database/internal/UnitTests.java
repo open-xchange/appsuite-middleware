@@ -64,7 +64,8 @@ import com.openexchange.database.internal.wrapping.UpdateFlagTest;
 @SuiteClasses({
     JDBC4ConnectionReturnerTest.class,
     UpdateFlagTest.class,
-    ReplicationMonitorTest.class
+    ReplicationMonitorTest.class,
+    GlobalDatabaseServiceImplTest.class
 })
 public class UnitTests {
 

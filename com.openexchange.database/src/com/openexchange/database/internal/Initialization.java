@@ -52,13 +52,14 @@ package com.openexchange.database.internal;
 import static com.openexchange.database.internal.Configuration.Property.CHECK_WRITE_CONS;
 import static com.openexchange.database.internal.Configuration.Property.REPLICATION_MONITOR;
 import static com.openexchange.java.Autoboxing.I;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.internal.reloadable.GenericReloadable;
+import com.openexchange.database.internal.reloadable.GlobalDbConfigsReloadable;
 import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.exception.OXException;
 
@@ -156,8 +157,8 @@ public final class Initialization {
             LOG.warn("Resolving server name to an identifier failed. This is normal until a server has been registered.", e);
         }
         // Global database service
-        Map<String, GlobalDbConfig> globalDbConfigs = GlobalDbInit.init(configurationService, configDatabaseService, pools, monitor);
-        globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, globalDbConfigs, configViewFactory);
+        globalDatabaseService = new GlobalDatabaseServiceImpl(pools, monitor, configurationService, configDatabaseService, configViewFactory);
+        GenericReloadable.getInstance().addReloadable(new GlobalDbConfigsReloadable(globalDatabaseService, migrationService));
         // Schedule pending migrations
         if (null != migrationService) {
             configDatabaseService.scheduleMigrations(migrationService);

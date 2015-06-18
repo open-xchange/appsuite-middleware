@@ -57,7 +57,9 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetPermission;
+import com.openexchange.share.groupware.TargetProxyType;
 
 
 /**
@@ -159,5 +161,10 @@ public class FolderTargetProxy extends AbstractTargetProxy {
             return new DefaultPermission(permission.getEntity(), permission.isGroup(), permission.getBits());
         }
     };
+
+    @Override
+    public TargetProxyType getProxyType() {
+        return DriveTargetProxyType.FOLDER;
+    }
 
 }

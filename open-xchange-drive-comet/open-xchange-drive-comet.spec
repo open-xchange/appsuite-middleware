@@ -1,31 +1,31 @@
 
-Name:           open-xchange-drive-comet
-BuildArch:      noarch
-#!BuildIgnore:  post-build-checks
+Name:          open-xchange-drive-comet
+BuildArch:     noarch
+#!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
-BuildRequires:  ant
+BuildRequires: ant
 %else
-BuildRequires:  ant-nodeps
+BuildRequires: ant-nodeps
 %endif
-BuildRequires:  open-xchange-drive
-BuildRequires:  open-xchange-grizzly
 %if 0%{?rhel_version} && 0%{?rhel_version} == 600
 BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-Version:        @OXVERSION@
-%define         ox_release 0
-Release:        %{ox_release}_<CI_CNT>.<B_CNT>
-Group:          Applications/Productivity
-License:        GPL-2.0
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
-URL:            http://www.open-xchange.com/
-Source:         %{name}_%{version}.orig.tar.bz2
-Summary:        Drive push implementation using Comet and using less system resources
-Autoreqprov:    no
-Requires:       open-xchange-drive >= @OXVERSION@
-Requires:       open-xchange-grizzly >= @OXVERSION@
+BuildRequires: open-xchange-drive
+BuildRequires: open-xchange-grizzly
+Version:       @OXVERSION@
+%define        ox_release 0
+Release:       %{ox_release}_<CI_CNT>.<B_CNT>
+Group:         Applications/Productivity
+License:       GPL-2.0
+BuildRoot:     %{_tmppath}/%{name}-%{version}-build
+URL:           http://www.open-xchange.com/
+Source:        %{name}_%{version}.orig.tar.bz2
+Summary:       Drive push implementation using Comet and using less system resources
+Autoreqprov:   no
+Requires:      open-xchange-drive >= @OXVERSION@
+Requires:      open-xchange-grizzly >= @OXVERSION@
 
 %description
 This package should be installed if a real push implementation for the drive synchronization is wanted. This push implementation uses less
@@ -55,6 +55,22 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2539)
+* Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-26 (2521)
+* Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-15 (2529)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2497)
+* Tue Apr 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2505)
+* Fri Apr 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-09-09 (2495)
 * Tue Apr 14 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2473)
 * Wed Apr 08 2015 Marcus Klein <marcus.klein@open-xchange.com>

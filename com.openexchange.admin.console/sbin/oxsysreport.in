@@ -49,7 +49,7 @@
 #
 
 OXFUNCTIONS=@oxfunctions@
-export PATH="${PATH}:/opt/open-xchange/sbin"
+export PATH="/opt/open-xchange/sbin:${PATH}"
 
 # some defaults
 PATH="${PATH}:/opt/open-xchange/sbin"
@@ -149,7 +149,7 @@ collect_httpd_configs() {
             mkdir -p $(dirname ${_httpd_config_copy})
             cp -a ${dir} ${_httpd_config_copy}
             # Drop dangling links
-            find ${_httpd_config_copy} -type l -xtype l | xargs rm
+            find ${_httpd_config_copy} -type l -xtype l | xargs -r rm
             # Drop all files without name schema '.conf' or which are stored outside
             # <name>-enabled or <name>-available directories
             find ${_httpd_config_copy} -type f | \
@@ -652,6 +652,7 @@ for argument in ${@}; do
         ;;
         --${CREATE_THREAD_DUMP_LONG})
             CREATE_THREAD_DUMP=$(check_argument ${1} ${2})
+            SKIP_RUN_COMMANDS="true"
             NEEDED_TOOLS="kill top ${NEEDED_TOOLS}"
             shift 2
             if [ 'false' == "$(is_ox_running)" ]; then
@@ -660,6 +661,7 @@ for argument in ${@}; do
         ;;
         --${CREATE_HEAP_DUMP_LONG})
             CREATE_HEAP_DUMP=$(check_argument ${1} ${2})
+            SKIP_RUN_COMMANDS="true"
             if [ -f "/opt/open-xchange/sbin/heapdump" -a 'ibm' != "${JAVA_VM_TYPE}" ]; then
                 NEEDED_TOOLS="heapdump tee ${NEEDED_TOOLS}"
             elif [ 'ibm' == "${JAVA_VM_TYPE}" ]; then

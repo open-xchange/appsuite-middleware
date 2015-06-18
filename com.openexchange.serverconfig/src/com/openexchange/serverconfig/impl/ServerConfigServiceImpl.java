@@ -51,17 +51,13 @@ package com.openexchange.serverconfig.impl;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -70,7 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
-import com.openexchange.serverconfig.ServerConfigMatcherService;
+import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.serverconfig.ServerConfigServicesLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -88,45 +84,44 @@ public class ServerConfigServiceImpl implements ServerConfigService {
     private final static String SERVERCONFIG_PREFIX = "com.openexchange.appsuite.serverConfig.";
     private final static String SERVER_PREFIX = "com.openexchange.appsuite.server";
     private final static String[] prefixes = {SERVERCONFIG_PREFIX, SERVER_PREFIX};
-    
-    private ServiceLookup serviceLookup;
-    private ServerConfigServicesLookup serverConfigServicesLookup;
-    
 
+    private final ServiceLookup serviceLookup;
+    private final ServerConfigServicesLookup serverConfigServicesLookup;
+
+    /**
+     * Initializes a new {@link ServerConfigServiceImpl}.
+     */
     public ServerConfigServiceImpl(ServiceLookup serviceLookup, ServerConfigServicesLookup serverConfigServicesLookup) {
         super();
         this.serviceLookup = serviceLookup;
-        this.serverConfigServicesLookup = serverConfigServicesLookup; 
+        this.serverConfigServicesLookup = serverConfigServicesLookup;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public JSONObject getServerConfig(AJAXRequestData requestData, ServerSession session) throws OXException {
-        JSONObject serverConfigurationObject = null;
-        
+    public ServerConfig getServerConfig(String hostName, int userID, int contextID) throws OXException {
         ConfigurationService configService = serviceLookup.getService(ConfigurationService.class);
 
-        
         // The resulting brand/server configuration
         Map<String, Object> serverConfiguration = new HashMap<String, Object>(4);
-        
+
         // Get configured brands/server configurations
         Map<String, Object> configurations = (Map<String, Object>)configService.getYaml("as-config.yml");
         debugOut("as-config.yml", configurations);
-        
+
         Map<String, Object> defaults = (Map<String, Object>) configService.getYaml("as-config-defaults.yml");
         if (defaults != null) {
             serverConfiguration.putAll((Map<String, Object>) defaults.get("default"));
             debugOut("as-config-defaults.yml", defaults);
         }
-        
+
         // Find other applicable brands/server configurations
         if (configurations != null) {
             boolean empty = true;
             LinkedList<Map<String, Object>> applicableConfigs = new LinkedList<Map<String,Object>>();
             for (Map.Entry<String, Object> configEntry : configurations.entrySet()) {
                 Map<String, Object> possibleConfiguration = (Map<String, Object>) configEntry.getValue();
-                if (looksApplicable(possibleConfiguration, requestData, session)) {
+                if (looksApplicable(possibleConfiguration, hostName)) {
                     // ensure that "all"-host-wildcards are applied first
                     if ("all".equals(possibleConfiguration.get("host"))) {
                         applicableConfigs.addFirst(possibleConfiguration);
@@ -144,29 +139,24 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
 
-       
+
             /*
              * Add key/value pairs that start with SERVER_PREFIX or SERVERCONFIG_PREFIX to the serverconfig. The mentioned prefix is
-             * stripped from resulting name and entries are only added if the session is not anonymous.   
+             * stripped from resulting name and entries are only added if the session is not anonymous.
              */
             Map<String, Object> ccValues = new HashMap<String, Object>();
             ConfigView configView = null;
             ConfigViewFactory configViewFactory = serviceLookup.getService(ConfigViewFactory.class);
-            if (session.isAnonymous()) {
-                configView = configViewFactory.getView();
-            } else {
-                configView = configViewFactory.getView(session.getUserId(), session.getContextId());
-                
-            }
+            configView = configViewFactory.getView(userID, contextID);
 
             Map<String, ComposedConfigProperty<String>> allProperties = configView.all();
             for(Map.Entry<String, ComposedConfigProperty<String>> entry: allProperties.entrySet()) {
-                
+
                 String propName = entry.getKey();
                 for (String prefix : prefixes) {
                     if(propName.startsWith(prefix)) {
                         String value = entry.getValue().get();
-                        //Allow to keep value from global config if specified as "<as-config>" 
+                        //Allow to keep value from global config if specified as "<as-config>"
                         if (!value.equals("<as-config>")) {
                             ccValues.put(propName.substring(prefix.length()), value);
                         }
@@ -174,23 +164,23 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                 }
             }
             applicableConfigs.add(ccValues);
-            
+
             if (!empty) {
                 for (Map<String, Object> config : applicableConfigs) {
                     serverConfiguration.putAll(config);
                 }
             }
         }
-        
-        try {
-            serverConfigurationObject = (JSONObject) JSONCoercion.coerceToJSON(serverConfiguration);
-            addComputedValues(serverConfigurationObject, requestData, session);
-        } catch (JSONException e) {
-            // TODO proper OXExceptionCode
-            throw OXException.general("Error while adding computed values to server configuration", e);
+
+        /*
+         * Add computed values after configview values
+         */
+        for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
+            computed.addValue(serverConfiguration, hostName, userID, contextID);
         }
-        
-        return serverConfigurationObject;
+
+        ServerConfigImpl serverConfigImpl = new ServerConfigImpl(serverConfiguration, serverConfigServicesLookup.getClientFilters());
+        return serverConfigImpl;
     }
 
     /**
@@ -198,21 +188,20 @@ public class ServerConfigServiceImpl implements ServerConfigService {
      * should be used for an incoming request. If either of these matches the host given in the {@link AJAXRequestData} the configuration
      * objects looks applicable to us.
      * This check can additionally be expanded by your own {@link ServerConfigMatcherServices} that might apply other criteria to decide if
-     * a configuration object is applicable for the combination of {@link AJAXRequestData} and {@link ServerSession}. 
-     * 
+     * a configuration object is applicable for the combination of {@link AJAXRequestData} and {@link ServerSession}.
+     *
      * @param possibleConfiguration A possible configuration Object that should be checked
      * @param requestData The current request data
      * @param session The current session
      * @return true if the configuration object should be applied, false otherwise
-     * @throws OXException
      */
-    protected boolean looksApplicable(Map<String, Object> possibleConfiguration, AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected boolean looksApplicable(Map<String, Object> possibleConfiguration, String hostName) {
         if (possibleConfiguration == null) {
             return false;
         }
 
         // We need a hostname for the host and hostRegex check
-        if ( (requestData != null) && (!Strings.isEmpty(requestData.getHostname())) ) {
+        if ( !Strings.isEmpty(hostName) ) {
 
             // Check "host"
             {
@@ -222,7 +211,6 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                         return true;
                     }
 
-                    final String hostName = requestData.getHostname();
                     if (host.equals(hostName)) {
                         return true;
                     }
@@ -240,7 +228,6 @@ public class ServerConfigServiceImpl implements ServerConfigService {
                     try {
                         final Pattern pattern = Pattern.compile(hostRegex);
 
-                        final String hostName = requestData.getHostname();
                         if (pattern.matcher(hostName).find()) {
                             return true;
                         }
@@ -255,23 +242,7 @@ public class ServerConfigServiceImpl implements ServerConfigService {
             }
         }
 
-        // Check by matchers, might not depend on a hostname
-        {
-            final List<ServerConfigMatcherService> matchers = serverConfigServicesLookup.getMatchers();
-            for (final ServerConfigMatcherService matcher : matchers) {
-                if (matcher.looksApplicable(possibleConfiguration, requestData, session)) {
-                    return true;
-                }
-            }
-        }
-
         return false;
-    }
-
-    private void addComputedValues(JSONObject serverconfig, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        for (ComputedServerConfigValueService computed : serverConfigServicesLookup.getComputed()) {
-            computed.addValue(serverconfig, requestData, session);
-        }
     }
 
     // ---------------------------------------------------- DEBUG STUFF --------------------------------------------------------------- //

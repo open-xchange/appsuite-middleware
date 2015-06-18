@@ -2786,7 +2786,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
             }
         }
-        m.put(f.getFullName().replaceFirst(quoteReplacement(oldFullName), quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
+        m.put(f.getFullName().replaceFirst(Pattern.quote(oldFullName), quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
     }
 
     private void setFolderSubscription(final IMAPFolder f, final boolean subscribed) throws MessagingException {

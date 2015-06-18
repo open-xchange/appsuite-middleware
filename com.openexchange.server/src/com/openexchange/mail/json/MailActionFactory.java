@@ -53,6 +53,7 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXState;
@@ -104,6 +105,38 @@ import com.openexchange.server.ServiceLookup;
 @Module(name = "mail", description = "Used to access mail data. When mails are stored on an IMAP server, some functionality is not available due to restrictions of the IMAP protocol. Such functionality is marked with \"not IMAP\".")
 public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHandler, MailActionConstants {
 
+    private static final AtomicReference<MailActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailActionFactory>();
+
+    /**
+     * Gets the action factory
+     *
+     * @return The action factory or <code>null</code>
+     */
+    public static MailActionFactory getActionFactory() {
+        return INSTANCE_REFERENCE.get();
+    }
+
+    /**
+     * Initializes the action factory instance
+     *
+     * @param services The service look-up
+     * @return The initialized instance
+     */
+    public static MailActionFactory initializeActionFactory(ServiceLookup services) {
+        MailActionFactory actionFactory = new MailActionFactory(services);
+        INSTANCE_REFERENCE.set(actionFactory);
+        return actionFactory;
+    }
+
+    /**
+     * Releases the action factory instance.
+     */
+    public static void releaseActionFactory() {
+        INSTANCE_REFERENCE.set(null);
+    }
+
+    // ----------------------------------------------------------------------------------------------
+
     private final Map<String, AbstractMailAction> actions;
 
     /**
@@ -111,9 +144,9 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
      *
      * @param services The service look-up
      */
-    public MailActionFactory(final ServiceLookup services) {
+    private MailActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractMailAction>(32);
+        actions = new ConcurrentHashMap<String, AbstractMailAction>(32, 0.9f, 1);
         actions.put("all", new AllAction(services));
         actions.put("threadedAll", new SimpleThreadStructureAction(services));
         actions.put("get", new GetAction(services));

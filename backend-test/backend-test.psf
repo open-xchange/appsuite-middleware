@@ -15,6 +15,8 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.configread"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.config.cascade.context"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.storage.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.storage.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.crypto"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.database"/>
@@ -47,6 +49,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.oauth.provider.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.passwordchange.servlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.publish.json"/>

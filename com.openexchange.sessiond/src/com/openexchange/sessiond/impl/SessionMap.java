@@ -319,6 +319,23 @@ public final class SessionMap {
         }
     }
 
+    /**
+     * Returns a {@link Collection} view of the session identifiers contained in this map.
+     * <p>
+     * The collection is <b>NOT</b> backed by the map.
+     *
+     * @return The {@link Collection} view of the sessions identifiers contained in this map
+     */
+    public ArrayList<String> keys() {
+        final Lock rlock = rwLock.readLock();
+        rlock.lock();
+        try {
+            return new ArrayList<String>(sessionIdMap.keySet());
+        } finally {
+            rlock.unlock();
+        }
+    }
+
     // -------------------------------------------------------------------------------
 
     private static <K, V> V putIfAbsent(final K key, final V value, final Map<K, V> map) {

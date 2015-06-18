@@ -54,7 +54,6 @@ import java.io.Serializable;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -73,13 +72,9 @@ import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageAccountManagerProvider;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.file.storage.googledrive.osgi.Services;
-import com.openexchange.oauth.API;
-import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthAccountDeleteListener;
-import com.openexchange.oauth.OAuthUtilizerCreator;
 import com.openexchange.session.Session;
 
 /**
@@ -87,7 +82,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class GoogleDriveFileStorageService implements AccountAware, OAuthUtilizerCreator, OAuthAccountDeleteListener {
+public final class GoogleDriveFileStorageService implements AccountAware, OAuthAccountDeleteListener {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GoogleDriveFileStorageService.class);
 
@@ -207,41 +202,6 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthU
         }
     }
 
-    @Override
-    public API getApplicableApi() {
-        return API.GOOGLE;
-    }
-
-    @Override
-    public String createUtilizer(OAuthAccount oauthAccount, Session session) throws OXException {
-        if (false == API.GOOGLE.equals(oauthAccount.getAPI())) {
-            return null;
-        }
-
-        if (false == getAccounts0(session, false).isEmpty()) {
-            return null;
-        }
-
-        // Acquire account manager
-        FileStorageAccountManager accountManager = getAccountManager();
-
-        // Create file storage account instance
-        DefaultFileStorageAccount fileStorageAccount = new DefaultFileStorageAccount();
-        fileStorageAccount.setDisplayName("Google Drive");
-        fileStorageAccount.setFileStorageService(this);
-        fileStorageAccount.setServiceId(SERVICE_ID);
-
-        // Set its configuration
-        Map<String, Object> configuration = new HashMap<String, Object>(2);
-        configuration.put("account", Integer.toString(oauthAccount.getId()));
-        fileStorageAccount.setConfiguration(configuration);
-
-        // Add that account
-        String accountId = accountManager.addAccount(fileStorageAccount, session);
-        LOG.info("Created Google Drive account with ID {} for user {} in context {}", accountId, session.getUserId(), session.getContextId());
-        return accountId;
-    }
-
     // --------------------------------------------------------------------------------------------------------------------------------- //
 
     @Override
@@ -356,7 +316,7 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthU
             this.password = password;
             this.userId = userId;
             this.contextId = contextId;
-            parameters = new ConcurrentHashMap<String, Object>(8);
+            parameters = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
         }
 
         @Override

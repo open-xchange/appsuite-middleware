@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.json.action.AbstractDriveAction;
 import com.openexchange.drive.json.internal.Services;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -83,7 +84,11 @@ public abstract class AbstractDriveShareAction extends AbstractDriveAction {
         }
     }
 
-    protected String determineHostname(AJAXRequestData requestData) {
+    protected String determineHostname(ServerSession session, AJAXRequestData requestData) {
+        HostnameService hostNameService = Services.getOptionalService(HostnameService.class);
+        if(hostNameService != null) {
+            return hostNameService.getHostname(session.getUserId(), session.getContextId());
+        }
         HttpServletRequest servletRequest = requestData.optHttpServletRequest();
         if (null != servletRequest) {
             return servletRequest.getServerName();

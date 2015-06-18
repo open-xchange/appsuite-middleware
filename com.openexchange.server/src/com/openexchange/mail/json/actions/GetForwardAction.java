@@ -70,6 +70,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -163,6 +164,9 @@ public final class GetForwardAction extends AbstractMailAction {
              * Read in parameters
              */
             int length = paths.length();
+            if (length <= 0) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
             List<MailPath> forwardFors = new LinkedList<MailPath>();
             String[] folders = new String[length];
             String[] ids = new String[length];

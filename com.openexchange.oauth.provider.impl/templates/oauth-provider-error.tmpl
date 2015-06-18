@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="${lang}">
+  <head>
+    <meta charset="utf-8">
+    <title>${title?html}</title>
+  </head>
+  <body>
+    <div id="main">
+      <h1 id="headline">${headline?html}</h1>
+      <span id="message">${message?html}</span>
+      <details id ="details">
+        <summary>${detailsSummary?html}</summary>
+        <p>${detailsText?html}</p>
+      </details>
+    </div>
+    <div id="escape">
+      <button type="button" onclick="window.close();">${close?html}</button>
+    </div>
+  </body>
+</html>

@@ -72,7 +72,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
         apiKey, apiSecret, consumerKey, consumerSecret, redirectUrl
     };
 
-    private Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
+    private final Map<OAuthPropertyID, OAuthConfigurationProperty> properties;
 
     protected String id;
     protected String displayName;
@@ -84,12 +84,12 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
      */
     protected AbstractOAuthServiceMetaData() {
         super();
-        properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length);
+        properties = new ConcurrentHashMap<OAuthPropertyID, OAuthConfigurationProperty>(OAuthPropertyID.values().length, 0.9f, 1);
     }
 
     /**
      * Add an OAuthProperty
-     * 
+     *
      * @param prop The property's name
      * @param value The property's value
      */
@@ -99,7 +99,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Get the specified OAuthProperty
-     * 
+     *
      * @param prop The property's name
      * @return The property's value or null
      */
@@ -109,7 +109,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Get the configuration properties' names
-     * 
+     *
      * @return The configuration properties' names
      */
     protected String[] getConfigurationPropertyNames() {
@@ -158,7 +158,7 @@ public abstract class AbstractOAuthServiceMetaData implements OAuthServiceMetaDa
 
     /**
      * Get the OAuthProperty from the ConfigViewFactory
-     * 
+     *
      * @param session The session
      * @param propertyId The property identifier
      * @return The property's value

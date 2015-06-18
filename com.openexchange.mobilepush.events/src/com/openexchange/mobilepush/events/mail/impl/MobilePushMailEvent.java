@@ -50,12 +50,10 @@
 package com.openexchange.mobilepush.events.mail.impl;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import com.openexchange.mobilepush.MobilePushProviders;
 import com.openexchange.mobilepush.events.MobilePushEvent;
-import com.openexchange.mobilepush.events.storage.ContextUsers;
 
 /**
  * {@link MobilePushMailEvent}
@@ -64,11 +62,9 @@ import com.openexchange.mobilepush.events.storage.ContextUsers;
  */
 public class MobilePushMailEvent implements MobilePushEvent {
 
-    private int userId;
+    private final int userId;
 
-    private int contextId;
-
-    private List<ContextUsers> contextUsers;
+    private final int contextId;
 
     private final Map<String, Object> messageData;
 
@@ -84,17 +80,6 @@ public class MobilePushMailEvent implements MobilePushEvent {
         this.userId = userId;
         this.contextId = contextId;
         this.messageData = messageData;
-    }
-
-    /**
-     * Initializes a new {@link MobilePushMailEvent}.
-     *
-     * A list of context / userIds for providing the event to several users
-     */
-    public MobilePushMailEvent(List<ContextUsers> contextUsers, Map<String, Object> additionalData) {
-        super();
-        this.contextUsers = contextUsers;
-        this.messageData = additionalData;
     }
 
     @Override
@@ -115,11 +100,6 @@ public class MobilePushMailEvent implements MobilePushEvent {
     @Override
     public MobilePushProviders getProvider() {
         return PROVIDER;
-    }
-
-    @Override
-    public List<ContextUsers> getContextUsers() {
-        return contextUsers;
     }
 
     @Override
@@ -146,7 +126,7 @@ public class MobilePushMailEvent implements MobilePushEvent {
                 sb.append(',').append(' ');
             }
         }
-        return "MobilePushMailEvent [userId=" + userId + ", contextId=" + contextId + ", contextUsers=" + contextUsers + ", "
+        return "MobilePushMailEvent [userId=" + userId + ", contextId=" + contextId + ", "
             + "messageData=" + sb.toString() + "]";
     }
 }

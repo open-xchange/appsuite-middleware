@@ -50,6 +50,7 @@
 package com.openexchange.ajax.framework;
 
 import java.io.IOException;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.json.JSONException;
@@ -73,9 +74,14 @@ public abstract class CustomizedParser<T extends AbstractAJAXResponse> extends A
 
     @Override
     public String checkResponse(HttpResponse resp) throws ParseException, IOException {
+        return checkResponse(resp, null);
+    }
+
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException, IOException {
         String checkCustom = checkCustom(resp);
         if (checkCustom == null) {
-            return delegate.checkResponse(resp);
+            return delegate.checkResponse(resp, request);
         }
 
         return checkCustom;

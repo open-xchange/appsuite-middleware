@@ -50,7 +50,7 @@ package com.sun.mail.imap;
  *
  * @since JavaMail 1.4.4
  */
-public final class SortTerm {
+public class SortTerm {
     /**
      * Sort by message arrival date and time.
      */
@@ -93,12 +93,23 @@ public final class SortTerm {
      */
     public static final SortTerm TO = new SortTerm("TO");
 
-    private String term;
-    private SortTerm(String term) {
-	this.term = term;
+    private final String term;
+
+    /**
+     * Creates a new sort term
+     *
+     * @param term The term's upper-case string representation
+     * @throws NullPointerException If string representation is <code>null</code>
+     */
+    public SortTerm(String term) {
+        super();
+        if (null == term) {
+            throw new NullPointerException("Term is null.");
+        }
+        this.term = term;
     }
 
     public String toString() {
-	return term;
+        return term;
     }
 }

@@ -688,7 +688,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
-                headerFields.remove(toLowerCase(name));
+                headerFields.remove(Strings.toLowerCase(name));
                 {
                     final HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
@@ -981,7 +981,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     for (Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
                         String name = names.nextElement().toString();
                         String value = cParams.get(name);
-                        if (!isEmpty(value)) {
+                        if (!com.openexchange.java.Strings.isEmpty(value)) {
                             try {
                                 contentType.setParameterErrorAware(name, MimeMessageUtility.decodeEnvelopeHeader(value));
                             } catch (OXException e) {
@@ -1327,18 +1327,4 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         return null;
     }
-
-    /** Check for an empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

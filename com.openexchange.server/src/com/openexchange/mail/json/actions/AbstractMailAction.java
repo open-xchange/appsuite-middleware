@@ -423,7 +423,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     protected static int[] prepareColumns(int[] columns) {
         int[] fields = columns;
 
-        EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(MailField.getFields(fields)));
+        EnumSet<MailField> set = EnumSet.copyOf(Arrays.asList(MailField.getMatchingFields(fields)));
         if (set.contains(MailField.ORIGINAL_FOLDER_ID) && !set.contains(MailField.FOLDER_ID)) {
             int[] tmp = fields;
             fields = new int[tmp.length + 1];

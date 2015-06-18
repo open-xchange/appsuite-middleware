@@ -7,22 +7,6 @@ CREATE TABLE configdb_sequence (
 
 INSERT INTO configdb_sequence VALUES (0);
 
-DROP PROCEDURE IF EXISTS get_configdb_id;
-DELIMITER //
-CREATE PROCEDURE get_configdb_id() NOT DETERMINISTIC MODIFIES SQL DATA
-BEGIN
-    DECLARE identifier INT4 UNSIGNED;
-    SET identifier = 0;
-    SELECT id INTO identifier FROM configdb_sequence FOR UPDATE;
-    IF 0 = identifier THEN
-        INSERT INTO configdb_sequence (id) VALUES (identifier);
-    END IF;
-    SET identifier = identifier + 1;
-    UPDATE configdb_sequence SET id = identifier;
-    SELECT identifier;
-END//
-DELIMITER ;
-
 CREATE TABLE db_pool (
     db_pool_id INT4 UNSIGNED NOT NULL,
     url VARCHAR(255) NOT NULL,

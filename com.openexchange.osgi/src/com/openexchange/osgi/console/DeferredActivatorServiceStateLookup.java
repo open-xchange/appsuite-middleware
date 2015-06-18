@@ -68,7 +68,7 @@ public class DeferredActivatorServiceStateLookup implements ServiceStateLookup {
      */
     public DeferredActivatorServiceStateLookup() {
         super();
-        states = new ConcurrentHashMap<String, ServiceStateImpl>(128);
+        states = new ConcurrentHashMap<String, ServiceStateImpl>(128, 0.9f, 1);
     }
 
     /**

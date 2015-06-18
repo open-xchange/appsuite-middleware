@@ -50,7 +50,6 @@
 package com.openexchange.realtime;
 
 import javax.annotation.concurrent.NotThreadSafe;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -66,7 +65,7 @@ public @NotThreadSafe interface ComponentHandle {
     /**
      * Process the stanza that was received for this handle.
      */
-    void process(Stanza stanza) throws OXException;
+    void process(Stanza stanza);
 
     /**
      * Should this stanza be handled in the global thread. This should generally return false. Have this return

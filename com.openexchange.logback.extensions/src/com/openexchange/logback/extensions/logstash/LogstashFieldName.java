@@ -55,7 +55,7 @@ package com.openexchange.logback.extensions.logstash;
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum LogstashFieldName {
-    timestamp, version("@version"), message, threadName, loggerName, level, stacktrace, marker;
+    timestamp("@timestamp"), version("@version"), message, thread, logger, level, stacktrace, marker, line, clazz("class");
 
     private final String logstashName;
 

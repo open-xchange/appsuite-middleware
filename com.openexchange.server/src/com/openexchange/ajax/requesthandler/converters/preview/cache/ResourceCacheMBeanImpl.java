@@ -169,7 +169,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
             final Set<String> invalidsSet = new HashSet<String>(Arrays.asList("application/force-download", "application/x-download", "application/$suffix"));
             if (!com.openexchange.java.Strings.isEmpty(invalids)) {
                 for (final String invalid : invalids.split(" *, *")) {
-                    invalidsSet.add(toLowerCase(invalid.trim()));
+                    invalidsSet.add(com.openexchange.java.Strings.toLowerCase(invalid.trim()));
                 }
             }
 
@@ -280,7 +280,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
                     String mimeType = rs.getString(3);
                     if (!com.openexchange.java.Strings.isEmpty(mimeType)) {
                         final String contentTypeByFileName = MimeType2ExtMap.getContentType(fileName);
-                        if (invalidsSet.contains(toLowerCase(mimeType)) || (!defaultMimeType.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName))) {
+                        if (invalidsSet.contains(com.openexchange.java.Strings.toLowerCase(mimeType)) || (!defaultMimeType.equals(contentTypeByFileName) && !equalPrimaryTypes(mimeType, contentTypeByFileName))) {
                             tuples.add(new Tuple(contentTypeByFileName, rs));
                         }
                     }
@@ -320,20 +320,6 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
         }
     }
 
-    /** ASCII-wise to lower-case */
-    private String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
     private String getPrimaryType(final String contentType) {
         if (com.openexchange.java.Strings.isEmpty(contentType)) {
             return contentType;
@@ -346,7 +332,7 @@ public final class ResourceCacheMBeanImpl extends StandardMBean implements Resou
         if (null == contentType1 || null == contentType2) {
             return false;
         }
-        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+        return com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType2)));
     }
 
 }

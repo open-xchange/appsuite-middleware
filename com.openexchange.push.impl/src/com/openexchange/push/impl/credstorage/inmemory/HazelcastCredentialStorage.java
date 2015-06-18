@@ -65,7 +65,8 @@ import com.openexchange.push.credstorage.Credentials;
 import com.openexchange.push.credstorage.DefaultCredentials;
 import com.openexchange.push.impl.credstorage.Obfuscator;
 import com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials;
-import com.openexchange.push.impl.credstorage.inmemory.portable.PortablePushUser;
+import com.openexchange.push.impl.portable.HazelcastInstanceNotActiveExceptionHandler;
+import com.openexchange.push.impl.portable.PortablePushUser;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -96,7 +97,7 @@ public class HazelcastCredentialStorage implements CredentialStorage {
         this.obfuscator = obfuscator;
         this.services = services;
         this.notActiveExceptionHandler = notActiveExceptionHandler;
-        sources = new ConcurrentHashMap<PushUser, Credentials>(256);
+        sources = new ConcurrentHashMap<PushUser, Credentials>(256, 0.9f, 1);
     }
 
     private void handleNotActiveException(HazelcastInstanceNotActiveException e) {

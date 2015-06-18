@@ -195,7 +195,7 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public int getVersion() {
         final String version = file.getVersion();
-        return isEmpty(version) ? -1 : Integer.parseInt(version);
+        return com.openexchange.java.Strings.isEmpty(version) ? -1 : Integer.parseInt(version);
     }
 
     @Override
@@ -346,18 +346,6 @@ public class FileMetadata implements DocumentMetadata {
     @Override
     public void setShareable(boolean shareable) {
         file.setShareable(shareable);
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**

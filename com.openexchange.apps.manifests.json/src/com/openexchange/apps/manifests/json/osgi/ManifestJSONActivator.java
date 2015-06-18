@@ -52,18 +52,19 @@ package com.openexchange.apps.manifests.json.osgi;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.util.Map;
 import org.json.JSONArray;
-import org.osgi.framework.BundleContext;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.apps.manifests.json.ManifestActionFactory;
-import com.openexchange.apps.manifests.json.values.Manifests;
+import com.openexchange.apps.manifests.json.ManifestBuilder;
 import com.openexchange.apps.manifests.json.values.UIVersion;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.config.ForcedReloadable;
+import com.openexchange.config.Reloadable;
+import com.openexchange.conversion.simple.SimpleConverter;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.userconfiguration.osgi.PermissionRelevantServiceAddedTracker;
 import com.openexchange.java.Streams;
-import com.openexchange.osgi.NearRegistryServiceTracker;
 import com.openexchange.passwordchange.PasswordChangeService;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -74,9 +75,11 @@ import com.openexchange.serverconfig.ServerConfigService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
-public class ManifestJSONActivator extends AJAXModuleActivator {
+public class ManifestJSONActivator extends AJAXModuleActivator implements ForcedReloadable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestJSONActivator.class);
+
+    private volatile ManifestBuilder manifestBuilder;
 
     /**
      * Initializes a new {@link ManifestJSONActivator}.
@@ -84,7 +87,7 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
     public ManifestJSONActivator() {
         super();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -98,11 +101,12 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
      */
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[]{ConfigurationService.class, ServerConfigService.class};
+        return new Class<?>[] { ConfigurationService.class, ServerConfigService.class, SimpleConverter.class };
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        this.manifestBuilder = null;
         UIVersion.UIVERSION.set("");
         super.stopBundle();
     }
@@ -115,32 +119,34 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
         // Add tracker to identify if a PasswordChangeService was registered. If so, add to PermissionAvailabilityService
         rememberTracker(new PermissionRelevantServiceAddedTracker<PasswordChangeService>(context, PasswordChangeService.class));
 
-        //Read manifests from files
-        JSONArray readManifests = readManifests();
+        // Read manifests from files
+        JSONArray initialManifests = readManifests(getService(ConfigurationService.class));
 
-        //And track ManifestContributors
-        final NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker = new NearRegistryServiceTracker<ManifestContributor>(
-            context,
-            ManifestContributor.class
-        );
-        rememberTracker(manifestContributorTracker);
+        // And track ManifestContributors
+        ManifestContributorTracker manifestContributors = new ManifestContributorTracker(context);
+        rememberTracker(manifestContributors);
+        trackService(HostnameService.class);
         openTrackers();
 
-        //Enhance computed server config by adding UIVersion and Manifests to it
+        // Enhance computed server configuration by adding UIVersion
         UIVersion.UIVERSION.set(context.getBundle().getVersion().toString());
         registerService(ComputedServerConfigValueService.class, new UIVersion());
-        registerService(ComputedServerConfigValueService.class, new Manifests(readManifests, manifestContributorTracker));
 
-        registerModule(new ManifestActionFactory(this, readManifests, manifestContributorTracker), "apps/manifests");
+        // Register as Reloadable
+        registerService(Reloadable.class, this);
+
+        ManifestBuilder manifestBuilder = new ManifestBuilder(initialManifests, manifestContributors);
+        this.manifestBuilder = manifestBuilder;
+        manifestContributors.setManifestBuilder(manifestBuilder);
+        registerModule(new ManifestActionFactory(this, manifestBuilder), "apps/manifests");
     }
-    
-    private JSONArray readManifests() {
+
+    private JSONArray readManifests(ConfigurationService configService) {
         String[] paths;
         {
-            final ConfigurationService conf = getService(ConfigurationService.class);
-            String property = conf.getProperty("com.openexchange.apps.manifestPath");
+            String property = configService.getProperty("com.openexchange.apps.manifestPath");
             if (null == property) {
-                property = conf.getProperty("com.openexchange.apps.path");
+                property = configService.getProperty("com.openexchange.apps.path");
                 if (null == property) {
                     return new JSONArray(0);
                 }
@@ -153,33 +159,51 @@ public class ManifestJSONActivator extends AJAXModuleActivator {
             }
         }
 
-        final JSONArray array = new JSONArray(paths.length << 1);
-        for (final String path : paths) {
-            final File file = new File(path);
+        JSONArray manifests = new JSONArray(paths.length << 1);
+        for (String path : paths) {
+            File file = new File(path);
             if (file.exists()) {
-                for (final File f : file.listFiles()) {
-                    read(f, array);
+                for (File f : file.listFiles()) {
+                    read(f, manifests);
                 }
             }
         }
 
-        return array;
+        return manifests;
     }
 
-    private void read(File f, JSONArray array) {
+    private void read(File f, JSONArray manifests) {
         BufferedReader r = null;
         try {
             r = new BufferedReader(new FileReader(f));
-            final JSONArray fileContent = new JSONArray(r);
-            final int length = fileContent.length();
-            for (int i = 0, size = length; i < size; i++) {
-                array.put(fileContent.get(i));
+            JSONArray fileManifests = new JSONArray(r);
+            for (int i = 0, size = fileManifests.length(); i < size; i++) {
+                manifests.put(fileManifests.get(i));
             }
         } catch (Exception e) {
             LOG.error("", e);
         } finally {
             Streams.close(r);
         }
+    }
+
+    // --------------------------------------------------------------------------------------------------
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        ManifestBuilder manifestBuilder = this.manifestBuilder;
+        if (null != manifestBuilder) {
+            // Read manifests from files
+            JSONArray initialManifests = readManifests(configService);
+
+            // Reinitialize manifests builder
+            manifestBuilder.reinitialize(initialManifests);
+        }
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return null;
     }
 
 }

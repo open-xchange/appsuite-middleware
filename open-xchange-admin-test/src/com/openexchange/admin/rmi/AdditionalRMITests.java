@@ -194,6 +194,18 @@ public class AdditionalRMITests extends AbstractRMITest {
         assertIDsAreEqual(allUsers, queriedUsers);
     }
 
+    @Test
+    public void testGetDisplayNames() throws Exception {
+        final Credentials credentials = DummyCredentials();
+        User[] allUsers = ui.listAll(context, credentials);
+
+        User[] queriedUsers = ui.getData(context, allUsers, credentials);
+        assertIDsAreEqual(allUsers, queriedUsers);
+
+        String[] displayNames = ui.getDisplayNames(context, allUsers, credentials);
+        assertDisplayNamesAreEqual(queriedUsers, displayNames);
+    }
+
     /*
      * Gets all groups and checks whether our test user is in one ore more
      */

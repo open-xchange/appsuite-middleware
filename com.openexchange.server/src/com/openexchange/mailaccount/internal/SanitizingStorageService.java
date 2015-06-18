@@ -99,6 +99,19 @@ final class SanitizingStorageService implements MailAccountStorageService {
     }
 
     @Override
+    public MailAccount getRawMailAccount(int id, int userId, int cid) throws OXException {
+        try {
+            return storageService.getRawMailAccount(id, userId, cid);
+        } catch (final OXException e) {
+            if (!isURIError(e)) {
+                throw e;
+            }
+            Sanitizer.sanitize(userId, cid, storageService);
+            return storageService.getRawMailAccount(id, userId, cid);
+        }
+    }
+
+    @Override
     public MailAccount getMailAccount(final int id, final int user, final int cid) throws OXException {
         try {
             return storageService.getMailAccount(id, user, cid);
@@ -193,6 +206,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int user, int cid) throws OXException {
         storageService.setFullNamesForMailAccount(id, indexes, fullNames, user, cid);
+    }
+
+    @Override
+    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        storageService.setNamesForMailAccount(id, indexes, names, userId, contextId);
     }
 
     @Override

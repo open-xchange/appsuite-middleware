@@ -93,7 +93,7 @@ import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.conversion.InlineImageDataSource;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
@@ -156,6 +156,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     private static final String VIRTUAL = "___VIRTUAL___";
     private static final String MULTIPART_ID = "___MP-ID___";
+
+    private static final int MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -246,8 +248,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private boolean includePlainText;
     private boolean exactLength;
     private final int maxContentSize;
-    private boolean doDeepParseForNestedMessage = true;
-
+    /**
+     * Defines the current level of mail message nesting (of a maximum of 10)
+     */
+    private int currentNestingLevel = 0;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -449,7 +453,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
                 token.setAccessInfo(accountId, session);
                 token.setAttachmentInfo(tokenFolder, tokenMailId, attachmentId);
-                AttachmentTokenRegistry.getInstance().putToken(token, session);
+                AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
+                service.putToken(token, session);
                 final JSONObject attachmentObject = new JSONObject(2);
                 attachmentObject.put("id", token.getId());
                 attachmentObject.put("jsessionid", token.getJSessionId());
@@ -1074,7 +1079,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         final String keyContent = CONTENT;
                         final String keySize = SIZE;
                         boolean b = true;
-                        for (int i = len-1; b && i >= 0; i--) {
+                        for (int i = len - 1; b && i >= 0; i--) {
                             final JSONObject jObject = attachments.getJSONObject(i);
                             if (jObject.getString(keyContentType).startsWith("text/plain") && jObject.hasAndNotNull(keyContent)) {
                                 final String newContent = jObject.getString(keyContent) + sanitizeResult.getContent();
@@ -1255,7 +1260,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         ThresholdFileHolder backup = null;
         try {
             JSONObject nestedObject;
-            if (doDeepParseForNestedMessage) {
+            if (currentNestingLevel < MAX_NESTED_MESSAGES_LEVELS) {
                 MailMessage nestedMail;
                 {
                     Object content = mailPart.getContent();
@@ -1298,7 +1303,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.tokenFolder = tokenFolder;
                 msgHandler.tokenMailId = tokenMailId;
                 msgHandler.exactLength = exactLength;
-                msgHandler.doDeepParseForNestedMessage = false;
+                msgHandler.currentNestingLevel++;
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
             } else {
@@ -1640,21 +1645,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     }
 
     private boolean hasNoImage(final String htmlContent) {
-        return null == htmlContent || (toLowerCase(htmlContent).indexOf("<img ") < 0);
+        return null == htmlContent || (com.openexchange.java.Strings.toLowerCase(htmlContent).indexOf("<img ") < 0);
     }
-
-    /** ASCII-wise to lower-case */
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

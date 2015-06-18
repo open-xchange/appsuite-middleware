@@ -188,7 +188,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> list(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final com.openexchange.admin.rmi.dataobjects.User[] list = iface.list(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             if (null == list) {
                 return null;
             }
@@ -640,7 +640,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
     public java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> listCaseInsensitive(final com.openexchange.admin.soap.reseller.user.reseller.soap.dataobjects.ResellerContext ctx,final java.lang.String searchPattern,final com.openexchange.admin.soap.reseller.user.rmi.dataobjects.Credentials auth) throws DatabaseUpdateException_Exception , InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , NoSuchContextException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception    {
         final OXUserInterface iface = getUserInterface();
         try {
-            final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
+            final User[] listCaseInsensitive = iface.listCaseInsensitive(soap2Context(ctx), com.openexchange.java.Strings.isEmpty(searchPattern) ? "*" : searchPattern, soap2Credentials(auth));
             final java.util.List<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User> l = new ArrayList<com.openexchange.admin.soap.reseller.user.soap.dataobjects.User>(listCaseInsensitive.length);
             for (final User user : listCaseInsensitive) {
                 l.add(user2Soap(user));
@@ -1206,7 +1206,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         Integer i = soapUser.getImapPort();
         if (i != null) {
             final String s = user.getImapServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.IMAP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -1396,7 +1396,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         i = soapUser.getSmtpPort();
         if (i != null) {
             final String s = user.getSmtpServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.SMTP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -2075,17 +2075,4 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapModuleAccess.setWebmail(Boolean.valueOf(moduleAccess.getWebmail()));
         return soapModuleAccess;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

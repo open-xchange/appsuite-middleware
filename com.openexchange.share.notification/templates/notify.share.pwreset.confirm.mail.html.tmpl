@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+  <meta charset="UTF-8"></meta>
+  <#include "notify.common.style.html.tmpl">
+</head>
+<body>
+ <#escape x as x?html>
+ 
+  <p id="pwrc_greeting">
+    ${pwrc_greeting}
+  </p>
+  
+  <p id="pwrc_requestreceived">
+    ${pwrc_requestreceived} ${pwrc_account}
+  </p>
+  
+  <p id="pwrc_set_new_pwd">
+    ${pwrc_set_new_pwd}
+    <a class="btn" href="${pw_reset_confirm_link}"><span>${pw_reset_confirm_link_label}</span></a></p>
+  </p>
+  
+  <p id="pwrc_ignore">
+    ${pwrc_ignore}
+  </p>
+  
+  <p id="pwrc_automated_mail">
+    ${pwrc_automated_mail}
+  </p>
+  
+  <p id="pwrc_thanks">
+    ${pwrc_thanks}
+    ${pwrc_the_team}
+  </p>
+
+ </#escape>
+ 
+ <#include "notify.common.footer.html.tmpl">
+ 
+</body>
+</html>

@@ -175,7 +175,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
         /*
          * prepare url
          */
-        StringBuilder stringBuilder = new StringBuilder("/[uiwebpath]#session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
+        StringBuilder stringBuilder = new StringBuilder("[uiwebpath]#!&session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
         int module = share.getCommonModule();
         String folder = share.getCommonFolder();
         String item = null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
@@ -194,7 +194,7 @@ public class RedirectingShareHandler extends HttpAuthShareHandler {
          */
         String uiWebPath = loginConfig.getUiWebPath();
         //        uiWebPath = "/ox6/index.html";
-        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(ShareRedirectUtils.trimSlashes(uiWebPath)));
+        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(ShareRedirectUtils.getLoginPageUrl(uiWebPath)));
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));

@@ -1671,9 +1671,10 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+
     private static boolean containsWildcards(String pattern) {
-        final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
-        return WILDCARD_PATTERN.matcher(pattern).find();
+        return null == pattern ? false : WILDCARD_PATTERN.matcher(pattern).find();
     }
 
     private static String getPlaceholders(int length) {
@@ -3135,7 +3136,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             /*
              * Check if every possible occurrence is covered by a delete exception
              */
-            if (rresults.size() <= cdao.getDeleteException().length) {
+            if (null != cdao.getDeleteException() && rresults.size() <= cdao.getDeleteException().length) {
                 /*
                  * Commit current transaction
                  */
