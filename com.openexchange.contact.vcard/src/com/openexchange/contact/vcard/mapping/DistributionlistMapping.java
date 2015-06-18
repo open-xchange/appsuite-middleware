@@ -66,6 +66,7 @@ import ezvcard.parameter.EmailType;
 import ezvcard.property.Email;
 import ezvcard.property.Kind;
 import ezvcard.property.Member;
+import ezvcard.property.RawProperty;
 
 /**
  * {@link DistributionlistMapping}
@@ -132,6 +133,8 @@ public class DistributionlistMapping extends AbstractMapping {
             contact.setMarkAsDistributionlist(true);
             List<Email> memberEmails = getPropertiesWithTypes(vCard.getEmails(), EmailType.INTERNET.getValue());
             contact.setDistributionList(importLegacyMembers(memberEmails, parameters));
+        } else if (isAppleGroup(vCard)) {
+            contact.setMarkAsDistributionlist(true);
         } else if (null != vCard.getKind() && vCard.getKind().isGroup()) {
             /*
              * apply distribution list flag and import members
@@ -270,6 +273,17 @@ public class DistributionlistMapping extends AbstractMapping {
             }
         }
         return members;
+    }
+
+    /**
+     * Gets a value indicating whether the vCard represents an Apple-style group.
+     *
+     * @param vCard The vCard to check
+     * @return <code>true</code> if the vCard represents an Apple-style group, <code>false</code>, otherwise
+     */
+    private static boolean isAppleGroup(VCard vCard) {
+        RawProperty property = vCard.getExtendedProperty("X-ADDRESSBOOKSERVER-KIND");
+        return null != property && "group".equalsIgnoreCase(property.getValue());
     }
 
 }
