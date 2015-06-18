@@ -59,8 +59,7 @@ public class UpdateTest extends TaskTest {
 		final com.openexchange.groupware.container.Participant[] participants = new com.openexchange.groupware.container.Participant[2];
 		participants[0] = new UserParticipant();
 		participants[0].setIdentifier(userParticipantId);
-		participants[1] = new GroupParticipant();
-		participants[1].setIdentifier(groupParticipantId);
+		participants[1] = new GroupParticipant(groupParticipantId);
 
 		taskObj.setParticipants(participants);
 
