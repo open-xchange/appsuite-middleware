@@ -494,26 +494,16 @@ class UpdateData {
 
     private void prepareParticipantsWithChangedGroup() throws OXException {
         final Set<TaskParticipant> toCheck = new HashSet<TaskParticipant>();
-        final Set<TaskParticipant> orig = getOrigParticipants();
-        final HashMap<Integer, InternalParticipant> changedInternals = new HashMap<Integer, InternalParticipant>(getChangedParticipants().size());
-        for (final TaskParticipant changedParticipant : getChangedParticipants()) {
-            if (changedParticipant.getType() == TaskParticipant.Type.INTERNAL) {
-                final InternalParticipant cip = (InternalParticipant) changedParticipant;
-                changedInternals.put(I(cip.getIdentifier()), cip);
-            }
-        }
+        Set<InternalParticipant> changedInternals = ParticipantStorage.extractInternal(getChangedParticipants());
 
         // Retain the participants with changes
-        toCheck.addAll(orig);
+        toCheck.addAll(getOrigParticipants());
         toCheck.retainAll(getChangedParticipants());
 
-        for (final TaskParticipant tp : toCheck) {
-            if (tp.getType() == TaskParticipant.Type.INTERNAL) {
-                final InternalParticipant ip = (InternalParticipant) tp;
-                final InternalParticipant cp = changedInternals.get(I(ip.getIdentifier()));
-                if (cp != null) {
-                    changedGroup.add(cp);
-                }
+        for (final InternalParticipant ip : ParticipantStorage.extractInternal(toCheck)) {
+            InternalParticipant cp = ParticipantStorage.getParticipant(changedInternals, ip.getIdentifier());
+            if (cp != null) {
+                changedGroup.add(cp);
             }
         }
     }
