@@ -136,25 +136,32 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
     }
 
     public static boolean exists(Session session, Context ctx, Connection con) throws OXException {
-        final int cid = session.getContextId();
+        final int contextId = session.getContextId();
         final int userId = session.getUserId();
 
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
 
-        final Integer folderId = serverUserSetting.getContactCollectionFolder(cid, userId);
+        final Integer folderId = serverUserSetting.getContactCollectionFolder(contextId, userId);
         if (folderId != null) {
             final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
             if (folderAccess.exists(folderId.intValue())) {
                 // Folder already exists
                 session.setParameter("__ccf#", folderId);
+                LOG.debug("Detected contact-collect folder {} for user {} in context {}", folderId, userId, contextId);
                 return true;
             }
         }
-        if (!serverUserSetting.isContactCollectionEnabled(cid, userId).booleanValue() && isConfigured(serverUserSetting, cid, userId)) {
+        if (!serverUserSetting.isContactCollectionEnabled(contextId, userId).booleanValue() && (null != folderId)) {
             // Both - collect-on-mail-access and collect-on-mail-transport - disabled
+            LOG.debug("Considering contact-collect folder {} as existent as contact-collect feature NOT enabled for user {} in context {}", folderId, userId, contextId);
             return true;
         }
         // Should collect, or not explicitly set, so create folder
+        if (null == folderId) {
+            LOG.debug("Considering contact-collect folder as absent as contact-collect feature enabled for user {} in context {}", userId, contextId);
+        } else {
+            LOG.debug("Considering contact-collect folder {} as absent as contact-collect feature enabled for user {} in context {}", folderId, userId, contextId);
+        }
         return false;
     }
 
@@ -163,7 +170,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         if (exists(session, ctx, con)) {
             return false;
         }
-        final int cid = session.getContextId();
+        final int contextId = session.getContextId();
         final int userId = session.getUserId();
         final OXFolderAccess folderAccess = new OXFolderAccess(con, ctx);
         int collectFolderID = 0;
@@ -185,16 +192,12 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
          */
         final ServerUserSetting serverUserSetting = ServerUserSetting.getInstance(con);
         final Integer folder = Integer.valueOf(collectFolderID);
-        serverUserSetting.setContactCollectionFolder(cid, userId, folder);
+        serverUserSetting.setContactCollectionFolder(contextId, userId, folder);
         session.setParameter("__ccf#", folder);
-        serverUserSetting.setContactCollectOnMailAccess(cid, userId, serverUserSetting.isContactCollectOnMailAccess(cid, userId).booleanValue());
-        serverUserSetting.setContactCollectOnMailTransport(cid, userId, serverUserSetting.isContactCollectOnMailTransport(cid, userId).booleanValue());
-        LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", folder, Integer.valueOf(userId), Integer.valueOf(cid));
+        serverUserSetting.setContactCollectOnMailAccess(contextId, userId, serverUserSetting.isContactCollectOnMailAccess(contextId, userId).booleanValue());
+        serverUserSetting.setContactCollectOnMailTransport(contextId, userId, serverUserSetting.isContactCollectOnMailTransport(contextId, userId).booleanValue());
+        LOG.info("Contact collector folder (id={}) successfully created for user {} in context {}", folder, Integer.valueOf(userId), Integer.valueOf(contextId));
         return true;
-    }
-
-    private static boolean isConfigured(final ServerUserSetting setting, final int cid, final int userId) throws OXException {
-        return setting.getContactCollectionFolder(cid, userId) != null;
     }
 
     private static FolderObject createNewContactFolder(final int userId, final String name, final int parent) {
