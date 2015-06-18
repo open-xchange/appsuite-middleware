@@ -684,10 +684,6 @@ class UpdateData {
         updateTask(ctx, con, task, lastRead, modified, add, remove, null, addFolder, removeFolder, ACTIVE);
     }
 
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws OXException {
-        updateTask(ctx, con, task, lastRead, modified, add, remove, changedGroup, addFolder, removeFolder, ACTIVE);
-    }
-
     /**
      * This method execute the SQL statements on the given connection defined by the given data for the update.
      *
