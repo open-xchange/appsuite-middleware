@@ -47,30 +47,62 @@
  *
  */
 
-package com.openexchange.carddav.mapping;
+package com.openexchange.carddav.action;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.tools.mappings.DefaultMapping;
-
+import static org.slf4j.LoggerFactory.getLogger;
+import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.carddav.servlet.CardDAV;
+import com.openexchange.java.Strings;
+import com.openexchange.tools.session.SessionHolder;
+import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
+import com.openexchange.webdav.action.WebdavRequest;
 
 /**
- * {@link StringMapping} - Mapping implementation with a default
- * <code>truncate</code> implementation.
+ * {@link CardDAVMaxUploadSizeAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class StringMapping extends DefaultMapping<String, Contact> {
+public class CardDAVMaxUploadSizeAction extends OXWebdavMaxUploadSizeAction {
 
-	@Override
-    public boolean truncate(Contact contact, int length) throws OXException {
-		final String value = this.get(contact);
-		if (null != value && length < value.length()) {
-			this.set(contact, value.substring(0, length));
-			return true;
-		}
-		return false;
-	}
+    private final GroupwareCarddavFactory factory;
+
+    /**
+     * Initializes a new {@link CardDAVMaxUploadSizeAction}.
+     *
+     * @param factory The CardDAV factory
+     * @param sessionHolder The session holder
+     */
+    public CardDAVMaxUploadSizeAction(GroupwareCarddavFactory factory, SessionHolder sessionHolder) {
+        super();
+        this.factory = factory;
+        setSessionHolder(sessionHolder);
+    }
+
+    @Override
+    public boolean fits(WebdavRequest req) {
+        if (super.fits(req)) {
+            /*
+             * also check maximum allowed resource size
+             */
+            String contentLengthHeader = req.getHeader("content-length");
+            if (Strings.isEmpty(contentLengthHeader)) {
+                return true;
+            }
+            long contentLength = 0;
+            try {
+                contentLength = Long.parseLong(contentLengthHeader);
+            } catch (NumberFormatException e) {
+                getLogger(CardDAV.class).error("Error parsing content length header \"{}\": {}", contentLengthHeader, e.getMessage(), e);
+            }
+            if (0 >= contentLength) {
+                return true;
+            }
+            long maxVCardSize = factory.getState().getMaxVCardSize();
+            if (0 <= maxVCardSize && maxVCardSize >= contentLength) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
-

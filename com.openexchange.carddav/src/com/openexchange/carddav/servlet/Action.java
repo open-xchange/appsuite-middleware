@@ -47,47 +47,27 @@
  *
  */
 
-package com.openexchange.carddav.mixins;
-
-
-import com.openexchange.carddav.CarddavProtocol;
-import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
+package com.openexchange.carddav.servlet;
 
 /**
- * {@link MaxImageSize}
+ * {@link Action}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class MaxImageSize extends SingleXMLPropertyMixin {
+public enum Action {
 
-	protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MaxImageSize.class);
-
-	private final GroupwareCarddavFactory factory;
-
-    /**
-     * Initializes a new {@link MaxImageSize}.
-     *
-     * @param factory A reference to the CardDAV factory
-     */
-    public MaxImageSize(GroupwareCarddavFactory factory) {
-        super(CarddavProtocol.CARD_NS.getURI(), "max-image-size");
-        this.factory = factory;
-    }
-
-    @Override
-    protected String getValue() {
-        long maxSize = 4194304;
-        try {
-            String value = factory.getConfigValue("max_image_size", String.valueOf(maxSize));
-            maxSize = Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            LOG.warn("Invalid value for \"max_image_size\", falling back to {}", maxSize, e);
-        } catch (OXException e) {
-            LOG.warn("Error getting value for \"max_image_size\", falling back to {}", maxSize, e);
-        }
-        return String.valueOf(maxSize);
-    }
-
+    UNLOCK,
+    PROPPATCH,
+    PROPFIND,
+    OPTIONS,
+    MOVE,
+    MKCOL,
+    LOCK,
+    COPY,
+    DELETE,
+    GET,
+    HEAD,
+    PUT,
+    TRACE,
+    REPORT
 }

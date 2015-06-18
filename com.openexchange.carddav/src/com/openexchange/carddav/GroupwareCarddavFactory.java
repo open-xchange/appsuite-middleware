@@ -119,30 +119,27 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
-	private final FolderService folderService;
 	private final SessionHolder sessionHolder;
-	private final ThreadLocal<State> stateHolder = new ThreadLocal<State>();
-	private final ConfigViewFactory configs;
-	private final UserService userService;
-	private final ContactService contactService;
-    private VCardService vCardService;
-    private ServiceLookup services;
+	private final ThreadLocal<State> stateHolder;
+    private final ServiceLookup services;
 
+    /**
+     * Initializes a new {@link GroupwareCarddavFactory}.
+     *
+     * @param services A service lookup reference
+     * @param sessionHolder The session holder to use
+     */
 	public GroupwareCarddavFactory(ServiceLookup services, SessionHolder sessionHolder) {
 		super();
-		this.folderService = services.getService(FolderService.class);
 		this.sessionHolder = sessionHolder;
-		this.configs = services.getService(ConfigViewFactory.class);
-		this.userService = services.getService(UserService.class);
-		this.contactService = services.getService(ContactService.class);
-		this.vCardService = services.getService(VCardService.class);
 		this.services = services;
+		this.stateHolder = new ThreadLocal<State>();
 	}
 
 	@Override
 	public void beginRequest() {
-		super.beginRequest();
 		stateHolder.set(new State(this));
+        super.beginRequest();
 	}
 
 	@Override
@@ -186,11 +183,11 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 
     public User resolveUser(int userID) throws OXException {
-    	return userService.getUser(userID, getContext());
+    	return services.getService(UserService.class).getUser(userID, getContext());
     }
 
 	public FolderService getFolderService() {
-		return folderService;
+	    return services.getService(FolderService.class);
 	}
 
 	public Context getContext() {
@@ -206,7 +203,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 
 	public ContactService getContactService() throws OXException {
-		return this.contactService;
+		return services.getService(ContactService.class);
 	}
 
 	public State getState() {
@@ -214,7 +211,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 
 	public VCardService getVCardService() {
-	    return vCardService;
+	    return services.getService(VCardService.class);
 	}
 
 	public VCardStorageService getVCardStorageService() {
@@ -222,9 +219,22 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	}
 
     public String getConfigValue(String key, String defaultValue) throws OXException {
-        ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        ConfigView view = services.getService(ConfigViewFactory.class).getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
         ComposedConfigProperty<String> property = view.property(key, String.class);
         return property.isDefined() ? property.get() : defaultValue;
+    }
+
+    /**
+     * (Optionally) Gets coerced property value from configuration.
+     *
+     * @param property The property name
+     * @param coerceTo The type to coerce to
+     * @param defaultValue The default value
+     * @return The coerced value or <code>defaultValue</code> if absent
+     */
+    public <T> T optConfigValue(String property, Class<T> coerceTo, T defaultValue) throws OXException {
+        ConfigView view = services.getService(ConfigViewFactory.class).getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        return view.opt(property, coerceTo, defaultValue);
     }
 
 	/**
@@ -244,7 +254,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	 */
 	public void setOverrideNextSyncToken(String value) {
 		try {
-			this.userService.setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, this.getUser().getId(), this.getContext());
+		    services.getService(UserService.class).setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, this.getUser().getId(), this.getContext());
 		} catch (OXException e) {
 			LOG.error("", e);
 		}
@@ -259,7 +269,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 	 */
 	public String getOverrideNextSyncToken() {
 		try {
-			return this.userService.getUserAttribute(getOverrideNextSyncTokenAttributeName(), this.getUser().getId(), this.getContext());
+			return services.getService(UserService.class).getUserAttribute(getOverrideNextSyncTokenAttributeName(), this.getUser().getId(), this.getContext());
 		} catch (OXException e) {
 			LOG.error("", e);
 		}
@@ -287,6 +297,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 		private UserizedFolder defaultFolder = null;
 		private String treeID = null;
 		private Date overallLastModified = null;
+		private Long maxVCardSize = null;
 
 		/**
 		 * Initializes a new {@link State}.
@@ -658,6 +669,24 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
 				}
 	    	}
 	    	return this.treeID;
+	    }
+
+	    /**
+	     * Gets the maximum size allowed for contact vCards.
+	     *
+	     * @return The maximum size, or <code>0</code> if not restricted
+	     */
+	    public long getMaxVCardSize() {
+	        if (null == maxVCardSize) {
+	            Long defaultValue = Long.valueOf(4194304);
+	            try {
+                    maxVCardSize = this.factory.optConfigValue("com.openexchange.contact.maxVCardSize", Long.class, defaultValue);
+                } catch (OXException e) {
+                    LOG.warn("error reading value for \"com.openexchange.contact.maxVCardSize\", falling back to {}.", defaultValue, e);
+                    maxVCardSize = defaultValue;
+                }
+	        }
+	        return maxVCardSize.longValue();
 	    }
 
 	    /**

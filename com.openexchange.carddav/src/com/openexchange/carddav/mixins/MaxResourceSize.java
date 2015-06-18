@@ -50,8 +50,8 @@
 package com.openexchange.carddav.mixins;
 
 
+import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -75,22 +75,14 @@ public class MaxResourceSize extends SingleXMLPropertyMixin {
      * @param factory A reference to the CardDAV factory
      */
     public MaxResourceSize(GroupwareCarddavFactory factory) {
-        super("urn:ietf:params:xml:ns:carddav", "max-resource-size");
+        super(CarddavProtocol.CARD_NS.getURI(), "max-resource-size");
         this.factory = factory;
     }
 
     @Override
     protected String getValue() {
-        long maxSize = 4194304;
-        try {
-            String value = factory.getConfigValue("com.openexchange.contact.maxVCardSize", String.valueOf(maxSize));
-            maxSize = Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            LOG.warn("Invalid value for \"com.openexchange.contact.maxVCardSize\", falling back to {}", maxSize, e);
-        } catch (OXException e) {
-            LOG.warn("Error getting value for \"com.openexchange.contact.maxVCardSize\", falling back to {}", maxSize, e);
-        }
-        return String.valueOf(maxSize);
+        long maxVCardSize = factory.getState().getMaxVCardSize();
+        return 0 < maxVCardSize ? String.valueOf(maxVCardSize) : null;
     }
 
 }

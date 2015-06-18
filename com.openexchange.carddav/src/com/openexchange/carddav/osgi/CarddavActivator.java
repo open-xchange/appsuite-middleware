@@ -62,6 +62,11 @@ import com.openexchange.user.UserService;
 import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
+/**
+ * {@link CarddavActivator}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
 public class CarddavActivator extends HousekeepingActivator {
 
     private volatile OSGiPropertyMixin mixin;
@@ -74,19 +79,24 @@ public class CarddavActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
-            CardDAV.setServiceLookup(this);
-            CarddavPerformer.setServices(this);
-
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(), null, null);
-
-            CarddavPerformer performer = CarddavPerformer.getInstance();
-            final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
+            org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("starting bundle: \"com.openexchange.carddav\"");
+            /*
+             * prepare CardDAV performer & initialize global OSGi property mixin
+             */
+            CarddavPerformer performer = new CarddavPerformer(this);
+            OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-
+            /*
+             * register CardDAV servlet & WebDAV path
+             */
+            CardDAV servlet = new CardDAV(this, performer);
+            getService(HttpService.class).registerServlet("/servlet/dav/carddav", servlet, null, null);
             registerService(PathRegistration.class, new PathRegistration("carddav"));
+            /*
+             * track vCard storage service
+             */
             trackService(VCardStorageService.class);
-
             openTrackers();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);
@@ -96,13 +106,23 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final OSGiPropertyMixin mixin = this.mixin;
+        org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).info("stopping bundle: \"com.openexchange.carddav\"");
+        /*
+         * close OSGi property mixin
+         */
+        OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
             mixin.close();
             this.mixin = null;
         }
+        /*
+         * unregister servlet
+         */
+        HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            httpService.unregister("/servlet/dav/carddav");
+        }
         super.stopBundle();
     }
-
 
 }
