@@ -17,6 +17,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap-usercopy"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-appsuite-backend"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-audit"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sessionstorage-hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-imap"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-authentication-kerberos"/>
@@ -78,7 +79,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-report-client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-rest"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-sessionstorage-hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-smtp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-soap-cxf"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-spamhandler-cloudmark"/>
