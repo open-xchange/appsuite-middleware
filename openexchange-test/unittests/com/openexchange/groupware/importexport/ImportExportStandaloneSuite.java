@@ -51,7 +51,6 @@ package com.openexchange.groupware.importexport;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
-
 import com.openexchange.groupware.importexport.importers.CsvDoesDifferentLanguages;
 import com.openexchange.groupware.importexport.importers.ExpressiveErrorMessageWhileParsingVCard;
 import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
@@ -84,7 +83,6 @@ public class ImportExportStandaloneSuite extends TestSuite {
 		tests.addTest( CSVContactImportTest.suite() );
 		tests.addTest( CSVContactExportTest.suite() );
 		tests.addTest( OutlookCSVContactImportTest.suite() );
-        tests.addTestSuite(com.openexchange.groupware.importexport.importers.CannotImportAppleContactsWithInlineImage.class);
         tests.addTest(CsvDoesDifferentLanguages.suite());
         tests.addTestSuite(PropertyDrivenMapperTest.class);
 
