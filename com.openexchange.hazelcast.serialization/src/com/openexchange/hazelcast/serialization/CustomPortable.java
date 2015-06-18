@@ -124,6 +124,9 @@ public interface CustomPortable extends Portable {
      * <li><code>  106</code>: com.openexchange.push.impl.balancing.registrypolicy.portable.PortableOwner</li>
      * <li><code>  107</code>: com.openexchange.mail.attachment.impl.portable.PortableCheckForAttachmentToken</li>
      * <li><code>  108</code>: com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken</li>
+     *
+     * <li><code>  200</code>: com.openexchange.office.hazelcast.serialization.PortableID</li>
+     * <li><code>  201</code>: com.openexchange.office.hazelcast.serialization.PortableDocumentState</li>
      * </ul>
      *
      * @return The class ID
