@@ -59,7 +59,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -503,6 +502,8 @@ class UpdateData {
         for (final InternalParticipant ip : ParticipantStorage.extractInternal(toCheck)) {
             InternalParticipant cp = ParticipantStorage.getParticipant(changedInternals, ip.getIdentifier());
             if (cp != null) {
+                cp.setConfirm(ip.getConfirm());
+                cp.setConfirmMessage(ip.getConfirmMessage());
                 changedGroup.add(cp);
             }
         }
