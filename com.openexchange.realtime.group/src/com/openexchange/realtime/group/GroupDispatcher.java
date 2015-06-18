@@ -480,6 +480,7 @@ public class GroupDispatcher implements ComponentHandle {
         copy.setTo(to);
         copy.setFrom(stanza.getFrom());
         copy.setTracer(stanza.getTracer());
+        copy.setSelector(stanza.getSelector());
         copyPayload(stanza, copy);
 
         return copy;
