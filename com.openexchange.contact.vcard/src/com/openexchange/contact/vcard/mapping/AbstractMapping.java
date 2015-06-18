@@ -74,6 +74,9 @@ public abstract class AbstractMapping implements VCardMapping {
     /** The extended <code>x-other</code> type parameter*/
     static final String TYPE_OTHER = "x-other";
 
+    /** The value used in the custom <code>X-ABLabel</code> property to indicate the "Other" label in Apple clients */
+    static final String ABLABEL_OTHER = "_$!<Other>!$_";
+
     /**
      * Initializes and adds a new conversion warning to the warnings collection in the supplied vCard parameters reference.
      *
@@ -400,6 +403,46 @@ public abstract class AbstractMapping implements VCardMapping {
     protected static boolean isLegacyDistributionList(VCard vCard) {
         RawProperty property = vCard.getExtendedProperty("X-OPEN-XCHANGE-CTYPE");
         return null != property && "dlist".equalsIgnoreCase(property.getValue());
+    }
+
+
+
+    /**
+     * If found, gets the value of an <code>X-ABLabel</code> grouped with the supplied property which is set by Apple clients to indicate
+     * the kind of a property, e.g. <code>_$!<Other>!$_</code>.
+     *
+     * @param vCard The vCard
+     * @param property The property to get the AB label for
+     * @return The value of the associated <code>X-ABLabel</code> property, or <code>null</code> if not defined
+     */
+    protected static String getABLabel(VCard vCard, VCardProperty property) {
+        if (null != property && null != property.getGroup()) {
+            for (RawProperty labelProperty : vCard.getExtendedProperties("X-ABLabel")) {
+                if (property.getGroup().equals(labelProperty.getGroup())) {
+                    return labelProperty.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a property that is associated with a matching <code>X-ABLabel</code> property.
+     *
+     * @param vCard The vCard
+     * @param properties The properties to check
+     * @param abLabel The <code>X-ABLabel</code> value to match
+     * @return The property, or <code>null</code> if not found
+     */
+    protected static <T extends VCardProperty> T getPropertyWithABLabel(VCard vCard, List<T> properties, String abLabel) {
+        if (null != properties && 0 < properties.size()) {
+            for (T property : properties) {
+                if (abLabel.equals(getABLabel(vCard, property))) {
+                    return property;
+                }
+            }
+        }
+        return null;
     }
 
 }

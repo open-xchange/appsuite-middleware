@@ -72,7 +72,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        Email businessEmail = getEmail(emails, EmailType.WORK.getValue(), 0);
+        Email businessEmail = getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0);
         if (has(contact, Contact.EMAIL1)) {
             if (null == businessEmail) {
                 vCard.addEmail(contact.getEmail1(), EmailType.WORK, EmailType.PREF);
@@ -86,7 +86,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email2 - type "HOME"
          */
-        Email homeEmail = getEmail(emails, EmailType.HOME.getValue(), 1);
+        Email homeEmail = getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1);
         if (has(contact, Contact.EMAIL2)) {
             if (null == homeEmail) {
                 vCard.addEmail(contact.getEmail2(), EmailType.HOME);
@@ -100,7 +100,7 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        Email otherEmail = getEmail(emails, TYPE_OTHER, 2);
+        Email otherEmail = getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2);
         if (has(contact, Contact.EMAIL3)) {
             if (null == otherEmail) {
                 otherEmail = new Email(contact.getEmail3());
@@ -140,15 +140,15 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        contact.setEmail1(parseEMail(getEmail(emails, EmailType.WORK.getValue(), 0), parameters));
+        contact.setEmail1(parseEMail(getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0), parameters));
         /*
          * email2 - type "HOME"
          */
-        contact.setEmail2(parseEMail(getEmail(emails, EmailType.HOME.getValue(), 1), parameters));
+        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1), parameters));
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        contact.setEmail3(parseEMail(getEmail(emails, TYPE_OTHER, 2), parameters));
+        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2), parameters));
         /*
          * telex - type "TLX"
          */
@@ -177,12 +177,14 @@ public class EMailMapping extends AbstractMapping {
      * Chooses a specific e-mail address from a list of candidates matching either a distinguishing type, or, if the candidates are not
      * using any distinguishing e-mail types at all, the n-th e-mail property as fallback.
      *
+     * @param vCard The vCard
      * @param emails The possible e-mail properties to choose from
      * @param distinguishingType The distinguishing type
+     * @param abLabel The distinguishing <code>X-ABLabel</code> property, or <code>null</code> if not used
      * @param fallbackIndex The index in the candidate list to use when selecting the fallback property, or <code>-1</code> to use no fallback
      * @return The matching e-mail property, or <code>null</code> if none was found
      */
-    private Email getEmail(List<Email> emails, String distinguishingType, int fallbackIndex) {
+    private Email getEmail(VCard vCard, List<Email> emails, String distinguishingType, String abLabel, int fallbackIndex) {
         if (null == emails || 0 == emails.size()) {
             return null;
         }
@@ -190,6 +192,12 @@ public class EMailMapping extends AbstractMapping {
          * prefer the most preferred property matching the type
          */
         Email email = getPropertyWithTypes(emails, distinguishingType);
+        if (null == email && null != abLabel) {
+            /*
+             * fallback to an item associated with a matching X-ABLabel
+             */
+            email = getPropertyWithABLabel(vCard, emails, abLabel);
+        }
         if (null == email && 0 <= fallbackIndex) {
             /*
              * if no distinguishing e-mail types defined, use the first address as fallback

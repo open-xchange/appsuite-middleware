@@ -111,7 +111,10 @@ public class AddressMapping extends AbstractMapping {
          */
         Address otherAddress = getAddressWithType(addresses, TYPE_OTHER);
         if (null == otherAddress) {
-            otherAddress = getPropertyWithoutTypes(addresses, 0, AddressType.WORK.getValue(), AddressType.HOME.getValue(), TYPE_OTHER);
+            otherAddress = getAddressWithType(addresses, "OTHER");
+            if (null == otherAddress) {
+                otherAddress = getPropertyWithoutTypes(addresses, 0, AddressType.WORK.getValue(), AddressType.HOME.getValue(), TYPE_OTHER);
+            }
             if (null != otherAddress) {
                 otherAddress.addParameter(ezvcard.parameter.VCardParameters.TYPE, TYPE_OTHER);
             }
@@ -179,7 +182,10 @@ public class AddressMapping extends AbstractMapping {
          */
         Address otherAddress = getAddressWithType(addresses, TYPE_OTHER);
         if (null == otherAddress) {
-            otherAddress = getPropertyWithoutTypes(addresses, 0, AddressType.WORK.getValue(), AddressType.HOME.getValue(), TYPE_OTHER);
+            otherAddress = getAddressWithType(addresses, "OTHER");
+            if (null == otherAddress) {
+                otherAddress = getPropertyWithoutTypes(addresses, 0, AddressType.WORK.getValue(), AddressType.HOME.getValue(), TYPE_OTHER);
+            }
         }
         if (null == otherAddress) {
             contact.setStreetOther(null);

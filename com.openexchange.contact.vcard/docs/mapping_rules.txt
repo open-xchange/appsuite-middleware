@@ -161,6 +161,7 @@ Apart from the simple mappings above, there are also more complex vCard properti
     if not found, and all `EMAIL` properties have no distinguishing type (i.e. none is marked `work`, `home`, `x-other` or `TLX`), parse the 2nd most preferred one
   - For the `other` mail address, the first `EMAIL` property with type `x-other` and type `pref` is parsed
     if not found, parse the first with type `x-other`
+    if not found, parse the `EMAIL` property that is grouped with an `X-ABLabel` with value `_$!<Other>!$_`
     if not found, parse the first without type parameter `work`, `home`, `x-other` or `TLX`
     if not found, and all `EMAIL` properties have no distinguishing type (i.e. none is marked `work`, `home`, `x-other` or `TLX`), parse the 3rd most preferred one
   - For the `telex` address, the first `EMAIL` property with type `TLX` and type `pref` is parsed
@@ -177,6 +178,7 @@ Apart from the simple mappings above, there are also more complex vCard properti
     if not found, add a new property with type `home`
   - For the `other` mail address, the first `EMAIL` property with type `x-other` and type `pref` is updated
     if not found, update the first with type `x-other`
+    if not found, update the `EMAIL` property that is grouped with an `X-ABLabel` with value `_$!<Other>!$_` and add the `x-other` type
     if not found, and all `EMAIL` properties have no distinguishing type (i.e. none is marked `work`, `home`, `x-other` or `TLX`), update the 3rd most preferred one and add the `x-other` type
     if not found, add a new property with types `x-other`
   - For the `telex` address, the first `EMAIL` property with type `tlx` and type `pref` is updated
