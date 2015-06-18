@@ -161,14 +161,15 @@ public class EMailMapping extends AbstractMapping {
         if (null != property) {
             String value = property.getValue();
             if (false == Strings.isEmpty(value)) {
-                if (null != parameters && parameters.isValidateContactEMail()) {
-                    try {
-                        new InternetAddress(value);
-                    } catch (AddressException e) {
-                        addConversionWarning(parameters, e, "EMAIL", e.getMessage());
-                    }
+                if (null == parameters || false == parameters.isValidateContactEMail()) {
+                    return value;
                 }
-                return value;
+                try {
+                    new InternetAddress(value).validate();
+                    return value;
+                } catch (AddressException e) {
+                    addConversionWarning(parameters, e, "EMAIL", e.getMessage());
+                }
             }
         }
         return null;
