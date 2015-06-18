@@ -66,8 +66,6 @@ import ezvcard.property.Email;
  */
 public class EMailMapping extends AbstractMapping {
 
-    static final String TYPE_OTHER = "x-other";
-
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
         List<Email> emails = vCard.getEmails();

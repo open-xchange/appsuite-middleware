@@ -64,8 +64,6 @@ import ezvcard.property.Address;
  */
 public class AddressMapping extends AbstractMapping {
 
-    static final String TYPE_OTHER = "X-OTHER";
-
     @Override
     public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
         List<Address> addresses = vCard.getAddresses();

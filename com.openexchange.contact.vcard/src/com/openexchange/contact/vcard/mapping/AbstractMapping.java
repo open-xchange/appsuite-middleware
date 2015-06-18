@@ -71,6 +71,9 @@ import ezvcard.property.VCardProperty;
  */
 public abstract class AbstractMapping implements VCardMapping {
 
+    /** The extended <code>x-other</code> type parameter*/
+    static final String TYPE_OTHER = "x-other";
+
     /**
      * Initializes and adds a new conversion warning to the warnings collection in the supplied vCard parameters reference.
      *
@@ -110,6 +113,13 @@ public abstract class AbstractMapping implements VCardMapping {
         return false;
     }
 
+    /**
+     * Gets a value indicating whether a contact has defined values for all of the supplied contact fields.
+     *
+     * @param contact The contact to check
+     * @param fields The contact fields / column identifiers to check
+     * @return <code>true</code> if all fields are set in the supplied contact, <code>false</code>, otherwise
+     */
     protected static boolean hasAll(Contact contact, int...fields) {
         for (int field : fields) {
             if (false == has(contact, field)) {
@@ -119,6 +129,13 @@ public abstract class AbstractMapping implements VCardMapping {
         return true;
     }
 
+    /**
+     * Gets a value indicating whether a contact has at least one defined value for any the supplied contact fields.
+     *
+     * @param contact The contact to check
+     * @param fields The contact fields / column identifiers to check
+     * @return <code>true</code> if at least one field is set in the supplied contact, <code>false</code>, otherwise
+     */
     protected static boolean hasOneOf(Contact contact, int...fields) {
         for (int field : fields) {
             if (has(contact, field)) {
@@ -128,6 +145,14 @@ public abstract class AbstractMapping implements VCardMapping {
         return false;
     }
 
+    /**
+     * Gets a value indicating whether a contact has a defined value for the supplied contact field, i.e. it has a value other than
+     * <code>null</code>.
+     *
+     * @param contact The contact to check
+     * @param fields The contact field / column identifier to check
+     * @return <code>true</code> if the field is set in the supplied contact, <code>false</code>, otherwise
+     */
     protected static boolean has(Contact contact, int field) {
         return null != contact.get(field);
     }

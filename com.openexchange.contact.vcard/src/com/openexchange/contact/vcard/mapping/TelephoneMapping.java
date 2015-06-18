@@ -66,7 +66,6 @@ import ezvcard.property.Telephone;
  */
 public class TelephoneMapping extends AbstractMapping {
 
-    static final String TYPE_OTHER = "x-other";
     static final String TYPE_CALLBACK = "x-callback";
     static final String TYPE_COMPANY = "x-company";
     static final String TYPE_ASSISTENT = "x-assistant";
