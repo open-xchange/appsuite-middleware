@@ -472,18 +472,32 @@ public final class TaskLogic {
         }
     }
 
-    private static Set<InternalParticipant> groupParticipants = null;
-
     /**
      * @return all participants who belong to a group.
      * @throws OXException
      */
-    static Set<InternalParticipant> getGroupParticipants(final Context ctx, final Participant[] participants) throws OXException {
-        if (groupParticipants == null) {
-            createParticipants(ctx, participants);
+    static Set<InternalParticipant> getGroupParticipants(Context ctx, Participant[] participants) throws OXException {
+        final Set<InternalParticipant> retval = new HashSet<InternalParticipant>();
+        for (final Participant participant : participants) {
+            switch (participant.getType()) {
+            case Participant.GROUP:
+                final GroupParticipant group = (GroupParticipant) participant;
+                final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
+                if (member.length == 0) {
+                    throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
+                }
+                for (final int userId : member) {
+                    retval.add(new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier())));
+                }
+                break;
+            case Participant.USER:
+            case Participant.EXTERNAL_USER:
+                break;
+            default:
+                throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
+            }
         }
-
-        return groupParticipants;
+        return retval;
     }
 
     /**
@@ -494,9 +508,8 @@ public final class TaskLogic {
      * @return a set of task participants.
      * @throws OXException if resolving of groups to users fails.
      */
-    static Set<TaskParticipant> createParticipants(final Context ctx, final Participant[] participants) throws OXException {
+    static Set<TaskParticipant> createParticipants(Context ctx, Participant[] participants) throws OXException {
         final Set<TaskParticipant> retval = new HashSet<TaskParticipant>();
-        final Set<InternalParticipant> foundGroupParticipants = new HashSet<InternalParticipant>();
         if (null == participants) {
             return retval;
         }
@@ -507,17 +520,15 @@ public final class TaskLogic {
                 break;
             case Participant.GROUP:
                 final GroupParticipant group = (GroupParticipant) participant;
-                {
-                    final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
-                    if (member.length == 0) {
-                        throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
-                    }
-                    for (final int userId : member) {
-                        final InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
-                        foundGroupParticipants.add(tParticipant);
-                        if (!retval.contains(tParticipant)) {
-                            retval.add(tParticipant);
-                        }
+                final int[] member = GroupStorage.getInstance().getGroup(group.getIdentifier(), ctx).getMember();
+                if (member.length == 0) {
+                    throw TaskExceptionCode.GROUP_IS_EMPTY.create(group.getDisplayName());
+                }
+                for (final int userId : member) {
+                    final InternalParticipant tParticipant = new InternalParticipant(new UserParticipant(userId), I(group.getIdentifier()));
+                    // Prefer the single added participant before being a group member
+                    if (!retval.contains(tParticipant)) {
+                        retval.add(tParticipant);
                     }
                 }
                 break;
@@ -528,7 +539,6 @@ public final class TaskLogic {
                 throw TaskExceptionCode.UNKNOWN_PARTICIPANT.create(Integer.valueOf(participant.getType()));
             }
         }
-        groupParticipants = foundGroupParticipants;
         return retval;
     }
 

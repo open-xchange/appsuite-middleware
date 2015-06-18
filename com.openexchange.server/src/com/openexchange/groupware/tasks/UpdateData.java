@@ -59,7 +59,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -494,26 +493,18 @@ class UpdateData {
 
     private void prepareParticipantsWithChangedGroup() throws OXException {
         final Set<TaskParticipant> toCheck = new HashSet<TaskParticipant>();
-        final Set<TaskParticipant> orig = getOrigParticipants();
-        final HashMap<Integer, InternalParticipant> changedInternals = new HashMap<Integer, InternalParticipant>(getChangedParticipants().size());
-        for (final TaskParticipant changedParticipant : getChangedParticipants()) {
-            if (changedParticipant.getType() == TaskParticipant.Type.INTERNAL) {
-                final InternalParticipant cip = (InternalParticipant) changedParticipant;
-                changedInternals.put(I(cip.getIdentifier()), cip);
-            }
-        }
+        Set<InternalParticipant> changedInternals = ParticipantStorage.extractInternal(getChangedParticipants());
 
         // Retain the participants with changes
-        toCheck.addAll(orig);
+        toCheck.addAll(getOrigParticipants());
         toCheck.retainAll(getChangedParticipants());
 
-        for (final TaskParticipant tp : toCheck) {
-            if (tp.getType() == TaskParticipant.Type.INTERNAL) {
-                final InternalParticipant ip = (InternalParticipant) tp;
-                final InternalParticipant cp = changedInternals.get(I(ip.getIdentifier()));
-                if (cp != null) {
-                    changedGroup.add(cp);
-                }
+        for (final InternalParticipant ip : ParticipantStorage.extractInternal(toCheck)) {
+            InternalParticipant cp = ParticipantStorage.getParticipant(changedInternals, ip.getIdentifier());
+            if (cp != null) {
+                cp.setConfirm(ip.getConfirm());
+                cp.setConfirmMessage(ip.getConfirmMessage());
+                changedGroup.add(cp);
             }
         }
     }
@@ -682,10 +673,6 @@ class UpdateData {
 
     static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws OXException {
         updateTask(ctx, con, task, lastRead, modified, add, remove, null, addFolder, removeFolder, ACTIVE);
-    }
-
-    static void updateTask(final Context ctx, final Connection con, final Task task, final Date lastRead, final int[] modified, final Set<TaskParticipant> add, final Set<TaskParticipant> remove, final Set<InternalParticipant> changedGroup, final Set<Folder> addFolder, final Set<Folder> removeFolder) throws OXException {
-        updateTask(ctx, con, task, lastRead, modified, add, remove, changedGroup, addFolder, removeFolder, ACTIVE);
     }
 
     /**
