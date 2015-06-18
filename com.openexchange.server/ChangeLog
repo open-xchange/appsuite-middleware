@@ -1,3 +1,8 @@
+* 2015-06-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 38787: Properly dispose GroupDispatcher
+ - Fix for bug 38231: Don't allow client to join a GroupDispatcher twice
+
 * 2015-06-17 - marcus.klein@open-xchange.com
 
  - Fix for bug 38782: Do not allow tasks anymore having a recurrence but lacking of start or end date.
@@ -10,9 +15,17 @@
 
  - Fix for bug 38550: Make the iOS client use the default contact folder as first collection
 
+* 2015-06-12 - marc.arens@open-xchange.com
+
+ - Fix for bug 38634: Improve RealtimeExceptionsCodes and handling
+
 * 2015-06-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 21064: Support display of S/MIME signed messages
+
+* 2015-06-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 38632: Enhance RunLoopManagerMBean to monitor fill status of loop clusters
 
 * 2015-06-09 - martin.herfurth@open-xchange.com
 
