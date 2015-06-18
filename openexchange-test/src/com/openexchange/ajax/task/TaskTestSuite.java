@@ -118,6 +118,7 @@ public final class TaskTestSuite {
         tests.addTestSuite(Bug12926Test.class);
         tests.addTestSuite(Bug13173Test.class);
         tests.addTestSuite(Bug14002Test.class);
+        tests.addTest(new JUnit4TestAdapter(Bug15291Test.class));
         tests.addTestSuite(Bug15580Test.class);
         tests.addTestSuite(Bug15897Test.class);
         tests.addTestSuite(Bug15937Test.class);
