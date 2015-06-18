@@ -59,91 +59,53 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
     private static final long serialVersionUID = 246682125014920210L;
 
     private int id;
-
     private String displayName;
-
     private String emailaddress;
-
     private boolean ignoreNotification;
 
-    /**
-     * Default constructor.
-     *
-     * @param id unique identifier of the group.
-     */
-    public GroupParticipant(final int id) {
+    public GroupParticipant(int id) {
         super();
         this.id = id;
     }
 
     /**
-     * @deprecated Use {@link #GroupParticipant(int)}.
-     */
-    @Deprecated
-    public GroupParticipant() {
-        this(0);
-    }
-
-    /**
-     * {@inheritDoc}
-     * @deprecated
+     * @deprecated Use {@link #GroupParticipant(int)}
      */
     @Deprecated
     @Override
-    public void setIdentifier(final int id) {
+    public void setIdentifier(int id) {
         this.id = id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getIdentifier() {
         return id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setDisplayName(final String displayName) {
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getDisplayName() {
         return displayName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getEmailAddress() {
         return emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void setEmailAddress(final String emailaddress) {
+    public void setEmailAddress(String emailaddress) {
         this.emailaddress = emailaddress == null ? null : emailaddress.toLowerCase();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getType() {
         return GROUP;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -153,11 +115,8 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (!(obj instanceof GroupParticipant)) {
             return false;
         }
@@ -165,11 +124,8 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
         return id == other.id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public int compareTo(final Participant part) {
+    public int compareTo(Participant part) {
         final int retval;
         if (GROUP == part.getType()) {
             retval = Integer.valueOf(id).compareTo(Integer.valueOf(part.getIdentifier()));
@@ -180,19 +136,16 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
     }
 
     @Override
-    public GroupParticipant clone() throws CloneNotSupportedException {
-        GroupParticipant retval = (GroupParticipant) super.clone();
-
-        retval.setDisplayName(this.getDisplayName());
-        retval.setEmailAddress(this.getEmailAddress());
-        retval.setIdentifier(this.getIdentifier());
-        retval.setIgnoreNotification(this.isIgnoreNotification());
-
+    public GroupParticipant clone() {
+        GroupParticipant retval = new GroupParticipant(id);
+        retval.setDisplayName(displayName);
+        retval.setEmailAddress(emailaddress);
+        retval.setIgnoreNotification(ignoreNotification);
         return retval;
     }
 
     @Override
-    public Participant getClone() throws CloneNotSupportedException {
+    public Participant getClone() {
         return clone();
     }
 
@@ -202,7 +155,12 @@ public class GroupParticipant implements Participant, Comparable<Participant> {
     }
 
     @Override
-    public void setIgnoreNotification(final boolean ignoreNotification) {
+    public void setIgnoreNotification(boolean ignoreNotification) {
         this.ignoreNotification = ignoreNotification;
+    }
+
+    @Override
+    public String toString() {
+        return "Group participant " + id + ",\"" + displayName + "\"";
     }
 }
