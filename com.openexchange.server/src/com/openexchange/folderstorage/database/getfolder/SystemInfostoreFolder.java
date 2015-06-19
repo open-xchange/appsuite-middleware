@@ -70,6 +70,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -177,7 +178,14 @@ public final class SystemInfostoreFolder {
                         subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(FolderStrings.SYSTEM_USER_INFOSTORE_FOLDER_NAME)));
                     }
                 } else if (fuid == FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID) {
-                    subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                    /*
+                     * only include public infostore root folder if there are visible subfolders, or user is able to create those
+                     */
+                    EffectivePermission effectivePermission = fo.getEffectiveUserPermission(user.getId(), userPerm, con);
+                    if (effectivePermission.canCreateSubfolders() ||
+                        0 < OXFolderIteratorSQL.getVisibleSubfolders(fuid, user.getId(), user.getGroups(), userPerm.getAccessibleModules(), ctx, con).size()) {
+                        subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(altNames ? FolderStrings.SYSTEM_PUBLIC_FILES_FOLDER_NAME : FolderStrings.SYSTEM_PUBLIC_INFOSTORE_FOLDER_NAME)));
+                    }
                 } else if (FolderObject.TRASH == fo.getType() && fo.isDefaultFolder()) {
                     subfolderIds.add(toArray(String.valueOf(fuid), sh.getString(
                         altNames ? FolderStrings.SYSTEM_TRASH_FILES_FOLDER_NAME : FolderStrings.SYSTEM_TRASH_INFOSTORE_FOLDER_NAME)));
