@@ -65,6 +65,8 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
 
     private String loginPath;
 
+    private String client;
+
     @Override
     public String getRequestId() {
         return requestId;
@@ -80,6 +82,11 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         return loginPath;
     }
 
+    @Override
+    public String getClientID() {
+        return client;
+    }
+
     public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
@@ -92,13 +99,18 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         this.loginPath = loginPath;
     }
 
+    public void setClientID(String client) {
+        this.client = client;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        result = prime * result + ((client == null) ? 0 : client.hashCode());
         result = prime * result + ((domainName == null) ? 0 : domainName.hashCode());
-        result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
         result = prime * result + ((loginPath == null) ? 0 : loginPath.hashCode());
+        result = prime * result + ((requestId == null) ? 0 : requestId.hashCode());
         return result;
     }
 
@@ -111,27 +123,32 @@ public class DefaultAuthnRequestInfo implements AuthnRequestInfo {
         if (getClass() != obj.getClass())
             return false;
         DefaultAuthnRequestInfo other = (DefaultAuthnRequestInfo) obj;
+        if (client == null) {
+            if (other.client != null)
+                return false;
+        } else if (!client.equals(other.client))
+            return false;
         if (domainName == null) {
             if (other.domainName != null)
                 return false;
         } else if (!domainName.equals(other.domainName))
-            return false;
-        if (requestId == null) {
-            if (other.requestId != null)
-                return false;
-        } else if (!requestId.equals(other.requestId))
             return false;
         if (loginPath == null) {
             if (other.loginPath != null)
                 return false;
         } else if (!loginPath.equals(other.loginPath))
             return false;
+        if (requestId == null) {
+            if (other.requestId != null)
+                return false;
+        } else if (!requestId.equals(other.requestId))
+            return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName + ", loginPath=" + loginPath + "]";
+        return "DefaultAuthnRequestInfo [requestId=" + requestId + ", domainName=" + domainName + ", loginPath=" + loginPath + ", client=" + client + "]";
     }
 
 }

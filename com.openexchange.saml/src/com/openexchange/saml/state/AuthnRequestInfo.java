@@ -87,4 +87,13 @@ public interface AuthnRequestInfo {
      */
     String getLoginPath();
 
+    /**
+     * Gets the client identifier that shall be assigned with the session to be created.
+     *
+     * @return The client ID or <code>null</code> if none was provided. In this case the
+     * configured default will be used, i.e. the value of <code>com.openexchange.ajax.login.http-auth.client</code>
+     * in <code>login.properties</code>.
+     */
+    String getClientID();
+
 }
