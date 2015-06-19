@@ -67,8 +67,8 @@ public class RedirectActivator extends HousekeepingActivator{
 	protected void startBundle() throws Exception {
 		final HttpService service = getService(HttpService.class);
 		final String alias = getService(DispatcherPrefixService.class).getPrefix() + "redirect";
-		this.alias = alias;
         service.registerServlet(alias, new RedirectServlet(), null, null);
+        this.alias = alias;
 	}
 
 	@Override

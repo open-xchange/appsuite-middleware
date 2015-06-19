@@ -65,7 +65,7 @@ public class Activator extends DeferredActivator {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
 
-    private BlackWhiteListServlet servlet;
+    private volatile String alias;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -104,11 +104,12 @@ public class Activator extends DeferredActivator {
     }
 
     private void registerServlet() {
-        final ServiceRegistry registry = ServletServiceRegistry.getInstance();
-        final HttpService httpService = registry.getService(HttpService.class);
-        if (servlet == null) {
+        HttpService httpService = ServletServiceRegistry.getInstance().getService(HttpService.class);
+        if (null != httpService) {
             try {
-                httpService.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist", servlet = new BlackWhiteListServlet(), null, null);
+                String alias = getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist";
+                httpService.registerServlet(alias, new BlackWhiteListServlet(), null, null);
+                this.alias = alias;
                 LOG.info("Black-/Whitelist Servlet registered.");
             } catch (final Exception e) {
                 LOG.error("", e);
@@ -117,11 +118,14 @@ public class Activator extends DeferredActivator {
     }
 
     private void unregisterServlet() {
-        final HttpService httpService = getService(HttpService.class);
-        if (httpService != null && servlet != null) {
-            httpService.unregister(getService(DispatcherPrefixService.class).getPrefix() + "blackwhitelist");
-            servlet = null;
-            LOG.info("Black-/Whitelist Servlet unregistered.");
+        HttpService httpService = getService(HttpService.class);
+        if (httpService != null) {
+            String alias = this.alias;
+            if (null != alias) {
+                httpService.unregister(alias);
+                LOG.info("Black-/Whitelist Servlet unregistered.");
+                this.alias = null;
+            }
         }
     }
 

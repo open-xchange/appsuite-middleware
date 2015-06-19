@@ -65,8 +65,8 @@ public class Activator extends HousekeepingActivator {
 
     private static final String ALIAS_APPENDIX = "recaptcha";
 
-    private ReCaptchaServlet servlet;
-    private String alias;
+    private volatile ReCaptchaServlet servlet;
+    private volatile String alias;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -118,8 +118,10 @@ public class Activator extends HousekeepingActivator {
         if (servlet == null) {
             try {
                 String alias = getService(DispatcherPrefixService.class).getPrefix() + ALIAS_APPENDIX;
+                ReCaptchaServlet servlet = new ReCaptchaServlet();
+                httpService.registerServlet(alias, servlet, null, null);
                 this.alias = alias;
-                httpService.registerServlet(alias, servlet = new ReCaptchaServlet(), null, null);
+                this.servlet = servlet;
                 LOG.info("reCAPTCHA Servlet registered.");
             } catch (final Exception e) {
                 LOG.error("", e);
@@ -129,10 +131,15 @@ public class Activator extends HousekeepingActivator {
 
     private synchronized void unregisterServlet() {
         HttpService httpService = getService(HttpService.class);
-        if (httpService != null && servlet != null && null != alias) {
-            httpService.unregister(alias);
-            servlet = null;
-            LOG.info("reCAPTCHA Servlet unregistered.");
+        if (httpService != null) {
+            String alias = this.alias;
+            ReCaptchaServlet servlet = this.servlet;
+            if (servlet != null && null != alias) {
+                httpService.unregister(alias);
+                this.servlet = null;
+                this.alias = null;
+                LOG.info("reCAPTCHA Servlet unregistered.");
+            }
         }
     }
 

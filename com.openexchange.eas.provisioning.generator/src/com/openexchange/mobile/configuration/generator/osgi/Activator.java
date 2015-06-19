@@ -74,7 +74,7 @@ public class Activator extends HousekeepingActivator {
 
     public static final String ALIAS = "/servlet/mobileconfig";
 
-    private boolean registered;
+    private volatile boolean registered;
 
     /**
      * Initializes a new {@link Activator}.
@@ -85,8 +85,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class };
+        return new Class<?>[] { ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class };
     }
 
     @Override
@@ -164,8 +163,12 @@ public class Activator extends HousekeepingActivator {
      */
     private synchronized void unregister() {
         HttpService service = getService(HttpService.class);
-        if (null != service && registered) {
-            service.unregister(ALIAS);
+        if (null != service) {
+            boolean registered = this.registered;
+            if (registered) {
+                service.unregister(ALIAS);
+                this.registered = false;
+            }
         }
     }
 

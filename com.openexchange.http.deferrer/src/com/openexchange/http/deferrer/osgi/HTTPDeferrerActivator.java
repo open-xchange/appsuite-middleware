@@ -70,6 +70,8 @@ import com.openexchange.osgi.SimpleRegistryListener;
  */
 public class HTTPDeferrerActivator extends HousekeepingActivator {
 
+    private volatile String alias;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
@@ -82,7 +84,10 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
 
         final DispatcherPrefixService prefixService = getService(DispatcherPrefixService.class);
         DefaultDeferringURLService.PREFIX.set(prefixService);
-        getService(HttpService.class).registerServlet(prefixService.getPrefix() + "defer", new DeferrerServlet(), null, null);
+        String alias = prefixService.getPrefix() + "defer";
+        getService(HttpService.class).registerServlet(alias, new DeferrerServlet(), null, null);
+        this.alias = alias;
+
         registerService(DeferringURLService.class, new DefaultDeferringURLService() {
 
             @Override
@@ -121,6 +126,19 @@ public class HTTPDeferrerActivator extends HousekeepingActivator {
 		});
 
         openTrackers();
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpService service = getService(HttpService.class);
+        if (null != service) {
+            String alias = this.alias;
+            if (null != alias) {
+                service.unregister(alias);
+                this.alias = null;
+            }
+        }
+        super.stopBundle();
     }
 
 }
