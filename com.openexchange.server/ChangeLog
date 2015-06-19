@@ -1,3 +1,7 @@
+* 2015-06-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38778: Don't try to strip the dispatcher prefix if it's not known
+
 * 2015-06-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23275: Added attach value to analyze response of invitations.
