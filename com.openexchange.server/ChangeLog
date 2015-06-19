@@ -14,6 +14,7 @@
 * 2015-06-19 - martin.herfurth@open-xchange.com
 
  - Fix for bug 23275: Added attach value to analyze response of invitations.
+ - Fix for bug 37061: Avoid NPE if no occurrences could be calculated. Log debug message instead.
 
 * 2015-06-18 - marcus.klein@open-xchange.com
 
