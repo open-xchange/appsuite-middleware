@@ -60,6 +60,7 @@ import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Require
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.RequireStartDate;
 import com.openexchange.data.conversion.ical.ical4j.internal.appointment.Transparency;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Attach;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedBy;
@@ -94,7 +95,7 @@ public final class AppointmentConverters {
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> verifyingStart = new Start<VEvent, Appointment>();
 
     private static AttributeConverter<VEvent, Appointment> end = new End<VEvent, Appointment>();
-    
+
     private static AttributeConverter<VEvent, Appointment> xMicrosoftCdoAlldayEvent = new XMicrosoftCdoAlldayEvent<VEvent, Appointment>();
 
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> verifyingDuration = new Duration<VEvent, Appointment>();
@@ -129,6 +130,8 @@ public final class AppointmentConverters {
 
     private static AbstractVerifyingAttributeConverter<VEvent, Appointment> participants = new Participants<VEvent, Appointment>();
 
+    private static AbstractVerifyingAttributeConverter<VEvent, Appointment> attach = new Attach<VEvent, Appointment>();
+
     /**
      * Prevent instantiation.
      */
@@ -143,7 +146,7 @@ public final class AppointmentConverters {
         ALL = getAll();
         ALL_ITIP = getAllItip();
     }
-    
+
     private static List<AttributeConverter<VEvent, Appointment>> getAll() {
         List<AttributeConverter<VEvent, Appointment>> tmp = new ArrayList<AttributeConverter<VEvent, Appointment>>();
         tmp.add(title);
@@ -192,6 +195,7 @@ public final class AppointmentConverters {
         tmp.add(sequence);
         tmp.add(participants);
         tmp.add(xMicrosoftCdoAlldayEvent);
+        tmp.add(attach);
 
         return tmp;
     }

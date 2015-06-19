@@ -122,6 +122,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             update = original;
         }
     	analysis.setUid(update.getUid());
+    	if (update.getAttachmentLink() != null) {
+    	    analysis.getAttributes().put("attach", update.getAttachmentLink());
+    	}
 
     	CalendarDataObject master = update;
         List<Appointment> exceptions = Collections.emptyList();

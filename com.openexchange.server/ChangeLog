@@ -1,3 +1,7 @@
+* 2015-06-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23275: Added attach value to analyze response of invitations.
+
 * 2015-06-18 - marcus.klein@open-xchange.com
 
  - Fix for bug 37002: Retain task user confirmation status even if client is sending always the full participant array.

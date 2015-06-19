@@ -226,6 +226,11 @@ public abstract class CalendarObject extends CommonObject {
     protected String principal;
 
     protected int principalId;
+    
+    /**
+     * An attachment link.
+     */
+    protected String attachmentLink;
 
     protected boolean fulltime;
 
@@ -290,6 +295,8 @@ public abstract class CalendarObject extends CommonObject {
     protected boolean b_principalId;
 
     protected boolean b_fulltime;
+
+    protected  boolean bAttachmentLink;
 
 	// GET METHODS
 	public String getTitle() {
@@ -892,6 +899,24 @@ public abstract class CalendarObject extends CommonObject {
 		return bConfirmations;
 	}
 
+    public String getAttachmentLink() {
+        return attachmentLink;
+    }
+
+    public void setAttachmentLink(String attachmentLink) {
+        this.attachmentLink = attachmentLink;
+        this.bAttachmentLink = true;
+    }
+    
+    public void removeAttachmentLink() {
+        this.attachmentLink = null;
+        this.bAttachmentLink = false;
+    }
+    
+    public boolean containsAttachmentLink() {
+        return bAttachmentLink;
+    }
+
 	@Override
 	public void reset() {
 		super.reset();
@@ -982,7 +1007,7 @@ public abstract class CalendarObject extends CommonObject {
 	 * ----------------- Recurrence Diagnosis -----------------
 	 */
 
-	/**
+    /**
 	 * Tests if this event is either a recurring event or a part of a recurring
 	 * event (change exception).
 	 * <p>

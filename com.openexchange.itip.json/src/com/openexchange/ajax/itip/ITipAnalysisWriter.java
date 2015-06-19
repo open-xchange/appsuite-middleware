@@ -50,6 +50,7 @@
 package com.openexchange.ajax.itip;
 
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -70,7 +71,6 @@ import com.openexchange.groupware.container.ConfirmationChange;
 import com.openexchange.groupware.container.Difference;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link ITipAnalysisWriter}
  *
@@ -86,20 +86,34 @@ public class ITipAnalysisWriter {
     }
 
     public void write(final ITipAnalysis analysis, final JSONObject object) throws JSONException {
-    	if (analysis.getMessage() != null && analysis.getMessage().getMethod() != null) {
+        if (analysis.getMessage() != null && analysis.getMessage().getMethod() != null) {
             object.put("messageType", analysis.getMessage().getMethod().toString().toLowerCase());
-    	}
-    	if (analysis.getUid() != null) {
-    		object.put("uid", analysis.getUid());
-    	}
+        }
+        if (analysis.getUid() != null) {
+            object.put("uid", analysis.getUid());
+        }
         writeAnnotations(analysis, object);
         writeChanges(analysis, object);
         writeActions(analysis, object);
+        writeAttributes(analysis, object);
+    }
+
+    private void writeAttributes(final ITipAnalysis analysis, final JSONObject object) throws JSONException {
+        if (analysis.getAttributes() == null || analysis.getAttributes().isEmpty()) {
+            return;
+        }
+
+        JSONObject attributes = new JSONObject();
+        for (Entry<String, Object> entry : analysis.getAttributes().entrySet()) {
+            attributes.put(entry.getKey(), entry.getValue());
+        }
+
+        object.putOpt("attributes", attributes);
     }
 
     private void writeActions(final ITipAnalysis analysis, final JSONObject object) throws JSONException {
         final JSONArray actionsArray = new JSONArray();
-        for(final ITipAction action : analysis.getActions()) {
+        for (final ITipAction action : analysis.getActions()) {
             actionsArray.put(action.name().toLowerCase());
         }
         object.put("actions", actionsArray);
@@ -110,7 +124,7 @@ public class ITipAnalysisWriter {
             return;
         }
         final JSONArray changesArray = new JSONArray();
-        for(final ITipChange change : analysis.getChanges()) {
+        for (final ITipChange change : analysis.getChanges()) {
             final JSONObject changeObject = new JSONObject();
             writeChange(change, changeObject);
             changesArray.put(changeObject);
@@ -118,11 +132,10 @@ public class ITipAnalysisWriter {
         object.put("changes", changesArray);
     }
 
-
     private void writeChange(final ITipChange change, final JSONObject changeObject) throws JSONException {
-    	if (change.getIntroduction() != null) {
-        	changeObject.put("introduction", change.getIntroduction());
-    	}
+        if (change.getIntroduction() != null) {
+            changeObject.put("introduction", change.getIntroduction());
+        }
 
         changeObject.put("type", change.getType().name().toLowerCase());
         changeObject.put("exception", change.isException());
@@ -274,9 +287,8 @@ public class ITipAnalysisWriter {
             array.put(annotationObject);
         }
 
-        object.put("annotations",array);
+        object.put("annotations", array);
     }
-
 
     private void writeAnnotation(final ITipAnnotation annotation, final JSONObject annotationObject) throws JSONException {
         annotationObject.put("message", annotation.getMessage());
