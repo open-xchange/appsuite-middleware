@@ -1637,25 +1637,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
         char separator = getSeparator(imapFolder);
 
-        if (null != indexRange) {
-            // Grab messages only with ID and sort field information
+        if (null == indexRange) {
+            // Fetch them all
+            FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
             List<MailMessage> list;
-            {
-                int[] seqnums;
-                if (null != msgIds) {
-                    seqnums = msgIds;
-                } else {
-                    seqnums = new int[messageCount];
-                    for (int i = 0; i < messageCount; i++) {
-                        seqnums[i] = i + 1;
-                    }
-                }
-
-                FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
-                MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1, separator);
-
-                list = new ArrayList<MailMessage>(mailMessages.length);
-                for (MailMessage mailMessage : mailMessages) {
+            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+            if (fetchBody) {
+                list = fetchMessages(msgIds, fetchProfile);
+            } else {
+                MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
+                list = new ArrayList<MailMessage>(tmp.length);
+                for (MailMessage mailMessage : tmp) {
                     if (null != mailMessage) {
                         list.add(mailMessage);
                     }
@@ -1666,43 +1658,32 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return EMPTY_RETVAL;
             }
 
-            // Sort them
+            // Sort
             Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
 
-            // Apply index range
-            list = applyIndexRange(list, indexRange);
-
-            // Determine UIDs
-            long[] uids = new long[list.size()];
-            int i = 0;
-            for (MailMessage mailMessage : list) {
-                uids[i++] = ((IDMailMessage) mailMessage).getUid();
-            }
-
-            // Fetch with proper attributes by UID
-            FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
-            MailMessage[] mailMessages;
-            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
-            if (fetchBody) {
-                List<MailMessage> tmp = fetchMessages(uids, fetchProfile);
-                mailMessages = tmp.toArray(new MailMessage[tmp.size()]);
-            } else {
-                mailMessages = fetchMessages(uids, fetchProfile, hasIMAP4rev1, separator);
-            }
-            setAccountInfo(mailMessages);
-            return mailMessages;
+            // Return
+            MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
+            return mailMessages.length > 0 ? mailMessages : EMPTY_RETVAL;
         }
 
-        // Fetch
-        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+        // A certain range is requested, thus grab messages only with ID and sort field information
         List<MailMessage> list;
-        boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
-        if (fetchBody) {
-            list = fetchMessages(msgIds, fetchProfile);
-        } else {
-            MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
-            list = new ArrayList<MailMessage>(tmp.length);
-            for (MailMessage mailMessage : tmp) {
+        {
+            int[] seqnums;
+            if (null != msgIds) {
+                seqnums = msgIds;
+            } else {
+                seqnums = new int[messageCount];
+                for (int i = messageCount; i > 0; i--) {
+                    seqnums[i - 1] = i;
+                }
+            }
+
+            FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
+            MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1, separator);
+
+            list = new ArrayList<MailMessage>(mailMessages.length);
+            for (MailMessage mailMessage : mailMessages) {
                 if (null != mailMessage) {
                     list.add(mailMessage);
                 }
@@ -1713,12 +1694,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return EMPTY_RETVAL;
         }
 
-        // Sort
+        // Sort them
         Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
 
-        // Return
-        MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
-        return mailMessages.length > 0 ? mailMessages : EMPTY_RETVAL;
+        // Apply index range
+        list = applyIndexRange(list, indexRange);
+
+        // Determine UIDs
+        long[] uids = new long[list.size()];
+        int i = 0;
+        for (MailMessage mailMessage : list) {
+            uids[i++] = ((IDMailMessage) mailMessage).getUid();
+        }
+
+        // Fetch with proper attributes by UID
+        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+        MailMessage[] mailMessages;
+        boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+        if (fetchBody) {
+            List<MailMessage> tmp = fetchMessages(uids, fetchProfile);
+            mailMessages = tmp.toArray(new MailMessage[tmp.size()]);
+        } else {
+            mailMessages = fetchMessages(uids, fetchProfile, hasIMAP4rev1, separator);
+        }
+        setAccountInfo(mailMessages);
+        return mailMessages;
     }
 
     private MailMessage[] fetchMessages(long[] uids, FetchProfile fetchProfile, boolean hasIMAP4rev1, char separator) throws MessagingException {
