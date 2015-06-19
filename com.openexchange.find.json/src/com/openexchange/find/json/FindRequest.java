@@ -217,13 +217,12 @@ public class FindRequest {
                     throw FindExceptionCode.UNSUPPORTED_FACET.create(jType, module.getIdentifier());
                 }
 
-                String valueId = getValueId(jFacet.optString("value", null));
+                String valueId = jFacet.optString("value", null);
                 if (valueId == null) {
                     // ignore invalid facets
                     continue;
                 }
 
-                Filter filter;
                 JSONObject jFilter = jFacet.optJSONObject("filter");
                 Filter filter;
                 if (jFilter == null) {

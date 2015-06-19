@@ -60,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
+import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.Operand;
@@ -112,9 +113,9 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
      * @return the search clause
      */
     @Override
-    public StringBuilder getClause() {
+    public String getClause() {
         final StringBuilder clause = Strings.trim(this.stringBuilder);
-        return 0 < clause.length() ? clause : new StringBuilder("TRUE");
+        return 0 < clause.length() ? clause.toString() : new StringBuilder("TRUE").toString();
     }
 
     private void append(final SearchTerm<?> term) throws OXException {
