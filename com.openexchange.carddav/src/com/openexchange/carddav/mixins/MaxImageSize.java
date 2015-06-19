@@ -78,14 +78,13 @@ public class MaxImageSize extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        long maxSize = 4194304;
+        long maxSize;
+        Long defaultValue = Long.valueOf(4194304);
         try {
-            String value = factory.getConfigValue("max_image_size", String.valueOf(maxSize));
-            maxSize = Long.parseLong(value);
-        } catch (NumberFormatException e) {
-            LOG.warn("Invalid value for \"max_image_size\", falling back to {}", maxSize, e);
+            maxSize = factory.optConfigValue("max_image_size", Long.class, defaultValue);
         } catch (OXException e) {
-            LOG.warn("Error getting value for \"max_image_size\", falling back to {}", maxSize, e);
+            LOG.warn("error reading value for \"max_image_size\", falling back to {}.", defaultValue, e);
+            maxSize = defaultValue;
         }
         return String.valueOf(maxSize);
     }
