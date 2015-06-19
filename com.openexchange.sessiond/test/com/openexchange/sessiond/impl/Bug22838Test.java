@@ -80,6 +80,7 @@ public class Bug22838Test extends TestCase {
 
     @Override
     protected void tearDown() throws Exception {
+        SessionHandler.close();
         super.tearDown();
     }
 

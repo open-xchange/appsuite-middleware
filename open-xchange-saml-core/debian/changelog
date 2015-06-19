@@ -1,0 +1,5 @@
+open-xchange-saml-core (7.6.1-0) stable; urgency=low
+
+  * initial packaging for SAML core package
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 24 March 2015 15:45:00 +0200

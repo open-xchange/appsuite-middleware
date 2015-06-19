@@ -71,6 +71,10 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.java.ConcurrentList;
 import com.openexchange.server.Initialization;
 import com.openexchange.server.ServiceHolderInit;
+import com.openexchange.session.inspector.SessionInspectorChain;
+import com.openexchange.session.inspector.SessionInspectorService;
+import com.openexchange.session.inspector.internal.ServiceSet;
+import com.openexchange.session.inspector.internal.SessionInspectorChainImpl;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
 import com.openexchange.tools.strings.DateStringParser;
@@ -88,6 +92,7 @@ public final class GlobalActivator implements BundleActivator {
     private volatile ServiceTracker<StringParser,StringParser> parserTracker;
     private volatile ServiceRegistration<StringParser> parserRegistration;
     private volatile ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration;
+    private volatile ServiceRegistration<SessionInspectorChain> inspectorChainRegistration;
     private volatile List<ServiceTracker<?,?>> trackers;
 
 
@@ -117,6 +122,14 @@ public final class GlobalActivator implements BundleActivator {
 
             final MetaContributorTracker metaContributors = new MetaContributorTracker(context);
             trackers.add(metaContributors);
+
+            // Session inspector chain
+            {
+                ServiceSet<SessionInspectorService> serviceSet = new ServiceSet<SessionInspectorService>(context);
+                trackers.add(new ServiceTracker<SessionInspectorService, SessionInspectorService>(context, SessionInspectorService.class, serviceSet));
+                SessionInspectorChainImpl chainImpl = new SessionInspectorChainImpl(serviceSet);
+                inspectorChainRegistration = context.registerService(SessionInspectorChain.class, chainImpl, null);
+            }
 
             for (final ServiceTracker<?,?> tracker : trackers) {
                 tracker.open();
@@ -228,15 +241,21 @@ public final class GlobalActivator implements BundleActivator {
             }
             shutdownStringParsers();
 
-            final ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
+            ServiceRegistration<MetaContributorRegistry> metaContributorsRegistration = this.metaContributorsRegistration;
             if (null != metaContributorsRegistration) {
                 metaContributorsRegistration.unregister();
                 this.metaContributorsRegistration = null;
             }
 
+            ServiceRegistration<SessionInspectorChain> inspectorChainRegistration = this.inspectorChainRegistration;
+            if (null != inspectorChainRegistration) {
+                inspectorChainRegistration.unregister();
+                this.inspectorChainRegistration = null;
+            }
+
             OXExceptionInterceptorRegistration.dropInstance();
 
-            logger.debug("Global bundle successfully stopped");
+            logger.info("Global bundle successfully stopped");
         } catch (final Exception e) {
             logger.error("", e);
             throw e;

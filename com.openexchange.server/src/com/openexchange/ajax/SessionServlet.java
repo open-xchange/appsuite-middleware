@@ -68,7 +68,9 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -110,8 +112,8 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param resp The response
      * @throws OXException If initialization fails
      */
-    protected void initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        SessionUtility.defaultInitializeSession(req, resp);
+    protected SessionResult<ServerSession> initializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+        return SessionUtility.defaultInitializeSession(req, resp);
     }
 
     @Override
@@ -123,8 +125,15 @@ public abstract class SessionServlet extends AJAXServlet {
         try {
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType(CONTENTTYPE_JAVASCRIPT);
-            initializeSession(req, resp);
-            ServerSession session = SessionUtility.getSessionObject(req, true);
+
+            // Get session result
+            SessionResult<ServerSession> result = initializeSession(req, resp);
+            if (Reply.STOP == result.getReply()) {
+                return;
+            }
+
+            // Get associated session (may be null)
+            ServerSession session = result.getSession();
             if (null != session) {
                 /*
                  * Track DB schema
@@ -141,7 +150,7 @@ public abstract class SessionServlet extends AJAXServlet {
                 /*
                  * Check max. concurrent AJAX requests
                  */
-                final int maxConcurrentRequests = getMaxConcurrentRequests(session);
+                int maxConcurrentRequests = getMaxConcurrentRequests(session);
                 if (maxConcurrentRequests > 0) {
                     counter = (AtomicInteger) session.getParameter(Session.PARAM_COUNTER);
                     if (null != counter && counter.incrementAndGet() > maxConcurrentRequests) {
@@ -158,6 +167,8 @@ public abstract class SessionServlet extends AJAXServlet {
                     interceptor.intercept(session);
                 }
             }
+
+            // Invoke service() method
             super.service(req, resp);
         } catch (final RateLimitedException e) {
             resp.setContentType("text/plain; charset=UTF-8");
@@ -180,7 +191,7 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
-    protected void superService(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void superService(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         super.service(req, resp);
     }
 
@@ -191,17 +202,19 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param req The HTTP request
      * @param resp The HTTP response
      */
-    protected void handleSessiondException(final OXException e, final HttpServletRequest req, final HttpServletResponse resp) {
+    protected void handleSessiondException(OXException e, HttpServletRequest req, HttpServletResponse resp) {
         if (SessionUtility.isIpCheckError(e)) {
             try {
                 // Drop Open-Xchange cookies
-                final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-                final String sessionId = SessionUtility.getSessionId(req);
-                final ServerSession session = SessionUtility.getSession(req, sessionId, sessiondService);
-                SessionUtility.removeOXCookies(session.getHash(), req, resp);
+                SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+                String sessionId = SessionUtility.getSessionId(req);
+                SessionResult<ServerSession> result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
+                if (null != result.getSession()) {
+                    SessionUtility.removeOXCookies(result.getSession().getHash(), req, resp);
+                }
                 SessionUtility.removeJSESSIONID(req, resp);
                 sessiondService.removeSession(sessionId);
-            } catch (final Exception e2) {
+            } catch (Exception e2) {
                 LOG.error("Cookies could not be removed.", e2);
             } finally {
                 LogProperties.removeSessionProperties();
@@ -217,7 +230,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @param httpResponse The HTTP response
      * @throws IOException If an I/O error occurs
      */
-    protected void writeErrorAsJsCallback(final OXException e, final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException {
+    protected void writeErrorAsJsCallback(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         try {
             // As API response
             APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
@@ -225,7 +238,7 @@ public abstract class SessionServlet extends AJAXServlet {
             LOG.error("", e);
             try {
                 httpResponse.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "A JSON error occurred: " + e.getMessage());
-            } catch (final IOException ioe) {
+            } catch (IOException ioe) {
                 LOG.error("", ioe);
             }
         }

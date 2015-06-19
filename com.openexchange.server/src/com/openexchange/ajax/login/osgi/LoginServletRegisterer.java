@@ -128,10 +128,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (null != tmp && tmp instanceof String) {
                 String action = (String) tmp;
                 LoginRequestHandler handler = (LoginRequestHandler) obj;
-                handlers.put(action, handler);
-                if (null != login) {
-                    login.addRequestHandler(action, handler);
-                }
+                addLoginRequestHandler(action, handler);
             }
         }
         if (needsRegistration) {
@@ -225,15 +222,26 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             lock.unlock();
         }
         if (null != removeAction) {
-            handlers.remove(removeAction);
-            if (null != login) {
-                login.removeRequestHandler(removeAction);
-            }
+            removeLoginRequestHandler(removeAction);
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
             unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + SERVLET_PATH_APPENDIX);
         }
         context.ungetService(reference);
+    }
+
+    public void addLoginRequestHandler(String action, LoginRequestHandler handler) {
+        handlers.put(action, handler);
+        if (null != login) {
+            login.addRequestHandler(action, handler);
+        }
+    }
+
+    public void removeLoginRequestHandler(String action) {
+        handlers.remove(action);
+        if (null != login) {
+            login.removeRequestHandler(action);
+        }
     }
 }

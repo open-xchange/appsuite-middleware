@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.saml overrides" basedir=".">
+
+    <description>
+        This build file overrides the postInstall target to install templates.
+    </description>
+
+    <!-- Constants -->
+    <property name="templatesDir" value="templates"/>
+
+    <import file="build-project.xml"/>
+
+    <target name="postInstall">
+        <mkdir dir="${destDir}/${prefix}/${templatesDir}"/>
+        <copy todir="${destDir}/${prefix}/${templatesDir}">
+            <fileset dir="${templatesDir}"/>
+        </copy>
+    </target>
+
+</project>

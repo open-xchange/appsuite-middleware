@@ -72,6 +72,26 @@ public interface CustomPortable extends Portable {
     public static final int PORTABLEREPORT_CLASS_ID = 9;
 
     /**
+     * Unique id for PortableUserSessionsCleaner
+     */
+    public static final int PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID = 20;
+
+    /**
+     * Unique id for PortableSessionFilterApplier
+     */
+    public static final int PORTABLE_SESSIONS_FILTER_APPLIER_CLASS_ID = 21;
+
+    /**
+     * Unique id for PortableAuthnRequestInfo
+     */
+    public static final int PORTABLE_SAML_AUTHN_REQUEST_INFO = 22;
+
+    /**
+     * Unique id for PortableLogoutRequestInfo
+     */
+    public static final int PORTABLE_SAML_LOGOUT_REQUEST_INFO = 23;
+
+    /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
      * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
@@ -106,7 +126,14 @@ public interface CustomPortable extends Portable {
      * <li><code>  14</code>: com.openexchange.realtime.hazelcast.serialization.channel.PortableStanzaDispatcher</li>
      * <li><code>  15</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher</li>
      * <li><code>  16</code>: com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupStatus</li>
-     * <li><code> 17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
+     * <li><code>  17</code>: com.openexchange.caching.events.ms.internal.PortableCacheKey</li>
+     *
+     * <li><code>  19</code>: com.openexchange.session.reservation.impl.portable.PortableReservation</li>
+     * <li><code>  20</code>: com.openexchange.sessiond.serialization.PortableUserSessionsCleaner, used via
+     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID}</li>
+     * <li><code>  21</code>: com.openexchange.sessiond.serialization.PortableSessionFilterApplier</li>
+     * <li><code>  22</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
+     * <li><code>  23</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
      * </ul>
      *
      * @return The class ID

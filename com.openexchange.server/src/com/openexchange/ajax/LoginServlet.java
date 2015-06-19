@@ -109,7 +109,9 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -117,6 +119,7 @@ import com.openexchange.tools.io.IOTools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -208,6 +211,7 @@ public class LoginServlet extends AJAXServlet {
 
     /**
      * Gets the name of the public session cookie for specified HTTP request.
+     *
      * <pre>
      *  "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
      * </pre>
@@ -302,7 +306,7 @@ public class LoginServlet extends AJAXServlet {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 String randomToken = null;
-                if(conf.isRandomTokenEnabled()) {
+                if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
@@ -329,7 +333,12 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                    LOG.info(
+                                        "Changing IP of session {} with authID: {} from {} to {}.",
+                                        session.getSessionID(),
+                                        session.getAuthId(),
+                                        oldIP,
+                                        newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -359,7 +368,10 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info(
+                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
+                            context.getContextId(),
+                            user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -368,7 +380,10 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info(
+                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
+                        session.getContextId(),
+                        session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -426,14 +441,22 @@ public class LoginServlet extends AJAXServlet {
                             session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
                             if (null != secret) {
-                                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
+                                LOG.info(
+                                    "Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".",
+                                    secret,
+                                    session.getSecret());
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
                             // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
-                            LOG.info("Changing IP of session {} with authID: {} from {} to {}", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                            LOG.info(
+                                "Changing IP of session {} with authID: {} from {} to {}",
+                                session.getSessionID(),
+                                session.getAuthId(),
+                                oldIP,
+                                newIP);
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");
@@ -465,7 +488,7 @@ public class LoginServlet extends AJAXServlet {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 String randomToken = null;
-                if(conf.isRandomTokenEnabled()) {
+                if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
@@ -492,7 +515,12 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                    LOG.info(
+                                        "Changing IP of session {} with authID: {} from {} to {}.",
+                                        session.getSessionID(),
+                                        session.getAuthId(),
+                                        oldIP,
+                                        newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -522,7 +550,10 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info(
+                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
+                            context.getContextId(),
+                            user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -531,7 +562,10 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info(
+                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
+                        session.getContextId(),
+                        session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -708,7 +742,15 @@ public class LoginServlet extends AJAXServlet {
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
         }
-        final Session session = SessionUtility.getSession(conf.getHashSource(), req, sessionId, sessiond);
+        SessionResult<ServerSession> result = SessionUtility.getSession(conf.getHashSource(), req, resp, sessionId, sessiond);
+        if (Reply.STOP == result.getReply()) {
+            return;
+        }
+        Session session = result.getSession();
+        if (null == session) {
+            // Should not occur
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
         try {
             SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
             if (type == CookieType.SESSION) {
@@ -772,7 +814,7 @@ public class LoginServlet extends AJAXServlet {
         final com.openexchange.authentication.Cookie[] cookies = result.getCookies();
         if (null != cookies) {
             for (final com.openexchange.authentication.Cookie cookie : cookies) {
-                resp.addCookie(wrapCookie(cookie));
+                resp.addCookie(wrapCookie(cookie, result));
             }
         }
         final com.openexchange.authentication.Header[] headers = result.getHeaders();
@@ -783,8 +825,10 @@ public class LoginServlet extends AJAXServlet {
         }
     }
 
-    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie) {
-        return new Cookie(cookie.getName(), cookie.getValue());
+    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie, LoginResult result) {
+        Cookie servletCookie = new Cookie(cookie.getName(), cookie.getValue());
+        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), confReference.get());
+        return servletCookie;
     }
 
     /**
@@ -881,5 +925,5 @@ public class LoginServlet extends AJAXServlet {
         return null == serverName ? LogProperties.getLogProperty(LogProperties.Name.AJP_SERVER_NAME) : serverName;
     }
 
-    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    public static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
 }
