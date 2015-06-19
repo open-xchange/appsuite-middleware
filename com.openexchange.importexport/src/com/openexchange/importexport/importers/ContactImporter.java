@@ -49,7 +49,9 @@
 
 package com.openexchange.importexport.importers;
 
+import java.io.ByteArrayInputStream;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.container.Contact;
@@ -105,9 +107,19 @@ public abstract class ContactImporter extends AbstractImporter {
      */
     protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
         ContactService contactService = ImportExportServices.getContactService();
+        VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService();
+
         if (null == contactService) {
             throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
         }
+        
+        if (vCard != null && vCardStorage != null) {
+            String vCardId = vCardStorage.saveVCard(new ByteArrayInputStream(vCard.getBytes()), session.getContextId());
+            if (vCardId != null) {
+                contact.setVCardId(vCardId);
+            }
+        }
+
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
             try {
                 contactService.createContact(session, folderID, contact);
@@ -120,6 +132,11 @@ public abstract class ContactImporter extends AbstractImporter {
                 }
                 // re-throw
                 throw e;
+            } finally {
+                if (vCardStorage != null && contact.getVCardId() != null && contact.getObjectID() == 0) {
+                    vCardStorage.deleteVCard(contact.getVCardId(), session.getContextId());
+                    contact.removeVCardId();
+                }
             }
         }
     }

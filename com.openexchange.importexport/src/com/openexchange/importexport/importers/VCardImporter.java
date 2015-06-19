@@ -49,16 +49,17 @@
 
 package com.openexchange.importexport.importers;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
 import com.openexchange.exception.OXExceptionConstants;
@@ -70,23 +71,17 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.vcard.VCardFileToken;
 import com.openexchange.importexport.formats.vcard.VCardTokenizer;
+import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This importer translates VCards into contacts for the OX.
  *
- * @see OXContainerConverter - if you have a problem with the content of the parsed ICAL file
  * @see ContactService - if you cannot enter the parsed content as contact into the database
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -179,12 +174,9 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             }
         }
 
-        OXContainerConverter oxContainerConverter = null;
-
         final List<ImportResult> list = new ArrayList<ImportResult>();
 
         try {
-            oxContainerConverter = new OXContainerConverter(session);
             final VCardTokenizer tokenizer = new VCardTokenizer(is);
             final List<VCardFileToken> chunks = tokenizer.split();
             if (chunks.isEmpty()) {
@@ -192,54 +184,39 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             }
             int count = 0;
             int limit = getLimit(session);
+            
+            VCardService vCardService = ImportExportServices.getVCardService();
+
             for (final VCardFileToken chunk : chunks) {
-                final VersitDefinition def = chunk.getVersitDefinition();
                 final ImportResult importResult = new ImportResult();
 
-                if (def == null) {
-                    // could not find appropriate parser for this part of the vcard file
-                    LOG.error("Could not recognize format of the following VCard data: {}", Arrays.toString(chunk.getContent()));
-                    importResult.setDate(new Date(System.currentTimeMillis()));
-                    importResult.setException(ImportExportExceptionCodes.UNKNOWN_VCARD_FORMAT.create(chunk.getContent()));
-                } else {
-                    final VersitDefinition.Reader versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(chunk.getContent()), "UTF-8");
-                    try {
-                        final VersitObject versitObject = def.parse(versitReader);
+                try {
+                    if (limit <= 0 || count <= limit) {
+                        importResult.setFolder(String.valueOf(contactFolderId));
 
-                        if (limit <= 0 || count <= limit) {
-
-                            importResult.setFolder(String.valueOf(contactFolderId));
-
-                            final Contact contactObj = oxContainerConverter.convertContact(versitObject);
-                            contactObj.setParentFolderID(contactFolderId);
-                            importResult.setDate(new Date());
-                            try {
-                                super.createContact(session, contactObj, Integer.toString(contactFolderId), new String(chunk.getContent()));
-                                count++;
-                            } catch (final OXException oxEx) {
-                                if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
-                                    LOG.debug("", oxEx);
-                                } else {
-                                    LOG.error("", oxEx);
-                                }
-                                importResult.setException(oxEx);
-                                LOG.debug("cannot import contact object", oxEx);
+                        Contact contactObj = vCardService.importVCard(new ByteArrayInputStream(chunk.getContent()), null, null); 
+                        contactObj.setParentFolderID(contactFolderId);
+                        importResult.setDate(new Date());
+                        try {
+                            super.createContact(session, contactObj, Integer.toString(contactFolderId), new String(chunk.getContent()));
+                            count++;
+                        } catch (final OXException oxEx) {
+                            if (CATEGORY_USER_INPUT.equals(oxEx.getCategory())) {
+                                LOG.debug("", oxEx);
+                            } else {
+                                LOG.error("", oxEx);
                             }
-                            importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
-                            importResult.setDate(contactObj.getLastModified());
-                        } else {
-                            throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
+                            importResult.setException(oxEx);
+                            LOG.debug("cannot import contact object", oxEx);
                         }
-                    } catch (final VersitException e) {
-                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
-                        importResult.setException(ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage()));
-                    } catch (final ConverterException e) {
-                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
-                        importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
-                    } catch (final RuntimeException e) {
-                        LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
-                        importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
+                        importResult.setObjectId(String.valueOf(contactObj.getObjectID()));
+                        importResult.setDate(contactObj.getLastModified());
+                    } else {
+                        throw ImportExportExceptionCodes.LIMIT_EXCEEDED.create(limit);
                     }
+                } catch (final RuntimeException e) {
+                    LOG.error(generateErrorMessage(e, LOG.isDebugEnabled() ? new String(chunk.getContent(), Charsets.UTF_8) : null), e);
+                    importResult.setException(ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage()));
                 }
                 list.add(importResult);
             }
@@ -249,13 +226,6 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
         } catch (final IOException e) {
             LOG.error("", e);
             throw ImportExportExceptionCodes.VCARD_PARSING_PROBLEM.create(e, e.getMessage());
-        } catch (final ConverterException e) {
-            LOG.error("", e);
-            throw ImportExportExceptionCodes.VCARD_CONVERSION_PROBLEM.create(e, e.getMessage());
-        } finally {
-            if (oxContainerConverter != null) {
-                oxContainerConverter.close();
-            }
         }
 
         return list;
