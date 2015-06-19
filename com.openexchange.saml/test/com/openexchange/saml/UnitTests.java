@@ -63,7 +63,8 @@ import org.junit.runners.Suite.SuiteClasses;
 @RunWith(Suite.class)
 @SuiteClasses({
     KeySpecCredentialProviderTest.class,
-    SAMLWebSSOProviderTest.class
+    SAMLWebSSOProviderTest.class,
+    HzStateManagementTest.class
 })
 public class UnitTests {
 

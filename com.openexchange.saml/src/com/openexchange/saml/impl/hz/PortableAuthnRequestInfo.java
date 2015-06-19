@@ -71,6 +71,8 @@ public class PortableAuthnRequestInfo extends AbstractCustomPortable {
 
     private static final String LOGIN_PATH = "loginPath";
 
+    private static final String CLIENT = "client";
+
     private AuthnRequestInfo delegate;
 
     public PortableAuthnRequestInfo() {
@@ -100,6 +102,7 @@ public class PortableAuthnRequestInfo extends AbstractCustomPortable {
         writer.writeUTF(REQUEST_ID, delegate.getRequestId());
         writer.writeUTF(DOMAIN_NAME, delegate.getDomainName());
         writer.writeUTF(LOGIN_PATH, delegate.getLoginPath());
+        writer.writeUTF(CLIENT, delegate.getClientID());
     }
 
     @Override
@@ -108,6 +111,7 @@ public class PortableAuthnRequestInfo extends AbstractCustomPortable {
         dari.setDomainName(reader.readUTF(DOMAIN_NAME));
         dari.setRequestId(reader.readUTF(REQUEST_ID));
         dari.setLoginPath(reader.readUTF(LOGIN_PATH));
+        dari.setClientID(reader.readUTF(CLIENT));
         setDelegate(dari);
     }
 

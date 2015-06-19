@@ -68,6 +68,7 @@ import org.opensaml.xml.signature.Signature;
 import org.opensaml.xml.signature.Signer;
 import org.opensaml.xml.util.Base64;
 import org.opensaml.xml.util.XMLHelper;
+import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.contexts.Context;
@@ -200,6 +201,7 @@ public class SAMLWebSSOProviderTest {
             .setPath("/appsuite/api/saml/init")
             .setParameter("flow", "login")
             .setParameter("loginPath", requestedLoginPath)
+            .setParameter("client", "test-client")
             .build());
         URI authnRequestURI = new URI(provider.buildAuthnRequest(loginHTTPRequest, new SimHttpServletResponse()));
 
@@ -234,6 +236,7 @@ public class SAMLWebSSOProviderTest {
         Assert.assertEquals(requestHost, locationURI.getHost());
         Map<String, String> redirectParams = parseURIQuery(locationURI);
         Assert.assertEquals(requestedLoginPath, redirectParams.get("uiWebPath"));
+        Assert.assertEquals("test-client", redirectParams.get(LoginFields.CLIENT_PARAM));
         Assert.assertEquals("redeemReservation", redirectParams.get("action"));
         String reservationToken = redirectParams.get("token");
         Assert.assertNotNull(reservationToken);
