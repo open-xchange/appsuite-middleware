@@ -1041,7 +1041,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
             try {
                 // Initialize mover instance
-                FilestoreDataMover fsdm = FilestoreDataMover.newContextMover(oxu.getFilestore(srcStore_id), dst_filestore, ctx);
+                FilestoreDataMover fsdm = FilestoreDataMover.newContextMover(oxu.getFilestore(srcStore_id), destFilestore, ctx);
 
                 // Enable context after processing
                 fsdm.addPostProcessTask(new PostProcessTask() {
