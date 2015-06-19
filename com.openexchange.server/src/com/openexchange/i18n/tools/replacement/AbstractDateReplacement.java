@@ -100,12 +100,13 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
     protected AbstractDateReplacement(final Date date, final boolean withTime, final Locale locale, TimeZone timeZone) {
         super();
         this.withTime = withTime;
-        if(!withTime) {
-            timeZone = TimeZone.getTimeZone("UTC"); // No need to start calculating TZ offset with dates only. Assume UTC.
-        }
         this.date = date;
         this.dateFormat = getDateFormat(withTime, locale, timeZone);
-        this.timeZone = timeZone;
+        if (!withTime) {
+            this.timeZone = TimeZone.getTimeZone("UTC"); // No need to start calculating TZ offset with dates only. Assume UTC.
+        } else {
+            this.timeZone = timeZone;
+        }
     }
 
     @Override
@@ -249,8 +250,8 @@ public abstract class AbstractDateReplacement implements TemplateReplacement {
         /*
          * The date-only instance
          */
-        final DateFormat format = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
-
+        DateFormat format = DateFormat.getDateInstance(DateFormat.DEFAULT, l);
+        format.setTimeZone(timeZone);
         return format;
     }
 
