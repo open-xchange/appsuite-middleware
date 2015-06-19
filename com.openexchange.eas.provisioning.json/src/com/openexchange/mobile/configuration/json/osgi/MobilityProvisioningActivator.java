@@ -50,9 +50,7 @@
 package com.openexchange.mobile.configuration.json.osgi;
 
 import static com.openexchange.mobile.configuration.json.osgi.MobilityProvisioningServiceRegistry.getInstance;
-import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
-import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.mobile.configuration.json.action.ActionService;
@@ -68,6 +66,7 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
     private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MobilityProvisioningActivator.class);
     private final static String SERVLET_PATH_APPENDIX = "mobilityprovisioning";
+    private volatile String alias;
 
 	public MobilityProvisioningActivator() {
 		super();
@@ -75,41 +74,18 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 
 	@Override
 	protected Class<?>[] getNeededServices() {
-		return new Class<?>[] { ConfigurationService.class,HttpService.class, DispatcherPrefixService.class };
+		return new Class<?>[] { ConfigurationService.class, HttpService.class, DispatcherPrefixService.class };
 	}
 
 	@Override
 	protected void handleAvailability(final Class<?> clazz) {
-		LOG.warn("Absent service: {}", clazz.getName());
-		final Object service = getService(clazz);
-		if (service instanceof HttpService) {
-		    final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
-            if (null != dispatcherPrefixService) {
-                final String alias = dispatcherPrefixService.getPrefix() + SERVLET_PATH_APPENDIX;
-                try {
-                    ((HttpService) service).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
-                } catch (final ServletException e) {
-                    LOG.error("Unable to register servlet for {}", alias, e);
-                } catch (final NamespaceException e) {
-                    LOG.error("Unable to register servlet for {}", alias, e);
-                } catch (final Exception e) {
-                    LOG.error("Unable to register servlet for {}", alias, e);
-                }
-		    }
-		}
-        getInstance().addService(clazz, service);
+	    LOG.info("Re-available service: {}", clazz.getName());
+		getInstance().addService(clazz, this.<Object>getService(clazz));
 	}
 
 	@Override
 	protected void handleUnavailability(final Class<?> clazz) {
-		LOG.info("Re-available service: {}", clazz.getName());
-		if (HttpService.class.equals(clazz)) {
-		    final HttpService service = getService(HttpService.class);
-		    final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
-            if (null != service && null != dispatcherPrefixService) {
-                service.unregister(dispatcherPrefixService.getPrefix() + SERVLET_PATH_APPENDIX);
-            }
-		}
+	    LOG.warn("Absent service: {}", clazz.getName());
 		getInstance().removeService(clazz);
 
 	}
@@ -130,7 +106,9 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 				}
 			}
 
-			getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX, new MobilityProvisioningServlet(), null, null);
+			String alias = getService(DispatcherPrefixService.class).getPrefix() + SERVLET_PATH_APPENDIX;
+            getService(HttpService.class).registerServlet(alias, new MobilityProvisioningServlet(), null, null);
+            this.alias = alias;
 
             track(ActionService.class, new ActionServiceListener(context));
             openTrackers();
@@ -145,9 +123,12 @@ public class MobilityProvisioningActivator extends HousekeepingActivator {
 	protected void stopBundle() throws Exception {
 		try {
 		    final HttpService service = getService(HttpService.class);
-            final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
-            if (null != service && null != dispatcherPrefixService) {
-                service.unregister(dispatcherPrefixService.getPrefix() + SERVLET_PATH_APPENDIX);
+            if (null != service) {
+                String alias = this.alias;
+                if (null != alias) {
+                    service.unregister(alias);
+                    this.alias = null;
+                }
             }
             /*
              * Close service trackers

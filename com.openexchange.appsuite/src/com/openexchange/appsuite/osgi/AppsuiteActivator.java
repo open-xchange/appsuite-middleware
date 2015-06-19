@@ -75,6 +75,7 @@ import com.openexchange.tools.session.ServerSession;
 public class AppsuiteActivator extends HousekeepingActivator implements ForcedReloadable {
 
     private volatile AppsLoadServlet appsLoadServlet;
+    private volatile String alias;
 
     /**
      * Initializes a new {@link AppsuiteActivator}.
@@ -136,7 +137,9 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
             if (null == prefix) {
                 prefix = Dispatcher.PREFIX.get();
             }
-            getService(HttpService.class).registerServlet(prefix + "apps/load", appsLoadServlet, null, null);
+            String alias = prefix + "apps/load";
+            getService(HttpService.class).registerServlet(alias, appsLoadServlet, null, null);
+            this.alias = alias;
 
             StringBuilder sb = new StringBuilder(128);
             for (File app : apps) {
@@ -148,6 +151,19 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
 
         // Register ramp-up service
         registerService(LoginRampUpService.class, new AppSuiteLoginRampUp(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            String alias = this.alias;
+            if (null != alias) {
+                httpService.unregister(alias);
+                this.alias = null;
+            }
+        }
+        super.stopBundle();
     }
 
     private File[] getApps(ConfigurationService config) throws BundleException {

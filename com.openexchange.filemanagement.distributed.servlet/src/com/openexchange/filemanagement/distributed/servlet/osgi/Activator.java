@@ -10,6 +10,8 @@ import com.openexchange.osgi.HousekeepingActivator;
 
 public class Activator extends HousekeepingActivator {
 
+    private volatile String alias;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { HttpService.class, ManagedFileManagement.class, ConfigurationService.class, DispatcherPrefixService.class };
@@ -17,9 +19,23 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
         HttpService service = getService(HttpService.class);
-        service.registerServlet(getService(DispatcherPrefixService.class).getPrefix() + DistributedFileServlet.PATH, new DistributedFileServlet(this), null, null);
+        String alias = getService(DispatcherPrefixService.class).getPrefix() + DistributedFileServlet.PATH;
+        service.registerServlet(alias, new DistributedFileServlet(this), null, null);
+        this.alias = alias;
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpService service = getService(HttpService.class);
+        if (null != service) {
+            String alias = this.alias;
+            if (null != alias) {
+                service.unregister(alias);
+                this.alias = null;
+            }
+        }
+        super.stopBundle();
     }
 
 }
