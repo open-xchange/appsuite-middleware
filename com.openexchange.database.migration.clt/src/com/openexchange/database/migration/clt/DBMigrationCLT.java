@@ -49,25 +49,32 @@
 
 package com.openexchange.database.migration.clt;
 
+import java.util.Set;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
+import javax.management.MBeanServerInvocationHandler;
+import javax.management.ObjectName;
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.MissingOptionException;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.cli.AbstractMBeanCLI;
 import com.openexchange.database.migration.mbean.DBMigrationMBean;
+import com.openexchange.java.Strings;
 
 /**
- * Command line tool to control config database migrations.
+ * Command line tool to control database migrations.
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since 7.6.1
  */
-public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
+public class DBMigrationCLT extends AbstractMBeanCLI<Void> {
 
+    private static final String OPT_SCHEMA_NAME_SHORT = "n";
+    private static final String OPT_SCHEMA_NAME_LONG = "name";
     private static final String OPT_UNLOCK_SHORT = "u";
     private static final String OPT_UNLOCK_LONG = "force-unlock";
     private static final String OPT_LIST_LOCKS_SHORT = "ll";
@@ -76,7 +83,7 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
     private static final String OPT_RUN_LONG = "run";
 
     public static void main(String[] args) {
-        new ConfigDBMigrationCLT().execute(args);
+        new DBMigrationCLT().execute(args);
     }
 
     // ------------------------------------------------------------------------------------ //
@@ -84,7 +91,7 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
     /**
      * Initializes a new {@link CloseSessionsCLT}.
      */
-    private ConfigDBMigrationCLT() {
+    private DBMigrationCLT() {
         super();
     }
 
@@ -125,7 +132,7 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected String getName() {
-        return "configdbmigrations";
+        return "dbmigrations";
     }
 
     /**
@@ -133,6 +140,10 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected void addOptions(Options options) {
+        OptionGroup requiredOptions = new OptionGroup();
+        requiredOptions.setRequired(true);
+        requiredOptions.addOption(new Option(OPT_SCHEMA_NAME_SHORT, OPT_SCHEMA_NAME_LONG, true, "The database schema name to use"));
+        options.addOptionGroup(requiredOptions);
         OptionGroup ops = new OptionGroup();
         ops.setRequired(false);
         ops.addOption(new Option(OPT_RUN_SHORT, OPT_RUN_LONG, false, "Forces a run of the current core changelog."));
@@ -146,8 +157,32 @@ public class ConfigDBMigrationCLT extends AbstractMBeanCLI<Void> {
      */
     @Override
     protected Void invoke(Options options, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
-        DBMigrationMBean migrationMBean = getMBean(mbsc, DBMigrationMBean.class, DBMigrationMBean.DOMAIN);
-
+        String schemaName = cmd.getOptionValue(OPT_SCHEMA_NAME_SHORT);
+        if (Strings.isEmpty(schemaName)) {
+            throw new MissingOptionException("Database schema name missing");
+        }
+        /*
+         * search matching migration MBean
+         */
+        Set<ObjectName> objectNames = mbsc.queryNames(new ObjectName(DBMigrationMBean.DOMAIN + ":*,name=" + schemaName), null);
+        if (null == objectNames || 0 == objectNames.size()) {
+            System.err.println("No migration MBean found for schema name \"" + schemaName + "\"");
+            System.exit(1);
+            return null;
+        }
+        if (1 < objectNames.size()) {
+            System.err.println("More than one matching migration MBeans found for schema name \"" + schemaName + "\":");
+            for (ObjectName objectName : objectNames) {
+                System.err.println(" - " + objectName);
+            }
+            System.exit(1);
+            return null;
+        }
+        /*
+         * instantiate proxy & invoke requested operation
+         */
+        ObjectName objectName = objectNames.iterator().next();
+        DBMigrationMBean migrationMBean = MBeanServerInvocationHandler.newProxyInstance(mbsc, objectName, DBMigrationMBean.class, false);
         if (cmd.hasOption(OPT_RUN_SHORT)) {
             migrationMBean.forceMigration();
             System.out.println("Done.\nCurrent status: " + migrationMBean.getMigrationStatus());
