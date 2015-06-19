@@ -336,6 +336,8 @@ public class ContentType extends ParameterizedHeader {
 
     private static final String PARAM_NAME = "name";
 
+    private static final String PARAM_BOUNDARY = "boundary";
+
     private String primaryType;
 
     private String subType;
@@ -831,6 +833,20 @@ public class ContentType extends ParameterizedHeader {
      */
     public String removeNameParameter() {
         return removeParameter(PARAM_NAME);
+    }
+
+    /**
+     * @return the <code>"boundary"</code> value or <code>null</code> if not present
+     */
+    public String getBoundaryParameter() {
+        return getParameter(PARAM_BOUNDARY);
+    }
+
+    /**
+     * @return <code>true</code> if <code>"boundary"</code> parameter is present, <code>false</code> otherwise
+     */
+    public boolean containsBoundaryParameter() {
+        return containsParameter(PARAM_BOUNDARY);
     }
 
     /**
