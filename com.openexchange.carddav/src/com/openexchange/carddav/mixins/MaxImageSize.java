@@ -78,7 +78,7 @@ public class MaxImageSize extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        long maxSize;
+        Long maxSize;
         Long defaultValue = Long.valueOf(4194304);
         try {
             maxSize = factory.optConfigValue("max_image_size", Long.class, defaultValue);
