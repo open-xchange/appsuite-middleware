@@ -1,3 +1,7 @@
+* 2015-06-21 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36886: Set proper folder identifier in "com.openexchange.groupware.tasks.InternalParticipant" instance
+
 * 2015-06-19 - marcus.klein@open-xchange.com
 
  - Fix for bug 38021: Date formatting for participant notification mails used server time zone instead of UTC.
@@ -9,7 +13,7 @@
 * 2015-06-19 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38778: Don't try to strip the dispatcher prefix if it's not known
- - Fix for bug 38283: Pass reloaded filestore reference to data mover 
+ - Fix for bug 38283: Pass reloaded filestore reference to data mover
 
 * 2015-06-19 - martin.herfurth@open-xchange.com
 
