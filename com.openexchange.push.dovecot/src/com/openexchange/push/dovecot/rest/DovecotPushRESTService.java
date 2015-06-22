@@ -1,14 +1,12 @@
 
 package com.openexchange.push.dovecot.rest;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.rest.services.OXRESTService;
+import com.openexchange.rest.services.annotations.PUT;
+import com.openexchange.rest.services.annotations.ROOT;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -17,8 +15,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.2
  */
-@Path("/http-notify/v1/")
-public class DovecotPushRESTService {
+@ROOT("/http-notify/v1/")
+public class DovecotPushRESTService extends OXRESTService<Void> {
 
     /**
      * Initializes a new {@link DovecotPushRESTService}.
@@ -35,12 +33,15 @@ public class DovecotPushRESTService {
      *
      * Notifies about passed event.<br>
      */
-    @PUT
-    @Path("/notify")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
-    public JSONObject notify(JSONObject data) throws OXException {
-        if (data == null || data.isEmpty()) {
+    @PUT("/notify")
+    public Object notifyMethod() throws OXException {
+        Object data = request.getData();
+        if (!(data instanceof JSONObject)) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
+        JSONObject jData = (JSONObject) data;
+        if (jData.isEmpty()) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
 
