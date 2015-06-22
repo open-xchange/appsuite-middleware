@@ -123,6 +123,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     new InternalParticipant(participant, groupId);
                 taskParticipant.setConfirm(result.getInt(pos++));
                 taskParticipant.setConfirmMessage(result.getString(pos++));
+                // Only for removed participants the folder is stored in the participant table. For all active participants the folder
+                // is stored in the task_folder table.
                 if (StorageType.REMOVED == type) {
                     final int folderId = result.getInt(pos++);
                     if (0 == folderId) {
