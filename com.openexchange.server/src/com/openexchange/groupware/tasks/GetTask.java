@@ -154,7 +154,7 @@ public final class GetTask {
     }
 
     /**
-     * TODO instanciate this class with the normal folder object.
+     * TODO instantiate this class with the normal folder object.
      */
     private FolderObject getFolder() throws OXException {
         if (null == folder) {
