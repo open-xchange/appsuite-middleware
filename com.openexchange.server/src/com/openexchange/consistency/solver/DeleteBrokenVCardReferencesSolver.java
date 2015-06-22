@@ -69,7 +69,7 @@ public class DeleteBrokenVCardReferencesSolver implements ProblemSolver {
     public void solve(Context ctx, Set<String> problems) throws OXException {
         VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
         if (vCardStorageMetadataStore == null) {
-            LOG.warn("TODO");
+            LOG.warn("Required service VCardStorageMetadataStore absent. Unable to solve VCard related consistency issues on storage.");
             return;
         }
         if (problems.size() > 0) {
