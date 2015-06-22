@@ -49,44 +49,56 @@
 
 package com.openexchange.consistency.osgi;
 
-import org.slf4j.Logger;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ConsistencyActivator}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * {@link ConsistencyServiceLookup}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public final class ConsistencyActivator extends HousekeepingActivator {
+public class ConsistencyServiceLookup {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyActivator.class);
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(this);
-
-        track(ManagementService.class, new MBeanRegisterer(context));
-        trackService(VCardStorageMetadataStore.class);
-        trackService(VCardStorageService.class);
-
-        openTrackers();
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(final ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
-    @Override
-    public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(null);
+    public static <S extends Object> S getService(final Class<? extends S> c) throws OXException {
+        return ConsistencyServiceLookup.getService(c, false);
+    }
 
-        closeTrackers();
-        super.stopBundle();
+    public static <S extends Object> S getService(final Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        final ServiceLookup serviceLookup = ref.get();
+        final S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
     }
 }

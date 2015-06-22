@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,35 @@
  *
  */
 
-package com.openexchange.consistency.osgi;
+package com.openexchange.consistency.solver;
 
-import org.slf4j.Logger;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.Set;
+import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 
 /**
- * {@link ConsistencyActivator}
+ * {@link DeleteBrokenPreviewReferencesSolver}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public final class ConsistencyActivator extends HousekeepingActivator {
+public class DeleteBrokenPreviewReferencesSolver implements ProblemSolver {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteBrokenPreviewReferencesSolver.class);
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public void solve(Context ctx, Set<String> problems) throws OXException {
+        if (problems.size() > 0) {
+            ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
+            metadataStore.removeByRefId(ctx.getContextId(), problems);
+            LOG.info("Deleted {} broken preview cache references.", problems.size());
+        }
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(this);
-
-        track(ManagementService.class, new MBeanRegisterer(context));
-        trackService(VCardStorageMetadataStore.class);
-        trackService(VCardStorageService.class);
-
-        openTrackers();
+    public String description() {
+        return "delete broken preview references";
     }
 
-    @Override
-    public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(null);
-
-        closeTrackers();
-        super.stopBundle();
-    }
 }

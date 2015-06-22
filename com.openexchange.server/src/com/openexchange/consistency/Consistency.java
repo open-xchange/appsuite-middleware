@@ -49,21 +49,15 @@
 
 package com.openexchange.consistency;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getStatement;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,15 +66,28 @@ import java.util.TreeSet;
 import javax.management.MBeanException;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.consistency.osgi.ConsistencyServiceLookup;
+import com.openexchange.consistency.solver.CreateDummyFileForAttachmentSolver;
+import com.openexchange.consistency.solver.CreateDummyFileForInfoitemSolver;
+import com.openexchange.consistency.solver.CreateDummyFileForSnippetSolver;
+import com.openexchange.consistency.solver.CreateInfoitemSolver;
+import com.openexchange.consistency.solver.DeleteAttachmentSolver;
+import com.openexchange.consistency.solver.DeleteBrokenPreviewReferencesSolver;
+import com.openexchange.consistency.solver.DeleteBrokenVCardReferencesSolver;
+import com.openexchange.consistency.solver.DeleteInfoitemSolver;
+import com.openexchange.consistency.solver.DeleteSnippetSolver;
+import com.openexchange.consistency.solver.DoNothingSolver;
+import com.openexchange.consistency.solver.ProblemSolver;
+import com.openexchange.consistency.solver.RecordSolver;
+import com.openexchange.consistency.solver.RemoveFileSolver;
+import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -106,7 +113,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -182,7 +189,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -253,7 +260,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /*
      * FIXME: Here we should call com.openexchange.admin.storage.mysqlStorage.OXContextMySQLStorageCommon.deleteContextFromConfigDB(Connection, int)
-     *        for now I copied the code from there (except the empty schema deletion)
+     * for now I copied the code from there (except the empty schema deletion)
      */
     private void deleteContextFromConfigDB(final Connection configCon, final int contextId) throws SQLException {
         PreparedStatement stmt = null;
@@ -271,18 +278,18 @@ public abstract class Consistency implements ConsistencyMBean {
                 LOG.error("", e);
             }
 
-                LOG.debug("Deleting login2context entries for context {}", contextId);
+            LOG.debug("Deleting login2context entries for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM login2context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
-                LOG.debug("Deleting context entry for context {}", contextId);
+            LOG.debug("Deleting context entry for context {}", contextId);
             stmt = configCon.prepareStatement("DELETE FROM context WHERE cid=?");
             stmt.setInt(1, contextId);
             stmt.executeUpdate();
             stmt.close();
         } finally {
-            if( null != stmt ) {
+            if (null != stmt) {
                 stmt.close();
             }
         }
@@ -290,7 +297,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     @Override
     public List<String> checkOrRepairConfigDB(final boolean repair) throws MBeanException {
-        if( repair ) {
+        if (repair) {
             LOG.info("Repair inconsistent configdb");
         } else {
             LOG.info("List inconsistent configdb");
@@ -311,7 +318,7 @@ public abstract class Consistency implements ConsistencyMBean {
             while (rs.next()) {
                 final String schema = rs.getString(1);
                 final Integer ctx = Integer.valueOf(rs.getInt(2));
-                if( schemaMap.containsKey(schema)) {
+                if (schemaMap.containsKey(schema)) {
                     schemaMap.get(schema).add(ctx);
                 } else {
                     List<Integer> ctxs = new ArrayList<Integer>();
@@ -321,25 +328,25 @@ public abstract class Consistency implements ConsistencyMBean {
             }
             DBUtils.closeSQLStuff(rs, stmt);
             stmt = null;
-            for(final String schema : schemaMap.keySet()) {
+            for (final String schema : schemaMap.keySet()) {
                 List<Integer> ctxs = schemaMap.get(schema);
                 Integer poolid = schemaPoolMap.get(schema);
                 poolCon = Database.get(poolid.intValue(), schema);
                 String contextids = "";
-                for(final Integer c : ctxs) {
+                for (final Integer c : ctxs) {
                     contextids += c + ",";
                 }
-                contextids = contextids.substring(0, contextids.length()-1);
+                contextids = contextids.substring(0, contextids.length() - 1);
                 stmt = poolCon.prepareStatement("SELECT cid FROM login2user WHERE cid IN (" + contextids + ") GROUP BY cid");
                 rs = stmt.executeQuery();
                 while (rs.next()) {
                     final Integer ctx = Integer.valueOf(rs.getInt(1));
                     ctxs.remove(ctx);
                 }
-                if( ctxs.size() > 0 ) {
+                if (ctxs.size() > 0) {
                     LOG.info("Schema {} is broken", schema);
-                    for(final Integer ctx : ctxs) {
-                        if( repair ) {
+                    for (final Integer ctx : ctxs) {
+                        if (repair) {
                             LOG.info("Deleting inconsistent entry for context {} from configdb", ctx);
                             deleteContextFromConfigDB(confCon, ctx.intValue());
                             ret.add("Deleted inconsistent entry for context " + ctx + " from configdb");
@@ -354,7 +361,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 Database.back(poolid.intValue(), poolCon);
                 poolCon = null;
             }
-            if ( ret.size() == 0 && repair ) {
+            if (ret.size() == 0 && repair) {
                 ret.add("there was nothing to repair");
             }
             DBUtils.closeSQLStuff(rs, stmt);
@@ -384,7 +391,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
             retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
@@ -395,7 +402,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
             retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
@@ -479,8 +486,8 @@ public abstract class Consistency implements ConsistencyMBean {
         for (final Context ctx : contexts) {
             final FileStorage storage = getFileStorage(ctx);
 
-            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this);
-            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferences(), resolvers.filesolver, database, attachments, storage);
+            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, ctx);
+            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storage);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -535,11 +542,11 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws OXException {
+    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws OXException {
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
-        LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description());
+        LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
         try {
             stor.recreateStateFile();
         } catch (OXException e) {
@@ -563,6 +570,8 @@ public abstract class Consistency implements ConsistencyMBean {
         LOG.info("Found {} snippets", snippetset.size());
         final SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(ctx);
         LOG.info("Found {} previews", previewset.size());
+        final SortedSet<String> vcardset = getVCardFileStoreLocationsperContext(ctx);
+        LOG.info("Found {} vCards", vcardset.size());
         SortedSet<String> dbfileset;
         try {
             LOG.info("Loading all infostore filestore locations");
@@ -572,6 +581,7 @@ public abstract class Consistency implements ConsistencyMBean {
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
             joineddbfileset.addAll(previewset);
+            joineddbfileset.addAll(vcardset);
 
             LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
 
@@ -602,6 +612,10 @@ public abstract class Consistency implements ConsistencyMBean {
                 previewSolver.solve(ctx, previewset);
             }
 
+            if (diffset(vcardset, filestoreset, "database list of VCard files", "filestore list")) {
+                vCardSolver.solve(ctx, vcardset);
+            }
+
             // Build the difference set of the filestore set, so that the final
             // filestoreset contains all the members that aren't in the dbfileset or
             // the dbdelfileset
@@ -609,10 +623,18 @@ public abstract class Consistency implements ConsistencyMBean {
                 // implement the solver for the filestore here
                 fileSolver.solve(ctx, filestoreset);
             }
-
         } catch (final OXException e) {
             erroroutput(e);
         }
+    }
+
+    private SortedSet<String> getVCardFileStoreLocationsperContext(Context ctx) throws OXException {
+        VCardStorageMetadataStore vCardStorageMetadataStore = ConsistencyServiceLookup.getOptionalService(VCardStorageMetadataStore.class);
+        if (vCardStorageMetadataStore != null) {
+            Set<String> loadRefIds = vCardStorageMetadataStore.loadRefIds(ctx.getContextId());
+            return new TreeSet<String>(loadRefIds);
+        }
+        return new TreeSet<String>();
     }
 
     private SortedSet<String> getPreviewCacheFileStoreLocationsperContext(Context ctx) throws OXException {
@@ -623,13 +645,13 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private SortedSet<String> getSnippetFileStoreLocationsperContext(Context ctx) throws OXException {
         final SortedSet<String> retval = new TreeSet<String>();
-        Connection wcon = null;
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            wcon = Database.get(ctx, true);
-            if (tableExists(wcon, "snippet")) {
-                stmt = wcon.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
+            con = Database.get(ctx, false);
+            if (DBUtils.tableExists(con, "snippet")) {
+                stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
                 stmt.setInt(1, ctx.getContextId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
@@ -638,8 +660,8 @@ public abstract class Consistency implements ConsistencyMBean {
                 DBUtils.closeSQLStuff(rs, stmt);
                 stmt = null;
             }
-            if (tableExists(wcon, "snippetAttachment")) {
-                stmt = wcon.prepareStatement("SELECT referenceId FROM snippetAttachment WHERE cid=?");
+            if (DBUtils.tableExists(con, "snippetAttachment")) {
+                stmt = con.prepareStatement("SELECT referenceId FROM snippetAttachment WHERE cid=?");
                 stmt.setInt(1, ctx.getContextId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {
@@ -652,8 +674,8 @@ public abstract class Consistency implements ConsistencyMBean {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
-            if (null != wcon) {
-                Database.back(ctx, true, wcon);
+            if (null != con) {
+                Database.back(ctx, false, con);
             }
         }
         return retval;
@@ -696,19 +718,23 @@ public abstract class Consistency implements ConsistencyMBean {
 
         final ProblemSolver filesolver;
 
-        public ResolverPolicy(final ProblemSolver dbsolver, final ProblemSolver attachmentsolver, final ProblemSolver snippetsolver, final ProblemSolver filesolver) {
+        final ProblemSolver vCardSolver;
+
+        public ResolverPolicy(final ProblemSolver dbsolver, final ProblemSolver attachmentsolver, final ProblemSolver snippetsolver, final ProblemSolver filesolver, final ProblemSolver vCardSolver) {
             this.dbsolver = dbsolver;
             this.attachmentsolver = attachmentsolver;
             this.snippetsolver = snippetsolver;
             this.filesolver = filesolver;
+            this.vCardSolver = vCardSolver;
         }
 
-        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor, final Consistency consistency) throws OXException {
+        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor, final Consistency consistency, final Context context) throws OXException {
             final String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
             ProblemSolver snippetsolver = new DoNothingSolver();
             ProblemSolver filesolver = new DoNothingSolver();
+            ProblemSolver vCardSolver = new DoNothingSolver();
 
             for (final String option : options) {
                 final String[] tuple = option.split("\\s*:\\s*");
@@ -719,728 +745,48 @@ public abstract class Consistency implements ConsistencyMBean {
                 final String action = tuple[1];
                 if ("missing_file_for_infoitem".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        dbsolver = new CreateDummyFileForInfoitem(database, stor);
+                        dbsolver = new CreateDummyFileForInfoitemSolver(database, stor);
                     } else if ("delete".equals(action)) {
-                        dbsolver = new DeleteInfoitem(database);
+                        dbsolver = new DeleteInfoitemSolver(database);
                     } else {
                         dbsolver = new DoNothingSolver();
                     }
                 } else if ("missing_file_for_attachment".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        attachmentsolver = new CreateDummyFileForAttachment(attach, stor);
+                        attachmentsolver = new CreateDummyFileForAttachmentSolver(attach, stor);
                     } else if ("delete".equals(action)) {
-                        attachmentsolver = new DeleteAttachment(attach);
+                        attachmentsolver = new DeleteAttachmentSolver(attach);
                     } else {
                         attachmentsolver = new DoNothingSolver();
                     }
                 } else if ("missing_file_for_snippet".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        snippetsolver = new CreateDummyFileForSnippet(stor);
+                        snippetsolver = new CreateDummyFileForSnippetSolver(stor);
                     } else if ("delete".equals(action)) {
-                        snippetsolver = new DeleteSnippet();
+                        snippetsolver = new DeleteSnippetSolver();
                     } else {
                         snippetsolver = new DoNothingSolver();
                     }
+                } else if ("missing_file_for_vcard".equals(condition)) {
+                    if ("delete".equals(action)) {
+                        //TODO hat er alle geloescht?
+                        vCardSolver = new DeleteBrokenVCardReferencesSolver();
+                    } else {
+                        vCardSolver = new DoNothingSolver();
+                    }
                 } else if ("missing_entry_for_file".equals(condition)) {
                     if ("create_admin_infoitem".equals(action)) {
-                        filesolver = new CreateInfoitem(database, stor, consistency);
+                        filesolver = new CreateInfoitemSolver(database, stor, consistency.getAdmin(context));
                     } else if ("delete".equals(action)) {
-                        filesolver = new RemoveFile(stor);
+                        filesolver = new RemoveFileSolver(stor);
                     } else {
                         filesolver = new DoNothingSolver();
                     }
                 }
             }
 
-            return new ResolverPolicy(dbsolver, attachmentsolver, snippetsolver, filesolver);
+            return new ResolverPolicy(dbsolver, attachmentsolver, snippetsolver, filesolver, vCardSolver);
         }
 
     }
-
-    private static interface ProblemSolver {
-
-        public void solve(Context ctx, Set<String> problems) throws OXException;
-
-        String description();
-    }
-
-    private static class DoNothingSolver implements ProblemSolver {
-
-        public DoNothingSolver() {
-            super();
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            // Ignore
-        }
-
-        @Override
-        public String description() {
-            return "Do Nothing";
-        }
-    }
-
-    private static class RecordSolver implements ProblemSolver {
-
-        public RecordSolver() {
-            super();
-        }
-
-        private final List<String> memory = new ArrayList<String>();
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            memory.addAll(problems);
-        }
-
-        @Override
-        public String description() {
-            return "Remember in List";
-        }
-
-        public List<String> getProblems() {
-            return memory;
-        }
-    }
-
-    private static class CreateDummyFile {
-
-        private final FileStorage storage;
-
-        public CreateDummyFile(final FileStorage storage) {
-            this.storage = storage;
-        }
-
-        /**
-         * This method create a dummy file a returns its name
-         *
-         * @return The name of the dummy file
-         * @throws OXException
-         */
-        protected String createDummyFile() throws OXException {
-            final String filetext = "This is just a dummy file";
-            final InputStream input = new ByteArrayInputStream(filetext.getBytes());
-
-            return storage.saveNewFile(input);
-        }
-    }
-
-    private static class CreateDummyFileForInfoitem extends CreateDummyFile implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForInfoitem.class);
-
-        private final DatabaseImpl database;
-
-        public CreateDummyFileForInfoitem(final DatabaseImpl database, final FileStorage storage) {
-            super(storage);
-            this.database = database;
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            /*
-             * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
-             */
-            for (final String old_identifier : problems) {
-                try {
-                    final String identifier = createDummyFile();
-                    database.startTransaction();
-                    final int changed =
-                        database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
-                    database.commit();
-                    if (changed == 1) {
-                        LOG1.info(MessageFormat.format("Modified entry for identifier {0} in context {1} to new dummy identifier {2}", old_identifier, ctx.getContextId(), identifier));
-                    }
-                } catch (final OXException e) {
-                    LOG1.error("", e);
-                    try {
-                        database.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.debug("", e1);
-                    }
-                } catch (final RuntimeException e) {
-                    LOG1.error("", e);
-                    try {
-                        database.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.debug("", e1);
-                    }
-                } finally {
-                    try {
-                        database.finish();
-                    } catch (final OXException e) {
-                        LOG1.debug("", e);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public String description() {
-            return "Create dummy file for infoitem";
-        }
-    }
-
-    private static class CreateDummyFileForAttachment extends CreateDummyFile implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForAttachment.class);
-
-        private final AttachmentBase attachments;
-
-        public CreateDummyFileForAttachment(final AttachmentBase attachments, final FileStorage storage) {
-            super(storage);
-            this.attachments = attachments;
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            /*
-             * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
-             */
-            final int size = problems.size();
-            final Iterator<String> it = problems.iterator();
-            for (int k = 0; k < size; k++) {
-                try {
-                    final String identifier = createDummyFile();
-                    final String old_identifier = it.next();
-                    attachments.setTransactional(true);
-                    attachments.startTransaction();
-                    final int changed =
-                        attachments.modifyAttachment(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
-                    attachments.commit();
-                    if (changed == 1) {
-                        LOG1.info(MessageFormat.format("Created dummy entry for: {0}. New identifier is: {1}", old_identifier, identifier));
-                    }
-                } catch (final OXException e) {
-                    LOG1.error("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.error("", e1);
-                    }
-                } catch (final RuntimeException e) {
-                    LOG1.error("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.debug("", e1);
-                    }
-                } finally {
-                    try {
-                        attachments.finish();
-                    } catch (final OXException e) {
-                        LOG1.debug("", e);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public String description() {
-            return "Create dummy file for attachment";
-        }
-
-    }
-
-    private static class CreateDummyFileForSnippet extends CreateDummyFile implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippet.class);
-
-        public CreateDummyFileForSnippet(final FileStorage storage) {
-            super(storage);
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            /*
-             * Here we operate in two stages. First we create a dummy entry in the filestore. Second we update the Entries in the database
-             */
-            final int size = problems.size();
-            final Iterator<String> it = problems.iterator();
-            for (int k = 0; k < size; k++) {
-                Connection con = null;
-                PreparedStatement stmt = null;
-                try {
-                    con = Database.get(ctx, true);
-                    final String old_identifier = it.next();
-                    // Not recoverable
-                    if (tableExists(con, "snippet")) {
-                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
-                        int pos = 0;
-                        stmt.setInt(++pos, ctx.getContextId());
-                        stmt.setString(++pos, old_identifier);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                    // Partly recoverable
-                    if (tableExists(con, "snippetAttachment")) {
-                        final String identifier = createDummyFile();
-                        stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
-                        int pos = 0;
-                        stmt.setString(++pos, identifier);
-                        stmt.setInt(++pos, ctx.getContextId());
-                        stmt.setString(++pos, old_identifier);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                } catch (final SQLException e) {
-                    LOG1.error("", e);
-                } catch (final OXException e) {
-                    LOG1.error("", e);
-                } catch (final RuntimeException e) {
-                    LOG1.error("", e);
-                } finally {
-                    DBUtils.closeSQLStuff(stmt);
-                    if (null != con) {
-                        Database.back(ctx, true, con);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public String description() {
-            return "Create dummy file for snippet";
-        }
-
-    }
-
-    private static class RemoveFile implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(RemoveFile.class);
-
-        private final FileStorage storage;
-
-        public RemoveFile(final FileStorage storage) {
-            this.storage = storage;
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            try {
-                for (final String identifier : problems) {
-                    if (storage.deleteFile(identifier)) {
-                        LOG1.info(MessageFormat.format("Deleted identifier: {0}", identifier));
-                    }
-                }
-                /*
-                 * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
-                 */
-                storage.recreateStateFile();
-            } catch (final OXException e) {
-                LOG1.error("", e);
-            }
-        }
-
-        @Override
-        public String description() {
-            return "delete file";
-        }
-    }
-
-    private static class DeleteInfoitem implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(DeleteInfoitem.class);
-
-        private final DatabaseImpl database;
-
-        public DeleteInfoitem(final DatabaseImpl database) {
-            this.database = database;
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            // Now we go through the set an delete each superfluous entry:
-            for (final String identifier : problems) {
-                try {
-                    database.startTransaction();
-                    database.startDBTransaction();
-                    database.setRequestTransactional(true);
-                    final int[] numbers = database.removeDocument(identifier, ctx);
-                    database.commit();
-                    if (numbers[0] == 1) {
-                        LOG1.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
-                    }
-                    if (numbers[1] == 1) {
-                        LOG1.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
-                    }
-                } catch (final OXException e) {
-                    LOG1.error("", e);
-                    try {
-                        database.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.debug("", e1);
-                    }
-                } finally {
-                    try {
-                        database.finish();
-                    } catch (final OXException e) {
-                        LOG1.debug("", e);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public String description() {
-            return "delete infoitem";
-        }
-    }
-
-    private static class DeleteAttachment implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(DeleteAttachment.class);
-
-        private final AttachmentBase attachments;
-
-        public DeleteAttachment(final AttachmentBase attachments) {
-            this.attachments = attachments;
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            // Now we go through the set an delete each superfluous entry:
-            final Iterator<String> it = problems.iterator();
-            while (it.hasNext()) {
-                try {
-                    final String identifier = it.next();
-                    attachments.setTransactional(true);
-                    attachments.startTransaction();
-                    final int[] numbers = attachments.removeAttachment(identifier, ctx);
-                    attachments.commit();
-                    if (numbers[0] == 1) {
-                        LOG1.info(MessageFormat.format("Inserted entry for identifier {0} and Context {1} in del_attachments", identifier, ctx.getContextId()));
-                    }
-                    if (numbers[1] == 1) {
-                        LOG1.info(MessageFormat.format("Removed attachment database entry for: {0}", identifier));
-                    }
-                } catch (final OXException e) {
-                    LOG1.debug("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.debug("", e1);
-                    }
-                    return;
-                } catch (final RuntimeException e) {
-                    LOG1.error("", e);
-                    try {
-                        attachments.rollback();
-                        return;
-                    } catch (final OXException e1) {
-                        LOG1.debug("", e1);
-                    }
-                    return;
-                } finally {
-                    try {
-                        attachments.finish();
-                    } catch (final OXException e) {
-                        LOG1.debug("", e);
-                    }
-                }
-            }
-        }
-
-        @Override
-        public String description() {
-            return "delete attachment";
-        }
-    }
-
-    private static class DeleteSnippet implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(DeleteSnippet.class);
-
-        public DeleteSnippet() {
-            super();
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            // Now we go through the set an delete each superfluous entry:
-            final Iterator<String> it = problems.iterator();
-            while (it.hasNext()) {
-                Connection con = null;
-                PreparedStatement stmt = null;
-                boolean rollback = false;
-                try {
-                    con = Database.get(ctx, true);
-                    con.setAutoCommit(false);
-                    rollback = true;
-
-                    final int contextId = ctx.getContextId();
-                    final String old_identifier = it.next();
-                    // Not recoverable
-                    if (tableExists(con, "snippet")) {
-                        stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
-                        int pos = 0;
-                        stmt.setInt(++pos, contextId);
-                        stmt.setString(++pos, old_identifier);
-                        stmt.executeUpdate();
-                        DBUtils.closeSQLStuff(stmt);
-                        stmt = null;
-                    }
-                    // Partly recoverable
-                    if (tableExists(con, "snippetAttachment")) {
-                        final List<int[]> pairs = new LinkedList<int[]>();
-                        {
-                            ResultSet rs = null;
-                            try {
-                                stmt = con.prepareStatement("SELECT user, id FROM snippetAttachment WHERE cid=? AND referenceId=?");
-                                int pos = 0;
-                                stmt.setInt(++pos, contextId);
-                                stmt.setString(++pos, old_identifier);
-                                rs = stmt.executeQuery();
-                                while (rs.next()) {
-                                    pairs.add(new int[] { rs.getInt(1), rs.getInt(2) });
-                                }
-                            } finally {
-                                DBUtils.closeSQLStuff(rs, stmt);
-                            }
-                        }
-                        for (final int[] pair : pairs) {
-                            final int userId=pair[0];
-                            final int id=pair[1];
-                            deleteSnippet(id, userId, contextId, con);
-                        }
-                    }
-                    con.commit();
-                    rollback = false;
-                } catch (final SQLException e) {
-                    LOG1.error("", e);
-                } catch (final OXException e) {
-                    LOG1.error("", e);
-                } catch (final RuntimeException e) {
-                    LOG1.error("", e);
-                } finally {
-                    if (rollback) {
-                        DBUtils.rollback(con);
-                    }
-                    DBUtils.closeSQLStuff(stmt);
-                    if (null != con) {
-                        DBUtils.autocommit(con);
-                        Database.back(ctx, true, con);
-                    }
-                }
-            }
-        }
-
-        private void deleteSnippet(final int id, final int userId, final int contextId, final Connection con) {
-            PreparedStatement stmt = null;
-            try {
-                // Delete attachments
-                stmt = con.prepareStatement("DELETE FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
-                int pos = 0;
-                stmt.setLong(++pos, contextId);
-                stmt.setLong(++pos, userId);
-                stmt.setLong(++pos, id);
-                stmt.executeUpdate();
-                closeSQLStuff(stmt);
-                stmt = null;
-                // Delete content
-                stmt = con.prepareStatement("DELETE FROM snippetContent WHERE cid=? AND user=? AND id=?");
-                pos = 0;
-                stmt.setLong(++pos, contextId);
-                stmt.setLong(++pos, userId);
-                stmt.setLong(++pos, id);
-                stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
-                stmt = null;
-                // Delete JSON object
-                stmt = con.prepareStatement("DELETE FROM snippetMisc WHERE cid=? AND user=? AND id=?");
-                pos = 0;
-                stmt.setLong(++pos, contextId);
-                stmt.setLong(++pos, userId);
-                stmt.setLong(++pos, id);
-                stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
-                stmt = null;
-                // Delete unnamed properties
-                final int confId;
-                {
-                    ResultSet rs = null;
-                    try {
-                        stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=0");
-                        pos = 0;
-                        stmt.setLong(++pos, contextId);
-                        stmt.setLong(++pos, userId);
-                        stmt.setString(++pos, Integer.toString(id));
-                        rs = stmt.executeQuery();
-                        confId = rs.next() ? Integer.parseInt(rs.getString(1)) : -1;
-                    } finally {
-                        closeSQLStuff(rs, stmt);
-                        stmt = null;
-                        rs = null;
-                    }
-                }
-                if (confId > 0) {
-                    stmt = con.prepareStatement("DELETE FROM genconf_attributes_strings WHERE cid = ? AND id = ?");
-                    pos = 0;
-                    stmt.setLong(++pos, contextId);
-                    stmt.setLong(++pos, confId);
-                    stmt.executeUpdate();
-                    DBUtils.closeSQLStuff(stmt);
-                    stmt = con.prepareStatement("DELETE FROM genconf_attributes_bools WHERE cid = ? AND id = ?");
-                    pos = 0;
-                    stmt.setLong(++pos, contextId);
-                    stmt.setLong(++pos, confId);
-                    stmt.executeUpdate();
-                    DBUtils.closeSQLStuff(stmt);
-                }
-                // Delete snippet
-                stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=0");
-                pos = 0;
-                stmt.setLong(++pos, contextId);
-                stmt.setLong(++pos, userId);
-                stmt.setString(++pos, Integer.toString(id));
-                stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
-                stmt = null;
-            } catch (final SQLException e) {
-                LOG1.error("", e);
-            } finally {
-                DBUtils.closeSQLStuff(stmt);
-            }
-        }
-
-        @Override
-        public String description() {
-            return "delete snippet";
-        }
-    }
-
-    private static class CreateInfoitem implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(CreateInfoitem.class);
-
-        private static final String description = "This file needs attention";
-
-        private static final String title = "Restoredfile";
-
-        private static final String fileName = "Restoredfile";
-
-        private static final String versioncomment = "";
-
-        private static final String categories = "";
-
-        private final DatabaseImpl database;
-
-        private final FileStorage storage;
-
-        private final Consistency consistency;
-
-        public CreateInfoitem(final DatabaseImpl database, final FileStorage storage, final Consistency consistency) {
-            this.database = database;
-            this.storage = storage;
-            this.consistency = consistency;
-        }
-
-        @Override
-        public void solve(final Context ctx, final Set<String> problems) throws OXException {
-            try {
-                final User user = consistency.getAdmin(ctx);
-                final DocumentMetadata document = new DocumentMetadataImpl();
-                document.setDescription(description);
-                document.setTitle(title);
-                document.setFileName(fileName);
-                document.setVersionComment(versioncomment);
-                document.setCategories(categories);
-
-                for (final String identifier : problems) {
-                    try {
-                        document.setFileSize(storage.getFileSize(identifier));
-                        document.setFileMIMEType(storage.getMimeType(identifier));
-                        database.startTransaction();
-                        final int[] numbers = database.saveDocumentMetadata(identifier, document, user, ctx);
-                        database.commit();
-                        if (numbers[2] == 1) {
-                            LOG1.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
-                        }
-                    } catch (final OXException e) {
-                        LOG1.error("", e);
-                        try {
-                            database.rollback();
-                            return;
-                        } catch (final OXException e1) {
-                            LOG1.debug("", e1);
-                        }
-                    } catch (final RuntimeException e) {
-                        LOG1.error("", e);
-                        try {
-                            database.rollback();
-                            return;
-                        } catch (final OXException e1) {
-                            LOG1.debug("", e1);
-                        }
-                    } finally {
-                        try {
-                            database.finish();
-                        } catch (final OXException e) {
-                            LOG1.debug("", e);
-                        }
-                    }
-                }
-
-            } catch (final OXException e) {
-                LOG1.error("", e);
-            }
-        }
-
-        @Override
-        public String description() {
-            return "create infoitem";
-        }
-    }
-
-    private static class DeleteBrokenPreviewReferences implements ProblemSolver {
-
-        private static final org.slf4j.Logger LOG1 =
-            org.slf4j.LoggerFactory.getLogger(DeleteBrokenPreviewReferences.class);
-
-        @Override
-        public void solve(Context ctx, Set<String> problems) throws OXException {
-            if (problems.size() > 0) {
-                ResourceCacheMetadataStore metadataStore = ResourceCacheMetadataStore.getInstance();
-                metadataStore.removeByRefId(ctx.getContextId(), problems);
-                LOG1.info("Deleted {} broken preview cache references.", problems.size());
-            }
-        }
-
-        @Override
-        public String description() {
-            return "delete broken preview references";
-        }
-
-    }
-
-    protected static boolean tableExists(final Connection con, final String table) throws SQLException {
-        final DatabaseMetaData metaData = con.getMetaData();
-        ResultSet rs = null;
-        boolean retval = false;
-        try {
-            rs = metaData.getTables(null, null, table, new String[] { "TABLE" });
-            retval = (rs.next() && rs.getString("TABLE_NAME").equals(table));
-        } finally {
-            DBUtils.closeSQLStuff(rs);
-        }
-        return retval;
-    }
-
 }

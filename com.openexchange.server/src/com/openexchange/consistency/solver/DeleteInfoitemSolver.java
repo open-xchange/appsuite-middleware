@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,66 @@
  *
  */
 
-package com.openexchange.consistency.osgi;
+package com.openexchange.consistency.solver;
 
-import org.slf4j.Logger;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.text.MessageFormat;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 
 /**
- * {@link ConsistencyActivator}
+ * {@link DeleteInfoitemSolver}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public final class ConsistencyActivator extends HousekeepingActivator {
+public class DeleteInfoitemSolver implements ProblemSolver {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyActivator.class);
+    private static final org.slf4j.Logger LOG1 = org.slf4j.LoggerFactory.getLogger(DeleteInfoitemSolver.class);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    private final DatabaseImpl database;
+
+    public DeleteInfoitemSolver(final DatabaseImpl database) {
+        this.database = database;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(this);
-
-        track(ManagementService.class, new MBeanRegisterer(context));
-        trackService(VCardStorageMetadataStore.class);
-        trackService(VCardStorageService.class);
-
-        openTrackers();
+    public void solve(final Context ctx, final Set<String> problems) throws OXException {
+        // Now we go through the set an delete each superfluous entry:
+        for (final String identifier : problems) {
+            try {
+                database.startTransaction();
+                database.startDBTransaction();
+                database.setRequestTransactional(true);
+                final int[] numbers = database.removeDocument(identifier, ctx);
+                database.commit();
+                if (numbers[0] == 1) {
+                    LOG1.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
+                }
+                if (numbers[1] == 1) {
+                    LOG1.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
+                }
+            } catch (final OXException e) {
+                LOG1.error("", e);
+                try {
+                    database.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG1.debug("", e1);
+                }
+            } finally {
+                try {
+                    database.finish();
+                } catch (final OXException e) {
+                    LOG1.debug("", e);
+                }
+            }
+        }
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(null);
-
-        closeTrackers();
-        super.stopBundle();
+    public String description() {
+        return "delete infoitem";
     }
 }

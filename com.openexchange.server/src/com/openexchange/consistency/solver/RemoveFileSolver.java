@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,49 @@
  *
  */
 
-package com.openexchange.consistency.osgi;
+package com.openexchange.consistency.solver;
 
-import org.slf4j.Logger;
-import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.management.ManagementService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.text.MessageFormat;
+import java.util.Set;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.tools.file.FileStorage;
 
 /**
- * {@link ConsistencyActivator}
+ * {@link RemoveFileSolver}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public final class ConsistencyActivator extends HousekeepingActivator {
+public class RemoveFileSolver implements ProblemSolver {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyActivator.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RemoveFileSolver.class);
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    private final FileStorage storage;
+
+    public RemoveFileSolver(final FileStorage storage) {
+        this.storage = storage;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        LOG.info("starting bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(this);
-
-        track(ManagementService.class, new MBeanRegisterer(context));
-        trackService(VCardStorageMetadataStore.class);
-        trackService(VCardStorageService.class);
-
-        openTrackers();
+    public void solve(final Context ctx, final Set<String> problems) {
+        try {
+            for (final String identifier : problems) {
+                if (storage.deleteFile(identifier)) {
+                    LOG.info(MessageFormat.format("Deleted identifier: {0}", identifier));
+                }
+            }
+            /*
+             * Afterwards we recreate the state file because it could happen that that now new free file slots are available.
+             */
+            storage.recreateStateFile();
+        } catch (final OXException e) {
+            LOG.error("", e);
+        }
     }
 
     @Override
-    public void stopBundle() throws Exception {
-        LOG.info("stopping bundle: com.openexchange.consistency");
-        ConsistencyServiceLookup.set(null);
-
-        closeTrackers();
-        super.stopBundle();
+    public String description() {
+        return "delete file";
     }
 }
