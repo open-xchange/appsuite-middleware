@@ -152,7 +152,8 @@ public class EMailMapping extends AbstractMapping {
         /*
          * telex - type "TLX"
          */
-        contact.setTelephoneTelex(parseEMail(getPropertyWithTypes(emails, EmailType.TLX), parameters));
+        Email property = getPropertyWithTypes(emails, EmailType.TLX);
+        contact.setTelephoneTelex(null != property ? property.getValue() : null);
     }
 
     private String parseEMail(Email property, VCardParameters parameters) {
