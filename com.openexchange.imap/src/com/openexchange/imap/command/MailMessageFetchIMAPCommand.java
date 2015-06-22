@@ -143,7 +143,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final int[] seqNums, final FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, int[] seqNums, FetchProfile fp) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -175,10 +175,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param separator The separator character
      * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
      * @param fp The fetch profile to use
-     * @param serverInfo The IMAP server information deduced from configuration
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, FetchProfile fp) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -187,7 +186,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         this.separator = separator;
         lastHandlers = new HashSet<FetchItemHandler>();
-        command = getFetchCommand(isRev1, fp, false, serverInfo);
+        command = getFetchCommand(isRev1, fp, false);
         uid = false;
         length = messageCount;
         uid2index = null;
