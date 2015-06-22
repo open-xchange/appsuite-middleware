@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderChildObject;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.SearchObject;
 import com.openexchange.groupware.search.TaskSearchObject;
@@ -483,10 +484,10 @@ public final class SQL {
             + "accepted,description,folder) VALUES (?,?,?,?,?,?,?)");
         SELECT_PARTS.put(StorageType.ACTIVE,
             "SELECT task,user,group_id,accepted,description,fuid "
-            + "FROM task_participant AS t JOIN oxfolder_tree AS f ON t.cid=f.cid AND t.user=f.created_from WHERE f.module=1 AND f.default_flag>0 AND t.cid=? AND t.task IN (");
+            + "FROM task_participant AS t JOIN oxfolder_tree AS f ON t.cid=f.cid AND t.user=f.created_from WHERE f.module="+FolderObject.TASK+" AND f.default_flag>0 AND t.cid=? AND t.task IN (");
         SELECT_PARTS.put(StorageType.REMOVED,
             "SELECT task,user,group_id,accepted,description,folder "
-            + "FROM task_removedparticipant AS t JOIN oxfolder_tree AS f ON t.cid=f.cid AND t.user=f.created_from WHERE f.module=1 AND f.default_flag>0 AND t.cid=? AND t.task IN (");
+            + "FROM task_removedparticipant AS t JOIN oxfolder_tree AS f ON t.cid=f.cid AND t.user=f.created_from WHERE f.module="+FolderObject.TASK+" AND f.default_flag>0 AND t.cid=? AND t.task IN (");
         SELECT_PARTS.put(StorageType.DELETED,
             "SELECT task,user,group_id,accepted,description,fuid "
             + "FROM del_task_participant WHERE cid=? AND task IN (");
