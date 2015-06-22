@@ -1637,15 +1637,25 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
         char separator = getSeparator(imapFolder);
 
+        int[] seqnums;
+        if (null != msgIds) {
+            seqnums = msgIds;
+        } else {
+            seqnums = new int[messageCount];
+            for (int i = messageCount; i > 0; i--) {
+                seqnums[i - 1] = i;
+            }
+        }
+
         if (null == indexRange) {
             // Fetch them all
             FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
             List<MailMessage> list;
             boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
             if (fetchBody) {
-                list = fetchMessages(msgIds, fetchProfile);
+                list = fetchMessages(seqnums, fetchProfile);
             } else {
-                MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
+                MailMessage[] tmp = fetchMessages(seqnums, fetchProfile, hasIMAP4rev1, separator);
                 list = new ArrayList<MailMessage>(tmp.length);
                 for (MailMessage mailMessage : tmp) {
                     if (null != mailMessage) {
@@ -1669,16 +1679,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         // A certain range is requested, thus grab messages only with ID and sort field information
         List<MailMessage> list;
         {
-            int[] seqnums;
-            if (null != msgIds) {
-                seqnums = msgIds;
-            } else {
-                seqnums = new int[messageCount];
-                for (int i = messageCount; i > 0; i--) {
-                    seqnums[i - 1] = i;
-                }
-            }
-
             FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
             MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1, separator);
 
