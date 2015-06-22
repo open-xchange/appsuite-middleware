@@ -69,21 +69,21 @@ import static org.junit.Assert.*;
 public class DefaultMailMappingServiceTest {
     private MockingServiceLookup services = null;
     private DefaultMailMappingService service = null;
-    
+
     @Before
     public void setup() {
         services = new MockingServiceLookup();
         service = new DefaultMailMappingService(services);
     }
-    
-    @Test 
+
+    @Test
     public void mailIsNull() throws OXException {
         assertNull(service.resolve(null));
     }
-    
+
     @Test
     public void testResolve() throws OXException {
-        
+
         ContextService contexts = services.mock(ContextService.class);
         UserService users = services.mock(UserService.class);
 
@@ -92,18 +92,18 @@ public class DefaultMailMappingServiceTest {
 
         User user = mock(User.class);
         when(user.getId()).thenReturn(12);
-        
+
         when(contexts.getContextId("test.invalid")).thenReturn(42);
         when(contexts.getContext(42)).thenReturn(ctx);
-        
+
         when(users.searchUser("charlie@test.invalid", ctx, true)).thenReturn(user);
-    
-        ResolvedMail resolved = service.resolve("charlie@test.invalid");
-        
+
+        ResolvedMail resolved = service.resolve("charlie@test.invalid", true);
+
         assertEquals(42, resolved.getContextID());
         assertEquals(12, resolved.getUserID());
     }
-    
+
     @Test
     public void testResolveUnknownUser() throws OXException {
         ContextService contexts = services.mock(ContextService.class);
@@ -112,17 +112,17 @@ public class DefaultMailMappingServiceTest {
         Context ctx = mock(Context.class);
         when(ctx.getContextId()).thenReturn(42);
 
-        
+
         when(contexts.getContextId("test.invalid")).thenReturn(42);
         when(contexts.getContext(42)).thenReturn(ctx);
-        
+
         when(users.searchUser("charlie@test.invalid", ctx, true)).thenReturn(null);
-    
+
         ResolvedMail resolved = service.resolve("charlie@test.invalid");
-        
+
         assertNull(resolved);
     }
-    
+
     @Test
     public void testResolveUnknownContext() throws OXException {
         ContextService contexts = services.mock(ContextService.class);
@@ -130,7 +130,7 @@ public class DefaultMailMappingServiceTest {
         when(contexts.getContextId("test.invalid")).thenReturn(0);
 
         ResolvedMail resolved = service.resolve("charlie@test.invalid");
-        
+
         assertNull(resolved);
     }
 }
