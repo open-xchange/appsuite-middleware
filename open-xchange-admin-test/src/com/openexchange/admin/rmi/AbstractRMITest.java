@@ -98,24 +98,6 @@ public abstract class AbstractRMITest extends AbstractTest {
         assertEquals("Both arrays should return the same IDs", set1, set2 );
     }
 
-    /**
-     * compares two user arrays by retrieving all the IDs they contain
-     * an checking if they match. Ignores duplicate entries, ignores
-     * users without an ID at all.
-     */
-    public void assertDisplayNamesAreEqual(User[] arr1, String[] arr2) {
-        Set<String> set1 = new HashSet<String>();
-        for (User element : arr1) {
-            set1.add( element.getDisplay_name() );
-        }
-        Set<String> set2 = new HashSet<String>();
-        for(int i = 0; i < arr1.length; i++){
-            set2.add( arr2[i] );
-        }
-
-        assertEquals("Both arrays should return the same display names.", set1, set2 );
-    }
-
     /*** Asserts for mandatory fields ***/
 
     public void assertUserEquals(User expected, User actual){
