@@ -51,6 +51,7 @@ package com.openexchange.rest.services.users.mailMapping.osgi;
 
 import com.openexchange.context.ContextService;
 import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.osgiservice.OSGIMailMappingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.rest.services.users.mailMapping.MailMappingRESTService;
 import com.openexchange.user.UserService;
@@ -64,11 +65,32 @@ public class MailMappingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ContextService.class, UserService.class, MailResolver.class };
+        return new Class<?>[] { ContextService.class, UserService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        OSGIMailMappingService osgiMailMappingService = new OSGIMailMappingService();
+        track(MailResolver.class, osgiMailMappingService);
+        openTrackers();
+        addService(MailResolver.class, osgiMailMappingService);
+
         registerService(MailMappingRESTService.class, new MailMappingRESTService(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        removeService(MailResolver.class);
+        super.stopBundle();
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 }
