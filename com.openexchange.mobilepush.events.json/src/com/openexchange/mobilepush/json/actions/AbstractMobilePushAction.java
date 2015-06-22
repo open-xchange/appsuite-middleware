@@ -53,18 +53,22 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mobilepush.json.MobilePushRequest;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AbstractMobilePushAction} - The abstract mobile notifier action.
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  */
 public abstract class AbstractMobilePushAction implements AJAXActionService {
+
+    private static final String CAPABILITY_MOBILEAPP = "mobile_mail_app";
 
     private final ServiceLookup services;
 
@@ -78,7 +82,7 @@ public abstract class AbstractMobilePushAction implements AJAXActionService {
 
     /**
      * Gets the service of specified type
-     * 
+     *
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      */
@@ -88,6 +92,16 @@ public abstract class AbstractMobilePushAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        {
+            CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+            if (null == capabilityService) {
+                throw ServiceExceptionCode.absentService(CapabilityService.class);
+            }
+            if (!capabilityService.getCapabilities(session).contains(CAPABILITY_MOBILEAPP)) {
+                throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create(CAPABILITY_MOBILEAPP);
+            }
+        }
+
         try {
             return perform(new MobilePushRequest(requestData, session));
         } catch (final JSONException e) {
@@ -97,7 +111,7 @@ public abstract class AbstractMobilePushAction implements AJAXActionService {
 
     /**
      * Performs specified MobileNotifierRequest request.
-     * 
+     *
      * @param req The mobile notifier request
      * @return The result
      * @throws OXException If an error occurs
