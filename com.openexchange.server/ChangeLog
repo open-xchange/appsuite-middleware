@@ -1,3 +1,7 @@
+* 2015-06-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38030: Send appropriate event for standard sent folder when appending sent message
+
 * 2015-06-22 - marcus.klein@open-xchange.com
 
  - Fix for bug 36886: Load all task participants for the confirm action as this information is later needed for notification mails.
