@@ -62,7 +62,7 @@ import org.junit.runners.Suite.SuiteClasses;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-//    DefaultVCardStorageServiceTest.class
+    DefaultVCardStorageServiceTest.class
 })
 public class UnitTests {
 

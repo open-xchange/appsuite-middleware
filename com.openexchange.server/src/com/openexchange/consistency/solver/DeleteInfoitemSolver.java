@@ -63,7 +63,7 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
  */
 public class DeleteInfoitemSolver implements ProblemSolver {
 
-    private static final org.slf4j.Logger LOG1 = org.slf4j.LoggerFactory.getLogger(DeleteInfoitemSolver.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DeleteInfoitemSolver.class);
 
     private final DatabaseImpl database;
 
@@ -72,7 +72,7 @@ public class DeleteInfoitemSolver implements ProblemSolver {
     }
 
     @Override
-    public void solve(final Context ctx, final Set<String> problems) throws OXException {
+    public void solve(final Context ctx, final Set<String> problems) {
         // Now we go through the set an delete each superfluous entry:
         for (final String identifier : problems) {
             try {
@@ -82,24 +82,24 @@ public class DeleteInfoitemSolver implements ProblemSolver {
                 final int[] numbers = database.removeDocument(identifier, ctx);
                 database.commit();
                 if (numbers[0] == 1) {
-                    LOG1.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
+                    LOG.info(MessageFormat.format("Have to change infostore version number for entry: {0}", identifier));
                 }
                 if (numbers[1] == 1) {
-                    LOG1.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
+                    LOG.info(MessageFormat.format("Deleted entry {0} from infostore_documents.", identifier));
                 }
             } catch (final OXException e) {
-                LOG1.error("", e);
+                LOG.error("", e);
                 try {
                     database.rollback();
                     return;
                 } catch (final OXException e1) {
-                    LOG1.debug("", e1);
+                    LOG.debug("", e1);
                 }
             } finally {
                 try {
                     database.finish();
                 } catch (final OXException e) {
-                    LOG1.debug("", e);
+                    LOG.debug("", e);
                 }
             }
         }

@@ -97,6 +97,10 @@ public class DefaultVCardStorageService implements VCardStorageService {
      */
     @Override
     public InputStream getVCard(String identifier, int contextId) {
+        if (Strings.isEmpty(identifier)) {
+            LOG.warn("Identifier to get VCard for is null. Cannot return VCard.");
+            return null;
+        }
         try {
             QuotaFileStorage fileStorage = getFileStorage(contextId);
             InputStream vCard = fileStorage.getFile(identifier);
