@@ -47,21 +47,42 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.contact.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
+import com.openexchange.groupware.container.Contact;
 
-public class VCardTestSuite extends TestSuite{
+/**
+ * {@link Bug7250Test}
+ *
+ * vCard parser breaks special characters (e.g. umlauts)
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug7250Test extends VCardTest {
 
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
-		tests.addTestSuite(VCardMailPartAttachTest.class);
-		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
-        tests.addTestSuite(Bug25701Test.class);
-        tests.addTestSuite(Bug15400Test.class);
-		return tests;
-	}
+    /**
+     * Initializes a new {@link Bug7250Test}.
+     */
+    public Bug7250Test() {
+        super();
+    }
+
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard = "BEGIN:VCARD\n" +
+            "VERSION:2.1\n" +
+            "N;CHARSET=Windows-1252:B\u00f6rnig;Anke;;;\n" +
+            "FN;CHARSET=Windows-1252:Anke  B\u00f6rnig\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("Anke  B\u00f6rnig", contact.getDisplayName());
+    }
+
 }

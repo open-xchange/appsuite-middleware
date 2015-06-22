@@ -75,14 +75,22 @@ public class UnitTests {
         tests.addTestSuite(UpdateTest.class);
         tests.addTestSuite(WarningsTest.class);
         tests.addTestSuite(ColorLabelTest.class);
+        tests.addTestSuite(EmptyTest.class);
+        tests.addTestSuite(Bug13557Test.class);
+        tests.addTestSuite(Bug14349Test.class);
+        tests.addTestSuite(Bug14350Test.class);
         tests.addTestSuite(Bug15008Test.class);
+        tests.addTestSuite(Bug15229Test.class);
+        tests.addTestSuite(Bug15241Test.class);
         tests.addTestSuite(Bug18226Test.class);
         tests.addTestSuite(Bug21656Test.class);
-        tests.addTestSuite(Bug15241Test.class);
-        tests.addTestSuite(Bug14349Test.class);
-        tests.addTestSuite(Bug15241Test.class);
-        tests.addTestSuite(Bug14350Test.class);
+        tests.addTestSuite(Bug6823Test.class);
         tests.addTestSuite(Bug6962Test.class);
+        tests.addTestSuite(Bug7106Test.class);
+        tests.addTestSuite(Bug7248Test.class);
+        tests.addTestSuite(Bug7249Test.class);
+        tests.addTestSuite(Bug7250Test.class);
+        tests.addTestSuite(Bug7719Test.class);
         return tests;
     }
 }

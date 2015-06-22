@@ -84,43 +84,8 @@ public class VCardImportTest extends AbstractVCardTest {
 
 		ImportResult res = results.get(0);
         ContactService contactService = TestServiceRegistry.getInstance().getService(ContactService.class);
-        Contact co = contactService.getContact(sessObj, res.getFolder(), res.getObjectId()); 
+        Contact co = contactService.getContact(sessObj, res.getFolder(), res.getObjectId());
 	    assertEquals("Should have truncated name", expected, co.getSurName());
 	}
 
-	/*
-	 * TELEX is not read.
-	 */
-	@Test public void test7719() throws OXException, NumberFormatException, OXException, UnsupportedEncodingException, OXException, OXException {
-		//setup
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
-		final String telex = "7787987897897897897";
-		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:Schmitz;Hansi;;Dr.;\nFN:Dr. Hansi Schmitz\nEMAIL;PREF;INTERNET;CHARSET=Windows-1252:Hansi@Schmitz.super\nEMAIL;TLX:"+telex+"\nEND:VCARD";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-
-		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)), folders, null);
-		assertTrue("One import?" , 1 == results.size());
-		final ImportResult res = results.get(0);
-		assertEquals("Should have no error" , null, res.getException() );
-
-		ContactService contactService = TestServiceRegistry.getInstance().getService(ContactService.class);
-		Contact co = contactService.getContact(sessObj, res.getFolder(), res.getObjectId()); 
-		assertEquals("Has telex" , telex , co.getTelephoneTelex());
-	}
-
-	@Test public void testEmpty() throws UnsupportedEncodingException, NumberFormatException, OXException, OXException, OXException {
-		folderId = createTestFolder(FolderObject.CONTACT, sessObj,ctx, "vcard7719Folder");
-		final String vcard = "BEGIN:VCARD\nVERSION:2.1\nN:;;;;\nEND:VCARD\n";
-		final List <String> folders = Arrays.asList( Integer.toString(folderId) );
-
-		//import and tests
-		final List<ImportResult> results = imp.importData(sessObj, format, new ByteArrayInputStream(vcard.getBytes(com.openexchange.java.Charsets.UTF_8)), folders, null);
-		assertTrue("One import?" , 1 == results.size());
-		final ImportResult res = results.get(0);
-		assertEquals("Should have no error" , null, res.getException() );
-
-		ContactService contactService = TestServiceRegistry.getInstance().getService(ContactService.class);
-		contactService.getContact(sessObj, res.getFolder(), res.getObjectId()); 
-	}
 }

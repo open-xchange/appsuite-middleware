@@ -47,21 +47,46 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.contact.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
+import com.openexchange.groupware.container.Contact;
 
-public class VCardTestSuite extends TestSuite{
+/**
+ * {@link Bug7719Test}
+ *
+ * Configuration/Import: "Telex" lost during vCard import
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug7719Test extends VCardTest {
 
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
-		tests.addTestSuite(VCardMailPartAttachTest.class);
-		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
-        tests.addTestSuite(Bug25701Test.class);
-        tests.addTestSuite(Bug15400Test.class);
-		return tests;
-	}
+    /**
+     * Initializes a new {@link Bug7719Test}.
+     */
+    public Bug7719Test() {
+        super();
+    }
+
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String telex = "7787987897897897897";
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:2.1\n" +
+            "N:Schmitz;Hansi;;Dr.;\n" +
+            "FN:Dr. Hansi Schmitz\n" +
+            "EMAIL;PREF;INTERNET;CHARSET=Windows-1252:Hansi@Schmitz.super\n" +
+            "EMAIL;TLX:" + telex + "\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals(telex, contact.getTelephoneTelex());
+    }
+
 }

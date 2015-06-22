@@ -181,4 +181,26 @@ public class Bug6962Test extends VCardTest {
         assertTrue("warnings", null == warnings || 0 == warnings.size());
     }
 
+    public void testImportVCard_5() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:666\n" +
+            "N:;Svetlana;;;\n" +
+            "FN:Svetlana\n" +
+            "TEL;type=CELL;type=pref:6670373\n" +
+            "END:VCARD";
+        ;
+        VCardParameters parameters = getService().createParameters();
+        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        /*
+         * verify imported contact & warnings
+         */
+        assertNotNull(contact);
+        List<OXException> warnings = parameters.getWarnings();
+        assertTrue("warnings", null != warnings && 0 < warnings.size());
+    }
+
 }

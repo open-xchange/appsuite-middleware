@@ -47,21 +47,44 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.contact.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
+import com.openexchange.groupware.container.Contact;
 
-public class VCardTestSuite extends TestSuite{
+/**
+ * {@link Bug7106Test}
+ *
+ * Umlauts are broken in imported vCards
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug7106Test extends VCardTest {
 
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
-		tests.addTestSuite(VCardMailPartAttachTest.class);
-		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
-        tests.addTestSuite(Bug25701Test.class);
-        tests.addTestSuite(Bug15400Test.class);
-		return tests;
-	}
+    /**
+     * Initializes a new {@link Bug7106Test}.
+     */
+    public Bug7106Test() {
+        super();
+    }
+
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "N:;H\u00fcb\u00fcrt;;;\n" +
+            "FN:H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n\n" +
+            "TEL;type=CELL;type=pref:6670373\n" +
+            "END:VCARD\n"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("H\u00fcb\u00fcrt S\u00f6nderzeich\u00f6n", contact.getDisplayName());
+    }
+
 }

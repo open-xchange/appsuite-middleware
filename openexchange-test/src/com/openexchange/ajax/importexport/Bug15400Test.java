@@ -48,64 +48,61 @@
  */
 package com.openexchange.ajax.importexport;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-import com.openexchange.ajax.contact.action.DeleteRequest;
-import com.openexchange.ajax.contact.action.GetRequest;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXClient.User;
+import java.io.ByteArrayInputStream;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import com.openexchange.ajax.contact.AbstractManagedContactTest;
+import com.openexchange.ajax.importexport.actions.VCardImportRequest;
+import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.webdav.xml.ContactTest;
+import com.openexchange.java.Charsets;
 
-public class VCardExportTest extends AbstractVCardTest {
+/**
+ * {@link Bug15400Test}
+ *
+ * Import drops records that exceed field widths.
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug15400Test extends AbstractManagedContactTest {
 
-	final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ICalImportTest.class);
-
-	public VCardExportTest(final String name) {
+	/**
+	 * Initializes a new {@link Bug15400Test}.
+	 *
+	 * @param name The test name
+	 */
+	public Bug15400Test(String name) {
 		super(name);
-		simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
 
-	@Override
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
+    public void testBug15400() throws Exception {
+        /*
+         * check import
+         */
+        String name =
+            "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul " +
+            "Abbas Ibn Hadschi D...as War Knapp Und Wird Hier Abgeschnitten"
+        ;
+        String truncatedName =
+            "Hadschi Halef Omar Ben Hadschi Abul Abbas Ibn Hadschi Dawuhd al Gossarah Hadschi Halef Omar Ben Hadschi Abul " +
+            "Abbas Ibn Hadschi D"
+        ;
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:2.1\n" +
+            "N;CHARSET=Windows-1252:" + name + ";;;\n" +
+            "END:VCARD"
+        ;
+        VCardImportRequest importRequest = new VCardImportRequest(folderID, new ByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)));
+        VCardImportResponse importResponse = getClient().execute(importRequest);
+        JSONArray data = (JSONArray) importResponse.getData();
+        assertTrue("got no data from import request", null != data && 0 < data.length());
+        JSONObject jsonObject = data.getJSONObject(0);
+        assertNotNull("got no data from import request", jsonObject);
+        int objectID = jsonObject.optInt("id");
+        assertTrue("got no object id from import request", 0 < objectID);
+        Contact importedContact = manager.getAction(folderID, objectID);
+        assertEquals(truncatedName, importedContact.getSurName());
+    }
 
-	public void testExportVCard() throws Exception {
-		final String surname = "testImportVCard" + System.currentTimeMillis();
-
-		final Contact contactObj = new Contact();
-		contactObj.setSurName(surname);
-		contactObj.setGivenName("givenName");
-		contactObj.setBirthday(simpleDateFormat.parse("2007-04-04"));
-		contactObj.setParentFolderID(contactFolderId);
-
-		final int objectId = ContactTest.insertContact(getWebConversation(), contactObj, getHostName(), getLogin(), getPassword(), "");
-
-		final Contact[] contactArray = exportContact(getWebConversation(), contactFolderId, emailaddress, timeZone, getHostName(), getSessionId());
-
-		boolean found = false;
-		for (int a = 0; a < contactArray.length; a++) {
-			if (contactArray[a].getSurName() != null && contactArray[a].getSurName().equals(surname)) {
-				found = true;
-				ContactTest.compareObject(contactObj, contactArray[a]);
-			}
-		}
-		assertTrue("contact with surname: " + surname + " not found", found);
-
-		final AJAXClient client = new AJAXClient(User.User1);
-		final GetRequest getRequest = new GetRequest(contactFolderId, objectId, client.getValues().getTimeZone(), false);
-		Date lastModified;
-		try {
-            lastModified = client.execute(getRequest).getContact().getLastModified();
-        } catch (final Exception e) {
-            lastModified = new Date(System.currentTimeMillis() + 10000);
-        }
-
-		final DeleteRequest del = new DeleteRequest(client.getValues().getPrivateContactFolder(), objectId, lastModified, false);
-		client.execute(del);
-	}
 }

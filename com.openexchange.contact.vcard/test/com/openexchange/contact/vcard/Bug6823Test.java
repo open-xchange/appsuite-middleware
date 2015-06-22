@@ -47,51 +47,45 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.contact.vcard;
 
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
-import com.openexchange.ajax.framework.AJAXClient;
-import com.openexchange.ajax.framework.AJAXSession;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.test.FolderTestManager;
+import com.openexchange.groupware.container.Contact;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * {@link Bug6823Test}
+ *
+ * [Always] VCARD Import does not work
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class AbstractVCardImportTest extends AbstractVCardTest {
+public class Bug6823Test extends VCardTest {
 
-    final SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
-    private FolderTestManager folderManager;
-
-    private final AJAXClient client;
-
-    protected FolderObject testFolder;
-
-    public AbstractVCardImportTest(final String name) throws Exception {
-        super(name);
-        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        client = new AJAXClient(new AJAXSession(getWebConversation(), getHostName(), getSessionId()), false);
+    /**
+     * Initializes a new {@link Bug6823Test}.
+     */
+    public Bug6823Test() {
+        super();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        folderManager = new FolderTestManager(client);
-        testFolder = folderManager.generatePublicFolder(
-            "VCard Interface Tests",
-            Module.CONTACTS.getFolderConstant(),
-            client.getValues().getPrivateContactFolder(),
-            client.getValues().getUserId());
-        folderManager.insertFolderOnServer(testFolder);
-        contactFolderId = testFolder.getObjectID();
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:3.0\n" +
+            "N:;Svetlana;;;\n" +
+            "FN:Svetlana\n" +
+            "TEL;type=CELL;type=pref:6670373\n" +
+            "CATEGORIES:Nicht abgelegt\n" +
+            "X-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\n" +
+            "END:VCARD"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        folderManager.cleanUp();
-        super.tearDown();
-    }
 }

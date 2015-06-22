@@ -47,59 +47,40 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.contact.vcard;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import org.json.JSONException;
-import org.xml.sax.SAXException;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.importexport.ImportResult;
+import com.openexchange.groupware.container.Contact;
 
-public class Bug15229Test extends AbstractVCardImportTest {
-
-    public Bug15229Test(String name) throws Exception {
-        super(name);
-    }
+/**
+ * {@link EmptyTest}
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class EmptyTest extends VCardTest {
 
     /**
-     * Test escaped colons in URLs
+     * Initializes a new {@link EmptyTest}.
      */
-    public void testColons() throws OXException, SAXException, JSONException, Exception {
-        String bug = "BEGIN:VCARD\n" +
-            "\n" +
-            "VERSION:3.0\n" +
-            "\n" +
-            "N:L\u00f6fflad;Klaus;(piraten);;\n" +
-            "\n" +
-            "FN:Klaus (piraten) L\u00f6fflad\n" +
-            "\n" +
-            "EMAIL;type=INTERNET;type=HOME;type=pref:klaus@der-kapitaen.de\n" +
-            "\n" +
-            "TEL;type=CELL;type=pref:+49 151 22632571\n" +
-            "\n" +
-            "item1.URL;type=pref:http\\://wiki.piratenpartei.de/Benutzer\\:Magister_Navis\n" +
-            "\n" +
-            "item1.X-ABLabel:Piraten\n" +
-            "\n" +
-            "END:VCARD\n" +
-             "\n";
-
-        InputStream is = new ByteArrayInputStream(bug.getBytes());
-        byte[] buf = new byte[1024];
-        is.read(buf);
-        new ArrayList<String>();
-
-        ImportResult[] importResult = importVCard(
-                getWebConversation(),
-                new ByteArrayInputStream(buf),
-                contactFolderId,
-                timeZone,
-                emailaddress,
-                getHostName(),
-                getSessionId());
-
-        assertNull("Parsing Exception", importResult[0].getException());
+    public EmptyTest() {
+        super();
     }
+
+    public void testImportEmptyVCard() throws OXException {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "VERSION:2.1\n" +
+            "N:;;;;\n" +
+            "END:VCARD\n"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+    }
+
 }

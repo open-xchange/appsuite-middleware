@@ -47,21 +47,56 @@
  *
  */
 
-package com.openexchange.ajax.importexport;
+package com.openexchange.contact.vcard;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
+import com.openexchange.groupware.container.Contact;
 
-public class VCardTestSuite extends TestSuite{
+/**
+ * {@link Bug15229Test}
+ *
+ *  Illegal character in scheme name at index 4: http\://twitter.com/foobar
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class Bug15229Test extends VCardTest {
 
-	public static Test suite(){
-		TestSuite tests = new TestSuite();
-		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
-		tests.addTestSuite(VCardMailPartAttachTest.class);
-		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
-        tests.addTestSuite(Bug25701Test.class);
-        tests.addTestSuite(Bug15400Test.class);
-		return tests;
-	}
+    /**
+     * Initializes a new {@link Bug15229Test}.
+     */
+    public Bug15229Test() {
+        super();
+    }
+
+    public void testImportVCard() throws Exception {
+        /*
+         * import vCard
+         */
+        String vCard =
+            "BEGIN:VCARD\n" +
+            "\n" +
+            "VERSION:3.0\n" +
+            "\n" +
+            "N:L\u00f6fflad;Klaus;(piraten);;\n" +
+            "\n" +
+            "FN:Klaus (piraten) L\u00f6fflad\n" +
+            "\n" +
+            "EMAIL;type=INTERNET;type=HOME;type=pref:klaus@der-kapitaen.de\n" +
+            "\n" +
+            "TEL;type=CELL;type=pref:+49 151 22632571\n" +
+            "\n" +
+            "item1.URL;type=pref:http\\://wiki.piratenpartei.de/Benutzer\\:Magister_Navis\n" +
+            "\n" +
+            "item1.X-ABLabel:Piraten\n" +
+            "\n" +
+            "END:VCARD\n" +
+             "\n"
+        ;
+        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        /*
+         * verify imported contact
+         */
+        assertNotNull(contact);
+        assertEquals("http://wiki.piratenpartei.de/Benutzer:Magister_Navis", contact.getURL());
+    }
+
 }
