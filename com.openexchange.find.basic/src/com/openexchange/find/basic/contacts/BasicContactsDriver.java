@@ -226,7 +226,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         if (null != contacts) {
             if (1 < contacts.size()) {
                 SpecialAlphanumSortContactComparator comparator = new SpecialAlphanumSortContactComparator(session.getUser().getLocale());
-                Collections.sort(contacts, comparator);
+                java.util.Collections.sort(contacts, comparator);
             }
             for (Contact contact : contacts) {
                 contactDocuments.add(new ContactsDocument(contact));
