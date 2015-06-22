@@ -51,7 +51,6 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import com.openexchange.session.Session;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
@@ -66,21 +65,13 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     private Session session;
 
-    private AuthenticationMode authMode;
-
-    private String username;
-
-    private String password;
-
     private List<ShareTarget> targets;
 
     private String message;
 
-    private int guestContextID;
+    private int targetUserID;
 
-    private int guestID;
-
-    private boolean causedGuestCreation;
+    private boolean isInitialShare;
 
     /**
      * Initializes a new {@link DefaultShareCreatedNotification}.
@@ -99,21 +90,6 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     }
 
     @Override
-    public AuthenticationMode getAuthMode() {
-        return authMode;
-    }
-
-    @Override
-    public String getUsername() {
-        return username;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
     public List<ShareTarget> getShareTargets() {
         return targets;
     }
@@ -128,18 +104,13 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
     }
 
     @Override
-    public int getGuestContextID() {
-        return guestContextID;
+    public int getTargetUserID() {
+        return targetUserID;
     }
 
     @Override
-    public int getGuestID() {
-        return guestID;
-    }
-
-    @Override
-    public boolean getCausedGuestCreation() {
-        return causedGuestCreation;
+    public boolean isInitialShare() {
+        return isInitialShare;
     }
 
     public void setTargets(List<ShareTarget> targets) {
@@ -150,32 +121,16 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
         this.session = session;
     }
 
-    public void setAuthMode(AuthenticationMode authMode) {
-        this.authMode = authMode;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public void setMessage(String message) {
         this.message = message;
     }
 
-    public void setGuestContextID(int guestContextID) {
-        this.guestContextID = guestContextID;
+    public void setTargetUserID(int targetUserID) {
+        this.targetUserID = targetUserID;
     }
 
-    public void setGuestID(int guestID) {
-        this.guestID = guestID;
-    }
-
-    public void setCausedGuestCreation(boolean causedGuestCreation) {
-        this.causedGuestCreation = causedGuestCreation;
+    public void setInitialShare(boolean isInitialShare) {
+        this.isInitialShare = isInitialShare;
     }
 
 }

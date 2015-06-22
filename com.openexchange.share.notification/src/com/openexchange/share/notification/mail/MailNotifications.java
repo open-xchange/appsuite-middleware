@@ -245,14 +245,10 @@ public class MailNotifications {
             DefaultShareCreatedNotification<InternetAddress> notification = new DefaultShareCreatedNotification<InternetAddress>(Transport.MAIL);
             notification.apply(this);
             notification.setSession(session);
-            notification.setAuthMode(authMode);
-            notification.setUsername(username);
-            notification.setGuestContextID(guestContextID);
-            notification.setGuestID(guestID);
-            notification.setPassword(password);
+            notification.setTargetUserID(guestID);
             notification.setTargets(targets);
             notification.setMessage(message);
-            notification.setCausedGuestCreation(causedGuestCreation);
+            notification.setInitialShare(causedGuestCreation);
             return notification;
         }
 

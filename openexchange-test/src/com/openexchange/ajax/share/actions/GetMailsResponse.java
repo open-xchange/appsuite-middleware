@@ -136,9 +136,9 @@ public class GetMailsResponse extends AbstractAJAXResponse {
 
         private final Map<String, String> headers = new HashMap<String, String>();
 
-        private String rawMessage;
+        private final String rawMessage;
 
-        private MimeMessage mimeMessage;
+        private final MimeMessage mimeMessage;
 
         public Message(String rawMessage) throws MessagingException {
             super();
@@ -188,23 +188,28 @@ public class GetMailsResponse extends AbstractAJAXResponse {
             br.close();
             return sb.toString();
         }
-        
+
+        private Document html;
+
         public Document getHtml() throws IOException, MessagingException {
-            Object content = mimeMessage.getContent();
-            if (content instanceof MimeMultipart) {
-                MimeMultipart multipart = (MimeMultipart) content;
-                for (int i = 0; i < multipart.getCount(); i++) {
-                    BodyPart bodyPart = multipart.getBodyPart(i);
-                    if (bodyPart.getContentType().startsWith("text/html")) {
-                        String readStream = readStream(bodyPart.getInputStream());
-                        Document document = Jsoup.parse(readStream);
-                        return document;
+            if (html == null) {
+                Object content = mimeMessage.getContent();
+                if (content instanceof MimeMultipart) {
+                    MimeMultipart multipart = (MimeMultipart) content;
+                    for (int i = 0; i < multipart.getCount(); i++) {
+                        BodyPart bodyPart = multipart.getBodyPart(i);
+                        if (bodyPart.getContentType().startsWith("text/html")) {
+                            String readStream = readStream(bodyPart.getInputStream());
+                            Document document = Jsoup.parse(readStream);
+                            html = document;
+                        }
                     }
                 }
             }
-            return null;
+
+            return html;
         }
-        
+
         public MimeMessage getMimeMessage() {
             return mimeMessage;
         }

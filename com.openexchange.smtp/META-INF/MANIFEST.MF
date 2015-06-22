@@ -78,4 +78,5 @@ Import-Package: com.openexchange.ajax.container,
 Bundle-Activator: com.openexchange.smtp.osgi.SMTPActivator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: com.openexchange.smtp,
- com.openexchange.smtp.config
+ com.openexchange.smtp.config,
+ com.openexchange.smtp.dataobjects

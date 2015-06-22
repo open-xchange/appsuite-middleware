@@ -74,11 +74,6 @@ public interface ShareNotification<T> {
         SHARE_CREATED,
 
         /**
-         * Notification type for internally created shares.
-         */
-        INTERNAL_SHARE_CREATED,
-
-        /**
          * Notification type for a password-reset that needs to be confirmed.
          * Use to send a request to confirm the password-reset to the share's recipient.
          */

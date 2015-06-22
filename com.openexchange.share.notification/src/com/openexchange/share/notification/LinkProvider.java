@@ -66,26 +66,11 @@ public interface LinkProvider {
     String getShareUrl();
 
     /**
-     * Gets the URL to the password reset servlet, containing the guest users token
-     * to reset his password.
-     *
-     * @return The URL
-     */
-    String getPasswordResetUrl();
-
-    /**
      * Gets the URL to confirm to reset a guest's password
      *
      * @param confirm The uuid to confirm
      * @return The URL
      */
     String getPasswordResetConfirmUrl(String confirm);
-
-    /**
-     * Gets the direct link to a shared file/folder for an internal user
-     *
-     * @return The direct link to a shared file/folder
-     */
-    String getInternalLink();
 
 }

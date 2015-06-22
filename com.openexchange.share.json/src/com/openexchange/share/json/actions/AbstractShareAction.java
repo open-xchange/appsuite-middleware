@@ -62,8 +62,6 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.notification.DefaultLinkProvider;
-import com.openexchange.share.notification.LinkProvider;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -145,11 +143,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
         }
 
         return prefixService.getPrefix();
-    }
-
-    // FIXME: hostname service or share service or whatever, but we need a single point to generate those URLs
-    protected LinkProvider buildLinkProvider(ServerSession session, AJAXRequestData requestData, String shareToken) {
-        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(session, requestData), getServletPrefix(), shareToken);
     }
 
     protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {

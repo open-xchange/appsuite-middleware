@@ -92,26 +92,20 @@ public class DefaultLinkProvider implements LinkProvider {
 
     @Override
     public String getShareUrl() {
-        return baseUrl() + "share" + '/' + shareToken;
-    }
+        if (internalLink == null) {
+            return baseUrl() + "share" + '/' + shareToken;
+        }
 
-    @Override
-    public String getPasswordResetUrl() {
-        return baseUrl() + "share/reset/password?share=" + shareToken;
+        return protocol + domain + internalLink;
     }
 
     @Override
     public String getPasswordResetConfirmUrl(String confirm) {
-        return getPasswordResetUrl() + "&confirm=" + confirm;
+        return baseUrl() + "share/reset/password?share=" + shareToken + "&confirm=" + confirm;
     }
 
     private String baseUrl() {
         return protocol + domain + servletPrefix;
-    }
-
-    @Override
-    public String getInternalLink() {
-        return protocol + domain + internalLink;
     }
 
 }
