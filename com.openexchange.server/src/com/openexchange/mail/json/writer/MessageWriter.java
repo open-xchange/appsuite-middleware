@@ -149,7 +149,7 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings) throws OXException {
         return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, null, false, -1);
     }
 
@@ -168,7 +168,7 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout) throws OXException {
         return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, null);
     }
 
@@ -188,7 +188,7 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter) throws OXException {
         return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1);
     }
 
@@ -199,8 +199,7 @@ public final class MessageWriter {
      * @param mail The mail to write
      * @param displayMode The display mode
      * @param session The session
-     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from
-     *            storage, thus no request-specific preparations will take place.
+     * @param settings The user's mail settings used for writing message; if <code>null</code> the settings are going to be fetched from storage, thus no request-specific preparations will take place.
      * @param warnings A container for possible warnings
      * @param tokenTimeout
      * @param mimeFilter The MIME filter
@@ -209,10 +208,10 @@ public final class MessageWriter {
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(final int accountId, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail settings, final Collection<OXException> warnings, final boolean token, final int tokenTimeout, final MimeFilter mimeFilter, final TimeZone optTimeZone, final boolean exactLength, final int maxContentSize) throws OXException {
-        final MailPath mailPath;
-        final String fullName = mail.getFolder();
-        final String mailId = mail.getMailId();
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize) throws OXException {
+        MailPath mailPath;
+        String fullName = mail.getFolder();
+        String mailId = mail.getMailId();
         if (fullName != null && mailId != null) {
             mailPath = new MailPath(accountId, fullName, mailId);
         } else if (mail.getMsgref() != null) {
@@ -220,7 +219,7 @@ public final class MessageWriter {
         } else {
             mailPath = MailPath.NULL;
         }
-        final UserSettingMail usm = null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
+        UserSettingMail usm = null == settings ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), session.getContextId()) : settings;
         /*
          * Add log properties
          */
@@ -235,26 +234,26 @@ public final class MessageWriter {
         }
 
         try {
-            final JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout, maxContentSize);
+            JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout, maxContentSize);
             handler.setExactLength(exactLength);
             if (null != optTimeZone) {
                 handler.setTimeZone(optTimeZone);
             }
-            final MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
+            MailMessageParser parser = new MailMessageParser().addMimeFilter(mimeFilter);
             parser.parseMailMessage(mail, handler);
             if (null != warnings) {
-                final List<OXException> list = parser.getWarnings();
+                List<OXException> list = parser.getWarnings();
                 if (!list.isEmpty()) {
                     warnings.addAll(list);
                 }
             }
-            final JSONObject jsonObject = handler.getJSONObject();
+            JSONObject jsonObject = handler.getJSONObject();
             if (mail instanceof Delegatized) {
-                final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
                 if (undelegatedAccountId >= 0) {
                     try {
                         jsonObject.put(FolderChildFields.FOLDER_ID, prepareFullname(undelegatedAccountId, fullName));
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -265,17 +264,17 @@ public final class MessageWriter {
             /*
              * Ensure "msgref" is present in draft mail
              */
-            final String key = MailJSONField.MSGREF.getKey();
+            String key = MailJSONField.MSGREF.getKey();
             if (!jsonObject.has(key) && null != mailPath) {
                 try {
                     jsonObject.put(key, mailPath.toString());
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
             return jsonObject;
-        } catch (final OXException e) {
-            final Throwable cause = e.getCause();
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
             if (null != cause && cause.getClass().getName().startsWith("MessageRemoved")) {
                 throw MailExceptionCode.MAIL_NOT_FOUND.create(cause, mailId, mail.getFolder());
             }
@@ -291,8 +290,8 @@ public final class MessageWriter {
      * @return The written JSON object or <code>null</code> if message's text body parts exceed max. size
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeRawMailMessage(final int accountId, final MailMessage mail) throws OXException {
-        final MailPath mailPath;
+    public static JSONObject writeRawMailMessage(int accountId, MailMessage mail) throws OXException {
+        MailPath mailPath;
         if (mail.getFolder() != null && mail.getMailId() != null) {
             mailPath = new MailPath(accountId, mail.getFolder(), mail.getMailId());
         } else if (mail.getMsgref() != null) {
@@ -300,7 +299,7 @@ public final class MessageWriter {
         } else {
             mailPath = MailPath.NULL;
         }
-        final RawJSONMessageHandler handler = new RawJSONMessageHandler(accountId, mailPath, mail);
+        RawJSONMessageHandler handler = new RawJSONMessageHandler(accountId, mailPath, mail);
         new MailMessageParser().parseMailMessage(mail, handler);
         return handler.getJSONObject();
     }
@@ -314,19 +313,19 @@ public final class MessageWriter {
 
         private final String headerName;
 
-        HeaderFieldWriter(final String headerName) {
+        HeaderFieldWriter(String headerName) {
             super();
             this.headerName = headerName;
         }
 
         @Override
-        public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
-            final Object value = getHeaderValue(mail);
+        public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
+            Object value = getHeaderValue(mail);
             if (withKey) {
                 if (null != value) {
                     try {
                         jsonContainer.toObject().put(headerName, value);
-                    } catch (final JSONException e) {
+                    } catch (JSONException e) {
                         throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                     }
                 }
@@ -336,7 +335,7 @@ public final class MessageWriter {
         }
 
         private Object getHeaderValue(MailMessage mail) {
-            final String[] headerValues = mail.getHeader(headerName);
+            String[] headerValues = mail.getHeader(headerName);
             if (null == headerValues || 0 == headerValues.length) {
                 return null;
             }
@@ -353,32 +352,33 @@ public final class MessageWriter {
 
     }
 
-    private static final EnumMap<MailListField, MailFieldWriter> WRITERS = new EnumMap<MailListField, MailFieldWriter>(MailListField.class);
+    private static final EnumMap<MailListField, MailFieldWriter> WRITERS;
 
     static {
-        WRITERS.put(MailListField.ID, new MailFieldWriter() {
+        EnumMap<MailListField, MailFieldWriter> writers = new EnumMap<MailListField, MailFieldWriter>(MailListField.class);
+        writers.put(MailListField.ID, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(DataFields.ID, mail.getMailId());
                     } else {
                         jsonContainer.toArray().put(mail.getMailId());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.FOLDER_ID, new MailFieldWriter() {
+        writers.put(MailListField.FOLDER_ID, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     int accId = accountId;
                     if (mail instanceof Delegatized) {
-                        final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                        int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
                         if (undelegatedAccountId >= 0) {
                             accId = undelegatedAccountId;
                         }
@@ -388,15 +388,15 @@ public final class MessageWriter {
                     } else {
                         jsonContainer.toArray().put(prepareFullname(accId, mail.getFolder()));
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.ORIGINAL_ID, new MailFieldWriter() {
+        writers.put(MailListField.ORIGINAL_ID, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     Object originalId;
                     if (mail.containsOriginalId() && null != mail.getOriginalId()) {
@@ -412,19 +412,19 @@ public final class MessageWriter {
                     } else {
                         jsonContainer.toArray().put(originalId);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.ORIGINAL_FOLDER_ID, new MailFieldWriter() {
+        writers.put(MailListField.ORIGINAL_FOLDER_ID, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     int accId = accountId;
                     if (mail instanceof Delegatized) {
-                        final int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
+                        int undelegatedAccountId = ((Delegatized) mail).getUndelegatedAccountId();
                         if (undelegatedAccountId >= 0) {
                             accId = undelegatedAccountId;
                         }
@@ -444,90 +444,105 @@ public final class MessageWriter {
                     } else {
                         jsonContainer.toArray().put(originalFolder);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.ATTACHMENT, new MailFieldWriter() {
+        writers.put(MailListField.ATTACHMENT, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.HAS_ATTACHMENTS.getKey(), mail.hasAttachment());
                     } else {
                         jsonContainer.toArray().put(mail.hasAttachment());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.FROM, new MailFieldWriter() {
+        writers.put(MailListField.MIME_TYPE, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
+                try {
+                    if (withKey) {
+                        jsonContainer.toObject().put(MailJSONField.CONTENT_TYPE.getKey(), mail.getContentType().toLowerCaseString());
+                    } else {
+                        jsonContainer.toArray().put(mail.getContentType().toLowerCaseString());
+                    }
+                } catch (JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        });
+        writers.put(MailListField.FROM, new MailFieldWriter() {
+
+            @Override
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.FROM.getKey(), getAddressesAsArray(mail.getFrom()));
                     } else {
                         jsonContainer.toArray().put(getAddressesAsArray(mail.getFrom()));
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.TO, new MailFieldWriter() {
+        writers.put(MailListField.TO, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.RECIPIENT_TO.getKey(), getAddressesAsArray(mail.getTo()));
                     } else {
                         jsonContainer.toArray().put(getAddressesAsArray(mail.getTo()));
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.CC, new MailFieldWriter() {
+        writers.put(MailListField.CC, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.RECIPIENT_CC.getKey(), getAddressesAsArray(mail.getCc()));
                     } else {
                         jsonContainer.toArray().put(getAddressesAsArray(mail.getCc()));
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.BCC, new MailFieldWriter() {
+        writers.put(MailListField.BCC, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.RECIPIENT_BCC.getKey(), getAddressesAsArray(mail.getBcc()));
                     } else {
                         jsonContainer.toArray().put(getAddressesAsArray(mail.getBcc()));
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.SUBJECT, new MailFieldWriter() {
+        writers.put(MailListField.SUBJECT, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     String subject = mail.getSubject();
                     if (withKey) {
@@ -543,30 +558,30 @@ public final class MessageWriter {
                             jsonContainer.toArray().put(subject.trim());
                         }
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.SIZE, new MailFieldWriter() {
+        writers.put(MailListField.SIZE, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.SIZE.getKey(), mail.getSize());
                     } else {
                         jsonContainer.toArray().put(mail.getSize());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.SENT_DATE, new MailFieldWriter() {
+        writers.put(MailListField.SENT_DATE, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     TimeZone timeZone = optTimeZone;
                     if (null == timeZone) {
@@ -585,15 +600,15 @@ public final class MessageWriter {
                             jsonContainer.toArray().put(JSONObject.NULL);
                         }
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.RECEIVED_DATE, new MailFieldWriter() {
+        writers.put(MailListField.RECEIVED_DATE, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     TimeZone timeZone = optTimeZone;
                     if (null == timeZone) {
@@ -612,47 +627,47 @@ public final class MessageWriter {
                             jsonContainer.toArray().put(JSONObject.NULL);
                         }
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.FLAGS, new MailFieldWriter() {
+        writers.put(MailListField.FLAGS, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.FLAGS.getKey(), mail.getFlags());
                     } else {
                         jsonContainer.toArray().put(mail.getFlags());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.THREAD_LEVEL, new MailFieldWriter() {
+        writers.put(MailListField.THREAD_LEVEL, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.THREAD_LEVEL.getKey(), mail.getThreadLevel());
                     } else {
                         jsonContainer.toArray().put(mail.getThreadLevel());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.DISPOSITION_NOTIFICATION_TO, new MailFieldWriter() {
+        writers.put(MailListField.DISPOSITION_NOTIFICATION_TO, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
-                    final Object value;
+                    Object value;
                     if ((mail.containsPrevSeen() ? mail.isPrevSeen() : mail.isSeen())) {
                         value = JSONObject.NULL;
                     } else {
@@ -666,30 +681,30 @@ public final class MessageWriter {
                     } else {
                         jsonContainer.toArray().put(value);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.PRIORITY, new MailFieldWriter() {
+        writers.put(MailListField.PRIORITY, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.PRIORITY.getKey(), mail.getPriority());
                     } else {
                         jsonContainer.toArray().put(mail.getPriority());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.MSG_REF, new MailFieldWriter() {
+        writers.put(MailListField.MSG_REF, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         if (mail.containsMsgref()) {
@@ -698,17 +713,17 @@ public final class MessageWriter {
                     } else {
                         jsonContainer.toArray().put(mail.containsMsgref() ? mail.getMsgref() : JSONObject.NULL);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.COLOR_LABEL, new MailFieldWriter() {
+        writers.put(MailListField.COLOR_LABEL, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
-                    final int colorLabel;
+                    int colorLabel;
                     if (MailProperties.getInstance().isUserFlagsEnabled() && mail.containsColorLabel()) {
                         colorLabel = mail.getColorLabel();
                     } else {
@@ -719,118 +734,119 @@ public final class MessageWriter {
                     } else {
                         jsonContainer.toArray().put(colorLabel);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.TOTAL, new MailFieldWriter() {
+        writers.put(MailListField.TOTAL, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.TOTAL.getKey(), JSONObject.NULL);
                     } else {
                         jsonContainer.toArray().put(JSONObject.NULL);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.NEW, new MailFieldWriter() {
+        writers.put(MailListField.NEW, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.NEW.getKey(), JSONObject.NULL);
                     } else {
                         jsonContainer.toArray().put(JSONObject.NULL);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.UNREAD, new MailFieldWriter() {
+        writers.put(MailListField.UNREAD, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.UNREAD.getKey(), mail.getUnreadMessages());
                     } else {
                         jsonContainer.toArray().put(mail.getUnreadMessages());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.DELETED, new MailFieldWriter() {
+        writers.put(MailListField.DELETED, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
                         jsonContainer.toObject().put(MailJSONField.DELETED.getKey(), JSONObject.NULL);
                     } else {
                         jsonContainer.toArray().put(JSONObject.NULL);
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.ACCOUNT_NAME, new MailFieldWriter() {
+        writers.put(MailListField.ACCOUNT_NAME, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
-                        final JSONObject jsonObject = (JSONObject) jsonContainer;
+                        JSONObject jsonObject = (JSONObject) jsonContainer;
                         jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
                         jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
                     } else {
                         jsonContainer.toArray().put(mail.getAccountName());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
-        WRITERS.put(MailListField.ACCOUNT_ID, new MailFieldWriter() {
+        writers.put(MailListField.ACCOUNT_ID, new MailFieldWriter() {
 
             @Override
-            public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+            public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
                 try {
                     if (withKey) {
-                        final JSONObject jsonObject = (JSONObject) jsonContainer;
+                        JSONObject jsonObject = (JSONObject) jsonContainer;
                         jsonObject.put(MailJSONField.ACCOUNT_NAME.getKey(), mail.getAccountName());
                         jsonObject.put(MailJSONField.ACCOUNT_ID.getKey(), mail.getAccountId());
                     } else {
                         jsonContainer.toArray().put(mail.getAccountId());
                     }
-                } catch (final JSONException e) {
+                } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         });
+        WRITERS = writers;
     }
 
     private static final MailFieldWriter UNKNOWN = new MailFieldWriter() {
 
         @Override
-        public void writeField(final JSONValue jsonContainer, final MailMessage mail, final int level, final boolean withKey, final int accountId, final int user, final int cid, final TimeZone optTimeZone) throws OXException {
+        public void writeField(JSONValue jsonContainer, MailMessage mail, int level, boolean withKey, int accountId, int user, int cid, TimeZone optTimeZone) throws OXException {
             try {
                 if (withKey) {
                     jsonContainer.toObject().put("Unknown column", JSONObject.NULL);
                 } else {
                     jsonContainer.toArray().put(JSONObject.NULL);
                 }
-            } catch (final JSONException e) {
+            } catch (JSONException e) {
                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
             }
         }
@@ -896,7 +912,7 @@ public final class MessageWriter {
      * @param timeZone The time zone
      * @return The time with added time zone offset
      */
-    public static long addUserTimezone(final long time, final TimeZone timeZone) {
+    public static long addUserTimezone(long time, TimeZone timeZone) {
         return (time + timeZone.getOffset(time));
     }
 
@@ -909,12 +925,12 @@ public final class MessageWriter {
      * [[&quot;The Personal&quot;, &quot;someone@somewhere.com&quot;], ...]
      * </pre>
      */
-    public static JSONArray getAddressesAsArray(final InternetAddress[] addrs) {
+    public static JSONArray getAddressesAsArray(InternetAddress[] addrs) {
         if (addrs == null || addrs.length == 0) {
             return EMPTY_JSON_ARR;
         }
-        final JSONArray jsonArr = new JSONArray(addrs.length);
-        for (final InternetAddress address : addrs) {
+        JSONArray jsonArr = new JSONArray(addrs.length);
+        for (InternetAddress address : addrs) {
             jsonArr.put(getAddressAsArray(address));
         }
         return jsonArr;
@@ -923,13 +939,13 @@ public final class MessageWriter {
     /**
      * Convert an <code>InternetAddress</code> instance into a JSON-Array conforming to: ["The Personal", "someone@somewhere.com"]
      */
-    private static JSONArray getAddressAsArray(final InternetAddress addr) {
-        final JSONArray retval = new JSONArray(2);
+    private static JSONArray getAddressAsArray(InternetAddress addr) {
+        JSONArray retval = new JSONArray(2);
         // Personal
-        final String personal = addr.getPersonal();
+        String personal = addr.getPersonal();
         retval.put(personal == null || personal.length() == 0 ? JSONObject.NULL : preparePersonal(personal));
         // Address
-        final String address = addr.getAddress();
+        String address = addr.getAddress();
         retval.put(address == null || address.length() == 0 ? JSONObject.NULL : prepareAddress(address));
 
         return retval;
@@ -937,13 +953,13 @@ public final class MessageWriter {
 
     // private static final Pattern PATTERN_QUOTE = Pattern.compile("[.,:;<>\"]");
 
-    private static String preparePersonal(final String personal) {
+    private static String preparePersonal(String personal) {
         return MimeMessageUtility.quotePhrase(personal, false);
     }
 
     private static final String DUMMY_DOMAIN = "@unspecified-domain";
 
-    private static String prepareAddress(final String address) {
+    private static String prepareAddress(String address) {
         String decoded = toIDN(MimeMessageUtility.decodeMultiEncodedHeader(address));
         // Check for slash character -- the delimiting character for MSISDN addresses
         int pos = decoded.indexOf('@');

@@ -82,6 +82,11 @@ public enum MailField {
      */
     CONTENT_TYPE(MailListField.ATTACHMENT),
     /**
+     * The MIME type<br>
+     * <b>[low cost]</b>
+     */
+    MIME_TYPE(MailListField.MIME_TYPE),
+    /**
      * From<br>
      * <b>[low cost]</b>
      */
@@ -206,7 +211,7 @@ public enum MailField {
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL
      */
     public static final MailField[] FIELDS_LOW_COST = {
-        ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
+        ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
         DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL };
 
     /**
@@ -216,7 +221,7 @@ public enum MailField {
      * DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS
      */
     public static final MailField[] FIELDS_WO_BODY = {
-        ID, FOLDER_ID, CONTENT_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
+        ID, FOLDER_ID, CONTENT_TYPE, MIME_TYPE, FROM, TO, CC, BCC, SUBJECT, SIZE, SENT_DATE, RECEIVED_DATE, FLAGS, THREAD_LEVEL,
         DISPOSITION_NOTIFICATION_TO, PRIORITY, COLOR_LABEL, HEADERS };
 
     private final MailListField listField;
