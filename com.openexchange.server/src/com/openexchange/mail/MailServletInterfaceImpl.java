@@ -3030,6 +3030,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             } else {
                 uidArr = messageStorage.appendMessages(sentFullname, new MailMessage[] { sentMail });
             }
+            postEventRemote(accountId, sentFullname, true, true);
             try {
                 /*
                  * Update caches
