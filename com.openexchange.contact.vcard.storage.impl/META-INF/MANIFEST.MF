@@ -9,11 +9,12 @@ Bundle-ClassPath: .
 Bundle-SymbolicName: com.openexchange.contact.vcard.storage.impl
 Import-Package: com.openexchange.config,
  com.openexchange.contact.vcard.storage,
- com.openexchange.event,
  com.openexchange.database,
+ com.openexchange.event,
  com.openexchange.exception,
  com.openexchange.filestore,
  com.openexchange.groupware.container,
+ com.openexchange.groupware.filestore,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.osgi,

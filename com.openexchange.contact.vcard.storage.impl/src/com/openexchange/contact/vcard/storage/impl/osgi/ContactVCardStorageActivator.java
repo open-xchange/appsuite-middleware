@@ -56,10 +56,12 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageMetadataStore;
 import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageService;
 import com.openexchange.contact.vcard.storage.impl.VCardCleaner;
-import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageMetadataStore;
+import com.openexchange.contact.vcard.storage.impl.VCardFilestoreLocationUpdater;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -92,6 +94,7 @@ public class ContactVCardStorageActivator extends HousekeepingActivator {
         try {
             LOG.info("starting bundle: com.openexchange.contact.vcard.storage.impl");
 
+            registerService(FileLocationHandler.class, new VCardFilestoreLocationUpdater());
             DefaultVCardStorageService vCardStorageService = new DefaultVCardStorageService();
             Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { VCardCleaner.EVENT_TOPIC });
