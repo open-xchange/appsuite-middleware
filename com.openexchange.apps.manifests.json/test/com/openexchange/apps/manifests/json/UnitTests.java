@@ -52,18 +52,16 @@ package com.openexchange.apps.manifests.json;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.apps.manifests.json.osgi.ManifestJSONActivatorTest;
 
 /**
  * Unit tests for the bundle com.openexchange.apps.manifests.json
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    AllActionTest.class,
-    ManifestJSONActivatorTest.class
+    AllActionTest.class
 })
 public class UnitTests {
 
