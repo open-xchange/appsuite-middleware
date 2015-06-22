@@ -49,7 +49,12 @@
 
 package com.openexchange.mailmapping.impl;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -70,6 +75,28 @@ import com.openexchange.user.UserService;
  */
 public class DefaultMailMappingService implements MailResolver {
 
+    private volatile Boolean lookUpByDomain;
+    private boolean lookUpByDomain() {
+        Boolean tmp = lookUpByDomain;
+        if (null == tmp) {
+            synchronized (DefaultMailMappingService.class) {
+                tmp = lookUpByDomain;
+                if (null == tmp) {
+                    boolean defaultValue = false;
+                    ConfigurationService service = services.getOptionalService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.mailmapping.lookUpByDomain", defaultValue));
+                    lookUpByDomain = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
+
+    // ------------------------------------------------------------------------------------------------
+
     /** The service look-up */
     private final ServiceLookup services;
 
@@ -89,15 +116,6 @@ public class DefaultMailMappingService implements MailResolver {
             return null;
         }
 
-        int atSign = mail.lastIndexOf('@');
-        if (atSign <= 0 || atSign >= mail.length()) {
-            // Does not seem to be a valid E-Mail address
-            return null;
-        }
-
-        // Extract domain
-        String domain = mail.substring(atSign + 1);
-
         // Acquire needed services
         ContextService contexts = services.getService(ContextService.class);
         if (null == contexts) {
@@ -108,19 +126,65 @@ public class DefaultMailMappingService implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
-        // Map the domain name to a context id
+        return lookUpByDomain() ? lookUpByDomain(mail, contexts, users) : lookUpBySchema(mail, users, contexts);
+    }
+
+    private ResolvedMail lookUpByDomain(String mail, ContextService contexts, UserService users) throws OXException {
+        int atSign = mail.lastIndexOf('@');
+        if (atSign <= 0 || atSign >= mail.length()) {
+            // Does not seem to be a valid E-Mail address
+            return null;
+        }
+
+        // Extract domain
+        String domain = mail.substring(atSign + 1);
+
+        // Map the domain name to a context identifier
         int cid = contexts.getContextId(domain);
         if (cid <= 0) {
             return null;
         }
-        Context context = contexts.getContext(cid);
-        // Search for a user with the mail address
+
+        // Search for a user with the mail address in that context
+        return lookUpInContext(mail, cid, users, contexts);
+    }
+
+    private ResolvedMail lookUpBySchema(String mail, UserService users, ContextService contexts) throws OXException {
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        List<Integer> contextIds = contexts.getAllContextIds();
+        Set<Integer> visited = new HashSet<Integer>(contextIds.size(), 0.9f);
+        for (Integer contextId : contextIds) {
+            if (visited.add(contextId)) {
+                // Search for a user with the mail address in that context
+                ResolvedMail resolvedMail = lookUpInContext(mail, contextId.intValue(), users, contexts);
+                if (null != resolvedMail) {
+                    return resolvedMail;
+                }
+
+                int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId.intValue());
+                if (null != contextsInSameSchema) {
+                    for (int i = contextsInSameSchema.length; i-- > 0;) {
+                        visited.add(Integer.valueOf(contextsInSameSchema[i]));
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private ResolvedMail lookUpInContext(String mail, int contextId, UserService users, ContextService contexts) throws OXException {
+        Context context = contexts.getContext(contextId);
         User found = users.searchUser(mail, context, true);
         if (found == null) {
             return null;
         }
 
-        return ResolvedMail.ACCEPT(found.getId(), context.getContextId());
+        return ResolvedMail.ACCEPT(found.getId(), contextId);
     }
 
 }

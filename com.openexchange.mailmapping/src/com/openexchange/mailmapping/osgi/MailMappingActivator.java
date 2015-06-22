@@ -52,7 +52,9 @@ package com.openexchange.mailmapping.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.mailmapping.MailResolver;
 import com.openexchange.mailmapping.impl.DefaultMailMappingService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +77,7 @@ public class MailMappingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, DatabaseService.class, ConfigurationService.class };
     }
 
     @Override
