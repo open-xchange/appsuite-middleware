@@ -123,14 +123,14 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     new InternalParticipant(participant, groupId);
                 taskParticipant.setConfirm(result.getInt(pos++));
                 taskParticipant.setConfirmMessage(result.getString(pos++));
-                //if (StorageType.REMOVED == type) {
+                if (StorageType.REMOVED == type) {
                     final int folderId = result.getInt(pos++);
                     if (0 == folderId) {
                         taskParticipant.setFolderId(UserParticipant.NO_PFID);
                     } else {
                         taskParticipant.setFolderId(folderId);
                     }
-                //}
+                }
                 HashSet<InternalParticipant> participants = tmp.get(Integer
                     .valueOf(taskId));
                 if (null == participants) {

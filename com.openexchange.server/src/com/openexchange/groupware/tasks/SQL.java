@@ -240,11 +240,10 @@ public final class SQL {
      * @throws OXException if a mapping for a column isn't implemented.
      */
     static String getFields(final int[] columns, final boolean folder, String prefix) throws OXException {
-        if (prefix == null) {
+        if (prefix == null)
             prefix = "";
-        } else {
+        else
             prefix += ".";
-        }
 
         final StringBuilder builder = new StringBuilder();
         for (final int i : columns) {
@@ -482,13 +481,13 @@ public final class SQL {
             "INSERT INTO task_removedparticipant (cid,task,user,group_id,"
             + "accepted,description,folder) VALUES (?,?,?,?,?,?,?)");
         SELECT_PARTS.put(StorageType.ACTIVE,
-            "SELECT task,user,group_id,accepted,description,fuid "
-            + "FROM task_participant AS t JOIN oxfolder_tree AS f ON t.cid=f.cid AND t.user=f.created_from WHERE f.module=1 AND f.default_flag>0 AND t.cid=? AND t.task IN (");
+            "SELECT task,user,group_id,accepted,description "
+            + "FROM task_participant WHERE cid=? AND task IN (");
         SELECT_PARTS.put(StorageType.REMOVED,
             "SELECT task,user,group_id,accepted,description,folder "
-            + "FROM task_removedparticipant AS t JOIN oxfolder_tree AS f ON t.cid=f.cid AND t.user=f.created_from WHERE f.module=1 AND f.default_flag>0 AND t.cid=? AND t.task IN (");
+            + "FROM task_removedparticipant WHERE cid=? AND task IN (");
         SELECT_PARTS.put(StorageType.DELETED,
-            "SELECT task,user,group_id,accepted,description,fuid "
+            "SELECT task,user,group_id,accepted,description "
             + "FROM del_task_participant WHERE cid=? AND task IN (");
         sql = "UPDATE " + tableName + " SET group_id=?, accepted=?, "
             + "description=? WHERE cid=? AND task=? AND user=?";
