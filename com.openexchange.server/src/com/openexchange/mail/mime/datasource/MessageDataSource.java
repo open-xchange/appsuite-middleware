@@ -131,7 +131,7 @@ public final class MessageDataSource implements DataSource {
     /**
      * Create a data source from a String
      */
-    public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
+    public MessageDataSource(final String data, final ContentType contentType) {
         final ContentType ct;
         if (contentType.containsCharsetParameter()) {
             ct = contentType;

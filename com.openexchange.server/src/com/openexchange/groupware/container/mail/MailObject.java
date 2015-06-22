@@ -564,8 +564,6 @@ public class MailObject {
             }
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
