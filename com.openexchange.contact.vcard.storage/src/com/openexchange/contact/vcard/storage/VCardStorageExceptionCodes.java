@@ -64,8 +64,13 @@ import com.openexchange.exception.OXExceptionStrings;
  */
 public enum VCardStorageExceptionCodes implements DisplayableOXExceptionCode {
 
+    /**
+     * An error occurred: %1$s
+     */
+    ERROR("An error occurred: %1$s", null, CATEGORY_ERROR, 1),
+
     /** Unable to access the filestore. */
-    FILESTORE_DOWN("Unable to access the file store.", VCardStorageExceptionMessages.FILESTORE_DOWN_MSG, CATEGORY_SERVICE_DOWN, 1),
+    FILESTORE_DOWN("Unable to access the file store.", VCardStorageExceptionMessages.FILESTORE_DOWN_MSG, CATEGORY_SERVICE_DOWN, 2),
 
     ;
 
