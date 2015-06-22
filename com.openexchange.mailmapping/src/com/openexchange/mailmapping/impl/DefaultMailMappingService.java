@@ -116,6 +116,18 @@ public class DefaultMailMappingService implements MailResolver {
 
     @Override
     public ResolvedMail resolve(String mail) throws OXException {
+        return resolve(mail, lookUpByDomain());
+    }
+
+    /**
+     * Resolves specified E-Mail address
+     *
+     * @param mail The E-Mail address to resolve
+     * @param lookUpByDomain Whether look-up should happen by domain (not recommended as it requires appropriate login mappings) or by DB schema (reliably, but slower)
+     * @return The resolved E-Mail address or <code>null</code> if it could not be resolved
+     * @throws OXException If resolve operation fails
+     */
+    public ResolvedMail resolve(String mail, boolean lookUpByDomain) throws OXException {
         if (Strings.isEmpty(mail)) {
             return null;
         }
@@ -147,7 +159,7 @@ public class DefaultMailMappingService implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
-        return lookUpByDomain() ? lookUpByDomain(mail, domain, contexts, users) : lookUpBySchema(mail, users, contexts);
+        return lookUpByDomain ? lookUpByDomain(mail, domain, contexts, users) : lookUpBySchema(mail, users, contexts);
     }
 
     private ResolvedMail lookUpByDomain(String mail, String domain, ContextService contexts, UserService users) throws OXException {
