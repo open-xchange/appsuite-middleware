@@ -170,7 +170,7 @@ public class ReplicationMonitor {
                     throw createException(assign, true, e2);
                 }
             }
-            if (!write && assign.isTransactionInitialized() && false == assign.isToConfigDB()) {
+            if (!write && assign.isTransactionInitialized()) {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
@@ -228,7 +228,7 @@ public class ReplicationMonitor {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
-            if (!assign.isToConfigDB() && !state.isUsedAsRead()) {
+            if (!state.isUsedAsRead()) {
                 // ConfigDB has no replication monitor and for master fallback connections the counter must not be incremented.
                 if (state.isUsedForUpdate()) {
                     // Data on the master has been changed without using a transaction, so we need to increment the counter here.

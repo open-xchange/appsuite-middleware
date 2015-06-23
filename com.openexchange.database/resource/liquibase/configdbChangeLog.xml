@@ -3,6 +3,7 @@
 <!-- *************************************************************************************
     Hints:
        - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG table
+       - use failOnError param to define if a successful execution of the ChangeSet is required
  ************************************************************************************* -->
 
 <databaseChangeLog xmlns="urn:liquibase"
@@ -144,6 +145,28 @@
                 COMMIT;
               END;
           </createProcedure>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="7.8.0:replicationMonitor:createForConfigDB" author="martin.schneider@open-xchange.com" failOnError="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="replicationMonitor" />
+            </not>
+        </preConditions>
+        <comment>
+            Add table 'replicationMonitor' for master/slave replication.
+        </comment>
+        <sql>
+            CREATE TABLE replicationMonitor (
+                cid int(10) unsigned NOT NULL,
+                transaction bigint(20) NOT NULL,
+                PRIMARY KEY (cid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+            INSERT INTO replicationMonitor (cid,transaction) VALUES (0,0);
+        </sql>
+        <rollback>
+            <dropTable tableName="replicationMonitor" />
         </rollback>
     </changeSet>
 </databaseChangeLog>

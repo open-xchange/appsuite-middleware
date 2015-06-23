@@ -127,9 +127,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     private Connection get(final boolean write, final boolean noTimeout) throws OXException {
         final AssignmentImpl assign = assignmentService.getConfigDBAssignment();
-        return monitor.checkFallback(pools, assign, noTimeout, write);
-        // TODO Enable the following if the configuration database gets a table replicationMonitor.
-        // return ReplicationMonitor.checkActualAndFallback(pools, assign, false, write);
+        return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
     private static void back(final Connection con) {
