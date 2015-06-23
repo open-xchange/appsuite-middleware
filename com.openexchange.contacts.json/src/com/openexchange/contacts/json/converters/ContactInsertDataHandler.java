@@ -59,12 +59,14 @@ import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.java.Streams;
@@ -126,20 +128,39 @@ public final class ContactInsertDataHandler implements DataHandler {
             JSONArray jsonArray = new JSONArray();
             VCardService vCardService = services.getService(VCardService.class);
             ContactService contactService = services.getService(ContactService.class);
-            searchIterator = vCardService.importVCards(inputStream, vCardService.createParameters(session).setKeepOriginalVCard(false));
+            VCardStorageService vCardStorageService = contactService.supports(serverSession, folderID, ContactField.VCARD_ID) ?
+                services.getOptionalService(VCardStorageService.class) : null;
+            searchIterator = vCardService.importVCards(inputStream, vCardService.createParameters(session).setKeepOriginalVCard(null != vCardStorageService));
             while (searchIterator.hasNext()) {
                 /*
                  * import each contact
                  */
                 VCardImport vCardImport = null;
+                boolean saved = false;
+                String vCardID = null;
                 try {
                     vCardImport = searchIterator.next();
                     Contact contact = vCardImport.getContact();
+                    if (null != vCardStorageService) {
+                        InputStream vCardStream = null;
+                        try {
+                            vCardStream = vCardImport.getVCard().getStream();
+                            vCardID = vCardStorageService.saveVCard(vCardStream, session.getContextId());
+                            contact.setVCardId(vCardID);
+                        } finally {
+                            Streams.close(vCardStream);
+                        }
+                    }
                     try {
                         contactService.createContact(serverSession, folderID, contact);
+                        saved = true;
                     } catch (OXException e) {
                         org.slf4j.LoggerFactory.getLogger(ContactInsertDataHandler.class).debug("error storing contact", e);
                         throw handleDataTruncation(e);
+                    } finally {
+                        if (false == saved && null != vCardID) {
+                            vCardStorageService.deleteVCard(vCardID, session.getContextId());
+                        }
                     }
                     /*
                      * include new identifiers in result
