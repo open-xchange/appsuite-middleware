@@ -74,7 +74,6 @@ import com.openexchange.push.dovecot.DovecotPushDeleteListener;
 import com.openexchange.push.dovecot.DovecotPushManagerService;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.HzDovecotPushClusterLock;
-import com.openexchange.push.dovecot.rest.DovecotPushRESTService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -240,8 +239,6 @@ public class DovecotPushActivator extends HousekeepingActivator {
         openTrackers();
 
         registerService(DeleteListener.class, new DovecotPushDeleteListener());
-
-        registerService(DovecotPushRESTService.class, new DovecotPushRESTService());
     }
 
     @Override
