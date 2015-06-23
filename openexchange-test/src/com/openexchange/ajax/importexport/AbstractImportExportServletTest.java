@@ -51,12 +51,13 @@ package com.openexchange.ajax.importexport;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AbstractAJAXTest;
 import com.openexchange.exception.OXException;
@@ -67,7 +68,6 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.webdav.xml.FolderTest;
 
-
 /**
  * Test of the ImporterExporter servlet. This class serves as library for all
  * derived tests.
@@ -76,107 +76,135 @@ import com.openexchange.webdav.xml.FolderTest;
  *
  */
 public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
-	//private SessionObject sessObj;
-	public String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
+
+    //private SessionObject sessObj;
+    public String FOLDER_NAME = "csv-contact-roundtrip-ajax-test";
 
     public String IMPORTED_CSV = ContactTestData.IMPORT_MULTIPLE;
-	public String EXPORT_SERVLET = "export";
-	public String IMPORT_SERVLET = "import";
-	public String IMPORT_VCARD = "BEGIN:VCARD\nVERSION:3.0\nPRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nNICKNAME:Tierlieb\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com\nORG:- deactivated -\nREV:20061204T160750.018Z\nURL:www.tobias-prinz.de\nUID:80@ox6.netline.de\nEND:VCARD\n";
-	public String[] IMPORT_VCARD_AWAITED_ELEMENTS = "PRODID:OPEN-XCHANGE\nFN:Prinz\\, Tobias\nN:Prinz;Tobias;;;\nBDAY:19810501\nADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\nTEL;TYPE=home,voice:+49 2358 7192\nEMAIL:tobias.prinz@open-xchange.com".split("\n");
+    public String EXPORT_SERVLET = "export";
+    public String IMPORT_SERVLET = "import";
 
-	public AbstractImportExportServletTest(final String name){
-		super(name);
-	}
+    /* @formatter:off */
+    public String IMPORT_VCARD =
+          "BEGIN:VCARD\n"
+        + "VERSION:3.0\n"
+        + "PRODID:-//Open-Xchange//7.8.0-Rev0//EN\n"
+        + "FN:Prinz\\, Tobias\n"
+        + "N:Prinz;Tobias;;;\n"
+        + "NICKNAME:Tierlieb\n"
+        + "BDAY:19810501\n"
+        + "ADR;TYPE=work:;;;Meinerzhagen;NRW;58540;DE\n"
+        + "TEL;TYPE=home,voice:+49 2358 7192\n"
+        + "EMAIL:tobias.prinz@open-xchange.com\n"
+        + "ORG:- deactivated -\n"
+        + "REV:20061204T160750.018Z\n"
+        + "URL:www.tobias-prinz.de\n"
+        + "UID:80@ox6.netline.de\n"
+        + "X-SHOESIZE:9.5\n"
+        + "END:VCARD\n";
+    
+    public Map<String, String> VCARD_ELEMENTS = new HashMap<String, String>(){{
+        put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
+        put("FN", "Prinz\\, Tobias");
+        put("N", "Prinz;Tobias;;;");
+        put("BDAY", "1981-05-01");
+        put("ADR;TYPE=work", ";;;Meinerzhagen;NRW;58540;DE");
+        put("TEL;TYPE=home,voice", "+49 2358 7192");
+        put("EMAIL", "tobias.prinz@open-xchange.com");
+        put("X-SHOESIZE", "9.5");
+    }};
 
-	@Override
-	public void setUp() throws Exception{
-		super.setUp();
-	//	final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
-	//  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
-	//	sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
-	}
+    /* @formatter:on */
 
-	@Override
-	public void tearDown() throws Exception{
+    public AbstractImportExportServletTest(final String name) {
+        super(name);
+    }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+        //  final UserStorage uStorage = UserStorage.getInstance(new ContextImpl(1));
+        //  final int userId = uStorage.getUserId( Init.getAJAXProperty("login") );
+        //  sessObj = SessionObjectWrapper.createSessionObject(userId, 1, "csv-roundtrip-test");
+    }
+
+    @Override
+    public void tearDown() throws Exception {
         super.tearDown();
-	}
+    }
 
-	protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {
-		final FolderObject folderObj = com.openexchange.ajax.FolderTest
-		.getStandardCalendarFolder(getWebConversation(),
-		getHostName(), getSessionId());
+    protected int getUserId_FIXME() throws MalformedURLException, OXException, IOException, SAXException, JSONException, OXException {
+        final FolderObject folderObj = com.openexchange.ajax.FolderTest
+            .getStandardCalendarFolder(getWebConversation(),
+                getHostName(), getSessionId());
 
-		return folderObj.getCreatedBy();
-	}
+        return folderObj.getCreatedBy();
+    }
 
-	public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
-		final StringBuilder bob = new StringBuilder("http://");
-		bob.append(getHostName());
-		bob.append("/ajax/");
-		bob.append(servlet);
-		bob.append("?session=");
-		bob.append(getSessionId());
-		addParam(bob, AJAXServlet.PARAMETER_FOLDERID, folderId ) ;
-		addParam(bob, AJAXServlet.PARAMETER_ACTION, format.getConstantName());
-		return bob.toString();
-	}
+    public String getUrl(final String servlet, final int folderId, final Format format) throws IOException, JSONException, OXException {
+        final StringBuilder bob = new StringBuilder("http://");
+        bob.append(getHostName());
+        bob.append("/ajax/");
+        bob.append(servlet);
+        bob.append("?session=");
+        bob.append(getSessionId());
+        addParam(bob, AJAXServlet.PARAMETER_FOLDERID, folderId);
+        addParam(bob, AJAXServlet.PARAMETER_ACTION, format.getConstantName());
+        return bob.toString();
+    }
 
-	public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException{
-		final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
+    public String getCSVColumnUrl(final String servlet, final int folderId, final Format format) throws IOException, OXException, JSONException {
+        final StringBuilder bob = new StringBuilder(getUrl(servlet, folderId, format));
 
-		addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber()+","+ContactField.EMAIL1.getNumber()+","+ContactField.DISPLAY_NAME.getNumber());
-		return bob.toString();
-	}
+        addParam(bob, AJAXServlet.PARAMETER_COLUMNS, ContactField.GIVEN_NAME.getNumber() + "," + ContactField.EMAIL1.getNumber() + "," + ContactField.DISPLAY_NAME.getNumber());
+        return bob.toString();
+    }
 
-	protected void addParam(final StringBuilder bob, final String param, final String value){
-		bob.append('&');
-		bob.append(param);
-		bob.append('=');
-		bob.append(value);
-	}
+    protected void addParam(final StringBuilder bob, final String param, final String value) {
+        bob.append('&');
+        bob.append(param);
+        bob.append('=');
+        bob.append(value);
+    }
 
-	protected void addParam(final StringBuilder bob, final String param, final int value){
-		addParam(bob, param, Integer.toString(value));
-	}
+    protected void addParam(final StringBuilder bob, final String param, final int value) {
+        addParam(bob, param, Integer.toString(value));
+    }
 
-	protected int createFolder(final String title, final int folderObjectModuleID) throws Exception{
-		final FolderObject folderObj = new FolderObject();
-		folderObj.setFolderName(title);
-		folderObj.setParentFolderID(FolderObject.PRIVATE);
-		folderObj.setModule(folderObjectModuleID);
-		folderObj.setType(FolderObject.PRIVATE);
+    protected int createFolder(final String title, final int folderObjectModuleID) throws Exception {
+        final FolderObject folderObj = new FolderObject();
+        folderObj.setFolderName(title);
+        folderObj.setParentFolderID(FolderObject.PRIVATE);
+        folderObj.setModule(folderObjectModuleID);
+        folderObj.setType(FolderObject.PRIVATE);
 
-		final OCLPermission[] permission = new OCLPermission[] {
-			FolderTest.createPermission( getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
-		};
+        final OCLPermission[] permission = new OCLPermission[] {
+            FolderTest.createPermission(getUserId_FIXME(), false, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION, OCLPermission.ADMIN_PERMISSION),
+        };
 
-		folderObj.setPermissionsAsArray( permission );
-		try{
-			return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
-		} catch(final OXException e){
-			return -1;
-		}
-	}
+        folderObj.setPermissionsAsArray(permission);
+        try {
+            return FolderTest.insertFolder(getWebConversation(), folderObj, getHostName(), getLogin(), getPassword(), "");
+        } catch (final OXException e) {
+            return -1;
+        }
+    }
 
-	protected void removeFolder( final int folderId) throws OXException, Exception{
-		if(folderId == -1){
-			return;
-		}
-		FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword(), "");
-	}
+    protected void removeFolder(final int folderId) throws OXException, Exception {
+        if (folderId == -1) {
+            return;
+        }
+        FolderTest.deleteFolder(getWebConversation(), new int[] { folderId }, getHostName(), getLogin(), getPassword(), "");
+    }
 
-
-
-	public static void assertEquals(final String message, final List l1, final List l2){
-		if(l1.size() != l2.size()) {
-			fail(message);
-		}
-		final Set s = new HashSet(l1);
-		for(final Object o : l2) {
-			assertTrue(message,s.remove(o));
-		}
-	}
-
+    public static void assertEquals(final String message, final List l1, final List l2) {
+        if (l1.size() != l2.size()) {
+            fail(message);
+        }
+        final Set s = new HashSet(l1);
+        for (final Object o : l2) {
+            assertTrue(message, s.remove(o));
+        }
+    }
 
 }

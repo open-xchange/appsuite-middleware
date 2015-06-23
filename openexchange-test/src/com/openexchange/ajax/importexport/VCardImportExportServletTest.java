@@ -51,6 +51,7 @@ package com.openexchange.ajax.importexport;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.Map.Entry;
 import com.meterware.httpunit.GetMethodWebRequest;
 import com.meterware.httpunit.PostMethodWebRequest;
 import com.meterware.httpunit.WebConversation;
@@ -68,42 +69,50 @@ import com.openexchange.test.OXTestToolkit;
  */
 public class VCardImportExportServletTest extends AbstractImportExportServletTest {
 
-	public VCardImportExportServletTest(final String name) {
-		super(name);
-	}
+    public VCardImportExportServletTest(final String name) {
+        super(name);
+    }
 
-	public void testVCardRoundtrip() throws Exception{
-		//preparations
-		final String insertedCSV = IMPORT_VCARD;
-		final Format format = Format.VCARD;
-		final int folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
+    public void testVCardRoundtrip() throws Exception{
+        //preparations
+        final String insertedCSV = IMPORT_VCARD;
+        final Format format = Format.VCARD;
+        final int folderId = createFolder("vcard-contact-roundtrip-" + System.currentTimeMillis(),FolderObject.CONTACT);
 
-		try {
-			//test: import
-			InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
-			WebConversation webconv = getWebConversation();
-			WebRequest req = new PostMethodWebRequest(
-					getUrl(IMPORT_SERVLET, folderId, format),
-					true);
-			req.selectFile("file", "contact.vcf", is, format.getMimeType());
-			WebResponse webRes = webconv.getResource(req);
+        try {
+            //test: import
+            InputStream is = new ByteArrayInputStream(insertedCSV.getBytes());
+            WebConversation webconv = getWebConversation();
+            WebRequest req = new PostMethodWebRequest(
+                    getUrl(IMPORT_SERVLET, folderId, format),
+                    true);
+            req.selectFile("file", "contact.vcf", is, format.getMimeType());
+            WebResponse webRes = webconv.getResource(req);
 
-			extractFromCallback( webRes.getText() );
+            extractFromCallback( webRes.getText() );
 
-			//test: export
-			webconv =  getWebConversation();
-			req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
-			webRes = webconv.sendRequest(req);
-			is = webRes.getInputStream();
-			final String resultingVCard = OXTestToolkit.readStreamAsString(is);
-			//finally: checking
-			for(final String test: IMPORT_VCARD_AWAITED_ELEMENTS){
-				assertTrue("VCard contains " + test + "?", resultingVCard.contains(test));
-			}
-		} finally {
-			//clean up
-			removeFolder(folderId);
-		}
-	}
+            //test: export
+            webconv =  getWebConversation();
+            req = new GetMethodWebRequest( getUrl(EXPORT_SERVLET, folderId, format) );
+            webRes = webconv.sendRequest(req);
+            is = webRes.getInputStream();
+            String resultingVCard = OXTestToolkit.readStreamAsString(is);
+            String[] result = resultingVCard.split("\n");
+            System.out.println(resultingVCard);
+            //finally: checking
+            for (Entry<String, String> element : VCARD_ELEMENTS.entrySet()) {
+                assertTrue("Missing element: " + element.getKey(), resultingVCard.contains(element.getKey()));
+                for (String r : result) {
+                    if (r.startsWith(element.getKey())) {
+                        assertTrue("Missing value " + element.getValue(), r.contains(element.getValue()));
+                        break;
+                    }
+                }
+            }
+        } finally {
+            //clean up
+            removeFolder(folderId);
+        }
+    }
 
 }
