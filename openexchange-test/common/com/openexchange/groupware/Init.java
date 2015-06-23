@@ -99,6 +99,7 @@ import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
 import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
 import com.openexchange.conversion.ConversionService;
@@ -135,7 +136,6 @@ import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.generic.FolderUpdaterRegistry;
 import com.openexchange.groupware.generic.FolderUpdaterService;
@@ -911,7 +911,7 @@ public final class Init {
 
     public static void startAndInjectConverterService() {
         if (null == TestServiceRegistry.getInstance().getService(ConversionService.class)) {
-            ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler());
+            ConversionEngineRegistry.getInstance().putDataHandler("com.openexchange.contact", new ContactInsertDataHandler(TestServiceRegistry.getInstance()));
             ConversionEngineRegistry.getInstance().putDataSource("com.openexchange.mail.vcard", new VCardMailPartDataSource());
 
             final ConversionService conversionService = new ConversionServiceImpl();

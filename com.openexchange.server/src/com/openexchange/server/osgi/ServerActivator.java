@@ -142,8 +142,6 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
-import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
@@ -725,16 +723,6 @@ public final class ServerActivator extends HousekeepingActivator {
         /*
          * Register data handlers
          */
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registerService(DataHandler.class, new ContactInsertDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
-            registerService(DataHandler.class, new ContactJSONDataHandler(), props);
-        }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical");
