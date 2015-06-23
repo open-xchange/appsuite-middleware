@@ -154,18 +154,18 @@ public class AuditEventHandlerTest {
     }
 
     @Test
-    public void testGetInstance_Fine_ReturnInstance() {
+    public void testGetInstance_Fine_ReturnInstance() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
         Assert.assertNotNull(this.auditEventHandler);
     }
 
     @Test
-    public void testHandleEvent_InfoLoggingDisabled_Return() {
+    public void testHandleEvent_InfoLoggingDisabled_Return() throws Exception {
         this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(false);
-        MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
+        MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
 
         this.auditEventHandler.handleEvent(event);
 
@@ -177,7 +177,7 @@ public class AuditEventHandlerTest {
         this.auditEventHandler = new AuditEventHandler(userService);
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
-        MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
+        MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("topicOfAnyOtherEvent");
 
         this.auditEventHandler.handleEvent(event);
@@ -196,7 +196,7 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
-        MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
+        MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/infostore/");
 
         this.auditEventHandler.handleEvent(event);
@@ -215,7 +215,7 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
-        MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
+        MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/");
 
         this.auditEventHandler.handleEvent(event);
@@ -235,7 +235,7 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
-        MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
+        MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/infostore/");
 
         this.auditEventHandler.handleEvent(event);
@@ -255,7 +255,7 @@ public class AuditEventHandlerTest {
         };
 
         PowerMockito.when(log.isInfoEnabled()).thenReturn(true);
-        MockUtils.injectValueIntoPrivateField(AuditEventHandler.class, "LOG", log);
+        MockUtils.injectValueIntoPrivateField(this.auditEventHandler, "logger", log);
         PowerMockito.when(this.event.getTopic()).thenReturn("com/openexchange/groupware/");
 
         this.auditEventHandler.handleEvent(event);

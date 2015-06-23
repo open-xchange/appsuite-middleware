@@ -98,6 +98,8 @@ import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
@@ -142,8 +144,6 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contact.datahandler.ContactInsertDataHandler;
-import com.openexchange.groupware.contact.datahandler.ContactJSONDataHandler;
 import com.openexchange.groupware.contact.datasource.ContactDataSource;
 import com.openexchange.groupware.datahandler.ICalInsertDataHandler;
 import com.openexchange.groupware.datahandler.ICalJSONDataHandler;
@@ -456,6 +456,10 @@ public final class ServerActivator extends HousekeepingActivator {
         // ICal Emitter
         track(ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class));
 
+        // vCard service & storage
+        track(VCardService.class, new RegistryCustomizer<VCardService>(context, VCardService.class));
+        track(VCardStorageService.class, new RegistryCustomizer<VCardStorageService>(context, VCardStorageService.class));
+
         // Data Retention Service
         track(DataRetentionService.class, new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class));
 
@@ -725,16 +729,6 @@ public final class ServerActivator extends HousekeepingActivator {
         /*
          * Register data handlers
          */
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact");
-            registerService(DataHandler.class, new ContactInsertDataHandler(), props);
-        }
-        {
-            final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
-            props.put(STR_IDENTIFIER, "com.openexchange.contact.json");
-            registerService(DataHandler.class, new ContactJSONDataHandler(), props);
-        }
         {
             final Dictionary<String, Object> props = new Hashtable<String, Object>(1);
             props.put(STR_IDENTIFIER, "com.openexchange.ical");

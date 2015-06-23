@@ -49,13 +49,15 @@
 
 package com.openexchange.contacts.json.actions;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.container.ModifyableFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.vcard.VCardExport;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -64,11 +66,6 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 
 /**
@@ -90,59 +87,73 @@ public class GetVCardAction extends ContactAction {
 
     @Override
     protected AJAXRequestResult perform(ContactRequest request) throws OXException {
+        /*
+         * export user's contact as vCard
+         */
+        AJAXRequestData requestData = request.getRequest();
         ServerSession session = request.getSession();
-        Contact contact = getContactService().getUser(session, session.getUserId());
-
-        OXContainerConverter converter = new OXContainerConverter(session, session.getContext());
-        OutputStream out = null;
-        try {
-            VersitObject versitObj = converter.convertContact(contact, "3.0");
-            ByteArrayOutputStream os = Streams.newByteArrayOutputStream();
-            String mimeTextVcard = MimeTypes.MIME_TEXT_VCARD;
-            VersitDefinition def = Versit.getDefinition(mimeTextVcard);
-            VersitDefinition.Writer w = def.getWriter(os, "UTF-8");
-            def.write(w, versitObj);
-            w.flush();
-            os.flush();
-
-            AJAXRequestData ajaxRequestData = request.getRequest();
-            if (ajaxRequestData.setResponseHeader("Content-Type", mimeTextVcard)) {
-                // Set HTTP response headers
-                {
-                    final StringBuilder sb = new StringBuilder(512);
-                    sb.append("attachment");
-                    DownloadUtility.appendFilenameParameter("vcard.vcf", mimeTextVcard, ajaxRequestData.getUserAgent(), sb);
-                    ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
-                }
-
-                // Write content
-                out = ajaxRequestData.optOutputStream();
+        VCardExport vCardExport = exportVCard(session);
+        if (requestData.setResponseHeader("Content-Type", MimeTypes.MIME_TEXT_VCARD)) {
+            /*
+             * try to write a "direct" result if possible
+             */
+            StringBuilder stringBuilder = new StringBuilder(128).append("attachment");
+            DownloadUtility.appendFilenameParameter("vcard.vcf", MimeTypes.MIME_TEXT_VCARD, requestData.getUserAgent(), stringBuilder);
+            requestData.setResponseHeader("Content-Disposition", stringBuilder.toString());
+            OutputStream out = null;
+            try {
+                out = requestData.optOutputStream();
                 if (null != out) {
-                    out.write(os.toByteArray());
+                    InputStream inputStream = null;
+                    byte[] buffer = new byte[0xFFFF];
+                    try {
+                        inputStream = vCardExport.getClosingStream();
+                        for (int len; (len = inputStream.read(buffer, 0, buffer.length)) > 0;) {
+                            out.write(buffer, 0, len);
+                        }
+                    } finally {
+                        Streams.close(inputStream);
+                    }
                     out.flush();
                     Streams.close(out);
                     out = null;
-
-                    // Signal direct response
                     return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
                 }
+            } catch (IOException e) {
+                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            } finally {
+                Streams.close(out);
             }
+        }
 
-            ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(os.toByteArray());
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName("vcard.vcf");
-            fileHolder.setContentType(mimeTextVcard);
-            fileHolder.setDelivery("download");
+        /*
+         * respond with "file" result as fallback
+         */
+        requestData.setFormat("file");
+        ModifyableFileHolder fileHolder = new ModifyableFileHolder(vCardExport.getVCard());
+        fileHolder.setDisposition("attachment").setName("vcard.vcf").setContentType(MimeTypes.MIME_TEXT_VCARD).setDelivery("download");
+        return new AJAXRequestResult(fileHolder, "file");
+    }
 
-            ajaxRequestData.setFormat("file");
-            return new AJAXRequestResult(fileHolder, "file");
-        } catch (ConverterException e) {
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+    /**
+     * Exports the session user's vCard.
+     *
+     * @param session The session
+     * @return The exported vCard
+     */
+    private VCardExport exportVCard(ServerSession session) throws OXException {
+        Contact contact = getContactService().getUser(session, session.getUserId());
+        InputStream originalVCard = null;
+        if (null != contact.getVCardId()) {
+            VCardStorageService vCardStorageService = optVCardStorageService();
+            if (null != vCardStorageService) {
+                originalVCard = vCardStorageService.getVCard(contact.getVCardId(), session.getContextId());
+            }
+        }
+        try {
+            return getVCardService().exportContact(contact, originalVCard, getVCardService().createParameters(session));
         } finally {
-            converter.close();
-            Streams.close(out);
+            Streams.close(originalVCard);
         }
     }
 

@@ -83,7 +83,7 @@ public class MailMappingActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-        props.put(Constants.SERVICE_RANKING, Integer.MIN_VALUE);
+        props.put(Constants.SERVICE_RANKING, Integer.valueOf(Integer.MIN_VALUE));
         registerService(MailResolver.class, new DefaultMailMappingService(this), props);
     }
 

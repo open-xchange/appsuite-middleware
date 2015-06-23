@@ -61,68 +61,46 @@ import com.openexchange.server.ServiceExceptionCode;
  */
 public class AuditConfiguration {
 
-	public static boolean getEnabled() throws OXException {
-		final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-		if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.AuditFileHandler.enabled", "false"));
-	}
+    public static boolean getEnabled() throws OXException {
+        return Boolean.parseBoolean(getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.enabled", "false"));
+    }
 
-	public static String getLogfileLocation() throws OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-        if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.pattern", "/var/log/open-xchange/open-xchange-audit.log");
-	}
+    public static String getLogfileLocation() throws OXException {
+        return getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.pattern", "/var/log/open-xchange/open-xchange-audit.log");
+    }
 
-	public static Level getLoglevel() throws OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-        if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return Level.parse(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.level", Level.INFO.toString()));
-	}
+    public static Level getLoglevel() throws OXException {
+        return Level.parse(getConfigService().getProperty("com.openexchange.audit.logging.AuditFileHandler.level", Level.INFO.toString()));
+    }
 
-	public static int getLogfileLimit() throws OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-        if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return Integer.parseInt(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.limit", "2097152"));
-	}
+    public static int getLogfileLimit() throws OXException {
+        return Integer.parseInt(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.limit", "2097152"));
+    }
 
-	public static int getLogfileCount() throws OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-        if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return Integer.parseInt(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.count", "99"));
-	}
+    public static int getLogfileCount() throws OXException {
+        return Integer.parseInt(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.count", "99"));
+    }
 
-	public static Formatter getLogfileFormatter() throws InstantiationException, IllegalAccessException, ClassNotFoundException, OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-        if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return (Formatter)Class.forName(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.formatter", "java.util.logging.SimpleFormatter")).newInstance();
-	}
+    public static Formatter getLogfileFormatter() throws InstantiationException, IllegalAccessException, ClassNotFoundException, OXException {
+        return (Formatter) Class.forName(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.formatter", "java.util.logging.SimpleFormatter")).newInstance();
+    }
 
-	public static boolean getLogfileAppend() throws OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
-        if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-		return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.impl.AuditEventHandler.append", "true"));
-	}
+    public static boolean getLogfileAppend() throws OXException {
+        return Boolean.parseBoolean(getConfigService().getProperty("com.openexchange.audit.logging.AuditEventHandler.append", "true"));
+    }
 
-	public static boolean getFileAccessLogging() throws OXException {
-	    final ConfigurationService configservice = Services.optService(ConfigurationService.class);
+    public static boolean getFileAccessLogging() throws OXException {
+        return Boolean.parseBoolean(getConfigService().getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true"));
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static ConfigurationService getConfigService() throws OXException {
+        ConfigurationService configservice = Services.optService(ConfigurationService.class);
         if (null == configservice) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+            throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
-        return Boolean.parseBoolean(configservice.getProperty("com.openexchange.audit.logging.FileAccessLogging.enabled", "true"));
-	}
+        return configservice;
+    }
 
 }
