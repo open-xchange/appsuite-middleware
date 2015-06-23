@@ -515,7 +515,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (null != flagInfo) {
                 List<String> list = new LinkedList<String>();
                 for (int i = 0; i < maildIds.length; i++) {
-                    if (!flagInfo[i].isSeen()) {
+                    MailMessage mailMessage = flagInfo[i];
+                    if (null != mailMessage && !mailMessage.isSeen()) {
                         list.add(maildIds[i]);
                     }
                 }
@@ -619,15 +620,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 if (null != flagInfo) {
                     List<String> list = new LinkedList<String>();
                     for (int i = 0; i < destIds.length; i++) {
-                        if (!flagInfo[i].isSeen()) {
+                        MailMessage mailMessage = flagInfo[i];
+                        if (null != mailMessage && !mailMessage.isSeen()) {
                             list.add(destIds[i]);
                         }
                     }
-                    destAccess.getMessageStorage().updateMessageFlags(
-                        destFullname,
-                        list.toArray(new String[list.size()]),
-                        MailMessage.FLAG_SEEN,
-                        false);
+                    destAccess.getMessageStorage().updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
                 }
                 postEvent(destAccountId, destFullname, true, true);
                 try {
@@ -2351,7 +2349,10 @@ final class MailServletInterfaceImpl extends MailServletInterface {
              * Apply thread level
              */
             for (int i = 0; i < fetchedMails.length; i++) {
-                fetchedMails[i].setThreadLevel(mails[i].getThreadLevel());
+                MailMessage mailMessage = fetchedMails[i];
+                if (null != mailMessage) {
+                    mailMessage.setThreadLevel(mails[i].getThreadLevel());
+                }
             }
             mails = fetchedMails;
         }

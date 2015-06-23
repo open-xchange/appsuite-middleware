@@ -1,6 +1,7 @@
 * 2015-06-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
+ - Fix for bug 38901: Added null guard
 
 * 2015-06-23 - tobias.friedrich@open-xchange.com
 
