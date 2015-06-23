@@ -159,7 +159,7 @@ public class DefaultMailMappingService implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
-        return lookUpByDomain ? lookUpByDomain(mail, domain, contexts, users) : lookUpBySchema(mail, users, contexts);
+        return lookUpByDomain ? lookUpByDomain(mail, domain, contexts, users) : lookUpBySchema(mail, domain, users, contexts);
     }
 
     private ResolvedMail lookUpByDomain(String mail, String domain, ContextService contexts, UserService users) throws OXException {
@@ -173,7 +173,12 @@ public class DefaultMailMappingService implements MailResolver {
         return lookUpInContext(mail, cid, users, contexts);
     }
 
-    private ResolvedMail lookUpBySchema(String mail, UserService users, ContextService contexts) throws OXException {
+    private ResolvedMail lookUpBySchema(String mail, String domain, UserService users, ContextService contexts) throws OXException {
+        ResolvedMail resolvedMail = lookUpByDomain(mail, domain, contexts, users);
+        if (null != resolvedMail) {
+            return resolvedMail;
+        }
+
         DatabaseService databaseService = services.getService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
@@ -184,7 +189,7 @@ public class DefaultMailMappingService implements MailResolver {
         for (Integer contextId : contextIds) {
             if (visited.add(contextId)) {
                 // Search for a user with the mail address in that context
-                ResolvedMail resolvedMail = lookUpInContext(mail, contextId.intValue(), users, contexts);
+                resolvedMail = lookUpInContext(mail, contextId.intValue(), users, contexts);
                 if (null != resolvedMail) {
                     return resolvedMail;
                 }
