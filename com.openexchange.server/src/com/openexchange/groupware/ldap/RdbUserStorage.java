@@ -1396,14 +1396,14 @@ public class RdbUserStorage extends UserStorage {
                 closeSQLStuff(result, stmt);
             }
             try {
-                if (userId == -1 && considerAliases) {
+                if (userId < 0 && considerAliases) {
                     UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
                     int retUserId = alias.getUserId(context.getContextId(), pattern);
-                    if(retUserId != -1) {
+                    if (retUserId > 0) {
                         userId = retUserId;
                     }
                 }
-                if (userId == -1) {
+                if (userId < 0) {
                     //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }
