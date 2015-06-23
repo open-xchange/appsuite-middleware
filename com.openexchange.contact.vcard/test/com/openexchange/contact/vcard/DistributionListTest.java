@@ -92,7 +92,7 @@ public class DistributionListTest extends VCardTest {
         /*
          * export to new vCard
          */
-        VCard vCard = getMapper().exportContact(contact, null, null);
+        VCard vCard = getMapper().exportContact(contact, null, null, null);
         /*
          * verify vCard
          */
@@ -131,7 +131,7 @@ public class DistributionListTest extends VCardTest {
             "PRODID:-//Open-Xchange//<unknown version>//EN\r\n" +
             "END:VCARD\r\n"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -170,7 +170,7 @@ public class DistributionListTest extends VCardTest {
             "EMAIL;TYPE=INTERNET:klaus@example.com\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -210,11 +210,11 @@ public class DistributionListTest extends VCardTest {
             "END:VCARD"
         ;
         VCard orignalVCard = parse(vCardString);
-        Contact contact = getMapper().importVCard(orignalVCard, null, null);
+        Contact contact = getMapper().importVCard(orignalVCard, null, null, null);
         /*
          * export vCard again & verify written properties
          */
-        VCard vCard = getMapper().exportContact(contact, orignalVCard, null);
+        VCard vCard = getMapper().exportContact(contact, orignalVCard, null, null);
         orignalVCard = parse(vCardString);
         assertNotNull("no vCard exported", vCard);
         assertNull(vCard.getExtendedProperty("X-OPEN-XCHANGE-CTYPE"));

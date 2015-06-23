@@ -53,6 +53,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.encoding.URLCoder;
@@ -68,7 +69,7 @@ import ezvcard.property.Impp;
 public class IMPPMapping extends AbstractMapping {
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Impp> impps = vCard.getImpps();
         /*
          * instant_messenger1 - type "WORK"
@@ -105,7 +106,7 @@ public class IMPPMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         List<Impp> impps = vCard.getImpps();
         /*
          * instant_messenger1 - type "WORK"

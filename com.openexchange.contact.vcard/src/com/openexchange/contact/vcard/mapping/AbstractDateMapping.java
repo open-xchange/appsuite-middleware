@@ -50,7 +50,9 @@
 package com.openexchange.contact.vcard.mapping;
 
 import java.util.Date;
+import java.util.List;
 import java.util.TimeZone;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.DateOrTimeProperty;
 
@@ -68,14 +70,14 @@ public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends 
     protected abstract T newProperty();
 
     @Override
-    protected T exportProperty(Contact contact) {
+    protected T exportProperty(Contact contact, List<OXException> warnings) {
         T property = newProperty();
-        exportProperty(contact, property);
+        exportProperty(contact, property, warnings);
         return property;
     }
 
     @Override
-    protected void exportProperty(Contact contact, T property) {
+    protected void exportProperty(Contact contact, T property, List<OXException> warnings) {
         Object value = contact.get(field);
         if (null != value && Date.class.isInstance(value)) {
             /*
@@ -89,7 +91,7 @@ public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends 
     }
 
     @Override
-    protected void importProperty(T property, Contact contact) {
+    protected void importProperty(T property, Contact contact, List<OXException> warnings) {
         Date value = property.getDate();
         if (null == value) {
             contact.set(field, null);

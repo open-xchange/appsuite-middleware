@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,43 +49,50 @@
 
 package com.openexchange.contact.vcard;
 
+import java.io.Closeable;
+import java.io.InputStream;
+import java.util.List;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 
+
 /**
- * {@link Bug7248Test}
- *
- * vCard parser quite unfriendly towards Outlook vcf files.
+ * {@link VCardImport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public class Bug7248Test extends VCardTest {
+public interface VCardImport extends Closeable {
 
     /**
-     * Initializes a new {@link Bug7248Test}.
+     * Gets the imported contact.
+     *
+     * @return The imported contact
      */
-    public Bug7248Test() {
-        super();
-    }
+    Contact getContact();
 
-    public void testImportVCard() throws Exception {
-        /*
-         * import vCard
-         */
-        String vCard =
-            "BEGIN:VCARD\n" +
-            "VERSION:2.1\n" +
-            "N:Colombara;Robert\n" +
-            "FN:Robert Colombara\n" +
-            "ADR;WORK:;;;;;;DE\n" +
-            "ADR;HOME:;;;;;- / -\n" +
-            "END:VCARD"
-        ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
-        /*
-         * verify imported contact
-         */
-        assertNotNull(contact);
-        assertEquals("Colombara", contact.getSurName());
-    }
+    /**
+     * Gets a list of parser- and conversion warnings.
+     *
+     * @return The warnings
+     */
+    List<OXException> getWarnings();
+
+    /**
+     * Gets a file holder storing the original vCard, or <code>null</code> if not available
+     *
+     * @return The original vCard, or <code>null</code> if not available
+     */
+    IFileHolder getVCard();
+
+    /**
+     * Gets the input stream carrying the vCard contents.
+     * <p>
+     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
+     *
+     * @return The input stream
+     */
+    InputStream getClosingStream() throws OXException;
 
 }

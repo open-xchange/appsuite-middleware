@@ -71,11 +71,11 @@ public class RoundtripTest extends VCardTest {
          * export full contact
          */
         Contact originalContact = getFullContact();
-        VCard vCard = getMapper().exportContact(originalContact, null, null);
+        VCard vCard = getMapper().exportContact(originalContact, null, null, null);
         /*
          * import vCard again
          */
-        Contact importedContact = getMapper().importVCard(vCard, null, null);
+        Contact importedContact = getMapper().importVCard(vCard, null, null, null);
         /*
          * verify properties
          */
@@ -87,11 +87,11 @@ public class RoundtripTest extends VCardTest {
          * import vCard
          */
         VCard originalVCard = getOutlook2007VCard();
-        Contact contact = getMapper().importVCard(originalVCard, null, null);
+        Contact contact = getMapper().importVCard(originalVCard, null, null, null);
         /*
          * export vCard again
          */
-        VCard exportedVCard = getMapper().exportContact(contact, getOutlook2007VCard(), null);
+        VCard exportedVCard = getMapper().exportContact(contact, getOutlook2007VCard(), null, null);
         /*
          * verify properties
          */

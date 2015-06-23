@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Url;
 
@@ -64,17 +66,17 @@ public class URLMapping extends SimpleMapping<Url> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Url property) {
+    protected void exportProperty(Contact contact, Url property, List<OXException> warnings) {
         property.setValue(contact.getURL());
     }
 
     @Override
-    protected Url exportProperty(Contact contact) {
+    protected Url exportProperty(Contact contact, List<OXException> warnings) {
         return new Url(contact.getURL());
     }
 
     @Override
-    protected void importProperty(Url property, Contact contact) {
+    protected void importProperty(Url property, Contact contact, List<OXException> warnings) {
         contact.setURL(property.getValue());
     }
 

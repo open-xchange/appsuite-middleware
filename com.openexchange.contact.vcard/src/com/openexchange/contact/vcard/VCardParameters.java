@@ -50,8 +50,6 @@
 package com.openexchange.contact.vcard;
 
 import java.awt.Dimension;
-import java.util.List;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 
@@ -71,31 +69,72 @@ public interface VCardParameters {
     VCardVersion getVersion();
 
     /**
+     * Sets the target version to use during export.
+     *
+     * @param version The version
+     * @return A self reference
+     */
+    VCardParameters setVersion(VCardVersion version);
+
+    /**
      * Gets the dimensions for scaling contact images during export.
      *
      * @return The photo scale dimension, or <code>null</code> if no scaling should be done
      */
     Dimension getPhotoScaleDimension();
-    /**
-     * Gets a value indicating whether import and export is done in <i>strict</i> mode or not.
-     *
-     * @return <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
-     */
-    boolean isStrict();
 
     /**
-     * Gets the underlying groupware session.
+     * Sets the dimensions for scaling contact images during export.
      *
-     * @return The session, or <code>null</code> if not set
+     * @param dimension The photo scale dimension, or <code>null</code> if no scaling should be done
+     * @return A self reference
      */
-    Session getSession();
+    VCardParameters setPhotoScaleDimension(Dimension dimension);
+
+     /**
+      * Gets a value indicating whether import and export is done in <i>strict</i> mode or not.
+      *
+      * @return <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
+      */
+     boolean isStrict();
+
+     /**
+      * Sets a value indicating whether import and export is done in <i>strict</i> mode or not.
+      *
+      * @param strict <code>true</code> if strict mode is enabled, <code>false</code>, otherwise
+      * @return A self reference
+      */
+     VCardParameters setStrict(boolean strict);
+
+     /**
+      * Gets the underlying groupware session.
+      *
+      * @return The session, or <code>null</code> if not set
+      */
+     Session getSession();
+
+     /**
+      * Sets the underlying groupware session.
+      *
+      * @param session The session, or <code>null</code> if not set
+      * @return A self reference
+      */
+     VCardParameters setSession(Session session);
+
+     /**
+      * Gets the maximum allowed size in bytes for contact images.
+      *
+      * @return The maximum allowed size
+      */
+     long getMaxContactImageSize();
 
     /**
-     * Gets the maximum allowed size in bytes for contact images.
+     * Sets the maximum allowed size in bytes for contact images.
      *
-     * @return The maximum allowed size
+     * @param maxSize The maximum allowed size
+     * @return A self reference
      */
-    int getMaxContactImageSize();
+    VCardParameters setMaxContactImageSize(long maxSize);
 
     /**
      * Gets a value indicating whether e-mail addresses in contacts should by checked for validity or not.
@@ -105,11 +144,12 @@ public interface VCardParameters {
     boolean isValidateContactEMail();
 
     /**
-     * Gets a list of warnings that occurred during import or export.
+     * Sets a value indicating whether e-mail addresses in contacts should by checked for validity or not.
      *
-     * @return The warnings
+     * @param validateContactEMail <code>true</code> to validate e-mail addresses, <code>false</code>, otherwise
+     * @return A self reference
      */
-    List<OXException> getWarnings();
+    VCardParameters setValidateContactEMail(boolean validateContactEMail);
 
     /**
      * Gets a value indicating whether vCards should be validated after parsing or not.
@@ -119,11 +159,51 @@ public interface VCardParameters {
     boolean isSkipValidation();
 
     /**
+     * Sets a value indicating whether vCards should be validated after parsing or not.
+     *
+     * @param skipValidation <code>true</code> if additional validation is skipped, <code>false</code>, otherwise
+     * @return A self reference
+     */
+    VCardParameters setSkipValidation(boolean skipValidation);
+
+    /**
      * Gets the maximum allowed size of a (single) vCard file in bytes. vCards larger than the configured maximum size are rejected and
      * not parsed. A value of <code>0</code> or smaller is considered as unlimited.
      *
      * @return The maximum allowed size of a (single) vCard file in bytes, or <code>0</code> if not restricted
      */
     long getMaxVCardSize();
+
+    /**
+     * Sets the maximum allowed size of a (single) vCard file in bytes. vCards larger than the configured maximum size are rejected and
+     * not parsed. A value of <code>0</code> or smaller is considered as unlimited.
+     *
+     * @param maxSize The maximum allowed size of a (single) vCard file in bytes, or <code>0</code> if not restricted
+     * @return A self reference
+     */
+    VCardParameters setMaxVCardSize(long maxSize);
+
+    /**
+     * Gets a value indicating whether the original vCard should be remembered during import and provided via the associated import
+     * result afterwards or not.
+     * <p/>
+     * If enabled, the original vCard is written into a file holder that is available via {@link VCardImport#getVCard()} afterwards, so
+     * the calling method should ensure to close each import result in a try/finally block to release resources.
+     *
+     * @return <code>true</code> if the original vCard should be kept, <code>false</code>, otherwise
+     */
+    boolean isKeepOriginalVCard();
+
+    /**
+     * Sets a value indicating whether the original vCard should be remembered during import and provided via the associated import
+     * result afterwards or not.
+     * <p/>
+     * If enabled, the original vCard is written into a file holder that is available via {@link VCardImport#getVCard()} afterwards, so
+     * the calling method should ensure to close each import result in a try/finally block to release resources.
+     *
+     * @param keepOriginalVCard <code>true</code> if the original vCard should be kept, <code>false</code>, otherwise
+     * @return A self reference
+     */
+    VCardParameters setKeepOriginalVCard(boolean keepOriginalVCard);
 
 }

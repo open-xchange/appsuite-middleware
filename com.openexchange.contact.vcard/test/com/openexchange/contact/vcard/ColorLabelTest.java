@@ -76,7 +76,7 @@ public class ColorLabelTest extends VCardTest {
         /*
          * export to new vCard
          */
-        VCard vCard = getMapper().exportContact(contact, null, null);
+        VCard vCard = getMapper().exportContact(contact, null, null, null);
         /*
          * verify vCard
          */
@@ -95,7 +95,7 @@ public class ColorLabelTest extends VCardTest {
         /*
          * parse vCard & verify color label
          */
-        Contact contact = getMapper().importVCard(vCard, null, null);
+        Contact contact = getMapper().importVCard(vCard, null, null, null);
         assertNotNull("no contact imported", contact);
         assertEquals("wrong value for color label", Contact.LABEL_7, contact.getLabel());
     }

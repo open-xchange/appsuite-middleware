@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.RawProperty;
@@ -76,7 +78,7 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
     }
 
     @Override
-    protected void exportProperty(Contact contact, RawProperty property) {
+    protected void exportProperty(Contact contact, RawProperty property, List<OXException> warnings) {
         Object value = contact.get(field);
         if (false == String.class.isInstance(value)) {
             throw new IllegalArgumentException("No string field: " + field);
@@ -85,28 +87,28 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
     }
 
     @Override
-    protected void importProperty(RawProperty property, Contact contact) {
+    protected void importProperty(RawProperty property, Contact contact, List<OXException> warnings) {
         contact.set(field, property.getValue());
     }
 
     @Override
-    protected RawProperty exportProperty(Contact contact) {
+    protected RawProperty exportProperty(Contact contact, List<OXException> warnings) {
         RawProperty property = new RawProperty(propertyName, null);
-        exportProperty(contact, property);
+        exportProperty(contact, property, warnings);
         return property;
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters options, List<OXException> warnings) {
         /*
          * apply current value
          */
         RawProperty existingProperty = getFirstProperty(vCard);
         if (has(contact, field)) {
             if (null == existingProperty) {
-                vCard.addProperty(exportProperty(contact));
+                vCard.addProperty(exportProperty(contact, warnings));
             } else {
-                exportProperty(contact, existingProperty);
+                exportProperty(contact, existingProperty, warnings);
             }
         } else if (null != existingProperty) {
             vCard.removeProperty(existingProperty);
@@ -119,7 +121,7 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
                 RawProperty alternativeProperty = getFirstProperty(vCard.getExtendedProperties(alternativeName));
                 if (null != alternativeProperty) {
                     if (has(contact, field)) {
-                        exportProperty(contact, alternativeProperty);
+                        exportProperty(contact, alternativeProperty, warnings);
                     } else {
                         vCard.removeProperty(alternativeProperty);
                     }
@@ -129,7 +131,7 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         /*
          * import property
          */
@@ -137,7 +139,7 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
         if (null == existingProperty) {
             contact.set(field, null);
         } else {
-            importProperty(existingProperty, contact);
+            importProperty(existingProperty, contact, warnings);
         }
         /*
          * try to import first matching alternative property as fallback
@@ -146,7 +148,7 @@ public class ExtendedStringPropertyMapping extends ExtendedPropertyMapping {
             for (String alternativeName : alternativeNames) {
                 RawProperty alternativeProperty = getFirstProperty(vCard.getExtendedProperties(alternativeName));
                 if (null != alternativeProperty) {
-                    importProperty(alternativeProperty, contact);
+                    importProperty(alternativeProperty, contact, warnings);
                     break;
                 }
             }

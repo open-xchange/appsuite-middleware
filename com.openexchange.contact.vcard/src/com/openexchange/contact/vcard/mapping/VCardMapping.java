@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 
@@ -66,8 +68,9 @@ public interface VCardMapping {
      * @param contact The contact to export
      * @param vCard The target vCard
      * @param parameters Further options to use, or <code>null</code> to use to the default options
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      */
-    void exportContact(Contact contact, VCard vCard, VCardParameters parameters);
+    void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings);
 
     /**
      * Imports the mapped vCard properties into the supplied contact
@@ -75,7 +78,8 @@ public interface VCardMapping {
      * @param vCard The vCard to import
      * @param contact The target contact
      * @param parameters Further options to use, or <code>null</code> to use to the default options
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      */
-    void importVCard(VCard vCard, Contact contact, VCardParameters parameters);
+    void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings);
 
 }

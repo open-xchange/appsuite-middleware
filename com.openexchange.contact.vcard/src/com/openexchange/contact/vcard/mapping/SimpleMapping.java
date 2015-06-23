@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.VCardProperty;
@@ -76,20 +78,20 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
         this.propertyClass = propertyClass;
     }
 
-    protected abstract void exportProperty(Contact contact, T property);
+    protected abstract void exportProperty(Contact contact, T property, List<OXException> warnings);
 
-    protected abstract T exportProperty(Contact contact);
+    protected abstract T exportProperty(Contact contact, List<OXException> warnings);
 
-    protected abstract void importProperty(T property, Contact contact);
+    protected abstract void importProperty(T property, Contact contact, List<OXException> warnings);
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         T existingProperty = getFirstProperty(vCard);
         if (has(contact, field)) {
             if (null == existingProperty) {
-                vCard.addProperty(exportProperty(contact));
+                vCard.addProperty(exportProperty(contact, warnings));
             } else {
-                exportProperty(contact, existingProperty);
+                exportProperty(contact, existingProperty, warnings);
             }
         } else if (null != existingProperty) {
             vCard.removeProperty(existingProperty);
@@ -97,12 +99,12 @@ public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMap
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         T existingProperty = getFirstProperty(vCard);
         if (null == existingProperty) {
             contact.set(field, null);
         } else {
-            importProperty(existingProperty, contact);
+            importProperty(existingProperty, contact, warnings);
         }
     }
 

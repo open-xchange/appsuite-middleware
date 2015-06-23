@@ -52,8 +52,6 @@ package com.openexchange.contact.vcard;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 
 /**
  * {@link Bug6962Test}
@@ -92,13 +90,13 @@ public class Bug6962Test extends VCardTest {
             "UID:80@ox6.netline.de\n" +
             "END:VCARD\n"
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        VCardImport vCardImport = importVCard(vCard);
+        Contact contact = vCardImport.getContact();
         /*
          * verify imported contact & warnings
          */
         assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        List<OXException> warnings = vCardImport.getWarnings();
         assertTrue("no warning", null != warnings && 0 < warnings.size());
     }
 
@@ -116,13 +114,13 @@ public class Bug6962Test extends VCardTest {
             "X-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\n" +
             "END:VCARD";
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        VCardImport vCardImport = importVCard(vCard);
+        Contact contact = vCardImport.getContact();
         /*
          * verify imported contact & warnings
          */
         assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        List<OXException> warnings = vCardImport.getWarnings();
         assertTrue("no warning", null != warnings && 0 < warnings.size());
     }
 
@@ -147,13 +145,13 @@ public class Bug6962Test extends VCardTest {
             "UID:80@ox6.netline.de\n" +
             "END:VCARD\n"
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        VCardImport vCardImport = importVCard(vCard);
+        Contact contact = vCardImport.getContact();
         /*
          * verify imported contact & warnings
          */
         assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        List<OXException> warnings = vCardImport.getWarnings();
         assertTrue("warnings", null == warnings || 0 == warnings.size());
     }
 
@@ -171,13 +169,13 @@ public class Bug6962Test extends VCardTest {
             "X-ABUID:CBC739E8-694E-4589-8651-8C30E1A6E724\\:ABPerson\n" +
             "END:VCARD";
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        VCardImport vCardImport = importVCard(vCard);
+        Contact contact = vCardImport.getContact();
         /*
          * verify imported contact & warnings
          */
         assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        List<OXException> warnings = vCardImport.getWarnings();
         assertTrue("warnings", null == warnings || 0 == warnings.size());
     }
 
@@ -193,13 +191,13 @@ public class Bug6962Test extends VCardTest {
             "TEL;type=CELL;type=pref:6670373\n" +
             "END:VCARD";
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        VCardImport vCardImport = importVCard(vCard);
+        Contact contact = vCardImport.getContact();
         /*
          * verify imported contact & warnings
          */
         assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        List<OXException> warnings = vCardImport.getWarnings();
         assertTrue("warnings", null != warnings && 0 < warnings.size());
     }
 

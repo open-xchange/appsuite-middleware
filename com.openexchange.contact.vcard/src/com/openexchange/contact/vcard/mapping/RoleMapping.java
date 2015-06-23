@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Role;
 
@@ -67,17 +69,17 @@ public class RoleMapping extends SimpleMapping<Role> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Role property) {
+    protected void exportProperty(Contact contact, Role property, List<OXException> warnings) {
         property.setValue(contact.getProfession());
     }
 
     @Override
-    protected Role exportProperty(Contact contact) {
+    protected Role exportProperty(Contact contact, List<OXException> warnings) {
         return new Role(contact.getProfession());
     }
 
     @Override
-    protected void importProperty(Role property, Contact contact) {
+    protected void importProperty(Role property, Contact contact, List<OXException> warnings) {
         contact.setProfession(property.getValue());
     }
 

@@ -54,8 +54,6 @@ import java.util.Locale;
 import com.openexchange.contact.vcard.internal.VCardExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 
 /**
  * {@link Bug13557Test}
@@ -109,13 +107,13 @@ public class Bug13557Test extends VCardTest {
             +"X-PRIMARY-PHONE;CHARSET=utf-8:1\n"
             +"END:VCARD\n";
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8)), null, parameters);
+        VCardImport vCardImport = importVCard(vCard, null);
+        Contact contact = vCardImport.getContact();
         /*
-         * verify imported contact & wanring
+         * verify imported contact & warning
          */
         assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        List<OXException> warnings = vCardImport.getWarnings();
         assertTrue("no warning", null != warnings && 0 < warnings.size());
         for (OXException warning : warnings) {
             if (VCardExceptionCodes.PARSER_ERROR.equals(warning)) {

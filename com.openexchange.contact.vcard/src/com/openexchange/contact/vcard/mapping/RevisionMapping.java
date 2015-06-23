@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.Revision;
@@ -63,7 +65,7 @@ import ezvcard.property.Revision;
 public class RevisionMapping extends AbstractMapping {
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         Revision property = vCard.getRevision();
         if (null == property) {
             vCard.setRevision(contact.getLastModified());
@@ -73,7 +75,7 @@ public class RevisionMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameter, List<OXException> warnings) {
         Revision revision = vCard.getRevision();
         if (null != revision) {
             contact.setLastModified(revision.getValue());

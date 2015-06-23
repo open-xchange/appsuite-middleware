@@ -7,6 +7,7 @@ Bundle-Activator: com.openexchange.carddav.osgi.CarddavActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
  com.openexchange.authentication,
  com.openexchange.config.cascade,
  com.openexchange.contact,

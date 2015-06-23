@@ -84,7 +84,7 @@ public class Bug14349Test extends VCardTest {
             "UID:39614@192.168.33.100\n" +
             "END:VCARD\n"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
         /*
          * verify imported contact
          */

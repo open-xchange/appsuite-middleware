@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,57 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.internal;
 
-import com.openexchange.groupware.container.Contact;
+import java.io.InputStream;
+import java.util.List;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardExport;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 
 /**
- * {@link Bug7248Test}
- *
- * vCard parser quite unfriendly towards Outlook vcf files.
+ * {@link DefaultVCardExport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public class Bug7248Test extends VCardTest {
+public class DefaultVCardExport implements VCardExport {
+
+    private final List<OXException> warnings;
+    private final ThresholdFileHolder vCardHolder;
 
     /**
-     * Initializes a new {@link Bug7248Test}.
+     * Initializes a new {@link DefaultVCardExport}.
+     *
+     * @param vCardHolder A file holder storing the vCard
+     * @param warnings A list of parser- and conversion warnings
      */
-    public Bug7248Test() {
+    public DefaultVCardExport(ThresholdFileHolder vCardHolder, List<OXException> warnings) {
         super();
+        this.vCardHolder = vCardHolder;
+        this.warnings = warnings;
     }
 
-    public void testImportVCard() throws Exception {
-        /*
-         * import vCard
-         */
-        String vCard =
-            "BEGIN:VCARD\n" +
-            "VERSION:2.1\n" +
-            "N:Colombara;Robert\n" +
-            "FN:Robert Colombara\n" +
-            "ADR;WORK:;;;;;;DE\n" +
-            "ADR;HOME:;;;;;- / -\n" +
-            "END:VCARD"
-        ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
-        /*
-         * verify imported contact
-         */
-        assertNotNull(contact);
-        assertEquals("Colombara", contact.getSurName());
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    @Override
+    public IFileHolder getVCard() {
+        return vCardHolder;
+    }
+
+    @Override
+    public void close() {
+        Streams.close(vCardHolder);
+    }
+
+    @Override
+    public InputStream getClosingStream() throws OXException {
+        return vCardHolder.getClosingStream();
     }
 
 }

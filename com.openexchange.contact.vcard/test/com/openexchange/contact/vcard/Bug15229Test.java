@@ -91,7 +91,7 @@ public class Bug15229Test extends VCardTest {
             "END:VCARD\n" +
              "\n"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
         /*
          * verify imported contact
          */

@@ -49,11 +49,9 @@
 
 package com.openexchange.contact.vcard;
 
-import java.util.ArrayList;
 import com.openexchange.contact.vcard.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.internal.VCardParametersImpl;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 
@@ -365,14 +363,13 @@ public class MaxSizeTest extends VCardTest {
         byte[] vCardBytes = vCardString.getBytes(Charsets.UTF_8);
         VCardParametersImpl parameters = new VCardParametersImpl();
         parameters.setMaxContactImageSize(500);
-        parameters.setWarnings(new ArrayList<OXException>());
-        Contact contact = getService().importVCard(Streams.newByteArrayInputStream(vCardBytes), null, parameters);
-        assertNotNull("no contact imported", contact);
-        assertTrue("no warnings", 0 < parameters.getWarnings().size());
-        OXException warning = parameters.getWarnings().get(0);
-        assertNotNull("no warning", contact);
+        VCardImport vCardImport = importVCard(vCardBytes, parameters);
+        assertNotNull("no contact imported", vCardImport.getContact());
+        assertTrue("no warnings", 0 < vCardImport.getWarnings().size());
+        OXException warning = vCardImport.getWarnings().get(0);
+        assertNotNull("no warning", warning);
         assertTrue("unexpected warning", VCardExceptionCodes.CONVERSION_FAILED.equals(warning));
-        assertNull("image data imported", contact.getImage1());
+        assertNull("image data imported", vCardImport.getContact().getImage1());
     }
 
 }

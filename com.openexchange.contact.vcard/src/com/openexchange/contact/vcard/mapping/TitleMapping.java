@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Title;
 
@@ -67,17 +69,17 @@ public class TitleMapping extends SimpleMapping<Title> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Title property) {
+    protected void exportProperty(Contact contact, Title property, List<OXException> warnings) {
         property.setValue(contact.getPosition());
     }
 
     @Override
-    protected Title exportProperty(Contact contact) {
+    protected Title exportProperty(Contact contact, List<OXException> warnings) {
         return new Title(contact.getPosition());
     }
 
     @Override
-    protected void importProperty(Title property, Contact contact) {
+    protected void importProperty(Title property, Contact contact, List<OXException> warnings) {
         contact.setPosition(property.getValue());
     }
 

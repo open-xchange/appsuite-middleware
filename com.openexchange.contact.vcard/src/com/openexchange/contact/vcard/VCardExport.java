@@ -47,76 +47,43 @@
  *
  */
 
-package com.openexchange.contact.vcard.mapping;
+package com.openexchange.contact.vcard;
 
-import com.openexchange.contact.vcard.VCardParameters;
-import com.openexchange.groupware.container.Contact;
-import ezvcard.VCard;
-import ezvcard.property.TextProperty;
+import java.io.Closeable;
+import java.io.InputStream;
+import java.util.List;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SimpleStringMapping}
+ * {@link VCardExport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public abstract class SimpleStringMapping<T extends TextProperty> extends AbstractMapping {
+public interface VCardExport extends Closeable {
 
-    protected final int field;
-    protected final Class<T> propertyClass;
+    /**
+     * Gets a list of conversion warnings.
+     *
+     * @return The warnings
+     */
+    List<OXException> getWarnings();
 
-    public SimpleStringMapping(int field, Class<T> propertyClass) {
-        super();
-        this.field = field;
-        this.propertyClass = propertyClass;
-    }
+    /**
+     * Gets a file holder storing the exported vCard
+     *
+     * @return The exported vCard, or <code>null</code> if not available
+     */
+    IFileHolder getVCard();
 
-    protected abstract T newProperty();
-
-    protected void exportProperty(Contact contact, T property) {
-        Object value = contact.get(field);
-        if (false == String.class.isInstance(value)) {
-            throw new IllegalArgumentException("No string field: " + field);
-        }
-        property.setValue((String) value);
-    }
-
-    protected T exportProperty(Contact contact) {
-        T property = newProperty();
-        exportProperty(contact, property);
-        return property;
-    }
-
-    protected void importProperty(T property, Contact contact) {
-        String value = property.getValue();
-        contact.set(field, value);
-    }
-
-    @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
-        T existingProperty = getFirstProperty(vCard);
-        if (null != contact.get(field)) {
-            if (null == existingProperty) {
-                vCard.addProperty(exportProperty(contact));
-            } else {
-                exportProperty(contact, existingProperty);
-            }
-        } else if (null != existingProperty) {
-            vCard.removeProperty(existingProperty);
-        }
-    }
-
-    @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
-        T existingProperty = getFirstProperty(vCard);
-        if (null == existingProperty) {
-            contact.set(field, null);
-        } else {
-            importProperty(existingProperty, contact);
-        }
-    }
-
-    private T getFirstProperty(VCard vCard) {
-        return getFirstProperty(vCard.getProperties(propertyClass));
-    }
+    /**
+     * Gets the input stream carrying the vCard contents.
+     * <p>
+     * Closing the stream will also {@link #close() close} this {@link VCardExport} instance.
+     *
+     * @return The input stream
+     */
+    InputStream getClosingStream() throws OXException;
 
 }

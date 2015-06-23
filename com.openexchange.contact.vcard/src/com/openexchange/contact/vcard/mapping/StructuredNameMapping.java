@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.mapping;
 
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -71,7 +72,7 @@ public class StructuredNameMapping extends AbstractMapping {
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         StructuredName property = vCard.getStructuredName();
         if (containsStructuredName(contact)) {
             if (null == property) {
@@ -107,7 +108,7 @@ public class StructuredNameMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         String surName = null;
         String givenName = null;
         String middleName = null;

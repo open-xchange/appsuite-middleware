@@ -52,6 +52,7 @@ package com.openexchange.contact.vcard.mapping;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.parameter.AddressType;
@@ -65,7 +66,7 @@ import ezvcard.property.Address;
 public class AddressMapping extends AbstractMapping {
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Address> addresses = vCard.getAddresses();
         /*
          * business address - type "WORK"
@@ -137,7 +138,7 @@ public class AddressMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         List<Address> addresses = vCard.getAddresses();
         /*
          * business address - type "WORK"

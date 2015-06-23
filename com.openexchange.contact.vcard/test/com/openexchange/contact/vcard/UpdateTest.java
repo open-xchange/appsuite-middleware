@@ -74,23 +74,23 @@ public class UpdateTest extends VCardTest {
              * export original, empty contact as vCard
              */
             Contact originalContact = new Contact();
-            VCard vCard = getMapper().exportContact(originalContact, null, null);
+            VCard vCard = getMapper().exportContact(originalContact, null, null, null);
             /*
              * update property in contact & export him again
              */
             Contact updatedContact = originalContact.clone();
             String setValue = UUIDs.getUnformattedStringFromRandom();
             updatedContact.set(field, setValue);
-            VCard updatedVCard = getMapper().exportContact(updatedContact, vCard, null);
+            VCard updatedVCard = getMapper().exportContact(updatedContact, vCard, null, null);
             /*
              * import the updated vCard as new contact & check the property
              */
-            Contact importedContact = getMapper().importVCard(updatedVCard, null, null);
+            Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
             assertEquals("Field " + field + " not set", setValue, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
-            importedContact = getMapper().importVCard(updatedVCard, originalContact, null);
+            importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
             assertEquals("Field " + field + " not set", setValue, importedContact.get(field));
         }
     }
@@ -103,23 +103,23 @@ public class UpdateTest extends VCardTest {
             Contact originalContact = new Contact();
             String originalValue = UUIDs.getUnformattedStringFromRandom();
             originalContact.set(field, originalValue);
-            VCard vCard = getMapper().exportContact(originalContact, null, null);
+            VCard vCard = getMapper().exportContact(originalContact, null, null, null);
             /*
              * update property in contact & export him again
              */
             Contact updatedContact = originalContact.clone();
             String updatedValue = UUIDs.getUnformattedStringFromRandom();
             updatedContact.set(field, updatedValue);
-            VCard updatedVCard = getMapper().exportContact(updatedContact, vCard, null);
+            VCard updatedVCard = getMapper().exportContact(updatedContact, vCard, null, null);
             /*
              * import the updated vCard as new contact & check the property
              */
-            Contact importedContact = getMapper().importVCard(updatedVCard, null, null);
+            Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
             assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
-            importedContact = getMapper().importVCard(updatedVCard, originalContact, null);
+            importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
             assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
         }
     }
@@ -132,7 +132,7 @@ public class UpdateTest extends VCardTest {
             Contact originalContact = new Contact();
             String originalValue = UUIDs.getUnformattedStringFromRandom();
             originalContact.set(field, originalValue);
-            VCard vCard = getMapper().exportContact(originalContact, null, null);
+            VCard vCard = getMapper().exportContact(originalContact, null, null, null);
             /*
              * update property in vCard & parse it again
              */
@@ -143,12 +143,12 @@ public class UpdateTest extends VCardTest {
             /*
              * import the updated vCard as new contact & check the property
              */
-            Contact importedContact = getMapper().importVCard(updatedVCard, null, null);
+            Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
             assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
-            importedContact = getMapper().importVCard(updatedVCard, originalContact, null);
+            importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
             assertEquals("Field " + field + " not updated", updatedValue, importedContact.get(field));
         }
     }
@@ -161,22 +161,22 @@ public class UpdateTest extends VCardTest {
             Contact originalContact = new Contact();
             String originalValue = UUIDs.getUnformattedStringFromRandom();
             originalContact.set(field, originalValue);
-            VCard vCard = getMapper().exportContact(originalContact, null, null);
+            VCard vCard = getMapper().exportContact(originalContact, null, null, null);
             /*
              * remove property in contact & export him again
              */
             Contact updatedContact = originalContact.clone();
             updatedContact.set(field, null);
-            VCard updatedVCard = getMapper().exportContact(updatedContact, vCard, null);
+            VCard updatedVCard = getMapper().exportContact(updatedContact, vCard, null, null);
             /*
              * import the updated vCard as new contact & check the property
              */
-            Contact importedContact = getMapper().importVCard(updatedVCard, null, null);
+            Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
             assertEquals("Field " + field + " not removed", null, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
-            importedContact = getMapper().importVCard(updatedVCard, originalContact, null);
+            importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
             assertEquals("Field " + field + " not removed", null, importedContact.get(field));
         }
     }
@@ -189,7 +189,7 @@ public class UpdateTest extends VCardTest {
             Contact originalContact = new Contact();
             String originalValue = UUIDs.getUnformattedStringFromRandom();
             originalContact.set(field, originalValue);
-            VCard vCard = getMapper().exportContact(originalContact, null, null);
+            VCard vCard = getMapper().exportContact(originalContact, null, null, null);
             /*
              * remove property in vCard & parse it again
              */
@@ -200,12 +200,12 @@ public class UpdateTest extends VCardTest {
             /*
              * import the updated vCard as new contact & check the property
              */
-            Contact importedContact = getMapper().importVCard(updatedVCard, null, null);
+            Contact importedContact = getMapper().importVCard(updatedVCard, null, null, null);
             assertEquals("Field " + field + " not removed", null, importedContact.get(field));
             /*
              * import the updated contact as update of the original contact & check the property
              */
-            importedContact = getMapper().importVCard(updatedVCard, originalContact, null);
+            importedContact = getMapper().importVCard(updatedVCard, originalContact, null, null);
             assertEquals("Field " + field + " not removed", null, importedContact.get(field));
         }
     }

@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.Classification;
@@ -69,28 +71,28 @@ public class ClassMapping extends SimpleMapping<Classification> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Classification property) {
+    protected void exportProperty(Contact contact, Classification property, List<OXException> warnings) {
         property.setValue(contact.getPrivateFlag() ? "PRIVATE" : "PUBLIC");
     }
 
     @Override
-    protected Classification exportProperty(Contact contact) {
+    protected Classification exportProperty(Contact contact, List<OXException> warnings) {
         return new Classification(contact.getPrivateFlag() ? "PRIVATE" : "PUBLIC");
     }
 
     @Override
-    protected void importProperty(Classification property, Contact contact) {
+    protected void importProperty(Classification property, Contact contact, List<OXException> warnings) {
         contact.setPrivateFlag("PRIVATE".equals(property.getValue()) || "CONFIDENTIAL".equals(property.getValue()));
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         Classification existingProperty = getFirstProperty(vCard);
         if (contact.getPrivateFlag()) {
             if (null == existingProperty) {
-                vCard.addProperty(exportProperty(contact));
+                vCard.addProperty(exportProperty(contact, warnings));
             } else {
-                exportProperty(contact, existingProperty);
+                exportProperty(contact, existingProperty, warnings);
             }
         } else if (null != existingProperty) {
             vCard.removeProperty(existingProperty);
@@ -98,12 +100,12 @@ public class ClassMapping extends SimpleMapping<Classification> {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         Classification existingProperty = getFirstProperty(vCard);
         if (null == existingProperty) {
             contact.setPrivateFlag(false);
         } else {
-            importProperty(existingProperty, contact);
+            importProperty(existingProperty, contact, warnings);
         }
     }
 

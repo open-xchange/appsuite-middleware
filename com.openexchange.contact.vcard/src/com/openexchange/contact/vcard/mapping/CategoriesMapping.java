@@ -50,6 +50,8 @@
 package com.openexchange.contact.vcard.mapping;
 
 import java.util.Arrays;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.property.Categories;
@@ -66,21 +68,21 @@ public class CategoriesMapping extends SimpleMapping<Categories> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Categories property) {
+    protected void exportProperty(Contact contact, Categories property, List<OXException> warnings) {
         property.getValues().clear();
-        property.getValues().addAll(Arrays.asList(Strings.splitByComma(contact.getCategories())));                
+        property.getValues().addAll(Arrays.asList(Strings.splitByComma(contact.getCategories())));
     }
 
     @Override
-    protected Categories exportProperty(Contact contact) {
+    protected Categories exportProperty(Contact contact, List<OXException> warnings) {
         Categories property = new Categories();
-        exportProperty(contact, property);
+        exportProperty(contact, property, warnings);
         return property;
     }
 
     @Override
-    protected void importProperty(Categories property, Contact contact) {
+    protected void importProperty(Categories property, Contact contact, List<OXException> warnings) {
         contact.setCategories(Strings.join(property.getValues(), ","));
     }
-    
+
 }

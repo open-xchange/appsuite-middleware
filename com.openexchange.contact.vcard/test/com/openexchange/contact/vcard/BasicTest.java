@@ -92,7 +92,7 @@ public class BasicTest extends VCardTest {
             "END:VCARD\r\n"
         ;
         VCard vCard = parse(vCardString);
-        Contact contact = getMapper().importVCard(vCard, null, null);
+        Contact contact = getMapper().importVCard(vCard, null, null, null);
         /*
          * verify imported contact
          */
@@ -137,7 +137,7 @@ public class BasicTest extends VCardTest {
             "END:VCARD\r\n"
         ;
         VCard vCard = parse(vCardString);
-        Contact contact = getMapper().importVCard(vCard, null, null);
+        Contact contact = getMapper().importVCard(vCard, null, null, null);
         /*
          * verify imported contact
          */
@@ -183,7 +183,7 @@ public class BasicTest extends VCardTest {
             "END:VCARD\r\n"
         ;
         VCard vCard = parse(vCardString);
-        Contact contact = getMapper().importVCard(vCard, null, null);
+        Contact contact = getMapper().importVCard(vCard, null, null, null);
         /*
          * verify imported contact
          */
@@ -240,7 +240,7 @@ public class BasicTest extends VCardTest {
             "END:VCARD\r\n"
         ;
         VCard vCard = parse(vCardString);
-        Contact contact = getMapper().importVCard(vCard, null, null);
+        Contact contact = getMapper().importVCard(vCard, null, null, null);
         /*
          * verify imported contact
          */
@@ -300,7 +300,7 @@ public class BasicTest extends VCardTest {
             "END:VCARD"
         ;
         VCard vCard = parse(vCardString);
-        Contact contact = getMapper().importVCard(vCard, null, null);
+        Contact contact = getMapper().importVCard(vCard, null, null, null);
         /*
          * verify imported contact
          */
@@ -428,21 +428,21 @@ public class BasicTest extends VCardTest {
         /*
          * verify 1st imported contact
          */
-        Contact contact = getMapper().importVCard(vCards.get(0), null, null);
+        Contact contact = getMapper().importVCard(vCards.get(0), null, null, null);
         assertNotNull(contact);
         assertEquals("john.doe@company.com", contact.getEmail1());
         assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 2nd imported contact
          */
-        contact = getMapper().importVCard(vCards.get(1), null, null);
+        contact = getMapper().importVCard(vCards.get(1), null, null, null);
         assertNotNull(contact);
         assertEquals("jane.doe@company.com", contact.getEmail1());
         assertEquals("My Contacts", contact.getCategories());
         /*
          * verify 3rd imported contact
          */
-        contact = getMapper().importVCard(vCards.get(2), null, null);
+        contact = getMapper().importVCard(vCards.get(2), null, null, null);
         assertNotNull(contact);
         assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
         assertEquals("\u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
@@ -451,7 +451,7 @@ public class BasicTest extends VCardTest {
         /*
          * verify 4th imported contact
          */
-        contact = getMapper().importVCard(vCards.get(3), null, null);
+        contact = getMapper().importVCard(vCards.get(3), null, null, null);
         assertNotNull(contact);
         assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1", contact.getDisplayName());
         assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1 \u00d1", contact.getSurName());
@@ -464,7 +464,7 @@ public class BasicTest extends VCardTest {
         /*
          * verify 5th imported contact
          */
-        contact = getMapper().importVCard(vCards.get(4), null, null);
+        contact = getMapper().importVCard(vCards.get(4), null, null, null);
         assertNotNull(contact);
         assertEquals("\u00d1 \u00d1 \u00d1 \u00d1 ", contact.getDisplayName());
         assertEquals("\u00d1 \u00d1", contact.getSurName());
@@ -483,7 +483,7 @@ public class BasicTest extends VCardTest {
         /*
          * verify 6th imported contact
          */
-        contact = getMapper().importVCard(vCards.get(5), null, null);
+        contact = getMapper().importVCard(vCards.get(5), null, null, null);
         assertNotNull(contact);
         assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getDisplayName());
         assertEquals("\u00d1\u00d1\u00d1\u00d1", contact.getSurName());
@@ -508,7 +508,7 @@ public class BasicTest extends VCardTest {
             "NOTE:\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -573,7 +573,7 @@ public class BasicTest extends VCardTest {
             "REV:2012-03-05T13:32:54Z\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -654,7 +654,7 @@ public class BasicTest extends VCardTest {
             " ISED OF THE POSSIBILITY OF SUCH DAMAGE.\\nFavotire Color: Blue\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -1304,7 +1304,7 @@ public class BasicTest extends VCardTest {
             " 9T9mwR4XxpqYOf+gBff/Gq/BGil7KIe1Z//9k=\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -1528,7 +1528,7 @@ public class BasicTest extends VCardTest {
             " 34567890123456789012345678901234567890\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -1933,7 +1933,7 @@ public class BasicTest extends VCardTest {
             "X-ABUID:6B29A774-D124-4822-B8D0-2780EC117F60\\:ABPerson\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */
@@ -2037,7 +2037,7 @@ public class BasicTest extends VCardTest {
             "REV:20120305T131933Z\r\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCardString), null, null);
+        Contact contact = getMapper().importVCard(parse(vCardString), null, null, null);
         /*
          * verify imported contact
          */

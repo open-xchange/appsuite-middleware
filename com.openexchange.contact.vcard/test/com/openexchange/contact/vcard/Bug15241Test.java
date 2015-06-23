@@ -124,7 +124,7 @@ public class Bug15241Test extends VCardTest {
             +"X-ABUID:0C13691C-A7E6-4DC2-BD53-D6B1A9797509\\:ABPerson\n"
             +"END:VCARD\n"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
         /*
          * verify imported contact
          */

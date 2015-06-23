@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -63,9 +64,10 @@ import junit.framework.TestCase;
 import com.openexchange.contact.vcard.internal.DefaultVCardService;
 import com.openexchange.contact.vcard.internal.VCardMapper;
 import com.openexchange.contact.vcard.internal.VCardParametersFactoryImpl;
-import com.openexchange.contact.vcard.internal.VCardParametersImpl;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.time.TimeTools;
 import ezvcard.Ezvcard;
@@ -372,6 +374,24 @@ public abstract class VCardTest extends TestCase {
         this.vCardService = new DefaultVCardService(new VCardParametersFactoryImpl());
     }
 
+    protected VCardImport importVCard(String vCard) throws OXException {
+        return importVCard(vCard.getBytes(Charsets.UTF_8), null);
+    }
+
+    protected VCardImport importVCard(String vCard, VCardParameters parameters) throws OXException {
+        return importVCard(vCard.getBytes(Charsets.UTF_8), parameters);
+    }
+
+    protected VCardImport importVCard(byte[] vCard, VCardParameters parameters) throws OXException {
+        InputStream inputStream = null;
+        try {
+            inputStream = Streams.newByteArrayInputStream(vCard);
+            return getService().importVCard(inputStream, null, parameters);
+        } finally {
+            Streams.close(inputStream);
+        }
+    }
+
     protected VCardMapper getMapper() {
         return mapper;
     }
@@ -564,7 +584,7 @@ public abstract class VCardTest extends TestCase {
         return contact;
     }
 
-    protected static VCardParametersImpl getParameters() {
+    protected static VCardParameters getParameters() {
         return new VCardParametersFactoryImpl().createParameters();
     }
 

@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.RawProperty;
@@ -71,7 +73,7 @@ public class ColorLabelMapping extends AbstractMapping {
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         RawProperty property = getFirstProperty(vCard.getExtendedProperties(X_OX_COLOR_LABEL));
         int colorLabel = contact.getLabel();
         if (Contact.LABEL_NONE != colorLabel) {
@@ -86,20 +88,20 @@ public class ColorLabelMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         RawProperty property = getFirstProperty(vCard.getExtendedProperties(X_OX_COLOR_LABEL));
         if (null != property) {
             int colorLabel;
             try {
                 colorLabel = Integer.parseInt(property.getValue());
             } catch (NumberFormatException e) {
-                addConversionWarning(parameters, e, X_OX_COLOR_LABEL, e.getMessage());
+                addConversionWarning(warnings, e, X_OX_COLOR_LABEL, e.getMessage());
                 return;
             }
             if (Contact.LABEL_1 <= colorLabel && colorLabel <= Contact.LABEL_10) {
                 contact.setLabel(colorLabel);
             } else {
-                addConversionWarning(parameters, X_OX_COLOR_LABEL, "Ignoring illegal color label: " + colorLabel);
+                addConversionWarning(warnings, X_OX_COLOR_LABEL, "Ignoring illegal color label: " + colorLabel);
             }
         } else {
             contact.setLabel(Contact.LABEL_NONE);

@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -184,7 +185,7 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
             }
             int count = 0;
             int limit = getLimit(session);
-            
+
             VCardService vCardService = ImportExportServices.getVCardService();
 
             for (final VCardFileToken chunk : chunks) {
@@ -194,7 +195,8 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
                     if (limit <= 0 || count <= limit) {
                         importResult.setFolder(String.valueOf(contactFolderId));
 
-                        Contact contactObj = vCardService.importVCard(new ByteArrayInputStream(chunk.getContent()), null, null); 
+                        VCardImport vCardImport = vCardService.importVCard(new ByteArrayInputStream(chunk.getContent()), null, null);
+                        Contact contactObj = vCardImport.getContact();
                         contactObj.setParentFolderID(contactFolderId);
                         importResult.setDate(new Date());
                         try {

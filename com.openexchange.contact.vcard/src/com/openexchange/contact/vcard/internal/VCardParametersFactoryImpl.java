@@ -50,9 +50,9 @@
 package com.openexchange.contact.vcard.internal;
 
 import java.awt.Dimension;
-import java.util.ArrayList;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardParametersFactory;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.exception.OXException;
@@ -73,6 +73,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
     private boolean defaultStrict;
     private VCardVersion defaultVersion;
     private long defaultMaxVCardSize;
+    private boolean defaultKeepOriginalVCard;
 
     /**
      * Initializes a new {@link VCardParametersFactoryImpl}.
@@ -85,6 +86,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         defaultStrict = false;
         defaultVersion = VCardVersion.VERSION_3_0;
         defaultMaxVCardSize = 4194304;
+        defaultKeepOriginalVCard = false;
     }
 
     /**
@@ -114,7 +116,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
     }
 
     @Override
-    public VCardParametersImpl createParameters(Session session) {
+    public VCardParameters createParameters(Session session) {
         VCardParametersImpl parameters = new VCardParametersImpl();
         parameters.setSession(session);
         parameters.setStrict(defaultStrict);
@@ -122,13 +124,13 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         parameters.setPhotoScaleDimension(defaultPhotoScaleDimension);
         parameters.setMaxContactImageSize(defaultMaxContactImageSize);
         parameters.setValidateContactEMail(defaultValidateContactEMail);
-        parameters.setWarnings(new ArrayList<OXException>());
         parameters.setMaxVCardSize(defaultMaxVCardSize);
+        parameters.setKeepOriginalVCard(defaultKeepOriginalVCard);
         return parameters;
     }
 
     @Override
-    public VCardParametersImpl createParameters() {
+    public VCardParameters createParameters() {
         return createParameters(null);
     }
 

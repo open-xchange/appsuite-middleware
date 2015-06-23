@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Uid;
 
@@ -67,17 +69,17 @@ public class UIDMapping extends SimpleMapping<Uid> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Uid property) {
+    protected void exportProperty(Contact contact, Uid property, List<OXException> warnings) {
         property.setValue(contact.getUid());
     }
 
     @Override
-    protected Uid exportProperty(Contact contact) {
+    protected Uid exportProperty(Contact contact, List<OXException> warnings) {
         return new Uid(contact.getUid());
     }
 
     @Override
-    protected void importProperty(Uid property, Contact contact) {
+    protected void importProperty(Uid property, Contact contact, List<OXException> warnings) {
         contact.setUid(property.getValue());
     }
 

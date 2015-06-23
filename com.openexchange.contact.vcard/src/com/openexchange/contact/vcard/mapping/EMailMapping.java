@@ -53,6 +53,7 @@ import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -67,7 +68,7 @@ import ezvcard.property.Email;
 public class EMailMapping extends AbstractMapping {
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Email> emails = vCard.getEmails();
         /*
          * email1 - type "WORK"
@@ -129,7 +130,7 @@ public class EMailMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         /*
          * skip import for legacy distribution list vCards
          */
@@ -140,15 +141,15 @@ public class EMailMapping extends AbstractMapping {
         /*
          * email1 - type "WORK"
          */
-        contact.setEmail1(parseEMail(getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0), parameters));
+        contact.setEmail1(parseEMail(getEmail(vCard, emails, EmailType.WORK.getValue(), null, 0), parameters, warnings));
         /*
          * email2 - type "HOME"
          */
-        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1), parameters));
+        contact.setEmail2(parseEMail(getEmail(vCard, emails, EmailType.HOME.getValue(), null, 1), parameters, warnings));
         /*
          * email3 - type "X-OTHER", or no specific type
          */
-        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2), parameters));
+        contact.setEmail3(parseEMail(getEmail(vCard, emails, TYPE_OTHER, ABLABEL_OTHER, 2), parameters, warnings));
         /*
          * telex - type "TLX"
          */
@@ -156,7 +157,7 @@ public class EMailMapping extends AbstractMapping {
         contact.setTelephoneTelex(null != property ? property.getValue() : null);
     }
 
-    private String parseEMail(Email property, VCardParameters parameters) {
+    private String parseEMail(Email property, VCardParameters parameters, List<OXException> warnings) {
         if (null != property) {
             String value = property.getValue();
             if (false == Strings.isEmpty(value)) {
@@ -167,7 +168,7 @@ public class EMailMapping extends AbstractMapping {
                     new InternetAddress(value).validate();
                     return value;
                 } catch (AddressException e) {
-                    addConversionWarning(parameters, e, "EMAIL", e.getMessage());
+                    addConversionWarning(warnings, e, "EMAIL", e.getMessage());
                 }
             }
         }

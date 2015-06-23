@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.FormattedName;
 
@@ -64,17 +66,17 @@ public class FormattedNameMapping extends SimpleMapping<FormattedName> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, FormattedName property) {
+    protected void exportProperty(Contact contact, FormattedName property, List<OXException> warnings) {
         property.setValue(contact.getDisplayName());
     }
 
     @Override
-    protected FormattedName exportProperty(Contact contact) {
+    protected FormattedName exportProperty(Contact contact, List<OXException> warnings) {
         return new FormattedName(contact.getDisplayName());
     }
 
     @Override
-    protected void importProperty(FormattedName property, Contact contact) {
+    protected void importProperty(FormattedName property, Contact contact, List<OXException> warnings) {
         contact.setDisplayName(property.getValue());
     }
 

@@ -62,6 +62,7 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
@@ -333,7 +334,8 @@ public class VCardExporter implements Exporter {
             originalVCard = vCardStorage.getVCard(contactObj.getVCardId(), session.getContextId());
         }
 
-        return ImportExportServices.getVCardService().exportContact(contactObj, originalVCard, null);
+        VCardExport vCardExport = ImportExportServices.getVCardService().exportContact(contactObj, originalVCard, null);
+        return vCardExport.getVCard().getStream(); //TODO: getClosingStream()?
     }
 
     private boolean isSaveToDisk(final Map<String, Object> optionalParams) {

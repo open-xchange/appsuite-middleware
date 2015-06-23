@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -75,7 +76,7 @@ public class TelephoneMapping extends AbstractMapping {
     static final String TYPE_2ND = "x-2nd";
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         List<Telephone> properties = vCard.getProperties(Telephone.class);
         /*
          * special
@@ -109,7 +110,7 @@ public class TelephoneMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         List<Telephone> properties = vCard.getProperties(Telephone.class);
         /*
          * special

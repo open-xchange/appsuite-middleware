@@ -51,6 +51,7 @@ package com.openexchange.contact.vcard.mapping;
 
 import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.VCard;
@@ -71,7 +72,7 @@ public class OrganizationMapping extends AbstractMapping {
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         Organization property = vCard.getOrganization();
         if (containsOrganization(contact)) {
             if (null == property) {
@@ -93,7 +94,7 @@ public class OrganizationMapping extends AbstractMapping {
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         String company = null;
         String department = null;
         String branches = null;

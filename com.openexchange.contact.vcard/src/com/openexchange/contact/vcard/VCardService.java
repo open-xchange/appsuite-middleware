@@ -53,6 +53,7 @@ import java.io.InputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * {@link VCardService} - The VCard merge service for VCards and contacts.
@@ -69,11 +70,11 @@ public interface VCardService extends VCardParametersFactory {
      * @param contact The contact to export
      * @param originalVCard The vCard to merge the contact into, or <code>null</code> to export to a new vCard
      * @param parameters Further parameters for the vCard export, or <code>null</code> if not used
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      * @return The exported contact as vCard
-     * @throws OXException If exporting given contact to a vCard fails - non-fatal conversion warnings are accessible via passed vCard
-     *                     parameters reference
+     * @throws OXException If exporting given contact to a vCard fails - non-fatal conversion warnings are accessible in the export result
      */
-    InputStream exportContact(Contact contact, InputStream originalVCard, VCardParameters parameters) throws OXException;
+    VCardExport exportContact(Contact contact, InputStream originalVCard, VCardParameters parameters) throws OXException;
 
     /**
      * Imports a vCard, optionally merging with an existing contact.
@@ -83,9 +84,18 @@ public interface VCardService extends VCardParametersFactory {
      * @param parameters Further parameters for the vCard import, or <code>null</code> if not used
      * @return The imported vCard as contact, which is a new instance if passed contact reference is <code>null</code>, or the passed
      *         contact itself, otherwise
-     * @throws OXException If importing the vCard fails - non-fatal conversion warnings are accessible via passed vCard parameters
-     *                     reference
+     * @throws OXException If importing the vCard fails - non-fatal conversion warnings are accessible in the import result
      */
-    Contact importVCard(InputStream vCard, Contact contact, VCardParameters parameters) throws OXException;
+    VCardImport importVCard(InputStream vCard, Contact contact, VCardParameters parameters) throws OXException;
+
+    /**
+     * Imports multiple vCards.
+     *
+     * @param vCards The input stream holding the vCards to import
+     * @param parameters Further parameters for the vCard import, or <code>null</code> if not used
+     * @return The imported vCards wrapped by a search iterator
+     * @throws OXException If importing the vCard fails - non-fatal conversion warnings are accessible in each import result
+     */
+    SearchIterator<VCardImport> importVCards(InputStream vCards, VCardParameters parameters) throws OXException;
 
 }

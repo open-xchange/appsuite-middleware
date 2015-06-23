@@ -76,6 +76,7 @@ import com.openexchange.contact.vcard.mapping.TitleMapping;
 import com.openexchange.contact.vcard.mapping.UIDMapping;
 import com.openexchange.contact.vcard.mapping.URLMapping;
 import com.openexchange.contact.vcard.mapping.VCardMapping;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 
@@ -346,14 +347,15 @@ public class VCardMapper {
      * @param contact The contact to export
      * @param vCard The vCard to merge the contact into, or <code>null</code> to export to a new vCard
      * @param parameters Further options to use
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      * @return The exported contact as vCard
      */
-    public VCard exportContact(Contact contact, VCard vCard, VCardParameters parameters) {
+    public VCard exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         if (null == vCard) {
             vCard = new VCard();
         }
         for (VCardMapping mapping : mappings) {
-            mapping.exportContact(contact, vCard, parameters);
+            mapping.exportContact(contact, vCard, parameters, warnings);
         }
         return vCard;
     }
@@ -364,14 +366,15 @@ public class VCardMapper {
      * @param vCard The vCard to import
      * @param contact The contact to merge the vCard into, or <code>null</code> to import as a new contact
      * @param parameters Further options to use
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      * @return The imported vCard as contact
      */
-    public Contact importVCard(VCard vCard, Contact contact, VCardParameters parameters) {
+    public Contact importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         if (null == contact) {
             contact = new Contact();
         }
         for (VCardMapping mapping : mappings) {
-            mapping.importVCard(vCard, contact, parameters);
+            mapping.importVCard(vCard, contact, parameters, warnings);
         }
         return contact;
     }

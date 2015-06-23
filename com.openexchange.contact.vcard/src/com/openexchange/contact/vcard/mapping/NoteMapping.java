@@ -49,6 +49,8 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.property.Note;
 
@@ -67,17 +69,17 @@ public class NoteMapping extends SimpleMapping<Note> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Note property) {
+    protected void exportProperty(Contact contact, Note property, List<OXException> warnings) {
         property.setValue(contact.getNote());
     }
 
     @Override
-    protected Note exportProperty(Contact contact) {
+    protected Note exportProperty(Contact contact, List<OXException> warnings) {
         return new Note(contact.getNote());
     }
 
     @Override
-    protected void importProperty(Note property, Contact contact) {
+    protected void importProperty(Note property, Contact contact, List<OXException> warnings) {
         contact.setNote(property.getValue());
     }
 

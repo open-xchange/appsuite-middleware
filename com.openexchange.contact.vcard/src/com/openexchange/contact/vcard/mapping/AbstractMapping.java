@@ -80,38 +80,38 @@ public abstract class AbstractMapping implements VCardMapping {
     /**
      * Initializes and adds a new conversion warning to the warnings collection in the supplied vCard parameters reference.
      *
-     * @param parameters The parameters to add the warning to
+     * @param warnings A reference to the warnings collection, or <code>null</code> if not used
      * @param cause The underlying exception
      * @param propertyName The vCard property name where the warning occurred
      * @param message The warning message
      * @return <code>true</code> if the warning was added, <code>false</code>, otherwise
      */
-    protected static boolean addConversionWarning(com.openexchange.contact.vcard.VCardParameters parameters, Throwable cause, String propertyName, String message) {
-        return addWarning(parameters, VCardExceptionCodes.CONVERSION_FAILED.create(cause, propertyName, message));
+    protected static boolean addConversionWarning(List<OXException> warnings, Throwable cause, String propertyName, String message) {
+        return addWarning(warnings, VCardExceptionCodes.CONVERSION_FAILED.create(cause, propertyName, message));
     }
 
     /**
      * Initializes and adds a new conversion warning to the warnings collection in the supplied vCard parameters reference.
      *
-     * @param parameters The parameters to add the warning to
+     * @param warnings A reference to the warnings collection, or <code>null</code> if not used
      * @param propertyName The vCard property name where the warning occurred
      * @param message The warning message
      * @return <code>true</code> if the warning was added, <code>false</code>, otherwise
      */
-    protected static boolean addConversionWarning(com.openexchange.contact.vcard.VCardParameters parameters, String propertyName, String message) {
-        return addWarning(parameters, VCardExceptionCodes.CONVERSION_FAILED.create(propertyName, message));
+    protected static boolean addConversionWarning(List<OXException> warnings, String propertyName, String message) {
+        return addWarning(warnings, VCardExceptionCodes.CONVERSION_FAILED.create(propertyName, message));
     }
 
     /**
-     * Adds a conversion warning to the warnings collection in the supplied vCard parameters reference.
+     * Adds a conversion warning to the supplied warnings collection.
      *
-     * @param parameters The parameters to add the warning to
+     * @param warnings A reference to the warnings collection, or <code>null</code> if not used
      * @param warning The warning to add
      * @return <code>true</code> if the warning was added, <code>false</code>, otherwise
      */
-    protected static boolean addWarning(com.openexchange.contact.vcard.VCardParameters parameters, OXException warning) {
-        if (null != parameters && null != parameters.getWarnings()) {
-            return parameters.getWarnings().add(warning);
+    protected static boolean addWarning(List<OXException> warnings, OXException warning) {
+        if (null != warnings) {
+            return warnings.add(warning);
         }
         return false;
     }

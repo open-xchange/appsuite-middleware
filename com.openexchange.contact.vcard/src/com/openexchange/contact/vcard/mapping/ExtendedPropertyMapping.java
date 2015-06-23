@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import ezvcard.VCard;
 import ezvcard.property.RawProperty;
@@ -69,20 +71,20 @@ public abstract class ExtendedPropertyMapping extends SimpleMapping<RawProperty>
     }
 
     @Override
-    protected RawProperty exportProperty(Contact contact) {
+    protected RawProperty exportProperty(Contact contact, List<OXException> warnings) {
         RawProperty property = new RawProperty(propertyName, null);
-        exportProperty(contact, property);
+        exportProperty(contact, property, warnings);
         return property;
     }
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters  parameters) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         RawProperty existingProperty = getFirstProperty(vCard);
         if (has(contact, field)) {
             if (null == existingProperty) {
-                vCard.addProperty(exportProperty(contact));
+                vCard.addProperty(exportProperty(contact, warnings));
             } else {
-                exportProperty(contact, existingProperty);
+                exportProperty(contact, existingProperty, warnings);
             }
         } else if (null != existingProperty) {
             vCard.removeProperty(existingProperty);
@@ -90,12 +92,12 @@ public abstract class ExtendedPropertyMapping extends SimpleMapping<RawProperty>
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters  parameters) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters  parameters, List<OXException> warnings) {
         RawProperty existingProperty = getFirstProperty(vCard);
         if (null == existingProperty) {
             contact.set(field, null);
         } else {
-            importProperty(existingProperty, contact);
+            importProperty(existingProperty, contact, warnings);
         }
     }
 

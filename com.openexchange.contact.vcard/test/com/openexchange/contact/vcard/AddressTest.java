@@ -81,7 +81,7 @@ public class AddressTest extends VCardTest {
         /*
          * export to new vCard
          */
-        VCard vCard = getMapper().exportContact(contact, null, null);
+        VCard vCard = getMapper().exportContact(contact, null, null, null);
         /*
          * verify vCard
          */
@@ -113,7 +113,7 @@ public class AddressTest extends VCardTest {
         /*
          * export to existing vCard
          */
-        vCard = getMapper().exportContact(contact, vCard, null);
+        vCard = getMapper().exportContact(contact, vCard, null, null);
         /*
          * verify vCard
          */
@@ -143,7 +143,7 @@ public class AddressTest extends VCardTest {
         /*
          * export to existing vCard
          */
-        vCard = getMapper().exportContact(contact, vCard, null);
+        vCard = getMapper().exportContact(contact, vCard, null, null);
         /*
          * verify vCard
          */

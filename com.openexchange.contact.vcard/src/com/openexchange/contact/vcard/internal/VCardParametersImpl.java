@@ -50,10 +50,8 @@
 package com.openexchange.contact.vcard.internal;
 
 import java.awt.Dimension;
-import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardVersion;
-import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 
@@ -65,15 +63,15 @@ import com.openexchange.session.Session;
  */
 public class VCardParametersImpl implements VCardParameters {
 
-    private int maxContactImageSize;
+    private long maxContactImageSize;
     private boolean validateContactEMail;
     private VCardVersion version;
     private Dimension photoScaleDimension;
     private boolean strict;
     private Session session;
-    private List<OXException> warnings;
     private boolean skipValidation;
     private long maxVCardSize;
+    private boolean keepOriginalVCard;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -86,13 +84,11 @@ public class VCardParametersImpl implements VCardParameters {
     public VCardVersion getVersion() {
         return version;
     }
-    /**
-     * Sets the version
-     *
-     * @param version The version to set
-     */
-    public void setVersion(VCardVersion version) {
+
+    @Override
+    public VCardParameters setVersion(VCardVersion version) {
         this.version = version;
+        return this;
     }
 
     @Override
@@ -100,13 +96,10 @@ public class VCardParametersImpl implements VCardParameters {
         return photoScaleDimension;
     }
 
-    /**
-     * Sets the photoScaleDimension
-     *
-     * @param photoScaleDimension The photoScaleDimension to set
-     */
-    public void setPhotoScaleDimension(Dimension photoScaleDimension) {
+    @Override
+    public VCardParameters setPhotoScaleDimension(Dimension photoScaleDimension) {
         this.photoScaleDimension = photoScaleDimension;
+        return this;
     }
 
     @Override
@@ -114,13 +107,10 @@ public class VCardParametersImpl implements VCardParameters {
         return strict;
     }
 
-    /**
-     * Sets the strict
-     *
-     * @param strict The strict to set
-     */
-    public void setStrict(boolean strict) {
+    @Override
+    public VCardParameters setStrict(boolean strict) {
         this.strict = strict;
+        return this;
     }
 
     @Override
@@ -128,27 +118,21 @@ public class VCardParametersImpl implements VCardParameters {
         return session;
     }
 
-    /**
-     * Sets the session
-     *
-     * @param session The session to set
-     */
-    public void setSession(Session session) {
+    @Override
+    public VCardParameters setSession(Session session) {
         this.session = session;
+        return this;
     }
 
     @Override
-    public int getMaxContactImageSize() {
+    public long getMaxContactImageSize() {
         return maxContactImageSize;
     }
 
-    /**
-     * Sets the maxContactImageSize
-     *
-     * @param maxContactImageSize The maxContactImageSize to set
-     */
-    public void setMaxContactImageSize(int maxContactImageSize) {
+    @Override
+    public VCardParameters setMaxContactImageSize(long maxContactImageSize) {
         this.maxContactImageSize = maxContactImageSize;
+        return this;
     }
 
     @Override
@@ -156,46 +140,21 @@ public class VCardParametersImpl implements VCardParameters {
         return validateContactEMail;
     }
 
-    /**
-     * Sets the validateContactEMail
-     *
-     * @param validateContactEMail The validateContactEMail to set
-     */
-    public void setValidateContactEMail(boolean validateContactEMail) {
-        this.validateContactEMail = validateContactEMail;
-    }
-
     @Override
-    public List<OXException> getWarnings() {
-        return warnings;
+    public VCardParameters setValidateContactEMail(boolean validateContactEMail) {
+        this.validateContactEMail = validateContactEMail;
+        return this;
     }
 
-    /**
-     * Sets the warnings
-     *
-     * @param warnings The warnings to set
-     */
-    public void setWarnings(List<OXException> warnings) {
-        this.warnings = warnings;
-    }
-
-    /**
-     * Gets the skipValidation
-     *
-     * @return The skipValidation
-     */
     @Override
     public boolean isSkipValidation() {
         return skipValidation;
     }
 
-    /**
-     * Sets the skipValidation
-     *
-     * @param skipValidation The skipValidation to set
-     */
-    public void setSkipValidation(boolean skipValidation) {
+    @Override
+    public VCardParameters setSkipValidation(boolean skipValidation) {
         this.skipValidation = skipValidation;
+        return this;
     }
 
     @Override
@@ -203,13 +162,21 @@ public class VCardParametersImpl implements VCardParameters {
         return maxVCardSize;
     }
 
-    /**
-     * Sets the maxVCardSize
-     *
-     * @param maxVCardSize The maxVCardSize to set
-     */
-    public void setMaxVCardSize(long maxVCardSize) {
+    @Override
+    public VCardParameters setMaxVCardSize(long maxVCardSize) {
         this.maxVCardSize = maxVCardSize;
+        return this;
+    }
+
+    @Override
+    public boolean isKeepOriginalVCard() {
+        return keepOriginalVCard;
+    }
+
+    @Override
+    public VCardParameters setKeepOriginalVCard(boolean keepOriginalVCard) {
+        this.keepOriginalVCard = keepOriginalVCard;
+        return this;
     }
 
 }

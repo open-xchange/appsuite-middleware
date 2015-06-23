@@ -78,7 +78,7 @@ public class Bug7249Test extends VCardTest {
             "EMAIL;PREF;INTERNET:Conference_Room_Olpe_EMAIL\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters(), null);
         /*
          * verify imported contact
          */

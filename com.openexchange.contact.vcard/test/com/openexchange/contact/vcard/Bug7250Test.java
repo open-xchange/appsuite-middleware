@@ -77,7 +77,7 @@ public class Bug7250Test extends VCardTest {
             "FN;CHARSET=Windows-1252:Anke  B\u00f6rnig\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters(), null);
         /*
          * verify imported contact
          */

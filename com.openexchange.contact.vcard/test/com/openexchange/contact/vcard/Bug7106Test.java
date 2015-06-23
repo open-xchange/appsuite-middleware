@@ -79,7 +79,7 @@ public class Bug7106Test extends VCardTest {
             "TEL;type=CELL;type=pref:6670373\n" +
             "END:VCARD\n"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
         /*
          * verify imported contact
          */

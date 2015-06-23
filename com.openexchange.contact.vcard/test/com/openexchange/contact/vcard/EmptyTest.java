@@ -76,7 +76,7 @@ public class EmptyTest extends VCardTest {
             "N:;;;;\n" +
             "END:VCARD\n"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters(), null);
         /*
          * verify imported contact
          */

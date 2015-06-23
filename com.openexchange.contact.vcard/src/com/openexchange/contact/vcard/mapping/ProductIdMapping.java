@@ -49,7 +49,9 @@
 
 package com.openexchange.contact.vcard.mapping;
 
+import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.version.Version;
 import ezvcard.VCard;
@@ -65,13 +67,13 @@ import ezvcard.property.RawProperty;
 public class ProductIdMapping extends AbstractMapping {
 
     @Override
-    public void exportContact(Contact contact, VCard vCard, VCardParameters options) {
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
         vCard.removeProperties(ProductId.class);
         vCard.addProperty(new RawProperty("PRODID", getValue()));
     }
 
     @Override
-    public void importVCard(VCard vCard, Contact contact, VCardParameters options) {
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
         // nothing to do
     }
 

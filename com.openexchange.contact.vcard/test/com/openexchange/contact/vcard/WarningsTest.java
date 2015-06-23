@@ -49,12 +49,8 @@
 
 package com.openexchange.contact.vcard;
 
-import java.io.InputStream;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Charsets;
-import com.openexchange.java.Streams;
 
 /**
  * {@link WarningsTest}
@@ -77,10 +73,9 @@ public class WarningsTest extends VCardTest {
             "FN:Erika Mustermann\r\n"+
             "END:VCARD\r\n"
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = importVCard(vCardString, parameters);
-        assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        VCardImport vCardImport = importVCard(vCardString);
+        assertNotNull(vCardImport.getContact());
+        List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
         assertEquals(1, warnings.size());
     }
@@ -94,10 +89,9 @@ public class WarningsTest extends VCardTest {
             "EMAIL;PREF;INTERNET:erika@mustermann@de\r\n"+
             "END:VCARD\r\n"
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = importVCard(vCardString, parameters);
-        assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        VCardImport vCardImport = importVCard(vCardString);
+        assertNotNull(vCardImport.getContact());
+        List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
         assertEquals(1, warnings.size());
     }
@@ -111,10 +105,9 @@ public class WarningsTest extends VCardTest {
             "PHOTO;JPEG:http://www.open-xchange.com\r\n"+
             "END:VCARD\r\n"
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = importVCard(vCardString, parameters);
-        assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        VCardImport vCardImport = importVCard(vCardString);
+        assertNotNull(vCardImport.getContact());
+        List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
         assertEquals(1, warnings.size());
     }
@@ -128,22 +121,11 @@ public class WarningsTest extends VCardTest {
             "BDAY:gestern\r\n"+
             "END:VCARD\r\n"
         ;
-        VCardParameters parameters = getService().createParameters();
-        Contact contact = importVCard(vCardString, parameters);
-        assertNotNull(contact);
-        List<OXException> warnings = parameters.getWarnings();
+        VCardImport vCardImport = importVCard(vCardString);
+        assertNotNull(vCardImport.getContact());
+        List<OXException> warnings = vCardImport.getWarnings();
         assertNotNull(warnings);
         assertEquals(1, warnings.size());
-    }
-
-    private Contact importVCard(String vCard, VCardParameters parameters) throws OXException {
-        InputStream inputStream = null;
-        try {
-            inputStream = Streams.newByteArrayInputStream(vCard.getBytes(Charsets.UTF_8));
-            return getService().importVCard(inputStream, null, parameters);
-        } finally {
-            Streams.close(inputStream);
-        }
     }
 
 }

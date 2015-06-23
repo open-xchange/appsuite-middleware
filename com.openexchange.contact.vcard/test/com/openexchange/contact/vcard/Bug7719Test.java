@@ -81,7 +81,7 @@ public class Bug7719Test extends VCardTest {
             "EMAIL;TLX:" + telex + "\n" +
             "END:VCARD"
         ;
-        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters());
+        Contact contact = getMapper().importVCard(parse(vCard), null, getService().createParameters(), null);
         /*
          * verify imported contact
          */

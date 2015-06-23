@@ -86,7 +86,7 @@ public class Bug15008Test extends VCardTest {
             114, 102, 101, 104, 110, 59, 59, 50, 54, 56, 49, 55, 59, 68, 101, 117, 116, 115, 99, 104, 108, 97, 110, 100, 13, 10, 78, 58,
             65, 100, 105, 59, 59, 59, 59, 13, 10, 70, 78, 58, 65, 100, 105, 13, 10, 69, 78, 68, 58, 86, 67, 65, 82, 68, 13, 10
         };
-        Contact contact = getMapper().importVCard(parse(vCard), null, null);
+        Contact contact = getMapper().importVCard(parse(vCard), null, null, null);
         /*
          * verify imported contact
          */

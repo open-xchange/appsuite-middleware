@@ -50,6 +50,8 @@
 package com.openexchange.contact.vcard.mapping;
 
 import java.util.Arrays;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import ezvcard.property.Nickname;
@@ -66,20 +68,20 @@ public class NicknameMapping extends SimpleMapping<Nickname> {
     }
 
     @Override
-    protected void exportProperty(Contact contact, Nickname property) {
+    protected void exportProperty(Contact contact, Nickname property, List<OXException> warnings) {
         property.getValues().clear();
         property.getValues().addAll(Arrays.asList(Strings.splitByComma(contact.getNickname())));
     }
 
     @Override
-    protected Nickname exportProperty(Contact contact) {
+    protected Nickname exportProperty(Contact contact, List<OXException> warnings) {
         Nickname property = new Nickname();
-        exportProperty(contact, property);
+        exportProperty(contact, property, warnings);
         return property;
     }
 
     @Override
-    protected void importProperty(Nickname property, Contact contact) {
+    protected void importProperty(Nickname property, Contact contact, List<OXException> warnings) {
         contact.setNickname(Strings.join(property.getValues(), ","));
     }
 
