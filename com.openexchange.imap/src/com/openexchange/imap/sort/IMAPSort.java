@@ -56,6 +56,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.EnumMap;
+import java.util.Map;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
@@ -310,21 +311,38 @@ public final class IMAPSort {
         }
 
         boolean rangeApplied = false;
-        int[] seqNums;
-        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && null == jmsSearchTerm) {
-            seqNums = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
-
-            // Check result
-            if (null == seqNums) {
-                // Apparently, SORT RETURN PARTIAL command failed
-                try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
-                try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
-                seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
-            } else {
-                // SORT RETURN PARTIAL command succeeded
-                rangeApplied = true;
+        int[] seqNums = null;
+        if (allowESORT && null != indexRange) {
+            Map<String, String> caps = imapConfig.asMap();
+            if (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")) && (null == jmsSearchTerm)) {
+                SortPartialResult result = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
+                switch (result.reason) {
+                    case SUCCESS:
+                        {
+                            seqNums = result.seqnums;
+                            if (null != seqNums) {
+                                // SORT RETURN PARTIAL command succeeded
+                                rangeApplied = true;
+                            }
+                        }
+                        break;
+                    case COMMAND_FAILED:
+                        break;
+                    case FOLDER_CLOSED:
+                        {
+                            // Apparently, SORT RETURN PARTIAL command failed
+                            try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
-        } else {
+        }
+
+        if (null == seqNums) {
+            // Either insufficient capabilities/conditions not met or SORT RETURN PARTIAL failed
             seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
         }
 
@@ -374,21 +392,38 @@ public final class IMAPSort {
         }
 
         boolean rangeApplied = false;
-        int[] seqNums;
-        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && (null == searchTerm || searchTerm.isAscii())) {
-            seqNums = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
-
-            // Check result
-            if (null == seqNums) {
-                // Apparently, SORT RETURN PARTIAL command failed
-                try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
-                try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
-                seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
-            } else {
-                // SORT RETURN PARTIAL command succeeded
-                rangeApplied = true;
+        int[] seqNums = null;
+        if (allowESORT && null != indexRange) {
+            Map<String, String> caps = imapConfig.asMap();
+            if (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")) && (null == searchTerm || searchTerm.isAscii())) {
+                SortPartialResult result = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
+                switch (result.reason) {
+                    case SUCCESS:
+                        {
+                            seqNums = result.seqnums;
+                            if (null != seqNums) {
+                                // SORT RETURN PARTIAL command succeeded
+                                rangeApplied = true;
+                            }
+                        }
+                        break;
+                    case COMMAND_FAILED:
+                        break;
+                    case FOLDER_CLOSED:
+                        {
+                            // Apparently, SORT RETURN PARTIAL command failed
+                            try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
-        } else {
+        }
+
+        if (null == seqNums) {
+            // Either insufficient capabilities/conditions not met or SORT RETURN PARTIAL failed
             seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
         }
 
@@ -403,10 +438,10 @@ public final class IMAPSort {
         return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
     }
 
-    private static int[] sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
+    private static SortPartialResult sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
         try {
             final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
-            return (int[]) imapFolder.doCommand(new ProtocolCommand() {
+            return (SortPartialResult) imapFolder.doCommand(new ProtocolCommand() {
 
                 @Override
                 public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
@@ -464,7 +499,7 @@ public final class IMAPSort {
 
                                 String partialResults = ir.readAtomStringList()[1];
                                 if ("NIL".equalsIgnoreCase(partialResults)) {
-                                    return new int[0];
+                                    return new SortPartialResult(new int[0], SortPartialReason.SUCCESS);
                                 }
                                 for (String snum : Strings.splitByComma(partialResults)) {
                                     int pos = snum.indexOf(':');
@@ -485,6 +520,9 @@ public final class IMAPSort {
 
                         // Copy the vector into 'matches'
                         matches = v.toArray();
+                    } else if (response.isBAD()) {
+                        // Obviously the SORT RETURN (PARTIAL ...) command failed
+                        return new SortPartialResult(null, SortPartialReason.COMMAND_FAILED);
                     }
 
                     // dispatch remaining untagged responses
@@ -499,7 +537,7 @@ public final class IMAPSort {
                 if (cause.getCause() instanceof com.sun.mail.iap.ByeIOException) {
                     // SORT RETURN PARTIAL command failed...
                     LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
-                    return null;
+                    return new SortPartialResult(null, SortPartialReason.FOLDER_CLOSED);
                 }
             }
             throw e;
@@ -701,5 +739,20 @@ public final class IMAPSort {
         }
     }
 
+    private static enum SortPartialReason {
+        SUCCESS, COMMAND_FAILED, FOLDER_CLOSED;
+    }
+
+    private static final class SortPartialResult {
+
+        final int[] seqnums;
+        final SortPartialReason reason;
+
+        SortPartialResult(int[] seqnums, SortPartialReason reason) {
+            super();
+            this.seqnums = seqnums;
+            this.reason = reason;
+        }
+    }
 
 }
