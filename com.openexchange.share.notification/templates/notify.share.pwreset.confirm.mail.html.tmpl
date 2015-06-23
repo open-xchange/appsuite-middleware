@@ -1,9 +1,9 @@
+<#include "notify.common.button.tmpl">
 <!DOCTYPE html>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
   <meta charset="UTF-8"></meta>
-  <#include "notify.common.style.html.tmpl">
 </head>
 <body>
  <#escape x as x?html>
@@ -18,7 +18,7 @@
   
   <p id="pwrc_set_new_pwd">
     ${pwrc_set_new_pwd}
-    <a class="btn" href="${pw_reset_confirm_link}"><span>${pw_reset_confirm_link_label}</span></a></p>
+    <@styledButton link="${pw_reset_confirm_link}">${pw_reset_confirm_link_label}</@styledButton>
   </p>
   
   <p id="pwrc_ignore">
