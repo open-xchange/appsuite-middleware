@@ -57,6 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -141,6 +142,15 @@ public abstract class ContactAction implements AJAXActionService {
         } catch (IllegalStateException e) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(VCardService.class.getName());
         }
+    }
+
+    /**
+     * Optionally gets the vCard storage service.
+     *
+     * @return The vCard storage service, or <code>null</code> if not available
+     */
+    protected VCardStorageService optVCardStorageService() throws OXException {
+        return serviceLookup.getOptionalService(VCardStorageService.class);
     }
 
     /**
