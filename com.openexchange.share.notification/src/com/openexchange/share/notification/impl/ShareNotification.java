@@ -50,7 +50,7 @@
 package com.openexchange.share.notification.impl;
 
 import java.util.Locale;
-import com.openexchange.share.notification.RequestContext;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
@@ -83,14 +83,6 @@ public interface ShareNotification<T> {
      * @return The transport information, never <code>null</code>
      */
     T getTransportInfo();
-
-    /**
-     * Gets the {@link LinkProvider} used for obtaining necessary URLs that are
-     * part of the notification messages.
-     *
-     * @return The provider, never <code>null</code>
-     */
-    LinkProvider getLinkProvider();
 
     /**
      * Gets the ID of the context where the share is located.

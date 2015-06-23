@@ -57,10 +57,10 @@ import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.drive.DriveShare;
 import com.openexchange.drive.DriveShareTarget;
-import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
 import com.openexchange.java.Enums;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -110,24 +110,24 @@ public class DriveShareParser {
             }
 
             @Override
-            public String getToken() throws OXException {
+            public String getToken() {
                 if (json.hasAndNotNull("token")) {
                     try {
                         return json.getString("token");
                     } catch (JSONException e) {
-                        // 
+                        //
                     }
                 }
                 return null;
             }
 
             @Override
-            public String getShareURL(String protocol, String fallbackHostname) throws OXException {
+            public String getShareURL(RequestContext context) {
                 if (json.hasAndNotNull("share_url")) {
                     try {
                         return json.getString("share_url");
                     } catch (JSONException e) {
-                        // 
+                        //
                     }
                 }
                 return null;

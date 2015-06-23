@@ -62,6 +62,7 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -114,7 +115,7 @@ public class GetLinkAction extends AbstractShareAction {
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getShareURL(determineProtocol(requestData), determineHostname(session, requestData)));
+            jResult.put("url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
             jResult.put("token", share.getGuest().getBaseToken());
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {

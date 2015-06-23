@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -107,7 +108,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getShareURL(determineProtocol(requestData), determineHostname(session.getServerSession(), requestData)));
+            jResult.put("url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
             jResult.put("token", share.getGuest().getBaseToken());
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {

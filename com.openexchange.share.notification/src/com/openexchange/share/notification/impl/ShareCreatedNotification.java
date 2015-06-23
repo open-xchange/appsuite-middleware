@@ -97,4 +97,11 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
      */
     boolean isInitialShare();
 
+    /**
+     * Gets the URL to the according share.
+     *
+     * @return The URL
+     */
+    String getShareUrl();
+
 }

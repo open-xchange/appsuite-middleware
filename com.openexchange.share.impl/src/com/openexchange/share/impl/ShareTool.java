@@ -100,8 +100,6 @@ import com.openexchange.userconf.UserPermissionService;
  */
 public class ShareTool {
 
-    public static final String SHARE_SERVLET = "share";
-
     /**
      * Extracts the first value of a specific attribute from a user.
      *

@@ -73,6 +73,8 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     private boolean isInitialShare;
 
+    private String shareUrl;
+
     /**
      * Initializes a new {@link DefaultShareCreatedNotification}.
      */
@@ -113,6 +115,11 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
         return isInitialShare;
     }
 
+    @Override
+    public String getShareUrl() {
+        return shareUrl;
+    }
+
     public void setTargets(List<ShareTarget> targets) {
         this.targets = targets;
     }
@@ -131,6 +138,10 @@ public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> 
 
     public void setInitialShare(boolean isInitialShare) {
         this.isInitialShare = isInitialShare;
+    }
+
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
     }
 
 }

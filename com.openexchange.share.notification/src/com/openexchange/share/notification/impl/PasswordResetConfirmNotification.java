@@ -75,17 +75,17 @@ public interface PasswordResetConfirmNotification<T> extends ShareNotification<T
     String getAccountName();
 
     /**
-     * Get the share token
+     * Gets the URL to the according share.
      *
-     * @return The share token
+     * @return The URL
      */
-    String getShareToken();
+    String getShareUrl();
 
     /**
-     * Get the uuid to confirm the password reset
+     * Gets the URL to be visited to reset the password.
      *
-     * @return The uuid to confirm the password reset
+     * @return The URL
      */
-    String getConfirmToken();
+    String getConfirmPasswordResetUrl();
 
 }

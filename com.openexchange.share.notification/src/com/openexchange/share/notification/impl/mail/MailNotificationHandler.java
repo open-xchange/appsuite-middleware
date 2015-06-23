@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class MailNotificationHandler implements ShareNotificationHandler {
+public class MailNotificationHandler implements ShareNotificationHandler<InternetAddress> {
 
     private final TransportProvider transportProvider;
 
@@ -96,7 +96,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
     }
 
     @Override
-    public <T extends ShareNotification<?>> void send(T notification) throws OXException {
+    public <T extends ShareNotification<InternetAddress>> void send(T notification) throws OXException {
         try {
             switch (notification.getType()) {
                 case SHARE_CREATED:
@@ -117,8 +117,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
         }
     }
 
-    private void sendShareCreated(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        @SuppressWarnings("unchecked")
+    private void sendShareCreated(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
         ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ShareCreatedMail.init(casted, transportProvider, services).compose();
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
@@ -128,8 +127,7 @@ public class MailNotificationHandler implements ShareNotificationHandler {
         }
     }
 
-    private void sendPasswordResetConfirm(ShareNotification<?> notification) throws UnsupportedEncodingException, OXException, MessagingException {
-        @SuppressWarnings("unchecked")
+    private void sendPasswordResetConfirm(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
         PasswordResetConfirmNotification<InternetAddress> casted = (PasswordResetConfirmNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ConfirmPasswordResetMail.init(casted, transportProvider, services).compose();
         sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);

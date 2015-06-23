@@ -47,73 +47,17 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.share.core;
 
-import java.util.List;
-import com.openexchange.session.Session;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.notification.RequestContext;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * A simple container holding all necessary information to send out a notification about the shares creation.
+ * {@link ShareConstants}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public class NotificationInfo {
+public class ShareConstants {
 
-    private final ShareRecipient recipient;
-    private final GuestInfo guestInfo;
-    private final List<ShareInfo> shareInfos;
-    private final Transport transport;
-    private final String message;
-    private final Session session;
-    private final RequestContext requestContext;
-
-    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, Session session, RequestContext requestContext) {
-        super();
-        this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-        this.transport = transport;
-        this.message = message;
-        this.session = session;
-        this.requestContext = requestContext;
-    }
-
-    public ShareRecipient getRecipient() {
-        return recipient;
-    }
-
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
-    }
-
-    public List<ShareInfo> getShareInfos() {
-        return shareInfos;
-    }
-
-    public Transport getTransport() {
-        return transport;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public RequestContext getRequestContext() {
-        return requestContext;
-    }
+    public static final String SHARE_SERVLET = "share";
 
 }

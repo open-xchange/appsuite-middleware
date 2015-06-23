@@ -51,7 +51,6 @@ package com.openexchange.drive.json;
 
 import java.util.List;
 import java.util.TimeZone;
-import javax.servlet.http.HttpServletRequest;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +62,7 @@ import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,18 +103,14 @@ public class DriveShareInfoResultConverter implements ResultConverter {
             timeZoneID = session.getUser().getTimeZone();
         }
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        String protocol = null != servletRequest ? com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest) :
-            requestData.isSecure() ? "https://" : "http://";
-        String hostname = null != servletRequest ? servletRequest.getServerName() : requestData.getHostname();
         /*
          * convert result object
          */
         Object resultObject = result.getResultObject();
         if (DriveShareInfo.class.isInstance(resultObject)) {
-            resultObject = convert((DriveShareInfo) resultObject, timeZone, protocol, hostname);
+            resultObject = convert((DriveShareInfo) resultObject, timeZone, requestData);
         } else {
-            resultObject = convert((List<DriveShareInfo>) resultObject, timeZone, protocol, hostname);
+            resultObject = convert((List<DriveShareInfo>) resultObject, timeZone, requestData);
         }
         result.setResultObject(resultObject, "json");
     }
@@ -124,14 +120,13 @@ public class DriveShareInfoResultConverter implements ResultConverter {
      *
      * @param shares The shares to serialize
      * @param timeZone The client timezone
-     * @param protocol The protocol
-     * @param hostname The hostname
+     * @param requestData
      * @return The serialized guest shares
      */
-    private JSONArray convert(List<DriveShareInfo> shares, TimeZone timeZone, String protocol, String hostname) throws OXException {
+    private JSONArray convert(List<DriveShareInfo> shares, TimeZone timeZone, AJAXRequestData requestData) throws OXException {
         JSONArray jsonArray = new JSONArray(shares.size());
         for (DriveShareInfo share : shares) {
-            jsonArray.put(convert(share, timeZone, protocol, hostname));
+            jsonArray.put(convert(share, timeZone, requestData));
         }
         return jsonArray;
     }
@@ -141,16 +136,17 @@ public class DriveShareInfoResultConverter implements ResultConverter {
      *
      * @param share The share to serialize
      * @param timeZone The client timezone
+     * @param requestData
      * @return The serialized guest share
      */
-    private JSONObject convert(DriveShareInfo share, TimeZone timeZone, String protocol, String hostname) throws OXException {
+    private JSONObject convert(DriveShareInfo share, TimeZone timeZone, AJAXRequestData requestData) throws OXException {
         try {
             JSONObject json = new JSONObject();
 
             /*
              * common share properties
              */
-            json.putOpt("share_url", share.getShareURL(protocol, hostname));
+            json.putOpt("share_url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
             json.put("token", share.getToken());
             /*
              * share targets & recipient

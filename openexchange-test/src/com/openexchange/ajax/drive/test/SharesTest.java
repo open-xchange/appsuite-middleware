@@ -61,8 +61,6 @@ import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
-import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.file.storage.DefaultFile;
@@ -179,7 +177,7 @@ public class SharesTest extends AbstractDriveShareTest {
         assertNotNull("Missing share.", anonymousFile);
         assertNotNull("Missing share.", anonymousFolder);
 
-        GuestClient guestClient = new GuestClient(anonymousFile.getShareURL(null, null), null, anonymous.getPassword());
+        GuestClient guestClient = new GuestClient(anonymousFile.getShareURL(getRequestContext()), null, anonymous.getPassword());
         InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
         checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
         FolderTestManager ftmGuest = new FolderTestManager(guestClient);
@@ -209,7 +207,7 @@ public class SharesTest extends AbstractDriveShareTest {
     //            }
     //        }
     //        assertNotNull("Missing share.", share);
-    //        
+    //
     //        System.out.println(share.getShareURL());
     //
     //        GuestClient guestClient = new GuestClient(share.getShareURL(), null, recipient.getPassword());

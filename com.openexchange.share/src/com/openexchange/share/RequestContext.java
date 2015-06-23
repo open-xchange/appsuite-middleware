@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,40 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.share;
 
 
 /**
- * A {@link LinkProvider} is used to build the hyperlinks that are contained in notification messages.
+ * Encapsulates information about the current HTTP request that is needed to generate
+ * links and redirect locations and to perform hostname-based configuration lookups.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface LinkProvider {
+public interface RequestContext {
 
     /**
-     * Gets the URL to the share the recipient is notified about.
+     * Gets the protocol via which this request was received, either <code>http</code>
+     * or <code>https</code>.
      *
-     * @return The URL
+     * @return The protocol
      */
-    String getShareUrl();
+    String getProtocol();
 
     /**
-     * Gets the URL to confirm to reset a guest's password
+     * Gets the requested hostname. This could have been determined by the HTTP request
+     * itself or an optional <code>HostnameService</code>.
      *
-     * @param confirm The uuid to confirm
-     * @return The URL
+     * @return The hostname
      */
-    String getPasswordResetConfirmUrl(String confirm);
+    String getHostname();
+
+    /**
+     * Gets the server-side servlet prefix, e.g. <code>/appsuite/api/</code>.
+     * The prefix always has leading and trailing slashed.
+     *
+     * @return The servlet prefix
+     */
+    String getServletPrefix();
 
 }

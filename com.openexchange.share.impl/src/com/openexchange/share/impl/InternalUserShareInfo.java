@@ -54,8 +54,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -142,7 +144,7 @@ public class InternalUserShareInfo implements ShareInfo {
             }
 
             @Override
-            public String getBaseToken() throws OXException {
+            public String getBaseToken() {
                 return null;
             }
 
@@ -154,13 +156,13 @@ public class InternalUserShareInfo implements ShareInfo {
     }
 
     @Override
-    public String getToken() throws OXException {
+    public String getToken() {
         return null;
     }
 
     @Override
-    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
-        return null;
+    public String getShareURL(RequestContext requestContext) {
+        return ShareLinks.generateInternal(requestContext, share.getTarget());
     }
 
 }

@@ -54,6 +54,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -89,11 +90,10 @@ public interface ShareNotificationService {
      *
      * @param transport The type of {@link Transport} to use when sending notifications
      * @param guestShare The guest share
-     * @param shareToken The current share token
      * @param confirmToken The confirm token to be part of the resulting link
      * @param requestContext The request context
      * @throws OXException
      */
-    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String confirmToken, RequestContext requestContext) throws OXException;
+    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, RequestContext requestContext) throws OXException;
 
 }

@@ -85,24 +85,39 @@ public class MailNotifications {
 
     public static class PasswordResetConfirmBuilder extends AbstractNotificationBuilder<PasswordResetConfirmBuilder, PasswordResetConfirmNotification<InternetAddress>, InternetAddress> {
 
-        private String shareToken;
-        private String confirmToken;
+        private String shareUrl;
         private String accountName;
+        private String pwResetUrl;
 
         protected PasswordResetConfirmBuilder() {
             super(NotificationType.CONFIRM_PASSWORD_RESET);
         }
 
-        public PasswordResetConfirmBuilder setShareToken(String shareToken) {
-            this.shareToken = shareToken;
+        /**
+         * Sets the share URL.
+         *
+         * @param shareUrl The URL
+         */
+        public PasswordResetConfirmBuilder setShareUrl(String shareUrl) {
+            this.shareUrl = shareUrl;
             return this;
         }
 
-        public PasswordResetConfirmBuilder setConfirmToken(String confirmToken) {
-            this.confirmToken = confirmToken;
+        /**
+         * Sets the URL to confirm the password reset request
+         *
+         * @param pwResetUrl The URL
+         */
+        public PasswordResetConfirmBuilder setConfirmPasswordResetUrl(String pwResetUrl) {
+            this.pwResetUrl = pwResetUrl;
             return this;
         }
 
+        /**
+         * Sets the name of the guest users account, e.g. his email address
+         *
+         * @param accountName The name
+         */
         public PasswordResetConfirmBuilder setAccountName(String accountName) {
             this.accountName = accountName;
             return this;
@@ -112,16 +127,15 @@ public class MailNotifications {
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkGreaterZero(guestID, "guestID");
             checkNotNull(accountName, "accountName");
-            checkNotNull(shareToken, "shareToken");
-            checkNotNull(confirmToken, "confirmToken");
+            checkNotNull(shareUrl, "shareUrl");
+            checkNotNull(pwResetUrl, "pwResetUrl");
 
             DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<>(Transport.MAIL);
             notification.apply(this);
-            notification.setShareToken(shareToken);
-            notification.setConfirmToken(confirmToken);
-            notification.setAccountName(accountName);
             notification.setGuestID(guestID);
-
+            notification.setAccountName(accountName);
+            notification.setShareUrl(shareUrl);
+            notification.setConfirmPasswordResetUrl(pwResetUrl);
             return notification;
         }
     }
@@ -129,12 +143,10 @@ public class MailNotifications {
     public static class ShareCreatedBuilder extends AbstractNotificationBuilder<ShareCreatedBuilder, ShareCreatedNotification<InternetAddress>, InternetAddress> {
 
         private Session session;
-
         private String message;
-
-        private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
-
         private boolean initialShare;
+        private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
+        private String shareUrl;
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
@@ -191,9 +203,20 @@ public class MailNotifications {
             return this;
         }
 
+        /**
+         * Sets the share URL.
+         *
+         * @param shareUrl The URL
+         */
+        public ShareCreatedBuilder setShareUrl(String shareUrl) {
+            this.shareUrl = shareUrl;
+            return this;
+        }
+
         @Override
         protected ShareCreatedNotification<InternetAddress> doBuild() {
             checkNotNull(session, "session");
+            checkNotNull(shareUrl, "shareUrl");
             checkNotEmpty(targets, "targets");
 
             DefaultShareCreatedNotification<InternetAddress> notification = new DefaultShareCreatedNotification<InternetAddress>(Transport.MAIL);
@@ -203,6 +226,7 @@ public class MailNotifications {
             notification.setTargets(targets);
             notification.setMessage(message);
             notification.setInitialShare(initialShare);
+            notification.setShareUrl(shareUrl);
             return notification;
         }
 

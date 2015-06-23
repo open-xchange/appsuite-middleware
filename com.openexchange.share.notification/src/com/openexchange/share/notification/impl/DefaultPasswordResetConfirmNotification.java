@@ -51,7 +51,6 @@ package com.openexchange.share.notification.impl;
 
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
-
 /**
  * {@link DefaultPasswordResetConfirmNotification}
  *
@@ -61,10 +60,10 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  */
 public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
 
-    private String shareToken;
-    private String confirmToken;
     private String accountName;
     private int guestId;
+    private String shareUrl;
+    private String pwResetUrl;
 
     public DefaultPasswordResetConfirmNotification(Transport transport) {
         super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
@@ -81,13 +80,13 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
     }
 
     @Override
-    public String getShareToken() {
-        return shareToken;
+    public String getShareUrl() {
+        return shareUrl;
     }
 
     @Override
-    public String getConfirmToken() {
-        return confirmToken;
+    public String getConfirmPasswordResetUrl() {
+        return pwResetUrl;
     }
 
     public void setAccountName(String accountName) {
@@ -98,12 +97,12 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
         this.guestId = guestId;
     }
 
-    public void setShareToken(String shareToken) {
-        this.shareToken = shareToken;
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
     }
 
-    public void setConfirmToken(String confirmToken) {
-        this.confirmToken = confirmToken;
+    public void setConfirmPasswordResetUrl(String pwResetUrl) {
+        this.pwResetUrl = pwResetUrl;
     }
 
 }

@@ -172,7 +172,7 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String HAS_SHARED_IMAGES_AND_MESSAGE = "%1$s (%2$s) has shared %3$s images with you and left you a message:";
 
     /** $username ($user_email) has shared a folder with you and left you a message: */
-    public static final String HAS_SHARED_FOLDER_AND_MESSAGE = "%1$s (%2$s) has shared the folder \"%1$s\" with you and left you a message:";
+    public static final String HAS_SHARED_FOLDER_AND_MESSAGE = "%1$s (%2$s) has shared the folder \"%3$s\" with you and left you a message:";
 
     /** $username ($user_email) has shared item "$filename" with you. */
     public static final String HAS_SHARED_ITEM_AND_MESSAGE = "%1$s (%2$s) has shared the item \"%3$s\" with you and left you a message:";

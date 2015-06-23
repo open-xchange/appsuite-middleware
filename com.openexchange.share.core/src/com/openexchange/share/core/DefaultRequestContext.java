@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.core;
 
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -56,6 +56,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.share.RequestContext;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -78,9 +79,11 @@ public class DefaultRequestContext implements RequestContext {
      * for creating new request context instances: {@link #newInstance(AJAXRequestData)}
      * and {@link #newInstance(HttpServletRequest, int, int)}.
      *
-     * @param protocol The protocol, <code>http</code> or <code>https</code>
-     * @param hostname The target hostname of the request
-     * @param servletPrefix The servlet prefix. Leading and trailing slashes are added if missing.
+     * @param protocol The protocol to use (e.g. <code>http</code>). You probably want to pass
+     *        <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
+     * @param hostname The hostname to use if no HostnameService is available. You probably want to pass
+     *        the result of a HostnameService call or as a fallback <code>HttpServletRequest.getServerName()</code> here.
+     * @param servletPrefix The servlet prefix for AJAX action factories. Leading and trailing slashes are added if missing.
      */
     public DefaultRequestContext(String protocol, String hostname, String servletPrefix) {
         super();

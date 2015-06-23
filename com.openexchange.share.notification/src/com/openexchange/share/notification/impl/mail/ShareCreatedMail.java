@@ -61,8 +61,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -113,7 +111,6 @@ public class ShareCreatedMail extends NotificationMail {
     }
 
     private static class CollectVarsData {
-
         ShareCreatedNotification<InternetAddress> notification;
         User sharingUser;
         User targetUser;
@@ -168,8 +165,7 @@ public class ShareCreatedMail extends NotificationMail {
         Map<String, Object> vars = prepareShareCreatedVars(data);
         basicTemplate.applyStyle(vars);
         FooterImage footerImage = basicTemplate.applyFooter(vars);
-        String templateName = getShareCreatedTemplate(configService, configViewFactory, notification);
-        String htmlContent = compileTemplate(templateName, vars, services);
+        String htmlContent = compileTemplate("notify.share.create.mail.html.tmpl", vars, services);
 
         MailData mailData = new MailData();
         mailData.sender = getSenderAddress(configService, notification.getSession(), sharingUser);
@@ -181,7 +177,7 @@ public class ShareCreatedMail extends NotificationMail {
         mailData.transportProvider = transportProvider;
         mailData.mailHeaders = new HashMap<>(5);
         mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
-        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
+        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getShareUrl());
         return new ShareCreatedMail(mailData);
     }
 
@@ -199,7 +195,7 @@ public class ShareCreatedMail extends NotificationMail {
     private static Map<String, Object> prepareShareCreatedVars(CollectVarsData data) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>();
         boolean hasMessage = !Strings.isEmpty(data.notification.getMessage());
-        String shareUrl = data.notification.getLinkProvider().getShareUrl();
+        String shareUrl = data.notification.getShareUrl();
         String email = data.sharingUser.getMail();
         List<ShareTarget> shareTargets = data.notification.getShareTargets();
         String fullName = data.shareOwnerName;
@@ -419,19 +415,6 @@ public class ShareCreatedMail extends NotificationMail {
                 }
             }
         }
-    }
-
-    private static String getShareCreatedTemplate(ConfigurationService configService, ConfigViewFactory configViewFactory, ShareCreatedNotification<InternetAddress> notification) throws OXException {
-        String templateName = null;
-        ConfigView configView = configViewFactory.getView(notification.getSession().getUserId(), notification.getSession().getContextId());
-        ComposedConfigProperty<String> templateNameProperty = configView.property("com.openexchange.share.create.mail.tmpl", String.class);
-        if (templateNameProperty.isDefined()) {
-            templateName = templateNameProperty.get();
-        } else {
-            templateName = configService.getProperty("com.openexchange.share.create.mail.tmpl", "notify.share.create.mail.html.tmpl");
-        }
-
-        return templateName;
     }
 
 }

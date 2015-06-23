@@ -58,7 +58,7 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface ShareNotificationHandler {
+public interface ShareNotificationHandler<TInfo> {
 
     /**
      * Gets the transport supported by this handler.
@@ -70,7 +70,7 @@ public interface ShareNotificationHandler {
      *
      * @param notification The notification
      */
-    <T extends ShareNotification<?>> void send(T notification) throws OXException;
+    <NType extends ShareNotification<TInfo>> void send(NType notification) throws OXException;
 
 
 }

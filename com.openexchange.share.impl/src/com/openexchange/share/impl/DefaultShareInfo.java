@@ -53,8 +53,11 @@ import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareLinks;
 
 /**
  * {@link DefaultShareInfo}
@@ -91,8 +94,18 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
     }
 
     @Override
-    public String getToken() throws OXException {
+    public String getToken() {
         return super.getToken(share.getTarget());
+    }
+
+    @Override
+    public String getShareURL(RequestContext context) {
+        ShareTarget target = getSingleTarget();
+        if (target == null) {
+            return ShareLinks.generateExternal(context, guestInfo.getBaseToken());
+        }
+
+        return ShareLinks.generateExternal(context, guestInfo.getBaseToken(), target.getPath());
     }
 
 }

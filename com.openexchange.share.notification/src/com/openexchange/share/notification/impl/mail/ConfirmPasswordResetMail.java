@@ -120,16 +120,17 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         String htmlContent = compileTemplate("notify.share.pwreset.confirm.mail.html.tmpl", vars, services); // TODO
 
         MailData mailData = new MailData();
-        mailData.sender = null; // TODO
+        mailData.sender = null;
         mailData.recipient = notification.getTransportInfo();
         mailData.subject = translator.translate(NotificationStrings.PWRC_SUBJECT);
         mailData.htmlContent = htmlContent;
         mailData.footerImage = footerImage;
         mailData.context = context;
         mailData.transportProvider = transportProvider;
+        mailData.mailHeaders = new HashMap<>(6);
         mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
-        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
-        mailData.mailHeaders.put("X-Open-Xchange-Share-Reset-PW-URL", notification.getLinkProvider().getPasswordResetConfirmUrl(notification.getConfirmToken()));
+        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getShareUrl());
+        mailData.mailHeaders.put("X-Open-Xchange-Share-Reset-PW-URL", notification.getConfirmPasswordResetUrl());
         return new ConfirmPasswordResetMail(mailData);
     }
 
@@ -139,7 +140,7 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
         vars.put(PWRC_ACCOUNT, notification.getAccountName());
         vars.put(PWRC_SET_NEW_PWD, translator.translate(NotificationStrings.PWRC_SET_NEW_PWD));
-        vars.put(PWRC_LINK, notification.getLinkProvider().getPasswordResetConfirmUrl(notification.getConfirmToken()));
+        vars.put(PWRC_LINK, notification.getConfirmPasswordResetUrl());
         vars.put(PWRC_LINK_LABEL, translator.translate(NotificationStrings.PWRC_LINK_LABEL));
         vars.put(PWRC_IGNORE, translator.translate(NotificationStrings.PWRC_IGNORE));
         vars.put(PWRC_AUTOMATED_MAIL, translator.translate(NotificationStrings.PWRC_AUTOMATED_MAIL));
