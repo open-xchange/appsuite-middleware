@@ -169,8 +169,8 @@ public class NotificationStrings implements LocalizableStrings {
 
 
     // expires
-    /** The link will expire at $preformatted_date */
-    public static final String LINK_EXPIRE = "The link will expire at %1$s";
+    /** The link will expire on $preformatted_date */
+    public static final String LINK_EXPIRE = "The link will expire on %1$s";
 
     /*
      * Password reset confirm mails
