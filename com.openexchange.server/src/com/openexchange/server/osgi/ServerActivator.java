@@ -98,6 +98,8 @@ import com.openexchange.configjump.ConfigJumpService;
 import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
@@ -453,6 +455,10 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // ICal Emitter
         track(ICalEmitter.class, new RegistryCustomizer<ICalEmitter>(context, ICalEmitter.class));
+
+        // vCard service & storage
+        track(VCardService.class, new RegistryCustomizer<VCardService>(context, VCardService.class));
+        track(VCardStorageService.class, new RegistryCustomizer<VCardStorageService>(context, VCardStorageService.class));
 
         // Data Retention Service
         track(DataRetentionService.class, new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class));

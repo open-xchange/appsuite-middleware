@@ -51,16 +51,16 @@ package com.openexchange.groupware.contact.datasource;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardExport;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -69,15 +69,11 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * {@link ContactDataSource} - A data source for contacts.
@@ -86,10 +82,7 @@ import com.openexchange.tools.versit.converter.OXContainerConverter;
  */
 public final class ContactDataSource implements DataSource {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactDataSource.class);
-
     private static final Class<?>[] TYPES = { InputStream.class, byte[].class };
-
     private static final String[] ARGS = { "com.openexchange.groupware.contact.pairs" };
 
     /**
@@ -135,28 +128,16 @@ public final class ContactDataSource implements DataSource {
         final Contact[] contacts = new Contact[len];
         {
         	final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
-//            final ContactInterfaceDiscoveryService discoveryService = ServerServiceRegistry.getInstance().getService(
-//                ContactInterfaceDiscoveryService.class,
-//                true);
-//            final TIntObjectMap<ContactInterface> tmp = new TIntObjectHashMap<ContactInterface>(len);
             for (int i = 0; i < len; i++) {
             	contacts[i] = contactService.getContact(session, Integer.toString(folderIds[i]), Integer.toString(objectIds[i]));
-//                final int folderId = folderIds[i];
-//                ContactInterface contactInterface = tmp.get(folderId);
-//                if (null == contactInterface) {
-//                    contactInterface = discoveryService.newContactInterface(folderId, session);
-//                    tmp.put(folderId, contactInterface);
-//                }
-//                contacts[i] = contactInterface.getObjectById(objectIds[i], folderId);
             }
         }
         /*
          * Create necessary objects
          */
         final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(len << 12);
-        final VersitDefinition contactDef = Versit.getDefinition("text/vcard");
         for (final Contact contact : contacts) {
-            writeVCard2Stream(contact, sink, contactDef, session);
+            writeVCard2Stream(contact, sink, session);
         }
         /*
          * Return data
@@ -175,33 +156,38 @@ public final class ContactDataSource implements DataSource {
             properties);
     }
 
-    private static void writeVCard2Stream(final Contact contact, final ByteArrayOutputStream stream, final VersitDefinition contactDef, final Session session) throws OXException {
-        final VersitDefinition.Writer versitWriter;
-        try {
-            versitWriter = contactDef.getWriter(stream, "UTF-8");
-        } catch (final IOException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+    /**
+     * Serializes the supplied contact as vCard and writes it to the output stream.
+     *
+     * @param contact The contact to serialize
+     * @param outputStream The target output stream
+     * @param session The session
+     */
+    private static void writeVCard2Stream(Contact contact, ByteArrayOutputStream outputStream, Session session) throws OXException {
+        VCardService vCardService = ServerServiceRegistry.getInstance().getService(VCardService.class, true);
+        InputStream originalVCard = null;
+        if (null != contact.getVCardId()) {
+            VCardStorageService vCardStorage = ServerServiceRegistry.getInstance().getService(VCardStorageService.class, false);
+            if (null != vCardStorage) {
+                originalVCard = vCardStorage.getVCard(contact.getVCardId(), session.getContextId());
+            }
         }
-        final OXContainerConverter oxContainerConverter;
+        VCardExport vCardExport = vCardService.exportContact(contact, originalVCard, vCardService.createParameters(session));
         try {
-            oxContainerConverter = new OXContainerConverter(session);
-        } catch (final ConverterException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        }
-        /*
-         * Convert
-         */
-        try {
-            oxContainerConverter.setAddDisplayName4DList(true);
-            final VersitObject versitObject = oxContainerConverter.convertContact(contact, "3.0");
-            contactDef.write(versitWriter, versitObject);
-            versitWriter.flush();
-        } catch (final ConverterException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            throw DataExceptionCodes.ERROR.create(e, e.getMessage());
+            InputStream inputStream = null;
+            byte[] buffer = new byte[0xFFFF];
+            try {
+                inputStream = vCardExport.getVCard().getStream();
+                for (int len; (len = inputStream.read(buffer, 0, buffer.length)) > 0;) {
+                    outputStream.write(buffer, 0, len);
+                }
+            } finally {
+                Streams.close(inputStream);
+            }
+        } catch (IOException e) {
+            throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            closeVersitResources(oxContainerConverter, versitWriter);
+            Streams.close(vCardExport);
         }
     }
 
@@ -215,16 +201,4 @@ public final class ContactDataSource implements DataSource {
         return TYPES;
     }
 
-    private static void closeVersitResources(final OXContainerConverter oxContainerConverter, final VersitDefinition.Writer versitWriter) {
-        if (oxContainerConverter != null) {
-            oxContainerConverter.close();
-        }
-        if (versitWriter != null) {
-            try {
-                versitWriter.close();
-            } catch (final IOException e) {
-                LOG.error("", e);
-            }
-        }
-    }
 }
