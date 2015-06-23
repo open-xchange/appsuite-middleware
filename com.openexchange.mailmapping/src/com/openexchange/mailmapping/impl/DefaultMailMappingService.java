@@ -49,6 +49,8 @@
 
 package com.openexchange.mailmapping.impl;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -3915,6 +3917,13 @@ public class DefaultMailMappingService implements MailResolver {
             externalDomains.add("zzn.com");
             externalDomains.add("zzom.co.uk");
         }
+
+        List<String> all = new ArrayList<String>(externalDomains);
+        Collections.sort(all);
+        for (String doma : all) {
+            System.err.println("#" + doma);
+        }
+
         return externalDomains;
     }
 
