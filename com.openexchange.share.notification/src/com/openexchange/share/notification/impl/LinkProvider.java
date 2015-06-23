@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,30 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
-import com.openexchange.share.AuthenticationMode;
 
 /**
- * A notification to send a link to confirm a password reset to a guest user who made use of the password reset mechanism. Such notifications must only be used
- * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
+ * A {@link LinkProvider} is used to build the hyperlinks that are contained in notification messages.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public interface PasswordResetConfirmNotification<T> extends ShareNotification<T> {
+public interface LinkProvider {
 
     /**
-     * Get the share token
+     * Gets the URL to the share the recipient is notified about.
      *
-     * @return The share token
+     * @return The URL
      */
-    String getToken();
+    String getShareUrl();
 
     /**
-     * Get the uuid to confirm the password reset
+     * Gets the URL to confirm to reset a guest's password
      *
-     * @return The uuid to confirm the password reset
+     * @param confirm The uuid to confirm
+     * @return The URL
      */
-    String getConfirm();
-
-    /**
-     * Get the email address of the guest user
-     *
-     * @return The guest's email address
-     */
-    String getAccount();
-
-    /**
-     * Get the ID of the according guest user
-     *
-     * @return The user ID
-     */
-    int getGuestID();
+    String getPasswordResetConfirmUrl(String confirm);
 
 }

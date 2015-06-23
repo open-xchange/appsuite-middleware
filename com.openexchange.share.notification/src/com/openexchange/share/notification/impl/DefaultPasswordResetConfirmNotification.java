@@ -49,41 +49,61 @@
 
 package com.openexchange.share.notification.impl;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.notification.RequestContext;
-import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * {@link AJAXRequestContext} - An implementation of {@link RequestContext}
- * based on {@link AJAXRequestData}.
+ * {@link DefaultPasswordResetConfirmNotification}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8
  */
-public class AJAXRequestContext implements RequestContext {
+public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
 
-    private final AJAXRequestData requestData;
+    private String shareToken;
+    private String confirmToken;
+    private String accountName;
+    private int guestId;
 
-    public AJAXRequestContext(AJAXRequestData requestData) {
-        super();
-        this.requestData = requestData;
+    public DefaultPasswordResetConfirmNotification(Transport transport) {
+        super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
     }
 
     @Override
-    public String getProtocol() {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (servletRequest != null) {
-            return Tools.considerSecure(servletRequest) ? "https" : "http";
-        }
-
-        return requestData.isSecure() ? "https://" : "http://";
+    public int getGuestID() {
+        return guestId;
     }
 
     @Override
-    public String getHostname() {
-        return requestData.getHostname();
+    public String getAccountName() {
+        return accountName;
+    }
+
+    @Override
+    public String getShareToken() {
+        return shareToken;
+    }
+
+    @Override
+    public String getConfirmToken() {
+        return confirmToken;
+    }
+
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
+    }
+
+    public void setGuestID(int guestId) {
+        this.guestId = guestId;
+    }
+
+    public void setShareToken(String shareToken) {
+        this.shareToken = shareToken;
+    }
+
+    public void setConfirmToken(String confirmToken) {
+        this.confirmToken = confirmToken;
     }
 
 }

@@ -1,4 +1,4 @@
-package com.openexchange.share.notification.mail.impl;
+package com.openexchange.share.notification.impl.mail;
 
 
 public enum TargetType {

@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.share.notification;
 
-import static com.openexchange.share.notification.impl.ShareNotifyExceptionMessages.INVALID_MAIL_ADDRESS_MSG;
-import static com.openexchange.share.notification.impl.ShareNotifyExceptionMessages.MISSING_MAIL_ADDRESS_MSG;
+import static com.openexchange.share.notification.ShareNotifyExceptionMessages.INVALID_MAIL_ADDRESS_MSG;
+import static com.openexchange.share.notification.ShareNotifyExceptionMessages.MISSING_MAIL_ADDRESS_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -94,7 +94,7 @@ public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
 
     ;
 
-    static final String PREFIX = "SHR_NOT";
+    public static final String PREFIX = "SHR_NOT";
 
     private final Category category;
     private final int number;

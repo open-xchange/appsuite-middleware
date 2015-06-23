@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.notification.mail.impl;
+package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.HashMap;
@@ -66,8 +66,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.share.notification.PasswordResetConfirmNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;
+import com.openexchange.share.notification.impl.PasswordResetConfirmNotification;
 import com.openexchange.user.UserService;
 
 
@@ -127,6 +127,9 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         mailData.footerImage = footerImage;
         mailData.context = context;
         mailData.transportProvider = transportProvider;
+        mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
+        mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
+        mailData.mailHeaders.put("X-Open-Xchange-Share-Reset-PW-URL", notification.getLinkProvider().getPasswordResetConfirmUrl(notification.getConfirmToken()));
         return new ConfirmPasswordResetMail(mailData);
     }
 
@@ -134,9 +137,9 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(PWRC_GREETING, translator.translate(NotificationStrings.PWRC_GREETING));
         vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
-        vars.put(PWRC_ACCOUNT, notification.getAccount());
+        vars.put(PWRC_ACCOUNT, notification.getAccountName());
         vars.put(PWRC_SET_NEW_PWD, translator.translate(NotificationStrings.PWRC_SET_NEW_PWD));
-        vars.put(PWRC_LINK, notification.getLinkProvider().getPasswordResetConfirmUrl(notification.getConfirm()));
+        vars.put(PWRC_LINK, notification.getLinkProvider().getPasswordResetConfirmUrl(notification.getConfirmToken()));
         vars.put(PWRC_LINK_LABEL, translator.translate(NotificationStrings.PWRC_LINK_LABEL));
         vars.put(PWRC_IGNORE, translator.translate(NotificationStrings.PWRC_IGNORE));
         vars.put(PWRC_AUTOMATED_MAIL, translator.translate(NotificationStrings.PWRC_AUTOMATED_MAIL));

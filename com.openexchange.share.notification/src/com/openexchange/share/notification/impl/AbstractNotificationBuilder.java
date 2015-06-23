@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
 import java.util.Collection;
 import java.util.Locale;
 import com.openexchange.java.Strings;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
+import com.openexchange.share.notification.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 

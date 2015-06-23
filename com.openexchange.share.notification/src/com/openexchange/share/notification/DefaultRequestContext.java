@@ -49,7 +49,14 @@
 
 package com.openexchange.share.notification;
 
-
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link DefaultRequestContext} - Default implementation of {@link RequestContext} based
@@ -64,15 +71,55 @@ public class DefaultRequestContext implements RequestContext {
 
     private final String hostname;
 
+    private final String servletPrefix;
+
     /**
-     * Initializes a new {@link DefaultRequestContext}.
-     * @param requestHostname
-     * @param protocol
+     * Initializes a new {@link DefaultRequestContext}. Note that there are convenience methods
+     * for creating new request context instances: {@link #newInstance(AJAXRequestData)}
+     * and {@link #newInstance(HttpServletRequest, int, int)}.
+     *
+     * @param protocol The protocol, <code>http</code> or <code>https</code>
+     * @param hostname The target hostname of the request
+     * @param servletPrefix The servlet prefix. Leading and trailing slashes are added if missing.
      */
-    public DefaultRequestContext(String hostname, String protocol) {
+    public DefaultRequestContext(String protocol, String hostname, String servletPrefix) {
         super();
         this.hostname = hostname;
         this.protocol = protocol;
+        this.servletPrefix = normalizePrefix(servletPrefix);
+    }
+
+    /**
+     * Creates a new {@link DefaultRequestContext} based on the given servlet request and an optional
+     * session object.
+     *
+     * @param servletRequest The servlet request
+     * @param contextId The context id or <code>-1</code> if none is available
+     * @param userId The user id or <code>-1</code> if none is available
+     * @return The request context
+     */
+    public static DefaultRequestContext newInstance(HttpServletRequest servletRequest, int contextId, int userId) {
+        String protocol = determineProtocol(servletRequest);
+        String hostname = determineHostname(servletRequest, contextId, userId);
+        String servletPrefix = determineServletPrefix();
+        return new DefaultRequestContext(protocol, hostname, servletPrefix);
+    }
+
+    /**
+     * Creates a new {@link DefaultRequestContext} based on the given AJAX request data.
+     *
+     * @param requestData The request data
+     * @return The request context
+     */
+    public static DefaultRequestContext newInstance(AJAXRequestData requestData) {
+        String protocol = determineProtocol(requestData);
+        String hostname = requestData.getHostname();
+        String servletPrefix = determineServletPrefix();
+        return new DefaultRequestContext(protocol, hostname, servletPrefix);
+    }
+
+    private static String determineProtocol(HttpServletRequest servletRequest) {
+        return Tools.considerSecure(servletRequest) ? "https" : "http";
     }
 
     @Override
@@ -83,6 +130,66 @@ public class DefaultRequestContext implements RequestContext {
     @Override
     public String getHostname() {
         return hostname;
+    }
+
+    @Override
+    public String getServletPrefix() {
+        return servletPrefix;
+    }
+
+    private static String normalizePrefix(String prefix) {
+        prefix = prefix.trim();
+        if (!prefix.startsWith("/")) {
+            prefix = "/" + prefix;
+        }
+        if (!prefix.endsWith(prefix)) {
+            prefix = prefix + "/";
+        }
+
+        return prefix;
+    }
+
+    private static String determineServletPrefix() {
+        try {
+            return ServiceCallWrapper.tryServiceCall(DefaultRequestContext.class, DispatcherPrefixService.class, new ServiceUser<DispatcherPrefixService, String>() {
+                @Override
+                public String call(DispatcherPrefixService service) throws Exception {
+                    return service.getPrefix();
+                }
+            }, DispatcherPrefixService.DEFAULT_PREFIX);
+        } catch (ServiceException e) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+    }
+
+    private static String determineHostname(HttpServletRequest servletRequest, final int contextId, final int userId) {
+        String hostname = null;
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(DefaultRequestContext.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    return service.getHostname(userId, contextId);
+                }
+            }, null);
+        } catch (ServiceException e) {
+            // ignore
+        }
+
+        if (hostname == null) {
+            hostname = servletRequest.getServerName();
+        }
+
+        return hostname;
+
+    }
+
+    private static String determineProtocol(AJAXRequestData requestData) {
+        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
+        if (servletRequest != null) {
+            return determineProtocol(servletRequest);
+        }
+
+        return requestData.isSecure() ? "https://" : "http://";
     }
 
 }

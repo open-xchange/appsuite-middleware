@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.ajax.smtptest.actions;
 
 import java.io.IOException;
 import org.json.JSONException;

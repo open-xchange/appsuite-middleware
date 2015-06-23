@@ -50,12 +50,12 @@
 package com.openexchange.share.notification.impl;
 
 import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.notification.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * A simple container holding all necessary information to send out a notification about the shares creation.
@@ -72,12 +72,12 @@ public class NotificationInfo {
     private final GuestInfo guestInfo;
     private final List<ShareInfo> shareInfos;
     private final Transport transport;
-    private String message;
-    private ServerSession session;
-    private AJAXRequestData requestData;
+    private final String message;
+    private final Session session;
+    private final RequestContext requestContext;
 
     public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, ServerSession session, AJAXRequestData requestData) {
+        Transport transport, String message, Session session, RequestContext requestContext) {
         super();
         this.recipient = recipient;
         this.guestInfo = guestInfo;
@@ -85,7 +85,7 @@ public class NotificationInfo {
         this.transport = transport;
         this.message = message;
         this.session = session;
-        this.requestData = requestData;
+        this.requestContext = requestContext;
     }
 
     public ShareRecipient getRecipient() {
@@ -99,7 +99,7 @@ public class NotificationInfo {
     public List<ShareInfo> getShareInfos() {
         return shareInfos;
     }
-    
+
     public Transport getTransport() {
         return transport;
     }
@@ -108,14 +108,12 @@ public class NotificationInfo {
         return message;
     }
 
-    public ServerSession getSession() {
+    public Session getSession() {
         return session;
     }
 
-    public AJAXRequestData getRequestData() {
-        return requestData;
+    public RequestContext getRequestContext() {
+        return requestContext;
     }
-    
-    
 
 }

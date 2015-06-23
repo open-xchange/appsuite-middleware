@@ -33,6 +33,7 @@ Import-Package: com.google.common.base;version="18.0.0",
  com.openexchange.mail.utils,
  com.openexchange.notification,
  com.openexchange.osgi,
+ com.openexchange.osgi.util,
  com.openexchange.server,
  com.openexchange.serverconfig,
  com.openexchange.session,
@@ -56,5 +57,4 @@ Import-Package: com.google.common.base;version="18.0.0",
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.share.notification,
- com.openexchange.share.notification.mail
+Export-Package: com.openexchange.share.notification

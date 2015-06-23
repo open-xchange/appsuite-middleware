@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,30 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
+import com.openexchange.exception.OXException;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
-
 /**
- * {@link DefaultPasswordResetConfirmNotification}
+ * {@link ShareNotificationHandler}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since v7.8
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
+public interface ShareNotificationHandler {
 
-    private String token;
-    private String confirm;
-    private String account;
-    private int guestId;
+    /**
+     * Gets the transport supported by this handler.
+     */
+    Transport getTransport();
 
-    public DefaultPasswordResetConfirmNotification(Transport transport) {
-        super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
-    }
+    /**
+     * Notifies the recipient of a {@link ShareNotification} about the according share.
+     *
+     * @param notification The notification
+     */
+    <T extends ShareNotification<?>> void send(T notification) throws OXException;
 
-    @Override
-    public String getToken() {
-        return token;
-    }
-
-    @Override
-    public String getConfirm() {
-        return confirm;
-    }
-
-    @Override
-    public String getAccount() {
-        return account;
-    }
-
-    @Override
-    public int getGuestID() {
-        return guestId;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setConfirm(String confirm) {
-        this.confirm = confirm;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public void setGuestID(int guestId) {
-        this.guestId = guestId;
-    }
 
 }

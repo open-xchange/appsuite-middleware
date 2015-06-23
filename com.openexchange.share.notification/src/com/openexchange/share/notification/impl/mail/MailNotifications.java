@@ -47,21 +47,20 @@
  *
  */
 
-package com.openexchange.share.notification.mail;
+package com.openexchange.share.notification.impl.mail;
 
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.session.Session;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.AbstractNotificationBuilder;
-import com.openexchange.share.notification.DefaultPasswordResetConfirmNotification;
-import com.openexchange.share.notification.DefaultShareCreatedNotification;
-import com.openexchange.share.notification.PasswordResetConfirmNotification;
-import com.openexchange.share.notification.ShareCreatedNotification;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.impl.AbstractNotificationBuilder;
+import com.openexchange.share.notification.impl.DefaultPasswordResetConfirmNotification;
+import com.openexchange.share.notification.impl.DefaultShareCreatedNotification;
+import com.openexchange.share.notification.impl.NotificationType;
+import com.openexchange.share.notification.impl.PasswordResetConfirmNotification;
+import com.openexchange.share.notification.impl.ShareCreatedNotification;
 
 /**
  * {@link MailNotifications}
@@ -87,8 +86,8 @@ public class MailNotifications {
     public static class PasswordResetConfirmBuilder extends AbstractNotificationBuilder<PasswordResetConfirmBuilder, PasswordResetConfirmNotification<InternetAddress>, InternetAddress> {
 
         private String shareToken;
-        private String confirm;
-        private String account;
+        private String confirmToken;
+        private String accountName;
 
         protected PasswordResetConfirmBuilder() {
             super(NotificationType.CONFIRM_PASSWORD_RESET);
@@ -99,27 +98,28 @@ public class MailNotifications {
             return this;
         }
 
-        public PasswordResetConfirmBuilder setConfirm(String confirm) {
-            this.confirm = confirm;
+        public PasswordResetConfirmBuilder setConfirmToken(String confirmToken) {
+            this.confirmToken = confirmToken;
             return this;
         }
 
-        public PasswordResetConfirmBuilder setAccount(String account) {
-            this.account = account;
+        public PasswordResetConfirmBuilder setAccountName(String accountName) {
+            this.accountName = accountName;
             return this;
         }
 
         @Override
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
-            checkNotNull(shareToken, "shareToken");
-            checkNotNull(confirm, "config");
             checkGreaterZero(guestID, "guestID");
+            checkNotNull(accountName, "accountName");
+            checkNotNull(shareToken, "shareToken");
+            checkNotNull(confirmToken, "confirmToken");
 
             DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<>(Transport.MAIL);
             notification.apply(this);
-            notification.setToken(shareToken);
-            notification.setConfirm(confirm);
-            notification.setAccount(account);
+            notification.setShareToken(shareToken);
+            notification.setConfirmToken(confirmToken);
+            notification.setAccountName(accountName);
             notification.setGuestID(guestID);
 
             return notification;
@@ -130,17 +130,11 @@ public class MailNotifications {
 
         private Session session;
 
-        private AuthenticationMode authMode;
-
-        private String username;
-
-        private String password;
-
         private String message;
 
         private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
 
-        private boolean causedGuestCreation;
+        private boolean initialShare;
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
@@ -153,41 +147,6 @@ public class MailNotifications {
          */
         public ShareCreatedBuilder setSession(Session session) {
             this.session = session;
-            return this;
-        }
-
-        /**
-         * Sets the {@link AuthenticationMode} of the shares guest user.
-         *
-         * @param authMode The authentication mode
-         */
-        public ShareCreatedBuilder setAuthMode(AuthenticationMode authMode) {
-            this.authMode = authMode;
-            return this;
-        }
-
-        /**
-         * Sets the username that must be used for logging in. The value is ignored if {@link AuthenticationMode} has been set to
-         * {@link AuthenticationMode#ANONYMOUS} or {@link AuthenticationMode#ANONYMOUS_PASSWORD}. A username must be set in case
-         * {@link AuthenticationMode#GUEST_PASSWORD} has been set as authentication mode
-         *
-         * @param username The username
-         */
-        public ShareCreatedBuilder setUsername(String username) {
-            this.username = username;
-            return this;
-        }
-
-        /**
-         * Sets the password that must be used for logging in. The value is ignored if {@link AuthenticationMode} has been set to
-         * {@link AuthenticationMode#ANONYMOUS}. If the authentication mode is {@link AuthenticationMode#GUEST_PASSWORD} and no password was
-         * set, a hint to re-use existing credentials and a link to reset the guest users password is contained within the notification
-         * instead of the password itself. For {@link AuthenticationMode#ANONYMOUS_PASSWORD} a password must always be set.
-         *
-         * @param password The password
-         */
-        public ShareCreatedBuilder setPassword(String password) {
-            this.password = password;
             return this;
         }
 
@@ -223,23 +182,18 @@ public class MailNotifications {
         }
 
         /**
-         * Set the causedGuestCreation flag to indicate if a new guest was created for this share and the notification needs to be phrased differently.
+         * Set whether this notification is about the first share targeting a new guest user.
          *
-         * @param causedGuestCreation the flag
+         * @param initialShare the flag
          */
-        public ShareCreatedBuilder setCausedGuestCreation(boolean causedGuestCreation) {
-            this.causedGuestCreation = causedGuestCreation;
+        public ShareCreatedBuilder setIntitialShare(boolean initialShare) {
+            this.initialShare = initialShare;
             return this;
         }
-
 
         @Override
         protected ShareCreatedNotification<InternetAddress> doBuild() {
             checkNotNull(session, "session");
-            checkNotNull(authMode, "authMode");
-            if (authMode == AuthenticationMode.GUEST_PASSWORD) {
-                checkNotNull(username, "username");
-            }
             checkNotEmpty(targets, "targets");
 
             DefaultShareCreatedNotification<InternetAddress> notification = new DefaultShareCreatedNotification<InternetAddress>(Transport.MAIL);
@@ -248,7 +202,7 @@ public class MailNotifications {
             notification.setTargetUserID(guestID);
             notification.setTargets(targets);
             notification.setMessage(message);
-            notification.setInitialShare(causedGuestCreation);
+            notification.setInitialShare(initialShare);
             return notification;
         }
 

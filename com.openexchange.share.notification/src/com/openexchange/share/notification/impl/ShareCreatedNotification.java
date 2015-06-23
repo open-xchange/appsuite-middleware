@@ -47,22 +47,54 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
+import java.util.List;
+import com.openexchange.session.Session;
+import com.openexchange.share.ShareTarget;
 
 /**
- * A notification to re-send the password of an anonymous share to a certain recipient.
+ * A notification to inform users about created shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface PasswordReminderNotification<T> extends ShareNotification<T> {
+public interface ShareCreatedNotification<T> extends ShareNotification<T> {
 
     /**
-     * Gets the password to notify the recipient about.
+     * Gets the session of the new shares creator.
      *
-     * @return The password, never <code>null</code>
+     * @return The session
      */
-    String getPassword();
+    Session getSession();
+
+    /**
+     * Gets the share targets to notify the recipient about.
+     *
+     * @return The share targets, never <code>null</code>
+     */
+    List<ShareTarget> getShareTargets();
+
+    /**
+     * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
+     * {@link NotificationType}.
+     *
+     * @return The message or <code>null</code>, if nothing was provided
+     */
+    String getMessage();
+
+    /**
+     * Get the id of the user something is shared to
+     *
+     * @return The user ID
+     */
+    int getTargetUserID();
+
+    /**
+     * Returns whether this notification is about the first share targeting a new guest user.
+     *
+     * @return <code>true</code> if a new guest was created and the notification is about the initial share, else <code>false</code>
+     */
+    boolean isInitialShare();
 
 }

@@ -64,6 +64,7 @@ import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.json.actions.ShareJSONParser;
+import com.openexchange.share.notification.DefaultRequestContext;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -93,7 +94,7 @@ public class InviteAction extends AbstractDriveShareAction {
              * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
              */
             ShareNotificationService shareNotificationService = Services.getService(ShareNotificationService.class);
-            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session.getServerSession(), requestData);
+            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session.getServerSession(), DefaultRequestContext.newInstance(requestData));
             /*
              * construct & return appropriate json result
              */

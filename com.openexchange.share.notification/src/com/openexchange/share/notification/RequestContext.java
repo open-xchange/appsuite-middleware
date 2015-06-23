@@ -77,4 +77,12 @@ public interface RequestContext {
      */
     String getHostname();
 
+    /**
+     * Gets the server-side servlet prefix, e.g. <code>/appsuite/api/</code>.
+     * The prefix always has leading and trailing slashed.
+     *
+     * @return The servlet prefix
+     */
+    String getServletPrefix();
+
 }

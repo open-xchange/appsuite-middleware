@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,56 @@
  *
  */
 
-package com.openexchange.share.notification;
-
-import java.util.List;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
+package com.openexchange.share.notification.impl;
 
 /**
- * A notification to inform users about created shares.
+ * Possible notification types. Meant to be extended for future requirements.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareCreatedNotification<T> extends ShareNotification<T> {
+public enum NotificationType {
+    /**
+     * Notification type for a newly created share.
+     * Use to send notifications about a new share to
+     * a recipient of any type.
+     */
+    SHARE_CREATED("share-created"),
 
     /**
-     * Gets the session of the new shares creator.
-     *
-     * @return The session
+     * Notification type for a password-reset that needs to be confirmed.
+     * Use to send a request to confirm the password-reset to the share's recipient.
      */
-    Session getSession();
+    CONFIRM_PASSWORD_RESET("confirm-pwreset");
+
+    private final String id;
+    private NotificationType(String id) {
+        this.id = id;
+    }
 
     /**
-     * Gets the share targets to notify the recipient about.
+     * Gets the type identifier
      *
-     * @return The share targets, never <code>null</code>
+     * @return The id
      */
-    List<ShareTarget> getShareTargets();
+    public String getId() {
+        return id;
+    }
 
     /**
-     * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
-     * {@link NotificationType}.
+     * Gets the notification for the given identifier
      *
-     * @return The message or <code>null</code>, if nothing was provided
+     * @param id The id
+     * @return The type or <code>null</code> if the identifier is invalid
      */
-    String getMessage();
+    public static NotificationType forId(String id) {
+        for (NotificationType type : NotificationType.values()) {
+            if (type.getId().equals(id)) {
+                return type;
+            }
+        }
 
-    /**
-     * Get the id of the user something is shared to
-     *
-     * @return The user ID
-     */
-    int getTargetUserID();
-
-    /**
-     * Returns whether this notification is about the first share targeting a new guest user.
-     *
-     * @return <code>true</code> if a new guest was created and the notification is about the initial share, else <code>false</code>
-     */
-    boolean isInitialShare();
+        return null;
+    }
 
 }

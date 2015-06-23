@@ -69,6 +69,7 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.DefaultRequestContext;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -149,8 +150,7 @@ public class PasswordResetServlet extends HttpServlet {
                  * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
                  */
                 ShareNotificationService shareNotificationService = ShareServiceLookup.getService(ShareNotificationService.class);
-                String protocol = com.openexchange.tools.servlet.http.Tools.getProtocol(request);
-                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, token, request.getServerName(), protocol, hash);
+                shareNotificationService.sendPasswordResetConfirmationNotification(Transport.MAIL, guestShare, token, hash, DefaultRequestContext.newInstance(request, contextID, guestID));
 
                 /*
                  * Redirect after notification was sent.

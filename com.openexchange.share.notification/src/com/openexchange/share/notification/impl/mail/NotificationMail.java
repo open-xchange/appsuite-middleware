@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.notification.mail.impl;
+package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.StringWriter;
@@ -72,7 +72,7 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.notification.impl.ShareNotifyExceptionCodes;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 

@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Locale;
+import com.openexchange.share.notification.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**

@@ -51,15 +51,11 @@ package com.openexchange.share.notification;
 
 import java.util.List;
 import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
-
-
-
 
 /**
  * A service to notify arbitrary recipients about available shares.
@@ -77,28 +73,27 @@ public interface ShareNotificationService {
     }
 
     /**
+     * Sends notifications about one or more created shares to multiple recipients.
+     *
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param shares A map from {@link ShareRecipient} to a list of {@link ShareInfos} iow. the recipients of the notifications and what they should be notified about
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param session The session of the notifying user
+     * @param requestContext The request context
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
+    List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> shares, String message, Session session, RequestContext requestContext);
+
+    /**
      * Send a notification mail that requests a confirmation for a requested password reset from the user.
      *
      * @param transport The type of {@link Transport} to use when sending notifications
      * @param guestShare The guest share
      * @param shareToken The current share token
-     * @param requestHostname The hostname to use for link generation
-     * @param protocol The protocol to use for link generation
-     * @param hash The password hash
+     * @param confirmToken The confirm token to be part of the resulting link
+     * @param requestContext The request context
      * @throws OXException
      */
-    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) throws OXException;
-
-    /**
-     * Sends notifications about one or more created shares to multiple guest user recipients.
-     *
-     * @param transport The type of {@link Transport} to use when sending notifications
-     * @param shares A map from {@link ShareRecipient} to a list of {@link ShareInfos} iow. the recipients of the notifications and what they should be notified about
-     * @param message The (optional) additional message for the notification
-     * @param session The session of the notifying user
-     * @param requestData Data of the underlying servlet request
-     * @return Any exceptions occurred during notification, or an empty list if all was fine
-     */
-    public List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> shares, String message, ServerSession session, AJAXRequestData requestData);
+    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String confirmToken, RequestContext requestContext) throws OXException;
 
 }

@@ -47,30 +47,71 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
+
+import java.util.Locale;
+import com.openexchange.share.notification.RequestContext;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * A {@link LinkProvider} is used to build the hyperlinks that are contained in notification messages.
+ * A {@link ShareNotification} encapsulates all information necessary to notify
+ * the according recipient about a share and provide her a link to access that share.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface LinkProvider {
+public interface ShareNotification<T> {
 
     /**
-     * Gets the URL to the share the recipient is notified about.
+     * Gets the transport that shall be used to deliver this notification.
      *
-     * @return The URL
+     * @return The {@link Transport}, never <code>null</code>
      */
-    String getShareUrl();
+    Transport getTransport();
 
     /**
-     * Gets the URL to confirm to reset a guest's password
+     * Gets the type of this notification (e.g. "a share has been created").
      *
-     * @param confirm The uuid to confirm
-     * @return The URL
+     * @return The {@link NotificationType}, never <code>null</code>
      */
-    String getPasswordResetConfirmUrl(String confirm);
+    NotificationType getType();
+
+    /**
+     * Gets the transport information used to notify the recipient.
+     *
+     * @return The transport information, never <code>null</code>
+     */
+    T getTransportInfo();
+
+    /**
+     * Gets the {@link LinkProvider} used for obtaining necessary URLs that are
+     * part of the notification messages.
+     *
+     * @return The provider, never <code>null</code>
+     */
+    LinkProvider getLinkProvider();
+
+    /**
+     * Gets the ID of the context where the share is located.
+     *
+     * @return The context ID
+     */
+    int getContextID();
+
+    /**
+     * Gets the locale used to translate the notification message before it is sent out.
+     *
+     * @return The locale
+     */
+    Locale getLocale();
+
+    /**
+     * Gets context information about the HTTP request that led to the generation of this
+     * notification.
+     *
+     * @return The request context
+     */
+    RequestContext getRequestContext();
 
 }

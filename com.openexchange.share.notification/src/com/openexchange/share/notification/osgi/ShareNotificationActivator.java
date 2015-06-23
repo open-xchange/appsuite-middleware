@@ -12,10 +12,10 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.impl.DefaultNotificationService;
-import com.openexchange.share.notification.mail.impl.MailNotificationHandler;
+import com.openexchange.share.notification.impl.ShareNotificationHandler;
+import com.openexchange.share.notification.impl.mail.MailNotificationHandler;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.notification.mail.impl;
+package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.io.UnsupportedEncodingException;
@@ -89,10 +89,9 @@ import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetProxyType;
-import com.openexchange.share.notification.ShareCreatedNotification;
 import com.openexchange.share.notification.impl.NotificationStrings;
+import com.openexchange.share.notification.impl.ShareCreatedNotification;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link ShareCreatedMail}
@@ -114,6 +113,7 @@ public class ShareCreatedMail extends NotificationMail {
     }
 
     private static class CollectVarsData {
+
         ShareCreatedNotification<InternetAddress> notification;
         User sharingUser;
         User targetUser;
@@ -180,13 +180,14 @@ public class ShareCreatedMail extends NotificationMail {
         mailData.context = context;
         mailData.transportProvider = transportProvider;
         mailData.mailHeaders = new HashMap<>(5);
-        mailData.mailHeaders.put("X-Open-Xchange-Share-Type", "share-created");
+        mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
         mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getLinkProvider().getShareUrl());
         return new ShareCreatedMail(mailData);
     }
 
     /**
      * Prepares a mapping from template keywords to actual textual values that will be used during template rendering.
+     *
      * @param data
      *
      * @param data.notification The {@link ShareCreatedNotification} containing infos about the created share
@@ -205,7 +206,7 @@ public class ShareCreatedMail extends NotificationMail {
 
         if (shareTargets.size() > 1) {
             int count = shareTargets.size();
-            if(data.targetProxyTypes.size() > 1) {//multiple shares of different types
+            if (data.targetProxyTypes.size() > 1) {//multiple shares of different types
                 if (hasMessage) {
                     vars.put(HAS_SHARED_ITEMS, String.format(data.translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count));
                 } else {
@@ -227,12 +228,12 @@ public class ShareCreatedMail extends NotificationMail {
             addViewItemsToVars(vars, targetProxyType, data.translator, false, shareUrl);
         }
 
-        if(hasMessage) {
+        if (hasMessage) {
             vars.put(USER_MESSAGE, data.notification.getMessage());
         }
 
         Date expiryDate = data.notification.getShareTargets().iterator().next().getExpiryDate();
-        if(data.targetUser.isGuest() &&  expiryDate != null) { // no expiry for internal users yet
+        if (data.targetUser.isGuest() && expiryDate != null) { // no expiry for internal users yet
             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, data.targetUser.getLocale());
             Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(data.targetUser.getTimeZone()).getOffset(expiryDate.getTime()));
             vars.put(WILL_EXPIRE, String.format(data.translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
@@ -276,37 +277,36 @@ public class ShareCreatedMail extends NotificationMail {
     }
 
     private static Map<String, Object> addSharedItemsToVars(Map<String, Object> vars, TargetProxyType targetProxyType, boolean hasMessage, Translator translator, String fullName, String email, int count) {
-        if(DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES), fullName , email , count));
-                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-                }
+        if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE), fullName, email, count));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_IMAGES), fullName, email, count));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+            }
 
-        } else if(DriveTargetProxyType.FILE.equals(targetProxyType)) {
-
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES), fullName , email , count));
-                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-                }
-        }  else if(DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName , email , count));
-                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-                }
+        } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE), fullName, email, count));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FILES), fullName, email, count));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+            }
+        } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS_AND_MESSAGE), fullName, email, count));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_FOLDERS), fullName, email, count));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+            }
         } else {
             //fall back to item for other types
-                if(hasMessage) {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName , email , count));
-                } else {
-                    vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName , email , count));
-                    vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
-                }
+            if (hasMessage) {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE), fullName, email, count));
+            } else {
+                vars.put(HAS_SHARED_ITEMS, String.format(translator.translate(NotificationStrings.HAS_SHARED_ITEMS), fullName, email, count));
+                vars.put(PLEASE_CLICK, translator.translate(NotificationStrings.PLEASE_CLICK_THEM));
+            }
         }
         return vars;
     }
@@ -378,13 +378,13 @@ public class ShareCreatedMail extends NotificationMail {
         String fullName = data.shareOwnerName;
         int count = data.notification.getShareTargets().size();
         if (count > 1 && data.targetProxyTypes.size() > 1) {
-            if(causedGuestCreation) {
+            if (causedGuestCreation) {
                 return String.format(data.translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName);
             } else {
                 return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName, count);
             }
         } else {
-            if(causedGuestCreation) {
+            if (causedGuestCreation) {
                 return String.format(data.translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName);
             } else {
                 ShareTarget shareTarget = data.notification.getShareTargets().get(0);
@@ -425,7 +425,7 @@ public class ShareCreatedMail extends NotificationMail {
         String templateName = null;
         ConfigView configView = configViewFactory.getView(notification.getSession().getUserId(), notification.getSession().getContextId());
         ComposedConfigProperty<String> templateNameProperty = configView.property("com.openexchange.share.create.mail.tmpl", String.class);
-        if(templateNameProperty.isDefined()) {
+        if (templateNameProperty.isDefined()) {
             templateName = templateNameProperty.get();
         } else {
             templateName = configService.getProperty("com.openexchange.share.create.mail.tmpl", "notify.share.create.mail.html.tmpl");
