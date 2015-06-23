@@ -61,7 +61,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -117,7 +116,6 @@ public class ShareCreatedMail extends NotificationMail {
 
         Translator translator;
         String shareOwnerName;
-        ServerConfig serverConfig;
         Set<TargetProxyType> targetProxyTypes;
         HashMap<ShareTarget, TargetProxy> targetProxies;
     }
@@ -129,16 +127,11 @@ public class ShareCreatedMail extends NotificationMail {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
         ConfigurationService configService = requireService(ConfigurationService.class, services);
-        ConfigViewFactory configViewFactory = requireService(ConfigViewFactory.class, services);
 
         Context context = contextService.getContext(notification.getContextID());
         User sharingUser = userService.getUser(notification.getSession().getUserId(), context);
         User targetUser = userService.getUser(notification.getTargetUserID(), context);
         Translator translator = translatorFactory.translatorFor(targetUser.getLocale());
-        ServerConfig serverConfig = serverConfigService.getServerConfig(
-            notification.getRequestContext().getHostname(),
-            targetUser.getId(),
-            context.getContextId());
 
         List<ShareTarget> shareTargets = notification.getShareTargets();
         HashMap<ShareTarget, TargetProxy> targetProxies = new HashMap<>(shareTargets.size());
@@ -156,10 +149,13 @@ public class ShareCreatedMail extends NotificationMail {
         data.targetUser = targetUser;
         data.translator = translator;
         data.shareOwnerName = FullNameBuilder.buildFullName(sharingUser, translator);
-        data.serverConfig = serverConfig;
         data.targetProxies = targetProxies;
         data.targetProxyTypes = targetProxyTypes;
 
+        ServerConfig serverConfig = serverConfigService.getServerConfig(
+            notification.getRequestContext().getHostname(),
+            targetUser.getId(),
+            context.getContextId());
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
         BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
         Map<String, Object> vars = prepareShareCreatedVars(data);
@@ -369,49 +365,39 @@ public class ShareCreatedMail extends NotificationMail {
     }
 
     private static String determineSubject(CollectVarsData data) {
-        boolean causedGuestCreation = data.notification.isInitialShare();
-        String productName = data.serverConfig.getProductName();
         String fullName = data.shareOwnerName;
         int count = data.notification.getShareTargets().size();
         if (count > 1 && data.targetProxyTypes.size() > 1) {
-            if (causedGuestCreation) {
-                return String.format(data.translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName);
-            } else {
-                return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName, count);
-            }
+            return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName, count);
         } else {
-            if (causedGuestCreation) {
-                return String.format(data.translator.translate(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT), fullName, productName);
-            } else {
-                ShareTarget shareTarget = data.notification.getShareTargets().get(0);
-                TargetProxy targetProxy = data.targetProxies.get(shareTarget);
-                TargetProxyType targetProxyType = targetProxy.getProxyType();
-                String itemName = targetProxy.getTitle();
-                if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
-                    if (count == 1) {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE), fullName, itemName);
-                    } else {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), fullName, count);
-                    }
-                } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
-                    if (count == 1) {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FILE), fullName, itemName);
-                    } else {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FILES), fullName, count);
-                    }
-                } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
-                    if (count == 1) {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER), fullName, itemName);
-                    } else {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS), fullName, count);
-                    }
+            ShareTarget shareTarget = data.notification.getShareTargets().get(0);
+            TargetProxy targetProxy = data.targetProxies.get(shareTarget);
+            TargetProxyType targetProxyType = targetProxy.getProxyType();
+            String itemName = targetProxy.getTitle();
+            if (DriveTargetProxyType.IMAGE.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGE), fullName, itemName);
                 } else {
-                    //fall back to item for other types
-                    if (count == 1) {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEM), fullName, itemName);
-                    } else {
-                        return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName);
-                    }
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_IMAGES), fullName, count);
+                }
+            } else if (DriveTargetProxyType.FILE.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FILE), fullName, itemName);
+                } else {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FILES), fullName, count);
+                }
+            } else if (DriveTargetProxyType.FOLDER.equals(targetProxyType)) {
+                if (count == 1) {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDER), fullName, itemName);
+                } else {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_FOLDERS), fullName, count);
+                }
+            } else {
+                //fall back to item for other types
+                if (count == 1) {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEM), fullName, itemName);
+                } else {
+                    return String.format(data.translator.translate(NotificationStrings.SUBJECT_SHARED_ITEMS), fullName);
                 }
             }
         }
