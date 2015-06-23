@@ -1,3 +1,7 @@
+* 2015-06-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug #38822: Don't overwrite displayname of distribution list member if not set in referenced contact
+
 * 2015-06-22 - thorben.betten@open-xchange.com
 
  - Fix for bug 38030: Send appropriate event for standard sent folder when appending sent message
