@@ -194,7 +194,15 @@ public class DefaultMailMappingService implements MailResolver {
 
     private ResolvedMail lookUpInContext(String mail, int contextId, UserService users, ContextService contexts) throws OXException {
         Context context = contexts.getContext(contextId);
-        User found = users.searchUser(mail, context, true);
+        User found;
+        try {
+            found = users.searchUser(mail, context, true);
+        } catch (OXException e) {
+            if (!e.equalsCode(14, "USR")) {
+                throw e;
+            }
+            found = null;
+        }
         if (found == null) {
             return null;
         }
