@@ -54,6 +54,7 @@ import org.apache.commons.lang.Validate;
 import com.openexchange.contact.vcard.storage.VCardStorageExceptionCodes;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -74,18 +75,13 @@ public class DefaultVCardStorageService implements VCardStorageService {
      * {@inheritDoc}
      */
     @Override
-    public String saveVCard(InputStream file, int contextId) {
+    public String saveVCard(InputStream file, int contextId) throws OXException {
         Validate.notNull(file, "VCard InputStream might not be null!");
 
-        try {
-            SaveFileAction action = createFileAction(file, contextId);
-            action.perform();
-            String fileStorageID = action.getFileStorageID();
-            return fileStorageID;
-        } catch (OXException oxException) {
-            LOG.error("Error while creating the VCard in storage.", oxException);
-        }
-        return null;
+        SaveFileAction action = createFileAction(file, contextId);
+        action.perform();
+        String fileStorageID = action.getFileStorageID();
+        return fileStorageID;
     }
 
     protected SaveFileAction createFileAction(InputStream file, int contextId) throws OXException {
@@ -96,38 +92,29 @@ public class DefaultVCardStorageService implements VCardStorageService {
      * {@inheritDoc}
      */
     @Override
-    public InputStream getVCard(String identifier, int contextId) {
+    public InputStream getVCard(String identifier, int contextId) throws OXException {
         if (Strings.isEmpty(identifier)) {
             LOG.warn("Identifier to get VCard for is null. Cannot return VCard.");
             return null;
         }
-        try {
-            QuotaFileStorage fileStorage = getFileStorage(contextId);
-            InputStream vCard = fileStorage.getFile(identifier);
-            return vCard;
-        } catch (OXException oxException) {
-            LOG.warn("Error while retrieving VCard from storage.", oxException);
-        }
-        return null;
+
+        QuotaFileStorage fileStorage = getFileStorage(contextId);
+        InputStream vCard = fileStorage.getFile(identifier);
+        return vCard;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean deleteVCard(String identifier, int contextId) {
+    public boolean deleteVCard(String identifier, int contextId) throws OXException {
         if (Strings.isEmpty(identifier)) {
             LOG.warn("Identifier for removing stored VCard not available.");
             return false;
         }
 
-        try {
-            QuotaFileStorage fileStorage = getFileStorage(contextId);
-            return fileStorage.deleteFile(identifier);
-        } catch (OXException oxException) {
-            LOG.warn("Error while deleting the file with identifier " + identifier, oxException);
-        }
-        return false;
+        QuotaFileStorage fileStorage = getFileStorage(contextId);
+        return fileStorage.deleteFile(identifier);
     }
 
     /**

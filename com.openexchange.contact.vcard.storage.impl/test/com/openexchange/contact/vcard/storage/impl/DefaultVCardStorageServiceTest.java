@@ -49,7 +49,11 @@
 
 package com.openexchange.contact.vcard.storage.impl;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
@@ -119,12 +123,11 @@ public class DefaultVCardStorageServiceTest {
         PowerMockito.when(quotaFileStorageService.getQuotaFileStorage(Matchers.anyInt())).thenReturn(quotaFileStorage);
     }
 
-    @Test
-    public void testSaveVCard_errorOccured_returnNull() {
+    @Test(expected = OXException.class)
+    public void testSaveVCard_errorOccured_throwException() throws OXException {
         PowerMockito.when(FileStorages.getQuotaFileStorageService()).thenReturn(null);
 
-        String vCardId = service.saveVCard(IOUtils.toInputStream(vCard), CONTEXT_ID);
-        assertNull(vCardId);
+        service.saveVCard(IOUtils.toInputStream(vCard), CONTEXT_ID);
     }
 
     @Test
@@ -139,12 +142,13 @@ public class DefaultVCardStorageServiceTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testSaveVCard_vCardNull_doNotPersist() {
+    public void testSaveVCard_vCardNull_doNotPersist() throws OXException
+    {
         service.saveVCard(null, CONTEXT_ID);
     }
 
     @Test
-    public void testDeleteVCard_vCardIdNull_doNothingAndReturnFalse() {
+    public void testDeleteVCard_vCardIdNull_doNothingAndReturnFalse() throws OXException {
         boolean deleteVCard = service.deleteVCard(null, CONTEXT_ID);
         assertFalse(deleteVCard);
     }
@@ -165,16 +169,15 @@ public class DefaultVCardStorageServiceTest {
         assertTrue(deleteVCard);
     }
 
-    @Test
-    public void testDeleteVCard_fileStorageThrowsException_returnFalse() throws OXException {
+    @Test(expected = OXException.class)
+    public void testDeleteVCard_fileStorageThrowsException_rethrow() throws OXException {
         Mockito.doThrow(new OXException(77)).when(quotaFileStorage).deleteFile(Matchers.anyString());
 
-        boolean deleteVCard = service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
-        assertFalse(deleteVCard);
+        service.deleteVCard(FILE_STORAGE_ID, CONTEXT_ID);
     }
 
     @Test
-    public void testGetVCard_identifierNull_returnNull() {
+    public void testGetVCard_identifierNull_returnNull() throws OXException {
         InputStream lVCard = service.getVCard(null, CONTEXT_ID);
         assertNull(lVCard);
     }
@@ -186,12 +189,11 @@ public class DefaultVCardStorageServiceTest {
         assertNull(lVCard);
     }
 
-    @Test
-    public void testGetVCard_fileStorageThrowsException_returnNull() throws OXException {
+    @Test(expected = OXException.class)
+    public void testGetVCard_fileStorageThrowsException_rethrow() throws OXException {
         Mockito.doThrow(new OXException(77)).when(quotaFileStorage).getFile(Matchers.anyString());
 
-        InputStream lVCard = service.getVCard(FILE_STORAGE_ID, CONTEXT_ID);
-        assertNull(lVCard);
+        service.getVCard(FILE_STORAGE_ID, CONTEXT_ID);
     }
 
     @Test

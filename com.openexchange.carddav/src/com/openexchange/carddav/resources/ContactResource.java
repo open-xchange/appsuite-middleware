@@ -346,7 +346,11 @@ public class ContactResource extends CardDAVResource {
         if (null != vCardID) {
             VCardStorageService vCardStorage = factory.getVCardStorageService();
             if (null != vCardStorage) {
-                originalVCard = vCardStorage.getVCard(vCardID, factory.getSession().getContextId());
+                try {
+                    originalVCard = vCardStorage.getVCard(vCardID, factory.getSession().getContextId());
+                } catch (OXException oxException) {
+                    LOG.warn("Error while retrieving VCard with id {} in context {} from storage.", vCardID, factory.getSession().getContextId(), oxException);
+                }
             }
         }
         /*
@@ -371,7 +375,7 @@ public class ContactResource extends CardDAVResource {
      *
      * @param e the exception to handle
      * @return <code>true</code>, if the operation should be retried,
-     * <code>false</code>, otherwise.
+     *         <code>false</code>, otherwise.
      * @throws WebdavProtocolException
      */
     private boolean handle(OXException e) throws WebdavProtocolException {
@@ -451,9 +455,12 @@ public class ContactResource extends CardDAVResource {
         if (null != vCardID) {
             VCardStorageService vCardStorage = factory.getVCardStorageService();
             if (null != vCardStorage) {
-                vCardStorage.deleteVCard(vCardID, factory.getSession().getContextId());
+                try {
+                    vCardStorage.deleteVCard(vCardID, factory.getSession().getContextId());
+                } catch (OXException oxException) {
+                    LOG.warn("Error while deleting VCard with id {} in context {} from storage.", vCardID, factory.getSession().getContextId(), oxException);
+                }
             }
         }
     }
-
 }

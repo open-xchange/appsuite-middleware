@@ -53,6 +53,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.event.CommonEvent;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 
@@ -65,6 +66,8 @@ import com.openexchange.java.Strings;
 public class VCardCleaner implements EventHandler {
 
     public static final String EVENT_TOPIC = "com/openexchange/groupware/contact/delete";
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardCleaner.class);
 
     private final VCardStorageService vCardStorage;
 
@@ -87,12 +90,15 @@ public class VCardCleaner implements EventHandler {
                 Contact contact = (Contact) commonEvent.getActionObj();
                 if (null != contact) {
                     String vCardID = contact.getVCardId();
-                    if (false == Strings.isEmpty(vCardID)) {
-                        vCardStorage.deleteVCard(vCardID, contextID);
+                    if (!Strings.isEmpty(vCardID)) {
+                        try {
+                            vCardStorage.deleteVCard(vCardID, contextID);
+                        } catch (OXException oxException) {
+                            LOG.warn("Error while deleting the VCard with id {} in context {} from storage.", vCardID, contextID, oxException);
+                        }
                     }
                 }
             }
         }
     }
-
 }

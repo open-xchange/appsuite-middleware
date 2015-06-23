@@ -50,6 +50,7 @@
 package com.openexchange.contact.vcard.storage;
 
 import java.io.InputStream;
+import com.openexchange.exception.OXException;
 
 /**
  * Handles storing of VCards for contacts
@@ -64,18 +65,20 @@ public interface VCardStorageService {
      *
      * @param file The stream to save as a file
      * @param contextId The context identifier
-     * @return The VCard's identifier or <code>null</code> if an error occurred
+     * @return The VCard's identifier
+     * @throws OXException
      */
-    String saveVCard(InputStream file, int contextId);
+    String saveVCard(InputStream file, int contextId) throws OXException;
 
     /**
      * Gets denoted VCard content as a stream.
      *
      * @param identifier The VCard identifier
      * @param contextId The context identifier
-     * @return The content stream or <code>null</code> if an error occurred
+     * @return The content stream returned from the file storage
+     * @throws OXException
      */
-    InputStream getVCard(String identifier, int contextId);
+    InputStream getVCard(String identifier, int contextId) throws OXException;
 
     /**
      * Deletes denoted VCard.
@@ -83,6 +86,7 @@ public interface VCardStorageService {
      * @param identifier The VCard identifier
      * @param contextId The context identifier
      * @return <code>true</code> if deletion was successful; otherwise <code>false</code>
+     * @throws OXException
      */
-    boolean deleteVCard(String identifier, int contextId);
+    boolean deleteVCard(String identifier, int contextId) throws OXException;
 }
