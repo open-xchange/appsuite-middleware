@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,31 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.internal;
 
-import java.io.Closeable;
-import java.io.InputStream;
-import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link VCardImport}
+ * {@link VCardExceptionMessages}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class VCardExceptionMessages implements LocalizableStrings {
+
+    public static final String NO_VCARD_FOUND_MSG = "No vCard could be found in the supplied file. Please use a valid vCard file and try again.";
+
+    public static final String VALIDATION_FAILED_MSG = "Validation failed for property \"%1$s\": %2$s";
+
+    public static final String PARSER_ERROR_MSG = "Error reading vCard: %1$s";
+
+    public static final String CONVERSION_FAILED_MSG = "Conversion failed for property \"%1$s\": %2$s";
+
+    public static final String MAXIMUM_SIZE_EXCEEDED_MSG = "The vCard exceeds the maximum allowed size and can't be imported.";
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link VCardExceptionMessages}.
      */
-    Contact getContact();
-
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
-
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
-
+    private VCardExceptionMessages() {
+        super();
+    }
 }

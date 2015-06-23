@@ -47,51 +47,29 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
-import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.exception.OXException;
+import java.util.Date;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.property.Anniversary;
 
 /**
- * {@link VCardImport}
+ * {@link AnniversaryMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class AnniversaryMapping extends AbstractDateMapping<Anniversary> {
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link AnniversaryMapping}.
      */
-    Contact getContact();
+    public AnniversaryMapping() {
+        super(Contact.ANNIVERSARY, Anniversary.class);
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
-
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    protected Anniversary newProperty() {
+        return new Anniversary((Date) null);
+    }
 
 }

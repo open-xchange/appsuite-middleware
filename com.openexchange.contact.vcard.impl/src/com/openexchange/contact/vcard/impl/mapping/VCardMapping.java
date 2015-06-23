@@ -47,51 +47,39 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
 
 /**
- * {@link VCardImport}
+ * {@link VCardMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public interface VCardMapping {
 
     /**
-     * Gets the imported contact.
+     * Exports the mapped contact attributes into the supplied vCard.
      *
-     * @return The imported contact
+     * @param contact The contact to export
+     * @param vCard The target vCard
+     * @param parameters Further options to use, or <code>null</code> to use to the default options
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      */
-    Contact getContact();
+    void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings);
 
     /**
-     * Gets a list of parser- and conversion warnings.
+     * Imports the mapped vCard properties into the supplied contact
      *
-     * @return The warnings
+     * @param vCard The vCard to import
+     * @param contact The target contact
+     * @param parameters Further options to use, or <code>null</code> to use to the default options
+     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
      */
-    List<OXException> getWarnings();
-
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings);
 
 }

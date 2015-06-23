@@ -47,51 +47,42 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
+import ezvcard.property.Nickname;
 
 /**
- * {@link VCardImport}
+ * {@link NicknameMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class NicknameMapping extends SimpleMapping<Nickname> {
 
-    /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
-     */
-    Contact getContact();
+    public NicknameMapping() {
+        super(Contact.NICKNAME, Nickname.class);
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    protected void exportProperty(Contact contact, Nickname property, List<OXException> warnings) {
+        property.getValues().clear();
+        property.getValues().addAll(Arrays.asList(Strings.splitByComma(contact.getNickname())));
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    protected Nickname exportProperty(Contact contact, List<OXException> warnings) {
+        Nickname property = new Nickname();
+        exportProperty(contact, property, warnings);
+        return property;
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    protected void importProperty(Nickname property, Contact contact, List<OXException> warnings) {
+        contact.setNickname(Strings.join(property.getValues(), ","));
+    }
 
 }

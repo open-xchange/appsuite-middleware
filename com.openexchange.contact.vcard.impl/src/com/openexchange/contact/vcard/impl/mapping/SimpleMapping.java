@@ -47,51 +47,69 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
+import ezvcard.property.VCardProperty;
 
 /**
- * {@link VCardImport}
+ * {@link SimpleMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public abstract class SimpleMapping<T extends VCardProperty> extends AbstractMapping {
+
+    protected final int field;
+    protected final Class<T> propertyClass;
 
     /**
-     * Gets the imported contact.
+     * Initializes a new {@link SimpleMapping}.
      *
-     * @return The imported contact
+     * @param field The mapped contact column identifier
+     * @param propertyClass The vCard property class
      */
-    Contact getContact();
+    protected SimpleMapping(int field, Class<T> propertyClass) {
+        super();
+        this.field = field;
+        this.propertyClass = propertyClass;
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    protected abstract void exportProperty(Contact contact, T property, List<OXException> warnings);
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    protected abstract T exportProperty(Contact contact, List<OXException> warnings);
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    protected abstract void importProperty(T property, Contact contact, List<OXException> warnings);
+
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        T existingProperty = getFirstProperty(vCard);
+        if (has(contact, field)) {
+            if (null == existingProperty) {
+                vCard.addProperty(exportProperty(contact, warnings));
+            } else {
+                exportProperty(contact, existingProperty, warnings);
+            }
+        } else if (null != existingProperty) {
+            vCard.removeProperty(existingProperty);
+        }
+    }
+
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
+        T existingProperty = getFirstProperty(vCard);
+        if (null == existingProperty) {
+            contact.set(field, null);
+        } else {
+            importProperty(existingProperty, contact, warnings);
+        }
+    }
+
+    protected T getFirstProperty(VCard vCard) {
+        return getFirstProperty(vCard.getProperties(propertyClass));
+    }
 
 }

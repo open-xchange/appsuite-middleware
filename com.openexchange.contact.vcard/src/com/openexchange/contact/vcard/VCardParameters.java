@@ -52,7 +52,6 @@ package com.openexchange.contact.vcard;
 import java.awt.Dimension;
 import com.openexchange.session.Session;
 
-
 /**
  * {@link VCardParameters}
  *

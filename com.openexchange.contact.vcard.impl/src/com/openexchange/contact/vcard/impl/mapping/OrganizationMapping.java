@@ -47,51 +47,77 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Strings;
+import ezvcard.VCard;
+import ezvcard.property.Organization;
 
 /**
- * {@link VCardImport}
+ * {@link OrganizationMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class OrganizationMapping extends AbstractMapping {
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link OrganizationMapping}.
      */
-    Contact getContact();
+    public OrganizationMapping() {
+        super();
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        Organization property = vCard.getOrganization();
+        if (containsOrganization(contact)) {
+            if (null == property) {
+                property = new Organization();
+                vCard.addOrganization(property);
+            } else {
+                property.getValues().clear();
+            }
+            property.addValue(contact.getCompany());
+            property.addValue(contact.getDepartment());
+            if (contact.containsBranches() && false == Strings.isEmpty(contact.getBranches())) {
+                for (String branch : Strings.splitByComma(contact.getBranches())) {
+                    property.addValue(branch);
+                }
+            }
+        } else if (null != property) {
+            vCard.removeProperty(property);
+        }
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
+        String company = null;
+        String department = null;
+        String branches = null;
+        Organization property = vCard.getOrganization();
+        if (null != property) {
+            List<String> values = property.getValues();
+            if (null != values && 0 < values.size()) {
+                company = values.get(0);
+                if (1 < values.size()) {
+                    department = values.get(1);
+                    if (2 < values.size()) {
+                        branches = Strings.join(values.subList(2, values.size()), ", ");
+                    }
+                }
+            }
+        }
+        contact.setCompany(company);
+        contact.setDepartment(department);
+        contact.setBranches(branches);
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    private static boolean containsOrganization(Contact contact) {
+        return hasOneOf(contact, Contact.COMPANY, Contact.BRANCHES, Contact.DEPARTMENT);
+    }
 
 }

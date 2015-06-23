@@ -49,7 +49,6 @@
 
 package com.openexchange.contact.vcard;
 
-
 /**
  * {@link VCardVersion} - An enumeration of VCard versions.
  *

@@ -47,51 +47,69 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.property.DateOrTimeProperty;
 
 /**
- * {@link VCardImport}
+ * {@link AbstractDateMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public abstract class AbstractDateMapping<T extends DateOrTimeProperty> extends SimpleMapping<T> {
 
-    /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
-     */
-    Contact getContact();
+    protected AbstractDateMapping(int field, Class<T> propertyClass) {
+        super(field, propertyClass);
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    protected abstract T newProperty();
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    protected T exportProperty(Contact contact, List<OXException> warnings) {
+        T property = newProperty();
+        exportProperty(contact, property, warnings);
+        return property;
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    protected void exportProperty(Contact contact, T property, List<OXException> warnings) {
+        Object value = contact.get(field);
+        if (null != value && Date.class.isInstance(value)) {
+            /*
+             * adjust date for serialization through ez-vcard (that uses local timezone)
+             */
+            Date adjustedDate = new Date(subtractTimeZoneOffset(((Date) value).getTime(), TimeZone.getDefault()));
+            property.setDate(adjustedDate, false);
+        } else {
+            property.setDate(null, false);
+        }
+    }
+
+    @Override
+    protected void importProperty(T property, Contact contact, List<OXException> warnings) {
+        Date value = property.getDate();
+        if (null == value) {
+            contact.set(field, null);
+        } else {
+            /*
+             * adjust date after deserialization through ez-vcard (that uses local timezone)
+             */
+            Date adjustedDate = new Date(addTimeZoneOffset(value.getTime(), TimeZone.getDefault()));
+            contact.set(field, adjustedDate);
+        }
+    }
+
+    private static long addTimeZoneOffset(long date, TimeZone timeZone) {
+        return null == timeZone ? date : date + timeZone.getOffset(date);
+    }
+
+    private static long subtractTimeZoneOffset(long date, TimeZone timeZone) {
+        return null == timeZone ? date : date - timeZone.getOffset(date);
+    }
 
 }

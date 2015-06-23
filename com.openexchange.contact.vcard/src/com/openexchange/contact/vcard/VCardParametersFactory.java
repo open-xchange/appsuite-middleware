@@ -51,7 +51,6 @@ package com.openexchange.contact.vcard;
 
 import com.openexchange.session.Session;
 
-
 /**
  * {@link VCardParametersFactory}
  *

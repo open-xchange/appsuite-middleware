@@ -47,51 +47,64 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
+import ezvcard.property.RawProperty;
 
 /**
- * {@link VCardImport}
+ * {@link ColorLabelMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class ColorLabelMapping extends AbstractMapping {
+
+    static final String X_OX_COLOR_LABEL = "X-OX-COLOR-LABEL";
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link ColorLabelMapping}.
      */
-    Contact getContact();
+    public ColorLabelMapping() {
+        super();
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        RawProperty property = getFirstProperty(vCard.getExtendedProperties(X_OX_COLOR_LABEL));
+        int colorLabel = contact.getLabel();
+        if (Contact.LABEL_NONE != colorLabel) {
+            if (null == property) {
+                vCard.addExtendedProperty(X_OX_COLOR_LABEL, String.valueOf(colorLabel));
+            } else {
+                property.setValue(String.valueOf(colorLabel));
+            }
+        } else if (null != property) {
+            vCard.removeProperty(property);
+        }
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
-
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
+        RawProperty property = getFirstProperty(vCard.getExtendedProperties(X_OX_COLOR_LABEL));
+        if (null != property) {
+            int colorLabel;
+            try {
+                colorLabel = Integer.parseInt(property.getValue());
+            } catch (NumberFormatException e) {
+                addConversionWarning(warnings, e, X_OX_COLOR_LABEL, e.getMessage());
+                return;
+            }
+            if (Contact.LABEL_1 <= colorLabel && colorLabel <= Contact.LABEL_10) {
+                contact.setLabel(colorLabel);
+            } else {
+                addConversionWarning(warnings, X_OX_COLOR_LABEL, "Ignoring illegal color label: " + colorLabel);
+            }
+        } else {
+            contact.setLabel(Contact.LABEL_NONE);
+        }
+    }
 }

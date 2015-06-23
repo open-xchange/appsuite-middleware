@@ -47,51 +47,42 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.version.Version;
+import ezvcard.VCard;
+import ezvcard.property.ProductId;
+import ezvcard.property.RawProperty;
+
 
 /**
- * {@link VCardImport}
+ * {@link ProductIdMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class ProductIdMapping extends AbstractMapping {
 
-    /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
-     */
-    Contact getContact();
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        vCard.removeProperties(ProductId.class);
+        vCard.addProperty(new RawProperty("PRODID", getValue()));
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
+        // nothing to do
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    private static String getValue() {
+        String versionString = Version.getInstance().optVersionString();
+        if (null == versionString) {
+            versionString = "<unknown version>";
+        }
+        return "-//" + Version.NAME + "//" + versionString + "//EN";
+    }
 
 }

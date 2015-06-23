@@ -47,51 +47,66 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
+import ezvcard.property.Classification;
 
 /**
- * {@link VCardImport}
+ * {@link ClassMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class ClassMapping extends SimpleMapping<Classification> {
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link ClassMapping}.
      */
-    Contact getContact();
+    public ClassMapping() {
+        super(Contact.PRIVATE_FLAG, Classification.class);
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    protected void exportProperty(Contact contact, Classification property, List<OXException> warnings) {
+        property.setValue(contact.getPrivateFlag() ? "PRIVATE" : "PUBLIC");
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    protected Classification exportProperty(Contact contact, List<OXException> warnings) {
+        return new Classification(contact.getPrivateFlag() ? "PRIVATE" : "PUBLIC");
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    protected void importProperty(Classification property, Contact contact, List<OXException> warnings) {
+        contact.setPrivateFlag("PRIVATE".equals(property.getValue()) || "CONFIDENTIAL".equals(property.getValue()));
+    }
+
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        Classification existingProperty = getFirstProperty(vCard);
+        if (contact.getPrivateFlag()) {
+            if (null == existingProperty) {
+                vCard.addProperty(exportProperty(contact, warnings));
+            } else {
+                exportProperty(contact, existingProperty, warnings);
+            }
+        } else if (null != existingProperty) {
+            vCard.removeProperty(existingProperty);
+        }
+    }
+
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameters, List<OXException> warnings) {
+        Classification existingProperty = getFirstProperty(vCard);
+        if (null == existingProperty) {
+            contact.setPrivateFlag(false);
+        } else {
+            importProperty(existingProperty, contact, warnings);
+        }
+    }
 
 }

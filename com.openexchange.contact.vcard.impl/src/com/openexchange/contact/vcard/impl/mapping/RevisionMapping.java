@@ -47,51 +47,39 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
+import ezvcard.property.Revision;
+
 
 /**
- * {@link VCardImport}
+ * {@link RevisionMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class RevisionMapping extends AbstractMapping {
 
-    /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
-     */
-    Contact getContact();
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        Revision property = vCard.getRevision();
+        if (null == property) {
+            vCard.setRevision(contact.getLastModified());
+        } else {
+            property.setValue(contact.getLastModified());
+        }
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
-
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters parameter, List<OXException> warnings) {
+        Revision revision = vCard.getRevision();
+        if (null != revision) {
+            contact.setLastModified(revision.getValue());
+        }
+    }
 
 }

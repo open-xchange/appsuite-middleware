@@ -47,51 +47,29 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
-import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.exception.OXException;
+import java.util.Date;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.property.Birthday;
 
 /**
- * {@link VCardImport}
+ * {@link BirthdayMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class BirthdayMapping extends AbstractDateMapping<Birthday> {
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link BirthdayMapping}.
      */
-    Contact getContact();
+    public BirthdayMapping() {
+        super(Contact.BIRTHDAY, Birthday.class);
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
-
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
-
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    protected Birthday newProperty() {
+        return new Birthday((Date) null);
+    }
 
 }

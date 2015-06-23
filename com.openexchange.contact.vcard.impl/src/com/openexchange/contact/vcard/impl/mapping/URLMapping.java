@@ -47,51 +47,37 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.property.Url;
 
 /**
- * {@link VCardImport}
+ * {@link URLMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class URLMapping extends SimpleMapping<Url> {
 
-    /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
-     */
-    Contact getContact();
+    public URLMapping() {
+        super(Contact.URL, Url.class);
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    protected void exportProperty(Contact contact, Url property, List<OXException> warnings) {
+        property.setValue(contact.getURL());
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    protected Url exportProperty(Contact contact, List<OXException> warnings) {
+        return new Url(contact.getURL());
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    protected void importProperty(Url property, Contact contact, List<OXException> warnings) {
+        contact.setURL(property.getValue());
+    }
 
 }

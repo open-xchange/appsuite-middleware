@@ -47,51 +47,57 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.internal;
 
-import java.io.Closeable;
 import java.io.InputStream;
 import java.util.List;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 
 /**
- * {@link VCardImport}
+ * {@link DefaultVCardExport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public class DefaultVCardExport implements VCardExport {
+
+    private final List<OXException> warnings;
+    private final ThresholdFileHolder vCardHolder;
 
     /**
-     * Gets the imported contact.
+     * Initializes a new {@link DefaultVCardExport}.
      *
-     * @return The imported contact
+     * @param vCardHolder A file holder storing the vCard
+     * @param warnings A list of parser- and conversion warnings
      */
-    Contact getContact();
+    public DefaultVCardExport(ThresholdFileHolder vCardHolder, List<OXException> warnings) {
+        super();
+        this.vCardHolder = vCardHolder;
+        this.warnings = warnings;
+    }
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    public IFileHolder getVCard() {
+        return vCardHolder;
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    public void close() {
+        Streams.close(vCardHolder);
+    }
+
+    @Override
+    public InputStream getClosingStream() throws OXException {
+        return vCardHolder.getClosingStream();
+    }
 
 }

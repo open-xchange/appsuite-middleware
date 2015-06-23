@@ -47,51 +47,63 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.mapping;
 
-import java.io.Closeable;
-import java.io.InputStream;
 import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import ezvcard.VCard;
+import ezvcard.property.RawProperty;
 
 /**
- * {@link VCardImport}
+ * {@link ExtendedPropertyMapping}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public abstract class ExtendedPropertyMapping extends SimpleMapping<RawProperty> {
 
-    /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
-     */
-    Contact getContact();
+    protected final String propertyName;
 
-    /**
-     * Gets a list of parser- and conversion warnings.
-     *
-     * @return The warnings
-     */
-    List<OXException> getWarnings();
+    protected ExtendedPropertyMapping(int field, String name) {
+        super(field, RawProperty.class);
+        this.propertyName = name;
+    }
 
-    /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
-     *
-     * @return The original vCard, or <code>null</code> if not available
-     */
-    IFileHolder getVCard();
+    @Override
+    protected RawProperty exportProperty(Contact contact, List<OXException> warnings) {
+        RawProperty property = new RawProperty(propertyName, null);
+        exportProperty(contact, property, warnings);
+        return property;
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    @Override
+    public void exportContact(Contact contact, VCard vCard, VCardParameters parameters, List<OXException> warnings) {
+        RawProperty existingProperty = getFirstProperty(vCard);
+        if (has(contact, field)) {
+            if (null == existingProperty) {
+                vCard.addProperty(exportProperty(contact, warnings));
+            } else {
+                exportProperty(contact, existingProperty, warnings);
+            }
+        } else if (null != existingProperty) {
+            vCard.removeProperty(existingProperty);
+        }
+    }
+
+    @Override
+    public void importVCard(VCard vCard, Contact contact, VCardParameters  parameters, List<OXException> warnings) {
+        RawProperty existingProperty = getFirstProperty(vCard);
+        if (null == existingProperty) {
+            contact.set(field, null);
+        } else {
+            importProperty(existingProperty, contact, warnings);
+        }
+    }
+
+    @Override
+    protected RawProperty getFirstProperty(VCard vCard) {
+        return getFirstProperty(vCard.getExtendedProperties(propertyName));
+    }
 
 }

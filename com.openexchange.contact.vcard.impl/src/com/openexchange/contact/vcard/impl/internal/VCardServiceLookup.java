@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,65 @@
  *
  */
 
-package com.openexchange.contact.vcard;
+package com.openexchange.contact.vcard.impl.internal;
 
-import java.io.Closeable;
-import java.io.InputStream;
-import java.util.List;
-import com.openexchange.ajax.fileholder.IFileHolder;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link VCardImport}
+ * {@link VCardServiceLookup}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public interface VCardImport extends Closeable {
+public final class VCardServiceLookup {
 
     /**
-     * Gets the imported contact.
-     *
-     * @return The imported contact
+     * Initializes a new {@link VCardServiceLookup}.
      */
-    Contact getContact();
+    private VCardServiceLookup() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
     /**
-     * Gets a list of parser- and conversion warnings.
+     * Gets the service look-up
      *
-     * @return The warnings
+     * @return The service look-up or <code>null</code>
      */
-    List<OXException> getWarnings();
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
     /**
-     * Gets a file holder storing the original vCard, or <code>null</code> if not available
+     * Sets the service look-up
      *
-     * @return The original vCard, or <code>null</code> if not available
+     * @param serviceLookup The service look-up or <code>null</code>
      */
-    IFileHolder getVCard();
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
-    /**
-     * Gets the input stream carrying the vCard contents.
-     * <p>
-     * Closing the stream will also {@link #close() close} this {@link VCardImport} instance.
-     *
-     * @return The input stream
-     */
-    InputStream getClosingStream() throws OXException;
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
+
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
 
 }
