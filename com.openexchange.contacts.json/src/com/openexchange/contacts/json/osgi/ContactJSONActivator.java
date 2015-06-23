@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONDataHandler;
@@ -109,6 +110,11 @@ public class ContactJSONActivator extends AJAXModuleActivator {
                 return capabilities.contains(Permission.CONTACTS.getCapabilityName());
             }
         });
+        /*
+         * track vCard storage service
+         */
+        track(VCardStorageService.class);
+        openTrackers();
     }
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
