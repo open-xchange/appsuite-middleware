@@ -98,7 +98,6 @@ public class VCardImportExportServletTest extends AbstractImportExportServletTes
             is = webRes.getInputStream();
             String resultingVCard = OXTestToolkit.readStreamAsString(is);
             String[] result = resultingVCard.split("\n");
-            System.out.println(resultingVCard);
             //finally: checking
             for (Entry<String, String> element : VCARD_ELEMENTS.entrySet()) {
                 assertTrue("Missing element: " + element.getKey(), resultingVCard.contains(element.getKey()));
