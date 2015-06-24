@@ -72,7 +72,6 @@ import com.openexchange.ajax.requesthandler.oauth.OAuthDispatcherServletTest;
     com.openexchange.i18n.tools.replacement.FormatLocalizedStringReplacementTest.class,
     com.openexchange.login.internal.LoginPerformerTest.class,
     com.openexchange.tools.collections.OXCollectionsTest.class,
-    com.openexchange.tools.versit.valuedefinitions.rfc2445.ListValueDefinitionTest.class,
     com.openexchange.tools.iterator.SearchIteratorDelegatorTest.class,
     com.openexchange.tools.net.URIParserTest.class,
     com.openexchange.mail.utils.MsisdnUtilityTest.class,
