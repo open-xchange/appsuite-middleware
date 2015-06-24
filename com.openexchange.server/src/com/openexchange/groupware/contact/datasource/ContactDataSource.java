@@ -52,15 +52,12 @@ package com.openexchange.groupware.contact.datasource;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_FOLDERID;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_ID;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardExport;
-import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.internal.VCardUtil;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
 import com.openexchange.conversion.DataExceptionCodes;
@@ -69,7 +66,6 @@ import com.openexchange.conversion.DataSource;
 import com.openexchange.conversion.SimpleData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Streams;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -137,7 +133,7 @@ public final class ContactDataSource implements DataSource {
          */
         final ByteArrayOutputStream sink = new UnsynchronizedByteArrayOutputStream(len << 12);
         for (final Contact contact : contacts) {
-            writeVCard2Stream(contact, sink, session);
+            VCardUtil.exportContact(contact, session, sink);
         }
         /*
          * Return data
@@ -154,41 +150,6 @@ public final class ContactDataSource implements DataSource {
         return new SimpleData<D>(
             (D) (InputStream.class.equals(type) ? new UnsynchronizedByteArrayInputStream(vcardBytes) : vcardBytes),
             properties);
-    }
-
-    /**
-     * Serializes the supplied contact as vCard and writes it to the output stream.
-     *
-     * @param contact The contact to serialize
-     * @param outputStream The target output stream
-     * @param session The session
-     */
-    private static void writeVCard2Stream(Contact contact, ByteArrayOutputStream outputStream, Session session) throws OXException {
-        VCardService vCardService = ServerServiceRegistry.getInstance().getService(VCardService.class, true);
-        InputStream originalVCard = null;
-        if (null != contact.getVCardId()) {
-            VCardStorageService vCardStorage = ServerServiceRegistry.getInstance().getService(VCardStorageService.class, false);
-            if (null != vCardStorage) {
-                originalVCard = vCardStorage.getVCard(contact.getVCardId(), session.getContextId());
-            }
-        }
-        VCardExport vCardExport = vCardService.exportContact(contact, originalVCard, vCardService.createParameters(session));
-        try {
-            InputStream inputStream = null;
-            byte[] buffer = new byte[0xFFFF];
-            try {
-                inputStream = vCardExport.getVCard().getStream();
-                for (int len; (len = inputStream.read(buffer, 0, buffer.length)) > 0;) {
-                    outputStream.write(buffer, 0, len);
-                }
-            } finally {
-                Streams.close(inputStream);
-            }
-        } catch (IOException e) {
-            throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } finally {
-            Streams.close(vCardExport);
-        }
     }
 
     @Override

@@ -67,6 +67,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.contact.vcard.VCardImport;
+import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -77,18 +80,15 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.login.Interface;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.versit.Property;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * vcard
@@ -119,7 +119,7 @@ public final class vcard extends PermissionServlet {
         ContactField.TELEPHONE_CALLBACK, ContactField.TELEPHONE_CAR, ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_HOME1,
         ContactField.TELEPHONE_HOME2, ContactField.TELEPHONE_IP, ContactField.TELEPHONE_ISDN, ContactField.TELEPHONE_OTHER,
         ContactField.TELEPHONE_PAGER, ContactField.TELEPHONE_PRIMARY, ContactField.TELEPHONE_RADIO, ContactField.TELEPHONE_TELEX,
-        ContactField.TELEPHONE_TTYTDD, ContactField.TITLE, ContactField.URL, ContactField.DEFAULT_ADDRESS };
+        ContactField.TELEPHONE_TTYTDD, ContactField.TITLE, ContactField.URL, ContactField.DEFAULT_ADDRESS, ContactField.VCARD_ID };
 
     private static final String STR_USER_AGENT = "user-agent";
 
@@ -211,10 +211,6 @@ public final class vcard extends PermissionServlet {
                 DBUtils.closeResources(rs, principalStatement, readCon, true, context);
             }
 
-            final VersitDefinition def = Versit.getDefinition("text/vcard");
-            final VersitDefinition.Writer w = def.getWriter(os, "UTF-8");
-            final OXContainerConverter oxc = new OXContainerConverter(sessionObj);
-
             SearchIterator<Contact> it = null;
 
             try {
@@ -226,16 +222,11 @@ public final class vcard extends PermissionServlet {
                 while (it.hasNext()) {
                     final Contact contactObject = it.next();
 
-                    final VersitObject vo = oxc.convertContact(contactObject, "3.0");
-                    def.write(w, vo);
+                    VCardUtil.exportContact(contactObject, sessionObj, os);
 
                     entries.add(Integer.toString(contactObject.getObjectID()));
                 }
             } finally {
-                w.flush();
-                w.close();
-                oxc.close();
-
                 if (it != null) {
                     it.close();
                 }
@@ -401,37 +392,24 @@ public final class vcard extends PermissionServlet {
                 DBUtils.closeResources(rs, principalStatement, readCon, true, context);
             }
 
-            final VersitDefinition def = Versit.getDefinition(content_type);
-
-            final OXContainerConverter oxc = new OXContainerConverter(session);
-            //final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session);
-
+            VCardService vCardService = ServerServiceRegistry.getServize(VCardService.class, true);
+            SearchIterator<VCardImport> searchIterator = null;
             final Date timestamp = new Date();
             try {
-                final VersitDefinition.Reader r = def.getReader(is, "UTF-8");
-
-                while (true) {
-                    final VersitObject vo = def.parse(r);
-                    if (vo == null) {
-                        break;
-                    }
-
-                    final Property property = vo.getProperty("UID");
-
-                    client_id = null;
+                searchIterator = vCardService.importVCards(is, vCardService.createParameters(session));
+                while (searchIterator.hasNext()) {
                     int object_id = 0;
-
-                    if (property != null) {
-                        client_id = property.getValue().toString();
-                    }
-
-                    final Contact contactObj = oxc.convertContact(vo);
-
-                    if (contactObj.getObjectID() == 0) {
-                        contactObj.setParentFolderID(contactfolder_id);
-                    }
-
+                    VCardImport vCardImport = null;
                     try {
+                        vCardImport = searchIterator.next();
+
+                        final Contact contactObj = vCardImport.getContact();
+                        client_id = contactObj.getUid();
+
+                        if (contactObj.getObjectID() == 0) {
+                            contactObj.setParentFolderID(contactfolder_id);
+                        }
+
                         if (client_id != null && entries_db.containsKey(client_id)) {
                             try {
                                 object_id = Integer.parseInt(entries_db.get(client_id));
@@ -447,10 +425,10 @@ public final class vcard extends PermissionServlet {
 
                             final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                             if (contactObj.containsObjectID()) {
-                            	contactService.updateContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id),
-                            			contactObj, timestamp);
+                                contactService.updateContact(session, Integer.toString(contactfolder_id), Integer.toString(object_id),
+                                        contactObj, timestamp);
                             } else {
-                            	contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
+                                contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
                             }
 
                             entries.add(client_id);
@@ -459,10 +437,10 @@ public final class vcard extends PermissionServlet {
 
                             final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
                             if (contactObj.containsObjectID()) {
-                            	contactService.updateContact(session, Integer.toString(contactfolder_id),
-                            			Integer.toString(contactObj.getObjectID()), contactObj, timestamp);
+                                contactService.updateContact(session, Integer.toString(contactfolder_id),
+                                        Integer.toString(contactObj.getObjectID()), contactObj, timestamp);
                             } else {
-                            	contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
+                                contactService.createContact(session, Integer.toString(contactfolder_id), contactObj);
                             }
 
                             if (client_id != null) {
@@ -477,10 +455,12 @@ public final class vcard extends PermissionServlet {
                         } else {
                             throw exc;
                         }
+                    } finally {
+                        Streams.close(vCardImport);
                     }
                 }
             } finally {
-                oxc.close();
+                SearchIterators.close(searchIterator);
             }
 
             for (final Map.Entry<String, String> entry : entries_db.entrySet()) {
