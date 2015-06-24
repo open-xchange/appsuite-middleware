@@ -219,7 +219,7 @@ public final class LoginPerformer {
                  */
                 authService.authorizeUser(ctx, user);
             }
-            if (null != userLoginLanguage && !Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+            if (!Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
                 UserStorage us = UserStorage.getInstance();
                 UserImpl impl = new UserImpl(user);
                 impl.setPreferredLanguage(userLoginLanguage);
