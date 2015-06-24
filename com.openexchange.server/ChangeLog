@@ -1,3 +1,7 @@
+* 2015-06-24 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 37422: Set language chosen in login screen as user's preferred language (if differing) before rampUp
+
 * 2015-06-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
