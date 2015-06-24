@@ -73,6 +73,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -170,6 +171,7 @@ public final class LoginPerformer {
             if (null != cookies) {
                 properties.put("cookies", cookies);
             }
+            String userLoginLanguage = request.getLanguage();
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -190,7 +192,7 @@ public final class LoginPerformer {
              * get user & context
              */
             final Context ctx;
-            final User user;
+            User user;
             if (GuestAuthenticated.class.isInstance(authed)) {
                 /*
                  * use already resolved user / context
@@ -215,6 +217,13 @@ public final class LoginPerformer {
                  * authorize
                  */
                 authService.authorizeUser(ctx, user);
+            }
+            if (null != userLoginLanguage && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+                UserStorage us = UserStorage.getInstance();
+                UserImpl impl = new UserImpl(user);
+                impl.setPreferredLanguage(userLoginLanguage);
+                us.updateUser(impl, ctx);
+                user = impl;
             }
             retval.setContext(ctx);
             retval.setUser(user);

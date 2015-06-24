@@ -77,6 +77,7 @@ public class LoginRequestImpl implements LoginRequest {
         protected int serverPort;
         protected String httpSessionID;
         protected boolean tranzient;
+        protected String language;
 
         public Builder() {
             super();
@@ -132,6 +133,11 @@ public class LoginRequestImpl implements LoginRequest {
         public Builder tranzient(boolean tranzient) {
             this.tranzient = tranzient; return this;
         }
+
+        public Builder language(String language) {
+            this.language = language;
+            return this;
+        }
         public LoginRequestImpl build() {
             return new LoginRequestImpl(this);
         }
@@ -149,6 +155,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final int serverPort;
     private final String httpSessionID;
     private boolean tranzient;
+    private String language;
 
     /**
      * Initializes a new {@link LoginRequestImpl}.
@@ -173,6 +180,7 @@ public class LoginRequestImpl implements LoginRequest {
         this.serverPort = builder.serverPort;
         this.httpSessionID = builder.httpSessionID;
         this.tranzient = builder.tranzient;
+        this.language = builder.language;
     }
 
     /**
@@ -194,7 +202,7 @@ public class LoginRequestImpl implements LoginRequest {
      * @param serverPort The server port
      * @param httpSessionID The identifier of the associated HTTP session
      */
-    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID, String language) {
         super();
         this.login = login;
         this.password = password;
@@ -211,6 +219,11 @@ public class LoginRequestImpl implements LoginRequest {
         this.serverName = serverName;
         this.serverPort = serverPort;
         this.httpSessionID = httpSessionID;
+        this.language = language;
+    }
+
+    public LoginRequestImpl(String login, String password, String clientIP, String userAgent, String authId, String client, String version, String hash, Interface iface, Map<String, List<String>> headers, Cookie[] cookies, boolean secure, String serverName, int serverPort, String httpSessionID) {
+        this(login, password, clientIP, userAgent, authId, client, version, hash, iface, headers, cookies, secure, serverName, serverPort, httpSessionID, null);
     }
 
     @Override
@@ -315,6 +328,11 @@ public class LoginRequestImpl implements LoginRequest {
      */
     public void setTransient(boolean tranzient) {
         this.tranzient = tranzient;
+    }
+
+    @Override
+    public String getLanguage() {
+        return language;
     }
 
 }
