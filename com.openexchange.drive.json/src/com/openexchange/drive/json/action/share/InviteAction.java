@@ -51,7 +51,6 @@ package com.openexchange.drive.json.action.share;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,8 +61,9 @@ import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.DefaultRequestContext;
+import com.openexchange.share.core.performer.CreatedShare;
+import com.openexchange.share.core.performer.CreatedShares;
 import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -89,7 +89,7 @@ public class InviteAction extends AbstractDriveShareAction {
              * create the shares
              */
             DriveService driveService = Services.getService(DriveService.class, true);
-            Map<ShareRecipient, List<ShareInfo>> createdShares = driveService.createShare(session, recipients, targets);
+            CreatedShares createdShares = driveService.createShare(session, recipients, targets);
             /*
              * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
              */
@@ -102,17 +102,11 @@ public class InviteAction extends AbstractDriveShareAction {
             result.addWarnings(warnings);
             JSONArray jTokens = new JSONArray(recipients.size());
             for (ShareRecipient recipient : recipients) {
-                List<ShareInfo> shares = createdShares.get(recipient);
-                if (null == shares || 0 == shares.size()) {
-                    // internal recipient
+                if (recipient.isInternal()) {
                     jTokens.put(JSONObject.NULL);
                 } else {
-                    // external recipient
-                    if (1 == shares.size()) {
-                        jTokens.put(shares.get(0).getToken());
-                    } else {
-                        jTokens.put(shares.get(0).getGuest().getBaseToken());
-                    }
+                    CreatedShare share = createdShares.getShare(recipient);
+                    jTokens.put(share.getToken());
                 }
             }
             result.setResultObject(jTokens, "json");

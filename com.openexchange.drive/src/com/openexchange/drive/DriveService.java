@@ -57,8 +57,7 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.performer.CreatedShares;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -192,18 +191,18 @@ public interface DriveService {
 
     /**
      * Creates shares of the given targets for the given recipients.
-     * 
+     *
      * @param session The session
      * @param recipients The recipients
      * @param targets The targets
-     * @return A map, with all recipients and their shares
+     * @return The created shares
      * @throws OXException
      */
-    Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException;
+    CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException;
 
     /**
      * Updates a single share.
-     * 
+     *
      * @param session The session
      * @param clientTimestamp The client timnestamp
      * @param token The share token to be updated
@@ -217,7 +216,7 @@ public interface DriveService {
 
     /**
      * Removes share links
-     * 
+     *
      * @param session The session
      * @param links The links to be removed
      * @throws OXException
@@ -226,7 +225,7 @@ public interface DriveService {
 
     /**
      * Gets all currently active shares of the user
-     * 
+     *
      * @param session The session
      * @return A list of all shares
      * @throws OXException

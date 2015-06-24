@@ -52,7 +52,6 @@ package com.openexchange.drive.json.action.share;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -64,8 +63,9 @@ import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.DefaultRequestContext;
+import com.openexchange.share.core.performer.CreatedShare;
+import com.openexchange.share.core.performer.CreatedShares;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -102,14 +102,14 @@ public class GetLinkAction extends AbstractDriveShareAction {
              * create share
              */
             DriveService driveService = Services.getService(DriveService.class, true);
-            Map<ShareRecipient, List<ShareInfo>> shares = driveService.createShare(session, Collections.<ShareRecipient> singletonList(recipient), targets);
-            ShareInfo share = shares.get(recipient).get(0);
+            CreatedShares createdShares = driveService.createShare(session, Collections.<ShareRecipient> singletonList(recipient), targets);
+            CreatedShare share = createdShares.getShare(recipient);
             /*
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
-            jResult.put("token", share.getGuest().getBaseToken());
+            jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
+            jResult.put("token", share.getToken());
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

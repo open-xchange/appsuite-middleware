@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,64 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.core.performer;
 
 import java.util.Collections;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.RequestContext;
-import com.openexchange.share.Share;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.recipient.ShareRecipient;
+
 
 /**
- * {@link DefaultShareInfo}
+ * Class for results of {@link CreatePerformer#perform()}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
+public class CreatedShares {
 
-    private final Share share;
+    private final Map<ShareRecipient, CreatedShare> shares;
+
+    protected CreatedShares(Map<ShareRecipient, List<ShareInfo>> createdShares) {
+        super();
+        shares = new LinkedHashMap<>();
+        for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
+            ShareRecipient recipient = entry.getKey();
+            List<ShareInfo> shareInfos = entry.getValue();
+            shares.put(recipient, new CreatedShare(recipient, shareInfos.get(0).getGuest(), shareInfos));
+        }
+    }
 
     /**
-     * Initializes a new {@link DefaultShareInfo}.
+     * Gets an iterable of all recipients for who one or more shares have been created.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param guestUser The guest user
-     * @param share The share
-     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
-     * @throws OXException
+     * @return An immutable iterable
      */
-    public DefaultShareInfo(ServiceLookup services, int contextID, User guestUser, Share share, boolean adjustTargets) throws OXException {
-        super(services, contextID, guestUser, Collections.singletonList(share), adjustTargets);
-        this.share = share;
-        if (adjustTargets) {
-            // take over adjusted target
-            share.setTarget(super.getSingleTarget());
-        }
+    public Iterable<ShareRecipient> getRecipients() {
+        return Collections.unmodifiableSet(shares.keySet());
     }
 
-    @Override
-    public Share getShare() {
-        return share;
+    /**
+     * Gets the created share for the passed recipient. If the recipient is not part of
+     * {@link #getRecipients()}, <code>null</code> is returned.
+     *
+     * @param recipient The recipient
+     * @return The share
+     */
+    public CreatedShare getShare(ShareRecipient recipient) {
+        return shares.get(recipient);
     }
 
-    @Override
-    public String getToken() {
-        return super.getToken(share.getTarget());
-    }
-
-    @Override
-    public String getShareURL(RequestContext context) {
-        ShareTarget target = getSingleTarget();
-        if (target == null) {
-            return ShareLinks.generateExternal(context, guestInfo.getBaseToken());
-        }
-
-        return ShareLinks.generateExternal(context, getToken());
+    /**
+     * Gets the number of different recipients for who shares have been created.
+     *
+     * @return The number of recipients
+     */
+    public int size() {
+        return shares.size();
     }
 
 }

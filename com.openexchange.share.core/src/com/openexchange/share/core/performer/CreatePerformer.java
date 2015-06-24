@@ -78,7 +78,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<ShareInfo>>> {
+public class CreatePerformer extends AbstractPerformer<CreatedShares> {
 
     private final List<ShareRecipient> recipients;
 
@@ -99,7 +99,7 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> perform() throws OXException {
+    public CreatedShares perform() throws OXException {
         /*
          * distinguish between internal and external recipients
          */
@@ -166,7 +166,7 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
              * add internal users (not affected by sharing) to the resulting list for completeness
              */
             sharesPerRecipient.putAll(getShareService().addTargets(session, targets, internalRecipients));
-            return sharesPerRecipient;
+            return new CreatedShares(sharesPerRecipient);
         } catch (OXException e) {
             Databases.rollback(writeCon);
             throw e;

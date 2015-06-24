@@ -65,26 +65,20 @@ import com.openexchange.share.core.ShareConstants;
 public class ShareLinks {
 
     /**
-     * Generates a share link for a guest user with only the base token set.
+     * Generates a share link for a guest user based on the passed share token.
+     * The token can be a base token or an absolute one.
      *
      * @param context The request context
-     * @param baseToken The guest users base token
+     * @param shareToken The share token
      * @return The link
      */
-    public static String generateExternal(RequestContext context, String baseToken) {
-        return generateExternal0(context, baseToken, null);
-    }
+    public static String generateExternal(RequestContext context, String shareToken) {
+        StringBuilder stringBuilder = prepare(context)
+            .append(context.getServletPrefix())
+            .append(ShareConstants.SHARE_SERVLET).append('/')
+            .append(shareToken);
 
-    /**
-     * Generates a share link for a guest user with a concrete share target path.
-     *
-     * @param context The request context
-     * @param baseToken The guest users base token
-     * @param targetPath The share targets path
-     * @return The link
-     */
-    public static String generateExternal(RequestContext context, String baseToken, String targetPath) {
-        return generateExternal0(context, baseToken, targetPath);
+        return stringBuilder.toString();
     }
 
     /**
@@ -130,18 +124,6 @@ public class ShareLinks {
             .append(confirmToken);
 
 
-        return stringBuilder.toString();
-    }
-
-    private static String generateExternal0(RequestContext context, String baseToken, String targetPath) {
-        StringBuilder stringBuilder = prepare(context)
-            .append(context.getServletPrefix())
-            .append(ShareConstants.SHARE_SERVLET).append('/')
-            .append(baseToken);
-
-        if (null != targetPath) {
-            stringBuilder.append('/').append(targetPath);
-        }
         return stringBuilder.toString();
     }
 

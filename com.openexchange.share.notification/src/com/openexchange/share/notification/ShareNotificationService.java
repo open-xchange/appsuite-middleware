@@ -50,12 +50,11 @@
 package com.openexchange.share.notification;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.RequestContext;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.performer.CreatedShares;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -83,7 +82,7 @@ public interface ShareNotificationService {
      * @param requestContext The request context
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
-    List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> shares, String message, Session session, RequestContext requestContext);
+    List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, RequestContext requestContext);
 
     /**
      * Send a notification mail that requests a confirmation for a requested password reset from the user.
