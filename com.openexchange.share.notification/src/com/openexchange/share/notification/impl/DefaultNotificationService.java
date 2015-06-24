@@ -60,7 +60,10 @@ import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.GroupService;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -134,16 +137,33 @@ public class DefaultNotificationService implements ShareNotificationService {
         List<OXException> warnings = new ArrayList<OXException>();
         List<ShareNotification<InternetAddress>> notifications = new ArrayList<ShareNotification<InternetAddress>>(createdShares.size());
         boolean notifyInternalUsers = serviceLookup.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.notifyInternal", true);
+        GroupService groupService = serviceLookup.getService(GroupService.class);
+        ContextService contextService = serviceLookup.getService(ContextService.class);
         for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
             ShareRecipient recipient = entry.getKey();
             List<ShareInfo> shareInfos = entry.getValue();
             if (shareInfos != null && !shareInfos.isEmpty()) {
-                if (!InternalRecipient.class.isInstance(recipient) || notifyInternalUsers) {
-                    try {
+                try {
+                    if (recipient.isInternal() && notifyInternalUsers) {
+                        InternalRecipient internalRecipient = recipient.toInternal();
+                        if (internalRecipient.isGroup()) {
+                            Context context = contextService.getContext(shareInfos.get(0).getGuest().getContextID());
+                            int[] members = groupService.getGroup(context, internalRecipient.getEntity()).getMember();
+                            for (int userId : members) {
+                                InternalRecipient userRecipient = new InternalRecipient();
+                                userRecipient.setBits(internalRecipient.getBits());
+                                userRecipient.setEntity(userId);
+                                userRecipient.setGroup(false);
+                                notifications.add(buildInternalShareCreatedMailNotification(userRecipient, shareInfos, message, session, requestContext));
+                            }
+                        } else {
+                            notifications.add(buildInternalShareCreatedMailNotification(internalRecipient, shareInfos, message, session, requestContext));
+                        }
+                    } else if (recipient.getType() == RecipientType.GUEST) {
                         notifications.add(buildShareCreatedMailNotification(recipient, shareInfos, message, session, requestContext));
-                    } catch (Exception e) {
-                        collectWarning(warnings, e, shareInfos.get(0).getGuest().getEmailAddress());
                     }
+                } catch (Exception e) {
+                    collectWarning(warnings, e, shareInfos.get(0).getGuest().getEmailAddress());
                 }
             }
         }
@@ -204,16 +224,12 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     /**
-     * Builds a {@link ShareNotification} ready to be sent out to a recipent via mail.
+     * Builds a {@link ShareNotification} ready to be sent out to a guest recipient via mail.
      *
      * @return the built ShareNotification
      * @throws OXException
      */
     private ShareNotification<InternetAddress> buildShareCreatedMailNotification(ShareRecipient recipient, List<ShareInfo> createdShares, String message, Session session, RequestContext requestContext) throws OXException {
-        if (RecipientType.USER.equals(recipient.getType())) {
-            return buildInternalShareCreatedMailNotification((InternalRecipient) recipient, createdShares, message, session, requestContext);
-        }
-
         GuestInfo guestInfo = createdShares.get(0).getGuest();
         if (Strings.isEmpty(guestInfo.getEmailAddress())) {
             String guestName = guestInfo.getDisplayName();
@@ -251,7 +267,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     /**
-     * Builds a {@link ShareNotification} ready to be sent out to a internal recipent via mail.
+     * Builds a {@link ShareNotification} ready to be sent out to an internal recipient via mail.
      *
      * @return the built ShareNotification
      * @throws OXException
