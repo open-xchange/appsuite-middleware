@@ -65,16 +65,99 @@ import com.openexchange.osgi.annotation.SingletonService;
 @SingletonService
 public interface ICalEmitter {
 
-    // TODO: What about mixed exports?Tasks and Appointments
-    public String writeAppointments(List<Appointment> appointmentObjects, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    public String writeAppointmentRequest(Appointment appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    public String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
+    /**
+     * Creates a new iCal session to use when exporting multiple iCal items.
+     *
+     * @param mode The operation mode to use.
+     * @return A new iCal session
+     */
+    ICalSession createSession(Mode mode);
 
     /**
-     * Writes a free/busy-reply, using the supplied free/busy information to
-     * reflect the free/busy-times and the corresponding attendee.
+     * Creates a new iCal session for use during export.
+     *
+     * @return A new iCal session
+     */
+    ICalSession createSession();
+
+    /**
+     * Serializes the iCal session to an output stream.
+     *
+     * @param session The iCal session to write
+     * @param stream The target output stream
+     */
+    void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
+
+    /**
+     * Finishes and flushed the write operation of the iCal session.
+     *
+     * @param session The iCal session to flush
+     * @param stream The target output stream
+     */
+    void flush(ICalSession session, OutputStream stream) throws ConversionError;
+
+    /**
+     * Writes a single appointment to an iCal session.
+     *
+     * @param session The underlying iCal session
+     * @param appointment The appointment to write
+     * @param ctx The context
+     * @param errors A reference to store any conversion errors
+     * @param warnings A reference to store any non-fatal conversion warnings
+     * @return A reference to the exported iCal item
+     */
+    ICalItem writeAppointment(ICalSession session, Appointment appointment, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
+    /**
+     * Writes a single appointment to an iCal session, optionally considering special iTIP scheduling options.
+     *
+     * @param session The underlying iCal session
+     * @param appointment The appointment to write
+     * @param ctx The context
+     * @param iTip The associated iTIP container, or <code>null</code> if no iTIP scheduling is involved
+     * @param errors A reference to store any conversion errors
+     * @param warnings A reference to store any non-fatal conversion warnings
+     * @return A reference to the exported iCal item
+     */
+    ICalItem writeAppointment(ICalSession session, Appointment appointment, Context ctx, ITipContainer iTip, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
+    /**
+     * Writes a single task to an iCal session.
+     *
+     * @param session The underlying iCal session
+     * @param task The task to write
+     * @param ctx The context
+     * @param iTip The associated iTIP container, or <code>null</code> if no iTIP scheduling is involved
+     * @param errors A reference to store any conversion errors
+     * @param warnings A reference to store any non-fatal conversion warnings
+     * @return A reference to the exported iCal item
+     */
+    ICalItem writeTask(ICalSession session, Task task, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
+    /**
+     * Serializes one or more appointments directly as iCal file, i.e. not bound to an iCal session.
+     *
+     * @param appointments The appointments to write
+     * @param ctx The context
+     * @param errors A reference to store any conversion errors
+     * @param warnings A reference to store any non-fatal conversion warnings
+     * @return The exported iCal file as string
+     */
+    String writeAppointments(List<Appointment> appointments, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
+    /**
+     * Serializes one or more tasks directly as iCal file, i.e. not bound to an iCal session.
+     *
+     * @param tasks The tasks to write
+     * @param ctx The context
+     * @param errors A reference to store any conversion errors
+     * @param warnings A reference to store any non-fatal conversion warnings
+     * @return The exported iCal file as string
+     */
+    String writeTasks(List<Task> tasks, List<ConversionError> errors, List<ConversionWarning> warnings, Context ctx) throws ConversionError;
+
+    /**
+     * Serializes a free/busy-reply directly, using the supplied free/busy information to reflect the free/busy-times and the corresponding attendee.
      *
      * @param freeBusyRequest the free/busy-information
      * @param ctx the context
@@ -84,33 +167,5 @@ public interface ICalEmitter {
      * @throws ConversionError
      */
     String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    /**
-     * Creates a new {@link ICalSession} to collect the iCal information.
-     * @param mode Operation mode to use.
-     * @return a newly generated {@link ICalSession}.
-     */
-    public ICalSession createSession(Mode mode);
-
-    ICalSession createSession();
-
-    public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context ctx, ITipContainer iTip, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    /**
-     * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
-     */
-    public ICalItem writeAppointment(ICalSession session, Appointment appointment, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    /**
-     * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
-     */
-    public ICalItem writeTask(ICalSession session, Task task, Context context, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
-
-    /**
-     * @throws ConversionError if a wrong session is given that is not created with this implementations {@link #createSession()} method.
-     */
-    public void writeSession(ICalSession session, OutputStream stream) throws ConversionError;
-
-	public void flush(ICalSession session, OutputStream stream) throws ConversionError;
 
 }
