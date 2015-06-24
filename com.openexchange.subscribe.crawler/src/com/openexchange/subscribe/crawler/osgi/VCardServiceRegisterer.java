@@ -47,69 +47,46 @@
  *
  */
 
-package com.openexchange.subscribe.crawler;
+package com.openexchange.subscribe.crawler.osgi;
 
-import java.io.InputStream;
-import java.util.List;
-import java.util.Vector;
-import com.gargoylesoftware.htmlunit.TextPage;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.openexchange.contact.vcard.VCardImport;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Streams;
-import com.openexchange.subscribe.crawler.internal.AbstractStep;
-import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
+
 
 /**
- * This step takes TextPages (sourcecode of a HtmlPage) that each contain a vcard and converts them to ContactObjects for OX
+ * {@link IcalParserRegisterer}
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], List<TextPage>>{
+public class VCardServiceRegisterer implements ServiceTrackerCustomizer<VCardService,VCardService> {
 
-    private static final ContactSanitizer SANITIZER = new ContactSanitizer();
+    private final BundleContext context;
+    private final CrawlersActivator activator;
 
-    public ContactObjectsByVcardTextPagesStep() {
-
+    public VCardServiceRegisterer(final BundleContext context, final CrawlersActivator activator) {
+        super();
+        this.context = context;
+        this.activator = activator;
     }
 
     @Override
-    public void execute(final WebClient webClient) {
-        final Vector<Contact> contactObjects = new Vector<Contact>();
-        VCardService vCardService = workflow.getActivator().getVCardService();
+    public VCardService addingService(final ServiceReference<VCardService> reference) {
+        final VCardService vCardService = context.getService(reference);
+        activator.setVCardService(vCardService);
+        return vCardService;
+    }
 
-        for (final TextPage page : input) {
-            final byte[] vcard = page.getWebResponse().getContentAsBytes();
-            try {
-                Contact contact;
-                VCardImport vCardImport = null;
-                InputStream inputStream = null;
-                try {
-                    inputStream = Streams.newByteArrayInputStream(vcard);
-                    vCardImport = vCardService.importVCard(inputStream, null, vCardService.createParameters());
-                    contact = vCardImport.getContact();
-                } finally {
-                    Streams.close(inputStream, vCardImport);
-                }
-                SANITIZER.sanitize(contact);
-                contactObjects.add(contact);
-            } catch (final OXException e) {
-                exception = e;
-            }
-            executedSuccessfully = true;
-        }
-        // this allows empty addressbooks (no contacts is a legitimate result if there are none)
-        if (input.isEmpty()) {
-            executedSuccessfully = true;
-        }
+    @Override
+    public void modifiedService(final ServiceReference<VCardService> reference, final VCardService service) {
+        //nothing to do here
+    }
 
-        output = new Contact[contactObjects.size()];
-        for (int i = 0; i < output.length && i < contactObjects.size(); i++) {
-            output[i] = contactObjects.get(i);
-        }
-
+    @Override
+    public void removedService(final ServiceReference<VCardService> reference, final VCardService service) {
+        activator.setVCardService(null);
+        context.ungetService(reference);
     }
 
 }
