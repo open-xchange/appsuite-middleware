@@ -1527,14 +1527,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
             connectedAccounts = new HashMap<String, FileStorageAccountAccess>();
             this.connectedAccounts.set(connectedAccounts);
         }
-        final FileStorageAccountAccess cached = connectedAccounts.get(new StringBuilder(serviceId).append('/').append(accountId).toString());
+        String id = new StringBuilder(serviceId).append('/').append(accountId).toString();
+        FileStorageAccountAccess cached = connectedAccounts.get(id);
         if (cached != null) {
             return cached.getFileAccess();
         }
-        final FileStorageService fileStorage = getFileStorageService(serviceId);
 
-        final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-        connect(accountAccess);
+        FileStorageService fileStorage = getFileStorageService(serviceId);
+        FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
+        connect(accountAccess, id);
         return accountAccess.getFileAccess();
     }
 
@@ -1553,20 +1554,23 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractServi
         }
 
         // Others...
-        final FileStorageAccountAccess cached = connectedAccounts.get().get(serviceId + "/" + accountId);
+        String id = new StringBuilder(serviceId).append('/').append(accountId).toString();
+        final FileStorageAccountAccess cached = connectedAccounts.get().get(id);
         if (cached != null) {
             return cached.getFolderAccess();
         }
         final FileStorageService fileStorage = getFileStorageService(serviceId);
 
         final FileStorageAccountAccess accountAccess = fileStorage.getAccountAccess(accountId, session);
-        connect(accountAccess);
+        connect(accountAccess, id);
         return accountAccess.getFolderAccess();
     }
 
-    private void connect(final FileStorageAccountAccess accountAccess) throws OXException {
-        final String id = accountAccess.getService().getId() + "/" + accountAccess.getAccountId();
+    private void connect(FileStorageAccountAccess accountAccess) throws OXException {
+        connect(accountAccess, new StringBuilder(accountAccess.getService().getId()).append('/').append(accountAccess.getAccountId()).toString());
+    }
 
+    private void connect(FileStorageAccountAccess accountAccess, String id) throws OXException {
         Map<String, FileStorageAccountAccess> connectedAccounts = this.connectedAccounts.get();
         if (!connectedAccounts.containsKey(id)) {
             connectedAccounts.put(id, accountAccess);
