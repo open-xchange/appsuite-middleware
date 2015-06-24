@@ -1,3 +1,7 @@
+* 2015-06-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38892: Proper stop of MsCacheEventHandler on bundle shut-down
+
 * 2015-06-24 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 37422: Set language chosen in login screen as user's preferred language (if differing) before rampUp
