@@ -58,13 +58,12 @@ import org.microformats.hCard.HCard;
 import org.microformats.hCard.HCard.Address;
 import org.microformats.hCard.HCard.Email;
 import org.microformats.hCard.HCard.Tel;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
 import com.openexchange.tools.encoding.Base64;
-import com.openexchange.tools.versit.converter.ConverterException;
-
 
 /**
  * {@link HCardToContactTransformer}
@@ -209,7 +208,7 @@ public class HCardToContactTransformer {
         }
         try {
             HTTPToolkit.loadImageFromURL(c, uri.toString());
-        } catch (final ConverterException e) {
+        } catch (final OXException e) {
             // log error, but don't fail. Simply don't store an image
             final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HCardToContactTransformer.class);
             LOG.warn("Couldn't load image.", e);

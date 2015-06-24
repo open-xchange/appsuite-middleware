@@ -72,12 +72,14 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.infostore.ConverterException;
 import com.openexchange.java.Streams;
+import com.openexchange.subscribe.SubscriptionErrorMessage;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
 import com.openexchange.tools.ImageTypeDetector;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * {@link HTTPToolkit}
@@ -238,11 +240,11 @@ public class HTTPToolkit {
      * @param url The URI parameter's value
      * @throws ConverterException If converting image's data fails
      */
-    public static void loadImageFromURL(final Contact contact, final String url) throws ConverterException {
+    public static void loadImageFromURL(final Contact contact, final String url) throws OXException {
         try {
             loadImageFromURL(contact, new URL(url));
         } catch (final MalformedURLException e) {
-            throw new ConverterException("Image URL is not wellformed.", e);
+            SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         }
     }
 
@@ -254,7 +256,7 @@ public class HTTPToolkit {
      * @param url The image URL
      * @throws ConverterException If converting image's data fails
      */
-    private static void loadImageFromURL(final Contact contact, final URL url) throws ConverterException {
+    private static void loadImageFromURL(final Contact contact, final URL url) throws OXException {
         String mimeType = null;
         byte[] bytes = null;
         try {
@@ -278,9 +280,9 @@ public class HTTPToolkit {
                 Streams.close(in);
             }
         } catch (final SocketTimeoutException e) {
-            throw new ConverterException("Timeout reading \"" + url.toString() + "\"", e);
+            throw SubscriptionErrorMessage.COMMUNICATION_PROBLEM.create(e);
         } catch (final IOException e) {
-            throw new ConverterException("IO problem while reading \"" + url.toString() + "\"", e);
+            throw SubscriptionErrorMessage.IO_ERROR.create("IO problem while reading \"" + url.toString() + "\"", e);
         }
         if (mimeType == null) {
             mimeType = ImageTypeDetector.getMimeType(bytes);

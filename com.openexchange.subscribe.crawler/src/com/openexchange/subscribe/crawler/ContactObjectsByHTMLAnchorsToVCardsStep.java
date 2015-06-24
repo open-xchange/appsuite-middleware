@@ -65,7 +65,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * This step takes HtmlPages that each contain contact information in vcard-format and converts them to ContactObjects for OX
@@ -135,8 +134,6 @@ public class ContactObjectsByHTMLAnchorsToVCardsStep extends AbstractStep<Contac
                 contactObjects.add(contact);
 
             } catch (OXException e) {
-                exception = e;
-            } catch (final ConverterException e) {
                 exception = e;
             } catch (final IOException e) {
                 exception = e;

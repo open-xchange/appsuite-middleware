@@ -53,7 +53,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.groupware.importexport.importers.CsvDoesDifferentLanguages;
 import com.openexchange.groupware.importexport.mappers.PropertyDrivenMapperTest;
-import com.openexchange.tools.versit.filetokenizer.VCardTokenizerTest;
 
 /**
  * This suite is meant for tests without a running OX instance
@@ -66,10 +65,8 @@ public class ImportExportStandaloneSuite extends TestSuite {
 	public static Test suite(){
 		final TestSuite tests = new TestSuite();
 		//basics
-		tests.addTestSuite( VCardTokenizerTest.class );
 		tests.addTestSuite( ContactFieldTester.class );
 		tests.addTestSuite( ContactSwitcherTester.class );
-		tests.addTestSuite( VersitParserTest.class );
 		tests.addTest( CSVParserTest.suite() );
 		//tests.addTestSuite( com.openexchange.groupware.importexport.OXContainerConverterTest.class );
 		//tests.addTestSuite( com.openexchange.tools.versit.OXContainerConverterTest.class );

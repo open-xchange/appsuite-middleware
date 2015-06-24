@@ -51,11 +51,11 @@ package com.openexchange.subscribe.crawler.internal;
 
 import java.util.Calendar;
 import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * {@link Mappings}
@@ -72,7 +72,7 @@ public class Mappings {
      * @return The generated contact
      * @throws ConverterException If conversion fails
      */
-    public static Contact translateMapToContact(final Map<String, String> map) throws ConverterException {
+    public static Contact translateMapToContact(final Map<String, String> map) throws OXException {
 
         final Contact contact = new Contact();
 
