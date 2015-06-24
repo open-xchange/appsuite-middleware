@@ -49,14 +49,20 @@
 
 package com.openexchange.mailmapping.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mailmapping.MailResolver;
@@ -174,12 +180,13 @@ public class DefaultMailMappingService implements MailResolver {
         Set<Integer> visited = new HashSet<Integer>(contextIds.size(), 0.9f);
         for (Integer contextId : contextIds) {
             if (visited.add(contextId)) {
-                // Search for a user with the mail address in that context
-                resolvedMail = lookUpInContext(mail, contextId.intValue(), users, contexts);
+                // Search for a user with the mail address in that context's schema
+                resolvedMail = lookUpInSchema(mail, contextId.intValue(), databaseService);
                 if (null != resolvedMail) {
                     return resolvedMail;
                 }
 
+                // Discard other contexts in that schema
                 int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId.intValue());
                 if (null != contextsInSameSchema) {
                     for (int i = contextsInSameSchema.length; i-- > 0;) {
@@ -208,6 +215,35 @@ public class DefaultMailMappingService implements MailResolver {
         }
 
         return ResolvedMail.ACCEPT(found.getId(), contextId);
+    }
+
+    private ResolvedMail lookUpInSchema(String mail, int idOfContextInSchema, DatabaseService dbService) throws OXException {
+        Connection con = dbService.getReadOnly(idOfContextInSchema);
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, id FROM user WHERE mail LIKE ?");
+            stmt.setString(1, mail);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return ResolvedMail.ACCEPT(result.getInt(2), result.getInt(1));
+            }
+
+            Databases.closeSQLStuff(result, stmt);
+            stmt = con.prepareStatement("SELECT cid, id FROM user_attribute WHERE name=? AND value LIKE ?");
+            stmt.setString(1, "alias");
+            stmt.setString(2, mail);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return ResolvedMail.ACCEPT(result.getInt(2), result.getInt(1));
+            }
+            return null;
+        } catch (SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
+            dbService.backReadOnly(idOfContextInSchema, con);
+        }
     }
 
 }
