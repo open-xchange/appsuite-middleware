@@ -528,7 +528,7 @@ public final class IMAPSort {
                     // dispatch remaining untagged responses
                     protocol.notifyResponseHandlers(r);
                     protocol.handleResult(response);
-                    return matches;
+                    return new SortPartialResult(matches, SortPartialReason.SUCCESS);
                 }
             });
         } catch (FolderClosedException e) {
