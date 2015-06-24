@@ -60,6 +60,7 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.contact.internal.VCardUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.contexts.Context;
@@ -121,13 +122,7 @@ public final class GetVersitAction extends AbstractMailAction {
                     /*
                      * Save VCard
                      */
-                    VersitUtility.saveVCard(
-                        versitPart.getInputStream(),
-                        versitPart.getContentType().getBaseType(),
-                        versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                        retvalList,
-                        session,
-                        ctx);
+                    retvalList.add(VCardUtil.importContactToDefaultFolder(versitPart.getInputStream(), session));
                 } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
                     MimeTypes.MIME_TEXT_CALENDAR)) {
                     /*

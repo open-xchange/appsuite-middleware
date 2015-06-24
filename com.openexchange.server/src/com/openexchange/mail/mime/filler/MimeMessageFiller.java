@@ -1056,7 +1056,6 @@ public class MimeMessageFiller {
                 }
             }
             try {
-                final String userVCard = compositionParameters.getUserVCard(charset);
                 /*
                  * Create a body part for vcard
                  */
@@ -1066,7 +1065,7 @@ public class MimeMessageFiller {
                  */
                 final ContentType ct = new ContentType(MimeTypes.MIME_TEXT_VCARD);
                 ct.setCharsetParameter(charset);
-                vcardPart.setDataHandler(new DataHandler(new MessageDataSource(userVCard.getBytes(Charsets.forName(charset)), ct.toString())));
+                vcardPart.setDataHandler(new DataHandler(new MessageDataSource(compositionParameters.getUserVCard(), ct.toString())));
                 if (!ct.containsNameParameter()) {
                     ct.setNameParameter(encodedFileName);
                 }

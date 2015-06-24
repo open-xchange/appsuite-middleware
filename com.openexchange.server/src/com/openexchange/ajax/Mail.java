@@ -113,6 +113,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.contact.internal.VCardUtil;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -1787,13 +1788,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Save VCard
                          */
-                        VersitUtility.saveVCard(
-                            versitPart.getInputStream(),
-                            versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                                retvalList,
-                                session,
-                                ctx);
+                        retvalList.add(VCardUtil.importContactToDefaultFolder(versitPart.getInputStream(), session));
                     } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_CALENDAR)) {
                         /*

@@ -100,4 +100,9 @@ public class DefaultVCardExport implements VCardExport {
         return vCardHolder.getClosingStream();
     }
 
+    @Override
+    public byte[] toByteArray() throws OXException {
+        return vCardHolder.toByteArray();
+    }
+
 }

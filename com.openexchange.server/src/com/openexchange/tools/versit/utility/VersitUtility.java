@@ -54,12 +54,10 @@ import java.io.InputStream;
 import java.util.List;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
-import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
@@ -87,53 +85,6 @@ public final class VersitUtility {
      */
     private VersitUtility() {
         super();
-    }
-
-    /**
-     * Saves specified <code>VCard</code> mail part into corresponding default folder. The resulting instance of {@link CommonObject} is
-     * added to given list.
-     *
-     * @param vcardInputStream The VCard input stream
-     * @param baseContentType The VCard's base content type (e.g. <i>text/vcard</i>)
-     * @param charset The charset encoding of provided input stream's data
-     * @param retvalList The list to which the resulting instance of {@link CommonObject} is added
-     * @param session The session providing needed user data
-     * @param ctx The context
-     * @throws IOException If an I/O error occurs
-     * @throws ConverterException If input stream's data cannot be converted to VCard object
-     * @throws OXException If VCard object cannot be put into session user's default contact folder
-     */
-    public static void saveVCard(final InputStream vcardInputStream, final String baseContentType, final String charset, final List<CommonObject> retvalList, final Session session, final Context ctx) throws IOException, ConverterException, OXException {
-        /*
-         * Define versit reader
-         */
-        final VersitDefinition def = Versit.getDefinition(baseContentType);
-        final VersitDefinition.Reader r = def.getReader(vcardInputStream, charset);
-        /*
-         * Ok, convert versit object to corresponding data object and save this object via its interface
-         */
-        OXContainerConverter oxc = null;
-        try {
-            oxc = new OXContainerConverter(session);
-            // final ContactSQLInterface contactInterface = new RdbContactSQLInterface(session, ctx);
-            final VersitObject vo = def.parse(r);
-            if (vo != null) {
-                final Contact contactObj = oxc.convertContact(vo);
-                contactObj.setParentFolderID(new OXFolderAccess(ctx).getDefaultFolderID(session.getUserId(), FolderObject.CONTACT));
-                contactObj.setContextId(ctx.getContextId());
-                final ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-                contactService.createContact(session, Integer.toString(contactObj.getParentFolderID()), contactObj);
-                /*
-                 * Add to list
-                 */
-                retvalList.add(contactObj);
-            }
-        } finally {
-            if (oxc != null) {
-                oxc.close();
-                oxc = null;
-            }
-        }
     }
 
     private static final String VERSIT_VTODO = "VTODO";
