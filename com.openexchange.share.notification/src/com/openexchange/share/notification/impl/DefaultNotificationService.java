@@ -73,6 +73,7 @@ import com.openexchange.share.RequestContext;
 import com.openexchange.share.core.performer.CreatedShare;
 import com.openexchange.share.core.performer.CreatedShares;
 import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.notification.DefaultDecision;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.impl.mail.MailNotifications;
@@ -100,6 +101,8 @@ public class DefaultNotificationService implements ShareNotificationService {
     /** The queue for additional handlers */
     private final ConcurrentMap<Transport, ShareNotificationHandler<?>> handlers;
 
+    private final NotifyDecision notifyDecision;
+
     /**
      * Initializes a new {@link DefaultNotificationService}.
      */
@@ -107,6 +110,7 @@ public class DefaultNotificationService implements ShareNotificationService {
         super();
         this.serviceLookup = serviceLookup;
         handlers = new ConcurrentHashMap<Transport, ShareNotificationHandler<?>>();
+        notifyDecision = new DefaultDecision(serviceLookup);
     }
 
     /**
@@ -140,9 +144,9 @@ public class DefaultNotificationService implements ShareNotificationService {
         ContextService contextService = serviceLookup.getService(ContextService.class);
         for (ShareRecipient recipient : createdShares.getRecipients()) {
             CreatedShare share = createdShares.getShare(recipient);
-            if (share.size() > 0) {
-                GuestInfo guestInfo = share.getGuestInfo();
-                try {
+            GuestInfo guestInfo = share.getGuestInfo();
+            try {
+                if (notifyDecision.notifyAboutCreatedShare(transport, share, session)) {
                     if (recipient.isInternal() && notifyInternalUsers) {
                         InternalRecipient internalRecipient = recipient.toInternal();
                         if (internalRecipient.isGroup()) {
@@ -161,9 +165,9 @@ public class DefaultNotificationService implements ShareNotificationService {
                     } else if (recipient.getType() == RecipientType.GUEST) {
                         notifications.add(buildShareCreatedMailNotification(recipient, share, message, session, requestContext));
                     }
-                } catch (Exception e) {
-                    collectWarning(warnings, e, guestInfo.getEmailAddress());
                 }
+            } catch (Exception e) {
+                collectWarning(warnings, e, guestInfo.getEmailAddress());
             }
         }
 

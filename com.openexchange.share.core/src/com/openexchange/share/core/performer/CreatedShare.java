@@ -191,4 +191,13 @@ public class CreatedShare {
         return ShareLinks.generateExternal(requestContext, getToken());
     }
 
+    /**
+     * Gets whether this share is internal, meaning that the recipient is either a user or a group.
+     *
+     * @return <code>true</code> if the share is internal
+     */
+    public boolean isInternal() {
+        return recipient.isInternal();
+    }
+
 }
