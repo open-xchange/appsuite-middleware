@@ -49,10 +49,8 @@
 
 package com.openexchange.mail.json.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.mail.MessageRemovedException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -61,21 +59,17 @@ import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link GetVersitAction}
@@ -115,7 +109,6 @@ public final class GetVersitAction extends AbstractMailAction {
                 /*
                  * Save dependent on content type
                  */
-                final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                 final List<CommonObject> retvalList = new ArrayList<CommonObject>();
                 if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
                     MimeTypes.MIME_TEXT_VCARD)) {
@@ -128,13 +121,7 @@ public final class GetVersitAction extends AbstractMailAction {
                     /*
                      * Save ICalendar
                      */
-                    VersitUtility.saveICal(
-                        versitPart.getInputStream(),
-                        versitPart.getContentType().getBaseType(),
-                        versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                        retvalList,
-                        session,
-                        ctx);
+                    retvalList.addAll(ICalUtil.importToDefaultFolder(versitPart.getInputStream(), session));
                 } else {
                     throw MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT.create(versitPart.getContentType());
                 }
@@ -156,13 +143,6 @@ public final class GetVersitAction extends AbstractMailAction {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final ConverterException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

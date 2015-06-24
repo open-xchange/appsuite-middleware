@@ -115,6 +115,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.contact.internal.VCardUtil;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -205,7 +206,6 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.
@@ -1781,7 +1781,6 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Save dependent on content type
                      */
-                    final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                     final List<CommonObject> retvalList = new ArrayList<CommonObject>();
                     if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_VCARD)) {
@@ -1794,13 +1793,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         /*
                          * Save ICalendar
                          */
-                        VersitUtility.saveICal(
-                            versitPart.getInputStream(),
-                            versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                                retvalList,
-                                session,
-                                ctx);
+                        retvalList.addAll(ICalUtil.importToDefaultFolder(versitPart.getInputStream(), session));
                     } else {
                         throw MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT.create(versitPart.getContentType());
                     }
