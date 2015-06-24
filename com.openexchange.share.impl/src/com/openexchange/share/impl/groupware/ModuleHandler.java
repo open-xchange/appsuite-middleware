@@ -65,11 +65,38 @@ import com.openexchange.share.groupware.TargetProxy;
  */
 public interface ModuleHandler {
 
-    List<TargetProxy> loadTargets(List<ShareTarget> list, HandlerParameters parameters) throws OXException;
+    /**
+     * Loads a list of target proxies, one for every passed share target.
+     *
+     * @param targets The share targets
+     * @param publicFlags One flag for every targets parent folder. <code>true</code> if the folder is public.
+     * @param parameters The parameters
+     * @return the list of proxies in the same order as the according targets
+     * @throws OXException
+     */
+    List<TargetProxy> loadTargets(List<ShareTarget> targets, List<Boolean> publicFlags, HandlerParameters parameters) throws OXException;
 
-    TargetProxy loadTarget(ShareTarget target, Session session) throws OXException;
+    /**
+     * Loads a proxy object for the given share target.
+     *
+     * @param target The share target
+     * @param isPublic <code>true</code> if the items parent folder is public
+     * @param session The session
+     * @return The proxy
+     * @throws OXException
+     */
+    TargetProxy loadTarget(ShareTarget target, boolean isPublic, Session session) throws OXException;
 
-    TargetProxy loadTarget(ShareTarget target, Context context) throws OXException;
+    /**
+     * Loads a proxy object for the given share target.
+     *
+     * @param target The share target
+     * @param isPublic <code>true</code> if the items parent folder is public
+     * @param context The context
+     * @return The proxy
+     * @throws OXException
+     */
+    TargetProxy loadTarget(ShareTarget target, boolean isPublic, Context context) throws OXException;
 
     boolean canShare(TargetProxy proxy, HandlerParameters parameters);
 

@@ -56,7 +56,6 @@ import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.groupware.DriveTargetProxyType;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
@@ -72,12 +71,12 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
     private final UserizedFolder folder;
 
-    private final User user;
+    private final boolean isPublic;
 
-    public FolderTargetProxy(UserizedFolder folder, User user) {
+    public FolderTargetProxy(UserizedFolder folder, boolean isPublic) {
         super();
         this.folder = folder;
-        this.user = user;
+        this.isPublic = isPublic;
     }
 
     @Override
@@ -97,7 +96,7 @@ public class FolderTargetProxy extends AbstractTargetProxy {
 
     @Override
     public String getTitle() {
-        String name = folder.getLocalizedName(user.getLocale(), true);
+        String name = folder.getLocalizedName(folder.getUser().getLocale(), true);
         if (name == null) {
             name = folder.getName();
             if (name == null) {
@@ -165,6 +164,11 @@ public class FolderTargetProxy extends AbstractTargetProxy {
     @Override
     public TargetProxyType getProxyType() {
         return DriveTargetProxyType.FOLDER;
+    }
+
+    @Override
+    public boolean isPublic() {
+        return isPublic;
     }
 
 }

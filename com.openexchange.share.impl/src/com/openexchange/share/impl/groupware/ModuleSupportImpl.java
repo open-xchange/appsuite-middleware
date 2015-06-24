@@ -59,7 +59,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -69,7 +68,6 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -106,16 +104,15 @@ public class ModuleSupportImpl implements ModuleSupport {
             return null;
         }
 
+        if (Module.getForFolderConstant(target.getModule()) == null) {
+            return new VirtualTargetProxy(target);
+        }
+
+        UserizedFolder[] folderPath = requireService(FolderService.class, services).getPath(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null).getResponse();
         if (target.isFolder()) {
-            User user = requireService(UserService.class, services).getUser(session.getUserId(), session.getContextId());
-            if (null != Module.getForFolderConstant(target.getModule())) {
-                UserizedFolder userizedFolder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
-                return new FolderTargetProxy(userizedFolder, user);
-            } else {
-                return new VirtualTargetProxy(target);
-            }
+            return new FolderTargetProxy(folderPath[0], FolderTools.isPublicFolder(folderPath));
         } else {
-            return handlers.get(target.getModule()).loadTarget(target, session);
+            return handlers.get(target.getModule()).loadTarget(target, FolderTools.isPublicFolder(folderPath), session);
         }
     }
 
@@ -176,21 +173,24 @@ public class ModuleSupportImpl implements ModuleSupport {
         }
         Context context = services.getService(ContextService.class).getContext(contextID);
         target = adjustTarget(target, contextID, context.getMailadmin(), false);
+
+        if (Module.getForFolderConstant(target.getModule()) == null) {
+            return new VirtualTargetProxy(target);
+        }
+
+        int folderID;
+        try {
+            folderID = Integer.valueOf(target.getFolder());
+        } catch (NumberFormatException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+
+        OXFolderAccess folderAccess = new OXFolderAccess(context);
+        FolderObject folder = folderAccess.getFolderObject(folderID);
         if (target.isFolder()) {
-            int folderID;
-            try {
-                folderID = Integer.valueOf(target.getFolder());
-            } catch (NumberFormatException e) {
-                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            }
-            if (null != Module.getForFolderConstant(target.getModule())) {
-                FolderObject folder = new OXFolderAccess(context).getFolderObject(folderID);
-                return new AdministrativeFolderTargetProxy(folder);
-            } else {
-                return new VirtualTargetProxy(target);
-            }
-        } else {            
-            return handlers.get(target.getModule()).loadTarget(target, context);
+            return new AdministrativeFolderTargetProxy(folder, FolderTools.isPublicFolder(folder, folderAccess));
+        } else {
+            return handlers.get(target.getModule()).loadTarget(target, FolderTools.isPublicFolder(folder, folderAccess), context);
         }
     }
 

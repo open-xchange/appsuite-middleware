@@ -72,16 +72,18 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
 
     private final FolderObject folder;
     private final Set<Integer> affectedUsers;
+    private final boolean isPublic;
 
     /**
      * Initializes a new {@link AdministrativeFolderTargetProxy}.
      *
      * @param folder The underlying folder object
      */
-    public AdministrativeFolderTargetProxy(FolderObject folder) {
+    public AdministrativeFolderTargetProxy(FolderObject folder, boolean isPublic) {
         super();
         this.folder = folder;
         this.affectedUsers = new HashSet<Integer>();
+        this.isPublic = isPublic;
     }
 
     @Override
@@ -136,6 +138,11 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
         setModified();
     }
 
+    @Override
+    public boolean isPublic() {
+        return isPublic;
+    }
+
     /**
      * Gets the underlying folder.
      *
@@ -159,7 +166,7 @@ public class AdministrativeFolderTargetProxy extends AbstractTargetProxy {
     public String toString() {
         return "AdministrativeFolderTargetProxy [folder=" + folder + "]";
     }
-    
+
     @Override
     public TargetProxyType getProxyType() {
         return DriveTargetProxyType.FOLDER;

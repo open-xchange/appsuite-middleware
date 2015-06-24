@@ -52,6 +52,7 @@ package com.openexchange.share.impl.groupware;
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -90,29 +91,37 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public List<TargetProxy> loadTargets(List<ShareTarget> targets, HandlerParameters parameters) throws OXException {
+    public List<TargetProxy> loadTargets(List<ShareTarget> targets, List<Boolean> publicFlags, HandlerParameters parameters) throws OXException {
         List<TargetProxy> files = new ArrayList<TargetProxy>(targets.size());
         ConnectionHolder.CONNECTION.set(parameters.getWriteCon());
         try {
             if (parameters.isAdministrative()) {
                 IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
-                for (ShareTarget target : targets) {
+                Iterator<ShareTarget> targetIt = targets.iterator();
+                Iterator<Boolean> publicIt = publicFlags.iterator();
+                while (targetIt.hasNext()) {
+                    ShareTarget target = targetIt.next();
+                    boolean isPublic = publicIt.next().booleanValue();
                     FileID fileID = new FileID(target.getItem());
                     if (fileID.getFolderId() == null) {
                         fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
                     }
                     File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                    files.add(new FileTargetProxy(file));
+                    files.add(new FileTargetProxy(file, isPublic));
                 }
             } else {
                 IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
-                for (ShareTarget target : targets) {
+                Iterator<ShareTarget> targetIt = targets.iterator();
+                Iterator<Boolean> publicIt = publicFlags.iterator();
+                while (targetIt.hasNext()) {
+                    ShareTarget target = targetIt.next();
+                    boolean isPublic = publicIt.next().booleanValue();
                     FileID fileID = new FileID(target.getItem());
                     if (fileID.getFolderId() == null) {
                         fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
                     }
                     File file = fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION);
-                    files.add(new FileTargetProxy(file));
+                    files.add(new FileTargetProxy(file, isPublic));
                 }
             }
         } finally {
@@ -123,14 +132,14 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public TargetProxy loadTarget(ShareTarget target, Session session) throws OXException {
+    public TargetProxy loadTarget(ShareTarget target, boolean isPublic, Session session) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (fileID.getFolderId() == null) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
 
         IDBasedFileAccess fileAccess = getFileAccess(session);
-        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION), isPublic);
     }
 
     @Override
@@ -161,14 +170,14 @@ public class FileStorageHandler implements ModuleHandler {
     }
 
     @Override
-    public TargetProxy loadTarget(ShareTarget target, Context context) throws OXException {
+    public TargetProxy loadTarget(ShareTarget target, boolean isPublic, Context context) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (fileID.getFolderId() == null) {
             fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
         }
 
         IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(context);
-        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION));
+        return new FileTargetProxy(fileAccess.getFileMetadata(fileID.toUniqueID(), FileStorageFileAccess.CURRENT_VERSION), isPublic);
     }
 
     @Override
