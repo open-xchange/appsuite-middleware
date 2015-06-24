@@ -77,6 +77,7 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
@@ -218,7 +219,7 @@ public final class LoginPerformer {
                  */
                 authService.authorizeUser(ctx, user);
             }
-            if (null != userLoginLanguage && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+            if (null != userLoginLanguage && !Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
                 UserStorage us = UserStorage.getInstance();
                 UserImpl impl = new UserImpl(user);
                 impl.setPreferredLanguage(userLoginLanguage);
