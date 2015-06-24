@@ -70,11 +70,11 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.manifests.actions.ConfigRequest;
 import com.openexchange.ajax.manifests.actions.ConfigResponse;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.GetMailsRequest;
-import com.openexchange.ajax.share.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.share.actions.StopSMTPRequest;
+import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
+import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -289,7 +289,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             new File[] {image1},
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             String.format("%1$s %2$s"
               , String.format(NotificationStrings.HAS_SHARED_IMAGE, clientFullName, clientEmail, image1.getFileName())
               , NotificationStrings.PLEASE_CLICK_IT
@@ -305,7 +305,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             new File[] {image1},
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
             NotificationStrings.VIEW_IMAGE,
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
@@ -319,7 +319,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             files,
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGES, clientFullName, files.length),
             String.format("%1$s %2$s"
                 ,String.format(NotificationStrings.HAS_SHARED_IMAGES, clientFullName, clientEmail, files.length)
                 ,NotificationStrings.PLEASE_CLICK_THEM
@@ -336,7 +336,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             files,
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_IMAGES, clientFullName, files.length),
             String.format(NotificationStrings.HAS_SHARED_IMAGES_AND_MESSAGE, clientFullName, clientEmail, files.length),
             NotificationStrings.VIEW_IMAGES,
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGES, clientFullName, files.length),
@@ -352,7 +352,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             new File[] {file1},
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
             String.format("%1$s %2$s"
                 , String.format(NotificationStrings.HAS_SHARED_FILE, clientFullName, clientEmail, file1.getFileName())
                 , NotificationStrings.PLEASE_CLICK_IT
@@ -368,7 +368,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             new File[] {file1},
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
             String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
             NotificationStrings.VIEW_FILE,
             String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
@@ -382,7 +382,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             files,
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_FILES, clientFullName, files.length),
             String.format("%1$s %2$s"
                 ,String.format(NotificationStrings.HAS_SHARED_FILES, clientFullName, clientEmail, files.length)
                 , NotificationStrings.PLEASE_CLICK_THEM
@@ -399,7 +399,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             files,
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_FILES, clientFullName, files.length),
             String.format(NotificationStrings.HAS_SHARED_FILES_AND_MESSAGE, clientFullName, clientEmail, files.length),
             NotificationStrings.VIEW_FILES,
             String.format(NotificationStrings.SUBJECT_SHARED_FILES, clientFullName, files.length),
@@ -416,7 +416,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             files,
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_ITEMS, clientFullName, files.length),
             String.format("%1$s %2$s"
                 , String.format(NotificationStrings.HAS_SHARED_ITEMS, clientFullName, clientEmail, files.length)
                 ,NotificationStrings.PLEASE_CLICK_THEM
@@ -433,7 +433,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             files,
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_ITEMS, clientFullName, files.length),
             String.format(NotificationStrings.HAS_SHARED_ITEMS_AND_MESSAGE, clientFullName, clientEmail, files.length),
             NotificationStrings.VIEW_ITEMS,
             String.format(NotificationStrings.SUBJECT_SHARED_ITEMS, clientFullName, files.length),
@@ -448,7 +448,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             new File[] {},
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
             String.format("%1$s %2$s"
                 , String.format(NotificationStrings.HAS_SHARED_FOLDER, clientFullName, clientEmail, testFolder1.getFolderName())
                 ,NotificationStrings.PLEASE_CLICK_IT
@@ -464,7 +464,7 @@ public class MailNotificationTest extends ShareTest {
         testUserGotA(
             testFolder1,
             new File[] {},
-            String.format(NotificationStrings.SUBJECT_WELCOME_INVITE_TO_PRODUCT, clientFullName, productName),
+            String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
             String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
             NotificationStrings.VIEW_FOLDER,
             String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),

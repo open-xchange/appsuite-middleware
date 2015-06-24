@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,61 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
-
+import java.util.List;
+import com.openexchange.session.Session;
+import com.openexchange.share.ShareTarget;
 
 /**
- * {@link DefaultRequestContext} - Default implementation of {@link RequestContext} based
- * on plain fields.
+ * A notification to inform users about created shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultRequestContext implements RequestContext {
-
-    private final String protocol;
-
-    private final String hostname;
+public interface ShareCreatedNotification<T> extends ShareNotification<T> {
 
     /**
-     * Initializes a new {@link DefaultRequestContext}.
-     * @param requestHostname
-     * @param protocol
+     * Gets the session of the new shares creator.
+     *
+     * @return The session
      */
-    public DefaultRequestContext(String hostname, String protocol) {
-        super();
-        this.hostname = hostname;
-        this.protocol = protocol;
-    }
+    Session getSession();
 
-    @Override
-    public String getProtocol() {
-        return protocol;
-    }
+    /**
+     * Gets the share targets to notify the recipient about.
+     *
+     * @return The share targets, never <code>null</code>
+     */
+    List<ShareTarget> getShareTargets();
 
-    @Override
-    public String getHostname() {
-        return hostname;
-    }
+    /**
+     * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
+     * {@link NotificationType}.
+     *
+     * @return The message or <code>null</code>, if nothing was provided
+     */
+    String getMessage();
+
+    /**
+     * Get the id of the user something is shared to
+     *
+     * @return The user ID
+     */
+    int getTargetUserID();
+
+    /**
+     * Returns whether this notification is about the first share targeting a new guest user.
+     *
+     * @return <code>true</code> if a new guest was created and the notification is about the initial share, else <code>false</code>
+     */
+    boolean isInitialShare();
+
+    /**
+     * Gets the URL to the according share.
+     *
+     * @return The URL
+     */
+    String getShareUrl();
 
 }

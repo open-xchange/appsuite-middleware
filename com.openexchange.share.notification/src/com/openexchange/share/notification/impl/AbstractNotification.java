@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import java.util.Locale;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
@@ -64,8 +65,6 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     protected final Transport transport;
 
     protected final NotificationType type;
-
-    protected LinkProvider linkProvider;
 
     protected T transportInfo;
 
@@ -100,11 +99,6 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     }
 
     @Override
-    public LinkProvider getLinkProvider() {
-        return linkProvider;
-    }
-
-    @Override
     public T getTransportInfo() {
         return transportInfo;
     }
@@ -122,15 +116,6 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
     @Override
     public RequestContext getRequestContext() {
         return requestContext;
-    }
-
-    /**
-     * Sets the {@link LinkProvider}
-     *
-     * @param linkProvider
-     */
-    public void setLinkProvider(LinkProvider linkProvider) {
-        this.linkProvider = linkProvider;
     }
 
     /**
@@ -176,8 +161,7 @@ public abstract class AbstractNotification<T> implements ShareNotification<T> {
      */
     public void apply(AbstractNotificationBuilder<?, ?, T> builder) {
         this.transportInfo = builder.transportInfo;
-        this.linkProvider = builder.linkProvider;
-        this.contextID = builder.guestContextID;
+        this.contextID = builder.contextID;
         this.locale = builder.locale;
         this.requestContext = builder.requestContext;
     }

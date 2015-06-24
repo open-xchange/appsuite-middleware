@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,89 +47,56 @@
  *
  */
 
-package com.openexchange.share.notification;
-
-import java.util.Locale;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-
+package com.openexchange.share.notification.impl;
 
 /**
- * A {@link ShareNotification} encapsulates all information necessary to notify
- * the according recipient about a share and provide her a link to access that share.
+ * Possible notification types. Meant to be extended for future requirements.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareNotification<T> {
+public enum NotificationType {
+    /**
+     * Notification type for a newly created share.
+     * Use to send notifications about a new share to
+     * a recipient of any type.
+     */
+    SHARE_CREATED("share-created"),
 
     /**
-     * Possible notification types. Meant to be extended for future requirements.
+     * Notification type for a password-reset that needs to be confirmed.
+     * Use to send a request to confirm the password-reset to the share's recipient.
      */
-    public enum NotificationType {
-        /**
-         * Notification type for a newly created share.
-         * Use to send notifications about a new share to
-         * a recipient of any type.
-         */
-        SHARE_CREATED,
+    CONFIRM_PASSWORD_RESET("confirm-pwreset");
 
-        /**
-         * Notification type for a password-reset that needs to be confirmed.
-         * Use to send a request to confirm the password-reset to the share's recipient.
-         */
-        CONFIRM_PASSWORD_RESET
-
+    private final String id;
+    private NotificationType(String id) {
+        this.id = id;
     }
 
     /**
-     * Gets the transport that shall be used to deliver this notification.
+     * Gets the type identifier
      *
-     * @return The {@link Transport}, never <code>null</code>
+     * @return The id
      */
-    Transport getTransport();
+    public String getId() {
+        return id;
+    }
 
     /**
-     * Gets the type of this notification (e.g. "a share has been created").
+     * Gets the notification for the given identifier
      *
-     * @return The {@link NotificationType}, never <code>null</code>
+     * @param id The id
+     * @return The type or <code>null</code> if the identifier is invalid
      */
-    NotificationType getType();
+    public static NotificationType forId(String id) {
+        for (NotificationType type : NotificationType.values()) {
+            if (type.getId().equals(id)) {
+                return type;
+            }
+        }
 
-    /**
-     * Gets the transport information used to notify the recipient.
-     *
-     * @return The transport information, never <code>null</code>
-     */
-    T getTransportInfo();
-
-    /**
-     * Gets the {@link LinkProvider} used for obtaining necessary URLs that are
-     * part of the notification messages.
-     *
-     * @return The provider, never <code>null</code>
-     */
-    LinkProvider getLinkProvider();
-
-    /**
-     * Gets the ID of the context where the share is located.
-     *
-     * @return The context ID
-     */
-    int getContextID();
-
-    /**
-     * Gets the locale used to translate the notification message before it is sent out.
-     *
-     * @return The locale
-     */
-    Locale getLocale();
-
-    /**
-     * Gets context information about the HTTP request that led to the generation of this
-     * notification.
-     *
-     * @return The request context
-     */
-    RequestContext getRequestContext();
+        return null;
+    }
 
 }

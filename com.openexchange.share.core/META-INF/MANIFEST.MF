@@ -5,22 +5,31 @@ Bundle-SymbolicName: com.openexchange.share.core
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.context,
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.context,
  com.openexchange.database,
+ com.openexchange.dispatcher,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.modules,
+ com.openexchange.groupware.notify.hostname,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.osgi,
+ com.openexchange.osgi.util,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.share,
  com.openexchange.share.groupware,
  com.openexchange.share.recipient,
+ com.openexchange.tools.servlet.http,
  com.openexchange.tools.session,
  com.openexchange.user,
  javax.mail.internet,
+ javax.servlet;version="2.5.0",
+ javax.servlet.http;version="2.5.0",
  org.json
-Export-Package: com.openexchange.share.core.performer,
+Export-Package: com.openexchange.share.core,
+ com.openexchange.share.core.performer,
  com.openexchange.share.core.tools

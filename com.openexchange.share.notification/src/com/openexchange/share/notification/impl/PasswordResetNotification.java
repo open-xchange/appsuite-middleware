@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,20 +49,22 @@
 
 package com.openexchange.share.notification.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.share.AuthenticationMode;
 
 /**
- * {@link ShareNotifyExceptionMessages}
+ * A notification to send a new password to a guest user who made use of the password reset mechanism. Such notifications must only be used
+ * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
  *
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareNotifyExceptionMessages implements LocalizableStrings {
+public interface PasswordResetNotification<T> extends ShareNotification<T> {
 
-    public static final String INVALID_MAIL_ADDRESS_MSG = "\"%1$s\" is not a valid email address.";
-
-    public static final String MISSING_MAIL_ADDRESS_MSG = "No notification mail could be sent to user \"%1$s\". We don't know his email address.";
-
-    public static final String UNEXPECTED_ERROR_MSG = "An error occurred, we were unable to send an email to \"%2$s\".";
+    /**
+     * Gets the username of the guest that must be used for logging in.
+     *
+     * @return The username
+     */
+    String getUsername();
 
 }

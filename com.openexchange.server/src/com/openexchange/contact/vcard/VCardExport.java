@@ -86,4 +86,11 @@ public interface VCardExport extends Closeable {
      */
     InputStream getClosingStream() throws OXException;
 
+    /**
+     * Gets the exported vCard as byte array.
+     *
+     * @return The vCard bytes
+     */
+    byte[] toByteArray() throws OXException;
+
 }

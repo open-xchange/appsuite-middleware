@@ -61,6 +61,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -104,7 +105,7 @@ public class InviteAction extends AbstractShareAction {
              * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
              */
             ShareNotificationService shareNotificationService = services.getService(ShareNotificationService.class);
-            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session, requestData);
+            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session, DefaultRequestContext.newInstance(requestData));
             /*
              * construct & return appropriate json result
              */

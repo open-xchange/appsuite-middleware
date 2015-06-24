@@ -47,90 +47,22 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
-import java.util.List;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
- * A default implementation of {@link ShareCreatedNotification} that contains all
- * necessary data as fields. Plain setters can be used to initialize an instance.
+ * A notification to re-send the password of an anonymous share to a certain recipient.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultShareCreatedNotification<T> extends AbstractNotification<T> implements ShareCreatedNotification<T> {
-
-    private Session session;
-
-    private List<ShareTarget> targets;
-
-    private String message;
-
-    private int targetUserID;
-
-    private boolean isInitialShare;
+public interface PasswordReminderNotification<T> extends ShareNotification<T> {
 
     /**
-     * Initializes a new {@link DefaultShareCreatedNotification}.
+     * Gets the password to notify the recipient about.
+     *
+     * @return The password, never <code>null</code>
      */
-    public DefaultShareCreatedNotification(Transport transport) {
-        super(transport, NotificationType.SHARE_CREATED);
-    }
-
-    public DefaultShareCreatedNotification(Transport transport, NotificationType type) {
-        super(transport, type);
-    }
-
-    @Override
-    public Session getSession() {
-        return session;
-    }
-
-    @Override
-    public List<ShareTarget> getShareTargets() {
-        return targets;
-    }
-
-    @Override
-    public String getMessage() {
-        return message;
-    }
-
-    public List<ShareTarget> getTargets() {
-        return targets;
-    }
-
-    @Override
-    public int getTargetUserID() {
-        return targetUserID;
-    }
-
-    @Override
-    public boolean isInitialShare() {
-        return isInitialShare;
-    }
-
-    public void setTargets(List<ShareTarget> targets) {
-        this.targets = targets;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setTargetUserID(int targetUserID) {
-        this.targetUserID = targetUserID;
-    }
-
-    public void setInitialShare(boolean isInitialShare) {
-        this.isInitialShare = isInitialShare;
-    }
+    String getPassword();
 
 }

@@ -49,73 +49,60 @@
 
 package com.openexchange.share.notification.impl;
 
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * A simple container holding all necessary information to send out a notification about the shares creation.
+ * {@link DefaultPasswordResetConfirmNotification}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since v7.8.0
+ * @since v7.8
  */
-public class NotificationInfo {
+public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
 
-    private final ShareRecipient recipient;
-    private final GuestInfo guestInfo;
-    private final List<ShareInfo> shareInfos;
-    private final Transport transport;
-    private String message;
-    private ServerSession session;
-    private AJAXRequestData requestData;
+    private String accountName;
+    private int guestId;
+    private String shareUrl;
+    private String pwResetUrl;
 
-    public NotificationInfo(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos,
-        Transport transport, String message, ServerSession session, AJAXRequestData requestData) {
-        super();
-        this.recipient = recipient;
-        this.guestInfo = guestInfo;
-        this.shareInfos = shareInfos;
-        this.transport = transport;
-        this.message = message;
-        this.session = session;
-        this.requestData = requestData;
+    public DefaultPasswordResetConfirmNotification(Transport transport) {
+        super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
     }
 
-    public ShareRecipient getRecipient() {
-        return recipient;
+    @Override
+    public int getGuestID() {
+        return guestId;
     }
 
-    public GuestInfo getGuestInfo() {
-        return guestInfo;
+    @Override
+    public String getAccountName() {
+        return accountName;
     }
 
-    public List<ShareInfo> getShareInfos() {
-        return shareInfos;
-    }
-    
-    public Transport getTransport() {
-        return transport;
+    @Override
+    public String getShareUrl() {
+        return shareUrl;
     }
 
-    public String getMessage() {
-        return message;
+    @Override
+    public String getConfirmPasswordResetUrl() {
+        return pwResetUrl;
     }
 
-    public ServerSession getSession() {
-        return session;
+    public void setAccountName(String accountName) {
+        this.accountName = accountName;
     }
 
-    public AJAXRequestData getRequestData() {
-        return requestData;
+    public void setGuestID(int guestId) {
+        this.guestId = guestId;
     }
-    
-    
+
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
+    }
+
+    public void setConfirmPasswordResetUrl(String pwResetUrl) {
+        this.pwResetUrl = pwResetUrl;
+    }
 
 }

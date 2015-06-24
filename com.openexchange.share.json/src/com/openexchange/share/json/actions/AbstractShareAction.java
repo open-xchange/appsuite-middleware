@@ -51,13 +51,10 @@ package com.openexchange.share.json.actions;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.TimeZone;
-import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
@@ -136,15 +133,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
         return translatorFactory.translatorFor(session.getUser().getLocale());
     }
 
-    protected String getServletPrefix() {
-        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-
-        return prefixService.getPrefix();
-    }
-
     protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
         String timeZoneID = requestData.getParameter("timezone");
         if (null == timeZoneID) {
@@ -152,28 +140,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
         }
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
         return timeZone;
-    }
-
-    protected static String determineProtocol(AJAXRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
-        } else {
-            return requestData.isSecure() ? "https://" : "http://";
-        }
-    }
-
-    protected String determineHostname(ServerSession session, AJAXRequestData requestData) {
-        HostnameService hostNameService = services.getOptionalService(HostnameService.class);
-        if(hostNameService != null) {
-            return hostNameService.getHostname(session.getUserId(), session.getContextId());
-        }
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return servletRequest.getServerName();
-        } else {
-            return requestData.getHostname();
-        }
     }
 
 }

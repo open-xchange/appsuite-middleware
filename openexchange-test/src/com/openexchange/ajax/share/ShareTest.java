@@ -96,6 +96,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -152,6 +153,28 @@ public abstract class ShareTest extends AbstractAJAXSession {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
+    }
+
+    /**
+     * Gets a request context based on the AJAX clients values.
+     */
+    protected RequestContext getRequestContext() {
+        return new RequestContext() {
+            @Override
+            public String getProtocol() {
+                return client.getProtocol();
+            }
+
+            @Override
+            public String getHostname() {
+                return client.getHostname();
+            }
+
+            @Override
+            public String getServletPrefix() {
+                return "/ajax/";
+            }
+        };
     }
 
     /**

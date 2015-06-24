@@ -153,7 +153,7 @@ public class ContextCompositionParameters implements CompositionParameters {
     }
 
     @Override
-    public String getUserVCard(String charset) throws OXException {
+    public  byte[] getUserVCard() throws OXException {
         return null;
     }
 

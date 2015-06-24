@@ -57,38 +57,28 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.DefaultLinkProvider;
-import com.openexchange.share.notification.DefaultRequestContext;
-import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.ShareNotification;
-import com.openexchange.share.notification.ShareNotificationHandler;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.mail.MailNotifications;
-import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
-import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
+import com.openexchange.share.notification.impl.mail.MailNotifications;
+import com.openexchange.share.notification.impl.mail.MailNotifications.ShareCreatedBuilder;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -106,7 +96,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     private final ServiceLookup serviceLookup;
 
     /** The queue for additional handlers */
-    private final ConcurrentMap<Transport, ShareNotificationHandler> handlers;
+    private final ConcurrentMap<Transport, ShareNotificationHandler<?>> handlers;
 
     /**
      * Initializes a new {@link DefaultNotificationService}.
@@ -114,7 +104,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     public DefaultNotificationService(ServiceLookup serviceLookup) {
         super();
         this.serviceLookup = serviceLookup;
-        handlers = new ConcurrentHashMap<Transport, ShareNotificationHandler>();
+        handlers = new ConcurrentHashMap<Transport, ShareNotificationHandler<?>>();
     }
 
     /**
@@ -122,7 +112,7 @@ public class DefaultNotificationService implements ShareNotificationService {
      *
      * @param handler The handler to add
      */
-    public void add(ShareNotificationHandler handler) {
+    public void add(ShareNotificationHandler<?> handler) {
         handlers.putIfAbsent(handler.getTransport(), handler);
     }
 
@@ -131,45 +121,38 @@ public class DefaultNotificationService implements ShareNotificationService {
      *
      * @param handler The handler to remove
      */
-    public void remove(ShareNotificationHandler handler) {
+    public void remove(ShareNotificationHandler<?> handler) {
         handlers.remove(handler.getTransport(), handler);
     }
 
     @Override
-    public List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> createdShares, String message, ServerSession session, AJAXRequestData requestData) {
-        List<OXException> warnings = new ArrayList<OXException>();
+    public List<OXException> sendShareCreatedNotifications(Transport transport, Map<ShareRecipient, List<ShareInfo>> createdShares, String message, Session session, RequestContext requestContext) {
+        if (transport != Transport.MAIL) {
+            throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
+        }
 
-        /*
-         * To send the notifications we have to build NotificationInfo instances per recipient and share that contain the needed data to
-         * build the actual notification instance.
-         */
-        List<NotificationInfo> notificationInfos = new ArrayList<NotificationInfo>(createdShares.size());
+        List<OXException> warnings = new ArrayList<OXException>();
+        List<ShareNotification<InternetAddress>> notifications = new ArrayList<ShareNotification<InternetAddress>>(createdShares.size());
+        boolean notifyInternalUsers = serviceLookup.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.notifyInternal", true);
         for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
             ShareRecipient recipient = entry.getKey();
             List<ShareInfo> shareInfos = entry.getValue();
             if (shareInfos != null && !shareInfos.isEmpty()) {
-                if (!InternalRecipient.class.isInstance(recipient) || serviceLookup.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.notifyInternal", true)) {
-                    notificationInfos.add(new NotificationInfo(recipient, shareInfos.get(0).getGuest(), shareInfos, transport, message, session, requestData));
+                if (!InternalRecipient.class.isInstance(recipient) || notifyInternalUsers) {
+                    try {
+                        notifications.add(buildShareCreatedMailNotification(recipient, shareInfos, message, session, requestContext));
+                    } catch (Exception e) {
+                        collectWarning(warnings, e, shareInfos.get(0).getGuest().getEmailAddress());
+                    }
                 }
             }
         }
 
-        for (NotificationInfo notificationInfo : notificationInfos) {
+        for (ShareNotification<InternetAddress> shareNotification : notifications) {
             try {
-                ShareNotification<?> shareNotification = buildShareCreatedNotification(notificationInfo);
                 send(shareNotification);
-            } catch (OXException e) {
-                if (e.isPrefix(ShareNotifyExceptionCodes.PREFIX)) {
-                    warnings.add(e);
-                } else {
-                    String emailAddress = notificationInfo.getGuestInfo().getEmailAddress();
-                    LOG.error("Error while sending notification mail to {}", emailAddress, e);
-                    warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage(), emailAddress));
-                }
             } catch (Exception e) {
-                String emailAddress = notificationInfo.getGuestInfo().getEmailAddress();
-                LOG.error("Error while sending notification mail to {}", emailAddress, e);
-                warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage(), emailAddress));
+                collectWarning(warnings, e, shareNotification.getTransportInfo().toUnicodeString());
             }
         }
 
@@ -177,34 +160,42 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String shareToken, String requestHostname, String protocol, String hash) throws OXException {
+    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, RequestContext requestContext) throws OXException {
+        if (transport != Transport.MAIL) {
+            throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
+        }
+
         try {
             UserService userService = serviceLookup.getService(UserService.class);
             GuestInfo guestInfo = guestShare.getGuest();
             String mailAddress = guestInfo.getEmailAddress();
             User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-            LinkProvider linkProvider = buildLinkProvider(guestInfo.getGuestID(), guestInfo.getContextID(), requestHostname, shareToken, protocol);
+            String baseToken = guestShare.getGuest().getBaseToken();
 
             ShareNotification<InternetAddress> notification = MailNotifications.passwordConfirm()
                 .setTransportInfo(new InternetAddress(mailAddress, true))
-                .setLinkProvider(linkProvider)
-                .setGuestContext(guestInfo.getContextID())
+                .setContextID(guestInfo.getContextID())
                 .setGuestID(guestInfo.getGuestID())
                 .setLocale(guest.getLocale())
-                .setShareToken(shareToken)
-                .setConfirm(hash)
-                .setAccount(mailAddress)
-                .setRequestContext(new DefaultRequestContext(requestHostname, protocol)) // TODO combine with link provider
+                .setAccountName(mailAddress)
+                .setRequestContext(requestContext)
+                .setShareUrl(ShareLinks.generateExternal(requestContext, baseToken))
+                .setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(requestContext, baseToken, confirmToken))
                 .build();
 
             send(notification);
         } catch (Exception e) {
+            if (e instanceof OXException) {
+                throw (OXException) e;
+            }
+
             throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 
-    private <T extends ShareNotification<?>> void send(T notification) throws OXException {
-        ShareNotificationHandler handler = handlers.get(notification.getTransport());
+    private <T> void send(ShareNotification<T> notification) throws OXException {
+        @SuppressWarnings("unchecked")
+        ShareNotificationHandler<T> handler = (ShareNotificationHandler<T>) handlers.get(notification.getTransport());
         if (handler == null) {
             throw new OXException(new IllegalArgumentException("No provider exists to handle notifications for transport " + notification.getTransport().toString()));
         }
@@ -212,32 +203,19 @@ public class DefaultNotificationService implements ShareNotificationService {
         handler.send(notification);
     }
 
-    private ShareNotification<?> buildShareCreatedNotification(NotificationInfo notificationInfo) throws OXException {
-        ShareNotification<?> shareNotification = null;
-        switch (notificationInfo.getTransport()) {
-            case MAIL:
-                shareNotification = buildShareCreatedMailNotification(notificationInfo);
-                break;
-            default:
-                ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Unknown transport: " + notificationInfo.getTransport(), notificationInfo.getGuestInfo().getEmailAddress());
-                break;
-        }
-        return shareNotification;
-    }
-
     /**
      * Builds a {@link ShareNotification} ready to be sent out to a recipent via mail.
      *
-     * @param notificationInfo The needed infos to build the {@link ShareNotification}
      * @return the built ShareNotification
-     * @throws OXException if the email address needed to build the notification is missing
+     * @throws OXException
      */
-    private ShareNotification<?> buildShareCreatedMailNotification(NotificationInfo notificationInfo) throws OXException {
-        if (RecipientType.USER.equals(notificationInfo.getGuestInfo().getRecipientType())) {
-            return buildInternalShareCreatedMailNotification(notificationInfo);
+    private ShareNotification<InternetAddress> buildShareCreatedMailNotification(ShareRecipient recipient, List<ShareInfo> createdShares, String message, Session session, RequestContext requestContext) throws OXException {
+        if (RecipientType.USER.equals(recipient.getType())) {
+            return buildInternalShareCreatedMailNotification((InternalRecipient) recipient, createdShares, message, session, requestContext);
         }
-        if (Strings.isEmpty(notificationInfo.getGuestInfo().getEmailAddress())) {
-            GuestInfo guestInfo = notificationInfo.getGuestInfo();
+
+        GuestInfo guestInfo = createdShares.get(0).getGuest();
+        if (Strings.isEmpty(guestInfo.getEmailAddress())) {
             String guestName = guestInfo.getDisplayName();
             if (Strings.isEmpty(guestName)) {
                 guestName = NotificationStrings.UNKNOWN_USER_NAME;
@@ -246,47 +224,75 @@ public class DefaultNotificationService implements ShareNotificationService {
             throw ShareNotifyExceptionCodes.MISSING_MAIL_ADDRESS.create(guestName, guestInfo.getGuestID(), guestInfo.getContextID());
         }
 
-        ServerSession session = notificationInfo.getSession();
-        AJAXRequestData requestData = notificationInfo.getRequestData();
-        List<ShareInfo> createdShares = notificationInfo.getShareInfos();
-        GuestInfo guest = notificationInfo.getGuestInfo();
-        ShareRecipient recipient = notificationInfo.getRecipient();
-        String shareToken = createdShares.size() == 1 ? createdShares.get(0).getToken() : guest.getBaseToken();
-        String protocol = determineProtocol(requestData);
+        String shareUrl;
+        if (createdShares.size() == 1) {
+            shareUrl = ShareLinks.generateExternal(requestContext, guestInfo.getBaseToken(), createdShares.get(0).getShare().getTarget().getPath());
+        } else {
+            shareUrl = ShareLinks.generateExternal(requestContext, guestInfo.getBaseToken());
+        }
 
         try {
             ShareCreatedBuilder shareCreatedBuilder = MailNotifications.shareCreated()
-                .setTransportInfo(new InternetAddress(guest.getEmailAddress(), true))
-                .setLinkProvider(buildLinkProvider(session.getUserId(), session.getContextId(), requestData.getHostname(), shareToken, protocol))
-                .setGuestContext(guest.getContextID())
-                .setGuestID(guest.getGuestID())
-                .setLocale(guest.getLocale())
+                .setTransportInfo(new InternetAddress(guestInfo.getEmailAddress(), true))
+                .setContextID(guestInfo.getContextID())
+                .setGuestID(guestInfo.getGuestID())
+                .setLocale(guestInfo.getLocale())
                 .setSession(session)
                 .setTargets(getTargets(createdShares))
-                .setMessage(notificationInfo.getMessage())
-                .setCausedGuestCreation(isNewGuest(recipient))
-                .setRequestContext(new AJAXRequestContext(requestData)); // TODO combine with link provider
-
-            AuthenticationMode authMode = guest.getAuthentication();
-            switch (authMode) {
-                case ANONYMOUS:
-                    shareCreatedBuilder.setAuthMode(AuthenticationMode.ANONYMOUS);
-                    break;
-                case ANONYMOUS_PASSWORD:
-                    shareCreatedBuilder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
-                    shareCreatedBuilder.setPassword(((AnonymousRecipient) recipient).getPassword());
-                    break;
-                case GUEST_PASSWORD:
-                    shareCreatedBuilder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
-                    shareCreatedBuilder.setUsername(guest.getEmailAddress());
-                    shareCreatedBuilder.setPassword(((GuestRecipient) recipient).getPassword());
-                    break;
-            }
+                .setMessage(message)
+                .setIntitialShare(isNewGuest(recipient))
+                .setRequestContext(requestContext)
+                .setShareUrl(shareUrl);
 
             return shareCreatedBuilder.build();
         } catch (AddressException e) {
-            throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(guest.getEmailAddress());
+            throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(guestInfo.getEmailAddress());
         }
+    }
+
+    /**
+     * Builds a {@link ShareNotification} ready to be sent out to a internal recipent via mail.
+     *
+     * @return the built ShareNotification
+     * @throws OXException
+     */
+    private ShareNotification<InternetAddress> buildInternalShareCreatedMailNotification(InternalRecipient recipient, List<ShareInfo> createdShares, String message, Session session, RequestContext requestContext) throws OXException {
+        int contextId = session.getContextId();
+        User internalUser = serviceLookup.getService(UserService.class).getUser(recipient.getEntity(), contextId);
+
+        // TODO: no decision between one and multiple targets yet. where to jump to in the latter case?
+        String shareUrl = ShareLinks.generateInternal(requestContext, createdShares.get(0).getShare().getTarget());
+        try {
+            ShareCreatedBuilder shareCreatedBuilder = MailNotifications.shareCreated()
+                .setTransportInfo(new InternetAddress(internalUser.getMail(), true))
+                .setContextID(contextId)
+                .setGuestID(internalUser.getId())
+                .setLocale(internalUser.getLocale())
+                .setSession(session)
+                .setTargets(getTargets(createdShares))
+                .setMessage(message)
+                .setIntitialShare(isNewGuest(recipient))
+                .setRequestContext(requestContext)
+                .setShareUrl(shareUrl);
+
+            return shareCreatedBuilder.build();
+        } catch (AddressException e) {
+            throw ShareNotifyExceptionCodes.INVALID_MAIL_ADDRESS.create(internalUser.getMail());
+        }
+    }
+
+    /**
+     * Determines if a {@link ShareRecipient} is a newly created {link GuestRecipient}.
+     *
+     * @param recipient The {@link ShareRecipient}
+     * @return true if the recipient is a {link GuestRecipient} that had to be created.
+     */
+    private boolean isNewGuest(ShareRecipient recipient) {
+        if (RecipientType.GUEST.equals(recipient.getType())) {
+            GuestRecipient guestRecipient = GuestRecipient.class.cast(recipient);
+            return guestRecipient.wasCreated();
+        }
+        return false;
     }
 
     /**
@@ -306,108 +312,22 @@ public class DefaultNotificationService implements ShareNotificationService {
         return targets;
     }
 
-    /**
-     * Determines if a {@link ShareRecipient} is a newly created {link GuestRecipient}.
-     *
-     * @param recipient The {@link ShareRecipient}
-     * @return true if the recipient is a {link GuestRecipient} that had to be created.
-     */
-    private boolean isNewGuest(ShareRecipient recipient) {
-        if (RecipientType.GUEST.equals(recipient.getType())) {
-            GuestRecipient guestRecipient = GuestRecipient.class.cast(recipient);
-            return guestRecipient.wasCreated();
+    private static void collectWarning(List<OXException> warnings, Exception e, String emailAddress) {
+        if (emailAddress == null) {
+            emailAddress = "unknown";
         }
-        return false;
-    }
 
-    protected LinkProvider buildLinkProvider(int userID, int contextID, String requestHostname, String shareToken, String protocol) {
-        return new DefaultLinkProvider(protocol, determineHostname(userID, contextID, requestHostname), determineServletPrefix(), shareToken);
-    }
-
-    protected LinkProvider buildLinkProvider(int userID, int contextID, String requestHostname, String shareToken, String protocol, String internalLink) {
-        return new DefaultLinkProvider(protocol, determineHostname(userID, contextID, requestHostname), determineServletPrefix(), shareToken, internalLink);
-    }
-
-    protected static String determineProtocol(AJAXRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
-        }
-        return requestData.isSecure() ? "https://" : "http://";
-    }
-
-    /**
-     * Determines the hostname by first asking the optional {@link HostnameService} and then falling back to the hostname contained in the request.
-     *
-     * @param userID The userID to use when querying the {@link HostnameService}
-     * @param contextID The userID to use when querying the {@link HostnameService}
-     * @param requestHostname The hostname as provided by the request
-     * @return the determined hostname
-     */
-    protected String determineHostname(int userID, int contextID, String requestHostname) {
-        HostnameService hostNameService = serviceLookup.getOptionalService(HostnameService.class);
-        if (hostNameService != null) {
-            return hostNameService.getHostname(userID, contextID);
-        }
-        return requestHostname;
-    }
-
-    protected String determineServletPrefix() {
-        DispatcherPrefixService prefixService = serviceLookup.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-        return prefixService.getPrefix();
-    }
-
-    /**
-     * Builds a {@link ShareNotification} ready to be sent out to a internal recipent via mail.
-     *
-     * @param notificationInfo The needed infos to build the {@link ShareNotification}
-     * @return the built ShareNotification
-     * @throws OXException if the email address needed to build the notification is missing
-     */
-    private ShareNotification<?> buildInternalShareCreatedMailNotification(NotificationInfo notificationInfo) throws OXException {
-        Session session = notificationInfo.getSession();
-        AJAXRequestData requestData = notificationInfo.getRequestData();
-        InternalRecipient recipient = (InternalRecipient) notificationInfo.getRecipient();
-        List<ShareInfo> createdShares = notificationInfo.getShareInfos();
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-        String protocol = determineProtocol(requestData);
-        String uiWebPath = serviceLookup.getService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite");
-        User internalUser = serviceLookup.getService(UserService.class).getUser(recipient.getEntity(), contextId);
-
-        LinkProvider linkProvider;
-        if (createdShares.size() == 1 && null != createdShares.get(0).getShare().getTarget()) {
-            String module = Module.getForFolderConstant(createdShares.get(0).getShare().getTarget().getModule()).getName();
-            String folder = createdShares.get(0).getShare().getTarget().getFolder();
-            String item = createdShares.get(0).getShare().getTarget().getItem();
-            StringBuilder sb = new StringBuilder(uiWebPath).append("/ui#!!").append("&app=io.ox/").append(module).append("&folder=").append(folder);
-            if (null != item && !Strings.isEmpty(item)) {
-                sb.append("&item=").append(item);
+        if (e instanceof OXException) {
+            OXException oxe = (OXException) e;
+            if (oxe.isPrefix(ShareNotifyExceptionCodes.PREFIX)) {
+                warnings.add(oxe);
+            } else {
+                LOG.error("Error while sending notification mail to {}", emailAddress, oxe);
+                warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(oxe, oxe.getMessage(), emailAddress));
             }
-            linkProvider = buildLinkProvider(userId, contextId, requestData.getHostname(), null, protocol, sb.toString());
         } else {
-            StringBuilder sb = new StringBuilder(uiWebPath).append("/ui#!!").append("&app=io.ox/").append("files").append("&folder=").append(10);
-            linkProvider = buildLinkProvider(userId, contextId, requestData.getHostname(), null, protocol, sb.toString());
-        }
-
-        try {
-            ShareCreatedBuilder builder = MailNotifications.shareCreated()
-                .setGuestContext(contextId)
-                .setGuestID(internalUser.getId())
-                .setLocale(internalUser.getLocale())
-                .setSession(session)
-                .setTargets(getTargets(createdShares))
-                .setMessage(notificationInfo.getMessage())
-                .setRequestContext(new AJAXRequestContext(requestData))
-                .setCausedGuestCreation(false)
-                .setTransportInfo(new InternetAddress(internalUser.getMail(), true))
-                .setLinkProvider(linkProvider);
-            return builder.build();
-        } catch (Exception e) {
-            throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage(), notificationInfo.getGuestInfo().getEmailAddress());
+            LOG.error("Error while sending notification mail to {}", emailAddress, e);
+            warnings.add(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage(), emailAddress));
         }
     }
 

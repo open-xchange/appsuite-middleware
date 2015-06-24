@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,34 +47,30 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
-import com.openexchange.groupware.notify.hostname.HostnameService;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
- * Encapsulates information about the current HTTP request that is crucial to generate
- * a share notification.
+ * {@link ShareNotificationHandler}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface RequestContext {
+public interface ShareNotificationHandler<TInfo> {
 
     /**
-     * Gets the protocol via which this request was received, either <code>http</code>
-     * or <code>https</code>.
-     *
-     * @return The protocol
+     * Gets the transport supported by this handler.
      */
-    String getProtocol();
+    Transport getTransport();
 
     /**
-     * Gets the requested hostname. This could have been determined by the HTTP request
-     * itself or an optional {@link HostnameService}.
+     * Notifies the recipient of a {@link ShareNotification} about the according share.
      *
-     * @return The hostname
+     * @param notification The notification
      */
-    String getHostname();
+    <NType extends ShareNotification<TInfo>> void send(NType notification) throws OXException;
+
 
 }

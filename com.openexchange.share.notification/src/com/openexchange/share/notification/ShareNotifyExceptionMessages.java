@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,28 +49,20 @@
 
 package com.openexchange.share.notification;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ShareNotificationHandler}
+ * {@link ShareNotifyExceptionMessages}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
-public interface ShareNotificationHandler {
+public class ShareNotifyExceptionMessages implements LocalizableStrings {
 
-    /**
-     * Gets the transport supported by this handler.
-     */
-    Transport getTransport();
-    
-    /**
-     * Notifies the recipient of a {@link ShareNotification} about the according share.
-     *
-     * @param notification The notification
-     */
-    <T extends ShareNotification<?>> void send(T notification) throws OXException;
-   
+    public static final String INVALID_MAIL_ADDRESS_MSG = "\"%1$s\" is not a valid email address.";
+
+    public static final String MISSING_MAIL_ADDRESS_MSG = "No notification mail could be sent to user \"%1$s\". We don't know his email address.";
+
+    public static final String UNEXPECTED_ERROR_MSG = "An error occurred, we were unable to send an email to \"%2$s\".";
 
 }

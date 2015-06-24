@@ -47,12 +47,12 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
 import java.util.Collection;
 import java.util.Locale;
 import com.openexchange.java.Strings;
-import com.openexchange.share.notification.ShareNotification.NotificationType;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
@@ -69,9 +69,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
 
     protected T transportInfo;
 
-    protected LinkProvider linkProvider;
-
-    protected int guestContextID;
+    protected int contextID;
 
     protected int guestID;
 
@@ -95,22 +93,12 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
     }
 
     /**
-     * Sets the {@link LinkProvider}
+     * Sets the ID of the context where the share is located.
      *
-     * @param linkProvider
+     * @param contextID The context ID
      */
-    public B setLinkProvider(LinkProvider linkProvider) {
-        this.linkProvider = linkProvider;
-        return (B) this;
-    }
-
-    /**
-     * Sets the guest's context ID
-     *
-     * @param contextID
-     */
-    public B setGuestContext(int contextID) {
-        this.guestContextID = contextID;
+    public B setContextID(int contextID) {
+        this.contextID = contextID;
         return (B) this;
     }
 
@@ -152,8 +140,7 @@ public abstract class AbstractNotificationBuilder<B extends AbstractNotification
      */
     public N build() {
         checkNotNull(transportInfo, "transportInfo");
-        checkNotNull(linkProvider, "linkProvider");
-        checkNotZero(guestContextID, "guestContextID");
+        checkNotZero(contextID, "contextID");
         checkNotZero(guestID, "guestID");
         checkNotNull(locale, "locale");
         checkNotNull(requestContext, "requestContext");

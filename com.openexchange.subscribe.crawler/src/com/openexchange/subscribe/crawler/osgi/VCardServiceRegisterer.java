@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,46 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.subscribe.crawler.osgi;
 
-import javax.servlet.http.HttpServletRequest;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.share.notification.RequestContext;
-import com.openexchange.tools.servlet.http.Tools;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.contact.vcard.VCardService;
 
 
 /**
- * {@link AJAXRequestContext} - An implementation of {@link RequestContext}
- * based on {@link AJAXRequestData}.
+ * {@link IcalParserRegisterer}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class AJAXRequestContext implements RequestContext {
+public class VCardServiceRegisterer implements ServiceTrackerCustomizer<VCardService,VCardService> {
 
-    private final AJAXRequestData requestData;
+    private final BundleContext context;
+    private final CrawlersActivator activator;
 
-    public AJAXRequestContext(AJAXRequestData requestData) {
+    public VCardServiceRegisterer(final BundleContext context, final CrawlersActivator activator) {
         super();
-        this.requestData = requestData;
+        this.context = context;
+        this.activator = activator;
     }
 
     @Override
-    public String getProtocol() {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (servletRequest != null) {
-            return Tools.considerSecure(servletRequest) ? "https" : "http";
-        }
-
-        return requestData.isSecure() ? "https://" : "http://";
+    public VCardService addingService(final ServiceReference<VCardService> reference) {
+        final VCardService vCardService = context.getService(reference);
+        activator.setVCardService(vCardService);
+        return vCardService;
     }
 
     @Override
-    public String getHostname() {
-        return requestData.getHostname();
+    public void modifiedService(final ServiceReference<VCardService> reference, final VCardService service) {
+        //nothing to do here
+    }
+
+    @Override
+    public void removedService(final ServiceReference<VCardService> reference, final VCardService service) {
+        activator.setVCardService(null);
+        context.ungetService(reference);
     }
 
 }

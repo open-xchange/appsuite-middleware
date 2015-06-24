@@ -73,7 +73,7 @@ public interface GuestInfo {
      *
      * @return The base token
      */
-    String getBaseToken() throws OXException;
+    String getBaseToken();
 
     /**
      * Gets the e-mail address of the guest user if it denotes a named recipient.

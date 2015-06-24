@@ -51,6 +51,7 @@ package com.openexchange.drive;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareInfo;
 
 /**
@@ -63,7 +64,7 @@ public class DriveShareInfo {
 
     private DriveShare driveShare;
 
-    private ShareInfo delegate;
+    private final ShareInfo delegate;
 
     public DriveShareInfo(ShareInfo shareInfo) {
         this.delegate = shareInfo;
@@ -81,8 +82,8 @@ public class DriveShareInfo {
         return delegate.getToken();
     }
 
-    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
-        return delegate.getShareURL(protocol, fallbackHostname);
+    public String getShareURL(RequestContext requestContext) {
+        return delegate.getShareURL(requestContext);
     }
 
     public GuestInfo getGuest() {

@@ -50,12 +50,8 @@
 package com.openexchange.drive.json.action.share;
 
 import java.util.TimeZone;
-import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.json.action.AbstractDriveAction;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -73,37 +69,6 @@ public abstract class AbstractDriveShareAction extends AbstractDriveAction {
         }
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
         return timeZone;
-    }
-
-    protected String determineProtocol(AJAXRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
-        } else {
-            return requestData.isSecure() ? "https://" : "http://";
-        }
-    }
-
-    protected String determineHostname(ServerSession session, AJAXRequestData requestData) {
-        HostnameService hostNameService = Services.getOptionalService(HostnameService.class);
-        if(hostNameService != null) {
-            return hostNameService.getHostname(session.getUserId(), session.getContextId());
-        }
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return servletRequest.getServerName();
-        } else {
-            return requestData.getHostname();
-        }
-    }
-
-    protected String getServletPrefix() {
-        DispatcherPrefixService prefixService = Services.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-
-        return prefixService.getPrefix();
     }
 
 }

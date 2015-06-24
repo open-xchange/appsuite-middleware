@@ -69,7 +69,7 @@ public interface ShareService {
     /**
      * Resolves the supplied guest token to a guest share, holding all accessible share targets from the guest user's point of view.
      *
-     * @param token The token to resolve
+     * @param token The guest users base token
      * @return The guest share, containing all shares the user has access to, or <code>null</code> if no valid share could be looked up
      */
     GuestShare resolveToken(String token) throws OXException;

@@ -49,22 +49,18 @@
 
 package com.openexchange.subscribe.crawler;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.Vector;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.contact.vcard.VCardImport;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Streams;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * This step takes TextPages (sourcecode of a HtmlPage) that each contain a vcard and converts them to ContactObjects for OX
@@ -82,24 +78,24 @@ public class ContactObjectsByVcardTextPagesStep extends AbstractStep<Contact[], 
     @Override
     public void execute(final WebClient webClient) {
         final Vector<Contact> contactObjects = new Vector<Contact>();
-        final OXContainerConverter oxContainerConverter = new OXContainerConverter((TimeZone) null, (String) null);
+        VCardService vCardService = workflow.getActivator().getVCardService();
 
         for (final TextPage page : input) {
             final byte[] vcard = page.getWebResponse().getContentAsBytes();
-            final VersitDefinition def = Versit.getDefinition("text/x-vcard");
-            VersitDefinition.Reader versitReader;
-
             try {
-                versitReader = def.getReader(new ByteArrayInputStream(vcard), "ISO-8859-1");
-                final VersitObject versitObject = def.parse(versitReader);
-                final Contact contactObject = oxContainerConverter.convertContact(versitObject);
-                SANITIZER.sanitize(contactObject);
-                contactObjects.add(contactObject);
-            } catch (final VersitException e) {
-                exception = e;
-            } catch (final ConverterException e) {
-                exception = e;
-            } catch (final IOException e) {
+                Contact contact;
+                VCardImport vCardImport = null;
+                InputStream inputStream = null;
+                try {
+                    inputStream = Streams.newByteArrayInputStream(vcard);
+                    vCardImport = vCardService.importVCard(inputStream, null, vCardService.createParameters());
+                    contact = vCardImport.getContact();
+                } finally {
+                    Streams.close(inputStream, vCardImport);
+                }
+                SANITIZER.sanitize(contact);
+                contactObjects.add(contact);
+            } catch (final OXException e) {
                 exception = e;
             }
             executedSuccessfully = true;

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,63 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
+import java.util.Locale;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
 /**
- * {@link DefaultPasswordResetConfirmNotification}
+ * A {@link ShareNotification} encapsulates all information necessary to notify
+ * the according recipient about a share and provide her a link to access that share.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
- * @since v7.8
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
+public interface ShareNotification<T> {
 
-    private String token;
-    private String confirm;
-    private String account;
-    private int guestId;
+    /**
+     * Gets the transport that shall be used to deliver this notification.
+     *
+     * @return The {@link Transport}, never <code>null</code>
+     */
+    Transport getTransport();
 
-    public DefaultPasswordResetConfirmNotification(Transport transport) {
-        super(transport, NotificationType.CONFIRM_PASSWORD_RESET);
-    }
+    /**
+     * Gets the type of this notification (e.g. "a share has been created").
+     *
+     * @return The {@link NotificationType}, never <code>null</code>
+     */
+    NotificationType getType();
 
-    @Override
-    public String getToken() {
-        return token;
-    }
+    /**
+     * Gets the transport information used to notify the recipient.
+     *
+     * @return The transport information, never <code>null</code>
+     */
+    T getTransportInfo();
 
-    @Override
-    public String getConfirm() {
-        return confirm;
-    }
+    /**
+     * Gets the ID of the context where the share is located.
+     *
+     * @return The context ID
+     */
+    int getContextID();
 
-    @Override
-    public String getAccount() {
-        return account;
-    }
+    /**
+     * Gets the locale used to translate the notification message before it is sent out.
+     *
+     * @return The locale
+     */
+    Locale getLocale();
 
-    @Override
-    public int getGuestID() {
-        return guestId;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
-
-    public void setConfirm(String confirm) {
-        this.confirm = confirm;
-    }
-
-    public void setAccount(String account) {
-        this.account = account;
-    }
-
-    public void setGuestID(int guestId) {
-        this.guestId = guestId;
-    }
+    /**
+     * Gets context information about the HTTP request that led to the generation of this
+     * notification.
+     *
+     * @return The request context
+     */
+    RequestContext getRequestContext();
 
 }

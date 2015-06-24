@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,45 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.notification.impl;
 
-import java.util.List;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
+import com.openexchange.share.AuthenticationMode;
 
 /**
- * A notification to inform users about created shares.
+ * A notification to send a link to confirm a password reset to a guest user who made use of the password reset mechanism. Such notifications must only be used
+ * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8
  */
-public interface ShareCreatedNotification<T> extends ShareNotification<T> {
+public interface PasswordResetConfirmNotification<T> extends ShareNotification<T> {
 
     /**
-     * Gets the session of the new shares creator.
-     *
-     * @return The session
-     */
-    Session getSession();
-
-    /**
-     * Gets the share targets to notify the recipient about.
-     *
-     * @return The share targets, never <code>null</code>
-     */
-    List<ShareTarget> getShareTargets();
-
-    /**
-     * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
-     * {@link NotificationType}.
-     *
-     * @return The message or <code>null</code>, if nothing was provided
-     */
-    String getMessage();
-
-    /**
-     * Get the id of the user something is shared to
+     * Get the ID of the according guest user
      *
      * @return The user ID
      */
-    int getTargetUserID();
+    int getGuestID();
 
     /**
-     * Returns whether this notification is about the first share targeting a new guest user.
+     * Get the guest users account name (probably his email address)
      *
-     * @return <code>true</code> if a new guest was created and the notification is about the initial share, else <code>false</code>
+     * @return The account name
      */
-    boolean isInitialShare();
+    String getAccountName();
+
+    /**
+     * Gets the URL to the according share.
+     *
+     * @return The URL
+     */
+    String getShareUrl();
+
+    /**
+     * Gets the URL to be visited to reset the password.
+     *
+     * @return The URL
+     */
+    String getConfirmPasswordResetUrl();
 
 }

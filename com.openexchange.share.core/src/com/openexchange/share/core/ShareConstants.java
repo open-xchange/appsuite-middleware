@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,17 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.core;
 
-import com.openexchange.share.AuthenticationMode;
 
 /**
- * A notification to send a new password to a guest user who made use of the password reset mechanism. Such notifications must only be used
- * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
+ * {@link ShareConstants}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface PasswordResetNotification<T> extends ShareNotification<T> {
+public class ShareConstants {
 
-    /**
-     * Gets the username of the guest that must be used for logging in.
-     *
-     * @return The username
-     */
-    String getUsername();
+    public static final String SHARE_SERVLET = "share";
 
 }

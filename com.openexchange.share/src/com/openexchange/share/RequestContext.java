@@ -47,45 +47,40 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share;
 
-import com.openexchange.share.AuthenticationMode;
 
 /**
- * A notification to send a link to confirm a password reset to a guest user who made use of the password reset mechanism. Such notifications must only be used
- * for shares with {@link AuthenticationMode#GUEST_PASSWORD}.
+ * Encapsulates information about the current HTTP request that is needed to generate
+ * links and redirect locations and to perform hostname-based configuration lookups.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public interface PasswordResetConfirmNotification<T> extends ShareNotification<T> {
+public interface RequestContext {
 
     /**
-     * Get the share token
+     * Gets the protocol via which this request was received, either <code>http</code>
+     * or <code>https</code>.
      *
-     * @return The share token
+     * @return The protocol
      */
-    String getToken();
+    String getProtocol();
 
     /**
-     * Get the uuid to confirm the password reset
+     * Gets the requested hostname. This could have been determined by the HTTP request
+     * itself or an optional <code>HostnameService</code>.
      *
-     * @return The uuid to confirm the password reset
+     * @return The hostname
      */
-    String getConfirm();
+    String getHostname();
 
     /**
-     * Get the email address of the guest user
+     * Gets the server-side servlet prefix, e.g. <code>/appsuite/api/</code>.
+     * The prefix always has leading and trailing slashed.
      *
-     * @return The guest's email address
+     * @return The servlet prefix
      */
-    String getAccount();
-
-    /**
-     * Get the ID of the according guest user
-     *
-     * @return The user ID
-     */
-    int getGuestID();
+    String getServletPrefix();
 
 }
