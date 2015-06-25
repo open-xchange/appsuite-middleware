@@ -224,6 +224,41 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Inserts a public folder below folder 2 or folder 15 if its a drive folder.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertPublicFolder(EnumAPI api, int module) throws Exception {
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(randomUID());
+        folder.setModule(module);
+        folder.setType(FolderObject.PUBLIC);
+        OCLPermission perm1 = new OCLPermission();
+        perm1.setEntity(client.getValues().getUserId());
+        perm1.setGroupPermission(false);
+        perm1.setFolderAdmin(true);
+        perm1.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
+        if (module == FolderObject.INFOSTORE) {
+            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        } else {
+            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        }
+
+        InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, true);
+        InsertResponse response = client.execute(request);
+        response.fillObject(folder);
+        return folder;
+    }
+
+    /**
      * Inserts and remembers a new file with random content and a random name.
      *
      * @param folderID The parent folder identifier
