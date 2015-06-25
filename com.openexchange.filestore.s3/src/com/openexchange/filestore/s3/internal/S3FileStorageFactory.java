@@ -63,6 +63,7 @@ import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
@@ -248,8 +249,8 @@ public class S3FileStorageFactory implements FileStorageProvider {
             inputStream = new FileInputStream(pathToKeyStore);
             KeyStore keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(inputStream, passwordChars);
-            while (keyStore.aliases().hasMoreElements()) {
-                String alias = keyStore.aliases().nextElement();
+            for (Enumeration<String> aliases = keyStore.aliases(); aliases.hasMoreElements();) {
+                String alias = aliases.nextElement();
                 if (keyStore.isKeyEntry(alias)) {
                     Key key = keyStore.getKey(alias, passwordChars);
                     if (null != key && PrivateKey.class.isInstance(key)) {
