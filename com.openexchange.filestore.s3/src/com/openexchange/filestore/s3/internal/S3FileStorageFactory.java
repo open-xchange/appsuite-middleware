@@ -254,17 +254,17 @@ public class S3FileStorageFactory implements FileStorageFactoryCandidate {
                 }
             }
         } catch (FileNotFoundException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (KeyStoreException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (NoSuchAlgorithmException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (CertificateException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (IOException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } catch (UnrecoverableKeyException e) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Error reading " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Error reading " + pathToKeyStore);
         } finally {
             Streams.close(inputStream);
         }
