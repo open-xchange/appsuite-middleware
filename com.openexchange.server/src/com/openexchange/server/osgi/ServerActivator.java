@@ -153,6 +153,7 @@ import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
@@ -848,6 +849,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 secretService = null;
             }
             LoginServlet.setRampUpServices(null);
+            UploadUtility.shutDown();
         } finally {
             started.set(false);
             CONTEXT = null;
