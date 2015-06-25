@@ -59,6 +59,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
@@ -79,6 +84,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -88,7 +96,8 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public final class UploadUtility {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadUtility.class);
+    /** The logger */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadUtility.class);
 
     private static final TIntObjectMap<String> M = new TIntObjectHashMap<String>(13);
 
@@ -109,11 +118,27 @@ public final class UploadUtility {
         M.put(pos++, "U-");
     }
 
+    private static final AtomicReference<ScheduledTimerTask> TIMER_TASK_REFERENCE = new AtomicReference<ScheduledTimerTask>();
+
     /**
      * Initializes a new {@link UploadUtility}
      */
     private UploadUtility() {
         super();
+    }
+
+    /**
+     * Performs shut-down operations.
+     */
+    public static void shutDown() {
+        ScheduledTimerTask timerTask;
+        do {
+            timerTask = TIMER_TASK_REFERENCE.get();
+            if (null == timerTask) {
+                return;
+            }
+        } while (!TIMER_TASK_REFERENCE.compareAndSet(timerTask, null));
+        timerTask.cancel(true);
     }
 
     /**
@@ -372,6 +397,8 @@ public final class UploadUtility {
         }
     }
 
+    private static final String PREFIX = "openexchange-upload-" + com.openexchange.exception.OXException.getServerId() + "-";
+
     private static UploadFile processUploadedFile(FileItemStream item, String uploadDir, String fileName, long current, long maxFileSize, long maxOverallSize) throws IOException, FileUploadException {
         UploadFile retval = new UploadFileImpl();
         retval.setFieldName(item.getFieldName());
@@ -413,8 +440,22 @@ public final class UploadUtility {
         }
 
         // Create temporary file
-        File tmpFile = File.createTempFile("openexchange-upload-", null, new File(uploadDir));
+        File tmpFile = File.createTempFile(PREFIX, null, new File(uploadDir));
         tmpFile.deleteOnExit();
+        {
+            ScheduledTimerTask timerTask = TIMER_TASK_REFERENCE.get();
+            if (null == timerTask) {
+                synchronized (UploadUtility.class) {
+                    timerTask = TIMER_TASK_REFERENCE.get();
+                    if (null == timerTask) {
+                        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        long delay = 300000; // 5 minutes
+                        timerTask = timerService.scheduleWithFixedDelay(new UploadEvicter(PREFIX), delay, delay);
+                        TIMER_TASK_REFERENCE.set(timerTask);
+                    }
+                }
+            }
+        }
 
         // Write to temporary file
         InputStream in = null;
@@ -468,6 +509,59 @@ public final class UploadUtility {
         retval.setSize(size);
         retval.setTmpFile(tmpFile);
         return retval;
+    }
+
+    private static final class UploadEvicter implements Runnable {
+
+        private final Class<?> clazz;
+        private final Field field;
+        private final String prefix;
+
+        /**
+         * Initializes a new {@link UploadUtility.UploadEvicter}.
+         *
+         * @throws IllegalStateException If initialization fails
+         */
+        UploadEvicter(String prefix) {
+            super();
+            this.prefix = prefix;
+            try {
+                Class<?> clazz = Class.forName("java.io.DeleteOnExitHook");
+                Field[] declaredFields = clazz.getDeclaredFields();
+                Field field = declaredFields[0];
+                field.setAccessible(true);
+                this.clazz = clazz;
+                this.field = field;
+            } catch (Exception e) {
+                throw e instanceof IllegalStateException ? (IllegalStateException)e : new IllegalStateException(e);
+            }
+        }
+
+        @Override
+        public void run() {
+            try {
+                LinkedHashSet<String> theFiles;
+                synchronized (clazz) {
+                    theFiles = (LinkedHashSet<String>) field.get(null);
+                }
+
+                if (null != theFiles) {
+                    long stamp = System.currentTimeMillis() - 1800000; // Older than 30 minutes
+                    ArrayList<String> toBeDeleted = new ArrayList<>(theFiles);
+                    Collections.reverse(toBeDeleted);
+                    for (String filename : toBeDeleted) {
+                        File file = new File(filename);
+                        if (file.getName().startsWith(prefix) && file.exists() && file.lastModified() < stamp) {
+                            if (!file.delete()) {
+                                LOG.warn("Temporary file could not be deleted: {}", file.getPath());
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
     }
 
 }
