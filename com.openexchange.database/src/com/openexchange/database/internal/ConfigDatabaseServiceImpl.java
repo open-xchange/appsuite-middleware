@@ -257,8 +257,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
-    public void lock(Connection con) throws OXException {
-        contextAssignment.lock(con);
+    public void lock(Connection con, int writePoolId) throws OXException {
+        contextAssignment.lock(con, writePoolId);
     }
-
 }

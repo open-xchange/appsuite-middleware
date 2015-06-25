@@ -1371,7 +1371,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         final String[] unfilledSchemas;
         try {
-            pool.lock(con);
+            pool.lock(con, i(poolId));
             unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);

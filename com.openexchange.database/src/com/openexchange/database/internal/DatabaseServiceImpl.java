@@ -218,8 +218,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void lock(Connection con) throws OXException {
-        configDatabaseService.lock(con);
+    public void lock(Connection con, int writePoolId) throws OXException {
+        configDatabaseService.lock(con, writePoolId);
     }
 
     // Delegate global database service methods.

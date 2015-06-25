@@ -96,5 +96,5 @@ public interface OXAdminPoolInterface {
 
     String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException;
 
-    void lock(Connection con) throws PoolException;
+    void lock(Connection con, int writePoolId) throws PoolException;
 }

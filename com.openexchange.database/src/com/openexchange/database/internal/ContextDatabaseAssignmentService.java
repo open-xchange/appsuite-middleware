@@ -110,5 +110,5 @@ interface ContextDatabaseAssignmentService {
 
     String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
 
-    void lock(Connection con) throws OXException;
+    void lock(Connection con, int writePoolId) throws OXException;
 }
