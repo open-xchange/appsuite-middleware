@@ -7921,9 +7921,9 @@ msgid "View items"
 msgstr ""
 
 #. expires
-#. * The link will expire at $preformatted_date
+#. * The link will expire on $preformatted_date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:173
-msgid "The link will expire at %1$s"
+msgid "The link will expire on %1$s"
 msgstr ""
 
 #.
