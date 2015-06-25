@@ -131,7 +131,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         parameters.setValidateContactEMail(defaultValidateContactEMail);
         parameters.setMaxVCardSize(defaultMaxVCardSize);
         parameters.setKeepOriginalVCard(defaultKeepOriginalVCard);
-        parameters.setKeepOriginalVCard(defaultRemoveImageFromKeptVCard);
+        parameters.setRemoveImageFromKeptVCard(defaultRemoveImageFromKeptVCard);
         return parameters;
     }
 
