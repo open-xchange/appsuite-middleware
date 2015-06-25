@@ -213,7 +213,7 @@ public final class MessageWriter {
         String fullName = mail.getFolder();
         String mailId = mail.getMailId();
         if (fullName != null && mailId != null) {
-            mailPath = new MailPath(accountId, fullName, mailId);
+            mailPath = new MailPath(mail instanceof Delegatized ? ((Delegatized) mail).getUndelegatedAccountId() : accountId, fullName, mailId);
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {
