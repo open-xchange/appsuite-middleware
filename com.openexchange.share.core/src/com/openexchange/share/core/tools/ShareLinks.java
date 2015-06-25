@@ -49,6 +49,7 @@
 
 package com.openexchange.share.core.tools;
 
+import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.share.RequestContext;
@@ -73,12 +74,9 @@ public class ShareLinks {
      * @return The link
      */
     public static String generateExternal(RequestContext context, String shareToken) {
-        StringBuilder stringBuilder = prepare(context)
-            .append(context.getServletPrefix())
-            .append(ShareConstants.SHARE_SERVLET).append('/')
-            .append(shareToken);
-
-        return stringBuilder.toString();
+        return prepare(context)
+            .setPath(serverPath(context, "/" + shareToken))
+            .toString();
     }
 
     /**
@@ -92,17 +90,15 @@ public class ShareLinks {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();
-        StringBuilder stringBuilder = prepare(context)
-            .append("/appsuite/ui#!!&app=io.ox/")
-            .append(module)
-            .append("&folder=")
-            .append(folder);
-
+        StringBuilder fragment = new StringBuilder(64).append("!!&app=io.ox/").append(module).append("&folder=").append(folder);
         if (Strings.isNotEmpty(item)) {
-            stringBuilder.append("&item=").append(item);
+            fragment.append("&item=").append(item);
         }
 
-        return stringBuilder.toString();
+        return prepare(context)
+            .setPath("/appsuite/ui")
+            .setFragment(fragment.toString())
+            .toString();
     }
 
     /**
@@ -114,24 +110,21 @@ public class ShareLinks {
      * @return The link
      */
     public static String generateConfirmPasswordReset(RequestContext context, String baseShareToken, String confirmToken) {
-        StringBuilder stringBuilder = prepare(context)
-            .append(context.getServletPrefix())
-            .append(ShareConstants.SHARE_SERVLET)
-            .append("/reset/password?")
-            .append("share=")
-            .append(baseShareToken)
-            .append("&confirm=")
-            .append(confirmToken);
-
-
-        return stringBuilder.toString();
+            return prepare(context)
+                .setPath(serverPath(context, "/reset/password"))
+                .addParameter("share", baseShareToken)
+                .addParameter("confirm", confirmToken)
+                .toString();
     }
 
-    private static StringBuilder prepare(RequestContext context) {
-        return new StringBuilder()
-            .append(context.getProtocol())
-            .append("://")
-            .append(context.getHostname());
+    private static URIBuilder prepare(RequestContext context) {
+        return new URIBuilder()
+            .setScheme(context.getProtocol())
+            .setHost(context.getHostname());
+    }
+
+    private static String serverPath(RequestContext context, String endpoint) {
+        return context.getServletPrefix() + ShareConstants.SHARE_SERVLET + endpoint;
     }
 
 }
