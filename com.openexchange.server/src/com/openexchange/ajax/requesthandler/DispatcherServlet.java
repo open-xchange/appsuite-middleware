@@ -376,9 +376,9 @@ public class DispatcherServlet extends SessionServlet {
 
         ServerSession session = null;
         AJAXState state = null;
+        AJAXRequestData requestData = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-            AJAXRequestData requestData;
             /*
              * Parse & acquire session
              */
@@ -466,6 +466,9 @@ public class DispatcherServlet extends SessionServlet {
             }
             handleOXException(oxe, httpRequest, httpResponse);
         } finally {
+            if (null != requestData) {
+                requestData.cleanUploads();
+            }
             if (null != state) {
                 dispatcher.end(state);
             }

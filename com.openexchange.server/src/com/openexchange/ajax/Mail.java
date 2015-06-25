@@ -4843,6 +4843,8 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
         try {
             final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            boolean cleanUp = true;
+            UploadEvent uploadEvent = null;
             try {
                 /*
                  * Set response headers according to html spec
@@ -4859,7 +4861,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 UserSettingMail usm = session.getUserSettingMail();
                 long maxFileSize = usm.getUploadQuotaPerFile();
                 long maxSize = usm.getUploadQuota();
-                final UploadEvent uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
+                uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
                 uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
@@ -4868,7 +4870,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 uploadEvent.setParameter(UPLOAD_PARAM_GID, groupId);
                 uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
                 fireUploadEvent(uploadEvent, listeners);
+                cleanUp = false;
             } finally {
+                if (cleanUp && null != uploadEvent) {
+                    uploadEvent.cleanUp();
+                }
                 if (mailInterface != null) {
                     try {
                         mailInterface.close(true);
