@@ -127,8 +127,6 @@ public class ReportClient extends AbstractJMXTools {
 
     private static final String OPT_APPSUITE_RUN_AND_DELIVER_REPORT_LONG = "run-and-deliver-report";
 
-    private static final String OPT_APPSUITE_SILENT_LONG = "silent";
-
     private CLIOption displayonly = null;
 
     private CLIOption sendonly = null;
@@ -372,7 +370,7 @@ public class ReportClient extends AbstractJMXTools {
         } else {
             new TableWriter(
                 System.out,
-                new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
+                new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
                 ObjectHandler.createTotalList(totals)).write();
         }
 
@@ -587,9 +585,6 @@ public class ReportClient extends AbstractJMXTools {
                     Thread.sleep(silent ? 60000 : 1000);
                 }
             }
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
@@ -612,7 +607,6 @@ public class ReportClient extends AbstractJMXTools {
         long timePerContext = -1;
         if (finishedContexts > 0) {
             timePerContext = elapsedTime / finishedContexts;
-
         }
 
         StringBuilder b = new StringBuilder();

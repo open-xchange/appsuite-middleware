@@ -53,11 +53,14 @@ public class Total {
 
 	private String contexts;
 
-	private String users;
+    private String users;
 
-	public Total(String contexts, String users) {
+    private String guests;
+
+	public Total(String contexts, String users, String guests) {
 		this.contexts = contexts;
 		this.users = users;
+		this.guests = guests;
 	}
 
 	public String getContexts() {
@@ -68,17 +71,24 @@ public class Total {
 		this.contexts = contexts;
 	}
 
-	public String getUsers() {
-		return users;
-	}
+    public String getUsers() {
+        return users;
+    }
 
-	public void setUsers(String users) {
-		this.users = users;
-	}
+    public void setUsers(String users) {
+        this.users = users;
+    }
+
+    public String getGuests() {
+        return guests;
+    }
+
+    public void setGuests(String guests) {
+        this.guests = guests;
+    }
 
 	@Override
 	public String toString() {
-		return "TotalObject [contexts=" + contexts + ", users=" + users + "]";
+		return "TotalObject [contexts=" + contexts + ", users=" + users + ", guests=" + guests + "]";
 	}
-
 }

@@ -70,6 +70,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.DefaultRequestContext;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
@@ -163,29 +164,14 @@ public class PasswordResetServlet extends HttpServlet {
             } else {
                 // Try to set new password
                 if (confirm.equals(hash)) {
-                    GuestShare guestShare = shareService.resolveToken(token);
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-
                     UserImpl user = new UserImpl(guest);
                     user.setPasswordMech(guest.getPasswordMech());
                     user.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
                     userService.updateUser(user, context);
                     userService.invalidateUser(context, guestID);
-                    ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
-                    String status = "require_password";
-                    int emptyGuestPasswords = loginConfig.getEmptyGuestPasswords();
-                    if (emptyGuestPasswords > 0) {
-                        String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
-                        int loginCount = null != count ? Integer.parseInt(count) : 0;
-                        if (emptyGuestPasswords > loginCount) {
-                            status = "ask_password";
-                        }
-                    }
-                    String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                        URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                        status);
-                    response.setStatus(HttpServletResponse.SC_FOUND);
-                    response.sendRedirect(redirectUrl);
+
+                    response.sendRedirect(ShareLinks.generateExternal(DefaultRequestContext.newInstance(request, contextID, guestID), token));
                 } else {
                     LOG.debug("Bad attempt to reset password for share '{}'", token);
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);

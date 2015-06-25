@@ -125,8 +125,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
@@ -4774,6 +4772,8 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
         try {
             final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            boolean cleanUp = true;
+            UploadEvent uploadEvent = null;
             try {
                 /*
                  * Set response headers according to html spec
@@ -4790,7 +4790,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 UserSettingMail usm = session.getUserSettingMail();
                 long maxFileSize = usm.getUploadQuotaPerFile();
                 long maxSize = usm.getUploadQuota();
-                final UploadEvent uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
+                uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
                 uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
@@ -4799,7 +4799,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 uploadEvent.setParameter(UPLOAD_PARAM_GID, groupId);
                 uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
                 fireUploadEvent(uploadEvent, listeners);
+                cleanUp = false;
             } finally {
+                if (cleanUp && null != uploadEvent) {
+                    uploadEvent.cleanUp();
+                }
                 if (mailInterface != null) {
                     try {
                         mailInterface.close(true);

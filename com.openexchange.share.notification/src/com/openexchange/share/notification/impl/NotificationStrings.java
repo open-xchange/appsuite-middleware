@@ -83,7 +83,7 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String SUBJECT_SHARED_FOLDER = "%1$s has shared the folder \"%2$s\" with you.";
 
     /** $username has shared $number folders with you. */
-    public static final String SUBJECT_SHARED_FOLDERS = "%1$s has shared %2$ folders with you.";
+    public static final String SUBJECT_SHARED_FOLDERS = "%1$s has shared %2$d folders with you.";
 
     // detailed body
     /** $username ($user_email) has shared file "$filename" with you. */

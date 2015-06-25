@@ -151,7 +151,7 @@ public class LoginShareHandler extends AbstractShareHandler {
                     } else {
                         message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD)));
                     }
-                    messageType = "WARN";
+                    messageType = "INFO";
                     action = "ask_password";
                 } else {
                     if (null != proxy) {
@@ -159,7 +159,7 @@ public class LoginShareHandler extends AbstractShareHandler {
                     } else {
                         message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.REQUIRE_PASSWORD_WITHOUT_TARGET)));
                     }
-                    messageType = "ERROR";
+                    messageType = "INFO";
                     action = "require_password";
                 }
             } else {

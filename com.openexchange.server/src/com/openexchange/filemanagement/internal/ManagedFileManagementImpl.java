@@ -51,6 +51,7 @@ package com.openexchange.filemanagement.internal;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,12 +59,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
@@ -117,31 +119,62 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
     private static class FileManagementTask implements Runnable {
 
         private final org.slf4j.Logger logger;
-
         private final ConcurrentMap<String, ManagedFileImpl> tfiles;
-
         private final int time2live;
+        private final AtomicReference<File> tmpDirReference;
+        private final FileFilter defaultPrefixFilter;
+        private final Set<File> existentFiles;
 
-        public FileManagementTask(final ConcurrentMap<String, ManagedFileImpl> files, final int time2live, final org.slf4j.Logger logger) {
+        /**
+         * Initializes a new {@link FileManagementTask}.
+         */
+        FileManagementTask(ConcurrentMap<String, ManagedFileImpl> files, int time2live, AtomicReference<File> tmpDirReference, final String prefix, org.slf4j.Logger logger) {
             super();
             tfiles = files;
             this.time2live = time2live;
+            this.tmpDirReference = tmpDirReference;
+            existentFiles = new HashSet<File>(256, 0.9f);
+            defaultPrefixFilter = new FileFilter() {
+
+                @Override
+                public boolean accept(File pathname) {
+                    return pathname.isFile() && pathname.getName().startsWith(prefix);
+                }
+            };
             this.logger = logger;
         }
 
         @Override
         public void run() {
             try {
-                final long now = System.currentTimeMillis();
-                for (final Iterator<ManagedFileImpl> iter = tfiles.values().iterator(); iter.hasNext();) {
-                    final ManagedFileImpl cur = iter.next();
-                    final int optTimeToLive = cur.optTimeToLive();
+                // Grab all existing files belonging to this JVM instance (at least those with default prefix)
+                Set<File> existentFiles = this.existentFiles;
+                existentFiles.clear();
+                File directory = tmpDirReference.get();
+                for (File tmpFile : directory.listFiles(defaultPrefixFilter)) {
+                    existentFiles.add(tmpFile);
+                }
+
+                // Check for expired files
+                long now = System.currentTimeMillis();
+                for (Iterator<ManagedFileImpl> iter = tfiles.values().iterator(); iter.hasNext();) {
+                    ManagedFileImpl cur = iter.next();
+                    int optTimeToLive = cur.optTimeToLive();
                     if (cur.isDeleted() || ((now - cur.getLastAccess()) > (optTimeToLive > 0 ? optTimeToLive : time2live))) {
                         cur.delete();
                         iter.remove();
+                    } else {
+                        existentFiles.remove(cur.getFile());
                     }
                 }
-            } catch (final Throwable t) {
+
+                // Check for orphaned files belonging to this JVM instance
+                for (File orphaned : existentFiles) {
+                    if (!orphaned.delete()) {
+                        logger.warn("Temporary file could not be deleted: {}", orphaned.getPath());
+                    }
+                }
+            } catch (Throwable t) {
                 logger.error("", t);
             }
         }
@@ -151,36 +184,35 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
      * ############################ MEMBER SECTION ############################
      */
 
-    private static final String PREFIX = "open-xchange-managedfile-";
+    private static final String PREFIX = "open-xchange-managedfile-" + com.openexchange.exception.OXException.getServerId() + "-";
 
     private static final String SUFFIX = ".tmp";
 
     private final ConfigurationService cs;
     private final TimerService timer;
     private final ConcurrentMap<String, ManagedFileImpl> files;
-
     private final PropertyListener propertyListener;
-
-    private volatile ScheduledTimerTask timerTask;
-
     private final AtomicReference<File> tmpDirReference;
+    private final AtomicReference<ScheduledTimerTask> timerTaskReference;
 
+    /**
+     * Initializes a new {@link ManagedFileManagementImpl}.
+     */
     public ManagedFileManagementImpl(ConfigurationService cs, TimerService timer) {
         super();
         this.cs = cs;
         this.timer = timer;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
-        tmpDirReference = new AtomicReference<File>();
 
+        final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
+        this.tmpDirReference = tmpDirReference;
         propertyListener = new FileManagementPropertyListener(tmpDirReference);
         final String path = cs.getProperty("UPLOAD_DIRECTORY", propertyListener);
         tmpDirReference.set(getTmpDirByPath(path));
+
         // Register timer task
-        timerTask = timer.scheduleWithFixedDelay(
-            new FileManagementTask(files, TIME_TO_LIVE, LOG),
-            INITIAL_DELAY,
-            DELAY,
-            TimeUnit.MILLISECONDS);
+        ScheduledTimerTask timerTask = timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY);
+        timerTaskReference = new AtomicReference<ScheduledTimerTask>(timerTask);
     }
 
     @Override
@@ -545,6 +577,9 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         files.remove(id);
     }
 
+    /**
+     * Shuts-down this managed file management instance.
+     */
     public void shutDown() {
         shutDown(true);
     }
@@ -553,26 +588,30 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         if (complete && propertyListener != null) {
             cs.removePropertyListener("UPLOAD_DIRECTORY", propertyListener);
         }
-        final ScheduledTimerTask timerTask = this.timerTask;
-        if (timerTask != null) {
-            timerTask.cancel(true);
-            this.timerTask = null;
-            timer.purge();
-        }
+
+        stopTimerTask();
+
         tmpDirReference.set(null);
         clear();
     }
 
+    private boolean stopTimerTask() {
+        ScheduledTimerTask timerTask;
+        do {
+            timerTask = timerTaskReference.get();
+            if (null == timerTask) {
+                return false;
+            }
+        } while (!timerTaskReference.compareAndSet(timerTask, null));
+        timerTask.cancel(true);
+        timer.purge();
+        return true;
+    }
+
     void startUp() {
-        final ScheduledTimerTask timerTask = this.timerTask;
-        if (timerTask != null) {
-            timerTask.cancel(true);
+        if (stopTimerTask()) {
+            timerTaskReference.set(timer.scheduleWithFixedDelay(new FileManagementTask(files, TIME_TO_LIVE, tmpDirReference, PREFIX, LOG), INITIAL_DELAY, DELAY));
         }
-        this.timerTask = timer.scheduleWithFixedDelay(
-            new FileManagementTask(files, TIME_TO_LIVE, LOG),
-            INITIAL_DELAY,
-            DELAY,
-            TimeUnit.MILLISECONDS);
     }
 
     private static void copyFile(final File sourceFile, final File destFile) throws IOException {

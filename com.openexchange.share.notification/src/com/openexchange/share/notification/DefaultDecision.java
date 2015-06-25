@@ -49,6 +49,7 @@
 
 package com.openexchange.share.notification;
 
+import static com.openexchange.osgi.Tools.requireService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
@@ -83,14 +84,14 @@ public class DefaultDecision implements NotifyDecision {
         }
 
         if (share.isInternal()) {
-            boolean notifyInternalUsers = services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.share.notifyInternal", true);
+            boolean notifyInternalUsers = requireService(ConfigurationService.class, services).getBoolProperty("com.openexchange.share.notifyInternal", true);
             if (!notifyInternalUsers) {
                 return false;
             }
 
             // Don't notify internals about new permissions on public files/folders
             boolean onlyPublics = true;
-            ModuleSupport moduleSupport = services.getService(ModuleSupport.class);
+            ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
             for (ShareTarget target : share.getTargets()) {
                 TargetProxy proxy = moduleSupport.load(target, session);
                 onlyPublics &= proxy.isPublic();

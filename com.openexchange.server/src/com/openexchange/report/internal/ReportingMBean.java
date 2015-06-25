@@ -57,6 +57,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import javax.management.Attribute;
@@ -65,7 +66,6 @@ import javax.management.AttributeNotFoundException;
 import javax.management.DynamicMBean;
 import javax.management.MBeanException;
 import javax.management.MBeanInfo;
-import javax.management.ReflectionException;
 import javax.management.RuntimeOperationsException;
 import javax.management.openmbean.CompositeDataSupport;
 import javax.management.openmbean.CompositeType;
@@ -81,6 +81,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
@@ -95,7 +97,7 @@ public class ReportingMBean implements DynamicMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingMBean.class);
 
-    private final String[] totalNames = { "contexts", "users" };
+    private final String[] totalNames = { "contexts", "users", "guests" };
 
     private CompositeType totalRow;
 
@@ -130,11 +132,9 @@ public class ReportingMBean implements DynamicMBean {
     }
 
     @Override
-    public Object getAttribute(final String attribute) throws AttributeNotFoundException, MBeanException, ReflectionException {
+    public Object getAttribute(final String attribute) throws AttributeNotFoundException, MBeanException {
         if (attribute == null) {
-            throw new RuntimeOperationsException(
-                new IllegalArgumentException("Attribute name cannot be null"),
-                "Cannot call getAttributeInfo with null attribute name");
+            throw new RuntimeOperationsException(new IllegalArgumentException("Attribute name cannot be null"), "Cannot call getAttributeInfo with null attribute name");
         }
         final ContextService contextService;
         final UserService userService;
@@ -146,7 +146,7 @@ public class ReportingMBean implements DynamicMBean {
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         }
         if ("Total".equals(attribute)) {
             return generateTotalTabular(contextService, userService, configurationService);
@@ -162,7 +162,7 @@ public class ReportingMBean implements DynamicMBean {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
             final Map<String, Integer> schemaMap = Tools.getAllSchemata(LOG);
-            final Map<Integer,ReportContext> allctx = new HashMap<Integer, ReportContext>();
+            final Map<Integer, ReportContext> allctx = new HashMap<Integer, ReportContext>();
             for (final String schema : schemaMap.keySet()) {
                 final int readPool = schemaMap.get(schema).intValue();
                 final Connection connection;
@@ -196,20 +196,20 @@ public class ReportingMBean implements DynamicMBean {
                         final int numusr = rs.getInt(2);
                         final int perm = rs.getInt(3);
                         final int inaccnt = rs.getInt(4);
-                        if( null != rc ) {
-                            Map<Integer,Integer> accCombs = rc.getAccessCombinations();
-                            Map<Integer,Integer> inactive = rc.getInactiveByCombination();
-                            if( null == accCombs ) {
+                        if (null != rc) {
+                            Map<Integer, Integer> accCombs = rc.getAccessCombinations();
+                            Map<Integer, Integer> inactive = rc.getInactiveByCombination();
+                            if (null == accCombs) {
                                 accCombs = new HashMap<Integer, Integer>();
                             }
-                            if( null == inactive ) {
+                            if (null == inactive) {
                                 inactive = new HashMap<Integer, Integer>();
                             }
                             accCombs.put(I(perm), I(numusr));
                             inactive.put(I(perm), I(inaccnt));
                             final Integer nusr = rc.getNumUsers();
-                            if( null != nusr ) {
-                                rc.setNumUsers(I(nusr.intValue()+numusr));
+                            if (null != nusr) {
+                                rc.setNumUsers(I(nusr.intValue() + numusr));
                             } else {
                                 rc.setNumUsers(I(numusr));
                             }
@@ -232,68 +232,46 @@ public class ReportingMBean implements DynamicMBean {
         } catch (OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         } catch (SQLException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         }
     }
 
     private TabularDataSupport generateTotalTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
         final TabularDataSupport total = new TabularDataSupport(totalType);
-        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
-            final Map<String, Integer> schemaMap = Tools.getAllSchemata(LOG);
-            int nrctx  = 0;
+            int nrctx = 0;
             int nruser = 0;
-            for (final String schema : schemaMap.keySet()) {
-                final int readPool = schemaMap.get(schema).intValue();
-                final Connection connection;
-                try {
-                    connection = dbService.get(readPool, schema);
-                } catch (final OXException e) {
-                    LOG.error("", e);
-                    throw new MBeanException(e, "Couldn't get connection to schema " + schema + " in pool " + readPool + ".");
-                }
-                PreparedStatement stmt = null;
-                ResultSet rs = null;
-                try {
-                    stmt = connection.prepareStatement("SELECT COUNT(DISTINCT cid) AS cid, COUNT(id) AS id FROM user");
-                    rs = stmt.executeQuery();
-                    while (rs.next()) {
-                        nrctx += rs.getInt(1);
-                        nruser += rs.getInt(2);
-                    }
-                    rs.close();
-                    stmt.close();
-                } catch (final SQLException e) {
-                    LOG.error("", e);
-                    throw new MBeanException(e, e.getMessage());
-                } finally {
-                    DBUtils.closeSQLStuff(rs, stmt);
-                    dbService.back(readPool, connection);
-                }
+            int nrguests = 0;
+            List<Integer> allContextIds = contextService.getAllContextIds();
+
+            int userCount = 0;
+            int guestCount = 0;
+            for (Integer contextId : allContextIds) {
+                Context context = contextService.getContext(contextId);
+                User[] guest = userService.getUser(context, true, true);
+                guestCount += guest.length;
+                User[] user = userService.getUser(context);
+                userCount += user.length;
             }
-            final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] {
-                I(nrctx), I(nruser) });
+            nrctx = allContextIds.size();
+            nruser = userCount;
+            nrguests = guestCount;
+
+            final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(nrctx), I(nruser), I(nrguests) });
             total.put(value);
             return total;
-        } catch (final MBeanException e) {
-            LOG.error("", e);
-            throw e;
         } catch (OpenDataException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         } catch (OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
-        } catch (SQLException e) {
-            LOG.error("", e);
-            final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         }
     }
 
@@ -324,18 +302,18 @@ public class ReportingMBean implements DynamicMBean {
                         Integer count = rs.getInt(2);
                         Integer nradm = rs.getInt(3);
                         Integer nrdisabled = rs.getInt(4);
-                        if( macMap.containsKey(mac) ) {
-                            macMap.put(mac, macMap.get(mac)+count);
+                        if (macMap.containsKey(mac)) {
+                            macMap.put(mac, macMap.get(mac) + count);
                         } else {
                             macMap.put(mac, count);
                         }
-                        if( admMap.containsKey(mac) ) {
-                            admMap.put(mac, admMap.get(mac)+nradm);
+                        if (admMap.containsKey(mac)) {
+                            admMap.put(mac, admMap.get(mac) + nradm);
                         } else {
                             admMap.put(mac, nradm);
                         }
-                        if( disabledMap.containsKey(mac) ) {
-                            disabledMap.put(mac, disabledMap.get(mac)+nrdisabled);
+                        if (disabledMap.containsKey(mac)) {
+                            disabledMap.put(mac, disabledMap.get(mac) + nrdisabled);
                         } else {
                             disabledMap.put(mac, nrdisabled);
                         }
@@ -350,9 +328,8 @@ public class ReportingMBean implements DynamicMBean {
                     dbService.back(readPool, connection);
                 }
             }
-            for(final Integer key : macMap.keySet() ) {
-                final CompositeDataSupport value = new CompositeDataSupport(macsRow, macsNames, new Object[] {
-                    key, macMap.get(key), admMap.get(key), disabledMap.get(key) });
+            for (final Integer key : macMap.keySet()) {
+                final CompositeDataSupport value = new CompositeDataSupport(macsRow, macsNames, new Object[] { key, macMap.get(key), admMap.get(key), disabledMap.get(key) });
                 total.put(value);
             }
             return total;
@@ -362,15 +339,15 @@ public class ReportingMBean implements DynamicMBean {
         } catch (OpenDataException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         } catch (OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         } catch (SQLException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
-            throw new MBeanException(wrapMe,e.getMessage());
+            throw new MBeanException(wrapMe, e.getMessage());
         }
     }
 
@@ -378,28 +355,26 @@ public class ReportingMBean implements DynamicMBean {
         final TabularDataSupport detail = new TabularDataSupport(detailType);
         try {
             /**
-             *  FIXME:
-             *  Caldav/Carddav only available via ConfigCascade this might need to be added
-             *  Former version also did send login_mappings, but report client did not use it
+             * FIXME:
+             * Caldav/Carddav only available via ConfigCascade this might need to be added
+             * Former version also did send login_mappings, but report client did not use it
              */
-            final Map<Integer,ReportContext> ret = loadContextData();
-            for(final ReportContext c : ret.values().toArray(new ReportContext[ret.size()])) {
+            final Map<Integer, ReportContext> ret = loadContextData();
+            for (final ReportContext c : ret.values().toArray(new ReportContext[ret.size()])) {
                 final TabularDataSupport moduleAccessCombinations = new TabularDataSupport(moduleAccessCombinationsType);
-                final Map<Integer,Integer> accessCombinations = c.getAccessCombinations();
-                final Map<Integer,Integer> inacByCombi = c.getInactiveByCombination();
-                if( null != accessCombinations ) {
-                    for(final Entry<Integer, Integer> e : accessCombinations.entrySet()) {
-                        int inac=0;
-                        if( null != inacByCombi ) {
+                final Map<Integer, Integer> accessCombinations = c.getAccessCombinations();
+                final Map<Integer, Integer> inacByCombi = c.getInactiveByCombination();
+                if (null != accessCombinations) {
+                    for (final Entry<Integer, Integer> e : accessCombinations.entrySet()) {
+                        int inac = 0;
+                        if (null != inacByCombi) {
                             final Integer inAc = inacByCombi.get(e.getKey());
                             inac = inAc == null ? 0 : inAc.intValue();
                         }
-                        moduleAccessCombinations.put(new CompositeDataSupport(moduleAccessPermission, moduleAccessCombinationNames, new Object[] {
-                            e.getKey(), e.getValue(), I(inac) }));
+                        moduleAccessCombinations.put(new CompositeDataSupport(moduleAccessPermission, moduleAccessCombinationNames, new Object[] { e.getKey(), e.getValue(), I(inac) }));
                     }
                 }
-                final CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] {
-                    c.getId(), c.getAdminPermission(), c.getNumUsers(), c.getAge(), c.getCreated(), moduleAccessCombinations });
+                final CompositeDataSupport value = new CompositeDataSupport(detailRow, detailNames, new Object[] { c.getId(), c.getAdminPermission(), c.getNumUsers(), c.getAge(), c.getCreated(), moduleAccessCombinations });
                 detail.put(value);
             }
         } catch (final OpenDataException e) {
@@ -421,9 +396,7 @@ public class ReportingMBean implements DynamicMBean {
     @Override
     public AttributeList getAttributes(final String[] attributes) {
         if (attributes == null) {
-            throw new RuntimeOperationsException(
-                new IllegalArgumentException("attributes can not be null"),
-                "Cannot call getAttributes with null attribute names");
+            throw new RuntimeOperationsException(new IllegalArgumentException("attributes can not be null"), "Cannot call getAttributes with null attribute names");
         }
         final AttributeList resultList = new AttributeList();
         if (attributes.length == 0) {
@@ -447,9 +420,7 @@ public class ReportingMBean implements DynamicMBean {
 
     @Override
     public Object invoke(final String actionName, final Object[] params, final String[] signature) {
-        throw new RuntimeOperationsException(
-            new UnsupportedOperationException("invoke is not supported"),
-            "The method invoke is not supported.");
+        throw new RuntimeOperationsException(new UnsupportedOperationException("invoke is not supported"), "The method invoke is not supported.");
     }
 
     @Override
@@ -464,8 +435,8 @@ public class ReportingMBean implements DynamicMBean {
 
     private final MBeanInfo buildMBeanInfo() {
         try {
-            final String[] totalDescriptions = { "Number of contexts", "Number of users" };
-            final OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER };
+            final String[] totalDescriptions = { "Number of contexts", "Number of users", "Number of guests" };
+            final OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 
@@ -474,54 +445,20 @@ public class ReportingMBean implements DynamicMBean {
             macsRow = new CompositeType("Macs row", "A macs row", macsNames, macsDescriptions, macsTypes);
             macsType = new TabularType("Macs", "Macs view", macsRow, macsNames);
 
-            final String[] moduleAccessCombinationDescriptions = {
-                "Integer value of the module access combination", "number of users configured with this module access combination",
-                "inactive subset of useres configured with this module access combination" };
+            final String[] moduleAccessCombinationDescriptions = { "Integer value of the module access combination", "number of users configured with this module access combination", "inactive subset of useres configured with this module access combination" };
             final OpenType[] moduleAccessCombinationTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
-            moduleAccessPermission = new CompositeType(
-                "Module access permission",
-                "A module access combination and the number of users having it",
-                moduleAccessCombinationNames,
-                moduleAccessCombinationDescriptions,
-                moduleAccessCombinationTypes);
-            moduleAccessCombinationsType = new TabularType(
-                "Module access permission combinations",
-                "The different access combinations used in this context",
-                moduleAccessPermission,
-                new String[] { "module access combination" });
+            moduleAccessPermission = new CompositeType("Module access permission", "A module access combination and the number of users having it", moduleAccessCombinationNames, moduleAccessCombinationDescriptions, moduleAccessCombinationTypes);
+            moduleAccessCombinationsType = new TabularType("Module access permission combinations", "The different access combinations used in this context", moduleAccessPermission, new String[] { "module access combination" });
 
-            final String[] detailDescriptions = {
-                "Context identifier", "Context admin permission", "Number of users", "Context age in days",
-                "Date and time of context creation", "Module access permission combinations" };
-            final OpenType[] detailTypes = {
-                SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE,
-                moduleAccessCombinationsType };
+            final String[] detailDescriptions = { "Context identifier", "Context admin permission", "Number of users", "Context age in days", "Date and time of context creation", "Module access permission combinations" };
+            final OpenType[] detailTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.LONG, SimpleType.DATE, moduleAccessCombinationsType };
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
 
-            final OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport(
-                "Total",
-                "Total contexts and users.",
-                totalType,
-                true,
-                false,
-                false);
-            final OpenMBeanAttributeInfo macsAttribute = new OpenMBeanAttributeInfoSupport(
-                "Macs",
-                "List of macs and their count.",
-                macsType,
-                true,
-                false,
-                false);
-            final OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport(
-                "Detail",
-                "Detailed report about contexts and users",
-                detailType,
-                true,
-                false,
-                false);
-            return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] {
-                totalAttribute, macsAttribute, detailAttribute }, null, null, null);
+            final OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport("Total", "Total contexts and users.", totalType, true, false, false);
+            final OpenMBeanAttributeInfo macsAttribute = new OpenMBeanAttributeInfoSupport("Macs", "List of macs and their count.", macsType, true, false, false);
+            final OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport("Detail", "Detailed report about contexts and users", detailType, true, false, false);
+            return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] { totalAttribute, macsAttribute, detailAttribute }, null, null, null);
         } catch (final OpenDataException e) {
             LOG.error("", e);
         }

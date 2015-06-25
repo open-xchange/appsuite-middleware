@@ -29,6 +29,7 @@ Import-Package: com.openexchange.ajax.requesthandler,
  javax.mail.internet,
  javax.servlet;version="2.5.0",
  javax.servlet.http;version="2.5.0",
+ org.apache.http.client.utils,
  org.json
 Export-Package: com.openexchange.share.core,
  com.openexchange.share.core.performer,
