@@ -66,12 +66,10 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import ezvcard.Ezvcard;
 import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
-import ezvcard.ValidationWarnings;
-import ezvcard.io.scribe.ScribeIndex;
-import ezvcard.io.text.VCardReader;
 
 /**
  * {@link DefaultVCardService}
@@ -112,7 +110,17 @@ public class DefaultVCardService implements VCardService {
         /*
          * parse original vCard as template if supplied
          */
-        VCard template = null != originalVCard ? parseFirst(originalVCard, null, vCardParameters, warnings) : null;
+        VCard template = null;
+        if (null != originalVCard) {
+            try {
+                template = Ezvcard.parse(originalVCard).first();
+            } catch (IOException e) {
+                org.slf4j.LoggerFactory.getLogger(DefaultVCardService.class).error(
+                    "Error parsing original vCard during export of contact {}: {}", contact, e.getMessage(), e);
+            } finally {
+                Streams.close(originalVCard);
+            }
+        }
         /*
          * export contact & return export result
          */
@@ -123,32 +131,12 @@ public class DefaultVCardService implements VCardService {
 
     @Override
     public VCardImport importVCard(InputStream inputStream, Contact contact, VCardParameters parameters) throws OXException {
-        VCardParameters vCardParameters = getParametersOrDefault(parameters);
-        VCardInputStream vCardStream = null;
-        VCardReader reader = null;
-        ThresholdFileHolder sink = null;
-        boolean success = false;
+        VCardImportIterator importIterator = null;
         try {
-            /*
-             * parse first vCard from stream
-             */
-            List<OXException> warnings = new ArrayList<OXException>();
-            sink = vCardParameters.isKeepOriginalVCard() ? new ThresholdFileHolder() : null;
-            VCard vCard = parseFirst(inputStream, sink, vCardParameters, warnings);
-            /*
-             * import vCard
-             */
-            contact = mapper.importVCard(vCard, contact, vCardParameters, warnings);
-            /*
-             * construct & return vCard import result
-             */
-            success = true;
-            return new DefaultVCardImport(contact, warnings, sink);
+            importIterator = new VCardImportIterator(inputStream, mapper, getParametersOrDefault(parameters));
+            return importIterator.first(contact);
         } finally {
-            Streams.close(reader, vCardStream);
-            if (false == success) {
-                Streams.close(sink);
-            }
+            SearchIterators.close(importIterator);
         }
     }
 
@@ -185,52 +173,6 @@ public class DefaultVCardService implements VCardService {
         } catch (IOException e) {
             Streams.close(fileHolder);
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Parses the first vCard from the supplied input stream.
-     *
-     * @param inputStream The input stream to parse the vCard from
-     * @param sink A file holder to use as sink for copying the read data, or <code>null</code> if not used
-     * @param parameters Further parameters for the vCard import, or <code>null</code> if not used
-     * @param warnings A reference to a collection to store any warnings, or <code>null</code> if not used
-     * @return The parsed vCard
-     */
-    private VCard parseFirst(InputStream inputStream, ThresholdFileHolder sink, VCardParameters vCardParameters, List<OXException> warnings) throws OXException {
-        VCardInputStream vCardStream = null;
-        VCardReader reader = null;
-        try {
-            /*
-             * read & prase first vCard from stream
-             */
-            vCardStream = new VCardInputStream(inputStream, vCardParameters.getMaxVCardSize(), sink);
-            reader = new VCardReader(vCardStream);
-            reader.setScribeIndex(new ScribeIndex());
-            VCard vCard;
-            try {
-                vCard = reader.readNext();
-            } catch (IOException e) {
-                if (null != e.getCause() && OXException.class.isInstance(e.getCause())) {
-                    throw (OXException) e.getCause();
-                }
-                throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            }
-            warnings.addAll(VCardExceptionUtils.getParserWarnings(reader.getWarnings()));
-            if (null == vCard) {
-                throw VCardExceptionCodes.NO_VCARD.create();
-            }
-            /*
-             * validate parsed vCard as needed
-             */
-            if (false == vCardParameters.isSkipValidation()) {
-                ValidationWarnings validationWarnings = vCard.validate(
-                    null != vCard.getVersion() ? vCard.getVersion() : ezvcard.VCardVersion.valueOfByStr(vCardParameters.getVersion().getVersion()));
-                warnings.addAll(VCardExceptionUtils.getValidationWarnings(validationWarnings));
-            }
-            return vCard;
-        } finally {
-            Streams.close(reader, vCardStream);
         }
     }
 

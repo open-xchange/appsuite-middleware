@@ -52,8 +52,6 @@ package com.openexchange.contact.vcard.impl.internal;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link VCardInputStream}
@@ -65,7 +63,6 @@ public class VCardInputStream extends FilterInputStream {
     private final long maxSize;
 
     private long currentSize;
-    private ThresholdFileHolder sink;
 
     /**
      * Initializes a new {@link VCardInputStream}.
@@ -74,32 +71,8 @@ public class VCardInputStream extends FilterInputStream {
      * @param maxSize The maximum allowed size in bytes, or a value smaller or equal to <code>0</code> if there are no restrictions
      */
     public VCardInputStream(InputStream delegate, long maxSize) {
-        this(delegate, maxSize, null);
-    }
-
-    /**
-     * Initializes a new {@link VCardInputStream}.
-     *
-     * @param delegate The underlying stream
-     * @param maxSize The maximum allowed size in bytes, or a value smaller or equal to <code>0</code> if there are no restrictions
-     * @param sink A file holder to use as sink for copying the read data, or <code>null</code> if not used
-     */
-    public VCardInputStream(InputStream delegate, long maxSize, ThresholdFileHolder sink) {
         super(delegate);
         this.maxSize = maxSize;
-        this.sink = sink;
-    }
-
-    /**
-     * Sets the threshold file holder to use as sink.
-     *
-     * @param fileHolder The file holder sink to use
-     * @return The previously used sink, or <code>null</code> if there was none
-     */
-    public ThresholdFileHolder setSink(ThresholdFileHolder fileHolder) {
-        ThresholdFileHolder previousSink = sink;
-        this.sink = fileHolder;
-        return previousSink;
     }
 
     /**
@@ -115,13 +88,6 @@ public class VCardInputStream extends FilterInputStream {
         if (r != -1) {
             currentSize++;
             checkSize(currentSize);
-            if (null != sink) {
-                try {
-                    sink.write(new byte[] { (byte) r }, 0, 1);
-                } catch (OXException e) {
-                    throw new IOException(e);
-                }
-            }
         }
         return r;
     }
@@ -132,13 +98,6 @@ public class VCardInputStream extends FilterInputStream {
         if (r > 0) {
             currentSize += r;
             checkSize(currentSize);
-            if (null != sink) {
-                try {
-                    sink.write(arg0, arg1, arg2);
-                } catch (OXException e) {
-                    throw new IOException(e);
-                }
-            }
         }
         return r;
     }
