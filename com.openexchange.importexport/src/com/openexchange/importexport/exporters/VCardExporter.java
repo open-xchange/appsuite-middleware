@@ -234,12 +234,18 @@ public class VCardExporter implements Exporter {
 
     private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
 
-    private InputStream export(final ServerSession session, final String folderId, final String objectId) throws OXException {
-        ContactField[] fields = ContactMapper.getInstance().getFields(_contactFields);
-        List<ContactField> tmp = new ArrayList<ContactField>();
-        tmp.addAll(Arrays.asList(fields));
-        tmp.add(ContactField.VCARD_ID);
-        fields = tmp.toArray(new ContactField[tmp.size()]);
+    private InputStream export(final ServerSession session, final String folderId, final String objectId, int[] fieldsToBeExported) throws OXException {
+        ContactField[] fields;
+        if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
+            fields = ContactMapper.getInstance().getFields(_contactFields);
+            List<ContactField> tmp = new ArrayList<ContactField>();
+            tmp.addAll(Arrays.asList(fields));
+            tmp.add(ContactField.VCARD_ID);
+            fields = tmp.toArray(new ContactField[tmp.size()]);
+        } else {
+            // In this case the original vcard must not be merged. Since the ContactMapper does not even map the VCARD_ID column it will not be considered when exporting. 
+            fields = ContactMapper.getInstance().getFields(fieldsToBeExported);
+        }
 
         if (objectId == null) {
             List<InputStream> streams = new ArrayList<InputStream>();
@@ -292,10 +298,6 @@ public class VCardExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(final ServerSession session, final Format format, final String folder, final int objectId, final int[] fieldsToBeExported, final Map<String, Object> optionalParams) throws OXException {
-        if (fieldsToBeExported != null && fieldsToBeExported.length > 0) {
-            // TODO: Throw Exception?
-        }
-
         String oId = null;
         try {
             oId = objectId > 0 ? Integer.toString(objectId) : null;
@@ -312,12 +314,12 @@ public class VCardExporter implements Exporter {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
                     requestData.removeCachingHeader();
-                    IOUtils.copy(export(session, folder, oId), out);
+                    IOUtils.copy(export(session, folder, oId, fieldsToBeExported), out);
                     return null;
                 }
             }
             // No streaming support possible
-            return new SizedInputStream(export(session, folder, oId), -1, Format.VCARD);
+            return new SizedInputStream(export(session, folder, oId, fieldsToBeExported), -1, Format.VCARD);
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }

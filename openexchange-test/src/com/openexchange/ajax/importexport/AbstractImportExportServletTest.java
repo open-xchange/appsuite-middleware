@@ -102,6 +102,21 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         + "UID:80@ox6.netline.de\n"
         + "X-SHOESIZE:9.5\n"
         + "END:VCARD\n";
+
+    public String IMPORT_VCARD_2 =
+          "BEGIN:VCARD\n"
+        + "VERSION:3.0\n"
+        + "PRODID:-//Open-Xchange//7.8.0-Rev0//EN\n"
+        + "FN:Mustermann\\, Max\n"
+        + "N:Mustermann;Max;;;\n"
+        + "BDAY:19660730\n"
+        + "ADR;TYPE=work:;;;Musterstadt;NRW;12345;DE\n"
+        + "TEL;TYPE=home,voice:+491234567890\n"
+        + "EMAIL:max.mustermann@example.invalid\n"
+        + "REV:20061204T160750.018Z\n"
+        + "URL:www.example.invalid\n"
+        + "X-SHOESIZE:6.0\n"
+        + "END:VCARD\n";
     
     public Map<String, String> VCARD_ELEMENTS = new HashMap<String, String>(){{
         put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
@@ -112,6 +127,17 @@ public abstract class AbstractImportExportServletTest extends AbstractAJAXTest {
         put("TEL;TYPE=home,voice", "+49 2358 7192");
         put("EMAIL", "tobias.prinz@open-xchange.com");
         put("X-SHOESIZE", "9.5");
+    }};
+    
+    public Map<String, String> VCARD_ELEMENTS_2 = new HashMap<String, String>(){{
+        put("PRODID", "-//Open-Xchange//7.8.0-Rev0//EN");
+        put("FN", "Mustermann\\, Max");
+        put("N", "Mustermann;Max;;;");
+        put("BDAY", "1966-07-30");
+        put("ADR;TYPE=work", ";;;Musterstadt;NRW;12345;DE");
+        put("TEL;TYPE=home,voice", "+491234567890");
+        put("EMAIL", "max.mustermann@example.invalid");
+        put("X-SHOESIZE", "6.0");
     }};
 
     /* @formatter:on */

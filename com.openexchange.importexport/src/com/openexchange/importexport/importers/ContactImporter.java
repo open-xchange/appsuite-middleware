@@ -50,6 +50,9 @@
 package com.openexchange.importexport.importers;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
@@ -92,7 +95,21 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID) throws OXException {
-        this.createContact(session, contact, folderID, null);
+        this.createContact(session, contact, folderID, (InputStream) null);
+    }
+
+    /**
+     * Creates a new contact, implicitly trying again with trimmed values in
+     * case of truncation errors.
+     *
+     * @param session the current session
+     * @param contact the contact to create
+     * @param folderID the target folder ID
+     * @param vCard the FileHolder containing the original vCard
+     * @throws OXException
+     */
+    protected void createContact(Session session, Contact contact, String folderID, IFileHolder vCard) throws OXException {
+        this.createContact(session, contact, folderID, vCard == null ? null : vCard.getStream());
     }
 
     /**
@@ -106,6 +123,20 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
+        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes()));
+    }
+    
+    /**
+     * Creates a new contact, implicitly trying again with trimmed values in
+     * case of truncation errors.
+     *
+     * @param session the current session
+     * @param contact the contact to create
+     * @param folderID the target folder ID
+     * @param vCard the InputStream providing the original vCard
+     * @throws OXException
+     */
+    protected void createContact(Session session, Contact contact, String folderID, InputStream vCard) throws OXException {
         ContactService contactService = ImportExportServices.getContactService();
         VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService();
 
@@ -114,7 +145,7 @@ public abstract class ContactImporter extends AbstractImporter {
         }
         
         if (vCard != null && vCardStorage != null) {
-            String vCardId = vCardStorage.saveVCard(new ByteArrayInputStream(vCard.getBytes()), session.getContextId());
+            String vCardId = vCardStorage.saveVCard(vCard, session.getContextId());
             if (vCardId != null) {
                 contact.setVCardId(vCardId);
             }
