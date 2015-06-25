@@ -74,6 +74,8 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
     private VCardVersion defaultVersion;
     private long defaultMaxVCardSize;
     private boolean defaultKeepOriginalVCard;
+    private boolean defaultRemoveImageFromKeptVCard;
+
 
     /**
      * Initializes a new {@link VCardParametersFactoryImpl}.
@@ -86,7 +88,8 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         defaultStrict = false;
         defaultVersion = VCardVersion.VERSION_3_0;
         defaultMaxVCardSize = 4194304;
-        defaultKeepOriginalVCard = false;
+        defaultKeepOriginalVCard = true;
+        defaultRemoveImageFromKeptVCard = true;
     }
 
     /**
@@ -113,6 +116,8 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         defaultMaxContactImageSize = configService.getIntProperty("max_image_size", 4194304);
         defaultValidateContactEMail = configService.getBoolProperty("validate_contact_email", true);
         defaultMaxVCardSize = configService.getIntProperty("com.openexchange.contact.maxVCardSize", 4194304);
+        defaultKeepOriginalVCard = configService.getBoolProperty("com.openexchange.contact.storeVCards", true);
+        defaultRemoveImageFromKeptVCard = configService.getBoolProperty("com.openexchange.contact.removeImageFromStoredVCards", true);
     }
 
     @Override
@@ -126,6 +131,7 @@ public class VCardParametersFactoryImpl implements VCardParametersFactory {
         parameters.setValidateContactEMail(defaultValidateContactEMail);
         parameters.setMaxVCardSize(defaultMaxVCardSize);
         parameters.setKeepOriginalVCard(defaultKeepOriginalVCard);
+        parameters.setKeepOriginalVCard(defaultRemoveImageFromKeptVCard);
         return parameters;
     }
 

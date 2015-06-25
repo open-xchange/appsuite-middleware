@@ -77,6 +77,7 @@ public class UnitTests {
         tests.addTestSuite(ColorLabelTest.class);
         tests.addTestSuite(EmptyTest.class);
         tests.addTestSuite(ImportIteratorTest.class);
+        tests.addTestSuite(RemoveImageTest.class);
         tests.addTestSuite(Bug13557Test.class);
         tests.addTestSuite(Bug14349Test.class);
         tests.addTestSuite(Bug14350Test.class);
