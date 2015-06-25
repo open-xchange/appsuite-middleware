@@ -171,28 +171,30 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 try {
                     loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
                 } catch (RuntimeException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
+                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
                 }
             }
         }
         if (!share.getGuest().isPasswordSet()) {
-            if (Strings.isEmpty(loginInfo.getPassword()) && emptyGuestPasswords > 0 && emptyGuestPasswords > loginCount) {
-                userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
-                return user;
-            }
-            if (!Strings.isEmpty(loginInfo.getPassword())) {
+            if (Strings.isEmpty(loginInfo.getPassword())) {
+                if (emptyGuestPasswords < 0 || (emptyGuestPasswords > 0 && emptyGuestPasswords > loginCount)) {
+                    userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
+                    return user;
+                }
+            } else {
                 try {
-                UserImpl userToUpdate = new UserImpl(user);
-                userToUpdate.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-                userToUpdate.setUserPassword(PasswordMech.BCRYPT.encode(loginInfo.getPassword()));
-                userService.updateUser(userToUpdate, context);
-                return userToUpdate;
+                    UserImpl userToUpdate = new UserImpl(user);
+                    userToUpdate.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+                    userToUpdate.setUserPassword(PasswordMech.BCRYPT.encode(loginInfo.getPassword()));
+                    userService.updateUser(userToUpdate, context);
+                    return userToUpdate;
                 } catch (UnsupportedEncodingException e) {
                     throw LoginExceptionCodes.UNKNOWN.create(e);
                 } catch (NoSuchAlgorithmException e) {
                     throw LoginExceptionCodes.UNKNOWN.create(e);
                 }
             }
+
             throw LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.create();
         }
 
