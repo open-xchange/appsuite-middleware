@@ -155,7 +155,7 @@ public class LoginRequestImpl implements LoginRequest {
     private final int serverPort;
     private final String httpSessionID;
     private boolean tranzient;
-    private String language;
+    private final String language;
 
     /**
      * Initializes a new {@link LoginRequestImpl}.
