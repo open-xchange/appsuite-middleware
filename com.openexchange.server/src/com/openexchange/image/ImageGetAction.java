@@ -162,9 +162,6 @@ public class ImageGetAction implements AJAXActionService {
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         } catch (IllegalArgumentException e) {
             LOG.warn("Retrieving image failed.", e);
-            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
-                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getMessage());
-            }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
     }
