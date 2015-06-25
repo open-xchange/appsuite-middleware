@@ -193,6 +193,13 @@ public final class ImageUtility {
         return il;
     }
 
+    /**
+     * Parses image location from given request data
+     *
+     * @param requestData The request data to parse from
+     * @return The parsed image location
+     * @throws IllegalArgumentException If there is no matching registration name for request's URI (the URI part after path to the Servlet)
+     */
     public static ImageLocation parseImageLocationFrom(final AJAXRequestData requestData) {
         if (requestData == null) {
             return null;

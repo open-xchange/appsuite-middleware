@@ -51,6 +51,7 @@ package com.openexchange.image;
 
 import java.io.InputStream;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -92,27 +93,33 @@ public class ImageGetAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         // Check registration name
-        String registrationName = null;
+        String registrationName;
         {
-            final String serlvetRequestURI = requestData.getSerlvetRequestURI();
+            String serlvetRequestURI = requestData.getSerlvetRequestURI();
             if (null == serlvetRequestURI) {
                 LOG.debug("Missing path information in image URL.");
-
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
             }
-            for (Entry<String, String> entry : ImageActionFactory.alias2regName.entrySet()) {
-                String alias = entry.getKey();
-                if (serlvetRequestURI.contains(alias)) {
-                    registrationName = entry.getValue();
-                    break;
+
+            ConcurrentMap<String, String> alias2regname = ImageActionFactory.alias2regName;
+            registrationName = alias2regname.get(serlvetRequestURI);
+
+            if (null == registrationName) {
+                for (Entry<String, String> entry : alias2regname.entrySet()) {
+                    String alias = entry.getKey();
+                    if (serlvetRequestURI.contains(alias)) {
+                        registrationName = entry.getValue();
+                        break;
+                    }
                 }
             }
+
             if (registrationName == null) {
                 LOG.debug("Request URI cannot be resolved to an image location: {}", serlvetRequestURI);
-
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Unknown image location.");
             }
         }
+
         // Parse path
         ImageDataSource dataSource = null;
         try {
@@ -120,26 +127,21 @@ public class ImageGetAction implements AJAXActionService {
             dataSource = (ImageDataSource) conversionService.getDataSource(registrationName);
         } catch (OXException e) {
             LOG.debug("Missing ConversionService reference.", e);
-
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }
         if (dataSource == null) {
             LOG.debug("Data source cannot be found for: {}", registrationName);
-
             throw AjaxExceptionCodes.BAD_REQUEST.create("Invalid image location.");
         }
-        ImageLocation imageLocation = dataSource.parseRequest(requestData);
 
-        /*
-         * Output image
-         */
-        AJAXRequestResult requestResult = new AJAXRequestResult();
+        // Output image
         try {
-            /*
-             * Check for ETag headers
-             */
-            final String dataETag = dataSource.getETag(imageLocation, session);
-            final String clientETag = requestData.getHeader("If-None-Match");
+            ImageLocation imageLocation = dataSource.parseRequest(requestData);
+            AJAXRequestResult requestResult = new AJAXRequestResult();
+
+            // Check for ETag headers
+            String dataETag = dataSource.getETag(imageLocation, session);
+            String clientETag = requestData.getHeader("If-None-Match");
             if (null != clientETag && clientETag.equals(dataETag)) {
                 requestResult.setType(AJAXRequestResult.ResultType.ETAG);
                 requestResult.setFormat("file");
@@ -151,15 +153,20 @@ public class ImageGetAction implements AJAXActionService {
                 requestResult.setHeader("ETag", dataETag);
                 requestResult.setExpires(Tools.getDefaultImageExpiry());
             }
+            return requestResult;
         } catch (OXException e) {
             LOG.warn("Retrieving image failed.", e);
-
             if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
                 throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getSoleMessage());
             }
             throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
+        } catch (IllegalArgumentException e) {
+            LOG.warn("Retrieving image failed.", e);
+            if (ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_NOT_FOUND), e.getMessage());
+            }
+            throw AjaxExceptionCodes.BAD_REQUEST.create(e, new Object[0]);
         }
-        return requestResult;
     }
 
     private static void obtainImageData(ImageDataSource dataSource, ImageLocation imageLocation, Session session, AJAXRequestResult requestResult) throws OXException {
