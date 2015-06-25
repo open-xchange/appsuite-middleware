@@ -88,12 +88,12 @@ public class ObjectHandler {
 
         final List<Total> retval = new ArrayList<Total>();
         for (final Object tmp : data.keySet()) {
-            retval.add(new Total(((List<Object>) tmp).get(0).toString(), ((List<Object>) tmp).get(1).toString()));
+            retval.add(new Total(((List<Object>) tmp).get(0).toString(), ((List<Object>) tmp).get(1).toString(), ((List<Object>) tmp).get(2).toString()));
         }
 
         return (retval);
     }
-    
+
     public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
         return getClientLoginCount(mbsc, false);
     }
@@ -101,7 +101,7 @@ public class ObjectHandler {
     public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc, final boolean forYear) throws MBeanException {
         ClientLoginCount retval = new ClientLoginCount();
         LoginCounterMBean lcProxy = loginCounterProxy(mbsc);
-        
+
         Calendar cal = Calendar.getInstance();
         Date startDate = null;
         Date endDate = null;
@@ -114,15 +114,15 @@ public class ObjectHandler {
             cal.add(Calendar.DATE, -30);
             startDate = cal.getTime();
         }
-        
+
         Map<String, Integer> usmEasResult = lcProxy.getNumberOfLogins(startDate, endDate, true, "USM-EAS");
         Integer usmEas = usmEasResult.get(LoginCounterMBean.SUM);
         retval.setUsmeas(usmEas.toString());
-        
+
         Map<String, Integer> olox2Result = lcProxy.getNumberOfLogins(startDate, endDate, true, "OpenXchange.HTTPClient.OXAddIn");
         Integer olox2 = olox2Result.get(LoginCounterMBean.SUM);
         retval.setOlox2(olox2.toString());
-        
+
         Map<String, Integer> mobileAppResult = lcProxy.getNumberOfLogins(startDate, endDate, true, "com.openexchange.mobileapp");
         Integer mobileApp = mobileAppResult.get(LoginCounterMBean.SUM);
         retval.setMobileapp(mobileApp.toString());
@@ -137,7 +137,7 @@ public class ObjectHandler {
 
         return retval;
     }
-    
+
     private static LoginCounterMBean loginCounterProxy(MBeanServerConnection mbsc) {
         return MBeanServerInvocationHandler.newProxyInstance(mbsc, Constants.LOGIN_COUNTER_NAME, LoginCounterMBean.class, false);
     }
@@ -194,10 +194,10 @@ public class ObjectHandler {
 
     protected static List<List<Object>> createTotalList(final List<Total> totals) {
         final List<List<Object>> retval = new ArrayList<List<Object>>();
-        retval.add(Arrays.asList((Object) "contexts", "users"));
+        retval.add(Arrays.asList((Object) "contexts", "users", "guests"));
 
         for (final Total tmp : totals) {
-            retval.add(Arrays.asList((Object) tmp.getContexts(), tmp.getUsers()));
+            retval.add(Arrays.asList((Object) tmp.getContexts(), tmp.getUsers(), tmp.getGuests()));
         }
 
         return retval;

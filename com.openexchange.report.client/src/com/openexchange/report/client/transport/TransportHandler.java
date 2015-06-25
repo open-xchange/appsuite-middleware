@@ -87,8 +87,7 @@ public class TransportHandler {
 
     private static final String URL_ENCODING = "UTF-8";
 
-    public TransportHandler() {
-    }
+    public TransportHandler() {}
 
     public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear, final boolean savereport) throws IOException, JSONException {
         final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, versions, clc, clcYear);
@@ -136,9 +135,7 @@ public class TransportHandler {
             if ("true".equals(reportConfiguration.getUseProxy().trim()) && "true".equals(reportConfiguration.getProxyAuthRequired().trim())) {
                 final String proxyAutorizationProperty = "Basic " + Base64.encode((reportConfiguration.getProxyUsername().trim() + ":" + reportConfiguration.getProxyPassword().trim()).getBytes());
 
-                Authenticator.setDefault(new ProxyAuthenticator(
-                    reportConfiguration.getProxyUsername().trim(),
-                    reportConfiguration.getProxyPassword().trim()));
+                Authenticator.setDefault(new ProxyAuthenticator(reportConfiguration.getProxyUsername().trim(), reportConfiguration.getProxyPassword().trim()));
 
                 httpsURLConnection.setRequestProperty("Proxy-Authorization", proxyAutorizationProperty);
             }
@@ -181,6 +178,7 @@ public class TransportHandler {
         for (final Total tmp : totals) {
             total.put("contexts", tmp.getContexts());
             total.put("users", tmp.getUsers());
+            total.put("guests", tmp.getGuests());
         }
 
         for (final MacDetail tmp : macDetails) {
@@ -241,7 +239,7 @@ public class TransportHandler {
     }
 
     public void sendASReport(CompositeData report, boolean savereport) throws IOException, JSONException {
-        send(new JSONObject((String)report.get("data")), savereport);
+        send(new JSONObject((String) report.get("data")), savereport);
     }
 
 }
