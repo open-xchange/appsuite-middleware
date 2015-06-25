@@ -63,6 +63,7 @@ import com.openexchange.realtime.cleanup.LocalRealtimeCleanup;
 import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.ResourceDirectory;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.packet.ID;
@@ -120,14 +121,18 @@ public class ResponseChannel implements Channel {
             locks.get(id).lock();
             Stanza stanza = responses.get(id);
             if (stanza != null) {
+                LOG.debug("Returning stanza without waiting on condition: {}", stanza);
                 return stanza;
             }
             condition.get(id).await(timeout, unit);
             stanza = responses.get(id);
             if (stanza == null) {
-                throw RealtimeExceptionCodes.RESPONSE_AWAIT_TIMEOUT.create();
+                RealtimeException re = RealtimeExceptionCodes.RESPONSE_AWAIT_TIMEOUT.create();
+                LOG.error("Didn't get a response in time",re);
+                throw re;
             }
 
+            LOG.debug("Returning stanza after waiting on condition: {}", stanza);
             return stanza;
         } catch (InterruptedException e) {
             throw new OXException(e);
