@@ -158,6 +158,7 @@ import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFaca
 import com.openexchange.groupware.infostore.facade.impl.InfostoreFacadeImpl;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.upload.impl.UploadUtility;
 import com.openexchange.groupware.userconfiguration.osgi.CapabilityRegistrationListener;
 import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
@@ -855,6 +856,7 @@ public final class ServerActivator extends HousekeepingActivator {
                 secretService = null;
             }
             LoginServlet.setRampUpServices(null);
+            UploadUtility.shutDown();
         } finally {
             started.set(false);
             CONTEXT = null;
