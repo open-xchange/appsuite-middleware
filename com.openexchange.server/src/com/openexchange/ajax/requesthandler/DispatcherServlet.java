@@ -378,10 +378,10 @@ public class DispatcherServlet extends SessionServlet {
 
         ServerSession session = null;
         AJAXState state = null;
+        AJAXRequestData requestData = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-
-            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
+            requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
             /*
              * Start dispatcher processing
              */
@@ -432,6 +432,9 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResponse, false, false);
         } finally {
+            if (null != requestData) {
+                requestData.cleanUploads();
+            }
             if (null != state) {
                 dispatcher.end(state);
             }
