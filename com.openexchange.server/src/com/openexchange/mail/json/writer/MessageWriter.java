@@ -213,7 +213,7 @@ public final class MessageWriter {
         String fullName = mail.getFolder();
         String mailId = mail.getMailId();
         if (fullName != null && mailId != null) {
-            mailPath = new MailPath(mail instanceof Delegatized ? ((Delegatized) mail).getUndelegatedAccountId() : accountId, fullName, mailId);
+            mailPath = new MailPath(getAccountIdFor(accountId, mail), fullName, mailId);
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {
@@ -280,6 +280,18 @@ public final class MessageWriter {
             }
             throw e;
         }
+    }
+
+    private static int getAccountIdFor(int accountId, MailMessage mail) {
+        if (!(mail instanceof Delegatized)) {
+            return accountId;
+        }
+
+        int accId = ((Delegatized) mail).getUndelegatedAccountId();
+        if (accId < 0) {
+            return accountId;
+        }
+        return accId;
     }
 
     /**
