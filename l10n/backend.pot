@@ -7780,7 +7780,7 @@ msgstr ""
 
 #. * $username has shared $number folders with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:86
-msgid "%1$s has shared %2$ folders with you."
+msgid "%1$s has shared %2$d folders with you."
 msgstr ""
 
 #. detailed body
