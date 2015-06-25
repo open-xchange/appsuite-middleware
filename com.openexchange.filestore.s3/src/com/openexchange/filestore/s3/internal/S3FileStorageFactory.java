@@ -280,7 +280,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
         }
         if (null == publicKey) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No private key found in " + pathToKeyStore);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("No public key found in " + pathToKeyStore);
         }
         return new KeyPair(publicKey, privateKey);
     }
