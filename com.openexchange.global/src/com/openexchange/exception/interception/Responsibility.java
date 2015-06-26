@@ -59,6 +59,18 @@ package com.openexchange.exception.interception;
  */
 public class Responsibility {
 
+    /**
+     * The identifier for all modules/actions.
+     */
+    public static final String ALL = "*";
+
+    /**
+     * The {@link Responsibility} constant for all modules/actions.
+     */
+    public static final Responsibility RESPONSIBILITY_ALL = new Responsibility(ALL, ALL);
+
+    // ------------------------------------------------------------------------------------------------------------------------
+
     private final String module;
     private final String action;
     private final int hash;
@@ -66,10 +78,11 @@ public class Responsibility {
     /**
      * Initializes a new {@link Responsibility}.
      *
-     * @param module - the module the {@link OXExceptionInterceptor} is responsible for
-     * @param action - the module the {@link OXExceptionInterceptor} is responsible for.
+     * @param module The module the {@link OXExceptionInterceptor} is responsible for
+     * @param action The module the {@link OXExceptionInterceptor} is responsible for.
      */
     public Responsibility(String module, String action) {
+        super();
         if (module == null) {
             throw new IllegalArgumentException("Module might not be null");
         }
@@ -101,12 +114,36 @@ public class Responsibility {
     }
 
     /**
-     * {@inheritDoc}
+     * Checks if this responsibility implies given responsibility instance.
+     *
+     * @param responsibility The responsibility
+     * @return <code>true</code> if implied; otherwise <code>false</code>
      */
+    public boolean implies(Responsibility responsibility) {
+        return implies(responsibility.module, responsibility.action);
+    }
+
+    /**
+     * Checks if this responsibility implies given module/action combination.
+     *
+     * @param module The module identifier
+     * @param action The action identifier
+     * @return <code>true</code> if implied; otherwise <code>false</code>
+     */
+    public boolean implies(String module, String action) {
+        if (null == module || null == action) {
+            return false;
+        }
+
+        String thisModule = this.module;
+        String thisAction = this.action;
+        return (ALL.equals(thisModule) || thisModule.equals(module)) && (ALL.equals(thisAction) || thisAction.equals(action));
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (o == null) {
-            return false;
+        if (o == this) {
+            return true;
         }
         if (!(o instanceof Responsibility)) {
             return false;
@@ -115,9 +152,6 @@ public class Responsibility {
         return this.module.equals(pairo.getModule()) && this.action.equals(pairo.getAction());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int hashCode() {
         return hash;
