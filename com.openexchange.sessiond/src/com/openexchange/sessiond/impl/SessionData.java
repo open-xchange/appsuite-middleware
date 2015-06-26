@@ -398,6 +398,14 @@ final class SessionData {
         return false;
     }
 
+    /**
+     * Gets the first session for given user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param includeLongTerm Whether long-term container should be considered or not
+     * @return The first matching session or <code>null</code>
+     */
     public SessionControl getAnyActiveSessionForUser(final int userId, final int contextId, final boolean includeLongTerm) {
         rlock.lock();
         try {
@@ -431,7 +439,16 @@ final class SessionData {
         return null;
     }
 
-    public Session findFirstSessionForUser(final int userId, final int contextId, final SessionMatcher matcher, final boolean ignoreLongTerm) {
+    /**
+     * Finds the first session for given user that satisfies given matcher.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param matcher The matcher to satisfy
+     * @param ignoreLongTerm Whether long-term container should be considered or not
+     * @return The first matching session or <code>null</code>
+     */
+    public Session findFirstSessionForUser(int userId, int contextId, SessionMatcher matcher, boolean ignoreLongTerm) {
         rlock.lock();
         try {
             for (final SessionContainer container : sessionList) {
@@ -443,7 +460,7 @@ final class SessionData {
         } finally {
             rlock.unlock();
         }
-        if (!ignoreLongTerm) {
+        if (false == ignoreLongTerm) {
             rlongTermLock.lock();
             try {
                 if (!hasLongTermSession(userId, contextId)) {
@@ -464,26 +481,36 @@ final class SessionData {
         return null;
     }
 
-    SessionControl[] getUserSessions(final int userId, final int contextId) {
+    /**
+     * Gets the <b>local-only</b> sessions associated with specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The <b>local-only</b> sessions or an empty list
+     */
+    List<SessionControl> getUserSessions(int userId, int contextId) {
         // A read-only access to session list
-        final List<SessionControl> retval = new LinkedList<SessionControl>();
+        List<SessionControl> retval = new LinkedList<SessionControl>();
+
         // Short term ones
         rlock.lock();
         try {
-            for (final SessionContainer container : sessionList) {
+            for (SessionContainer container : sessionList) {
                 retval.addAll(Arrays.asList(container.getSessionsByUser(userId, contextId)));
             }
         } finally {
             rlock.unlock();
         }
+
+        // Long term ones
         rlongTermLock.lock();
         try {
             if (!hasLongTermSession(userId, contextId)) {
-                return retval.toArray(new SessionControl[retval.size()]);
+                return retval;
             }
-            for (final SessionMap longTermMap : longTermList) {
-                for (final SessionControl control : longTermMap.values()) {
-                    final Session session = control.getSession();
+            for (SessionMap longTermMap : longTermList) {
+                for (SessionControl control : longTermMap.values()) {
+                    Session session = control.getSession();
                     if (session.getContextId() == contextId && session.getUserId() == userId) {
                         retval.add(control);
                     }
@@ -492,15 +519,23 @@ final class SessionData {
         } finally {
             rlongTermLock.unlock();
         }
-        return retval.toArray(new SessionControl[retval.size()]);
+
+        return retval;
     }
 
-    int getNumOfUserSessions(final int userId, final int contextId) {
+    /**
+     * Gets the number of <b>local-only</b> sessions associated with specified user in given context.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The number of sessions
+     */
+    int getNumOfUserSessions(int userId, int contextId) {
         // A read-only access to session list
         int count = 0;
         rlock.lock();
         try {
-            for (final SessionContainer container : sessionList) {
+            for (SessionContainer container : sessionList) {
                 count += container.numOfUserSessions(userId, contextId);
             }
         } finally {
@@ -511,9 +546,9 @@ final class SessionData {
             if (!hasLongTermSession(userId, contextId)) {
                 return count;
             }
-            for (final SessionMap longTermMap : longTermList) {
-                for (final SessionControl control : longTermMap.values()) {
-                    final Session session = control.getSession();
+            for (SessionMap longTermMap : longTermList) {
+                for (SessionControl control : longTermMap.values()) {
+                    Session session = control.getSession();
                     if (session.getContextId() == contextId && session.getUserId() == userId) {
                         count++;
                     }
@@ -525,12 +560,19 @@ final class SessionData {
         return count;
     }
 
-    void checkAuthId(final String login, final String authId) throws OXException {
+    /**
+     * Checks validity/uniqueness of specified authentication identifier for given login
+     *
+     * @param login The login
+     * @param authId The authentication identifier
+     * @throws OXException If authentication identifier is invalid/non-unique
+     */
+    void checkAuthId(String login, String authId) throws OXException {
         if (null != authId) {
             rlock.lock();
             try {
-                for (final SessionContainer container : sessionList) {
-                    for (final SessionControl sc : container.getSessionControls()) {
+                for (SessionContainer container : sessionList) {
+                    for (SessionControl sc : container.getSessionControls()) {
                         if (authId.equals(sc.getSession().getAuthId())) {
                             throw SessionExceptionCodes.DUPLICATE_AUTHID.create(sc.getSession().getLogin(), login);
                         }
@@ -542,8 +584,8 @@ final class SessionData {
         }
         rlongTermLock.lock();
         try {
-            for (final SessionMap longTermMap : longTermList) {
-                for (final SessionControl control : longTermMap.values()) {
+            for (SessionMap longTermMap : longTermList) {
+                for (SessionControl control : longTermMap.values()) {
                     if (null != authId && authId.equals(control.getSession().getAuthId())) {
                         throw SessionExceptionCodes.DUPLICATE_AUTHID.create(control.getSession().getLogin(), login);
                     }

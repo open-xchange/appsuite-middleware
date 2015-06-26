@@ -1272,7 +1272,7 @@ public class InternetAddress extends Address implements Cloneable {
 	     * <let-dig-hyp> ::= <let-dig> | "-"
 	     * <let-dig> ::= <letter> | <digit>
 	     */
-	    if (!(Character.isLetterOrDigit(c) || c == '-' || c == '.'))
+	    if (!(Character.isLetterOrDigit(c) || c == '_' || c == '-' || c == '.'))
 		throw new AddressException(
 				"Domain contains illegal character", addr);
 	    if (c == '.' && lastc == '.')

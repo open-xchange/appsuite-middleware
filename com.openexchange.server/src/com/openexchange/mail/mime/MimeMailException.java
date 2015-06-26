@@ -70,6 +70,7 @@ import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.tools.exceptions.ExceptionUtils;
+import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
 import com.sun.mail.smtp.SMTPSenderFailedException;
@@ -570,11 +571,12 @@ public class MimeMailException extends OXException {
         return serverResponse;
     }
 
-    private static <E extends MessagingException> E lookupNested(final MessagingException e, final Class<E> clazz) {
+    private static <E> E lookupNested(final MessagingException e, final Class<E> clazz) {
         if (null == e) {
             return null;
         }
-        final Exception exception = e.getNextException();
+
+        Exception exception = e.getNextException();
         if (clazz.isInstance(exception)) {
             return clazz.cast(exception);
         }
@@ -641,6 +643,17 @@ public class MimeMailException extends OXException {
             return false;
         }
         return (toLowerCase(msg).indexOf("[inuse]") >= 0);
+    }
+
+    /**
+     * Checks for possible command-failed error.
+     */
+    public static boolean isCommandFailedException(MessagingException e) {
+        if (null == e) {
+            return false;
+        }
+        CommandFailedException commandFailedError = lookupNested(e, com.sun.mail.iap.CommandFailedException.class);
+        return null != commandFailedError;
     }
 
     private static String getSmtpInfo(SMTPSendFailedException sendFailedError) {

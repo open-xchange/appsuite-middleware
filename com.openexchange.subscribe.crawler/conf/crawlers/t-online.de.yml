@@ -4,14 +4,14 @@ displayName: t-online.de
 id: com.openexchange.subscribe.crawler.t-online.de
 workflowString: |
   --- !com.openexchange.subscribe.crawler.Workflow
-  steps: 
+  steps:
     - !com.openexchange.subscribe.crawler.LoginPageByFormActionStep
       actionOfLoginForm: /
       baseUrl: ""
       description: Log into the mobile version as the full one does not work
       linkAvailableAfterLogin: ".*overview.*"
-      nameOfPasswordField: pwd
-      nameOfUserField: usr
+      nameOfPasswordField: pw_pwd
+      nameOfUserField: pw_usr
       numberOfForm: 1
       pageTitleAfterLogin: ".*overview.*"
       password: ""
@@ -32,7 +32,7 @@ workflowString: |
       linkToTargetPage: ".*postalshow.*"
       pageParts: !com.openexchange.subscribe.crawler.internal.PagePartSequence
         page: ""
-        pageParts: 
+        pageParts:
           - !com.openexchange.subscribe.crawler.internal.PagePart
             regex: "(<td class=\"headline_else_td\">)([a-zA-Z\\säöüß-éè]*)(</td>)"
             type: 1
@@ -113,4 +113,4 @@ workflowString: |
             regex: "(?s)(BusPostal1\">(?:[^>]*>){6}\\s<div>)([^>]*)(</div>)"
             type: 1
             typeOfInfo: country_business
-  
+

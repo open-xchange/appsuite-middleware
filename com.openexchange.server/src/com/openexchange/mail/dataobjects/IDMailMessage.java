@@ -64,18 +64,32 @@ public final class IDMailMessage extends MailMessage {
     private static final long serialVersionUID = -8945006270321242506L;
 
     private long uid;
-
     private String mailId;
-
     private char separator;
-
     private int seqnum;
+    private int unreadMessages;
 
     /**
      * Initializes a new {@link IDMailMessage}
      */
     public IDMailMessage() {
         super();
+        unreadMessages = -1;
+    }
+
+    /**
+     * Initializes a new {@link IDMailMessage}
+     */
+    public IDMailMessage(final String mailId, final String folder) {
+        this();
+        this.mailId = mailId;
+        if (null == mailId) {
+            uid = -1L;
+        } else {
+            uid = StorageUtility.parseUnsignedLong(mailId);
+        }
+        setFolder(folder);
+        unreadMessages = -1;
     }
 
     @Override
@@ -94,20 +108,6 @@ public final class IDMailMessage extends MailMessage {
         return builder.toString();
     }
 
-    /**
-     * Initializes a new {@link IDMailMessage}
-     */
-    public IDMailMessage(final String mailId, final String folder) {
-        this();
-        this.mailId = mailId;
-        if (null == mailId) {
-            uid = -1L;
-        } else {
-            uid = StorageUtility.parseUnsignedLong(mailId);
-        }
-        setFolder(folder);
-    }
-
     @Override
     public String getMailId() {
         return mailId;
@@ -115,7 +115,7 @@ public final class IDMailMessage extends MailMessage {
 
     @Override
     public int getUnreadMessages() {
-        throw new UnsupportedOperationException("IDMailMessage.getUnreadMessages() not supported");
+        return unreadMessages;
     }
 
     @Override
@@ -187,7 +187,7 @@ public final class IDMailMessage extends MailMessage {
 
     @Override
     public void setUnreadMessages(final int unreadMessages) {
-        throw new UnsupportedOperationException("IDMailMessage.setUnreadMessages() not supported");
+        this.unreadMessages = unreadMessages;
     }
 
     @Override

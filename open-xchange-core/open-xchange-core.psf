@@ -3,6 +3,7 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,cern.colt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.google.common"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.google.android.gcm"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,org.codehaus.stax2"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.ctc.wstx"/>
@@ -17,6 +18,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.capabilities.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.charset"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.cluster.lock"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.cluster.timer"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.common"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.config.cascade.context"/>
@@ -94,6 +96,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.autoconfig.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mail.attachment.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mailmapping"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.management.impl"/>
@@ -116,6 +119,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.publish.online.infostore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.ms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.push.udp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.quartz"/>
@@ -151,6 +155,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.version"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.xml"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,javapns.notification.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,javax.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,liquibase.core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,net.fortuna.ical4j"/>

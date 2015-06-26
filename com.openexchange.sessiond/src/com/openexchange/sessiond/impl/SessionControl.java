@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.impl;
 
-import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.session.Session;
 
 /**
@@ -71,77 +70,25 @@ public class SessionControl {
     private final SessionImpl session;
 
     /**
-     * Last-accessed time stamp.
-     */
-    private final AtomicLong lastAccessed;
-
-    /**
-     * The idle time.
-     */
-    private final long idleTime;
-
-    /**
-     * Initializes a new {@link SessionControl}
-     *
-     * @param session The stored session
-     */
-    public SessionControl(final SessionImpl session) {
-        this(session, -1L); // Default idle time
-    }
-
-    /**
      * Initializes a new {@link SessionControl}
      *
      * @param session The stored session
      * @param idleTime The session's allowed idle time or <code>-1</code> to use default setting
      */
-    public SessionControl(final SessionImpl session, final long idleTime) {
+    public SessionControl(SessionImpl session) {
         super();
-        lastAccessed = new AtomicLong(System.currentTimeMillis());
         this.session = session;
         creationTime = System.currentTimeMillis();
-        this.idleTime = idleTime;
     }
 
     /**
-     * Checks if this session control is elapsed.
+     * Gets the session identifier
      *
-     * @param defaultIdleTime The default idle time
-     * @return <code>true</code> if elapsed; otherwise <code>false</code>
+     * @return The session identifier
+     * @see com.openexchange.sessiond.impl.SessionImpl#getSessionID()
      */
-    public boolean isElapsed(final long defaultIdleTime) {
-        if (idleTime < 0) {
-            return lastAccessed.get() < (System.currentTimeMillis() - defaultIdleTime);
-        }
-        return lastAccessed.get() < (System.currentTimeMillis() - idleTime);
-    }
-
-    /**
-     * Gets the idle time
-     *
-     * @return The idle time
-     */
-    public long getIdleTime() {
-        return idleTime;
-    }
-
-    /**
-     * Gets the last-accessed time stamp.
-     *
-     * @return The last-accessed time stamp
-     */
-    public long getLastAccessed() {
-        return lastAccessed.get();
-    }
-
-    /**
-     * Updates last-accessed time stamp.
-     *
-     * @return This control with last-accessed time stamp updated
-     */
-    public SessionControl touch() {
-        lastAccessed.set(System.currentTimeMillis());
-        return this;
+    public String getSessionID() {
+        return session.getSessionID();
     }
 
     /**
@@ -161,4 +108,5 @@ public class SessionControl {
     public long getCreationTime() {
         return creationTime;
     }
+
 }

@@ -407,12 +407,7 @@ public final class MimeStorageUtility {
         /*
          * Set of header names
          */
-        Set<HeaderName> names;
-        if (null == headerNames) {
-            names = Collections.emptySet();
-        } else {
-            names = new HashSet<HeaderName>(Arrays.asList(HeaderName.valuesOf(headerNames)));
-        }
+        Set<HeaderName> names = null == headerNames ? Collections.<HeaderName>emptySet() : new HashSet<HeaderName>(Arrays.asList(HeaderName.valuesOf(headerNames)));
         /*
          * Check which fields are contained in fetch profile item "ENVELOPE"
          */
@@ -475,6 +470,36 @@ public final class MimeStorageUtility {
         return fetchProfile;
     }
 
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * A fetch item to extend a fetch profile.
+     */
+    public static final class FetchItem extends FetchProfile.Item {
+
+        /**
+         * Initializes a new {@link FetchItem}.
+         *
+         * @param name The name
+         */
+        public FetchItem(String name) {
+            super(name);
+        }
+
+    }
+
+    /**
+     * This is the original mailbox item.
+     */
+    public static final FetchProfile.Item ORIGINAL_MAILBOX = new FetchItem("ORIGINAL-MAILBOX");
+
+    /**
+     * This is the original UID item.
+     */
+    public static final FetchProfile.Item ORIGINAL_UID = new FetchItem("ORIGINAL-UID");
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
     private static final EnumMap<MailField, FetchProfile.Item> FIELD2ITEM;
     private static final EnumMap<MailField, List<String>> FIELD2STRING;
 
@@ -486,7 +511,7 @@ public final class MimeStorageUtility {
         field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
         field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
         field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
-        field2item.put(MailField.SIZE, IMAPFolder.FetchProfileItem.SIZE);
+        field2item.put(MailField.SIZE, FetchProfile.Item.SIZE);
         field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
         FIELD2ITEM = field2item;
         /*

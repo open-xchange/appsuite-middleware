@@ -90,6 +90,8 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
 
     private boolean smtpEnvelopeFrom;
 
+    private boolean sendPartial;
+
     private String smtpAuthEnc;
 
     private int smtpTimeout;
@@ -126,6 +128,12 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
             final String smtpAuthStr = configuration.getProperty("com.openexchange.smtp.smtpAuthentication", "false").trim();
             smtpAuth = Boolean.parseBoolean(smtpAuthStr);
             logBuilder.append("\tSMTP Authentication: ").append(smtpAuth).append('\n');
+        }
+
+        {
+            final String sendPartialStr = configuration.getProperty("com.openexchange.smtp.sendPartial", "false").trim();
+            sendPartial = Boolean.parseBoolean(sendPartialStr);
+            logBuilder.append("\tSend Partial: ").append(sendPartial).append('\n');
         }
 
         {
@@ -194,6 +202,7 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     @Override
     protected void resetFields() {
         smtpLocalhost = null;
+        sendPartial = false;
         smtpAuth = false;
         smtpEnvelopeFrom = false;
         smtpAuthEnc = null;
@@ -212,6 +221,11 @@ public final class SMTPProperties extends AbstractProtocolProperties implements 
     @Override
     public boolean isSmtpAuth() {
         return smtpAuth;
+    }
+
+    @Override
+    public boolean isSendPartial() {
+        return sendPartial;
     }
 
     @Override

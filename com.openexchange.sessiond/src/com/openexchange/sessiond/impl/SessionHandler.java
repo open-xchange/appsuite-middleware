@@ -179,6 +179,15 @@ public final class SessionHandler {
     }
 
     /**
+     * Gets the configuration
+     *
+     * @return The configuration
+     */
+    public static SessiondConfigInterface getConfig() {
+        return config;
+    }
+
+    /**
      * Gets the session obfuscator that performs the conversion into/from a stored session
      *
      * @return The session obfuscator instance
@@ -416,16 +425,17 @@ public final class SessionHandler {
      *
      * @param userId The user ID
      * @param contextId The context ID
+     * @param considerSessionStorage <code>true</code> to also consider session storage; otherwise <code>false</code>
      * @return The wrapper objects for sessions
      */
-    public static SessionControl[] getUserSessions(final int userId, final int contextId) {
+    public static List<SessionControl> getUserSessions(final int userId, final int contextId, boolean considerSessionStorage) {
         SessionData sessionData = sessionDataRef.get();
         if (null == sessionData) {
             LOG.warn("\tSessionData instance is null.");
-            return new SessionControl[0];
+            return new LinkedList<SessionControl>();
         }
-        SessionControl[] retval = sessionData.getUserSessions(userId, contextId);
-        if (retval == null) {
+        List<SessionControl> retval = sessionData.getUserSessions(userId, contextId);
+        if (considerSessionStorage) {
             final SessionStorageService storageService = Services.getService(SessionStorageService.class);
             if (storageService != null) {
                 try {
@@ -453,9 +463,8 @@ public final class SessionHandler {
                             }
                     };
                     Session[] sessions = getFrom(c, new Session[0]);
-                    retval = new SessionControl[sessions.length];
                     for (int i = 0; i < sessions.length; i++) {
-                        retval[i] = sessionToSessionControl(sessions[i]);
+                        retval.add(sessionToSessionControl(sessions[i]));
                     }
                 } catch (RuntimeException e) {
                     LOG.error("", e);
@@ -530,6 +539,32 @@ public final class SessionHandler {
         }
         return retval;
     }
+
+    /**
+     * Stores the session (if available) into session storage.
+     *
+     * @param sessionId The session identifier
+     * @return <code>true</code> if stored; otherwise <code>false</code>
+     */
+    protected static boolean storeSession(String sessionId) {
+        if (null == sessionId) {
+            return false;
+        }
+
+        SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return false;
+        }
+        SessionControl sessionControl = sessionData.getSession(sessionId);
+        if (null == sessionControl) {
+            return false;
+        }
+
+        List<String> remotes = getRemoteParameterNames();
+        return putIntoSessionStorage(sessionControl.getSession(), true, null == remotes || remotes.isEmpty());
+    }
+
 
     /**
      * Adds a new session containing given attributes to session container(s)
@@ -629,9 +664,22 @@ public final class SessionHandler {
      * Puts the given session into session storage if possible
      *
      * @param session The session
+     * @param asyncPutToSessionStorage Whether to perform put asynchronously or not
      * @return <code>true</code> if put into session storage; otherwise <code>false</code>
      */
     public static boolean putIntoSessionStorage(SessionImpl session, boolean asyncPutToSessionStorage) {
+        return putIntoSessionStorage(session, false, asyncPutToSessionStorage);
+    }
+
+    /**
+     * Puts the given session into session storage if possible
+     *
+     * @param session The session
+     * @param addIfAbsent <code>true</code> to perform add-if-absent store operation; otherwise <code>false</code> to perform a possibly replacing put
+     * @param asyncPutToSessionStorage Whether to perform put asynchronously or not
+     * @return <code>true</code> if put into session storage; otherwise <code>false</code>
+     */
+    public static boolean putIntoSessionStorage(SessionImpl session, boolean addIfAbsent, boolean asyncPutToSessionStorage) {
         if (useSessionStorage(session)) {
             SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
             if (sessionStorageService != null) {
@@ -640,9 +688,9 @@ public final class SessionHandler {
                 }
                 if (asyncPutToSessionStorage) {
                     // Enforced asynchronous put
-                    storeSessionAsync(session, sessionStorageService, false);
+                    storeSessionAsync(session, sessionStorageService, addIfAbsent);
                 } else {
-                    storeSessionSync(session, sessionStorageService, false);
+                    storeSessionSync(session, sessionStorageService, addIfAbsent);
                 }
                 return true;
             }
@@ -775,7 +823,7 @@ public final class SessionHandler {
         int maxSessPerClient = config.getMaxSessionsPerClient();
         if (maxSessPerClient > 0) {
             SessionData sessionData = sessionDataRef.get();
-            SessionControl[] userSessions = null == sessionData ? new SessionControl[0] : sessionData.getUserSessions(userId, contextId);
+            List<SessionControl> userSessions = null == sessionData ? new LinkedList<SessionControl>() : sessionData.getUserSessions(userId, contextId);
             int cnt = 1; // We have at least one
             for (SessionControl sessionControl : userSessions) {
                 if (client.equals(sessionControl.getSession().getClient()) && ++cnt > maxSessPerClient) {
@@ -889,8 +937,8 @@ public final class SessionHandler {
         /*
          * Invalidate all other user sessions known by local session containers
          */
-        SessionControl[] userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
-        if (null != userSessionControls && 0 < userSessionControls.length) {
+        List<SessionControl> userSessionControls = sessionData.getUserSessions(currentSession.getUserId(), currentSession.getContextId());
+        if (null != userSessionControls) {
             for (SessionControl userSessionControl : userSessionControls) {
                 String otherSessionID = userSessionControl.getSession().getSessionID();
                 if (null != otherSessionID && false == otherSessionID.equals(sessionid)) {
@@ -1640,16 +1688,10 @@ public final class SessionHandler {
             sessionData.addTimerService(service);
         }
         long containerTimeout = config.getSessionContainerTimeout();
-        shortSessionContainerRotator = service.scheduleWithFixedDelay(
-            new ShortSessionContainerRotator(),
-            containerTimeout,
-            containerTimeout);
+        shortSessionContainerRotator = service.scheduleWithFixedDelay(new ShortSessionContainerRotator(), containerTimeout, containerTimeout);
         if (config.isAutoLogin()) {
             long longContainerTimeout = config.getLongTermSessionContainerTimeout();
-            longSessionContainerRotator = service.scheduleWithFixedDelay(
-                new LongSessionContainerRotator(),
-                longContainerTimeout,
-                longContainerTimeout);
+            longSessionContainerRotator = service.scheduleWithFixedDelay(new LongSessionContainerRotator(), longContainerTimeout, longContainerTimeout);
         }
     }
 
@@ -1711,9 +1753,7 @@ public final class SessionHandler {
     private static final class StoreSessionTask extends AbstractTask<Void> {
 
         private final SessionStorageService sessionStorageService;
-
         private final boolean addIfAbsent;
-
         private final SessionImpl session;
 
         protected StoreSessionTask(SessionImpl session, SessionStorageService sessionStorageService, boolean addIfAbsent) {

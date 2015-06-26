@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 18
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1152,6 +1152,9 @@ ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchang
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
 
+# SoftwareChange_Request-2429
+ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard.properties
+
 # SoftwareChange_Request-2442
 VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
 if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
@@ -1172,6 +1175,25 @@ fi
 
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
+
+# SoftwareChange_Request-2546
+VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
+if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
+    ox_set_property com.openexchange.push.allowedClients "\"USM-EAS*\", \"USM-JSON*\", \"open-xchange-mailapp\"" /opt/open-xchange/etc/mail-push.properties
+fi
+ox_add_property com.openexchange.push.allowPermanentPush true /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.enabled false /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.passcrypt "" /opt/open-xchange/etc/mail-push.properties
+ox_add_property com.openexchange.push.credstorage.rdb false /opt/open-xchange/etc/mail-push.properties
+
+# SoftwareChange_Request-2549
+VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc/server.properties)
+if [ "" = "$VALUE" ]; then
+    ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
+fi
+
+# SoftwareChange_Request-2575
+ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1213,6 +1235,10 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>

@@ -190,7 +190,14 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
         return performPUT(req, bodyObject);
     }
 
-    private AJAXRequestResult performGET(final MailRequest req) throws OXException {
+    /**
+     * Performs GET request.
+     *
+     * @param req The mail request
+     * @return The result
+     * @throws OXException If something fails
+     */
+    public AJAXRequestResult performGET(final MailRequest req) throws OXException {
         try {
             // Read in parameters
             final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
@@ -538,6 +545,13 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 fileName = fileName.replaceAll(Pattern.quote("/"), "_");
                 mailPart.setFileName(fileName);
             }
+
+            /*
+             * Since file's size given from mail server is just an estimation and therefore does not exactly match the file's size a
+             * future file access via WebDAV can fail because of the size mismatch. Thus set the file size to 0 to make the storage
+             * measure the size.
+             */
+            mailPart.setSize(0);
 
             // Store properties
             Map<String, Object> storeProps = new HashMap<String, Object>(4);

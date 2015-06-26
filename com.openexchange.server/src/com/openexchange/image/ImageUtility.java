@@ -163,7 +163,7 @@ public final class ImageUtility {
         }
         int queryStringStart = imageUri.indexOf('?');
         if (queryStringStart < 0) {
-            return null;
+            return new ImageLocation(new ImageLocation.Builder());
         }
 
         String[] nvps = SPLIT.split(imageUri.substring(queryStringStart + 1/*Consume starting '?'*/), 0);

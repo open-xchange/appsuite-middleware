@@ -131,12 +131,7 @@ public class ConfigDBMigrationExecutor implements Runnable {
                 }
             } catch (liquibase.exception.ValidationFailedException e) {
                 exception = e;
-                List<ChangeSet> invalidMD5Sums = e.getInvalidMD5Sums();
-                if (null == invalidMD5Sums || invalidMD5Sums.isEmpty()) {
-                    LOG.error("", e);
-                } else {
-                    LOG.debug("", e);
-                }
+                LOG.error("MD5Sum validation failed. No more ChangeSets will be executed!", e);
             } catch (liquibase.exception.LiquibaseException e) {
                 exception = e;
                 LOG.error("", e);

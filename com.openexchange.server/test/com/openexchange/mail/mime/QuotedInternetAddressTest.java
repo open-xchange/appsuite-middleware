@@ -134,4 +134,11 @@ public class QuotedInternetAddressTest extends TestCase {
         assertEquals("Address does not equals \"Joerg.Mustermann@musterfirma.org\"", "Joerg.Mustermann@musterfirma.org", parsed[0].getAddress());
     }
 
+    public void testBug38365() throws Exception {
+        QuotedInternetAddress addr = new QuotedInternetAddress("\"Peter \\\" Lustig\" <bar@foo.org>");
+        assertEquals("Display name does not equals \"Peter \" Lustig\"", "Peter \" Lustig", addr.getPersonal());
+
+        addr = new QuotedInternetAddress("bar@foo.org", "Peter Lustig \\");
+        assertEquals("Display name does not equals \"Peter Lustig \\\"", "Peter Lustig \\", addr.getPersonal());
+    }
 }

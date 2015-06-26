@@ -257,25 +257,23 @@ public final class SessionUtility {
      * @throws OXException If public session cannot be created
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
-        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if (cookies != null) {
-            final Cookie cookie = cookies.get(getPublicSessionCookieName(req));
-            if (null != cookie) {
-                return handlePublicSessionCookie(req, session, sessiondService, cookie.getValue(), false);
-            }
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        Cookie cookie = cookies.get(getPublicSessionCookieName(req));
+        if (null != cookie) {
+            return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
+        }
 
-            // No such cookie
-            final String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
-            if (null != publicSessionId) {
-                return handlePublicSessionCookie(req, session, sessiondService, publicSessionId, mayPerformPublicSessionAuth);
-            }
+        // No such cookie
+        String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+        if (null != publicSessionId) {
+            return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth);
+        }
 
-            // No such "public_session" parameter
-            if (mayUseFallbackSession && isChangeableUserAgent(req.getHeader(USER_AGENT))) {
-                for (final Map.Entry<String, Cookie> entry : cookies.entrySet()) {
-                    if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                        return handlePublicSessionCookie(req, session, sessiondService, entry.getValue().getValue(), false);
-                    }
+        // No such "public_session" parameter
+        if (mayUseFallbackSession && isChangeable(req)) {
+            for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                    return handlePublicSessionIdentifier(entry.getValue().getValue(), req, session, sessiondService, false);
                 }
             }
         }
@@ -284,7 +282,7 @@ public final class SessionUtility {
         return false;
     }
 
-    private static boolean handlePublicSessionCookie(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final String altId, final boolean publicSessionAuth) throws OXException {
+    private static boolean handlePublicSessionIdentifier(String altId, HttpServletRequest req, ServerSession session, SessiondService sessiondService, boolean publicSessionAuth) throws OXException {
         if (null != altId && null != session && altId.equals(session.getParameter(PARAM_ALTERNATIVE_ID))) {
             // same session (thus already verified)
             rememberPublicSession(req, session);
@@ -292,7 +290,7 @@ public final class SessionUtility {
         }
 
         // Lookup session by alternative id
-        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId));
+        final ServerSession publicSession = null == altId ? null : ServerSessionAdapter.valueOf(sessiondService.getSessionByAlternativeId(altId, publicSessionAuth));
         if (publicSession != null) {
             try {
                 if (false == publicSessionAuth) {
@@ -641,7 +639,7 @@ public final class SessionUtility {
                 }
 
                 // Check for special User-Agent to allow look-up by remembered cookie name
-                if (isChangeableUserAgent(req.getHeader(USER_AGENT))) {
+                if (isChangeable(req)) {
                     tmp.setLength(0);
                     cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
                     if (null != cookie) {
@@ -670,6 +668,12 @@ public final class SessionUtility {
         return null;
     }
 
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private static boolean isChangeable(HttpServletRequest req) {
+        return isChangeableUserAgent(req.getHeader(USER_AGENT));
+    }
+
     private static boolean isChangeableUserAgent(String userAgent) {
         return isMediaPlayerAgent(userAgent) || isMSIE11(userAgent);
     }
@@ -696,6 +700,8 @@ public final class SessionUtility {
         BrowserDetector bd = BrowserDetector.detectorFor(userAgent);
         return "Mozilla".equals(bd.getBrowserName()) && "Windows".equals(bd.getBrowserPlatform()) && 5.0f == bd.getBrowserVersion();
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets the appropriate hash for specified request.

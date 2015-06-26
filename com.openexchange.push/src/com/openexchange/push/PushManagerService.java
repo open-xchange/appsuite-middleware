@@ -53,7 +53,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link PushManagerService} - Manages push listeners.
+ * {@link PushManagerService} - Manages push listeners on session appearance/disappearance events.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

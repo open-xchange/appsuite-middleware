@@ -77,11 +77,9 @@ import com.openexchange.mail.MailInitialization;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
-import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.IMailAccessCache;
 import com.openexchange.mail.cache.SingletonMailAccessCache;
-import com.openexchange.mail.config.MailConfigException;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.mime.MimeCleanUp;
@@ -588,16 +586,6 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("mail server port");
         } else if (mailConfig.getLogin() == null) {
             throw MailExceptionCode.MISSING_CONNECT_PARAM.create("login");
-        } else if (mailConfig.getPassword() == null) {
-            final PasswordSource cur = MailProperties.getInstance().getPasswordSource();
-            if (!PasswordSource.GLOBAL.equals(cur)) {
-                throw MailExceptionCode.MISSING_CONNECT_PARAM.create("password");
-            }
-            final String masterPw = MailProperties.getInstance().getMasterPassword();
-            if (masterPw == null) {
-                throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
-            }
-            mailConfig.setPassword(masterPw);
         }
     }
 
@@ -1140,8 +1128,19 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
      *
      * @param waiting <code>true</code> if this mail access is waiting; otherwise <code>false</code>
      */
-    public void setWaiting(final boolean waiting) {
-        this.waiting = waiting;
+    public void setWaiting(boolean waiting) {
+        if (waiting) {
+            this.waiting = waiting;
+        } else {
+            boolean wasWaiting = this.waiting;
+            this.waiting = waiting;
+            if (wasWaiting) {
+                // Switched from waiting to non-waiting mode
+                if (tracked) {
+                    MailAccessWatcher.touchMailAccess(this);
+                }
+            }
+        }
     }
 
     /**

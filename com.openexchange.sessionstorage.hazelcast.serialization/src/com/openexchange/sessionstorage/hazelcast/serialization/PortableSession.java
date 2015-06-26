@@ -166,7 +166,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
          */
         {
             Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
-            writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String)altId : null);
+            writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String) altId : null);
         }
         {
             List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
@@ -179,15 +179,13 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 StringAppender values = new StringAppender(':', capacity);
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
-                    if (isSerializablePojo(value)) {
-                        String sValue = value.toString();
-                        names.append(parameterName);
-                        values.append(getSafeValue(sValue));
-                    } else {
-                        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
-                        if (null == value) {
-                            logger.warn("Denied remote parameter for null value.");
+                    if (null != value) {
+                        if (isSerializablePojo(value)) {
+                            String sValue = value.toString();
+                            names.append(parameterName);
+                            values.append(getSafeValue(sValue));
                         } else {
+                            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
                             logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                         }
                     }
@@ -313,7 +311,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     private static <T> T parseObjectFromString(String s, Class<T> clazz) {
         try {
-            return clazz.getConstructor(new Class[] {String.class }).newInstance(s);
+            return clazz.getConstructor(new Class[] { String.class }).newInstance(s);
         } catch (Exception e) {
             return null;
         }
