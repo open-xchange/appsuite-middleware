@@ -1,3 +1,7 @@
+* 2015-06-26 - marc.arens@open-xchange.com
+
+ - Fix for bug 39037: Don't wait for already handled Stanzas/Sequences
+
 * 2015-06-26 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 39069: Optimize tokenized autocomplete patterns and don't allow more than 5 of them
