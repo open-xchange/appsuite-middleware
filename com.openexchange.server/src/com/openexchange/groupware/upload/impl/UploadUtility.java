@@ -50,8 +50,6 @@
 package com.openexchange.groupware.upload.impl;
 
 import static com.openexchange.java.Strings.isEmpty;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -62,7 +60,9 @@ import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.fileupload.FileItemIterator;
@@ -83,11 +83,14 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.servlet.http.Tools;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link UploadUtility} - Utility class for uploads.
@@ -97,7 +100,7 @@ import com.openexchange.tools.servlet.http.Tools;
 public final class UploadUtility {
 
     /** The logger */
-    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadUtility.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UploadUtility.class);
 
     private static final TIntObjectMap<String> M = new TIntObjectHashMap<String>(13);
 
@@ -147,7 +150,7 @@ public final class UploadUtility {
      * @param size The number of bytes
      * @return The number of bytes in a human readable format
      */
-    public static String getSize(final long size) {
+    public static String getSize(long size) {
         return getSize(size, 2, false, true);
     }
 
@@ -161,7 +164,7 @@ public final class UploadUtility {
      *            <code>false</code> to narrow unit with <code>1000</code>.
      * @return The number of bytes in a human readable format
      */
-    public static String getSize(final long size, final int precision, final boolean longName, final boolean realSize) {
+    public static String getSize(long size, int precision, boolean longName, boolean realSize) {
         int pos = 0;
         double decSize = size;
         final int base = realSize ? 1024 : 1000;
@@ -184,7 +187,7 @@ public final class UploadUtility {
         return sb.toString();
     }
 
-    private static String getSizePrefix(final int pos) {
+    private static String getSizePrefix(int pos) {
         final String prefix = M.get(pos);
         if (prefix != null) {
             return prefix;
@@ -448,10 +451,15 @@ public final class UploadUtility {
                 synchronized (UploadUtility.class) {
                     timerTask = TIMER_TASK_REFERENCE.get();
                     if (null == timerTask) {
-                        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                        long delay = 300000; // 5 minutes
-                        timerTask = timerService.scheduleWithFixedDelay(new UploadEvicter(PREFIX), delay, delay);
-                        TIMER_TASK_REFERENCE.set(timerTask);
+                        try {
+                            UploadEvicter evicter = new UploadEvicter(PREFIX, LOG);
+                            TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                            long delay = 300000; // 5 minutes
+                            timerTask = timerService.scheduleWithFixedDelay(evicter, 3000, delay);
+                            TIMER_TASK_REFERENCE.set(timerTask);
+                        } catch (Exception e) {
+                            LOG.warn("Failed to initialze {}", UploadEvicter.class.getSimpleName(), e);
+                        }
                     }
                 }
             }
@@ -511,55 +519,150 @@ public final class UploadUtility {
         return retval;
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks for expired upload files.
+     * <p>
+     * Derived from <a href="http://www.jroller.com/javabean/entry/solving_an_outofmemoryerror_java_6">Java 6 DeleteOnExitHook memory leak</a> from Cedrik LIME.
+     */
     private static final class UploadEvicter implements Runnable {
 
-        private final Class<?> clazz;
-        private final Field field;
+        private final org.slf4j.Logger logger;
         private final String prefix;
+        private final Object mutex;
+        private final LinkedHashSet<String> files;
+        private int filesLastSize = 0; // contains files.size() from last iteration
 
         /**
          * Initializes a new {@link UploadUtility.UploadEvicter}.
          *
          * @throws IllegalStateException If initialization fails
          */
-        UploadEvicter(String prefix) {
+        UploadEvicter(String prefix, org.slf4j.Logger logger) {
             super();
+            this.logger = logger;
             this.prefix = prefix;
             try {
                 Class<?> clazz = Class.forName("java.io.DeleteOnExitHook");
                 Field[] declaredFields = clazz.getDeclaredFields();
-                Field field = declaredFields[0];
-                field.setAccessible(true);
-                this.clazz = clazz;
-                this.field = field;
+                Field filesField = getFieldFrom("files", declaredFields);
+                filesField.setAccessible(true);
+                LinkedHashSet<String> files = (LinkedHashSet<String>) filesField.get(null);
+                if (null == files) {
+                    throw new IllegalStateException("Can't initialize. Are you running Java 6+ or within a restricted SecurityManager?");
+                }
+                this.files = files;
+                mutex = isJavaVersionGreaterThan160_20() ? clazz : files;
+                synchronized (mutex) {
+                    filesLastSize = files.size();
+                }
+            } catch (IllegalStateException e) {
+                throw e;
             } catch (Exception e) {
-                throw e instanceof IllegalStateException ? (IllegalStateException)e : new IllegalStateException(e);
+                throw new IllegalStateException(e);
             }
         }
 
         @Override
         public void run() {
             try {
-                LinkedHashSet<String> theFiles;
-                synchronized (clazz) {
-                    theFiles = (LinkedHashSet<String>) field.get(null);
-                }
+                synchronized (mutex) {
+                    // Remove non-existing files from DeleteOnExitHook.files
+                    logger.debug("DeleteOnExitHook went from {} to {} file entries.", Integer.valueOf(filesLastSize), Integer.valueOf(files.size()));
+                    int existent = 0, removed = 0;
+                    int total = removed + existent;
+                    for (Iterator<String> iterator = files.iterator(); iterator.hasNext() && total < filesLastSize;) {
+                        String fileName = iterator.next();
+                        if (fileName == null || !new File(fileName).exists()) {
+                            // No file by given filename exists: remove (old), useless entry
+                            logger.trace("Removing file entry {}", fileName);
+                            iterator.remove();
+                            ++removed;
+                        } else {
+                            ++existent;
+                        }
+                        ++total;
+                    }
+                    if (removed > 0) {
+                        logger.debug("removed {}/{} entries", Integer.valueOf(removed), Integer.valueOf(total));
+                    }
+                    filesLastSize = files.size();
 
-                if (null != theFiles) {
-                    long stamp = System.currentTimeMillis() - 1800000; // Older than 30 minutes
-                    ArrayList<String> toBeDeleted = new ArrayList<>(theFiles);
-                    Collections.reverse(toBeDeleted);
-                    for (String filename : toBeDeleted) {
-                        File file = new File(filename);
-                        if (file.getName().startsWith(prefix) && file.exists() && file.lastModified() < stamp) {
-                            if (!file.delete()) {
-                                LOG.warn("Temporary file could not be deleted: {}", file.getPath());
+                    // Check orphaned files
+                    if (filesLastSize > 0) {
+                        long stamp = System.currentTimeMillis() - 1800000; // Older than 30 minutes
+                        List<String> toBeDeleted = new ArrayList<String>(files);
+                        Collections.reverse(toBeDeleted);
+                        for (String filename : toBeDeleted) {
+                            File file = new File(filename);
+                            if (file.getName().startsWith(prefix) && file.lastModified() < stamp) {
+                                logger.debug("Found expired file entry {}. Deleting...", filename);
+                                if (!file.delete()) {
+                                    logger.warn("Temporary file could not be deleted: {}", file.getPath());
+                                }
                             }
                         }
                     }
                 }
             } catch (Exception e) {
                 // Ignore
+            }
+        }
+
+        private Field getFieldFrom(String name, Field[] declaredFields) {
+            for (Field field : declaredFields) {
+                if (name.equals(field.getName())) {
+                    return field;
+                }
+            }
+            return null;
+        }
+
+        private boolean isJavaVersionGreaterThan160_20() {
+            float javaClassVersion = Float.parseFloat(getSystemProperty("java.class.version"));
+            // Java <= 5
+            if (javaClassVersion <= 49.0f) {
+                return false;
+            }
+            // Java >= 7
+            if (javaClassVersion > 50.0f) {
+                return true;
+            }
+            // This is Java 6. Get patch level version.
+            // Assume JAVA_VERSION is 1.6.0_x
+            String javaVersion = getJavaVersionTrimmed();
+            assert javaVersion.startsWith("1.6") : javaVersion;
+            String patchLevelStr = javaVersion.substring(javaVersion.indexOf('_'));
+            return Integer.parseInt(patchLevelStr) > 20;
+        }
+
+        private String getJavaVersionTrimmed() {
+            String javaVersion = getSystemProperty("java.version");
+            if (javaVersion == null) {
+                return null;
+            }
+
+            String result = javaVersion;
+            for (int i = 0; i < javaVersion.length(); ++i) {
+                if (Strings.isDigit(javaVersion.charAt(i))) {
+                    result = javaVersion.substring(i);
+                    break;
+                }
+            }
+            // Trim end while last char is not a digit
+            while (result.length() > 0 && ! Character.isDigit(result.charAt(result.length()))) {
+                result = result.substring(result.length() - 1);
+            }
+            return result;
+        }
+
+        private String getSystemProperty(String property) {
+            try {
+                return System.getProperty(property);
+            } catch (SecurityException ex) {
+                logger.warn("Encountered a SecurityException reading the system property '{}'; returning null instead.", property, ex);
+                return null;
             }
         }
     }
