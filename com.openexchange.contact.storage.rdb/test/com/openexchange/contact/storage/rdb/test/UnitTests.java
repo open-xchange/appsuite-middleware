@@ -51,7 +51,10 @@ package com.openexchange.contact.storage.rdb.test;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
+import com.openexchange.contact.storage.rdb.search.AutoCompleteAdapterTest;
+import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 
 /**
  * {@link UnitTests}
@@ -75,6 +78,7 @@ public class UnitTests {
     public static Test suite() {
         TestSuite tests = new TestSuite();
         tests.addTestSuite(DeduplicatorTest.class);
+        tests.addTestSuite(AutoCompleteAdapterTest.class);        
         return tests;
     }
 }
