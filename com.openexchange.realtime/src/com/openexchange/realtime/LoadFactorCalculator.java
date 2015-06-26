@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,29 @@
  *
  */
 
-package com.openexchange.realtime.example.chineseRoom;
-
-import java.util.concurrent.TimeUnit;
-import com.openexchange.realtime.Component;
-import com.openexchange.realtime.ComponentHandle;
-import com.openexchange.realtime.LoadFactorCalculator;
-import com.openexchange.realtime.packet.ID;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.realtime;
 
 
 /**
- * A very simple component that initializes a {@link ChineseRoom} as needed.
+ * {@link LoadFactorCalculator}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since v7.8.0
  */
-public class ChineseRoomComponent implements Component {
-
-    private final ServiceLookup services;
-
-    /**
-     * Initializes a new {@link ChineseRoomComponent}.
-     * @param chineseRoomActivator
-     */
-    public ChineseRoomComponent(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
+public interface LoadFactorCalculator {
     
     /**
-     * Create the room, say synthetic.china://room1 . Why "synthetic.china"? Read on!
+     * Get the loadfactor per given Component.
+     * 
+     * The load factor is calculated as: #{@link Stanza}s to be handled divided by #threads that feed individual {@link ComponentHandle}s
+     * e.g.
+     * <ul>
+     * <li>a load factor of 0.0 means that the system is idle</li>     
+     * <li>a load factor of 1.0 means that with optimal {@link Stanza} distribution per thread each thread is waiting for one {@link Stanza} to be handled</li>
+     * </ul>
+     * 
+     * @param component the {@link Component} to select the appropriate feeding threads
+     * @return the loadfactor per given Component
      */
-    @Override
-    public ComponentHandle create(ID id) {
-        return new ChineseRoom(id);
-    }
-
-    /**
-     * Now we can address rooms as synthetic.china://room1 (for example
-     */
-    @Override
-    public String getId() {
-        return "china";
-    }
-    
-    /**
-     * Automatically shut down a room after five minutes of idling.
-     */
-    @Override
-    public EvictionPolicy getEvictionPolicy() {
-        return new Timeout(5, TimeUnit.MINUTES);
-    }
-
-    @Override
-    public void setLoadFactorCalculator(LoadFactorCalculator loadFactorCalculator) {
-        //not interested
-    }
-
+    float getCurrentLoad(Component component);
 }

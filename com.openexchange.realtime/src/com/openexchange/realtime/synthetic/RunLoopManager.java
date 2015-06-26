@@ -68,6 +68,7 @@ import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.LoadFactorCalculator;
 import com.openexchange.realtime.management.RunLoopManagerMBean;
 import com.openexchange.realtime.management.RunLoopManagerManagement;
 import com.openexchange.realtime.packet.ID;
@@ -80,7 +81,7 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
+public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, LoadFactorCalculator {
 
     /**
      * Middle naming part of the managed RunLoops
@@ -304,6 +305,17 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
     @Override
     public ManagementObject<RunLoopManagerMBean> getManagementObject() {
         return runLoopManagerManagement;
+    }
+
+    @Override
+    public float getCurrentLoad(Component component) {
+        Collection<SyntheticChannelRunLoop> runLoops = getRunLoopsPerComponent().get(component.getId());
+        int runLoopCount = runLoops.size();
+        long sum = 0;
+        for (SyntheticChannelRunLoop syntheticChannelRunLoop : runLoops) {
+            sum += syntheticChannelRunLoop.getQueueSize();
+        }
+        return sum/runLoopCount;
     }
 
 }

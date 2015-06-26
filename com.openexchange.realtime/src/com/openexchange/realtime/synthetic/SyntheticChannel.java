@@ -243,6 +243,7 @@ public class SyntheticChannel extends AbstractRealtimeJanitor implements Channel
     public void addComponent(Component component) {
         runLoopManager.createRunLoops(component, RealtimeConfig.getInstance().getNumberOfRunLoops());
         components.put(component.getId(), component);
+        component.setLoadFactorCalculator(runLoopManager);
     }
 
     public void removeComponent(Component component) {
