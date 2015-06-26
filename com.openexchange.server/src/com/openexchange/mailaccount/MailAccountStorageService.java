@@ -122,7 +122,7 @@ public interface MailAccountStorageService {
      * Sets specified names for specified mail account.
      *
      * @param id The account identifier
-     * @param indexes The indexes of the full names to set
+     * @param indexes The indexes of the names to set
      * @param names The names to set
      * @param userId The user identifier
      * @param contextId The context identifier
