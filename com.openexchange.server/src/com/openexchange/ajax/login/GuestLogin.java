@@ -130,6 +130,8 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 login = jBody.getString("login");
             }
 
+            final Map<String, Object> loginProperties = new HashMap<String, Object>(2);
+            loginProperties.put("requestParameters", httpRequest.getParameterMap());
             return new LoginInfo() {
                 @Override
                 public String getPassword() {
@@ -141,7 +143,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
                 @Override
                 public Map<String, Object> getProperties() {
-                    return new HashMap<String, Object>(1);
+                    return loginProperties;
                 }
             };
         } catch (JSONException e) {
@@ -175,12 +177,30 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
             }
         }
+
+        // Check if setting a password was skipped
+        Map<String, Object> loginProperties = loginInfo.getProperties();
+        Map<String, String[]> requestParameters = (Map<String, String[]>) loginProperties.get("requestParameters");
+        String[] skips = requestParameters.get("skip");
+        if (skips != null && skips.length > 0 && Boolean.parseBoolean(skips[0])) {
+            if (share.getGuest().isPasswordSet()) {
+                throw INVALID_CREDENTIALS.create();
+            }
+
+            if (maySkip(emptyGuestPasswords, loginCount)) {
+                if (emptyGuestPasswords > 0) {
+                    // There's a fixed number of allowed skip operations so we need to count them
+                    userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
+                }
+                return user;
+            }
+
+            throw LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.create();
+        }
+
         if (!share.getGuest().isPasswordSet()) {
             if (Strings.isEmpty(loginInfo.getPassword())) {
-                if (emptyGuestPasswords < 0 || (emptyGuestPasswords > 0 && emptyGuestPasswords > loginCount)) {
-                    userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
-                    return user;
-                }
+                throw LoginExceptionCodes.NEW_PASSWORD_REQUIRED.create();
             } else {
                 try {
                     UserImpl userToUpdate = new UserImpl(user);
@@ -194,8 +214,6 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                     throw LoginExceptionCodes.UNKNOWN.create(e);
                 }
             }
-
-            throw LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.create();
         }
 
         // Authenticate the user
@@ -215,6 +233,14 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         }
 
         return user;
+    }
+
+    private static boolean maySkip(int emptyGuestPasswords, int loginCount) {
+        if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
+            return true;
+        }
+
+        return false;
     }
 
 }

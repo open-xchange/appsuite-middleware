@@ -129,7 +129,10 @@ public class LoginShareHandler extends AbstractShareHandler {
                     message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName)));
                 }
             }
-            if (!guestInfo.isPasswordSet()) {
+            if (guestInfo.isPasswordSet()) {
+                messageType = "INFO";
+                action = "login";
+            } else {
                 User guest = ShareServiceLookup.getService(UserService.class).getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                 Set<String> loginsWithoutPassword = guest.getAttributes().get("guestLoginWithoutPassword");
                 int loginCount = 0;
@@ -141,7 +144,7 @@ public class LoginShareHandler extends AbstractShareHandler {
                     }
                 }
                 int emptyGuestPasswords = getShareLoginConfiguration().getEmptyGuestPasswords();
-                if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
+                if (emptyGuestPasswords < 0 || (emptyGuestPasswords > 0 && emptyGuestPasswords > loginCount)) {
                     if (emptyGuestPasswords - loginCount == 1) {
                         if (null != proxy) {
                             message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.ASK_PASSWORD_WITH_TARGET)));
@@ -162,9 +165,6 @@ public class LoginShareHandler extends AbstractShareHandler {
                     messageType = "INFO";
                     action = "require_password";
                 }
-            } else {
-                messageType = "INFO";
-                action = "login";
             }
             String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestInfo, target, getShareLoginConfiguration().getLoginConfig(), message.toString(), messageType, action);
 

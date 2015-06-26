@@ -103,6 +103,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // You exceeded the maximum count of logins without password.
     public static final String LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG = "You exceeded the maximum count of logins without password.";
 
+    // A password is required to continue. Please choose one and try again.
+    public static final String NEW_PASSWORD_REQUIRED_MSG = "A password is required to continue. Please choose one and try again.";
+
     private LoginExceptionMessages() {
         super();
     }
