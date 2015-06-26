@@ -241,7 +241,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                 if (threshold.get() > stanza.getSequenceNumber()) {
                     stanza.trace("Discarded as this sequence number has already successfully passed this gate: " + stanza.getSequenceNumber());
                     LOG.debug("Discarded as this sequence number has already successfully passed this gate: {}, {}", stanza.getSequenceNumber(), stanza);
-                    return true;
+                    return false;
                 }
 
                 List<StanzaWithCustomAction> inbox = inboxes.get(stanza.getSequencePrincipal());
@@ -276,7 +276,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                     } else {
                         stanza.trace("Not in sequence but already enqueued, discarding.");
                             LOG.debug("Stanzas not in sequence, Threshold: {} SequenceNumber: {} but already buffered, discarding.", threshold.get(), stanza.getSequenceNumber());
-                        return true;
+                        return false;
                     }
                 } else {
                     stanza.trace("Buffer full, instructing client to reset sequence");

@@ -207,27 +207,30 @@ public class QueryAction extends RTAction {
                 }
 
             })) {
-                /*
-                 *  Stanza was handled by the gate. We have to return an ack if the Stanza carried a sequence number
-                 */
+                //  Stanza was handled by the gate. We have to return an ack if the Stanza carried a sequence number
                 if (sequenceNumber >= 0) {
                     List<Long> ackList = Collections.singletonList(sequenceNumber);
                     queryActionResults.put(ACKS, ackList);
                 }
-            }
-
-            // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
-            if (!customActionResults.containsKey(CARESULT_DONE)) {
-                try {
-                    if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
-                        LOG.debug("Timeout while waiting for handling Stanza:{} \n CustomActionResults contains: {}", new StanzaWriter().write(stanza), customActionResults);
-                        customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create());
+                
+                // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
+                if (!customActionResults.containsKey(CARESULT_DONE)) {
+                    try {
+                        if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
+                            LOG.debug("Timeout while waiting for handling Stanza:{}", new StanzaWriter().write(stanza));
+                            customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create());
+                        }
+                    } catch (InterruptedException e) {
+                        customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create(e));
                     }
-                } catch (InterruptedException e) {
-                    customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create(e));
                 }
+            } else {
+                 /*
+                  * Stanza was not handled as the sequence is already enqueued or has already passed this gate so don't wait for handling.
+                  * Simply fetch other Stanzas that are waiting for the client via pollStanzas and return
+                  */
+                LOG.debug("Returning early as Stanza was already handled {}", new StanzaWriter().write(stanza));
             }
-
         }
         catch (Throwable t) {
             LOG.error("", t);
