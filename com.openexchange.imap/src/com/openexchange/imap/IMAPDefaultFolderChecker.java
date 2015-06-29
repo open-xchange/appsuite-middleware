@@ -660,13 +660,8 @@ public class IMAPDefaultFolderChecker {
      * @param type The folder type
      * @param subscribe Whether to subscribe
      * @param modified Whether folders has been modified during check
-<<<<<<< HEAD
-     * @param cache The associated cache
-     * @return Dummy <code>null</code>
-=======
      * @param accountChanged The boolean reference to signal whether mail account has been changed
      * @return The checked full name
->>>>>>> 232ed18... Fix for bug 38476: Check consistency with mail account data in case SPECIAL-USE flags are advertised by IMAP server #3
      * @throws OXException If an error occurs
      */
     protected String checkFullNameFor(int index, String namespace, String fullName, String name, char sep, int type, int subscribe, BoolReference modified, BoolReference accountChanged) throws OXException {
