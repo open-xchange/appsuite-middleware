@@ -203,6 +203,16 @@ public abstract class OXUserStorageInterface {
     public abstract void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws StorageException;
 
     /**
+     * Changes the personal part of specified user's E-Mail address.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param personal The personal to set or <code>null</code> to drop the personal information (if any)
+     * @throws StorageException When an error in the subsystems occurred.
+     */
+    public abstract void changeMailAddressPersonal(Context ctx, User user, String personal) throws StorageException;
+
+    /**
      * Gets the current capabilities for denoted user.
      *
      * @param ctx The context
