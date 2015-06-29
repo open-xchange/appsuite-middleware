@@ -52,6 +52,7 @@ package com.openexchange.share.notification;
 import static com.openexchange.osgi.Tools.requireService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
@@ -60,6 +61,7 @@ import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.impl.NotifyDecision;
+import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -89,7 +91,17 @@ public class DefaultDecision implements NotifyDecision {
                 return false;
             }
 
-            // Don't notify internals about new permissions on public files/folders
+            /*
+             * If the/all target(s) are public internals shall only be notified if
+             *  - they are user entities, no groups
+             *  - they will be admins of any target
+             */
+            ShareRecipient recipient = share.getShareRecipient();
+            int[] permissionBits = Permissions.parsePermissionBits(recipient.getBits());
+            if (!recipient.toInternal().isGroup() && permissionBits[4] > 0) {
+                return true;
+            }
+
             boolean onlyPublics = true;
             ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
             for (ShareTarget target : share.getTargets()) {

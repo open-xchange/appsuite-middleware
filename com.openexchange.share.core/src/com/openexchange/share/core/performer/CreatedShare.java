@@ -100,6 +100,15 @@ public class CreatedShare {
     }
 
     /**
+     * Gets the {@link ShareRecipient}.
+     *
+     * @return The recipient
+     */
+    public ShareRecipient getShareRecipient() {
+        return recipient;
+    }
+
+    /**
      * Gets whether this share has a single or multiple targets.
      *
      * @return <code>true</code> a single target is contained. The
