@@ -1,3 +1,7 @@
+* 2015-06-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38233: Delete filestore before removing context from database  
+
 * 2015-06-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
