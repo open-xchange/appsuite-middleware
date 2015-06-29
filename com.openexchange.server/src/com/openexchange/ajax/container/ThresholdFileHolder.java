@@ -110,6 +110,9 @@ public final class ThresholdFileHolder implements IFileHolder {
     /** The list for post-processing tasks */
     private final List<Runnable> tasks;
 
+    /** <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle */
+    private final boolean autoManaged;
+
     /**
      * Initializes a new {@link ThresholdFileHolder} with default threshold (500 KB) and default initial capacity (64 KB).
      */
@@ -118,11 +121,20 @@ public final class ThresholdFileHolder implements IFileHolder {
     }
 
     /**
+     * Initializes a new {@link ThresholdFileHolder} with default threshold (500 KB) and default initial capacity (64 KB).
+     *
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     */
+    public ThresholdFileHolder(boolean autoManaged) {
+        this(-1, -1, autoManaged);
+    }
+
+    /**
      * Initializes a new {@link ThresholdFileHolder} with default initial capacity (64 KB).
      *
      * @param threshold The threshold
      */
-    public ThresholdFileHolder(final int threshold) {
+    public ThresholdFileHolder(int threshold) {
         this(threshold, -1);
     }
 
@@ -132,8 +144,20 @@ public final class ThresholdFileHolder implements IFileHolder {
      * @param threshold The threshold
      * @param initalCapacity The initial capacity
      */
-    public ThresholdFileHolder(final int threshold, final int initalCapacity) {
+    public ThresholdFileHolder(int threshold, int initalCapacity) {
+        this(threshold, initalCapacity, true);
+    }
+
+    /**
+     * Initializes a new {@link ThresholdFileHolder}.
+     *
+     * @param threshold The threshold
+     * @param initalCapacity The initial capacity
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     */
+    public ThresholdFileHolder(int threshold, int initalCapacity, boolean autoManaged) {
         super();
+        this.autoManaged = autoManaged;
         count = 0;
         this.threshold = threshold > 0 ? threshold : DEFAULT_IN_MEMORY_THRESHOLD;
         contentType = "application/octet-stream";
@@ -316,7 +340,7 @@ public final class ThresholdFileHolder implements IFileHolder {
                     count += len;
                     if ((null == tempFile) && (count > inMemoryThreshold)) {
                         // Stream to file because threshold is exceeded
-                        tempFile = TmpFileFileHolder.newTempFile();
+                        tempFile = TmpFileFileHolder.newTempFile(autoManaged);
                         this.tempFile = tempFile;
                         out = new FileOutputStream(tempFile);
                         baos.writeTo(out);

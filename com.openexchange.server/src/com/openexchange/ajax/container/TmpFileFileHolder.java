@@ -232,10 +232,28 @@ public final class TmpFileFileHolder implements IFileHolder {
      * @throws OXException If a file could not be created
      */
     public static File newTempFile() throws OXException {
+        return newTempFile(true);
+    }
+
+    /**
+     * Creates a new empty file. If this method returns successfully then it is guaranteed that:
+     * <ol>
+     * <li>The file denoted by the returned abstract pathname did not exist before this method was invoked, and
+     * <li>Neither this method nor any of its variants will return the same abstract pathname again in the current invocation of the virtual
+     * machine.
+     * </ol>
+     *
+     * @param autoManaged <code>true</code> to signal automatic management for the created file (deleted after processing threads terminates); otherwise <code>false</code> to let the caller control file's life-cycle
+     * @return An abstract pathname denoting a newly-created empty file
+     * @throws OXException If a file could not be created
+     */
+    public static File newTempFile(boolean autoManaged) throws OXException {
         try {
             final File tmpFile = File.createTempFile("open-xchange-tmpfile-", ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
-            LogProperties.appendTempFileProperty(tmpFile);
+            if (autoManaged) {
+                LogProperties.appendTempFileProperty(tmpFile);
+            }
             return tmpFile;
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
