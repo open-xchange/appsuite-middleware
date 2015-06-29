@@ -165,6 +165,51 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
     }
 
     @Override
+    public void changeMailAddressPersonal(ChangeMailAddressPersonal parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
+        final OXUserInterface userInterface = getUserInterface();
+        try {
+            userInterface.changeMailAddressPersonal(soap2Context(parameters.ctx), soap2User(parameters.user), parameters.personal, soap2Credentials(parameters.auth));
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
+            com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.user.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.user.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.user.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.user.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final NoSuchContextException e) {
+            com.openexchange.admin.soap.user.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.user.soap.NoSuchContextException();
+            com.openexchange.admin.soap.user.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.user.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.user.soap.StorageException faultDetail = new com.openexchange.admin.soap.user.soap.StorageException();
+            com.openexchange.admin.soap.user.exceptions.StorageException value = new com.openexchange.admin.soap.user.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidDataException e) {
+            com.openexchange.admin.soap.user.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.user.soap.InvalidDataException();
+            com.openexchange.admin.soap.user.exceptions.InvalidDataException value = new com.openexchange.admin.soap.user.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final DatabaseUpdateException e) {
+            com.openexchange.admin.soap.user.soap.DatabaseUpdateException faultDetail = new com.openexchange.admin.soap.user.soap.DatabaseUpdateException();
+            com.openexchange.admin.soap.user.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.user.exceptions.DatabaseUpdateException();
+            faultDetail.setDatabaseUpdateException(value);
+            throw new DatabaseUpdateException_Exception(e.getMessage(), faultDetail, e);
+        } catch (NoSuchUserException e) {
+            com.openexchange.admin.soap.user.soap.NoSuchUserException faultDetail = new com.openexchange.admin.soap.user.soap.NoSuchUserException();
+            com.openexchange.admin.soap.user.exceptions.NoSuchUserException value = new com.openexchange.admin.soap.user.exceptions.NoSuchUserException();
+            faultDetail.setNoSuchUserException(value);
+            throw new NoSuchUserException_Exception(e.getMessage(), faultDetail, e);
+        }
+    }
+
+    @Override
     public void changeCapabilities(final ChangeCapabilities parameters) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchUserException_Exception, DatabaseUpdateException_Exception {
         final OXUserInterface userInterface = getUserInterface();
         try {

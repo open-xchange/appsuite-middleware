@@ -269,6 +269,23 @@ public interface OXUserInterface extends Remote {
     public void changeCapabilities(Context ctx, User user, Set<String> capsToAdd, Set<String> capsToRemove, Set<String> capsToDrop, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
+     * Changes the personal part of specified user's E-Mail address.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param personal The personal to set or <code>null</code> to drop the personal information (if any)
+     * @param auth The credentials
+     * @throws RemoteException General RMI Exception
+     * @throws StorageException When an error in the subsystems occurred.
+     * @throws InvalidCredentialsException When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException If the context does not exist in the system.
+     * @throws InvalidDataException If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     * @throws NoSuchUserException
+     */
+    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+
+    /**
      * Moves a user's files from one storage to another.
      * <p>
      * This operation leaves quota usage unchanged and thus can be considered as the user-sensitive counterpart for <code>OXContextInterface.moveContextFilestore()</code>.

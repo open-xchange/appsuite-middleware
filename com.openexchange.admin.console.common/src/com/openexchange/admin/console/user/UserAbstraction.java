@@ -440,6 +440,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
     protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
 
+    protected static final String OPT_PERSONAL = "personal";
+
     protected static final String OPT_QUOTA_MODULE = "quota-module";
     protected static final String OPT_QUOTA_VALUE = "quota-value";
 
@@ -624,6 +626,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption capsToAdd = null;
     protected CLIOption capsToRemove = null;
     protected CLIOption capsToDrop = null;
+
+    protected CLIOption personal = null;
 
     protected CLIOption quotaModule = null;
     protected CLIOption quotaValue = null;
@@ -1791,6 +1795,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
 
+    protected void setPersonal(final AdminParser parser) {
+        this.personal = setLongOpt(parser,OPT_PERSONAL,"The personal of user's mail address or special value \"NULL\" to drop the personal (if any)", true, false, false);
+    }
+
     protected void setCapsToAdd(final AdminParser parser) {
         this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_ADD,"The capabilities to add as a comma-separated string; e.g. \"portal, -autologin\"", true, false,false);
     }
@@ -1932,6 +1940,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         } catch (NumberFormatException e) {
             throw new InvalidDataException("Quota value must be a number.");
         }
+    }
+
+    public String parseAndSetPersonal(final AdminParser parser) {
+        if (null == personal) {
+            setPersonal(parser);
+        }
+        Object object = parser.getOptionValue(personal);
+        if (null == object) {
+            return null;
+        }
+        return object.toString().trim();
     }
 
     public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {

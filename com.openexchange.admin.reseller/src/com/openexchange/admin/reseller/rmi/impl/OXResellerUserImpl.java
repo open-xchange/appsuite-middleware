@@ -95,6 +95,11 @@ public class OXResellerUserImpl implements OXUserPluginInterface {
     }
 
     @Override
+    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws PluginException {
+        // Nothing to do
+    }
+
+    @Override
     public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws PluginException {
         // Nothing to do
     }

@@ -193,6 +193,74 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
+    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
+        try {
+            basicauth.doAuthentication(auth, ctx);
+            checkContextAndSchema(ctx);
+            try {
+                setIdOrGetIDFromNameAndIdObject(ctx, user);
+            } catch (NoSuchObjectException e) {
+                throw new NoSuchUserException(e);
+            }
+            final int user_id = user.getId().intValue();
+            if (!tool.existsUser(ctx, user_id)) {
+                throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+            }
+
+            // Change personal
+            oxu.changeMailAddressPersonal(ctx, user, personal);
+
+            // Check for context administrator
+            final boolean isContextAdmin = tool.isContextAdmin(ctx, user.getId().intValue());
+
+            // Trigger plugin extensions
+            {
+                final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+                if (null != pluginInterfaces) {
+                    for (final OXUserPluginInterface oxuser : pluginInterfaces.getUserPlugins().getServiceList()) {
+                        if (oxuser.canHandleContextAdmin() || (!oxuser.canHandleContextAdmin() && !isContextAdmin)) {
+                            try {
+                                LOGGER.debug("Calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName());
+                                oxuser.changeMailAddressPersonal(ctx, user, personal, auth);
+                            } catch (final PluginException e) {
+                                LOGGER.error("Error while calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName(), e);
+                                throw StorageException.wrapForRMI(e);
+                            } catch (final RuntimeException e) {
+                                LOGGER.error("Error while calling changeMailAddressPersonal for plugin: {}", oxuser.getClass().getName(), e);
+                                throw StorageException.wrapForRMI(e);
+                            }
+                        }
+                    }
+                }
+            }
+
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final DatabaseUpdateException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchContextException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final NoSuchUserException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
     public void changeCapabilities(final Context ctx, final User user, final Set<String> capsToAdd, final Set<String> capsToRemove, final Set<String> capsToDrop, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         if ((null == capsToAdd || capsToAdd.isEmpty()) && (null == capsToRemove || capsToRemove.isEmpty()) && (null == capsToDrop || capsToDrop.isEmpty())) {
             throw new InvalidDataException("No capabilities specified.");
