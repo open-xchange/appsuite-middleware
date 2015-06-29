@@ -7,7 +7,7 @@ BuildRequires: open-xchange-oauth
 BuildRequires: open-xchange-halo
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 14
+%define        ox_release 15
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -80,6 +80,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/linkedinsubscribe.properties
 
 %changelog
+* Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2578)
 * Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
