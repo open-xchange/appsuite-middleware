@@ -52,6 +52,8 @@ package com.openexchange.report.appsuite.management;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.version.Version;
 
@@ -93,6 +95,9 @@ public class JMXReport {
 
             jsonData.put("timestamps", new JSONObject().put("start", startTime).put("stop", stopTime));
             jsonData.put("version", new JSONObject().put("version", Version.getInstance().getVersionString()).put("buildDate", Version.getInstance().getBuildDate()));
+
+            boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
+            jsonData.put("configs", new JSONObject().put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled)));
 
             this.data = jsonData.toString();
         } catch (JSONException e) {

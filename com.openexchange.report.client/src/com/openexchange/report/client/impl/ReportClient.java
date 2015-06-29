@@ -226,17 +226,18 @@ public class ReportClient extends AbstractJMXTools {
             }
             List<MacDetail> macDetails = ObjectHandler.getMacObjects(initConnection);
             final String[] versions = VersionHandler.getServerVersion();
+            Map<String, String> serverConfiguration = ObjectHandler.getServerConfiguration(initConnection);
             final ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
             final ClientLoginCount clcYear = ObjectHandler.getClientLoginCount(initConnection, true);
 
             switch (mode) {
             case SENDONLY:
             case SAVEONLY:
-                new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, clcYear, savereport);
+                new TransportHandler().sendReport(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear, savereport);
                 break;
 
             case DISPLAYONLY:
-                print(totals, contextDetails, macDetails, versions, parser, clc, clcYear);
+                print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
                 break;
 
             case NONE:
@@ -248,8 +249,8 @@ public class ReportClient extends AbstractJMXTools {
             case DISPLAYANDSEND:
             default:
                 savereport = false;
-                new TransportHandler().sendReport(totals, macDetails, contextDetails, versions, clc, clcYear, savereport);
-                print(totals, contextDetails, macDetails, versions, parser, clc, clcYear);
+                new TransportHandler().sendReport(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear, savereport);
+                print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
                 break;
             }
         } catch (final MalformedObjectNameException e) {
@@ -351,7 +352,7 @@ public class ReportClient extends AbstractJMXTools {
             NeededQuadState.notneeded);
     }
 
-    private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
+    private void print(final List<Total> totals, final List<ContextDetail> contextDetails, final List<MacDetail> macDetails, Map<String, String> serverConfiguration, final String[] versions, final AdminParser parser, final ClientLoginCount clc, final ClientLoginCount clcYear) {
         System.out.println("");
 
         if (null != parser.getOptionValue(this.csv)) {
@@ -389,6 +390,16 @@ public class ReportClient extends AbstractJMXTools {
         System.out.println("");
 
         if (null != parser.getOptionValue(this.csv)) {
+            new CSVWriter(System.out, ObjectHandler.createConfigurationList(serverConfiguration)).write();
+        } else {
+            new TableWriter(System.out,
+                new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) },
+                ObjectHandler.createConfigurationList(serverConfiguration)).write();
+        }
+
+        System.out.println("");
+
+        if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createLogincountList(clc)).write();
         } else {
             new TableWriter(System.out, new ColumnFormat[] {
@@ -405,6 +416,8 @@ public class ReportClient extends AbstractJMXTools {
                 new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT),
                 new ColumnFormat(Align.LEFT) }, ObjectHandler.createLogincountListYear(clcYear)).write();
         }
+
+        System.out.println("");
 
         if (null != contextDetails) {
             System.out.println("");
