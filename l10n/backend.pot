@@ -2537,6 +2537,11 @@ msgstr ""
 msgid "You exceeded the maximum count of logins without password."
 msgstr ""
 
+#. A password is required to continue. Please choose one and try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:107
+msgid "A password is required to continue. Please choose one and try again."
+msgstr ""
+
 #. Too few (%d) login attributes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
 msgid "Too few (%d) login attributes."
