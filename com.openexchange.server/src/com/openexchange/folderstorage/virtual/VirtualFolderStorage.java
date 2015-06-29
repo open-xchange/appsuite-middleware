@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -115,7 +116,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderStorage implements FolderStorage {
+public final class VirtualFolderStorage implements ReinitializableFolderStorage {
 
     private static final VirtualFolderStorage INSTANCE = new VirtualFolderStorage();
 
@@ -202,6 +203,25 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
         }
         return tmp.booleanValue();
+    }
+
+    @Override
+    public boolean reinitialize(String treeId, StorageParameters params) throws OXException {
+        // Delete associated folders
+        boolean deleted = Delete.deleteTree(params.getContextId(), unsignedInt(treeId), params.getUserId(), params.getSession());
+
+        if (false == deleted) {
+            return false;
+        }
+
+        MemoryTable table = MemoryTable.optMemoryTableFor(params.getSession());
+        if (null != table) {
+            table.remove(unsignedInt(treeId));
+        }
+
+        checkConsistency(treeId, params);
+
+        return true;
     }
 
     @Override
