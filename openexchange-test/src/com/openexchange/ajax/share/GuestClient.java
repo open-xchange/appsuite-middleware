@@ -88,6 +88,7 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
 import com.openexchange.ajax.session.actions.LoginRequest;
+import com.openexchange.ajax.session.actions.LoginRequest.GuestCredentials;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.actions.ResolveShareRequest;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
@@ -125,7 +126,6 @@ public class GuestClient extends AJAXClient {
     private final String module;
     private final String item;
     private final String folder;
-    private final String client;
 
     /**
      * Initializes a new {@link GuestClient}.
@@ -228,12 +228,15 @@ public class GuestClient extends AJAXClient {
     }
 
     public GuestClient(AJAXSession ajaxSession, String url, String username, String password, String client, boolean failOnNonRedirect, boolean mustLogout) throws Exception {
-        super(ajaxSession, mustLogout);
-        prepareClient(getHttpClient(), username, password);
-        this.client = client;
-        shareResponse = Executor.execute(this, new ResolveShareRequest(url, failOnNonRedirect));
+        this(new ClientConfig(url).setAJAXSession(ajaxSession).setCredentials(username, password).setClient(client).setFailOnNonRedirect(failOnNonRedirect).setMustLogout(mustLogout));
+    }
+
+    public GuestClient(ClientConfig config) throws Exception {
+        super(getOrCreateSession(config), config.mustLogout);
+        prepareClient(getHttpClient(), config.username, config.password);
+        shareResponse = Executor.execute(this, new ResolveShareRequest(config.url, config.failOnNonRedirect));
         if (null != shareResponse.getLoginType()) {
-            loginResponse = login(shareResponse, password, client);
+            loginResponse = login(shareResponse, config);
             getSession().setId(loginResponse.getSessionId());
             if (false == loginResponse.hasError()) {
                 JSONObject data = (JSONObject) loginResponse.getData();
@@ -255,21 +258,102 @@ public class GuestClient extends AJAXClient {
         }
     }
 
-    private LoginResponse login(ResolveShareResponse shareResponse, String password, String client) throws Exception {
+    private static AJAXSession getOrCreateSession(ClientConfig config) {
+        if (config.ajaxSession == null) {
+            return new AJAXSession();
+        }
+
+        return config.ajaxSession;
+    }
+
+    public static final class ClientConfig {
+
+        private final String url;
+
+        private String username;
+
+        private String password;
+
+        private boolean failOnNonRedirect;
+
+        private boolean mustLogout;
+
+        private boolean skipPassword;
+
+        private String client;
+
+        private AJAXSession ajaxSession;
+
+        public ClientConfig(String url) {
+            super();
+            this.url = url;
+        }
+
+        public ClientConfig setCredentials(ShareRecipient recipient) {
+            this.username = ShareTest.getUsername(recipient);
+            this.password = ShareTest.getPassword(recipient);
+            return this;
+        }
+
+        public ClientConfig setCredentials(String username, String password) {
+            this.username = username;
+            this.password = password;
+            return this;
+        }
+
+        public ClientConfig setUsername(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public ClientConfig setPassword(String password) {
+            this.password = password;
+            return this;
+        }
+
+        public ClientConfig setFailOnNonRedirect(boolean failOnNonRedirect) {
+            this.failOnNonRedirect = failOnNonRedirect;
+            return this;
+        }
+
+        public ClientConfig setMustLogout(boolean mustLogout) {
+            this.mustLogout = mustLogout;
+            return this;
+        }
+
+        public ClientConfig setSkipPassword(boolean skipPassword) {
+            this.skipPassword = skipPassword;
+            return this;
+        }
+
+        public ClientConfig setAJAXSession(AJAXSession ajaxSession) {
+            this.ajaxSession = ajaxSession;
+            return this;
+        }
+
+        public ClientConfig setClient(String client) {
+            this.client = client;
+            return this;
+        }
+
+    }
+
+    private LoginResponse login(ResolveShareResponse shareResponse, ClientConfig config) throws Exception {
         LoginRequest loginRequest = null;
         if ("guest".equals(shareResponse.getLoginType())) {
-            loginRequest = LoginRequest.createGuestLoginRequest(
-                shareResponse.getShare(), shareResponse.getTarget(), shareResponse.getLoginName(), password, client, false);
+            GuestCredentials credentials;
+            if (config.skipPassword) {
+                credentials = new GuestCredentials(config.username);
+            } else {
+                credentials = new GuestCredentials(config.username, config.password);
+            }
+            loginRequest = LoginRequest.createGuestLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), credentials, config.client, false);
         } else if ("anonymous".equals(shareResponse.getLoginType())) {
-            loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), password, false);
+            loginRequest = LoginRequest.createAnonymousLoginRequest(shareResponse.getShare(), shareResponse.getTarget(), config.password, false);
         } else {
             Assert.fail("unknown login type: " + shareResponse.getLoginType());
         }
         return Executor.execute(this, loginRequest);
-    }
-
-    private LoginResponse login(ResolveShareResponse shareResponse, String password) throws Exception {
-        return login(shareResponse, password, this.client);
     }
 
     private static void prepareClient(DefaultHttpClient httpClient, String username, String password) {

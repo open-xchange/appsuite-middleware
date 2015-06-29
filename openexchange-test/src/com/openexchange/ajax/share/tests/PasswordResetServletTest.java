@@ -49,11 +49,9 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.net.URLEncoder;
+import java.net.URI;
+import java.net.URLDecoder;
 import java.util.List;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.Executor;
@@ -67,9 +65,8 @@ import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
-import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.GuestRecipient;
 
@@ -156,26 +153,19 @@ public final class PasswordResetServletTest extends ShareTest {
         String location = response.getLocation();
 
         Assert.assertNotNull("Redirect URL cannot be null", location);
-        int lastIndexOf = share.getToken().lastIndexOf("/");
-        Assert.assertTrue("Redirect URL does not contain a token", location.contains(share.getToken().substring(0, lastIndexOf)));
-        String encode = URLEncoder.encode(((GuestRecipient) share.getRecipient()).getEmailAddress());
-        Assert.assertTrue("Redirect URL does not contain email address of the guest. Expected: " + encode + " within redirect URL: " + location, location.contains(encode));
+        Assert.assertEquals("Unexpected location", share.getShareURL(), location);
     }
 
     public void testResetPassword_passwordReset() throws Exception {
         String confirm = getConfirmationToken();
         Executor.execute(getSession(), new PasswordResetConfirmServletRequest(share.getToken(), confirm, false));
-
-        // Try to login without password
-        GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), null);
-        OXException e = guestClient.getLoginResponse().getException();
-        if (null != e && !e.equals(LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED)) {
-            fail("Password reset did not happen!");
-        }
-
-        // Try to set new password
-        guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), "abcdef");
-        Assert.assertNull("Could not set new password!", guestClient.getLoginResponse().getException());
+        String newPW = UUIDs.getUnformattedStringFromRandom();
+        // Set the new password
+        GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
+        guestClient.logout();
+        // Login again to verify
+        guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
+        guestClient.logout();
     }
 
     private String getConfirmationToken() throws Exception {
@@ -185,20 +175,18 @@ public final class PasswordResetServletTest extends ShareTest {
         List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
         assertEquals(1, messages.size());
         Message message = messages.get(0);
-        Document mail = message.getHtml();
-        assertNotNull("Mail has incorrect content.", mail.getElementById("pwrc_requestreceived"));
-        Element link = mail.getElementById("pwrc_set_new_pwd");
-        assertNotNull("Mail does not contain a link.", link);
-        Elements linkElements = link.getElementsByClass("btn");
-        assertEquals(1, linkElements.size());
-        Elements linkAttributes = linkElements.get(0).getElementsByAttribute("href");
-        String href = linkAttributes.attr("href");
-        assertTrue("Mail does not contain a confirmation token.", href.contains("&confirm="));
+        String url = message.getHeaders().get("X-Open-Xchange-Share-Reset-PW-URL");
+        String query = new URI(url).getRawQuery();
+        String[] kvPairs = query.split("&");
+        for (String kvPair : kvPairs) {
+            String[] kv = kvPair.split("=");
+            if (kv.length == 2 && "confirm".equals(kv[0])) {
+                return URLDecoder.decode(kv[1], "UTF-8");
+            }
+        }
 
-        String[] split = href.split("&confirm=");
-        assertEquals(2, split.length);
-        assertNotNull("Confirmation token was not set.", split[1]);
-        return split[1].trim();
+        fail("Confirmation token was not set in URL: " + url);
+        return null;
     }
 
 }

@@ -107,18 +107,18 @@ public class EmptyGuestPasswordTest extends ShareTest {
         ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
         checkShare(perm, folder, share);
         /*
-         * check access to share
+         * check access to share and skip setting password
          */
-        GuestClient guestClient = resolveShare(share, perm.getRecipient());
+        GuestClient guestClient = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
         LoginResponse response = guestClient.getLoginResponse();
         assertNotNull(response);
         assertFalse(response.hasError());
         assertNotNull(response.getSessionId());
 
         /*
-         * another login without password should fail with LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED
+         * another login with password skip should fail with LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED
          */
-        GuestClient guestClient2 = resolveShare(share, perm.getRecipient());
+        GuestClient guestClient2 = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
         LoginResponse response2 = guestClient2.getLoginResponse();
         assertNotNull(response2);
         assertTrue(response2.hasError());

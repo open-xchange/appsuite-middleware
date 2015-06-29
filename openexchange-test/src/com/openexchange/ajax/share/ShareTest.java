@@ -80,6 +80,7 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
+import com.openexchange.ajax.share.GuestClient.ClientConfig;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
@@ -601,6 +602,21 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected GuestClient resolveShare(String url, String username, String password) throws Exception {
         return new GuestClient(url, username, password);
+    }
+
+    /**
+     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the given user name but
+     * sets no password and simulates the "skip password" behavior.
+     *
+     * @param url The share URL
+     * @param username The username, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(String url, String username) throws Exception {
+        ClientConfig clientConfig = new GuestClient.ClientConfig(url)
+            .setUsername(username)
+            .setSkipPassword(true);
+        return new GuestClient(clientConfig);
     }
 
     protected boolean awaitGuestCleanup(int guestID, long timeout) throws Exception {

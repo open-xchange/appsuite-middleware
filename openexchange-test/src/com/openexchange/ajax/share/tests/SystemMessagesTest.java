@@ -106,13 +106,13 @@ public class SystemMessagesTest extends ShareTest {
         checkShare(perm, folder, share);
 
         {
-            GuestClient guestClient = resolveShare(share, perm.getRecipient());
+            GuestClient guestClient = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
             ResolveShareResponse response = guestClient.getShareResolveResponse();
 
             assertNotNull(response);
             String messageType = response.getMessageType();
             assertNotNull(messageType);
-            assertEquals("WARN", messageType);
+            assertEquals("INFO", messageType);
             String status = response.getStatus();
             assertNotNull(status);
             assertEquals("ask_password", status);
@@ -120,13 +120,13 @@ public class SystemMessagesTest extends ShareTest {
         }
 
         {
-            GuestClient guestClient = resolveShare(share, perm.getRecipient());
+            GuestClient guestClient = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
             ResolveShareResponse response = guestClient.getShareResolveResponse();
 
             assertNotNull(response);
             String messageType = response.getMessageType();
             assertNotNull(messageType);
-            assertEquals("ERROR", messageType);
+            assertEquals("INFO", messageType);
             String status = response.getStatus();
             assertNotNull(status);
             assertEquals("require_password", status);
