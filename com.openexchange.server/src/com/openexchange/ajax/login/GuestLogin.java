@@ -181,7 +181,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         // Check if setting a password was skipped
         Map<String, Object> loginProperties = loginInfo.getProperties();
         Map<String, String[]> requestParameters = (Map<String, String[]>) loginProperties.get("requestParameters");
-        String[] skips = requestParameters.get("skip");
+        String[] skips = requestParameters.get("skipButton");
         if (skips != null && skips.length > 0 && Boolean.parseBoolean(skips[0])) {
             if (share.getGuest().isPasswordSet()) {
                 throw INVALID_CREDENTIALS.create();
