@@ -430,4 +430,8 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return new SearchAdapter(contactSearch).getSearchTerm();
     }
 
+    @Override
+    public boolean supports(ContactField... fields) {
+        return false;
+    }
 }
