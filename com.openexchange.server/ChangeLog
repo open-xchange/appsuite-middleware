@@ -1,10 +1,14 @@
+* 2015-06-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38639: Orderly invalidate folder cache when (un)subscribing multiple nested folders
+
 * 2015-06-30 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 39085: Added support for AWS signature v4  
+ - Fix for bug 39085: Added support for AWS signature v4
 
 * 2015-06-29 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 38233: Delete filestore before removing context from database  
+ - Fix for bug 38233: Delete filestore before removing context from database
 
 * 2015-06-26 - tobias.friedrich@open-xchange.com
 

@@ -1418,7 +1418,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             storageVersion = getFolder(treeId, oldFolderId, storageParameters);
         }
         boolean isMove = null != folder.getParentID();
-        String oldParentId = isMove ? storageVersion.getParentID() : null;
+        String oldParentId = storageVersion.getParentID();
         {
             UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
             updatePerformer.setCheck4Duplicates(false);
@@ -1447,10 +1447,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         int contextId = storageParameters.getContextId();
         {
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            List<String> ids = isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId);
-            folderMapManagement.dropFor(ids, treeId, userId, contextId, session);
+            List<String> ids = new ArrayList<String>(isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId, oldParentId));
+            folderMapManagement.dropHierarchyFor(ids, treeId, userId, contextId);
             if (!treeId.equals(realTreeId)) {
-                folderMapManagement.dropFor(ids, realTreeId, userId, contextId, session);
+                folderMapManagement.dropHierarchyFor(ids, realTreeId, userId, contextId);
             }
 
             List<Serializable> keys = new LinkedList<Serializable>();
