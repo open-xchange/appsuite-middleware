@@ -87,7 +87,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
      * Middle naming part of the managed RunLoops
      */
     public static final String LOOP_NAMING_INFIX = "-handler-";
-    
+
     /**
      * Keep associations from component ids to distinct clusters of runloops for given ids.
      *
@@ -282,21 +282,21 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
         }
         return handlesInCluster;
     }
-    
+
     /**
-     * Get a view of the loop clusters. 
-     * 
-     * @return a view of the loop clusters 
+     * Get a view of the loop clusters.
+     *
+     * @return a view of the loop clusters
      */
     public Collection<SyntheticChannelRunLoop> getRunLoopView() {
         return loopClusters.values();
-        
+
     }
-    
+
     /**
-     * Get a view of the loop clusters per component. 
-     * 
-     * @return a readonly view of the loop clusters 
+     * Get a view of the loop clusters per component.
+     *
+     * @return a readonly view of the loop clusters
      */
     public Map<String, Collection<SyntheticChannelRunLoop>> getRunLoopsPerComponent() {
         return loopClusters.asMap();
@@ -315,7 +315,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
         for (SyntheticChannelRunLoop syntheticChannelRunLoop : runLoops) {
             sum += syntheticChannelRunLoop.getQueueSize();
         }
-        return sum/runLoopCount;
+        return ((float)sum/(float)runLoopCount);
     }
 
 }
