@@ -100,7 +100,7 @@
     <!-- ************** Release 7.8.0 starts here ************** -->
     <!-- ******************************************************* -->
 
-     <changeSet id="7.8.0:drop_stored_procedure_configdb_id" author="lars.hoogestraat@open-xchange.com">
+     <changeSet id="7.8.0:drop_stored_procedure_configdb_id" author="lars.hoogestraat@open-xchange.com" failOnError="false">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select COUNT(1) from mysql.proc WHERE name='get_configdb_id'</sqlCheck>
         </preConditions>
@@ -126,7 +126,7 @@
         </rollback>
     </changeSet>
 
-     <changeSet id="7.8.0:drop_stored_procedure_context_id" author="lars.hoogestraat@open-xchange.com">
+     <changeSet id="7.8.0:drop_stored_procedure_context_id" author="lars.hoogestraat@open-xchange.com" failOnError="false">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select COUNT(1) from mysql.proc WHERE name='get_context_id'</sqlCheck>
         </preConditions>
