@@ -49,6 +49,7 @@
 
 package com.openexchange.report.internal;
 
+import static com.openexchange.java.Autoboxing.B;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
@@ -75,8 +76,10 @@ import javax.management.openmbean.OpenMBeanAttributeInfoSupport;
 import javax.management.openmbean.OpenMBeanInfoSupport;
 import javax.management.openmbean.OpenType;
 import javax.management.openmbean.SimpleType;
+import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -86,7 +89,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * {@link ReportingMBean}
@@ -94,6 +96,8 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public class ReportingMBean implements DynamicMBean {
+
+    private static final String COM_OPENEXCHANGE_MAIL_ADMIN_MAIL_LOGIN_ENABLED = "com.openexchange.mail.adminMailLoginEnabled";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingMBean.class);
 
@@ -108,6 +112,12 @@ public class ReportingMBean implements DynamicMBean {
     private CompositeType macsRow;
 
     private TabularType macsType;
+
+    private final String[] configurationNames = { "key", "value" };
+
+    private CompositeType configurationRow;
+
+    private TabularType configurationType;
 
     private final String[] moduleAccessCombinationNames = { "module access combination", "users", "inactive" };
 
@@ -138,24 +148,48 @@ public class ReportingMBean implements DynamicMBean {
         }
         final ContextService contextService;
         final UserService userService;
-        final UserConfigurationService configurationService;
+        final ConfigurationService configurationService;
         try {
             contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
             userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            configurationService = ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true);
+            configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
         } catch (final OXException e) {
             LOG.error("", e);
             final Exception wrapMe = new Exception(e.getMessage());
             throw new MBeanException(wrapMe, e.getMessage());
         }
         if ("Total".equals(attribute)) {
-            return generateTotalTabular(contextService, userService, configurationService);
+            return generateTotalTabular(contextService, userService);
         } else if ("Macs".equals(attribute)) {
-            return generateMacsTabular(contextService, userService, configurationService);
+            return generateMacsTabular();
         } else if ("Detail".equals(attribute)) {
-            return generateDetailTabular(contextService, userService, configurationService);
+            return generateDetailTabular();
+        } else if ("Configuration".equals(attribute)) {
+            return generateConfigurationTabular(configurationService);
         }
         throw new AttributeNotFoundException("Cannot find " + attribute + " attribute ");
+    }
+
+    private TabularData generateConfigurationTabular(ConfigurationService configurationService) throws MBeanException {
+        final TabularData configuration = new TabularDataSupport(configurationType);
+        try {
+            boolean adminMailLoginEnabled = configurationService.getBoolProperty(COM_OPENEXCHANGE_MAIL_ADMIN_MAIL_LOGIN_ENABLED, false);
+            final CompositeDataSupport value = new CompositeDataSupport(configurationRow, configurationNames, new Object[] { COM_OPENEXCHANGE_MAIL_ADMIN_MAIL_LOGIN_ENABLED, B(adminMailLoginEnabled) });
+            configuration.put(value);
+        } catch (final OpenDataException e) {
+            LOG.error("", e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe);
+        } catch (final RuntimeException e) {
+            LOG.error("", e);
+            final Exception wrapMe = new Exception(e.getMessage());
+            throw new MBeanException(wrapMe);
+        } catch (final Throwable t) {
+            LOG.error("", t);
+            final Exception wrapMe = new Exception(t.getMessage());
+            throw new MBeanException(wrapMe);
+        }
+        return configuration;
     }
 
     private final Map<Integer, ReportContext> loadContextData() throws MBeanException {
@@ -240,7 +274,7 @@ public class ReportingMBean implements DynamicMBean {
         }
     }
 
-    private TabularDataSupport generateTotalTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
+    private TabularDataSupport generateTotalTabular(final ContextService contextService, final UserService userService) throws MBeanException {
         final TabularDataSupport total = new TabularDataSupport(totalType);
         try {
             int nrctx = 0;
@@ -275,7 +309,7 @@ public class ReportingMBean implements DynamicMBean {
         }
     }
 
-    private TabularDataSupport generateMacsTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
+    private TabularDataSupport generateMacsTabular() throws MBeanException {
         final TabularDataSupport total = new TabularDataSupport(macsType);
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         try {
@@ -351,7 +385,7 @@ public class ReportingMBean implements DynamicMBean {
         }
     }
 
-    private TabularDataSupport generateDetailTabular(final ContextService contextService, final UserService userService, final UserConfigurationService configService) throws MBeanException {
+    private TabularDataSupport generateDetailTabular() throws MBeanException {
         final TabularDataSupport detail = new TabularDataSupport(detailType);
         try {
             /**
@@ -455,10 +489,16 @@ public class ReportingMBean implements DynamicMBean {
             detailRow = new CompositeType("Detail row", "A detail row", detailNames, detailDescriptions, detailTypes);
             detailType = new TabularType("Detail", "Detail view", detailRow, new String[] { "identifier" });
 
+            final String[] configurationDescriptions = { "Property key", "Property value" };
+            final OpenType[] configurationTypes = { SimpleType.STRING, SimpleType.BOOLEAN };
+            configurationRow = new CompositeType("Configuration row", "A configuration row", configurationNames, configurationDescriptions, configurationTypes);
+            configurationType = new TabularType("Configuration", "Configuration view", configurationRow, configurationNames);
+
             final OpenMBeanAttributeInfo totalAttribute = new OpenMBeanAttributeInfoSupport("Total", "Total contexts and users.", totalType, true, false, false);
             final OpenMBeanAttributeInfo macsAttribute = new OpenMBeanAttributeInfoSupport("Macs", "List of macs and their count.", macsType, true, false, false);
             final OpenMBeanAttributeInfo detailAttribute = new OpenMBeanAttributeInfoSupport("Detail", "Detailed report about contexts and users", detailType, true, false, false);
-            return new OpenMBeanInfoSupport(this.getClass().getName(), "Context and user reporting.", new OpenMBeanAttributeInfo[] { totalAttribute, macsAttribute, detailAttribute }, null, null, null);
+            final OpenMBeanAttributeInfo configurationAttribute = new OpenMBeanAttributeInfoSupport("Configuration", "Configuration report", detailType, true, false, false);
+            return new OpenMBeanInfoSupport(this.getClass().getName(), "Context, user and server reporting.", new OpenMBeanAttributeInfo[] { totalAttribute, macsAttribute, detailAttribute, configurationAttribute }, null, null, null);
         } catch (final OpenDataException e) {
             LOG.error("", e);
         }

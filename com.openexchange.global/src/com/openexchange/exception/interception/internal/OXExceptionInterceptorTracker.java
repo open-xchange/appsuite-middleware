@@ -79,15 +79,14 @@ public class OXExceptionInterceptorTracker implements ServiceTrackerCustomizer<O
     public OXExceptionInterceptor addingService(ServiceReference<OXExceptionInterceptor> reference) {
         OXExceptionInterceptor interceptor = context.getService(reference);
 
-        if (OXExceptionInterceptorRegistration.getInstance().isResponsibleInterceptorRegistered(interceptor)) {
-            context.ungetService(reference);
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OXExceptionInterceptorTracker.class);
-            logger.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", interceptor.getRanking(), interceptor.getClass());
-            return null;
+        if (OXExceptionInterceptorRegistration.getInstance().put(interceptor)) {
+            return interceptor;
         }
 
-        OXExceptionInterceptorRegistration.getInstance().put(interceptor);
-        return interceptor;
+        context.ungetService(reference);
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OXExceptionInterceptorTracker.class);
+        logger.error("Interceptor for the given ranking {} and desired module/action combination already registered! Discard the new one from type: {}", interceptor.getRanking(), interceptor.getClass());
+        return null;
     }
 
     /**

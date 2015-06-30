@@ -55,6 +55,7 @@ import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENI
 import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.NEW_PASSWORD_REQUIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.NOT_SUPPORTED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.REDIRECT_MSG;
@@ -146,7 +147,11 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * You exceeded the maximum count of logins without password.
      */
-    LOGINS_WITHOUT_PASSWORD_EXCEEDED("You exceeded the maximum count of logins without password.", LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 22)
+    LOGINS_WITHOUT_PASSWORD_EXCEEDED("You exceeded the maximum count of logins without password.", LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 22),
+    /**
+     * A password is required to continue. Please choose one and try again.
+     */
+    NEW_PASSWORD_REQUIRED("A password is required to continue. Please choose one and try again.", NEW_PASSWORD_REQUIRED_MSG, Category.CATEGORY_USER_INPUT, 23)
 
     ;
 

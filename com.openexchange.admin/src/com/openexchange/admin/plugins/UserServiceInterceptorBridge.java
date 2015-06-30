@@ -151,6 +151,22 @@ public class UserServiceInterceptorBridge implements OXUserPluginInterface {
     }
 
     @Override
+    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws PluginException {
+        ContextAdapter contextAdapter = new ContextAdapter(ctx);
+        UserAdapter userAdapter = new UserAdapter(user);
+        ContactAdapter contactAdapter = new ContactAdapter(user, ctx.getId().intValue());
+        Map<String, Object> props = UserServiceInterceptor.EMPTY_PROPS;
+        List<UserServiceInterceptor> interceptors = interceptorRegistry.getInterceptors();
+        for (UserServiceInterceptor interceptor : interceptors) {
+            try {
+                interceptor.afterUpdate(contextAdapter, userAdapter, contactAdapter, props);
+            } catch (OXException e) {
+                throw new PluginException(e);
+            }
+        }
+    }
+
+    @Override
     public void changeModuleAccess(Context ctx, User user, String access_combination_name, Credentials auth) throws PluginException {
         ContextAdapter contextAdapter = new ContextAdapter(ctx);
         UserAdapter userAdapter = new UserAdapter(user);

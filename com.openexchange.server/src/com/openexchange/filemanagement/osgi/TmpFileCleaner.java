@@ -58,7 +58,7 @@ import com.openexchange.config.ConfigurationService;
 
 /**
  * {@link TmpFileCleaner}
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public final class TmpFileCleaner implements ServiceTrackerCustomizer<ConfigurationService, ConfigurationService> {
@@ -77,14 +77,18 @@ public final class TmpFileCleaner implements ServiceTrackerCustomizer<Configurat
         if (null != directory) {
             final File dir = new File(directory);
             if (dir.isDirectory() && dir.canWrite()) {
-                for (final File file : dir.listFiles(new FileFilter() {
+                // List files starting with either "open-xchange-" or "openexchange" prefix
+                File[] tmpFiles = dir.listFiles(new FileFilter() {
 
                     @Override
-                    public boolean accept(final File pathname) {
-                        final String name = pathname.getName();
+                    public boolean accept(File pathname) {
+                        String name = pathname.getName();
                         return name.startsWith("open-xchange-") || name.startsWith("openexchange");
                     }
-                })) {
+                });
+
+                // Delete those remnants
+                for (File file : tmpFiles) {
                     try {
                         file.delete();
                     } catch (final Exception x) {

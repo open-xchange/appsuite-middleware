@@ -10,6 +10,7 @@ opt/open-xchange/etc/contact.properties
 opt/open-xchange/etc/contactcollector.properties
 opt/open-xchange/etc/event.properties
 opt/open-xchange/etc/excludedupdatetasks.properties
+opt/open-xchange/etc/external-domains.properties
 opt/open-xchange/etc/filestorage.properties
 opt/open-xchange/etc/findbasic.properties
 opt/open-xchange/etc/foldercache.properties
@@ -32,7 +33,6 @@ opt/open-xchange/etc/mailcache.ccf
 opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
 opt/open-xchange/etc/mailresolver.properties
-opt/open-xchange/etc/external-domains.properties
 opt/open-xchange/etc/management.properties
 opt/open-xchange/etc/messaging.properties
 opt/open-xchange/etc/mime.types

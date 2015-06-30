@@ -178,6 +178,7 @@ public enum MailListField {
     ORIGINAL_FOLDER_ID(655, MailJSONField.ORIGINAL_FOLDER_ID.getKey()),
     /**
      * The MIME type information
+     * @since v7.8.0
      */
     MIME_TYPE(656, MailJSONField.CONTENT_TYPE.getKey()),
     ;

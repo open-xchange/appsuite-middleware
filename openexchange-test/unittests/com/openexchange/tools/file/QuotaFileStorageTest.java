@@ -253,7 +253,7 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        public void lock(Connection con) {
+        public void lock(Connection con, int poolId) {
             // Nothing to do
         }
 

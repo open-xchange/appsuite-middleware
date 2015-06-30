@@ -57,6 +57,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
@@ -144,7 +145,7 @@ public abstract class ContactImporter extends AbstractImporter {
             throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
         }
         
-        if (vCard != null && vCardStorage != null) {
+        if (vCard != null && vCardStorage != null && contactService.supports(session, folderID, ContactField.VCARD_ID)) {
             String vCardId = vCardStorage.saveVCard(vCard, session.getContextId());
             if (vCardId != null) {
                 contact.setVCardId(vCardId);

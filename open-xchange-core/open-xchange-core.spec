@@ -1191,6 +1191,12 @@ ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchang
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
 
+# SoftwareChange_Request-2541
+VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
+if [ "5000" = "$VALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 30000 /opt/open-xchange/etc/hazelcast.properties
+fi
+
 # SoftwareChange_Request-2546
 VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
 if [ "\"USM-EAS*\", \"USM-JSON*\"" = "$VALUE" ]; then
@@ -1206,6 +1212,9 @@ VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc
 if [ "" = "$VALUE" ]; then
     ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
 fi
+
+# SoftwareChange_Request-2575
+ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT

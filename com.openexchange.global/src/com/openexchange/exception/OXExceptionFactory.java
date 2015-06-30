@@ -190,8 +190,8 @@ public class OXExceptionFactory {
 
         // Check for interception
         if (intercept) {
-            final String module = LogProperties.getLogProperty(LogProperties.Name.AJAX_MODULE);
-            final String action = LogProperties.getLogProperty(LogProperties.Name.AJAX_ACTION);
+            String module = LogProperties.getLogProperty(LogProperties.Name.AJAX_MODULE);
+            String action = LogProperties.getLogProperty(LogProperties.Name.AJAX_ACTION);
 
             List<OXExceptionInterceptor> interceptors = OXExceptionInterceptorRegistration.getInstance().getResponsibleInterceptors(module, action);
             for (OXExceptionInterceptor interceptor : interceptors) {

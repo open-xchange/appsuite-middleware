@@ -58,6 +58,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -69,6 +70,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import com.openexchange.report.Constants;
 import com.openexchange.report.client.container.ClientLoginCount;
@@ -92,6 +94,22 @@ public class ObjectHandler {
         }
 
         return (retval);
+    }
+
+    public static Map<String, String> getServerConfiguration(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException {
+        final TabularData data = (TabularData) mbsc.getAttribute(new ObjectName(
+            "com.openexchange.reporting",
+            "name",
+            "Reporting"), "Configuration");
+
+        Map<String, String> configuration = new HashMap<>();
+        for (final Object tmp : data.values()) {
+            final CompositeDataSupport config = (CompositeDataSupport) tmp;
+            Object key = config.get("key");
+            Object value = config.get("value");
+            configuration.put(key.toString(), ((Boolean)value).toString());
+        }
+        return configuration;
     }
 
     public static ClientLoginCount getClientLoginCount(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException, InvalidAttributeValueException {
@@ -189,7 +207,7 @@ public class ObjectHandler {
             retval.add(contextDetail);
         }
 
-        return (retval);
+        return retval;
     }
 
     protected static List<List<Object>> createTotalList(final List<Total> totals) {
@@ -246,6 +264,16 @@ public class ObjectHandler {
             }
         }
 
+        return retval;
+    }
+
+    protected static List<List<Object>> createConfigurationList(final Map<String, String> serverConfiguration) {
+        final List<List<Object>> retval = new ArrayList<List<Object>>();
+        retval.add(Arrays.asList((Object) "key", "value"));
+
+        for (final Entry<String, String> tmp : serverConfiguration.entrySet()) {
+            retval.add(Arrays.asList((Object) tmp.getKey(), tmp.getValue()));
+        }
         return retval;
     }
 

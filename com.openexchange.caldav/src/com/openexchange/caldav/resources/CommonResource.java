@@ -109,19 +109,74 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         this.parentFolderID = Tools.parse(parent.getFolder().getID());
     }
 
+    // --------------------------------------------     ERROR HANDLING      ----------------------------------------------------------
+
+    /**
+     * Accepts an {@link OXException} instance signaling default status code (500).
+     *
+     * @param e The exception
+     * @return The appropriate {@link WebdavProtocolException} instance
+     */
+    protected WebdavProtocolException protocolException(OXException e) {
+        return protocolException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Accepts an {@link OXException} instance signaling specified status code (<code>statusCode</code>).
+     *
+     * @param e The exception
+     * @param statusCode The HTTP status code
+     * @return The appropriate {@link WebdavProtocolException} instance
+     */
+    protected WebdavProtocolException protocolException(OXException e, int statusCode) {
+        if (Category.CATEGORY_USER_INPUT.equals(e.getCategory())) {
+            LOG.debug("{}", this.getUrl(), e);
+        } else {
+            LOG.error("{}", this.getUrl(), e);
+        }
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, e);
+    }
+
+    /**
+     * Accepts a {@link Throwable} instance signaling default status code (500).
+     *
+     * @param e The exception
+     * @return The appropriate {@link WebdavProtocolException} instance
+     */
     protected WebdavProtocolException protocolException(Throwable t) {
         return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
+    /**
+     * Accepts a {@link Throwable} instance signaling specified status code (<code>statusCode</code>).
+     *
+     * @param t The exception
+     * @param statusCode The HTTP status code
+     * @return The appropriate {@link WebdavProtocolException} instance
+     */
     protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
         LOG.error("{}", this.getUrl(), t);
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 
+    /**
+     * Yields a {@link Throwable} instance with default error message signaling specified status code (<code>statusCode</code>).
+     *
+     * @param statusCode The HTTP status code
+     * @return The appropriate {@link WebdavProtocolException} instance
+     */
     protected WebdavProtocolException protocolException(int statusCode) {
-        return protocolException(new Throwable(), statusCode);
+        return protocolException(new Throwable("A WebDAV error occurred."), statusCode);
     }
 
+    /**
+     * Handles given {@link OXException} instance and either throws an appropriate {@link WebdavProtocolException} instance or checks if a
+     * retry attempt is supposed to be performed.
+     *
+     * @param e The exception to handle
+     * @return <code>true</code> to signal that the operation should be retried; otherwise <code>false</code> if no retry should be performed
+     * @throws WebdavProtocolException The appropriate {@link WebdavProtocolException} instance in case no retry is feasible
+     */
     protected boolean handle(OXException e) throws WebdavProtocolException {
         boolean retry = false;
         if (Tools.isDataTruncation(e)) {
@@ -140,16 +195,21 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
                 LOG.warn("{}: {} - removing problematic characters and trying again.", this.getUrl(), e.getMessage());
                 retry = true;
             }
-        } else if ("APP-0093".equals(e.getErrorCode())) {
+        } else if (e.equalsCode(93, "APP")) { // APP-0093
             /*
              * 'Moving a recurring appointment to another folder is not supported.'
              */
             throw protocolException(e, HttpServletResponse.SC_CONFLICT);
-        } else if ("APP-0100".equals(e.getErrorCode())) {
+        } else if (e.equalsCode(100, "APP")) { // APP-0100
             /*
              * 'Cannot insert appointment ABC. An appointment with the unique identifier (123) already exists.'
              */
             throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else if (e.equalsCode(70, "APP")) { // APP-0070
+            /*
+             * 'You can not use the private flag in a non private folder.'
+             */
+            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception
@@ -164,12 +224,11 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
             throw protocolException(e);
         }
 
-        if (retry) {
-            retryCount++;
-            return retryCount <= MAX_RETRIES;
-        } else {
+        if (!retry) {
             return false;
         }
+
+        return ++retryCount <= MAX_RETRIES;
     }
 
     protected abstract boolean trimTruncatedAttribute(Truncated truncated);
@@ -199,6 +258,8 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         }
         return hasReplaced;
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
 
     protected abstract String getFileExtension();
 

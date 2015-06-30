@@ -61,6 +61,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.management.openmbean.CompositeData;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONException;
@@ -89,8 +91,8 @@ public class TransportHandler {
 
     public TransportHandler() {}
 
-    public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear, final boolean savereport) throws IOException, JSONException {
-        final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, versions, clc, clcYear);
+    public void sendReport(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear, final boolean savereport) throws IOException, JSONException {
+        final JSONObject metadata = buildJSONObject(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear);
 
         send(metadata, savereport);
     }
@@ -157,7 +159,7 @@ public class TransportHandler {
         }
     }
 
-    private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {
+    private JSONObject buildJSONObject(final List<Total> totals, final List<MacDetail> macDetails, final List<ContextDetail> contextDetails, Map<String, String> serverConfiguration, final String[] versions, final ClientLoginCount clc, final ClientLoginCount clcYear) throws JSONException {
         final JSONObject retval = new JSONObject();
 
         final JSONObject total = new JSONObject();
@@ -166,6 +168,7 @@ public class TransportHandler {
         final JSONObject version = new JSONObject();
         final JSONObject clientlogincount = new JSONObject();
         final JSONObject clientlogincountyear = new JSONObject();
+        final JSONObject configuration = new JSONObject();
 
         final boolean wantsdetails = (null != contextDetails);
 
@@ -231,6 +234,13 @@ public class TransportHandler {
         if (wantsdetails) {
             retval.put("detail", detail);
         }
+
+        if (serverConfiguration != null) {
+            for (Entry<String, String> config : serverConfiguration.entrySet()) {
+                configuration.put(config.getKey(), config.getValue());
+            }
+            retval.put("configs", configuration);
+        }
         retval.put("version", version);
         retval.put("clientlogincount", clientlogincount);
         retval.put("clientlogincountyear", clientlogincountyear);
@@ -241,5 +251,4 @@ public class TransportHandler {
     public void sendASReport(CompositeData report, boolean savereport) throws IOException, JSONException {
         send(new JSONObject((String) report.get("data")), savereport);
     }
-
 }

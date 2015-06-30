@@ -74,8 +74,6 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
  */
 public class FolderParser {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FolderParser.class);
-
     private final UserPermissionBits userPermissionBits;
 
     private static final int[] mapping = { 0, 2, 4, -1, 8 };

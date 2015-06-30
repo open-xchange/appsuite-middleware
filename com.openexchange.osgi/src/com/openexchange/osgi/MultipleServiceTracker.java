@@ -181,7 +181,7 @@ public abstract class MultipleServiceTracker implements ServiceTrackerCustomizer
      * Invoked once a service was removed <b><i>after</i></b> {@link #onAllAvailable()} has been invoked.
      *
      * @param service The removed service
-     * @return <code>true</code> if {@link #onAllAvailable()} is supposed to re-invoked once all services are available again (default); otherwise <code>false</code>
+     * @return <code>true</code> if {@link #onAllAvailable()} is supposed to be re-invoked once all services are available again (default); otherwise <code>false</code>
      */
     protected abstract boolean serviceRemoved(Object service);
 

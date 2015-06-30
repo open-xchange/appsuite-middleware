@@ -49,6 +49,7 @@
 
 package com.openexchange.exception.interception.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -72,27 +73,6 @@ public class OXExceptionInterceptorRegistration {
 
     /** Singleton instance for this registration **/
     private static volatile OXExceptionInterceptorRegistration instance;
-
-    /** Comparator to sort registered {@link OXExceptionInterceptor} **/
-    private final Comparator<OXExceptionInterceptor> comparator;
-
-    /** List with all registered interceptors **/
-    private volatile List<OXExceptionInterceptor> interceptors;
-
-    private OXExceptionInterceptorRegistration() {
-        super();
-        this.interceptors = new LinkedList<OXExceptionInterceptor>();
-
-        comparator = new Comparator<OXExceptionInterceptor>() {
-
-            @Override
-            public int compare(OXExceptionInterceptor o1, OXExceptionInterceptor o2) {
-                int rank1 = o1.getRanking();
-                int rank2 = o2.getRanking();
-                return (rank1 < rank2 ? -1 : (rank1 == rank2 ? 0 : 1));
-            }
-        };
-    }
 
     /**
      * Initializes the instance using given configuration service instance
@@ -120,42 +100,65 @@ public class OXExceptionInterceptorRegistration {
         return instance;
     }
 
+    // ----------------------------------------------------------------------------------------------------------------------------
+
+    /** Comparator to sort registered {@link OXExceptionInterceptor} **/
+    private final Comparator<OXExceptionInterceptor> comparator;
+
+    /** List with all registered interceptors **/
+    private volatile List<OXExceptionInterceptor> interceptors;
+
+    private OXExceptionInterceptorRegistration() {
+        super();
+        this.interceptors = new LinkedList<OXExceptionInterceptor>();
+
+        comparator = new Comparator<OXExceptionInterceptor>() {
+
+            @Override
+            public int compare(OXExceptionInterceptor o1, OXExceptionInterceptor o2) {
+                int rank1 = o1.getRanking();
+                int rank2 = o2.getRanking();
+                return (rank1 < rank2 ? -1 : (rank1 == rank2 ? 0 : 1));
+            }
+        };
+    }
+
     /**
-     * Add an {@link OXExceptionInterceptor} to intercept exception throwing. If an interceptor should be added where a similar one is
+     * Adds an {@link OXExceptionInterceptor} to intercept exception throwing. If an interceptor should be added where a similar one is
      * already registered for (means ranking, module and action is equal) it won't be added.
      *
      * @param {@link OXExceptionInterceptor} to add
+     * @return <code>true</code> if interceptor is added; otherwise <code>false</code>
      */
-    public synchronized void put(final OXExceptionInterceptor interceptor) {
+    public synchronized boolean put(OXExceptionInterceptor interceptor) {
         if (interceptor == null) {
             LOG.error("Interceptor to add might not be null!");
-            return;
+            return false;
         }
 
         if (isResponsibleInterceptorRegistered(interceptor)) {
             LOG.error("Interceptor for the given ranking " + interceptor.getRanking() + " and desired module/action combination already registered! Discard the new one from type: " + interceptor.getClass());
-            return;
+            return false;
         }
         this.interceptors.add(interceptor);
+        return true;
     }
 
     /**
-     * Checks if an {@link OXExceptionInterceptor} is with same ranking and module/action combination is already registered
+     * Checks if an {@link OXExceptionInterceptor} with same ranking and module/action combination is already registered
      *
-     * @param interceptorCandidate - {@link OXExceptionInterceptor} that might be added
-     * @return boolean - true if a {@link OXExceptionInterceptor} is already registered for the given ranking and module/action combination,
-     *         otherwise false
+     * @param interceptorCandidate The {@link OXExceptionInterceptor} that might be added
+     * @return boolean<code>true</code> if a {@link OXExceptionInterceptor} is already registered for the given ranking and module/action combination, otherwise <code>false</code>
      */
     public boolean isResponsibleInterceptorRegistered(OXExceptionInterceptor interceptorCandidate) {
-        final List<OXExceptionInterceptor> interceptors = this.interceptors;
-
-        for (OXExceptionInterceptor interceptor : interceptors) {
+        for (OXExceptionInterceptor interceptor : this.interceptors) {
             if (interceptor.getRanking() != interceptorCandidate.getRanking()) {
                 continue;
             }
             for (Responsibility responsibility : interceptor.getResponsibilities()) {
                 for (Responsibility candidateResponsibility : interceptorCandidate.getResponsibilities()) {
-                    if (responsibility.equals(candidateResponsibility)) {
+                    if (responsibility.implies(candidateResponsibility)) {
+                        // There is another interceptor with the same ranking covering the same responsibility
                         return true;
                     }
                 }
@@ -165,7 +168,7 @@ public class OXExceptionInterceptorRegistration {
     }
 
     /**
-     * Remove an {@link OXExceptionInterceptor} to not intercept exception throwing
+     * Removes an {@link OXExceptionInterceptor} to not intercept exception throwing
      *
      * @param interceptor - {@link OXExceptionInterceptor} to remove
      */
@@ -179,14 +182,11 @@ public class OXExceptionInterceptorRegistration {
      * @return a ranked list with all registered {@link OXExceptionInterceptor}s
      */
     public List<OXExceptionInterceptor> getRegisteredInterceptors() {
-        List<OXExceptionInterceptor> lInterceptors = new LinkedList<OXExceptionInterceptor>();
-
-        // Add all handlers matching everything
-        lInterceptors.addAll(this.interceptors);
+        // Add all interceptors
+        List<OXExceptionInterceptor> lInterceptors = new ArrayList<OXExceptionInterceptor>(this.interceptors);
 
         // Now order them according to service ranking
         Collections.sort(lInterceptors, comparator);
-
         return lInterceptors;
     }
 
@@ -199,16 +199,16 @@ public class OXExceptionInterceptorRegistration {
      *         combination
      */
     public List<OXExceptionInterceptor> getResponsibleInterceptors(String module, String action) {
+        // Collect responsible interceptors
         List<OXExceptionInterceptor> lInterceptors = new LinkedList<OXExceptionInterceptor>();
-
         for (OXExceptionInterceptor interceptor : this.interceptors) {
             if (interceptor.isResponsible(module, action)) {
                 lInterceptors.add(interceptor);
             }
         }
 
+        // Sort by ranking & return
         Collections.sort(lInterceptors, comparator);
-
         return lInterceptors;
     }
 }

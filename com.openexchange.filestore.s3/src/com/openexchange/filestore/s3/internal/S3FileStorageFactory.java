@@ -69,11 +69,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3EncryptionClient;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
 import com.openexchange.config.ConfigurationService;
@@ -188,18 +190,20 @@ public class S3FileStorageFactory implements FileStorageProvider {
         /*
          * instantiate client
          */
+        ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID);
         AmazonS3Client client = null;
         String encryption = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption", "none");
         if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
             /*
              * use default AmazonS3Client
              */
-            client = new AmazonS3Client(credentials);
+            client = new AmazonS3Client(credentials, clientConfiguration);
         } else {
             /*
              * use AmazonS3EncryptionClient
              */
-            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID, encryption));
+            client = new AmazonS3EncryptionClient(
+                credentials, getEncryptionMaterials(filestoreID, encryption), clientConfiguration, new CryptoConfiguration());
         }
         /*
          * configure client
@@ -218,7 +222,18 @@ public class S3FileStorageFactory implements FileStorageProvider {
         if (configService.getBoolProperty("com.openexchange.filestore.s3." + filestoreID + ".pathStyleAccess", true)) {
             client.setS3ClientOptions(new S3ClientOptions().withPathStyleAccess(true));
         }
+
+
         return client;
+    }
+
+    private ClientConfiguration getClientConfiguration(String filestoreID) {
+        ClientConfiguration clientConfiguration = new ClientConfiguration();
+        String signerOverride = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".signerOverride");
+        if (false == Strings.isEmpty(signerOverride)) {
+            clientConfiguration.setSignerOverride(signerOverride);
+        }
+        return clientConfiguration;
     }
 
     private EncryptionMaterials getEncryptionMaterials(String filestoreID, String encryptionMode) throws OXException {

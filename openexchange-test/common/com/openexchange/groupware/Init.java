@@ -320,6 +320,7 @@ public final class Init {
     }
 
     public static void startServer() throws Exception {
+        long start = System.currentTimeMillis();
         if (!running.compareAndSet(false, true)) {
             /*
              * Already running
@@ -338,6 +339,7 @@ public final class Init {
         }
 
         ServiceCallWrapperModifier.initTestRun(services);
+        System.out.println("Initializing the test setup took " + (System.currentTimeMillis() - start) + "ms.");
     }
 
     private static void injectTestServices() throws Exception {
