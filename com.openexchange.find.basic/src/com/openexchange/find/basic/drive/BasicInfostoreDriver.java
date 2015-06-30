@@ -428,8 +428,8 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
     private static Metadata[] getFields(SearchRequest searchRequest) {
         Metadata[] fields = DEFAULT_FIELDS;
-        int[] columns = searchRequest.getColumns();
-        if (columns != null) {
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
             List<Metadata> tmp = new ArrayList<Metadata>(columns.length);
             for (int c : columns) {
                 Metadata field = Metadata.get(c);

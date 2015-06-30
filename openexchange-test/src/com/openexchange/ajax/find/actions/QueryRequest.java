@@ -78,7 +78,7 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
     private final int size;
     private final List<ActiveFacet> activeFacets;
     private final String module;
-    private final int[] columns;
+    private final String[] columns;
 
     /**
      * Initializes a new {@link QueryRequest}.
@@ -87,14 +87,14 @@ public class QueryRequest extends AbstractFindRequest<QueryResponse> {
         this(true, start, size, activeFacets, null, module, null);
     }
 
-    public QueryRequest(int start, int size, List<ActiveFacet> activeFacets, String module, int[] columns) {
+    public QueryRequest(int start, int size, List<ActiveFacet> activeFacets, String module, String[] columns) {
         this(true, start, size, activeFacets, null, module, columns);
     }
 
     /**
      * Initializes a new {@link QueryRequest}.
      */
-    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, Map<String, String> options, String module, int[] columns) {
+    public QueryRequest(boolean failOnError, int start, int size, List<ActiveFacet> activeFacets, Map<String, String> options, String module, String[] columns) {
         super(options);
         this.failOnError = failOnError;
         this.start = start;

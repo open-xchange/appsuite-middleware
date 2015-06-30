@@ -54,6 +54,7 @@ import java.util.Map;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.find.Columns;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
@@ -85,7 +86,7 @@ public class QueryAction extends AbstractFindAction {
     @Override
     protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
         final SearchService searchService = getSearchService();
-        final int[] columns = request.getColumns();
+        final String[] columns = request.getColumns();
         final Module module = request.requireModule();
         final Offset offset = request.getOffset();
         if (offset.len <= 0) {

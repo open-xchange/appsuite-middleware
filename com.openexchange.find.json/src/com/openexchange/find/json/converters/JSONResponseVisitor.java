@@ -48,6 +48,8 @@
  */
 package com.openexchange.find.json.converters;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
@@ -125,22 +127,30 @@ public class JSONResponseVisitor implements DocumentVisitor {
         }
     }
 
-    private MailFieldWriter[] mailFieldWriters = null;
+    private List<MailFieldWriter> mailFieldWriters = null;
 
     @Override
     public void visit(MailDocument mailDocument) {
         if (mailFieldWriters == null) {
-            int[] columns = queryResult.getSearchRequest().getColumns();
-            if (columns == null) {
-                mailFieldWriters = DEFAULT_MAIL_WRITERS;
+            String[] columns = queryResult.getSearchRequest().getColumns().getOriginalColumns();
+            if (columns == null || columns.length == 0) {
+                mailFieldWriters = new ArrayList<MailFieldWriter>(Arrays.asList(DEFAULT_MAIL_WRITERS));
             } else {
-                mailFieldWriters = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
+                mailFieldWriters = new ArrayList<MailFieldWriter>(columns.length);
+                for (String c : columns) {
+                    try {
+                        int ic = Integer.parseInt(c);
+                        mailFieldWriters.add(MessageWriter.getMailFieldWriter(MailListField.getField(ic)));
+                    } catch (NumberFormatException e) {
+                        mailFieldWriters.add(MessageWriter.getHeaderFieldWriter(c));
+                    }
+                }
             }
         }
 
         final MailMessage mailMessage = mailDocument.getMailMessage();
         try {
-            JSONObject jsonMessage = new JSONObject(mailFieldWriters.length);
+            JSONObject jsonMessage = new JSONObject(mailFieldWriters.size());
             int contextId = session.getContextId();
             int userId = session.getUserId();
             for (MailFieldWriter writer : mailFieldWriters) {

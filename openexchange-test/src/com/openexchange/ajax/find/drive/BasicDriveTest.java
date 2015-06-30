@@ -250,12 +250,14 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     private void testWithFields(Field fields[], boolean withColumns) throws Exception {
-        int columns[] = new int[fields.length];
+        String columns[] = new String[fields.length];
+        int intColumns[] = new int[fields.length];
         for (int i = 0; i < fields.length; i++) {
-            columns[i] = fields[i].getNumber();
+            intColumns[i] = fields[i].getNumber();
+            columns[i] = Integer.toString(fields[i].getNumber());
         }
 
-        ListInfostoreRequest listRequest = new ListInfostoreRequest(columns);
+        ListInfostoreRequest listRequest = new ListInfostoreRequest(intColumns);
         listRequest.addItem(new ListItem(metadata));
         ListInfostoreResponse listResponse = client.execute(listRequest);
         Object[] listDocument = listResponse.getArray()[0];
