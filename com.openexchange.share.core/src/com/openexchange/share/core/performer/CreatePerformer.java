@@ -52,7 +52,7 @@ package com.openexchange.share.core.performer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.DatabaseService;
@@ -66,8 +66,6 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
-import com.openexchange.share.recipient.InternalRecipient;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
 
@@ -103,16 +101,7 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
         /*
          * distinguish between internal and external recipients
          */
-        List<ShareRecipient> internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
-        List<ShareRecipient> externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
-        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(internalRecipients.size() + externalRecipients.size());
-        for (ShareRecipient recipient : internalRecipients) {
-            InternalRecipient internal = (InternalRecipient) recipient;
-            if (internal.getEntity() == session.getUserId()) {
-                throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
-            }
-            targetPermissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
-        }
+        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(recipients.size());
         /*
          * prepare transaction
          */
@@ -136,8 +125,8 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
              * create shares & corresponding guest user entities for external recipients first
              */
             Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient;
-            if (0 < externalRecipients.size()) {
-                sharesPerRecipient = getShareService().addTargets(session, targets, externalRecipients);
+            if (0 < recipients.size()) {
+                sharesPerRecipient = getShareService().addTargets(session, targets, recipients);
                 /*
                  * add appropriate target permissions for corresponding guest entities
                  * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target
@@ -148,7 +137,7 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
                     targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), false, shareRecipient.getBits()));
                 }
             } else {
-                sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>();
+                sharesPerRecipient = Collections.emptyMap();
             }
             /*
              * adjust folder & object permissions of share targets
@@ -165,7 +154,6 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
             /*
              * add internal users (not affected by sharing) to the resulting list for completeness
              */
-            sharesPerRecipient.putAll(getShareService().addTargets(session, targets, internalRecipients));
             return new CreatedShares(sharesPerRecipient);
         } catch (OXException e) {
             Databases.rollback(writeCon);
@@ -181,26 +169,6 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
                 update.close();
             }
         }
-    }
-
-    /**
-     * Gets a filtered map only containing the share recipients of the specified type.
-     *
-     * @param recipients The recipients to filter
-     * @param types The allowed types
-     * @return The filtered recipients
-     */
-    private static List<ShareRecipient> filterRecipients(List<ShareRecipient> recipients, RecipientType...types) {
-        List<ShareRecipient> filteredRecipients = new ArrayList<ShareRecipient>();
-        for (ShareRecipient recipient : recipients) {
-            for (RecipientType allowedType : types) {
-                if (allowedType == recipient.getType()) {
-                    filteredRecipients.add(recipient);
-                    break;
-                }
-            }
-        }
-        return filteredRecipients;
     }
 
 }

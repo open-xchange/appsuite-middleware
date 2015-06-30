@@ -251,7 +251,6 @@ public class DefaultShareService implements ShareService {
              * check quota restrictions
              */
             int expectedShares = targets.size() * recipients.size();
-            checkQuota(connectionHelper, session, expectedShares);
             /*
              * prepare guest users and resulting shares
              */
@@ -259,9 +258,9 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
             List<Share> sharesToStore = new ArrayList<Share>(expectedShares);
             for (ShareRecipient recipient : recipients) {
-                if (InternalRecipient.class.isInstance(recipient)) {
-                    InternalRecipient internal = (InternalRecipient) recipient;
-                    if (internal.getEntity() == session.getUserId()) {
+                if (recipient.isInternal()) {
+                    InternalRecipient internal = recipient.toInternal();
+                    if (!internal.isGroup() && internal.getEntity() == session.getUserId()) {
                         throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
                     }
                 }
@@ -282,6 +281,10 @@ public class DefaultShareService implements ShareService {
                 }
                 sharesPerRecipient.put(recipient, sharesForGuest);
             }
+            /*
+             * Check quota for real shares only, i.e. don't count internals that have accidently been added via their email addresses
+             */
+            checkQuota(connectionHelper, session, sharesToStore.size() * targets.size());
             /*
              * store shares & trigger collection of e-mail addresses
              */
