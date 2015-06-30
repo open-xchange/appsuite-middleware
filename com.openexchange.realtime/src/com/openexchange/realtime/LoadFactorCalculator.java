@@ -49,6 +49,8 @@
 
 package com.openexchange.realtime;
 
+import com.openexchange.realtime.packet.Stanza;
+
 
 /**
  * {@link LoadFactorCalculator}
@@ -57,19 +59,28 @@ package com.openexchange.realtime;
  * @since v7.8.0
  */
 public interface LoadFactorCalculator {
-    
+
     /**
      * Get the loadfactor per given Component.
-     * 
+     *
      * The load factor is calculated as: #{@link Stanza}s to be handled divided by #threads that feed individual {@link ComponentHandle}s
      * e.g.
      * <ul>
-     * <li>a load factor of 0.0 means that the system is idle</li>     
+     * <li>a load factor of 0.0 means that the system is idle</li>
      * <li>a load factor of 1.0 means that with optimal {@link Stanza} distribution per thread each thread is waiting for one {@link Stanza} to be handled</li>
      * </ul>
-     * 
+     *
      * @param component the {@link Component} to select the appropriate feeding threads
      * @return the loadfactor per given Component
      */
     float getCurrentLoad(Component component);
+
+    /**
+     * Provides the number of run loops per given Component.
+     *
+     * @param component the {@link Component} to select the appropriate feeding threads
+     *
+     * @return the number of run loops per given Component
+     */
+    int getRunLoopCount(Component component);
 }

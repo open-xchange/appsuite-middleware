@@ -318,4 +318,9 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
         return ((float)sum/(float)runLoopCount);
     }
 
+    @Override
+    public int getRunLoopCount(Component component) {
+        Collection<SyntheticChannelRunLoop> runLoops = getRunLoopsPerComponent().get(component.getId());
+        return runLoops.size();
+    }
 }
