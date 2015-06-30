@@ -94,6 +94,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.update.UpdateStatus;
 import com.openexchange.groupware.update.Updater;
+import com.openexchange.java.Strings;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.BitAND;
 import com.openexchange.sql.grammar.BitOR;
@@ -2275,21 +2276,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     @Override
     public boolean existsUserName(Context ctx, User user) throws StorageException {
-        final int contextId = ctx.getId().intValue();
-        final Connection con;
-        try {
-            con = cache.getConnectionForContext(contextId);
-        } catch (PoolException e) {
-            log.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-
-        boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
-
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         boolean foundOther = false;
         try {
+            con = cache.getConnectionForContext(contextId);
+            boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
             stmt = con.prepareStatement("SELECT uid FROM login2user WHERE cid=? AND uid=? AND id!=?");
             stmt.setInt(1, contextId);
             stmt.setString(2, autoLowerCase ? user.getName().toLowerCase() : user.getName());
@@ -2298,16 +2292,18 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             while (!foundOther && result.next()) {
                 foundOther = user.getName().equals(result.getString(1));
             }
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);
-
             if (null != con) {
                 try {
                     cache.pushConnectionForContextAfterReading(contextId, con);
-                } catch (final PoolException e) {
+                } catch (PoolException e) {
                     log.error("Error pushing context connection to pool.", e);
                 }
             }
@@ -2320,6 +2316,41 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         final User tmp = new User(-1);
         tmp.setName(username);
         return existsUserName(ctx,tmp);
+    }
+
+    @Override
+    public boolean existsDisplayName(Context ctx, String displayName) throws StorageException {
+        if (Strings.isEmpty(displayName)) {
+            return false;
+        }
+
+        int contextId = ctx.getId().intValue();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            stmt = con.prepareStatement("SELECT 1 FROM prg_contacts WHERE cid=? AND field01=?");
+            stmt.setInt(1, contextId);
+            stmt.setString(2, displayName);
+            result = stmt.executeQuery();
+            return result.next();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(contextId, con);
+                } catch (PoolException e) {
+                    log.error("Error pushing context connection to pool.", e);
+                }
+            }
+        }
     }
 
     @Override

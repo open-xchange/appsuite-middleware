@@ -58,6 +58,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
+import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
@@ -69,6 +70,7 @@ public abstract class ExistsCore extends UserAbstraction {
         // required
         setIdOption(parser);
         setUsernameOption(parser, NeededQuadState.eitheror);
+        setDisplayNameOption(parser, NeededQuadState.eitheror);
     }
 
     protected final void commonfunctions(final AdminParser parser, final String[] args) {
@@ -78,21 +80,29 @@ public abstract class ExistsCore extends UserAbstraction {
         try {
             parser.ownparse(args);
 
-            final Context ctx = contextparsing(parser);
-            final User usr = new User();
+            // Parse arguments
+            Context ctx = contextparsing(parser);
+            User usr = new User();
             parseAndSetUserId(parser, usr);
             parseAndSetUsername(parser, usr);
-            final Credentials auth = credentialsparsing(parser);
+            parseAndSetDisplayName(parser, usr);
+            Credentials auth = credentialsparsing(parser);
 
-            // get rmi ref
-            final OXUserInterface oxusr = getUserInterface();
+            // Get RMI stub
+            OXUserInterface oxusr = getUserInterface();
+
             String usrident;
-            if( null != usr.getId() ) {
+            if (null != usr.getId()) {
                 usrident = String.valueOf(usr.getId());
-            } else {
+            } else if (null != usr.getName()) {
                 usrident = usr.getName();
+            } else if (null != usr.getDisplay_name()) {
+                usrident = new StringBuilder(usr.getDisplay_name().length() + 2).append('"').append(usr.getDisplay_name()).append('"').toString();
+            } else {
+                throw new MissingOptionException("Neither identifier, name nor display name given");
             }
-            if( maincall(parser, oxusr, ctx, usr, auth) ) {
+
+            if (maincall(parser, oxusr, ctx, usr, auth)) {
                 System.out.println("User " + usrident + " exists");
                 sysexit(0);
             } else {
@@ -100,7 +110,7 @@ public abstract class ExistsCore extends UserAbstraction {
                 sysexit(1);
             }
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
         }
     }

@@ -1,3 +1,7 @@
+* 2015-06-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38605: Extended the "com.openexchange.admin.rmi.OXUserInterface.exists()" method to also accept a display name when performing existence check
+
 * 2015-06-29 - thorben.betten@open-xchange.com
 
  - Fix for bug 38794: Added a method to change the personal part of a user's E-Mail address in his mail account settings

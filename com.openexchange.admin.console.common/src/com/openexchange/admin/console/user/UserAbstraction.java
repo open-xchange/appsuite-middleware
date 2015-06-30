@@ -674,6 +674,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     // For right error output
     protected String username = null;
+    protected String displayName = null;
     protected Integer userid = null;
     private CLIOption email1Option;
     private CLIOption mailenabledOption;
@@ -2025,6 +2026,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.username = (String) parser.getOptionValue(this.userNameOption);
         if (null != this.username) {
             usr.setName(this.username);
+        }
+    }
+
+    protected void parseAndSetDisplayName(final AdminParser parser, final User usr) {
+        this.displayName = (String) parser.getOptionValue(this.displayNameOption);
+        if (null != this.displayName) {
+            usr.setDisplay_name(displayName);
         }
     }
 
