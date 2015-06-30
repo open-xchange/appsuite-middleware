@@ -1597,8 +1597,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public boolean exists(final Context ctx, final User user, final Credentials credentials) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException {
-        final Credentials auth = credentials == null ? new Credentials("","") : credentials;
+    public boolean exists(Context ctx, User user, Credentials credentials) throws RemoteException, InvalidDataException, InvalidCredentialsException, StorageException, DatabaseUpdateException, NoSuchContextException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
         } catch (final InvalidDataException e2) {
@@ -1623,23 +1623,25 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             checkContextAndSchema(ctx);
 
-            if( null != user.getId() ) {
+            if (null != user.getId()) {
                 return tool.existsUser(ctx, user);
-            } else if( null != user.getName() ) {
+            } else if (null != user.getName()) {
                 return tool.existsUserName(ctx, user.getName());
+            } else if (null != user.getDisplay_name()) {
+                return tool.existsDisplayName(ctx, user.getDisplay_name());
             } else {
-                throw new InvalidDataException("Neither id nor name is set in supplied user object");
+                throw new InvalidDataException("Neither identifier, name nor display name set in given user object");
             }
-        } catch (final InvalidCredentialsException e) {
+        } catch (InvalidCredentialsException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final StorageException e) {
+        } catch (StorageException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final DatabaseUpdateException e) {
+        } catch (DatabaseUpdateException e) {
             LOGGER.error("", e);
             throw e;
-        } catch (final NoSuchContextException e) {
+        } catch (NoSuchContextException e) {
             LOGGER.error("", e);
             throw e;
         }

@@ -71,9 +71,11 @@ public abstract class OXToolStorageInterface {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolStorageInterface.class);
 
-    protected static AdminCache cache = null;
+    /** The admin cache */
+    protected static final AdminCache cache;
 
-    protected static PropertyHandler prop = null;
+    /** The property handler */
+    protected static final PropertyHandler prop;
 
     static {
         try {
@@ -81,6 +83,7 @@ public abstract class OXToolStorageInterface {
             prop = cache.getProperties();
         } catch (OXGenericException e) {
             log.warn("", e);
+            throw new IllegalStateException(e);
         }
     }
 
@@ -93,10 +96,12 @@ public abstract class OXToolStorageInterface {
     }
 
     /**
-     * Checks if given domain is used by any user,group or resource as mailaddress in given context.
-     * @param domain
-     * @return
-     * @throws StorageException
+     * Checks if given domain is used by any user,group or resource as mail address in given context.
+     *
+     * @param ctx  The context
+     * @param domain The domain
+     * @return <code>true</code> if given domain is used by any user,group or resource as mail address; otherwise <code>false</code>
+     * @throws StorageException If check fails
      */
     public abstract boolean domainInUse(final Context ctx,final String domain) throws StorageException;
 
@@ -190,125 +195,154 @@ public abstract class OXToolStorageInterface {
      * This method will detect if a specified user exists. It check this through the user id and the
      * user name specified in the user object
      *
-     * @param ctx
+     * @param ctx The context
      * @param users
      * @return
-     * @throws StorageException
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsUser(final Context ctx, final User[] users) throws StorageException;
+    public abstract boolean existsUser(Context ctx, User[] users) throws StorageException;
 
     /**
      * A convenience method for a single user object. See {@link #existsUser(Context, User[])}
      *
-     * @param ctx
+     * @param ctx The context
      * @param user
      * @return
-     * @throws StorageException
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsUser(final Context ctx, final User user) throws StorageException;
+    public abstract boolean existsUser(Context ctx, User user) throws StorageException;
 
 
     /**
      * Checks via group id and group name if it already exists in this context. Should be used in change method!
-     * @param ctx
+     *
+     * @param ctx The context
      * @param grp
      * @return
-     * @throws StorageException
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsGroupName(final Context ctx, final Group grp) throws StorageException;
+    public abstract boolean existsGroupName(Context ctx, Group grp) throws StorageException;
 
 
     /**
-     * Checks if given name is already used for a group in given context.Should be used in create method!
-     * @param ctx
+     * Checks if given name is already associated with a group in given context.Should be used in create method!
+     *
+     * @param ctx The context
      * @param groupName
      * @return
-     * @throws StorageException
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsGroupName(final Context ctx, final String groupName) throws StorageException;
+    public abstract boolean existsGroupName(Context ctx, String groupName) throws StorageException;
 
     /**
-     * Checks via user id and user name if it already exists in this context. Should be used in change method!
-     * @param ctx
-     * @param usr
-     * @return
-     * @throws StorageException
+     * Checks via user identifier and user name if it already exists in this context. Should be used in change method!
+     *
+     * @param ctx The context
+     * @param usr The user to check
+     * @return <code>true</code> if such a user does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsUserName(final Context ctx, final User usr) throws StorageException;
+    public abstract boolean existsUserName(Context ctx, User usr) throws StorageException;
 
     /**
-     * Checks if given name is already used for an user in given context.Should be used in create method!
-     * @param ctx
-     * @param userName
-     * @return
-     * @throws StorageException
+     * Checks if given name is already associated with a user in given context.
+     * <p>
+     * Should be used in create method!
+     *
+     * @param ctx The context
+     * @param userName The user name
+     * @return <code>true</code> if such a user name is associated with a user; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsUserName(final Context ctx, final String userName) throws StorageException;
+    public abstract boolean existsUserName(Context ctx, String userName) throws StorageException;
+
+    /**
+     * Checks if given display name is already associated with a user in given context.
+     *
+     * @param ctx The context
+     * @param displayName The display name to check
+     * @return <code>true</code> if such a display name is associated with a user; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
+     */
+    public abstract boolean existsDisplayName(Context ctx, String displayName) throws StorageException;
 
     /**
      * Checks via server id and server name if it already exists. Should be used in change method!
-     * @param srv
-     * @return
-     * @throws StorageException
+     *
+     * @param srv The server
+     * @return <code>true</code> if such a server does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsServerName(final Server srv) throws StorageException;
+    public abstract boolean existsServerName(Server srv) throws StorageException;
+
+    /**
+     * Checks if given name is already used!
+     * <p>
+     * Should be used in create method!
+     *
+     * @param serverName The server name
+     * @return <code>true</code> if such a server does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
+     */
+    public abstract boolean existsServerName(String serverName) throws StorageException;
+
+    /**
+     * Checks via database id and database name if it already exists.
+     * <p>
+     * Should be used in change method!
+     *
+     * @param db The database
+     * @return <code>true</code> if such a database does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
+     */
+    public abstract boolean existsDatabaseName(Database db) throws StorageException;
 
     /**
      * Checks if given name is already used!Should be used in create method!
-     * @param serverName
-     * @return
-     * @throws StorageException
+     *
+     * @param databaseName The database name
+     * @return <code>true</code> if such a database does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsServerName(final String serverName) throws StorageException;
-
-    /**
-     * Checks via database id and database name if it already exists. Should be used in change method!
-     * @param db
-     * @return
-     * @throws StorageException
-     */
-    public abstract boolean existsDatabaseName(final Database db) throws StorageException;
-
-    /**
-     *  Checks if given name is already used!Should be used in create method!
-     * @param databaseName
-     * @return
-     * @throws StorageException
-     */
-    public abstract boolean existsDatabaseName(final String databaseName) throws StorageException;
+    public abstract boolean existsDatabaseName(String databaseName) throws StorageException;
 
     /**
      * Checks via resource id and resource name if it already exists. Should be used in change method!
-     * @param ctx
+     * @param ctx The context
      * @param res
      * @return
      * @throws StorageException
      */
-    public abstract boolean existsResourceName(final Context ctx, final Resource res) throws StorageException;
+    public abstract boolean existsResourceName(Context ctx, Resource res) throws StorageException;
 
     /**
      *  Checks if given name is already used for resource in given context!Should be used in create method!
-     * @param ctx
+     * @param ctx The context
      * @param resourceName
      * @return
-     * @throws StorageException
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsResourceName(final Context ctx, final String resourceName) throws StorageException;
+    public abstract boolean existsResourceName(Context ctx, String resourceName) throws StorageException;
 
     /**
-     * Checks via context id and context name if it already exists. Should be used in change method!
-     * @param ctx
-     * @return
-     * @throws StorageException
+     * Checks via context id and context name if it already exists.
+     * <p>
+     * Should be used in change method!
+     *
+     * @param ctx The context
+     * @return <code>true</code> if such a context does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
      */
-    public abstract boolean existsContextName(final Context ctx) throws StorageException;
-
+    public abstract boolean existsContextName(Context ctx) throws StorageException;
 
     /**
-     * Checks if given context name already exists!Should be used in create method!
-     * @param contextName
-     * @return
-     * @throws StorageException
+     * Checks if given context name already exists!
+     * <p>
+     * Should be used in create method!
+     *
+     * @param contextName The context name
+     * @return <code>true</code> if such a context does exist; otherwise <code>false</code>
+     * @throws StorageException If existence check fails
      */
     public abstract boolean existsContextName(final String contextName) throws StorageException;
 
