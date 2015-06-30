@@ -427,13 +427,6 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthA
         public boolean isTransient() {
             return false;
         }
-
-        @Override
-        public Set<String> getParameterNames() {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
     }
 
 }
