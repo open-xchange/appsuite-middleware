@@ -243,6 +243,14 @@ public abstract class DefaultContactStorage implements ContactStorage {
     }
 
     /**
+     * Default implementation that always returns <code>false</code>. Override if applicable for storage.
+     */
+    @Override
+    public boolean supports(ContactField... fields) {
+        return false;
+    }
+
+    /**
      * Constructs a search term to find contacts what have a value !=
      * <code>null</code> for the supplied date field, combined with an
      * additional restriction for the parent folder IDs. This does only work
@@ -430,8 +438,4 @@ public abstract class DefaultContactStorage implements ContactStorage {
         return new SearchAdapter(contactSearch).getSearchTerm();
     }
 
-    @Override
-    public boolean supports(ContactField... fields) {
-        return false;
-    }
 }

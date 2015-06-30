@@ -438,11 +438,6 @@ public abstract class DefaultContactService implements ContactService {
         return this.doCheckIfFolderContainsForeignObjects(session, folderID);
     }
 
-    @Override
-    public boolean supports(Session session, String folderID, ContactField... fields) throws OXException {
-        return false;
-    }
-
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */
