@@ -351,43 +351,153 @@ public final class Init {
         // we'll have to do the service wiring differently.
         // This method duplicates statically what the OSGi container
         // handles dynamically
+        long startTestServices = System.currentTimeMillis();
         startVersionBundle();
+        System.out.println("startVersionBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectIDGeneratorService();
+        System.out.println("startAndInjectIDGeneratorService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectConfigBundle();
+        System.out.println("startAndInjectConfigBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectConfigViewFactory();
+        System.out.println("startAndInjectConfigViewFactory took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectThreadPoolBundle();
+        System.out.println("startAndInjectThreadPoolBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectBasicServices();
+        System.out.println("startAndInjectBasicServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectHTMLService();
+        System.out.println("startAndInjectHTMLService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectServerConfiguration();
+        System.out.println("startAndInjectServerConfiguration took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectNotification();
+        System.out.println("startAndInjectNotification took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectCache();
+        System.out.println("startAndInjectCache took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectCalendarServices();
+        System.out.println("startAndInjectCalendarServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectDatabaseBundle();
+        System.out.println("startAndInjectDatabaseBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectDatabaseUpdate();
+        System.out.println("startAndInjectDatabaseUpdate took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectI18NBundle();
+        System.out.println("startAndInjectI18NBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectMonitoringBundle();
+        System.out.println("startAndInjectMonitoringBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectEventBundle();
+        System.out.println("startAndInjectEventBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectSessiondBundle();
+        System.out.println("startAndInjectSessiondBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContextService();
+        System.out.println("startAndInjectContextService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectFileStorage();
+        System.out.println("startAndInjectFileStorage took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectGroupService();
+        System.out.println("startAndInjectGroupService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectFolderService();
+        System.out.println("startAndInjectFolderService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectResourceService();
+        System.out.println("startAndInjectResourceService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectMailAccountStorageService();
+        System.out.println("startAndInjectMailAccountStorageService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectMailBundle();
+        System.out.println("startAndInjectMailBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectSpamHandler();
+        System.out.println("startAndInjectSpamHandler took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectICalServices();
+        System.out.println("startAndInjectICalServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectConverterService();
+        System.out.println("startAndInjectConverterService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectXMLServices();
+        System.out.println("startAndInjectXMLServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectSubscribeServices();
+        System.out.println("startAndInjectSubscribeServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContactStorageServices();
+        System.out.println("startAndInjectContactStorageServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContactServices();
+        System.out.println("startAndInjectContactServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectContactCollector();
+        System.out.println("startAndInjectContactCollector took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectImportExportServices();
+        System.out.println("startAndInjectImportExportServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectCapabilitiesServices();
+        System.out.println("startAndInjectCapabilitiesServices took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectClusterTimerService();
+        System.out.println("startAndInjectClusterTimerService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectDefaultShareService();
+        System.out.println("startAndInjectDefaultShareService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
+        System.out.println("startAndInjectAliasService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
     }
 
     /**
