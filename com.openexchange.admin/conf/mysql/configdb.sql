@@ -89,6 +89,11 @@ CREATE TABLE context_server2db_pool (
     FOREIGN KEY(`cid`) REFERENCES context (`cid`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
+CREATE TABLE context2push_registration (
+    cid INT4 UNSIGNED NOT NULL,
+    PRIMARY KEY (cid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
 CREATE TABLE guest (
 	id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 	mail_address VARCHAR(255) NOT NULL,
