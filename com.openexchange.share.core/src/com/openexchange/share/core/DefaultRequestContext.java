@@ -187,7 +187,7 @@ public class DefaultRequestContext implements RequestContext {
     }
 
     private static String determineProtocol(AJAXRequestData requestData) {
-        return requestData.isSecure() ? "https://" : "http://";
+        return requestData.isSecure() ? "https" : "http";
     }
 
 }
