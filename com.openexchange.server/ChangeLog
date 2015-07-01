@@ -1,3 +1,7 @@
+* 2015-07-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39063: Signal proper file name when putting a mail attachment into file storage
+
 * 2015-06-30 - thorben.betten@open-xchange.com
 
  - Fix for bug 38639: Orderly invalidate folder cache when (un)subscribing multiple nested folders

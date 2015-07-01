@@ -568,16 +568,18 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
             // Store
             String id = attachmentStorage.storeAttachment(mailPart, StoreOperation.SIMPLE_STORE, storeProps, session);
+            MailPart updatedMailPart = attachmentStorage.getAttachment(id, session);
 
-            /*
-             * JSON response object
-             */
+            // File name can differ from expected filename
+            String newFilename = updatedMailPart.getFileName();
+
+            // JSON response object
             JSONObject jFileData = new JSONObject(8);
             jFileData.put("mailFolder", folderPath);
             jFileData.put("mailUID", uid);
             jFileData.put("id", id);
             jFileData.put("folder_id", destFolderID);
-            jFileData.put("filename", mailPart.getFileName());
+            jFileData.put("filename", newFilename);
             return new AJAXRequestResult(jFileData, "json");
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
