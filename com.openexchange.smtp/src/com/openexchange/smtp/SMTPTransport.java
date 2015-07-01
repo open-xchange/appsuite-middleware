@@ -682,31 +682,29 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Check recipients
              */
-            final Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
+            Address[] recipients = allRecipients == null ? smtpMessage.getAllRecipients() : allRecipients;
             processAddressHeader(smtpMessage);
-            final boolean poisoned = checkRecipients(recipients);
+
+            boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
                 saveChangesSafe(smtpMessage, true);
-            } else {
-                try {
-                    final long start = System.currentTimeMillis();
-                    final Transport transport = getSMTPSession().getTransport(SMTP);
-                    try {
-                        connectTransport(transport, smtpConfig);
-                        saveChangesSafe(smtpMessage, true);
-                        transport(smtpMessage, recipients, transport, smtpConfig);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } catch (final javax.mail.AuthenticationFailedException e) {
-                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                    } finally {
-                        transport.close();
-                    }
-                } catch (final MessagingException e) {
-                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
-                }
+                return MimeMessageConverter.convertMessage(smtpMessage);
             }
-            return MimeMessageConverter.convertMessage(smtpMessage);
-        } catch (final MessagingException e) {
+
+            Transport transport = getSMTPSession().getTransport(SMTP);
+            try {
+                long start = System.currentTimeMillis();
+                connectTransport(transport, smtpConfig);
+                saveChangesSafe(smtpMessage, true);
+                MimeMessage sentMimeMessage = transport(smtpMessage, recipients, transport, smtpConfig);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                return MimeMessageConverter.convertMessage(sentMimeMessage);
+            } catch (javax.mail.AuthenticationFailedException e) {
+                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+            } finally {
+                transport.close();
+            }
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } finally {
             // Restore the ClassLoader
@@ -827,28 +825,28 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                  */
                 final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
                 processAddressHeader(mimeMessage);
-                final boolean poisoned = checkRecipients(recipients);
+
+                boolean poisoned = checkRecipients(recipients);
                 if (poisoned) {
                     saveChangesSafe(mimeMessage, true);
-                } else {
-                    try {
-                        final long start = System.currentTimeMillis();
-                        final Transport transport = getSMTPSession().getTransport(SMTP);
-                        try {
-                            connectTransport(transport, smtpConfig);
-                            saveChangesSafe(mimeMessage, true);
-                            transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
-                            mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                        } catch (final javax.mail.AuthenticationFailedException e) {
-                            throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                        } finally {
-                            transport.close();
-                        }
-                    } catch (final MessagingException e) {
-                        throw MimeMailException.handleMessagingException(e, smtpConfig, session);
-                    }
+                    return MimeMessageConverter.convertMessage(mimeMessage);
                 }
-                return MimeMessageConverter.convertMessage(mimeMessage);
+
+                Transport transport = getSMTPSession().getTransport(SMTP);
+                try {
+                    long start = System.currentTimeMillis();
+                    connectTransport(transport, smtpConfig);
+                    saveChangesSafe(mimeMessage, true);
+                    MimeMessage sentMimeMessage = transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    return MimeMessageConverter.convertMessage(sentMimeMessage);
+                } catch (javax.mail.AuthenticationFailedException e) {
+                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                } catch (MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                } finally {
+                    transport.close();
+                }
             }
             /*
              * Fill from scratch
@@ -882,32 +880,34 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                  * Drop special "x-original-headers" header
                  */
                 smtpMessage.removeHeader("x-original-headers");
+
                 if (poisoned) {
                     saveChangesSafe(smtpMessage, true);
-                } else {
-                    final long start = System.currentTimeMillis();
-                    final Transport transport = getSMTPSession().getTransport(SMTP);
-                    try {
-                        connectTransport(transport, smtpConfig);
-                        /*
-                         * Save changes
-                         */
-                        saveChangesSafe(smtpMessage, true);
-                        /*
-                         * TODO: Do encryption here
-                         */
-                        transport(smtpMessage, recipients, transport, smtpConfig, mtaStatusInfo);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } catch (final javax.mail.AuthenticationFailedException e) {
-                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                    }  finally {
-                        transport.close();
-                    }
+                    return MimeMessageConverter.convertMessage(smtpMessage);
+                }
+
+                Transport transport = getSMTPSession().getTransport(SMTP);
+                try {
+                    long start = System.currentTimeMillis();
+                    connectTransport(transport, smtpConfig);
+                    /*
+                     * Save changes
+                     */
+                    saveChangesSafe(smtpMessage, true);
+                    /*
+                     * TODO: Do encryption here
+                     */
+                    MimeMessage sentMimeMessage = transport(smtpMessage, recipients, transport, smtpConfig, mtaStatusInfo);
+                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    return MimeMessageConverter.convertMessage(sentMimeMessage);
+                } catch (final javax.mail.AuthenticationFailedException e) {
+                    throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                }  finally {
+                    transport.close();
                 }
             } finally {
                 invokeLater(new MailCleanerTask(composedMail));
             }
-            return MimeMessageConverter.convertMessage(smtpMessage);
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } catch (final IOException e) {
@@ -953,11 +953,11 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         }
     }
 
-    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
-        transport(smtpMessage, recipients, transport, smtpConfig, null);
+    private MimeMessage transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        return transport(smtpMessage, recipients, transport, smtpConfig, null);
     }
 
-    private void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo mtaInfo) throws OXException {
+    private MimeMessage transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo mtaInfo) throws OXException {
         // Prepare addresses
         prepareAddresses(recipients);
 
@@ -1006,8 +1006,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                    transportAlt(messageToSend, recipients, transport, smtpConfig);
-                    return;
+                    return transportAlt(messageToSend, recipients, transport, smtpConfig);
                 }
             } else if (e.getNextException() instanceof IOException) {
                 if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
@@ -1021,9 +1020,10 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         } finally {
             listenerChain.onAfterMessageTransport(messageToSend, exception, session);
         }
+        return messageToSend;
     }
 
-    private void transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private MimeMessage transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, session);
             smtpMessage.setDataHandler(new DataHandler(dataSource));
@@ -1043,6 +1043,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                     }
                 }
             });
+            return smtpMessage;
         } catch (final MessagingException me) {
             throw MimeMailException.handleMessagingException(me, smtpConfig, session);
         }
