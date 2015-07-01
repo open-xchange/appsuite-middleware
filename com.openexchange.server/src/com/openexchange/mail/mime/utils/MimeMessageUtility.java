@@ -2363,6 +2363,81 @@ public final class MimeMessageUtility {
         }
     }
 
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param original The original MIME message
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage cloneMessage(MimeMessage original, Date optReceivedDate) throws OXException {
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            original.writeTo(sink.asOutputStream());
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    /**
+     * Constructs a MimeBodyPart by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @return The new {@link MimeBodyPart} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeBodyPart clonePart(Part part) throws OXException {
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            part.writeTo(sink.asOutputStream());
+
+            File tempFile = sink.getTempFile();
+            MimeBodyPart tmp;
+            if (null == tempFile) {
+                tmp = new MimeBodyPart(sink.getStream());
+            } else {
+                tmp = new FileBackedMimeBodyPart(tempFile);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
     /**
      * Gets the stream of specified part's raw data.
      *

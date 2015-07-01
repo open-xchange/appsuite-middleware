@@ -254,7 +254,7 @@ public final class TmpFileFileHolder implements IFileHolder {
             final File tmpFile = File.createTempFile("open-xchange-tmpfile-", ".tmp", uploadDirectory());
             tmpFile.deleteOnExit();
             if (autoManaged) {
-                LogProperties.appendTempFileProperty(tmpFile);
+                LogProperties.addTempFile(tmpFile);
             }
             return tmpFile;
         } catch (final IOException e) {

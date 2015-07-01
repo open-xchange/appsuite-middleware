@@ -601,6 +601,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         final ReentrantLock mainLock = this.mainLock;
         mainLock.lock();
         try {
+            LogProperties.dropTempFiles();
             completedTaskCount += w.completedTasks.get();
             workers.remove(w);
             if (--poolSize > 0) {
@@ -1662,7 +1663,6 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
             {
                 Map<String, Object> mdc = customFutureTask.getMdc();
                 if (null != mdc) {
-                    mdc.remove(LogProperties.Name.TEMP_FILE.getName());
                     MDC.setContextMap(mdc);
                 }
             }
@@ -2507,14 +2507,13 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
      * Deletes tracked temporary files.
      */
     static void deleteTempFiles() {
-        String[] tempFiles = LogProperties.getTempFileProperty();
+        String[] tempFiles = LogProperties.getAndRemoveTempFiles();
         if (null != tempFiles) {
             for (String path : tempFiles) {
                 File f = new File(path);
                 f.delete();
             }
         }
-        LogProperties.removeTempFileProperty();
     }
 
 }
