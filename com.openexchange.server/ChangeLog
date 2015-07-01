@@ -1,3 +1,7 @@
+* 2015-07-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38936: Prefer display name as sort name for distribution lists
+
 * 2015-07-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 39063: Signal proper file name when putting a mail attachment into file storage
