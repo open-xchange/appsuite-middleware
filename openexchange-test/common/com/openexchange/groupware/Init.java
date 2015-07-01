@@ -331,10 +331,14 @@ public final class Init {
          * Start-up
          */
         injectProperty();
+        long startTestServices = System.currentTimeMillis();
         injectTestServices();
+        System.out.println("Injecting the test services took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         for (final Initialization init : inits) {
+            long startInit = System.currentTimeMillis();
             init.start();
+            System.out.println("Starting init for " + init.toString() + " took " + (System.currentTimeMillis() - startInit) + "ms.");
             started.add(init);
         }
 
