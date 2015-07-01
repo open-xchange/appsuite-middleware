@@ -87,7 +87,7 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
-import com.openexchange.folderstorage.osgi.ShareServiceHolder;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
@@ -584,7 +584,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
 
         try {
-            ShareService shareService = ShareServiceHolder.requireShareService();
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
             session.setParameter(Connection.class.getName(), connection);
             shareService.deleteTargets(session, Collections.singletonList(new ShareTarget(contentType.getModule(), folderID)), guestIDs);
         } finally {
@@ -605,7 +605,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      */
     protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
-        ShareService shareService = ShareServiceHolder.requireShareService();
+        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
         try {
             session.setParameter(Connection.class.getName(), connection);
             for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {

@@ -80,6 +80,7 @@ import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.osgi.Tools;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -200,6 +201,12 @@ public final class FolderStorageActivator implements BundleActivator {
         super();
     }
 
+    private static final Class<?>[] TRACKED_SERVICES = new Class<?>[] {
+        ShareService.class,
+        UserService.class,
+        DatabaseService.class
+    };
+
     @Override
     public void start(final BundleContext context) throws Exception {
         try {
@@ -214,23 +221,14 @@ public final class FolderStorageActivator implements BundleActivator {
                 null));
             serviceRegistrations.add(context.registerService(AdditionalFolderField.class.getName(), new DisplayNameFolderField(), null));
             // Register service trackers
-            serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(4);
+            serviceTrackers = new ArrayList<ServiceTracker<?, ?>>(2);
             serviceTrackers.add(new ServiceTracker<FolderStorage, FolderStorage>(
                 context,
                 FolderStorage.class.getName(),
                 new FolderStorageTracker(context)));
-            serviceTrackers.add(new ServiceTracker<ShareService, ShareService>(
-                context,
-                ShareService.class.getName(),
-                new ShareServiceHolder(context)));
-            serviceTrackers.add(new ServiceTracker<UserService, UserService>(
-                context,
-                UserService.class,
-                new UserServiceHolder(context)));
-            serviceTrackers.add(new ServiceTracker<DatabaseService, DatabaseService>(
-                context,
-                DatabaseService.class,
-                new DatabaseServiceHolder(context)));
+
+            FolderStorageServices services = FolderStorageServices.init(context, TRACKED_SERVICES);
+            serviceTrackers.add(new ServiceTracker<>(context, Tools.generateServiceFilter(context, TRACKED_SERVICES), services));
             for (final ServiceTracker<?, ?> serviceTracker : serviceTrackers) {
                 serviceTracker.open();
             }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,7 +49,8 @@
 
 package com.openexchange.folderstorage.osgi;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -59,68 +60,86 @@ import com.openexchange.share.ShareService;
 
 
 /**
- * {@link ShareServiceHolder} - allows the folder storage layer to easily access
- * the {@link ShareService}.
+ * {@link FolderStorageServices}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
-public class ShareServiceHolder implements ServiceTrackerCustomizer<ShareService, ShareService> {
+public class FolderStorageServices implements ServiceTrackerCustomizer<Object, Object> {
 
-    private static AtomicReference<ShareService> SERVICE = new AtomicReference<ShareService>();
+    private static final FolderStorageServices INSTANCE = new FolderStorageServices();
 
-    private final BundleContext context;
+    private final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<>();
 
-    /**
-     * Initializes a new {@link ShareServiceHolder}.
-     * @param context
-     */
-    public ShareServiceHolder(BundleContext context) {
+    private BundleContext context;
+
+    private Class<?>[] serviceClasses;
+
+    private FolderStorageServices() {
         super();
-        this.context = context;
+    }
+
+    static FolderStorageServices init(BundleContext context, Class<?>[] services) {
+        INSTANCE.context = context;
+        INSTANCE.serviceClasses = services;
+        return INSTANCE;
+    }
+
+    @Override
+    public Object addingService(ServiceReference<Object> reference) {
+        if (context == null) {
+            return null;
+        }
+
+        Object service = context.getService(reference);
+        if (service == null) {
+            return null;
+        }
+
+        for (Class<?> clazz : serviceClasses) {
+            if (clazz.isAssignableFrom(service.getClass())) {
+                services.put(clazz, service);
+                break;
+            }
+        }
+
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<Object> reference, Object service) {}
+
+    @Override
+    public void removedService(ServiceReference<Object> reference, Object service) {
+        for (Class<?> clazz : serviceClasses) {
+            if (clazz.isAssignableFrom(service.getClass())) {
+                services.remove(clazz, service);
+                break;
+            }
+        }
     }
 
     /**
-     * Gets the {@link ShareService} if available.
+     * Gets the service if available.
      *
      * @return The service or <code>null</code>.
      */
-    public static ShareService getShareService() {
-        return SERVICE.get();
+    public static <T> T getService(Class<T> clazz) {
+        return (T) INSTANCE.services.get(clazz);
     }
 
     /**
-     * Gets the {@link ShareService}.
+     * Gets the service.
      *
      * @return The service.
      * @throws OXException {@link ServiceExceptionCode#SERVICE_UNAVAILABLE} if service is unavailable.
      */
-    public static ShareService requireShareService() throws OXException {
-        ShareService service =  SERVICE.get();
+    public static <T> T requireService(Class<T> clazz) throws OXException {
+        T service = (T) INSTANCE.services.get(clazz);
         if (service == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareService.class.getName());
         }
 
         return service;
     }
-
-    @Override
-    public ShareService addingService(ServiceReference<ShareService> reference) {
-        ShareService service = context.getService(reference);
-        if (service != null) {
-            SERVICE.set(service);
-        }
-
-        return service;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<ShareService> reference, ShareService service) {
-    }
-
-    @Override
-    public void removedService(ServiceReference<ShareService> reference, ShareService service) {
-        SERVICE.set(null);
-    }
-
 }

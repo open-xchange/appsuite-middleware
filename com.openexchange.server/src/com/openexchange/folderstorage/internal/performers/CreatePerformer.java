@@ -69,7 +69,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.osgi.UserServiceHolder;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -79,6 +79,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CreatePerformer} - Serves the <code>CREATE</code> request.
@@ -280,7 +281,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
          * check for any present guest permissions
          */
         ComparedPermissions comparedPermissions = new ComparedPermissions(
-            session.getContext(), toCreate.getPermissions(), new Permission[0], UserServiceHolder.requireUserService(), transactionManager.getConnection());
+            session.getContext(), toCreate.getPermissions(), new Permission[0], FolderStorageServices.requireService(UserService.class), transactionManager.getConnection());
         if (comparedPermissions.hasNewGuests()) {
             /*
              * create "plain" folder without guests first...
