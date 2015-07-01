@@ -82,6 +82,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.osgi.Tools;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -203,6 +204,7 @@ public final class FolderStorageActivator implements BundleActivator {
 
     private static final Class<?>[] TRACKED_SERVICES = new Class<?>[] {
         ShareService.class,
+        ShareNotificationService.class,
         UserService.class,
         DatabaseService.class
     };

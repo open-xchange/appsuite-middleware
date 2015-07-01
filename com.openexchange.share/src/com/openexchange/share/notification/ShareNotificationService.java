@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,52 @@
  *
  */
 
-package com.openexchange.share.notification.impl;
+package com.openexchange.share.notification;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-
+import com.openexchange.share.CreatedShares;
+import com.openexchange.share.GuestShare;
+import com.openexchange.share.RequestContext;
+import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * A strategy to decide if a certain notification should be sent or not.
+ * A service to notify arbitrary recipients about available shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface NotifyDecision {
+public interface ShareNotificationService {
 
     /**
-     * Checks whether a 'share created' notification should be sent.
+     * The transport mechanism to use for notification messages.
+     */
+    public enum Transport {
+        MAIL
+    }
+
+    /**
+     * Sends notifications about one or more created shares to multiple recipients.
      *
-     * @param transport The transport
-     * @param share The created share
-     * @param session The session used for creating the share
-     * @return <code>true</code> if a notification should be sent
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param shares A map from {@link ShareRecipient} to a list of {@link ShareInfos} iow. the recipients of the notifications and what they should be notified about
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param session The session of the notifying user
+     * @param requestContext The request context
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
+    List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, RequestContext requestContext);
+
+    /**
+     * Send a notification mail that requests a confirmation for a requested password reset from the user.
+     *
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param guestShare The guest share
+     * @param confirmToken The confirm token to be part of the resulting link
+     * @param requestContext The request context
      * @throws OXException
      */
-    boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException;
+    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, RequestContext requestContext) throws OXException;
 
 }

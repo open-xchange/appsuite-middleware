@@ -47,11 +47,12 @@
  *
  */
 
-package com.openexchange.share.core.performer;
+package com.openexchange.share.core;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.share.CreatedShare;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareInfo;
@@ -66,7 +67,7 @@ import com.openexchange.share.recipient.ShareRecipient;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class CreatedShare {
+public class CreatedShareImpl implements CreatedShare {
 
     private final ShareRecipient recipient;
 
@@ -74,7 +75,7 @@ public class CreatedShare {
 
     private final List<ShareInfo> shareInfos;
 
-    public CreatedShare(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos) {
+    public CreatedShareImpl(ShareRecipient recipient, GuestInfo guestInfo, List<ShareInfo> shareInfos) {
         super();
         this.recipient = recipient;
         this.guestInfo = guestInfo;
@@ -86,6 +87,7 @@ public class CreatedShare {
      *
      * @return The number
      */
+    @Override
     public int size() {
         return shareInfos.size();
     }
@@ -95,6 +97,7 @@ public class CreatedShare {
      *
      * @return The guest info
      */
+    @Override
     public GuestInfo getGuestInfo() {
         return guestInfo;
     }
@@ -104,6 +107,7 @@ public class CreatedShare {
      *
      * @return The recipient
      */
+    @Override
     public ShareRecipient getShareRecipient() {
         return recipient;
     }
@@ -114,6 +118,7 @@ public class CreatedShare {
      * @return <code>true</code> a single target is contained. The
      * result is equivalent to <code>createdShare.size() == 1</code>.
      */
+    @Override
     public boolean hasSingleTarget() {
         return shareInfos.size() == 1;
     }
@@ -124,6 +129,7 @@ public class CreatedShare {
      *
      * @return The first target.
      */
+    @Override
     public ShareTarget getFirstTarget() {
         return shareInfos.get(0).getShare().getTarget();
     }
@@ -133,6 +139,7 @@ public class CreatedShare {
      *
      * @return The iterable
      */
+    @Override
     public Iterable<ShareTarget> getTargets() {
         List<ShareTarget> targets = new ArrayList<>(shareInfos.size());
         for (ShareInfo info : shareInfos) {
@@ -147,6 +154,7 @@ public class CreatedShare {
      *
      * @return The first share info
      */
+    @Override
     public ShareInfo getFirstInfo() {
         return shareInfos.get(0);
     }
@@ -156,6 +164,7 @@ public class CreatedShare {
      *
      * @return The iterable
      */
+    @Override
     public Iterable<ShareInfo> getInfos() {
         return Collections.unmodifiableList(shareInfos);
     }
@@ -168,6 +177,7 @@ public class CreatedShare {
      *
      * @return The token
      */
+    @Override
     public String getToken() {
         if (recipient.isInternal()) {
             return null;
@@ -191,6 +201,7 @@ public class CreatedShare {
      * @param requestContext
      * @return The URL
      */
+    @Override
     public String getUrl(RequestContext requestContext) {
         if (recipient.isInternal()) {
             // TODO: no handling for multi-target shares yet
@@ -205,6 +216,7 @@ public class CreatedShare {
      *
      * @return <code>true</code> if the share is internal
      */
+    @Override
     public boolean isInternal() {
         return recipient.isInternal();
     }

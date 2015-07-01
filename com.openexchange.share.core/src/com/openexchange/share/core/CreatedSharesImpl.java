@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,70 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share.core;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-import com.openexchange.share.GuestShare;
-import com.openexchange.share.RequestContext;
-import com.openexchange.share.core.performer.CreatedShares;
+import java.util.Map;
+import java.util.Map.Entry;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.recipient.ShareRecipient;
 
+
 /**
- * A service to notify arbitrary recipients about available shares.
+ * Class for results of {@link CreatePerformer#perform()}.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareNotificationService {
+public class CreatedSharesImpl implements CreatedShares {
 
-    /**
-     * The transport mechanism to use for notification messages.
-     */
-    public enum Transport {
-        MAIL
+    private final Map<ShareRecipient, CreatedShareImpl> shares;
+
+    public CreatedSharesImpl(Map<ShareRecipient, List<ShareInfo>> createdShares) {
+        super();
+        shares = new LinkedHashMap<>();
+        for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
+            ShareRecipient recipient = entry.getKey();
+            List<ShareInfo> shareInfos = entry.getValue();
+            shares.put(recipient, new CreatedShareImpl(recipient, shareInfos.get(0).getGuest(), shareInfos));
+        }
     }
 
     /**
-     * Sends notifications about one or more created shares to multiple recipients.
+     * Gets an iterable of all recipients for who one or more shares have been created.
      *
-     * @param transport The type of {@link Transport} to use when sending notifications
-     * @param shares A map from {@link ShareRecipient} to a list of {@link ShareInfos} iow. the recipients of the notifications and what they should be notified about
-     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
-     * @param session The session of the notifying user
-     * @param requestContext The request context
-     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     * @return An immutable iterable
      */
-    List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, RequestContext requestContext);
+    @Override
+    public Iterable<ShareRecipient> getRecipients() {
+        return Collections.unmodifiableSet(shares.keySet());
+    }
 
     /**
-     * Send a notification mail that requests a confirmation for a requested password reset from the user.
+     * Gets the created share for the passed recipient. If the recipient is not part of
+     * {@link #getRecipients()}, <code>null</code> is returned.
      *
-     * @param transport The type of {@link Transport} to use when sending notifications
-     * @param guestShare The guest share
-     * @param confirmToken The confirm token to be part of the resulting link
-     * @param requestContext The request context
-     * @throws OXException
+     * @param recipient The recipient
+     * @return The share
      */
-    void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, RequestContext requestContext) throws OXException;
+    @Override
+    public CreatedShare getShare(ShareRecipient recipient) {
+        return shares.get(recipient);
+    }
+
+    /**
+     * Gets the number of different recipients for who shares have been created.
+     *
+     * @return The number of recipients
+     */
+    @Override
+    public int size() {
+        return shares.size();
+    }
 
 }

@@ -47,74 +47,39 @@
  *
  */
 
-package com.openexchange.share.notification;
+package com.openexchange.share;
 
-import static com.openexchange.osgi.Tools.requireService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permissions;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.CreatedShare;
-import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.groupware.TargetProxy;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.notification.impl.NotifyDecision;
 import com.openexchange.share.recipient.ShareRecipient;
 
-
 /**
- * {@link DefaultDecision}
+ * {@link CreatedShares}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class DefaultDecision implements NotifyDecision {
+public interface CreatedShares {
 
-    private final ServiceLookup services;
+    /**
+     * Gets an iterable of all recipients for who one or more shares have been created.
+     *
+     * @return An immutable iterable
+     */
+    Iterable<ShareRecipient> getRecipients();
 
-    public DefaultDecision(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
+    /**
+     * Gets the created share for the passed recipient. If the recipient is not part of
+     * {@link #getRecipients()}, <code>null</code> is returned.
+     *
+     * @param recipient The recipient
+     * @return The share
+     */
+    CreatedShare getShare(ShareRecipient recipient);
 
-    @Override
-    public boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException {
-        if (share.size() == 0) {
-            return false;
-        }
-
-        if (share.isInternal()) {
-            boolean notifyInternalUsers = requireService(ConfigurationService.class, services).getBoolProperty("com.openexchange.share.notifyInternal", true);
-            if (!notifyInternalUsers) {
-                return false;
-            }
-
-            /*
-             * If the/all target(s) are public internals shall only be notified if
-             *  - they are user entities, no groups
-             *  - they will be admins of any target
-             */
-            ShareRecipient recipient = share.getShareRecipient();
-            int[] permissionBits = Permissions.parsePermissionBits(recipient.getBits());
-            if (!recipient.toInternal().isGroup() && permissionBits[4] > 0) {
-                return true;
-            }
-
-            boolean onlyPublics = true;
-            ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
-            for (ShareTarget target : share.getTargets()) {
-                TargetProxy proxy = moduleSupport.load(target, session);
-                onlyPublics &= proxy.isPublic();
-            }
-
-            if (onlyPublics) {
-                return false;
-            }
-        }
-
-        return true;
-    }
+    /**
+     * Gets the number of different recipients for who shares have been created.
+     *
+     * @return The number of recipients
+     */
+    int size();
 
 }

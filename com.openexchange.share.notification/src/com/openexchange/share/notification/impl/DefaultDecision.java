@@ -47,64 +47,73 @@
  *
  */
 
-package com.openexchange.share.core.performer;
+package com.openexchange.share.notification.impl;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import com.openexchange.share.ShareInfo;
+import static com.openexchange.osgi.Tools.requireService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.groupware.TargetProxy;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
- * Class for results of {@link CreatePerformer#perform()}.
+ * {@link DefaultDecision}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class CreatedShares {
+public class DefaultDecision implements NotifyDecision {
 
-    private final Map<ShareRecipient, CreatedShare> shares;
+    private final ServiceLookup services;
 
-    protected CreatedShares(Map<ShareRecipient, List<ShareInfo>> createdShares) {
+    public DefaultDecision(ServiceLookup services) {
         super();
-        shares = new LinkedHashMap<>();
-        for (Entry<ShareRecipient, List<ShareInfo>> entry : createdShares.entrySet()) {
-            ShareRecipient recipient = entry.getKey();
-            List<ShareInfo> shareInfos = entry.getValue();
-            shares.put(recipient, new CreatedShare(recipient, shareInfos.get(0).getGuest(), shareInfos));
+        this.services = services;
+    }
+
+    @Override
+    public boolean notifyAboutCreatedShare(Transport transport, CreatedShare share, Session session) throws OXException {
+        if (share.size() == 0) {
+            return false;
         }
-    }
 
-    /**
-     * Gets an iterable of all recipients for who one or more shares have been created.
-     *
-     * @return An immutable iterable
-     */
-    public Iterable<ShareRecipient> getRecipients() {
-        return Collections.unmodifiableSet(shares.keySet());
-    }
+        if (share.isInternal()) {
+            boolean notifyInternalUsers = requireService(ConfigurationService.class, services).getBoolProperty("com.openexchange.share.notifyInternal", true);
+            if (!notifyInternalUsers) {
+                return false;
+            }
 
-    /**
-     * Gets the created share for the passed recipient. If the recipient is not part of
-     * {@link #getRecipients()}, <code>null</code> is returned.
-     *
-     * @param recipient The recipient
-     * @return The share
-     */
-    public CreatedShare getShare(ShareRecipient recipient) {
-        return shares.get(recipient);
-    }
+            /*
+             * If the/all target(s) are public internals shall only be notified if
+             *  - they are user entities, no groups
+             *  - they will be admins of any target
+             */
+            ShareRecipient recipient = share.getShareRecipient();
+            int[] permissionBits = Permissions.parsePermissionBits(recipient.getBits());
+            if (!recipient.toInternal().isGroup() && permissionBits[4] > 0) {
+                return true;
+            }
 
-    /**
-     * Gets the number of different recipients for who shares have been created.
-     *
-     * @return The number of recipients
-     */
-    public int size() {
-        return shares.size();
+            boolean onlyPublics = true;
+            ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
+            for (ShareTarget target : share.getTargets()) {
+                TargetProxy proxy = moduleSupport.load(target, session);
+                onlyPublics &= proxy.isPublic();
+            }
+
+            if (onlyPublics) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

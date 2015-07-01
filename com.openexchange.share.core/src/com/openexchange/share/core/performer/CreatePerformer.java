@@ -52,16 +52,15 @@ package com.openexchange.share.core.performer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
@@ -124,20 +123,14 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
             /*
              * create shares & corresponding guest user entities for external recipients first
              */
-            Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient;
-            if (0 < recipients.size()) {
-                sharesPerRecipient = getShareService().addTargets(session, targets, recipients);
-                /*
-                 * add appropriate target permissions for corresponding guest entities
-                 * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target
-                 */
-                for (Map.Entry<ShareRecipient, List<ShareInfo>> entry : sharesPerRecipient.entrySet()) {
-                    ShareRecipient shareRecipient = entry.getKey();
-                    ShareInfo shareInfo = entry.getValue().get(0);
-                    targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), false, shareRecipient.getBits()));
-                }
-            } else {
-                sharesPerRecipient = Collections.emptyMap();
+            CreatedShares sharesPerRecipient = getShareService().addTargets(session, targets, recipients);
+            /*
+             * add appropriate target permissions for corresponding guest entities
+             * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target
+             */
+            for (ShareRecipient shareRecipient : recipients) {
+                CreatedShare share = sharesPerRecipient.getShare(shareRecipient);
+                targetPermissions.add(new TargetPermission(share.getGuestInfo().getGuestID(), false, shareRecipient.getBits()));
             }
             /*
              * adjust folder & object permissions of share targets
@@ -154,7 +147,7 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
             /*
              * add internal users (not affected by sharing) to the resulting list for completeness
              */
-            return new CreatedShares(sharesPerRecipient);
+            return sharesPerRecipient;
         } catch (OXException e) {
             Databases.rollback(writeCon);
             throw e;

@@ -95,7 +95,8 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -606,6 +607,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
         ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+
+        CreatedShares shares;
         try {
             session.setParameter(Connection.class.getName(), connection);
             for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
@@ -614,12 +617,13 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 for (GuestPermission permission : permissions) {
                     recipients.add(permission.getRecipient());
                 }
-                List<ShareInfo> shares = shareService.addTarget(session, entry.getKey(), recipients);
+                shares = shareService.addTarget(session, entry.getKey(), recipients);
                 if (null == shares || shares.size() != permissions.size()) {
                     throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
                 }
-                for (int i = 0; i < shares.size(); i++) {
-                    permissions.get(i).setEntity(shares.get(i).getGuest().getGuestID());
+                for (GuestPermission permission : permissions) {
+                    CreatedShare share = shares.getShare(permission.getRecipient());
+                    permission.setEntity(share.getGuestInfo().getGuestID());
                 }
             }
         } finally {
