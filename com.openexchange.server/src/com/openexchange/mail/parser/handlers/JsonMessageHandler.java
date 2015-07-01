@@ -1303,7 +1303,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 msgHandler.tokenFolder = tokenFolder;
                 msgHandler.tokenMailId = tokenMailId;
                 msgHandler.exactLength = exactLength;
-                msgHandler.currentNestingLevel++;
+                msgHandler.currentNestingLevel = currentNestingLevel + 1;
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
             } else {
