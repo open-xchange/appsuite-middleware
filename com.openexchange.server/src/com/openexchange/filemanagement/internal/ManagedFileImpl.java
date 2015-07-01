@@ -59,7 +59,6 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileExceptionErrorMessage;
@@ -97,16 +96,17 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
 
     private final int optTtl;
 
-
+    private final String dispatcherPrefix;
 
     /**
      * Initializes a new {@link ManagedFileImpl}.
      *
      * @param id The unique ID
      * @param file The kept file
+     * @param dispatcherPrefix The dispatcher servlet prefix
      */
-    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file) {
-        this(management, id, file, -1);
+    public ManagedFileImpl(ManagedFileManagementImpl management, String id, File file, String dispatcherPrefix) {
+        this(management, id, file, -1, dispatcherPrefix);
     }
 
     /**
@@ -115,13 +115,15 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
      * @param id The unique ID
      * @param file The kept file
      * @param optTtl The optional TTL
+     * @param dispatcherPrefix The dispatcher servlet prefix
      */
-    public ManagedFileImpl(ManagedFileManagementImpl management, final String id, final File file, int optTtl) {
+    public ManagedFileImpl(ManagedFileManagementImpl management, String id, File file, int optTtl, String dispatcherPrefix) {
         super();
         this.management = management;
         this.optTtl = optTtl;
         this.id = id;
         this.file = file;
+        this.dispatcherPrefix = dispatcherPrefix;
         lastAccessed = System.currentTimeMillis();
         listeners = new LinkedBlockingQueue<FileRemovedListener>();
     }
@@ -165,7 +167,7 @@ public final class ManagedFileImpl implements ManagedFile, FileRemovedRegistry, 
         /*
          * Compose URL parameters
          */
-        sb.append(prefix).append(DefaultDispatcherPrefixService.getInstance().getPrefix()).append("file");
+        sb.append(prefix).append(dispatcherPrefix).append("file");
         if (null != route) {
             sb.append(";jsessionid=").append(route);
         }

@@ -69,9 +69,10 @@ public final class JSlobRestServlet extends AbstractRestServlet {
 
     /**
      * Initializes a new {@link JSlobRestServlet}.
+     * @param prefix The dispatcher servlet prefix
      */
-    public JSlobRestServlet() {
-        super();
+    public JSlobRestServlet(String prefix) {
+        super(prefix);
         final EnumMap<Method, MethodHandler> m = new EnumMap<Method, MethodHandler>(Method.class);
         m.put(Method.GET, new GetMethodHandler());
         m.put(Method.PUT, new PutMethodHandler());

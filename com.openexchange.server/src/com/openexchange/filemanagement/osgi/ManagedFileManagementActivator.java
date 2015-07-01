@@ -54,6 +54,7 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.filemanagement.internal.ManagedFileManagementImpl;
 import com.openexchange.osgi.DependentServiceRegisterer;
@@ -75,7 +76,7 @@ public final class ManagedFileManagementActivator implements BundleActivator {
     @Override
     public void start(BundleContext context) throws Exception {
         trackers.add(new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new TmpFileCleaner(context)));
-        DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, ConfigurationService.class, TimerService.class);
+        DependentServiceRegisterer<ManagedFileManagement> registerer = new DependentServiceRegisterer<ManagedFileManagement>(context, ManagedFileManagement.class, ManagedFileManagementImpl.class, null, ConfigurationService.class, TimerService.class, DispatcherPrefixService.class);
         trackers.add(new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer));
         for (ServiceTracker<?,?> tracker : trackers) {
             tracker.open();

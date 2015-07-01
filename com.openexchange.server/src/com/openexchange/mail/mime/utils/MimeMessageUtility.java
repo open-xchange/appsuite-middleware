@@ -117,7 +117,6 @@ import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -565,7 +564,7 @@ public final class MimeMessageUtility {
         if (fromIndex < 0) {
             fromIndex = 0;
         }
-        String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
+        String prefix = ServerServiceRegistry.getServize(DispatcherPrefixService.class).getPrefix();
         if (prefix.charAt(0) == '/') {
             prefix = prefix.substring(1);
         }

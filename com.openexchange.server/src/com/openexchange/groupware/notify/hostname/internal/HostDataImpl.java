@@ -66,12 +66,15 @@ public final class HostDataImpl implements HostData {
 
     private boolean secure;
 
-    public HostDataImpl(boolean secure, String host, int port, String route) {
+    private final String dispatcherPrefix;
+
+    public HostDataImpl(boolean secure, String host, int port, String route, String dispatcherPrefix) {
         super();
         this.secure = secure;
         this.host = host;
         this.port = port;
         this.route = route;
+        this.dispatcherPrefix = dispatcherPrefix;
     }
 
     @Override
@@ -92,6 +95,11 @@ public final class HostDataImpl implements HostData {
     @Override
     public boolean isSecure() {
         return secure;
+    }
+
+    @Override
+    public String getDispatcherPrefix() {
+        return dispatcherPrefix;
     }
 
     /**

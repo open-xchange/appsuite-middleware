@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +76,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -146,24 +146,6 @@ public class DispatcherServlet extends SessionServlet {
         return DISPATCHER.get();
     }
 
-    /**
-     * Sets the prefix.
-     *
-     * @param prefix The prefix or <code>null</code> to remove
-     */
-    public static void setPrefix(String prefix) {
-        PREFIX.set(prefix);
-    }
-
-    /**
-     * Gets the prefix.
-     *
-     * @return The prefix or <code>null</code> if absent
-     */
-    public static String getPrefix() {
-        return PREFIX.get();
-    }
-
     private static final AtomicReference<List<ResponseRenderer>> RESPONSE_RENDERERS = new AtomicReference<List<ResponseRenderer>>(Collections.<ResponseRenderer> emptyList());
 
     /**
@@ -176,12 +158,18 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected final String lineSeparator;
 
+    /**
+     * The dispatcher servlet prefix (e.g. /appsuite/api/)
+     */
+    protected final String prefix;
+
 
     /**
      * Initializes a new {@link DispatcherServlet}.
      */
-    public DispatcherServlet() {
+    public DispatcherServlet(String prefix) {
         super();
+        this.prefix = prefix;
         defaultRequestDataTools = AJAXRequestDataTools.getInstance();
         lineSeparator = System.getProperty("line.separator");
     }
@@ -193,6 +181,21 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected AJAXRequestDataTools getAjaxRequestDataTools() {
         return defaultRequestDataTools;
+    }
+
+    /**
+     * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
+     * <p>
+     * All requests starting with this prefix are directed to dispatcher framework.
+     *
+     * @deprecated Use {@link DispatcherPrefixService} instead! Classes of the AJAX framework (i.e.
+     *             non-module-specific classes below the com.openexchange.ajax package might also
+     *             use {@link Dispatchers#getPrefix()} after the framework is guaranteed to be initialized.
+     *
+     */
+    @Deprecated
+    public static String getPrefix() {
+        return Dispatchers.getPrefix();
     }
 
     /**
@@ -280,7 +283,7 @@ public class DispatcherServlet extends SessionServlet {
                         throw e;
                     }
                     // Missing secret cookie
-                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), prefix, e, getAjaxRequestDataTools()));
                 }
                 SessionUtility.verifySession(req, sessiondService, sessionId, session);
                 SessionUtility.rememberSession(req, session);
@@ -297,7 +300,7 @@ public class DispatcherServlet extends SessionServlet {
         boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
             AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String module = requestDataTools.getModule(prefix, req);
             String action = requestDataTools.getAction(req);
             Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
@@ -541,13 +544,13 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-        String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+        String module = requestDataTools.getModule(prefix, httpRequest);
         String action = requestDataTools.getAction(httpRequest);
         ServerSession session = getSession(httpRequest, DISPATCHER.get(), module, action);
         /*
          * Parse AJAXRequestData
          */
-        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
+        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, prefix, httpResponse);
         requestData.setSession(session);
         return requestData;
     }
@@ -704,22 +707,24 @@ public class DispatcherServlet extends SessionServlet {
         private static final String PARAM_TOKEN = Session.PARAM_TOKEN;
 
         private final Dispatcher dispatcher;
+        private final String prefix;
         private final OXException e;
         private final AJAXRequestDataTools requestDataTools;
 
         /**
          * Initializes a new {@link SessionSecretCheckerImplementation}.
          */
-        protected NoSecretCallbackChecker(Dispatcher dispatcher, OXException e, AJAXRequestDataTools requestDataTools) {
+        protected NoSecretCallbackChecker(Dispatcher dispatcher, String prefix, OXException e, AJAXRequestDataTools requestDataTools) {
             super();
             this.requestDataTools = requestDataTools;
+            this.prefix = prefix;
             this.dispatcher = dispatcher;
             this.e = e;
         }
 
         @Override
         public void checkSecret(Session session, HttpServletRequest req, String cookieHashSource) throws OXException {
-            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String module = requestDataTools.getModule(prefix, req);
             String action = requestDataTools.getAction(req);
             boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
             if (!noSecretCallback) {

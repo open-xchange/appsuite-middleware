@@ -134,9 +134,6 @@ public class AppsuiteActivator extends HousekeepingActivator implements ForcedRe
         // Register Servlet
         {
             String prefix = getService(DispatcherPrefixService.class).getPrefix();
-            if (null == prefix) {
-                prefix = Dispatcher.PREFIX.get();
-            }
             String alias = prefix + "apps/load";
             getService(HttpService.class).registerServlet(alias, appsLoadServlet, null, null);
             this.alias = alias;
