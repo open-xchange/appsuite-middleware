@@ -129,12 +129,15 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
      * @return The appropriate {@link WebdavProtocolException} instance
      */
     protected WebdavProtocolException protocolException(OXException e, int statusCode) {
-        if (Category.CATEGORY_USER_INPUT.equals(e.getCategory())) {
+        if (Category.CATEGORY_USER_INPUT.equals(e.getCategory()) || Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
             LOG.debug("{}", this.getUrl(), e);
         } else {
             LOG.error("{}", this.getUrl(), e);
         }
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, e);
+        if (WebdavProtocolException.class.isInstance(e)) {
+            return (WebdavProtocolException) e;
+        }
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(getUrl(), statusCode, e);
     }
 
     /**
