@@ -56,7 +56,7 @@ import java.io.Serializable;
  * The default strategy should be automatic where the server decides on the current schema load, which willl be determined on every call.
  * In memory just loads the schema load once and handles/updates the information in memory. This might be more error-prone, but is also more efficient.
  * If a schema is provided, the context will be created in this schema regardless of it's load.
- * 
+ *
  * Only one strategy can be configured. Setting one strategy automaticalle disables the other strategies.
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
@@ -64,51 +64,65 @@ import java.io.Serializable;
  */
 public class SchemaSelectStrategy implements Serializable {
 
-    public enum Strategy {
+    /** The strategy enumeration */
+    public static enum Strategy {
         SCHEMA, AUTOMATIC, IN_MEMORY;
     }
 
     private static final long serialVersionUID = 2888117829864032432L;
 
-    private Strategy strategy;
-
-    private String schema;
-
     /**
-     * Initializes a new {@link SchemaSelectStrategy}.
-     * 
-     * @param strategy
+     * Creates a schema strategy for auto-determining schema name
+     *
+     * @return The appropriate schema strategy
      */
-    private SchemaSelectStrategy(Strategy strategy) {
-        this.strategy = strategy;
-    }
-
-    /**
-     * Initializes a new {@link SchemaSelectStrategy}.
-     * 
-     * @param schema2
-     * @param schemaName
-     */
-    private SchemaSelectStrategy(Strategy strategy, String schemaName) {
-        this(strategy);
-        this.schema = schemaName;
-    }
-
     public static SchemaSelectStrategy automatic() {
         return new SchemaSelectStrategy(Strategy.AUTOMATIC);
     }
 
+    /**
+     * Creates a schema strategy for fetching the schema name from in-memory cache.
+     *
+     * @return The appropriate schema strategy
+     */
     public static SchemaSelectStrategy inMemory() {
         return new SchemaSelectStrategy(Strategy.IN_MEMORY);
     }
 
+    /**
+     * Creates a schema strategy for a pre-defined schema name
+     *
+     * @param schemaName The schema name
+     * @return The appropriate schema strategy
+     */
     public static SchemaSelectStrategy schema(String schemaName) {
         return new SchemaSelectStrategy(Strategy.SCHEMA, schemaName);
     }
 
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    private final Strategy strategy;
+    private final String schema;
+
+    /**
+     * Initializes a new {@link SchemaSelectStrategy}.
+     */
+    private SchemaSelectStrategy(Strategy strategy) {
+        this(strategy, null);
+    }
+
+    /**
+     * Initializes a new {@link SchemaSelectStrategy}.
+     */
+    private SchemaSelectStrategy(Strategy strategy, String schemaName) {
+        super();
+        this.strategy = strategy;
+        this.schema = schemaName;
+    }
+
     /**
      * Returns the configured schema.
-     * 
+     *
      * @return The schema
      */
     public String getSchema() {
@@ -117,7 +131,7 @@ public class SchemaSelectStrategy implements Serializable {
 
     /**
      * Returns the strategy.
-     * 
+     *
      * @return The strategy
      */
     public Strategy getStrategy() {
