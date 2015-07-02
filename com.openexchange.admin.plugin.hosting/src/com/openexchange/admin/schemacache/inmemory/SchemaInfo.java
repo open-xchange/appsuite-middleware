@@ -145,20 +145,21 @@ public class SchemaInfo {
     /**
      * Gets (and increments used count) for next available schema
      *
+     * @param maxContexts The configured max. number of contexts allowed per schema
      * @return The next schema or <code>null</code>
      */
-    public String getAndIncrementNextSchema() {
+    public String getAndIncrementNextSchema(int maxContexts) {
         if (deprecated) {
             return null;
         }
-        SchemaCount leastSchemaCount = queue.poll();
-        if (null == leastSchemaCount) {
-            return null;
+        for (SchemaCount nextSchema; (nextSchema = queue.poll()) != null;) {
+            if (nextSchema.count < maxContexts) {
+                nextSchema.incrementCount();
+                queue.offer(nextSchema);
+                return nextSchema.name;
+            }
         }
-
-        leastSchemaCount.incrementCount();
-        queue.offer(leastSchemaCount);
-        return leastSchemaCount.name;
+        return null;
     }
 
 }

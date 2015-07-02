@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,35 +49,42 @@
 
 package com.openexchange.admin.schemacache;
 
+import java.sql.Connection;
+import java.util.Map;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
+
 
 /**
- * {@link SchemaCache} - A cache for selecting the next schema to use when creating a context.
+ * {@link DefaultContextCountPerSchemaClosure}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface SchemaCache {
+public class DefaultContextCountPerSchemaClosure implements ContextCountPerSchemaClosure {
+
+    private final Connection configCon;
+    private final int poolId;
+    private final OXAdminPoolInterface pool;
 
     /**
-     * Gets the name for the next schema that is supposed to be used.
-     * <p>
-     * (Re-)initialization is performed if cache bucket is currently empty
-     *
-     * @param poolId The identifier of the database pool
-     * @param maxContexts The configured max. number of contexts allowed per schema
-     * @param closure The closure to invoke to retrieve the current context-per-schema count
-     * @return The schema name according to cache's state
-     * @throws StorageException If next schema cannot be returned
+     * Initializes a new {@link DefaultContextCountPerSchemaClosure}.
      */
-    String getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
+    public DefaultContextCountPerSchemaClosure(Connection configCon, int poolId, OXAdminPoolInterface pool) {
+        super();
+        this.configCon = configCon;
+        this.poolId = poolId;
+        this.pool = pool;
+    }
 
-    /**
-     * Clears the cache for given write pool to force (re-)initialization on next {@link #getNextSchemaFor(int, int, ContextCountPerSchemaClosure)} invocation.
-     *
-     * @param poolId The identifier of the database pool
-     * @throws StorageException If clear operation fails
-     */
-    void clearFor(int poolId) throws StorageException;
+    @Override
+    public Map<String, Integer> getContextCountPerSchema(int maxContexts) throws StorageException {
+        try {
+            return pool.getContextCountPerSchema(configCon, poolId, maxContexts);
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        }
+    }
 
 }

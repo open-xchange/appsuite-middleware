@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,35 +49,23 @@
 
 package com.openexchange.admin.schemacache;
 
+import java.util.Map;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
 /**
- * {@link SchemaCache} - A cache for selecting the next schema to use when creating a context.
+ * {@link ContextCountPerSchemaClosure}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface SchemaCache {
+public interface ContextCountPerSchemaClosure {
 
     /**
-     * Gets the name for the next schema that is supposed to be used.
-     * <p>
-     * (Re-)initialization is performed if cache bucket is currently empty
+     * Gets the number of contexts per schema that are located in given database identified by <code>poolId</code>.
      *
-     * @param poolId The identifier of the database pool
      * @param maxContexts The configured max. number of contexts allowed per schema
-     * @param closure The closure to invoke to retrieve the current context-per-schema count
-     * @return The schema name according to cache's state
-     * @throws StorageException If next schema cannot be returned
+     * @return A mapping providing the count per schema
+     * @throws StorageException If schema count cannot be returned
      */
-    String getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
-
-    /**
-     * Clears the cache for given write pool to force (re-)initialization on next {@link #getNextSchemaFor(int, int, ContextCountPerSchemaClosure)} invocation.
-     *
-     * @param poolId The identifier of the database pool
-     * @throws StorageException If clear operation fails
-     */
-    void clearFor(int poolId) throws StorageException;
-
+    Map<String, Integer> getContextCountPerSchema(int maxContexts) throws StorageException;
 }

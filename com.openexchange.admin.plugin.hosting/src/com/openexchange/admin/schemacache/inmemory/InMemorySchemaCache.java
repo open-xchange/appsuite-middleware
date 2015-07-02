@@ -49,13 +49,11 @@
 
 package com.openexchange.admin.schemacache.inmemory;
 
-import java.sql.Connection;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 
 /**
  * {@link InMemorySchemaCache} - The in-memory schema cache implementation.
@@ -91,17 +89,13 @@ public class InMemorySchemaCache implements SchemaCache {
     }
 
     @Override
-    public String getNextSchemaFor(int poolId, Connection configCon, int maxContexts, OXAdminPoolInterface pool) throws StorageException {
+    public String getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException {
         SchemaInfo schemaInfo = getSchemaInfo(poolId);
         synchronized (schemaInfo) {
-            try {
-                if (false == isAccessible(schemaInfo)) {
-                    schemaInfo.initializeWith(pool.getContextCountPerSchema(configCon, poolId, maxContexts));
-                }
-                return schemaInfo.getAndIncrementNextSchema();
-            } catch (PoolException e) {
-                throw new StorageException(e);
+            if (false == isAccessible(schemaInfo)) {
+                schemaInfo.initializeWith(closure.getContextCountPerSchema(maxContexts));
             }
+            return schemaInfo.getAndIncrementNextSchema(maxContexts);
         }
     }
 

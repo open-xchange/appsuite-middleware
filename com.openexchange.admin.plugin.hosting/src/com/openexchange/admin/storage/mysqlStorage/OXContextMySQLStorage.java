@@ -99,6 +99,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
+import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
 import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -1327,7 +1329,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             case IN_MEMORY:
                 // Get the schema name advertised by cache
                 schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
-                String cachedSchemaName = schemaCache.getNextSchemaFor(db.getId().intValue(), configCon, this.CONTEXTS_PER_SCHEMA, ClientAdminThread.cache.getPool());
+                ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, db.getId().intValue(), ClientAdminThread.cache.getPool());
+                String cachedSchemaName = schemaCache.getNextSchemaFor(db.getId().intValue(), this.CONTEXTS_PER_SCHEMA, closure);
                 if (null != cachedSchemaName) {
                     db.setScheme(cachedSchemaName);
                     break;
