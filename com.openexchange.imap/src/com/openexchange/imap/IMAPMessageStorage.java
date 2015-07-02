@@ -1429,14 +1429,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     int blkSize = imapStore.getFetchBlockSize();
                     try {
                         // Copy complete MIME stream
-                        long st = System.currentTimeMillis();
-
                         imapStore.setFetchBlockSize(_5MB);
                         MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
                         mail = MimeMessageConverter.convertMessage(copy, false);
-
-                        long dur = System.currentTimeMillis() - st;
-                        System.err.println("IMAPMessageStorage.getMessageLong() -- Cloning complex message took " + dur + "ms");
                         // Set flags and received date
                         MimeMessageConverter.parseFlags(msg.getFlags(), mail);
                         if (!mail.containsColorLabel()) {
