@@ -54,6 +54,7 @@ import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -128,15 +129,20 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
-    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth) throws StorageException, InvalidDataException;
+    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException;
 
-    protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
+    protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
         try{
             doNullCheck(ctx,admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
+        }
+        
+        if (schemaSelectStrategy == null) {
+            schemaSelectStrategy = new SchemaSelectStrategy();
+            schemaSelectStrategy.setAutomatic(true);
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
@@ -179,7 +185,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 }
             }
 
-            final Context retval = createmaincall(ret, admin_user, db, access,auth);
+            final Context retval = createmaincall(ret, admin_user, db, access,auth, schemaSelectStrategy);
 
             return retval;
         } catch (final ContextExistsException e) {
