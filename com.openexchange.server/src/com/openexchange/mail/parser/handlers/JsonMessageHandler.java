@@ -157,7 +157,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String VIRTUAL = "___VIRTUAL___";
     private static final String MULTIPART_ID = "___MP-ID___";
 
-    private static final int MAX_NESTED_MESSAGES_LEVELS = 10;
+    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -248,10 +248,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private boolean includePlainText;
     private boolean exactLength;
     private final int maxContentSize;
-    /**
-     * Defines the current level of mail message nesting (of a maximum of 10)
-     */
     private int currentNestingLevel = 0;
+    private final int maxNestedMessageLevels;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -265,7 +263,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, new MailPath(mailPath), null, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1);
+        this(accountId, new MailPath(mailPath), null, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1, -1);
     }
 
     /**
@@ -283,7 +281,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1);
+        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1, -1);
     }
 
     /**
@@ -299,10 +297,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param token <code>true</code> to add attachment tokens
      * @param ttlMillis The tokens' timeout
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @param maxNestedMessageLevels The number of levels in which deep-parsing of nested messages takes place; otherwise only ID information is set; '<=0' falls back to default value (10)
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis, final int maxContentSize) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, maxContentSize);
+    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, maxContentSize, maxNestedMessageLevels);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -315,7 +314,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JsonMessageHandler} for internal usage
      */
-    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize) throws OXException {
+    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         super();
         this.multiparts = new LinkedList<MultipartInfo>();
         this.embedded = DisplayMode.DOCUMENT.equals(displayMode) ? false : embedded;
@@ -331,6 +330,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.mailPath = mailPath;
         this.maxContentSize = maxContentSize;
         this.jsonObject = new JSONObject(32);
+        this.maxNestedMessageLevels = maxNestedMessageLevels <= 0 ? DEFAULT_MAX_NESTED_MESSAGES_LEVELS : maxNestedMessageLevels;
         try {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
@@ -1260,7 +1260,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         ThresholdFileHolder backup = null;
         try {
             JSONObject nestedObject;
-            if (currentNestingLevel < MAX_NESTED_MESSAGES_LEVELS) {
+            if (currentNestingLevel < maxNestedMessageLevels) {
                 MailMessage nestedMail;
                 {
                     Object content = mailPart.getContent();
@@ -1296,7 +1296,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         return true;
                     }
                 }
-                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize);
+                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize, maxNestedMessageLevels);
                 msgHandler.setTimeZone(timeZone);
                 msgHandler.includePlainText = includePlainText;
                 msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
