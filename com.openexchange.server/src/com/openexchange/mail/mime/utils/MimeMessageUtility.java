@@ -543,7 +543,6 @@ public final class MimeMessageUtility {
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;
-    private static final String DEFAULT_ALT_PREFIX = DispatcherPrefixService.DEFAULT_ALT_PREFIX;
 
     private static final String FILE_ALIAS_APPENDIX = "file";
 
@@ -565,18 +564,11 @@ public final class MimeMessageUtility {
             fromIndex = 0;
         }
         String prefix = ServerServiceRegistry.getServize(DispatcherPrefixService.class).getPrefix();
-        if (prefix.charAt(0) == '/') {
-            prefix = prefix.substring(1);
-        }
         if (tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0) {
             return true;
         }
-        final String altPrefix = DEFAULT_ALT_PREFIX.substring(1);
-        if (altPrefix.equals(prefix)) {
-            return false;
-        }
-        prefix = altPrefix;
-        return tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0;
+
+        return false;
     }
 
     /**

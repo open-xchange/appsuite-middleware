@@ -65,16 +65,11 @@ public interface DispatcherPrefixService {
     public static final String DEFAULT_PREFIX = "/ajax/";
 
     /**
-     * The default alternative prefix <tt>"/appsuite/api/"</tt>.
-     */
-    public static final String DEFAULT_ALT_PREFIX = "/appsuite/api/";
-
-    /**
      * Gets the prefix for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
      * <p>
      * All requests starting with this prefix are directed to dispatcher framework.
      *
-     * @return The prefix
+     * @return The prefix containing leading and trailing slashes
      */
     public String getPrefix();
 

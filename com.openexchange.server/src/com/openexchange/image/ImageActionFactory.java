@@ -56,7 +56,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 
@@ -89,8 +88,6 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
         alias2regName.put(alias, registrationName);
     }
 
-    private static final String DEFAULT_ALT_PREFIX = DispatcherPrefixService.DEFAULT_ALT_PREFIX;
-
     /**
      * Gets the registration name for given URL.
      *
@@ -102,11 +99,7 @@ public class ImageActionFactory implements AJAXActionServiceFactory {
             return null;
         }
         String dispatcherPrefix = ImageUtility.getDispatcherPrefix();
-        String regName = getRegistrationNameFor(url, dispatcherPrefix);
-        if (null == regName && !DEFAULT_ALT_PREFIX.equals(dispatcherPrefix)) {
-            regName = getRegistrationNameFor(url, DEFAULT_ALT_PREFIX);
-        }
-        return regName;
+        return getRegistrationNameFor(url, dispatcherPrefix);
     }
 
     private static String getRegistrationNameFor(final String url, final String prefix) {
