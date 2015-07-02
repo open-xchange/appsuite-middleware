@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -200,6 +201,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
         return configDatabaseService.getUnfilledSchemas(con, poolId, maxContexts);
+    }
+
+    @Override
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+        return configDatabaseService.getContextCountPerSchema(con, poolId, maxContexts);
     }
 
     @Override

@@ -99,6 +99,8 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.schemacache.SchemaCache;
+import com.openexchange.admin.schemacache.SchemaCacheProvider;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -1065,10 +1067,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error(e.getMessage(), e);
                 throw new StorageException(e.getMessage());
             }
-            // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
+            // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
             try {
                 startTransaction(configCon);
-                findOrCreateSchema(configCon, db);
+
+                // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
+                findOrCreateSchema(configCon, db, schemaSelectStrategy);
+
+                // Continue with context creation
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
                 final Context retval = writeContext(ctx, adminUser, access);
@@ -1287,10 +1293,15 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     /**
+     * Looks-up the next suitable schema
+     *
      * @param configCon a write connection to the configuration database that is already in a transaction.
+     * @param db The database
+     * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
      */
-    private void findOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
+    private void findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
         if (CONTEXTS_PER_SCHEMA == 1) {
+            // Ignore strategy as there shall be only one schema per context
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
@@ -1303,24 +1314,53 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             return;
         }
 
-        String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
-        if (schemaName == null) {
-            int schemaUnique;
-            try {
-                schemaUnique = IDGenerator.getId(configCon);
-            } catch (SQLException e) {
-                throw new StorageException(e.getMessage(), e);
-            }
-            schemaName = db.getName() + '_' + schemaUnique;
-            db.setScheme(schemaName);
-            OXUtilStorageInterface.getInstance().createDatabase(db);
-        } else {
-            db.setScheme(schemaName);
+        // The effective strategy
+        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.automatic() : schemaSelectStrategy;
+
+        // Determine the schema name according to effective strategy
+        SchemaCache schemaCache = null;
+        switch (effectiveStrategy.getStrategy()) {
+            case SCHEMA:
+                // Pre-defined schema name
+                db.setScheme(effectiveStrategy.getSchema());
+                break;
+            case IN_MEMORY:
+                // Get the schema name advertised by cache
+                schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
+                String cachedSchemaName = schemaCache.getNextSchemaFor(db.getId().intValue(), configCon, this.CONTEXTS_PER_SCHEMA, ClientAdminThread.cache.getPool());
+                if (null != cachedSchemaName) {
+                    db.setScheme(cachedSchemaName);
+                    break;
+                }
+                //$FALL-THROUGH$
+            default:
+                // Clear cache once "live" schema information is requested
+                if (null == schemaCache) {
+                    schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
+                }
+                schemaCache.clearFor(db.getId().intValue());
+
+                // Freshly determine the next schema to use
+                String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
+                if (schemaName == null) {
+                    int schemaUnique;
+                    try {
+                        schemaUnique = IDGenerator.getId(configCon);
+                    } catch (SQLException e) {
+                        throw new StorageException(e.getMessage(), e);
+                    }
+                    schemaName = db.getName() + '_' + schemaUnique;
+                    db.setScheme(schemaName);
+                    OXUtilStorageInterface.getInstance().createDatabase(db);
+                } else {
+                    db.setScheme(schemaName);
+                }
+                break;
         }
     }
 
     private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
-        findOrCreateSchema(con, db);
+        findOrCreateSchema(con, db, null);
         try {
             updateContextServer2DbPool(db, con, contextId);
         } catch (PoolException e) {

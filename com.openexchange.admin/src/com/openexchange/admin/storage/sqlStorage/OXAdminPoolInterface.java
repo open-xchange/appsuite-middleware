@@ -50,6 +50,7 @@
 package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
@@ -95,6 +96,17 @@ public interface OXAdminPoolInterface {
     String getSchemaName(int contextId) throws PoolException;
 
     String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws PoolException;
+
+    /**
+     * Gets the number of contexts per schema that are located in given database identified by <code>poolId</code>.
+     *
+     * @param con The connection to the config database
+     * @param poolId The pool identifier
+     * @param maxContexts The configured maximum allowed contexts for a database schema.
+     * @return A mapping providing the count per schema
+     * @throws PoolException If schema count cannot be returned
+     */
+    Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException;
 
     void lock(Connection con, int writePoolId) throws PoolException;
 }

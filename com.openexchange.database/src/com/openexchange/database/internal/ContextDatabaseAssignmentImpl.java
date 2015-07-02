@@ -58,10 +58,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
@@ -329,24 +330,48 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
-        List<String> retval = new LinkedList<String>();
         try {
             stmt = con.prepareStatement(NOTFILLED);
             stmt.setInt(1, poolId);
             stmt.setInt(2, maxContexts);
             result = stmt.executeQuery();
+            List<String> retval = new LinkedList<String>();
             while (result.next()) {
                 String schema = result.getString(1);
                 int count = result.getInt(2);
                 LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
                 retval.add(schema);
             }
+            return retval.toArray(new String[retval.size()]);
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval.toArray(new String[retval.size()]);
+    }
+
+    @Override
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(NOTFILLED);
+            stmt.setInt(1, poolId);
+            stmt.setInt(2, maxContexts);
+            result = stmt.executeQuery();
+            Map<String, Integer> retval = new LinkedHashMap<String, Integer>(32, 0.9F);
+            while (result.next()) {
+                String schema = result.getString(1);
+                int count = result.getInt(2);
+                LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
+                retval.put(schema, I(count));
+            }
+            return retval;
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
     }
 
     @Override
