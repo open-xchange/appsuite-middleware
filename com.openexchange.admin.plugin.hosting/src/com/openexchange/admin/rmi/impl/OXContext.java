@@ -344,7 +344,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public Context create(final Context ctx, final User admin_user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return createcommon(ctx, admin_user, null, null, auth, null);
+        return createcommon(ctx, admin_user, null, null, auth, getDefaultSchemaSelectStrategy());
     }
 
     @Override
@@ -354,7 +354,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public Context create(final Context ctx, final User admin_user, final String access_combination_name, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return create(ctx, admin_user, access_combination_name, credentials, null);
+        return create(ctx, admin_user, access_combination_name, credentials, getDefaultSchemaSelectStrategy());
     }
 
     @Override
@@ -387,7 +387,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
 
     @Override
     public Context create(final Context ctx, final User admin_user, final UserModuleAccess access, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return create(ctx, admin_user, access, credentials, null);
+        return create(ctx, admin_user, access, credentials, getDefaultSchemaSelectStrategy());
     }
 
     @Override

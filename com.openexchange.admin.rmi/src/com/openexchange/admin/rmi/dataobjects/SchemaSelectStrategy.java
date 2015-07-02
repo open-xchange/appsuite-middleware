@@ -64,24 +64,46 @@ import java.io.Serializable;
  */
 public class SchemaSelectStrategy implements Serializable {
 
+    public enum Strategy {
+        SCHEMA, AUTOMATIC, IN_MEMORY;
+    }
+
     private static final long serialVersionUID = 2888117829864032432L;
+
+    private Strategy strategy;
 
     private String schema;
 
-    private boolean automatic;
-
-    private boolean inMemory;
+    /**
+     * Initializes a new {@link SchemaSelectStrategy}.
+     * 
+     * @param strategy
+     */
+    private SchemaSelectStrategy(Strategy strategy) {
+        this.strategy = strategy;
+    }
 
     /**
-     * Sets the schmema to be used.
-     * Disables the automatic and the inMemory settings.
+     * Initializes a new {@link SchemaSelectStrategy}.
      * 
-     * @param schema The schema
+     * @param schema2
+     * @param schemaName
      */
-    public void setSchema(String schema) {
-        this.schema = schema;
-        this.automatic = false;
-        this.inMemory = false;
+    private SchemaSelectStrategy(Strategy strategy, String schemaName) {
+        this(strategy);
+        this.schema = schemaName;
+    }
+
+    public static SchemaSelectStrategy automatic() {
+        return new SchemaSelectStrategy(Strategy.AUTOMATIC);
+    }
+
+    public static SchemaSelectStrategy inMemory() {
+        return new SchemaSelectStrategy(Strategy.IN_MEMORY);
+    }
+
+    public static SchemaSelectStrategy schema(String schemaName) {
+        return new SchemaSelectStrategy(Strategy.SCHEMA, schemaName);
     }
 
     /**
@@ -94,49 +116,12 @@ public class SchemaSelectStrategy implements Serializable {
     }
 
     /**
-     * Enables automatic schema handling.
-     * Disables the inMemory and the schema settings.
+     * Returns the strategy.
      * 
-     * @param automatic
+     * @return The strategy
      */
-    public void setAutomatic(boolean automatic) {
-        this.automatic = automatic;
-        if (automatic) {
-            this.schema = null;
-            this.inMemory = false;
-        }
-    }
-
-    /**
-     * Whether automatic schema selection is enabled or not.
-     * 
-     * @return
-     */
-    public boolean isAutomatic() {
-        return automatic;
-    }
-
-    /**
-     * Enables in memory schema handling.
-     * Disables the automatic and the schema settings.
-     * 
-     * @param inMemory
-     */
-    public void setInMemory(boolean inMemory) {
-        this.inMemory = inMemory;
-        if (inMemory) {
-            this.schema = null;
-            this.automatic = false;
-        }
-    }
-
-    /**
-     * Whether in memory schema selection is enabled ot not.
-     * 
-     * @return
-     */
-    public boolean isInMemory() {
-        return inMemory;
+    public Strategy getStrategy() {
+        return strategy;
     }
 
 }

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi.impl;
 
 import org.osgi.framework.BundleContext;
@@ -65,7 +66,6 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.PluginInterfaces;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
 import com.openexchange.admin.tools.GenericChecks;
-
 
 public abstract class OXContextCommonImpl extends OXCommonImpl {
 
@@ -99,7 +99,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 }
             }
 
-            if( ret == null || ( ret != null && ret.booleanValue())  ) {
+            if (ret == null || (ret != null && ret.booleanValue())) {
                 if (!ctx.mandatoryCreateMembersSet()) {
                     throw new InvalidDataException("Mandatory fields in context not set: " + ctx.getUnsetMembers());
                 }
@@ -114,7 +114,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw new ContextExistsException("Context already exists!");
         }
 
-        if(ctx.getName()!=null && tool.existsContextName(ctx.getName())){
+        if (ctx.getName() != null && tool.existsContextName(ctx.getName())) {
             throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
         }
 
@@ -131,18 +131,17 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
 
     protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException;
 
+    protected SchemaSelectStrategy getDefaultSchemaSelectStrategy() {
+        return SchemaSelectStrategy.automatic();
+    }
+
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {
-        try{
-            doNullCheck(ctx,admin_user);
+        try {
+            doNullCheck(ctx, admin_user);
         } catch (final InvalidDataException e1) {
             final InvalidDataException invalidDataException = new InvalidDataException("Context or user not correct");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
-        }
-        
-        if (schemaSelectStrategy == null) {
-            schemaSelectStrategy = new SchemaSelectStrategy();
-            schemaSelectStrategy.setAutomatic(true);
         }
 
         new BasicAuthenticator(context).doAuthentication(auth);
@@ -152,14 +151,14 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         try {
             final OXToolStorageInterface tool = OXToolStorageInterface.getInstance();
             Context ret = ctx;
-            if( isAnyPluginLoaded() ) {
+            if (isAnyPluginLoaded()) {
                 final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
                 if (null != pluginInterfaces) {
                     for (final OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
                         try {
                             ret = contextInterface.preCreate(ret, admin_user, auth);
                         } catch (PluginException e) {
-                            LOGGER.error("",e);
+                            LOGGER.error("", e);
                             throw StorageException.wrapForRMI(e);
                         }
                     }
@@ -171,7 +170,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             // Ensure context identifier is contained in login mappings
             {
                 final String sContextId = ret.getIdAsString();
-                if (null !=sContextId) {
+                if (null != sContextId) {
                     ret.addLoginMapping(sContextId);
                 }
             }
@@ -185,11 +184,11 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
                 }
             }
 
-            final Context retval = createmaincall(ret, admin_user, db, access,auth, schemaSelectStrategy);
+            final Context retval = createmaincall(ret, admin_user, db, access, auth, schemaSelectStrategy);
 
             return retval;
         } catch (final ContextExistsException e) {
-            LOGGER.error("",e);
+            LOGGER.error("", e);
             throw e;
         } catch (final InvalidDataException e) {
             LOGGER.error("", e);
