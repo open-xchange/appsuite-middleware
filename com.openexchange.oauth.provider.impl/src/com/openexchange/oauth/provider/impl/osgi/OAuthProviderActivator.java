@@ -233,7 +233,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
             HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
-            SessiondService.class };
+            SessiondService.class, CapabilityService.class };
     }
 
     @Override
@@ -258,11 +258,12 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         trackService(HostnameService.class);
         trackService(ConfigViewFactory.class);
         trackService(AuthorizationService.class);
-        trackService(CapabilityService.class);
         trackService(TemplateService.class);
         trackService(TranslatorFactory.class);
         trackService(HtmlService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
+
+        getService(CapabilityService.class).declareCapability("oauth-grants");
 
         OAuthProvider provider = new OAuthProvider(this, context);
         this.provider = provider;
