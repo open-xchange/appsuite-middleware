@@ -7738,21 +7738,6 @@ msgstr ""
 msgid "No session found for identifier: %1$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
-msgid "\"%1$s\" is not a valid email address."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
-msgid ""
-"No notification mail could be sent to user \"%1$s\". We don't know his email "
-"address."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:66
-msgid "An error occurred, we were unable to send an email to \"%2$s\"."
-msgstr ""
-
 #. subject
 #. * $username has shared file "$filename" with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
@@ -8065,6 +8050,11 @@ msgstr ""
 msgid "The link \"%1$s\" is invalid."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
+msgid "\"%1$s\" is not a valid email address."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
 msgid ""
 "The share has been modified in the meantime. Please refresh or synchronize "
@@ -8101,6 +8091,16 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
+msgid ""
+"No notification mail could be sent to user \"%1$s\". We don't know his email "
+"address."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:66
+msgid "An error occurred, we were unable to send an email to \"%2$s\"."
 msgstr ""
 
 #. *
