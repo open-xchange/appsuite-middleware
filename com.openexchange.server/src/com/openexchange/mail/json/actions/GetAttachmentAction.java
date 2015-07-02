@@ -94,6 +94,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -105,6 +106,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -227,12 +229,20 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 String tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
                 unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
             }
+            boolean asJson = AJAXRequestDataTools.parseBoolParameter("as_json", req.getRequest());
             if (sequenceId == null && imageContentId == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
 
             // Get mail interface
             MailServletInterface mailInterface = getMailInterface(req);
+
+            if (asJson) {
+                if (sequenceId == null) {
+                    throw MailExceptionCode.MISSING_PARAM.create(PARAMETER_MAILATTCHMENT);
+                }
+                imageContentId = null;
+            }
 
             long size = -1L; /* mail system does not provide exact size */
             MailPart mailPart = null;
@@ -290,6 +300,22 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                     if (mailPart == null) {
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                    }
+                }
+
+                if (asJson && mailPart.getContentType().startsWith("message/rfc822")) {
+                    MailMessage nestedMailMessage = MailMessageParser.getMessageContentFrom(mailPart);
+                    if (null != nestedMailMessage) {
+                        nestedMailMessage.setAccountId(mailInterface.getAccountID());
+                        AJAXRequestResult requestResult = new AJAXRequestResult(nestedMailMessage, "mail");
+                        MailConverter.getInstance().convert2JSON(req.getRequest(), requestResult, req.getSession());
+                        JSONObject jNestedMail = (JSONObject) requestResult.getResultObject();
+                        jNestedMail.remove(MailJSONField.UNREAD.getKey());
+                        jNestedMail.remove(MailJSONField.FLAGS.getKey());
+                        jNestedMail.remove(MailJSONField.USER.getKey());
+                        jNestedMail.remove(MailJSONField.COLOR_LABEL.getKey());
+                        jNestedMail.remove(MailJSONField.MODIFIED.getKey());
+                        return requestResult;
                     }
                 }
 
