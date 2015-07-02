@@ -64,6 +64,8 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -86,6 +88,7 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
+import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -97,8 +100,13 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
@@ -607,8 +615,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
         ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+        ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
 
-        CreatedShares shares;
+        CreatedShares shares = null;
         try {
             session.setParameter(Connection.class.getName(), connection);
             for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
@@ -628,6 +637,37 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             }
         } finally {
             session.setParameter(Connection.class.getName(), null);
+        }
+
+        RequestContext requestContext = Tools.getRequestContext(session, decorator);
+        if (requestContext == null) {
+            StringBuilder addresses = new StringBuilder();
+            boolean first = true;
+            for (ShareRecipient recipient : shares.getRecipients()) {
+                if (recipient instanceof GuestRecipient) {
+                    String address = ((GuestRecipient)recipient).getEmailAddress();
+                    if (first){
+                        addresses.append(address);
+                        first = false;
+                    } else {
+                        addresses.append(", ").append(address);
+                    }
+                }
+            }
+
+            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.", addresses.toString());
+            Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
+            logger.warn("Cannot send out notification mails for new guests because the necessary request context could not be constructed.", e);
+            if (storageParameters != null) {
+                storageParameters.addWarning(e);
+            }
+        } else {
+            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, shares, null, session, requestContext);
+            if (storageParameters != null) {
+                for (OXException warning : warnings) {
+                    storageParameters.addWarning(warning);
+                }
+            }
         }
     }
 

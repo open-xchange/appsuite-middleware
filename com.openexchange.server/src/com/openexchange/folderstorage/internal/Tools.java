@@ -57,20 +57,29 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.type.DocumentsType;
 import com.openexchange.folderstorage.type.MusicType;
 import com.openexchange.folderstorage.type.PicturesType;
 import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
+import com.openexchange.share.RequestContext;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -322,6 +331,71 @@ public final class Tools {
             }
         }
         return null;
+    }
+
+    /**
+     * Tries to construct a {@link RequestContext} instance based on the given properties of the session
+     * and decorator.
+     *
+     * @param session The session or <code>null</code>
+     * @param decorator The decorator or <code>null</code>
+     * @return A request context or <code>null</code> if none could be constructed due to missing data
+     * @throws OXException If a service lookup fails
+     */
+    public static RequestContext getRequestContext(Session session, FolderServiceDecorator decorator) throws OXException {
+        if (session != null) {
+            HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            if (hostData != null) {
+                return new FolderStorageRequestContext(hostData.isSecure() ? "https" : "http", hostData.getHost(), hostData.getDispatcherPrefix());
+            }
+        }
+
+        if (decorator != null) {
+            AJAXRequestData requestData = (AJAXRequestData) decorator.getProperty("ajaxRequestData");
+            String prefix = FolderStorageServices.requireService(DispatcherPrefixService.class).getPrefix();
+            if (requestData != null) {
+                return new FolderStorageRequestContext(requestData.isSecure() ? "https" : "http", requestData.getHostname(), prefix);
+            }
+
+            String protocol = (String) decorator.getProperty("http.protocol");
+            String host = (String) decorator.getProperty("http.host");
+            if (Strings.isNotEmpty(protocol) && Strings.isNotEmpty(host)) {
+                return new FolderStorageRequestContext(protocol, host, prefix);
+            }
+        }
+
+        return null;
+    }
+
+    private static final class FolderStorageRequestContext implements RequestContext {
+
+        private final String protocol;
+        private final String host;
+        private final String prefix;
+
+
+        public FolderStorageRequestContext(String protocol, String host, String prefix) {
+            super();
+            this.protocol = protocol;
+            this.host = host;
+            this.prefix = prefix;
+        }
+
+        @Override
+        public String getProtocol() {
+            return protocol;
+        }
+
+        @Override
+        public String getHostname() {
+            return host;
+        }
+
+        @Override
+        public String getServletPrefix() {
+            return prefix;
+        }
+
     }
 
 }
