@@ -1074,6 +1074,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
             SchemaCacheRollback cacheRollback = null;
+            boolean error = true;
             try {
                 startTransaction(configCon);
 
@@ -1086,6 +1087,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 final Context retval = writeContext(ctx, adminUser, access);
                 configCon.commit();
                 LOG.info("Context {} created!", retval.getId());
+                error = false;
                 return retval;
             } catch (SQLException e) {
                 rollback(configCon);
@@ -1096,7 +1098,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw e;
             } finally {
-                if (null != cacheRollback) {
+                if (error && (null != cacheRollback)) {
                     cacheRollback.rollback();
                 }
                 autocommit(configCon);
