@@ -117,4 +117,9 @@ public class InMemorySchemaCache implements SchemaCache {
         }
     }
 
+    @Override
+    public String toString() {
+        return cache.toString();
+    }
+
 }

@@ -81,6 +81,16 @@ public class SchemaInfo {
         void incrementCount() {
             count++;
         }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder(24).append("SchemaCount [");
+            if (name != null) {
+                builder.append("name=").append(name).append(", ");
+            }
+            builder.append("count=").append(count).append("]");
+            return builder.toString();
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
@@ -162,4 +172,13 @@ public class SchemaInfo {
         return null;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(128).append("SchemaInfo [");
+        if (queue != null) {
+            builder.append("queue=").append(queue).append(", ");
+        }
+        builder.append("poolId=").append(poolId).append(", stamp=").append(stamp).append(", deprecated=").append(deprecated).append("]");
+        return builder.toString();
+    }
 }
