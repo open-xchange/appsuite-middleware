@@ -54,6 +54,8 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
+import com.openexchange.admin.schemacache.SchemaCacheRollback;
+import com.openexchange.admin.schemacache.SchemaResult;
 
 /**
  * {@link InMemorySchemaCache} - The in-memory schema cache implementation.
@@ -62,6 +64,34 @@ import com.openexchange.admin.schemacache.SchemaCache;
  * @since v7.8.0
  */
 public class InMemorySchemaCache implements SchemaCache {
+
+    private static final class InMemoryRollback implements SchemaCacheRollback {
+
+        private final int poolId;
+        private final ConcurrentMap<Integer, SchemaInfo> cache;
+        private final long modCount;
+        private final String schemaName;
+
+        InMemoryRollback(String schemaName, long modCount, int poolId, ConcurrentMap<Integer, SchemaInfo> cache) {
+            super();
+            this.poolId = poolId;
+            this.cache = cache;
+            this.schemaName = schemaName;
+            this.modCount = modCount;
+        }
+
+        @Override
+        public void rollback() {
+            SchemaInfo schemaInfo = cache.get(Integer.valueOf(poolId));
+            if (null != schemaInfo) {
+                synchronized (schemaInfo) {
+                    schemaInfo.decrementSchema(schemaName, modCount);
+                }
+            }
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------
 
     private final ConcurrentMap<Integer, SchemaInfo> cache;
     private final long timeout;
@@ -89,13 +119,15 @@ public class InMemorySchemaCache implements SchemaCache {
     }
 
     @Override
-    public String getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException {
+    public SchemaResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException {
         SchemaInfo schemaInfo = getSchemaInfo(poolId);
         synchronized (schemaInfo) {
             if (false == isAccessible(schemaInfo)) {
                 schemaInfo.initializeWith(closure.getContextCountPerSchema(poolId, maxContexts));
             }
-            return schemaInfo.getAndIncrementNextSchema(maxContexts);
+            SchemaCount schemaCount = schemaInfo.getAndIncrementNextSchema(maxContexts);
+            String schemaName = schemaCount.name;
+            return new SchemaResult(schemaName, new InMemoryRollback(schemaName, schemaCount.modCount, poolId, cache));
         }
     }
 

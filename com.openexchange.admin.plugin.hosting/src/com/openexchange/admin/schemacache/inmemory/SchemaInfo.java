@@ -49,6 +49,7 @@
 
 package com.openexchange.admin.schemacache.inmemory;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -60,45 +61,11 @@ import java.util.PriorityQueue;
  */
 public class SchemaInfo {
 
-    private static final class SchemaCount implements Comparable<SchemaCount> {
-
-        final String name;
-        int count;
-
-        SchemaCount(String name, int count) {
-            super();
-            this.name = name;
-            this.count = count;
-        }
-
-        @Override
-        public int compareTo(SchemaCount o) {
-            int thisCount = this.count;
-            int otherCount = o.count;
-            return thisCount < otherCount ? -1 : (thisCount == otherCount ? 0 : 1);
-        }
-
-        void incrementCount() {
-            count++;
-        }
-
-        @Override
-        public String toString() {
-            StringBuilder builder = new StringBuilder(24).append("SchemaCount [");
-            if (name != null) {
-                builder.append("name=").append(name).append(", ");
-            }
-            builder.append("count=").append(count).append("]");
-            return builder.toString();
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
     private final PriorityQueue<SchemaCount> queue;
     private final int poolId;
     private long stamp;
     private boolean deprecated;
+    private long modCount;
 
     /**
      * Initializes a new {@link SchemaInfo}.
@@ -108,6 +75,7 @@ public class SchemaInfo {
         this.poolId = poolId;
         queue = new PriorityQueue<SchemaCount>(32);
         deprecated = true; // Deprecated by default
+        modCount = 0L;
     }
 
     /**
@@ -142,11 +110,13 @@ public class SchemaInfo {
      * Old state gets cleared.
      *
      * @param contextCountPerSchema The mapping for context count per schema
+     * @param modCount The modification count
      */
     public void initializeWith(Map<String, Integer> contextCountPerSchema) {
         queue.clear();
+        modCount++;
         for (Map.Entry<String, Integer> entry : contextCountPerSchema.entrySet()) {
-            queue.offer(new SchemaCount(entry.getKey(), entry.getValue().intValue()));
+            queue.offer(new SchemaCount(entry.getKey(), entry.getValue().intValue(), modCount));
         }
         stamp = System.currentTimeMillis();
         deprecated = false;
@@ -158,7 +128,7 @@ public class SchemaInfo {
      * @param maxContexts The configured max. number of contexts allowed per schema
      * @return The next schema or <code>null</code>
      */
-    public String getAndIncrementNextSchema(int maxContexts) {
+    public SchemaCount getAndIncrementNextSchema(int maxContexts) {
         if (deprecated) {
             return null;
         }
@@ -166,19 +136,42 @@ public class SchemaInfo {
             if (nextSchema.count < maxContexts) {
                 nextSchema.incrementCount();
                 queue.offer(nextSchema);
-                return nextSchema.name;
+                return nextSchema;
             }
         }
         return null;
     }
 
+    /**
+     * Decrements the schema count
+     *
+     * @param schemaName The schema name
+     * @param modCount The modification count at the time when the schema count was obtained
+     */
+    public void decrementSchema(String schemaName, long modCount) {
+        if (this.modCount != modCount) {
+            // Reinitialized in the meantime
+            return;
+        }
+        SchemaCount schemaCount = null;
+        for (Iterator<SchemaCount> it = queue.iterator(); null == schemaCount && it.hasNext();) {
+            SchemaCount current = it.next();
+            if (current.name.equals(schemaName)) {
+                it.remove();
+                schemaCount = current;
+            }
+        }
+        if (null != schemaCount) {
+            schemaCount.decrementCount();
+            queue.offer(schemaCount);
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder(128).append("SchemaInfo [");
-        if (queue != null) {
-            builder.append("queue=").append(queue).append(", ");
-        }
-        builder.append("poolId=").append(poolId).append(", stamp=").append(stamp).append(", deprecated=").append(deprecated).append("]");
+        builder.append("queue=").append(queue).append(", poolId=").append(poolId).append(", stamp=").append(stamp);
+        builder.append(", deprecated=").append(deprecated).append(", modCount=").append(modCount).append("]");
         return builder.toString();
     }
 }

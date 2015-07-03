@@ -47,37 +47,75 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
-
-import com.openexchange.admin.rmi.exceptions.StorageException;
+package com.openexchange.admin.schemacache.inmemory;
 
 /**
- * {@link SchemaCache} - A cache for selecting the next schema to use when creating a context.
+ * A schema count.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
  */
-public interface SchemaCache {
+final class SchemaCount implements Comparable<SchemaCount> {
+
+    final String name;
+    final long modCount;
+    int count;
+
+    SchemaCount(String name, int count, long modCount) {
+        super();
+        this.modCount = modCount;
+        this.name = name;
+        this.count = count;
+    }
+
+    @Override
+    public int compareTo(SchemaCount o) {
+        int thisCount = this.count;
+        int otherCount = o.count;
+        return thisCount < otherCount ? -1 : (thisCount == otherCount ? 0 : 1);
+    }
 
     /**
-     * Gets the name for the next schema that is supposed to be used.
-     * <p>
-     * (Re-)initialization is performed if cache bucket is currently empty
+     * Gets the modification count
      *
-     * @param poolId The identifier of the database pool
-     * @param maxContexts The configured max. number of contexts allowed per schema
-     * @param closure The closure to invoke to retrieve the current context-per-schema count
-     * @return The schema name according to cache's state
-     * @throws StorageException If next schema cannot be returned
+     * @return The modification count
      */
-    SchemaResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
+    public long getModCount() {
+        return modCount;
+    }
 
     /**
-     * Clears the cache for given write pool to force (re-)initialization on next {@link #getNextSchemaFor(int, int, ContextCountPerSchemaClosure)} invocation.
+     * Gets the schema name
      *
-     * @param poolId The identifier of the database pool
-     * @throws StorageException If clear operation fails
+     * @return The schema name
      */
-    void clearFor(int poolId) throws StorageException;
+    public String getName() {
+        return name;
+    }
 
+    /**
+     * Gets the current count; that is the number of contexts using associated schema.
+     *
+     * @return The current count
+     */
+    public int getCount() {
+        return count;
+    }
+
+    void incrementCount() {
+        count++;
+    }
+
+    void decrementCount() {
+        count--;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(24).append("SchemaCount [");
+        if (name != null) {
+            builder.append("name=").append(name).append(", ");
+        }
+        builder.append("count=").append(count).append("]");
+        return builder.toString();
+    }
 }

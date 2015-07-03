@@ -104,6 +104,8 @@ import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
 import com.openexchange.admin.schemacache.SchemaCacheProvider;
+import com.openexchange.admin.schemacache.SchemaCacheRollback;
+import com.openexchange.admin.schemacache.SchemaResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -1071,11 +1073,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 throw new StorageException(e.getMessage());
             }
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
+            SchemaCacheRollback cacheRollback = null;
             try {
                 startTransaction(configCon);
 
                 // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
-                findOrCreateSchema(configCon, db, schemaSelectStrategy);
+                cacheRollback = findOrCreateSchema(configCon, db, schemaSelectStrategy);
 
                 // Continue with context creation
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
@@ -1093,6 +1096,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw e;
             } finally {
+                if (null != cacheRollback) {
+                    cacheRollback.rollback();
+                }
                 autocommit(configCon);
             }
         } finally {
@@ -1302,7 +1308,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param db The database
      * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
      */
-    private void findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
+    private SchemaCacheRollback findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
         if (CONTEXTS_PER_SCHEMA == 1) {
             // Ignore strategy as there shall be only one schema per context
             int schemaUnique;
@@ -1314,7 +1320,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             String schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(db);
-            return;
+            return null;
         }
 
         // The effective strategy
@@ -1331,16 +1337,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // Get the schema name advertised by cache
                 schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
                 ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
-                String cachedSchemaName = schemaCache.getNextSchemaFor(db.getId().intValue(), this.CONTEXTS_PER_SCHEMA, closure);
-                if (null != cachedSchemaName) {
-                    db.setScheme(cachedSchemaName);
-                    break;
+                SchemaResult schemaResult = schemaCache.getNextSchemaFor(db.getId().intValue(), this.CONTEXTS_PER_SCHEMA, closure);
+                if (null != schemaResult) {
+                    db.setScheme(schemaResult.getSchemaName());
+                    return schemaResult.getRollback();
                 }
                 //$FALL-THROUGH$
             default:
                 autoFindOrCreateSchema(configCon, db);
                 break;
         }
+        return null;
     }
 
     /**
