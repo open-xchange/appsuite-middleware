@@ -404,7 +404,7 @@ public final class Init {
         System.out.println("startAndInjectDatabaseUpdate took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
-        startAndInjectI18NBundle();
+//        startAndInjectI18NBundle();
         System.out.println("startAndInjectI18NBundle took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
