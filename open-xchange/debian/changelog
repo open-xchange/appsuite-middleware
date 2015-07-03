@@ -1,3 +1,9 @@
+open-xchange (7.6.2-21) stable; urgency=medium
+
+  * Build for patch 2015-06-29 (2542)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 10:38:37 +0200
+
 open-xchange (7.6.2-20) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2569)
