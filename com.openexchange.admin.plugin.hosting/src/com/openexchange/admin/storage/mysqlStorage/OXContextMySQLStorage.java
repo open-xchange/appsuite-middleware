@@ -684,6 +684,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             deleteSchemeFromDatabaseIfEmpty(ox_db_write_con, configdb_write_con, source_database_id, scheme);
             configdb_write_con.commit();
             ox_db_write_con.commit();
+
+            // Force to re-initialize schema cache on next access
+            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != schemaCache) {
+                schemaCache.clearFor(source_database_id);
+                schemaCache.clearFor(target_database_id.getId().intValue());
+            }
         } catch (final TargetDatabaseException tde) {
             LOG.error("Exception caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, tde);
             LOG.error("Target database rollback starts for context {}", ctx.getId());
