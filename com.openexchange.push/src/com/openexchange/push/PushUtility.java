@@ -49,6 +49,7 @@
 
 package com.openexchange.push;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -60,7 +61,7 @@ import com.openexchange.event.CommonEvent;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
-import com.openexchange.push.internal.ServiceRegistry;
+import com.openexchange.push.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -116,17 +117,18 @@ public final class PushUtility {
      * @param session The session providing needed user data
      * @param props The optional additional properties to put into OSGi event
      * @param includeCommonEvent <code>true</code> to add {@link CommonEvent} properties for remote distribution, <code>false</code>, otherwise
-     * @param remoteMarker <code>true</code> to include remote marker; otherwise <code>false</code>
+     * @param publishMarker <code>true</code> to include publish marker; otherwise <code>false</code>
      * @throws OXException If posting event fails
      */
-    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props, boolean includeCommonEvent, boolean remoteMarker) throws OXException {
+    public static void triggerOSGiEvent(String folder, Session session, Map<String, Object> props, boolean includeCommonEvent, boolean publishMarker) throws OXException {
         if (null == folder || null == session) {
             return;
         }
         try {
-            final EventAdmin eventAdmin = ServiceRegistry.getInstance().getService(EventAdmin.class, true);
-            final int contextId = session.getContextId();
-            final int userId = session.getUserId();
+            EventAdmin eventAdmin = Services.requireService(EventAdmin.class);
+            EventFactoryService eventFactoryService = includeCommonEvent ? Services.requireService(EventFactoryService.class) : null;
+            int contextId = session.getContextId();
+            int userId = session.getUserId();
             /*
              * Create event's properties
              */
@@ -145,34 +147,24 @@ public final class PushUtility {
              * (see com.openexchange.push.ms.osgi.PushMsActivator.startBundle() /
              *      com.openexchange.push.ms.PushMsHandler.handleEvent(Event) )
              */
-            if (includeCommonEvent) {
-                final EventFactoryService eventFactoryService = ServiceRegistry.getInstance().getService(EventFactoryService.class, true);
-                final CommonEvent commonEvent =
-                    eventFactoryService.newCommonEvent(
-                        contextId,
-                        userId,
-                        Collections.<Integer, Set<Integer>> emptyMap(),
-                        CommonEvent.INSERT,
-                        Types.EMAIL,
-                        null,
-                        null,
-                        null,
-                        null,
-                        session);
+            if (null != eventFactoryService) {
+                Map<Integer, Set<Integer>> emptyMap = Collections.<Integer, Set<Integer>> emptyMap();
+                CommonEvent commonEvent = eventFactoryService.newCommonEvent(contextId, userId, emptyMap, CommonEvent.INSERT, Types.EMAIL, null, null, null, null, session);
                 properties.put(CommonEvent.EVENT_KEY, commonEvent);
             }
-            if (remoteMarker) {
-                properties.put(CommonEvent.REMOTE_MARKER, Boolean.TRUE);
+            if (publishMarker) {
+                // Add this property (with any or without a value) to distribute to remote nodes in the cluster
+                properties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
             }
             /*
              * Create event with push topic
              */
-            final Event event = new Event(PushEventConstants.TOPIC, properties);
+            Event event = new Event(PushEventConstants.TOPIC, properties);
             /*
              * Finally post it
              */
             eventAdmin.postEvent(event);
-            LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, userId, contextId);
+            LOG.debug("Notified new mails in folder \"{}\" for user {} in context {}", folder, I(userId), I(contextId));
         } catch (final OXException e) {
             throw e;
         }

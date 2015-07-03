@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -44,33 +44,37 @@ if [ ${1:-0} -eq 2 ]; then
 
     ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc/hazelcast sessionstorage_hazelcast.properties sessions.properties
 
+    PFILE=/opt/open-xchange/etc/hazelcast/sessions.properties
+
     # SoftwareChange_Request-1291
-    pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
-    if ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile; then
-       ox_remove_property com.openexchange.hazelcast.configuration.map.indexes.attributes $pfile
+    if ox_exists_property com.openexchange.hazelcast.configuration.map.indexes.attributes $PFILE; then
+       ox_remove_property com.openexchange.hazelcast.configuration.map.indexes.attributes $PFILE
     fi
 
     # SoftwareChange_Request-1286
     pfile=/opt/open-xchange/etc/hazelcast/sessions.properties
-    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile; then
-       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile)
-       ox_set_property com.openexchange.hazelcast.configuration.map.backupCount $oval $pfile
-       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.backupcount $pfile
+    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.backupcount $PFILE; then
+       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.backupcount $PFILE)
+       ox_set_property com.openexchange.hazelcast.configuration.map.backupCount $oval $PFILE
+       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.backupcount $PFILE
     fi
-    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $pfile; then
-       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $pfile)
-       ox_set_property com.openexchange.hazelcast.configuration.map.asyncBackupCount $oval $pfile
-       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $pfile
+    if ox_exists_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $PFILE; then
+       oval=$(ox_read_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $PFILE)
+       ox_set_property com.openexchange.hazelcast.configuration.map.asyncBackupCount $oval $PFILE
+       ox_remove_property com.openexchange.sessionstorage.hazelcast.map.asyncbackup $PFILE
     fi
-    if ox_exists_property com.openexchange.sessionstorage.hazelcast.enabled $pfile; then
-       ox_remove_property com.openexchange.sessionstorage.hazelcast.enabled $pfile
+    if ox_exists_property com.openexchange.sessionstorage.hazelcast.enabled $PFILE; then
+       ox_remove_property com.openexchange.sessionstorage.hazelcast.enabled $PFILE
     fi
-    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.readBackupData $pfile; then
-       ox_set_property com.openexchange.hazelcast.configuration.map.readBackupData "true" $pfile
+    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.readBackupData $PFILE; then
+       ox_set_property com.openexchange.hazelcast.configuration.map.readBackupData "true" $PFILE
     fi
-    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $pfile; then
-       ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $pfile
+    if ! ox_exists_property com.openexchange.hazelcast.configuration.map.name $PFILE; then
+       ox_set_property com.openexchange.hazelcast.configuration.map.name "sessions-2" $PFILE
     fi
+
+    # SoftwareChange_Request-2576
+    ox_add_property com.openexchange.hazelcast.configuration.map.indexes.attributes altId $PFILE
 fi
 
 %clean
@@ -88,6 +92,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/*
 
 %changelog
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>

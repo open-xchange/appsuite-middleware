@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -37,22 +37,28 @@ export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %post
-. /opt/open-xchange/lib/oxfunctions.sh
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+    . /opt/open-xchange/lib/oxfunctions.sh
 
-# prevent bash from expanding, see bug 13316
-GLOBIGNORE='*'
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
 
-ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_imapidle.properties
+    ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc push_imapidle.properties
 
-# SoftwareChange_Request-2103
-PFILE=/opt/open-xchange/etc/push_imapidle.properties
-ox_add_property com.openexchange.push.imapidle.delay "5000" $PFILE
-ox_add_property com.openexchange.push.imapidle.clusterLock "hz" $PFILE
-if ox_exists_property com.openexchange.push.imapidle.errordelay  $PFILE; then
-    ox_remove_property com.openexchange.push.imapidle.errordelay  $PFILE
-fi
-if ox_exists_property com.openexchange.push.imapidle.debug $PFILE; then
-    ox_remove_property com.openexchange.push.imapidle.debug $PFILE
+    # SoftwareChange_Request-2103
+    PFILE=/opt/open-xchange/etc/push_imapidle.properties
+    ox_add_property com.openexchange.push.imapidle.delay "5000" $PFILE
+    ox_add_property com.openexchange.push.imapidle.clusterLock "hz" $PFILE
+    if ox_exists_property com.openexchange.push.imapidle.errordelay  $PFILE; then
+        ox_remove_property com.openexchange.push.imapidle.errordelay  $PFILE
+    fi
+    if ox_exists_property com.openexchange.push.imapidle.debug $PFILE; then
+        ox_remove_property com.openexchange.push.imapidle.debug $PFILE
+    fi
+
+    # SoftwareChange_Request-2572
+    ox_add_property com.openexchange.push.imapidle.supportsPermanentListeners false $PFILE
 fi
 
 %clean
@@ -70,6 +76,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
+* Wed Jun 24 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Carsten Hoeger <choeger@open-xchange.com>

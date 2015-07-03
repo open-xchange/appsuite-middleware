@@ -68,6 +68,7 @@ import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountDeleteListener;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.push.PushListenerService;
 import com.openexchange.push.PushManagerService;
 import com.openexchange.push.imapidle.ImapIdleConfiguration;
 import com.openexchange.push.imapidle.ImapIdleDeleteListener;
@@ -76,6 +77,7 @@ import com.openexchange.push.imapidle.ImapIdlePushManagerService;
 import com.openexchange.push.imapidle.locking.HzImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -125,13 +127,19 @@ public class ImapIdleActivator extends HousekeepingActivator {
                     @Override
                     public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
                         HazelcastInstance hzInstance = context.getService(reference);
-                        String mapName = discoverSessionsMapName(hzInstance.getConfig(), logger);
-                        ((HzImapIdleClusterLock) configuration.getClusterLock()).setMapName(mapName);
-                        activator.addService(HazelcastInstance.class, hzInstance);
+                        try {
+                            String mapName = discoverSessionsMapName(hzInstance.getConfig(), logger);
+                            ((HzImapIdleClusterLock) configuration.getClusterLock()).setMapName(mapName);
+                            activator.addService(HazelcastInstance.class, hzInstance);
 
-                        reg = context.registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, activator), null);
+                            reg = context.registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, activator), null);
 
-                        return hzInstance;
+                            return hzInstance;
+                        } catch (IllegalStateException e) {
+                            logger.warn("Failed start-up for {}", context.getBundle().getSymbolicName(), e);
+                        }
+                        context.ungetService(reference);
+                        return null;
                     }
 
                     @Override
@@ -214,8 +222,8 @@ public class ImapIdleActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class, ThreadPoolService.class,
-            ContextService.class, UserService.class };
+        return new Class<?>[] { DatabaseService.class, TimerService.class, MailService.class, ConfigurationService.class, SessiondService.class,
+            ThreadPoolService.class, ContextService.class, UserService.class, PushListenerService.class };
     }
 
     @Override
@@ -227,11 +235,12 @@ public class ImapIdleActivator extends HousekeepingActivator {
         if (ImapIdleClusterLock.Type.HAZELCAST.equals(configuration.getClusterLock().getType())) {
             // Start tracking for Hazelcast
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, configuration, this));
-            openTrackers();
         } else {
             // Register PushManagerService instance
             registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
         }
+        trackService(SessionStorageService.class);
+        openTrackers();
 
         registerService(MailAccountDeleteListener.class, new ImapIdleMailAccountDeleteListener());
         registerService(DeleteListener.class, new ImapIdleDeleteListener());

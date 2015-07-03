@@ -49,12 +49,14 @@
 
 package com.openexchange.imap.sort;
 
+import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.EnumMap;
+import java.util.Map;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
 import javax.mail.StoreClosedException;
@@ -135,6 +137,218 @@ public final class IMAPSort {
         super();
     }
 
+    // ------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Attempts to perform a IMAP-based sort.
+     *
+     * @param imapFolder The IMAP folder
+     * @param filter The optional filter
+     * @param sortField The sort field
+     * @param orderDir The sort order
+     * @param imapConfig The IMAP configuration
+     * @return The IMAP-sorted sequence number or <code>null</code> if unable to do IMAP sort
+     * @throws MessagingException If sort attempt fails horribly
+     */
+    public static int[] sortMessages(IMAPFolder imapFolder, int[] filter, MailSortField sortField, OrderDirection orderDir, IMAPConfig imapConfig, boolean doImapSort, int threshold) throws MessagingException {
+        int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            return new int[0];
+        }
+
+        final int size = filter == null ? messageCount : filter.length;
+        if (doImapSort || (imapConfig.getCapabilities().hasSort() && (size >= threshold))) {
+            try {
+                // Get IMAP sort criteria
+                final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
+                final String sortCriteria = getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC);
+                if (null != sortCriteria) {
+                    final int[] seqNums;
+                    {
+                        // Do IMAP sort
+                        final long start = System.currentTimeMillis();
+                        seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                        LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
+                    }
+                    if ((seqNums == null) || (seqNums.length == 0)) {
+                        return new int[0];
+                    }
+                    return seqNums;
+                }
+            } catch (final FolderClosedException e) {
+                /*
+                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 */
+                throw e;
+            } catch (final StoreClosedException e) {
+                /*
+                 * Caused by a protocol error such as a socket error. No retry in this case.
+                 */
+                throw e;
+            } catch (final MessagingException e) {
+                if (e.getNextException() instanceof ProtocolException) {
+                    final ProtocolException protocolException = (ProtocolException) e.getNextException();
+                    final Response response = protocolException.getResponse();
+                    if (response != null && response.isBYE()) {
+                        /*
+                         * The BYE response is always untagged, and indicates that the server is about to close the connection.
+                         */
+                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                    }
+                    final Throwable cause = protocolException.getCause();
+                    if (cause instanceof StoreClosedException) {
+                        /*
+                         * Connection is down. No retry.
+                         */
+                        throw ((StoreClosedException) cause);
+                    } else if (cause instanceof FolderClosedException) {
+                        /*
+                         * Connection is down. No retry.
+                         */
+                        throw ((FolderClosedException) cause);
+                    }
+                }
+                LOG.warn("", IMAPException.create(IMAPException.Code.IMAP_SORT_FAILED, e, e.getMessage()));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Generates an appropriate <i>SORT</i> command as defined through the IMAP SORT EXTENSION corresponding to specified sort field and
+     * order direction.
+     * <p>
+     * The supported sort criteria are:
+     * <ul>
+     * <li><b>ARRIVAL</b><br>
+     * Internal date and time of the message. This differs from the ON criteria in SEARCH, which uses just the internal date.</li>
+     * <li><b>CC</b><br>
+     * RFC-822 local-part of the first "Cc" address.</li>
+     * <li><b>DATE</b><br>
+     * Sent date and time from the Date: header, adjusted by time zone. This differs from the SENTON criteria in SEARCH, which uses just the
+     * date and not the time, nor adjusts by time zone.</li>
+     * <li><b>FROM</b><br>
+     * RFC-822 local-part of the "From" address.</li>
+     * <li><b>REVERSE</b><br>
+     * Followed by another sort criterion, has the effect of that criterion but in reverse order.</li>
+     * <li><b>SIZE</b><br>
+     * Size of the message in octets.</li>
+     * <li><b>SUBJECT</b><br>
+     * Extracted subject text.</li>
+     * <li><b>TO</b><br>
+     * RFC-822 local-part of the first "To" address.</li>
+     * </ul>
+     * <p>
+     * Example:<br>
+     * {@link MailSortField#SENT_DATE} in descending order is turned to <code>"REVERSE DATE"</code>.
+     *
+     * @param sortField The sort field
+     * @param descendingDirection The order direction
+     * @return The sort criteria ready for being used inside IMAP's <i>SORT</i> command or <code>null</code> if sort field is not supported by IMAP
+     */
+    public static String getSortCritForIMAPCommand(final MailSortField sortField, final boolean descendingDirection) {
+        final StringBuilder imapSortCritBuilder = new StringBuilder(16).append(descendingDirection ? "REVERSE " : "");
+        switch (sortField) {
+        case SENT_DATE:
+            imapSortCritBuilder.append("DATE");
+            break;
+        case RECEIVED_DATE:
+            imapSortCritBuilder.append("ARRIVAL");
+            break;
+        case FROM:
+            imapSortCritBuilder.append("FROM");
+            break;
+        case TO:
+            imapSortCritBuilder.append("TO");
+            break;
+        case CC:
+            imapSortCritBuilder.append("CC");
+            break;
+        case SUBJECT:
+            imapSortCritBuilder.append("SUBJECT");
+            break;
+        case SIZE:
+            imapSortCritBuilder.append("SIZE");
+            break;
+        default:
+            return null;
+        }
+        return imapSortCritBuilder.toString();
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Attempts to perform a IMAP-based sort with a given search term.
+     *
+     * @param imapFolder The IMAP folder; not <code>null</code>
+     * @param jmsSearchTerm The search term or <code>null</code> to sort all messages
+     * @param sortField The sort field; not <code>null</code>
+     * @param order The sort order; not <code>null</code>
+     * @param allowESORT Whether to allow the ESORT command being issued (if supported) to limit number of sort results
+     * @param allowSORTDISPLAY Whether to allow the SORT=DISPLAY extension being used (if supported) to sort by DISPLAY value for From/To address
+     * @param imapConfig The IMAP configuration; not <code>null</code>
+     * @return The IMAP-sorted sequence number
+     * @throws MessagingException
+     * @throws OXException
+     */
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, javax.mail.search.SearchTerm jmsSearchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, IMAPConfig imapConfig) throws MessagingException, OXException {
+        SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC, allowSORTDISPLAY && imapConfig.asMap().containsKey("SORT=DISPLAY"));
+        if (sortTerms == null) {
+            throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
+        }
+
+        boolean sortedByLocalPart = false;
+        for (SortTerm sortTerm : sortTerms) {
+            if (SortTerm.FROM == sortTerm) {
+                sortedByLocalPart = true;
+            } else if (SortTerm.TO == sortTerm) {
+                sortedByLocalPart = true;
+            } else if (SortTerm.CC == sortTerm) {
+                sortedByLocalPart = true;
+            }
+        }
+
+        boolean rangeApplied = false;
+        int[] seqNums = null;
+        if (allowESORT && null != indexRange) {
+            Map<String, String> caps = imapConfig.asMap();
+            if (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")) && (null == jmsSearchTerm)) {
+                SortPartialResult result = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
+                switch (result.reason) {
+                    case SUCCESS:
+                        {
+                            seqNums = result.seqnums;
+                            if (null != seqNums) {
+                                // SORT RETURN PARTIAL command succeeded
+                                rangeApplied = true;
+                            }
+                        }
+                        break;
+                    case COMMAND_FAILED:
+                        break;
+                    case FOLDER_CLOSED:
+                        {
+                            // Apparently, SORT RETURN PARTIAL command failed
+                            try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        if (null == seqNums) {
+            // Either insufficient capabilities/conditions not met or SORT RETURN PARTIAL failed
+            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
+        }
+
+        return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
+    }
+
     /**
      * Attempts to perform a IMAP-based sort with a given search term.
      *
@@ -178,21 +392,38 @@ public final class IMAPSort {
         }
 
         boolean rangeApplied = false;
-        int[] seqNums;
-        if (allowESORT && null != indexRange && imapConfig.asMap().containsKey("ESORT") && (null == searchTerm || searchTerm.isAscii())) {
-            seqNums = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
-
-            // Check result
-            if (null == seqNums) {
-                // Apparently, SORT RETURN PARTIAL command failed
-                try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
-                try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
-                seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
-            } else {
-                // SORT RETURN PARTIAL command succeeded
-                rangeApplied = true;
+        int[] seqNums = null;
+        if (allowESORT && null != indexRange) {
+            Map<String, String> caps = imapConfig.asMap();
+            if (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")) && (null == searchTerm || searchTerm.isAscii())) {
+                SortPartialResult result = sortReturnPartial(sortTerms, jmsSearchTerm, indexRange, imapFolder);
+                switch (result.reason) {
+                    case SUCCESS:
+                        {
+                            seqNums = result.seqnums;
+                            if (null != seqNums) {
+                                // SORT RETURN PARTIAL command succeeded
+                                rangeApplied = true;
+                            }
+                        }
+                        break;
+                    case COMMAND_FAILED:
+                        break;
+                    case FOLDER_CLOSED:
+                        {
+                            // Apparently, SORT RETURN PARTIAL command failed
+                            try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                            try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
-        } else {
+        }
+
+        if (null == seqNums) {
+            // Either insufficient capabilities/conditions not met or SORT RETURN PARTIAL failed
             seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
         }
 
@@ -207,10 +438,10 @@ public final class IMAPSort {
         return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
     }
 
-    private static int[] sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
+    private static SortPartialResult sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
         try {
             final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
-            return (int[]) imapFolder.doCommand(new ProtocolCommand() {
+            return (SortPartialResult) imapFolder.doCommand(new ProtocolCommand() {
 
                 @Override
                 public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
@@ -268,7 +499,7 @@ public final class IMAPSort {
 
                                 String partialResults = ir.readAtomStringList()[1];
                                 if ("NIL".equalsIgnoreCase(partialResults)) {
-                                    return new int[0];
+                                    return new SortPartialResult(new int[0], SortPartialReason.SUCCESS);
                                 }
                                 for (String snum : Strings.splitByComma(partialResults)) {
                                     int pos = snum.indexOf(':');
@@ -289,12 +520,15 @@ public final class IMAPSort {
 
                         // Copy the vector into 'matches'
                         matches = v.toArray();
+                    } else if (response.isBAD()) {
+                        // Obviously the SORT RETURN (PARTIAL ...) command failed
+                        return new SortPartialResult(null, SortPartialReason.COMMAND_FAILED);
                     }
 
                     // dispatch remaining untagged responses
                     protocol.notifyResponseHandlers(r);
                     protocol.handleResult(response);
-                    return matches;
+                    return new SortPartialResult(matches, SortPartialReason.SUCCESS);
                 }
             });
         } catch (FolderClosedException e) {
@@ -303,7 +537,7 @@ public final class IMAPSort {
                 if (cause.getCause() instanceof com.sun.mail.iap.ByeIOException) {
                     // SORT RETURN PARTIAL command failed...
                     LOG.warn("SORT RETURN PARTIAL command failed. Fall-back to normal SORT command.", cause);
-                    return null;
+                    return new SortPartialResult(null, SortPartialReason.FOLDER_CLOSED);
                 }
             }
             throw e;
@@ -502,6 +736,22 @@ public final class IMAPSort {
             this.msgIds = msgIds;
             this.rangeApplied = rangeApplied;
             this.sortedByLocalPart = sortedByLocalPart;
+        }
+    }
+
+    private static enum SortPartialReason {
+        SUCCESS, COMMAND_FAILED, FOLDER_CLOSED;
+    }
+
+    private static final class SortPartialResult {
+
+        final int[] seqnums;
+        final SortPartialReason reason;
+
+        SortPartialResult(int[] seqnums, SortPartialReason reason) {
+            super();
+            this.seqnums = seqnums;
+            this.reason = reason;
         }
     }
 

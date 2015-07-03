@@ -102,6 +102,11 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
+    public boolean storeSession(String sessionId) throws OXException {
+        return SessionHandler.storeSession(sessionId);
+    }
+
+    @Override
     public void changeSessionPassword(final String sessionId, final String newPassword) throws OXException {
         SessionHandler.changeSessionPassword(sessionId, newPassword);
     }
@@ -145,26 +150,36 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public int getUserSessions(final int userId, final int contextId) {
+    public int getUserSessions(int userId, int contextId) {
         return SessionHandler.SESSION_COUNTER.getNumberOfSessions(userId, contextId);
     }
 
     @Override
-    public Collection<Session> getSessions(final int userId, final int contextId) {
-        final SessionControl[] sessionControls = SessionHandler.getUserSessions(userId, contextId);
-        if (null == sessionControls || 0 == sessionControls.length) {
+    public Collection<Session> getSessions(int userId, int contextId) {
+        return getSessions(userId, contextId, false);
+    }
+
+    @Override
+    public Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage) {
+        List<SessionControl> sessionControls = SessionHandler.getUserSessions(userId, contextId, considerSessionStorage);
+        if (null == sessionControls) {
             return Collections.emptyList();
         }
-        final int length = sessionControls.length;
-        final List<Session> list = new ArrayList<Session>(length);
-        for (int i = 0; i < length; i++) {
-            list.add(sessionControls[i].getSession());
+
+        List<Session> list = new ArrayList<Session>(sessionControls.size());
+        for (SessionControl sc : sessionControls) {
+            list.add(sc.getSession());
         }
         return list;
     }
 
     @Override
-    public SessionImpl getSession(final String sessionId) {
+    public SessionImpl getSession(String sessionId) {
+        return getSession(sessionId, true);
+    }
+
+    @Override
+    public SessionImpl getSession(String sessionId, boolean considerSessionStorage) {
         if (null == sessionId) {
             return null;
         }
@@ -177,7 +192,7 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
             }
             return null;
         }
-        return sessionControl.touch().getSession();
+        return sessionControl.getSession();
     }
 
     @Override
@@ -189,16 +204,21 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
     }
 
     @Override
-    public Session getSessionByAlternativeId(final String altId) {
+    public Session getSessionByAlternativeId(String altId) {
+        return getSessionByAlternativeId(altId, false);
+    }
+
+    @Override
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage) {
         if (null == altId) {
             return null;
         }
-        final SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId, false);
+        SessionControl sessionControl = SessionHandler.getSessionByAlternativeId(altId, lookupSessionStorage);
         if (null == sessionControl) {
-            LOG.info("Session not found by alternative identifier. Alternative ID: {}", altId);
+            LOG.debug("Session not found by alternative identifier. Alternative ID: {}", altId);
             return null;
         }
-        return sessionControl.touch().getSession();
+        return sessionControl.getSession();
     }
 
     @Override

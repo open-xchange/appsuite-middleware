@@ -61,7 +61,6 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 
 
 /**
@@ -86,24 +85,24 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
-    public boolean acquireLock(Session session) throws OXException {
+    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
-        int contextId = session.getContextId();
+        int contextId = sessionInfo.getContextId();
         Connection con = databaseService.getWritable(contextId);
         try {
-            return acquireDbLock(session, con);
+            return acquireDbLock(sessionInfo, con);
         } finally {
             databaseService.backWritable(contextId, con);
         }
     }
 
-    private boolean acquireDbLock(Session session, Connection con) throws OXException {
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
+    private boolean acquireDbLock(SessionInfo sessionInfo, Connection con) throws OXException {
+        int contextId = sessionInfo.getContextId();
+        int userId = sessionInfo.getUserId();
 
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -114,7 +113,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
-            stmt.setString(pos++, generateValue(now, session.getSessionID()));
+            stmt.setString(pos++, generateValue(now, sessionInfo));
             stmt.setBytes(pos++, UUIDs.toByteArray(UUID.randomUUID()));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
@@ -143,7 +142,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             // Invalid entry - try to replace it mutually exclusive
             stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=? AND value=?");
             pos = 1;
-            stmt.setString(pos++, generateValue(now, session.getSessionID()));
+            stmt.setString(pos++, generateValue(now, sessionInfo));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
@@ -157,29 +156,29 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
-    public void refreshLock(Session session) throws OXException {
+    public void refreshLock(SessionInfo sessionInfo) throws OXException {
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
-        int contextId = session.getContextId();
+        int contextId = sessionInfo.getContextId();
         Connection con = databaseService.getWritable(contextId);
         try {
-            refreshDbLock(session, con);
+            refreshDbLock(sessionInfo, con);
         } finally {
             databaseService.backWritable(contextId, con);
         }
     }
 
-    private void refreshDbLock(Session session, Connection con) throws OXException {
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
+    private void refreshDbLock(SessionInfo sessionInfo, Connection con) throws OXException {
+        int contextId = sessionInfo.getContextId();
+        int userId = sessionInfo.getUserId();
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("UPDATE user_attribute SET value=? WHERE cid=? AND id=? AND name=?");
             int pos = 1;
-            stmt.setString(pos++, generateValue(System.nanoTime(), session.getSessionID()));
+            stmt.setString(pos++, generateValue(System.nanoTime(), sessionInfo));
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setString(pos++, ATTR_IMAPIDLE_LOCK);
@@ -192,24 +191,24 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
     }
 
     @Override
-    public void releaseLock(Session session) throws OXException {
+    public void releaseLock(SessionInfo sessionInfo) throws OXException {
         DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
         if (null == databaseService) {
             throw ServiceExceptionCode.absentService(DatabaseService.class);
         }
 
-        int contextId = session.getContextId();
+        int contextId = sessionInfo.getContextId();
         Connection con = databaseService.getWritable(contextId);
         try {
-            releaseDbLock(session, con);
+            releaseDbLock(sessionInfo, con);
         } finally {
             databaseService.backWritable(contextId, con);
         }
     }
 
-    private void releaseDbLock(Session session, Connection con) throws OXException {
-        int contextId = session.getContextId();
-        int userId = session.getUserId();
+    private void releaseDbLock(SessionInfo sessionInfo, Connection con) throws OXException {
+        int contextId = sessionInfo.getContextId();
+        int userId = sessionInfo.getUserId();
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("DELETE FROM user_attribute WHERE cid=? AND id=? AND name=?");

@@ -385,6 +385,12 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         smtpProps.put("mail.smtp.connectiontimeout", Integer.toString(smtpProperties.getSmtpConnectionTimeout()));
                     }
                     /*
+                     * Send partial or abort?
+                     */
+                    if (smtpProperties.isSendPartial()) {
+                        smtpProps.put("mail.smtp.sendpartial", "true");
+                    }
+                    /*
                      * Check if a secure SMTP connection should be established
                      */
                     final String sPort = String.valueOf(smtpConfig.getPort());

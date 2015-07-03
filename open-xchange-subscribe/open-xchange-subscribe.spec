@@ -6,7 +6,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-oauth
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 19
+%define        ox_release 20
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -171,13 +171,18 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
-%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%config(noreplace) /opt/open-xchange/etc/crawler.properties
 %config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
+%config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
 %doc docs/
 
 %changelog
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Mon May 18 2015 Marcus Klein <marcus.klein@open-xchange.com>

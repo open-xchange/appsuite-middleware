@@ -317,8 +317,9 @@ public abstract class MailConfig {
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
      * @return The mail login of specified user
+     * @throws OXException If login cannot be determined
      */
-    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) {
+    public static final String getMailLogin(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
         return saneLogin(getMailLogin0(mailAccount, userLoginInfo));
     }
 
@@ -328,27 +329,37 @@ public abstract class MailConfig {
      * @param mailAccount The mail account used to determine the login
      * @param userLoginInfo The login information of the user
      * @return The mail login of specified user
+     * @throws OXException If login cannot be determined
      */
-    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) {
+    private static final String getMailLogin0(final MailAccount mailAccount, final String userLoginInfo) throws OXException {
         if (!mailAccount.isDefaultAccount()) {
             return mailAccount.getLogin();
         }
-        final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
-        if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-            return mailAccount.getLogin();
+
+        // For primary mail account
+        String login;
+        switch (MailProperties.getInstance().getLoginSource()) {
+            case USER_IMAPLOGIN:
+                login = mailAccount.getLogin();
+                break;
+            case PRIMARY_EMAIL: {
+                    String primaryAddress = mailAccount.getPrimaryAddress();
+                    try {
+                        login = QuotedInternetAddress.toACE(primaryAddress);
+                    } catch (AddressException e) {
+                        org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn("Login source primary email address \"{}\" could not be converted to ASCII. Using unicode representation.", primaryAddress, e);
+                        login = primaryAddress;
+                    }
+                    break;
+                }
+            default:
+                login = userLoginInfo;
+                break;
         }
-        if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-            try {
-                return QuotedInternetAddress.toACE(mailAccount.getPrimaryAddress());
-            } catch (final AddressException e) {
-                final String primaryAddress = mailAccount.getPrimaryAddress();
-                org.slf4j.LoggerFactory.getLogger(MailConfig.class).warn(
-                    "Login source primary email address \"" + primaryAddress + "\" could not be converted to ASCII. Using unicode representation.",
-                    e);
-                return primaryAddress;
-            }
+        if (null == login) {
+            throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Login not set. Either an invalid session or property \"com.openexchange.mail.loginSource\" is set incorrectly.");
         }
-        return userLoginInfo;
+        return login;
     }
 
     /**
@@ -690,11 +701,15 @@ public abstract class MailConfig {
             if (PasswordSource.GLOBAL.equals(cur)) {
                 final String masterPw = MailProperties.getInstance().getMasterPassword();
                 if (masterPw == null) {
-                    throw MailConfigException.create(new StringBuilder().append("Property \"masterPassword\" not set").toString());
+                    throw MailConfigException.create("Property \"com.openexchange.mail.masterPassword\" not set");
                 }
                 mailConfig.password = masterPw;
             } else {
-                mailConfig.password = session.getPassword();
+                String sessionPassword = session.getPassword();
+                if (null == sessionPassword) {
+                    throw MailExceptionCode.MISSING_CONNECT_PARAM.create("Session password not set. Either an invalid session or master authentication is not enabled (property \"com.openexchange.mail.passwordSource\" is not set to \"global\")");
+                }
+                mailConfig.password = sessionPassword;
             }
         } else {
             final String mailAccountPassword = mailAccount.getPassword();

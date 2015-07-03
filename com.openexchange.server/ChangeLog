@@ -1,6 +1,31 @@
+* 2015-06-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
+
 * 2015-05-29 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
+
+* 2015-08-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38260: Include distribution list entries when searching in contact module
+ 
+* 2015-06-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38600: Proper check if non-infostore file storage supports the "SEARCH_BY_TERM" capability
+ - Fix for bug 38603: Added option "com.openexchange.smtp.sendPartial" to allow partial send in case one or more (but not all) recipients are considered to be invalid on message
+                      transport
+ - Fix for bug 38604: Aligned .yml configuration file to current T-Online page layout for contact subscription
+
+* 2015-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38592: Ensure existence of table 'configdb.context2push_registration'
+
+* 2015-06-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
+ - Fix for bug 38553: Live connect against IMAP server to determine whether special folders are supposed to be used for standard mail folders
+                      (e.g. through advertising SPECIAL-USE flags)
 
 * 2015-05-27 - thorben.betten@open-xchange.com
 
@@ -58,6 +83,10 @@
 
  - Fix for bug 37340: Introduced checks for future database table layout
 
+* 2015-04-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37575: Use proper marker property to distribute to remote nodes in the cluster
+
 * 2015-04-02- thorben.betten@open-xchange.com
 
  - Fix for bug 37527: Pass header/cookie information on password change to AuthenticationService instance
@@ -65,6 +94,10 @@
 * 2015-03-18 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 37249: Ignore already processed images when updating a snippet.
+
+* 2015-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
 
 * 2015-03-12 - thorben.betten@open-xchange.com
 

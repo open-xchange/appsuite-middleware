@@ -60,16 +60,17 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 
 /**
- * SessionConfig
+ * {@link SessiondConfigImpl} - The default {@link SessiondConfigInterface} implementation.
  *
  * @author <a href="mailto:sebastian.kauss@open-xchange.org">Sebastian Kauss</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class SessiondConfigImpl implements SessiondConfigInterface {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SessiondConfigImpl.class);
 
-    private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L;
-    private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L;
+    private static final long SHORT_CONTAINER_LIFE_TIME = 6L * 60L * 1000L; // 6 minutes
+    private static final long LONG_CONTAINER_LIFE_TIME = 60L * 60L * 1000L; // 1 hour
 
     private int maxSession = 50000;
     private int maxSessionsPerUser = 100;
@@ -82,7 +83,13 @@ public class SessiondConfigImpl implements SessiondConfigInterface {
     private String obfuscationKey = "auw948cz,spdfgibcsp9e8ri+<#qawcghgifzign7c6gnrns9oysoeivn";
     private List<String> remoteParameterNames = Collections.emptyList();
 
-    public SessiondConfigImpl(final ConfigurationService conf) {
+    /**
+     * Initializes a new {@link SessiondConfigImpl}.
+     *
+     * @param conf The configuration service
+     */
+    public SessiondConfigImpl(ConfigurationService conf) {
+        super();
         maxSession = conf.getIntProperty("com.openexchange.sessiond.maxSession", maxSession);
         LOG.debug("Sessiond property: com.openexchange.sessiond.maxSession={}", maxSession);
 
