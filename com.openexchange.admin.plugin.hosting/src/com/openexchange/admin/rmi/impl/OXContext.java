@@ -1111,7 +1111,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         createaccess = createaccess.clone();
 
         Context ret = ctx;
-        ret = oxcox.create(ret, admin_user, createaccess, schemaSelectStrategy);
+        ret = oxcox.create(ret, admin_user, createaccess, schemaSelectStrategy == null ? getDefaultSchemaSelectStrategy() : schemaSelectStrategy);
         if (isAnyPluginLoaded()) {
             final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {

@@ -46,8 +46,8 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-package com.openexchange.admin.console.context;
 
+package com.openexchange.admin.console.context;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -72,6 +72,7 @@ import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 public abstract class ContextAbstraction extends UserAbstraction {
 
     private interface ClosureInterface {
+
         public ArrayList<String> getData(final Context ctx);
     }
 
@@ -99,7 +100,6 @@ public abstract class ContextAbstraction extends UserAbstraction {
             return string;
         }
 
-
         @Override
         public int getIndex() {
             return index;
@@ -123,6 +123,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
     private final static char OPT_NAME_DBNAME_SHORT = 'n';
     private final static String OPT_NAME_DBNAME_LONG = "name";
 
+    private static final String SCHEMA_OPT_DESC = "The schema name, where the context will be created. This bypasses any weight balancing. Must not be set, if \"schema-strategy\" is set.";
+    private static final String SCHEMA_OPT = "schema";
+
+    private static final String SCHEMA_STRATEGY_OPT_DESC = "The schema select strategy. \"automatic\" for automatic selection (default), \"in-memory\" for in memory selection. Must not be set, if \"schema\" option is set.";
+    private static final String SCHEMA_STRATEGY_OPT = "schema-strategy";
 
     public final static char OPT_CONTEXT_ADD_LOGIN_MAPPINGS_SHORT = 'L';
     public final static String OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG = "addmapping";
@@ -140,21 +145,27 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     private CLIOption databaseIdOption = null;
     private CLIOption databaseNameOption = null;
+    private CLIOption schemaOption;
+    private CLIOption schemaStrategyOption;
 
     protected Integer dbid = null;
     protected String dbname = null;
+    protected String schema;
+    protected String schemaStrategy;
+    
+    protected final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
+    protected final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
 
     protected Integer filestoreid = null;
 
     protected CLIOption targetFilestoreIDOption = null;
 
-
     private static final String OPT_NAME_CONTEXT_QUOTA_DESCRIPTION = "Context wide filestore quota in MB.";
     private final static char OPT_QUOTA_SHORT = 'q';
 
     private final static String OPT_QUOTA_LONG = "quota";
-    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION="master Admin password";
-    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION="master Admin user name";
+    protected static final String OPT_NAME_ADMINPASS_DESCRIPTION = "master Admin password";
+    protected static final String OPT_NAME_ADMINUSER_DESCRIPTION = "master Admin user name";
 
     protected CLIOption contextQuotaOption = null;
 
@@ -173,7 +184,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
         // future to check everytime
         for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
             if (ctxconsole instanceof ContextConsoleCreateInterface) {
-                ((ContextConsoleCreateInterface)ctxconsole).applyExtensionValuesFromCSV(nextLine, idarray, context);
+                ((ContextConsoleCreateInterface) ctxconsole).applyExtensionValuesFromCSV(nextLine, idarray, context);
             }
         }
     }
@@ -212,19 +223,19 @@ public abstract class ContextAbstraction extends UserAbstraction {
         // future to check everytime
         for (final ContextConsoleCommonInterface ctxconsole : this.subclasses) {
             if (ctxconsole instanceof ContextConsoleCreateInterface) {
-                ((ContextConsoleCreateInterface)ctxconsole).processCSVConstants(constantsMap);
+                ((ContextConsoleCreateInterface) ctxconsole).processCSVConstants(constantsMap);
             }
         }
     }
 
     @Override
     protected void setAdminPassOption(final AdminParser admp) {
-        this.adminPassOption = setShortLongOpt(admp,OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
+        this.adminPassOption = setShortLongOpt(admp, OPT_NAME_ADMINPASS_SHORT, OPT_NAME_ADMINPASS_LONG, OPT_NAME_ADMINPASS_DESCRIPTION, true, NeededQuadState.possibly);
     }
 
     @Override
     protected void setAdminUserOption(final AdminParser admp) {
-        this.adminUserOption= setShortLongOpt(admp,OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
+        this.adminUserOption = setShortLongOpt(admp, OPT_NAME_ADMINUSER_SHORT, OPT_NAME_ADMINUSER_LONG, OPT_NAME_ADMINUSER_DESCRIPTION, true, NeededQuadState.possibly);
     }
 
     protected void setExtensionOptions(final AdminParser parser, final Class<? extends ContextConsoleCommonInterface> clazz) {
@@ -240,14 +251,15 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
 
-    protected void setContextQuotaOption(final AdminParser parser,final boolean required ){
-        this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT,OPT_QUOTA_LONG,OPT_NAME_CONTEXT_QUOTA_DESCRIPTION,true, convertBooleantoTriState(required));
+    protected void setContextQuotaOption(final AdminParser parser, final boolean required) {
+        this.contextQuotaOption = setShortLongOpt(parser, OPT_QUOTA_SHORT, OPT_QUOTA_LONG, OPT_NAME_CONTEXT_QUOTA_DESCRIPTION, true, convertBooleantoTriState(required));
     }
 
     protected void sysoutOutput(final Context[] ctxs, final AdminParser parser) throws InvalidDataException {
         final ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
         for (final Context ctx : ctxs) {
             data.add(makeData(ctx, new ClosureInterface() {
+
                 @Override
                 public ArrayList<String> getData(final Context ctx) {
                     return getHumanReableDataOfAllExtensions(ctx, parser);
@@ -299,6 +311,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
         for (final Context ctx_tmp : ctxs) {
             data.add(makeData(ctx_tmp, new ClosureInterface() {
+
                 @Override
                 public ArrayList<String> getData(final Context ctx) {
                     return getCSVDataOfAllExtensions(ctx_tmp, parser);
@@ -311,11 +324,16 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
     protected void setDatabaseIDOption(final AdminParser parser) {
-        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT,OPT_NAME_DATABASE_ID_LONG,"The id of the database.",true, NeededQuadState.eitheror);
+        this.databaseIdOption = setShortLongOpt(parser, OPT_NAME_DATABASE_ID_SHORT, OPT_NAME_DATABASE_ID_LONG, "The id of the database.", true, NeededQuadState.eitheror);
     }
 
-    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required){
-        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT,OPT_NAME_DBNAME_LONG,"Name of the database",true, required);
+    protected void setDatabaseNameOption(final AdminParser parser, final NeededQuadState required) {
+        this.databaseNameOption = setShortLongOpt(parser, OPT_NAME_DBNAME_SHORT, OPT_NAME_DBNAME_LONG, "Name of the database", true, required);
+    }
+
+    protected void setSchemaOptions(AdminParser parser) {
+        schemaOption = setLongOpt(parser, SCHEMA_OPT, SCHEMA_OPT_DESC, true, false);
+        schemaStrategyOption = setLongOpt(parser, SCHEMA_STRATEGY_OPT, SCHEMA_STRATEGY_OPT_DESC, true, false);
     }
 
     protected final void displayDisabledMessage(final String id, final Integer ctxid, final AdminParser parser) {
@@ -388,6 +406,11 @@ public abstract class ContextAbstraction extends UserAbstraction {
         }
     }
 
+    protected void parseAndSetSchemaOptions(AdminParser parser) {
+        schema = (String) parser.getOptionValue(schemaOption);
+        schemaStrategy = (String) parser.getOptionValue(schemaStrategyOption);
+    }
+
     protected void setFilestoreIdOption(final AdminParser parser) {
         this.targetFilestoreIDOption = setShortLongOpt(parser, OPT_FILESTORE_SHORT, OPT_FILESTORE_LONG, "Target filestore id", true, NeededQuadState.needed);
     }
@@ -402,18 +425,21 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected Context getContext(final String[] nextLine, final int[] idarray) throws InvalidDataException, ParseException {
         final Context context = super.getContext(nextLine, idarray);
         setValue(nextLine, idarray, ContextConstants.contextname, new MethodStringClosure() {
+
             @Override
             public void callMethod(String value) throws ParseException, InvalidDataException {
                 context.setName(value);
             }
         });
         setValue(nextLine, idarray, ContextConstants.lmapping, new MethodStringClosure() {
+
             @Override
             public void callMethod(String value) throws ParseException, InvalidDataException {
                 context.addLoginMapping(value);
             }
         });
         setValue(nextLine, idarray, ContextConstants.quota, new MethodStringClosure() {
+
             @Override
             public void callMethod(String value) throws ParseException, InvalidDataException {
                 try {
@@ -532,9 +558,9 @@ public abstract class ContextAbstraction extends UserAbstraction {
 
     protected void applyDynamicOptionsToContext(final AdminParser parser, final Context ctx) {
         final Map<String, Map<String, String>> dynamicArguments = parser.getDynamicArguments();
-        for(final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
+        for (final Map.Entry<String, Map<String, String>> namespaced : dynamicArguments.entrySet()) {
             final String namespace = namespaced.getKey();
-            for(final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
+            for (final Map.Entry<String, String> pair : namespaced.getValue().entrySet()) {
                 final String name = pair.getKey();
                 final String value = pair.getValue();
 
@@ -544,4 +570,3 @@ public abstract class ContextAbstraction extends UserAbstraction {
     }
 
 }
-
