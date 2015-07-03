@@ -93,7 +93,7 @@ public class InMemorySchemaCache implements SchemaCache {
         SchemaInfo schemaInfo = getSchemaInfo(poolId);
         synchronized (schemaInfo) {
             if (false == isAccessible(schemaInfo)) {
-                schemaInfo.initializeWith(closure.getContextCountPerSchema(maxContexts));
+                schemaInfo.initializeWith(closure.getContextCountPerSchema(poolId, maxContexts));
             }
             return schemaInfo.getAndIncrementNextSchema(maxContexts);
         }

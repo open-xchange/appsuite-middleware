@@ -63,9 +63,10 @@ public interface ContextCountPerSchemaClosure {
     /**
      * Gets the number of contexts per schema that are located in given database identified by <code>poolId</code>.
      *
+     * @param poolId The identifier of the database pool
      * @param maxContexts The configured max. number of contexts allowed per schema
      * @return A mapping providing the count per schema
      * @throws StorageException If schema count cannot be returned
      */
-    Map<String, Integer> getContextCountPerSchema(int maxContexts) throws StorageException;
+    Map<String, Integer> getContextCountPerSchema(int poolId, int maxContexts) throws StorageException;
 }

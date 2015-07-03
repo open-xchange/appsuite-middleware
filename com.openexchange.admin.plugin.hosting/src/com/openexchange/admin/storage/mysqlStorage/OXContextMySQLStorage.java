@@ -1329,7 +1329,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             case IN_MEMORY:
                 // Get the schema name advertised by cache
                 schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
-                ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, db.getId().intValue(), ClientAdminThread.cache.getPool());
+                ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
                 String cachedSchemaName = schemaCache.getNextSchemaFor(db.getId().intValue(), this.CONTEXTS_PER_SCHEMA, closure);
                 if (null != cachedSchemaName) {
                     db.setScheme(cachedSchemaName);

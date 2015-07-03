@@ -65,21 +65,19 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 public class DefaultContextCountPerSchemaClosure implements ContextCountPerSchemaClosure {
 
     private final Connection configCon;
-    private final int poolId;
     private final OXAdminPoolInterface pool;
 
     /**
      * Initializes a new {@link DefaultContextCountPerSchemaClosure}.
      */
-    public DefaultContextCountPerSchemaClosure(Connection configCon, int poolId, OXAdminPoolInterface pool) {
+    public DefaultContextCountPerSchemaClosure(Connection configCon, OXAdminPoolInterface pool) {
         super();
         this.configCon = configCon;
-        this.poolId = poolId;
         this.pool = pool;
     }
 
     @Override
-    public Map<String, Integer> getContextCountPerSchema(int maxContexts) throws StorageException {
+    public Map<String, Integer> getContextCountPerSchema(int poolId, int maxContexts) throws StorageException {
         try {
             return pool.getContextCountPerSchema(configCon, poolId, maxContexts);
         } catch (PoolException e) {
