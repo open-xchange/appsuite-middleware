@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       &lt;sequence>
- *         &lt;element name="schemaName" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
+ *         &lt;element name="schema_name" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
  *         &lt;element name="strategy" type="{http://www.w3.org/2001/XMLSchema}date" minOccurs="0"/>
  *       &lt;/sequence>
  *     &lt;/restriction>
@@ -34,9 +34,9 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class SchemaSelectStrategy {
 
-    @XmlElement(nillable = true)
+    @XmlElement(name = "schema_name", nillable = true)
     protected String schemaName;
-    @XmlElement(nillable = true)
+    @XmlElement(name = "strategy", nillable = true)
     protected String strategy;
 
     /**
