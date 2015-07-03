@@ -73,6 +73,7 @@ import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -307,9 +308,15 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     MailMessage nestedMailMessage = MailMessageParser.getMessageContentFrom(mailPart);
                     if (null != nestedMailMessage) {
                         nestedMailMessage.setAccountId(mailInterface.getAccountID());
+
+                        // Prepare request/result objects
+                        AJAXRequestData requestData = req.getRequest();
+                        requestData.putParameter("embedded", "true");
+                        requestData.putParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, "false");
                         AJAXRequestResult requestResult = new AJAXRequestResult(nestedMailMessage, "mail");
-                        MailConverter.getInstance().convert2JSON(req.getRequest(), requestResult, req.getSession());
-                        JSONObject jNestedMail = (JSONObject) requestResult.getResultObject();
+
+                        // Generate JSON reperesentation
+                        JSONObject jNestedMail = MailConverter.getInstance().convertSingle4Get(nestedMailMessage, ParamContainer.getInstance(requestData), req.getSession(), mailInterface);
                         jNestedMail.remove(MailJSONField.UNREAD.getKey());
                         jNestedMail.remove(MailJSONField.FLAGS.getKey());
                         jNestedMail.remove(MailJSONField.USER.getKey());
