@@ -710,7 +710,11 @@ public abstract class ShareTest extends AbstractAJAXSession {
                 assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
             }
         } else if (RecipientType.GUEST.equals(expected.getType())) {
-            assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+            if (null == ((GuestRecipient) expected).getPassword()) {
+                assertEquals("Wrong authentication", AuthenticationMode.GUEST, actual.getAuthentication());
+            } else {
+                assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+            }
         }
     }
 

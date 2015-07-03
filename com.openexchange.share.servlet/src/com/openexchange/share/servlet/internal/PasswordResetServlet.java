@@ -75,7 +75,6 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
-import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -167,7 +166,6 @@ public class PasswordResetServlet extends HttpServlet {
                     User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
                     UserImpl user = new UserImpl(guest);
                     user.setPasswordMech(guest.getPasswordMech());
-                    user.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
                     userService.updateUser(user, context);
                     userService.invalidateUser(context, guestID);
 

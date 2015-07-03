@@ -97,8 +97,7 @@ public final class ShareServletUtils {
     }
 
     /**
-     * Authenticates the request to the share and performs a guest login, sending an appropriate HTTP response in case of unauthorized
-     * access.
+     * Authenticates the request to the share and performs a guest login.
      *
      * @param share The share
      * @param request The request

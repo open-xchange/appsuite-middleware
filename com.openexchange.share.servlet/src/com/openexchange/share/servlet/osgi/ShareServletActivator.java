@@ -68,8 +68,7 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.servlet.handler.AbstractShareHandler;
-import com.openexchange.share.servlet.handler.LoginShareHandler;
-import com.openexchange.share.servlet.handler.RedirectingShareHandler;
+import com.openexchange.share.servlet.handler.WebUIShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
@@ -123,11 +122,7 @@ public class ShareServletActivator extends HousekeepingActivator {
 
         // Register default handlers
         {
-            ShareHandler handler = new RedirectingShareHandler();
-            registerService(ShareHandler.class, handler, handler.getRanking());
-        }
-        {
-            ShareHandler handler = new LoginShareHandler();
+            ShareHandler handler = new WebUIShareHandler();
             registerService(ShareHandler.class, handler, handler.getRanking());
         }
     }
