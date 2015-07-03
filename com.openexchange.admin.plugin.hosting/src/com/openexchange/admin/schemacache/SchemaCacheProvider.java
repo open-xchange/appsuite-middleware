@@ -104,4 +104,13 @@ public class SchemaCacheProvider {
         return schemaCache;
     }
 
+    /**
+     * Optionally gets the schema cache (if already initialized).
+     *
+     * @return The schema cache or <code>null</code>
+     */
+    public SchemaCache optSchemaCache() {
+        return cacheReference.get();
+    }
+
 }
