@@ -6,7 +6,7 @@ BuildRequires:  ant
 BuildRequires:  ant-nodeps
 BuildRequires:  java-sdk-ibm >= 1.6.0
 Version:    	@OXVERSION@
-%define        ox_release 22
+%define        ox_release 23
 Release:     	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -47,9 +47,11 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
-* Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-07-02 (2611)
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2578)
-* Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)

@@ -1,14 +1,20 @@
+open-xchange-themes-default (7.6.2-23) stable; urgency=medium
+
+  * Build for patch 2015-07-02 (2611)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 13:08:21 +0200
+
 open-xchange-themes-default (7.6.2-22) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2578)
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 29 Jun 2015 17:05:17 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 11:29:41 +0200
 
 open-xchange-themes-default (7.6.2-21) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2542)
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 29 Jun 2015 16:16:13 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 10:38:34 +0200
 
 open-xchange-themes-default (7.6.2-20) stable; urgency=medium
 

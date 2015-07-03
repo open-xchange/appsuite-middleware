@@ -1,14 +1,20 @@
+open-xchange-linkedin (7.6.2-16) stable; urgency=medium
+
+  * Build for patch 2015-07-02 (2611)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 13:07:47 +0200
+
 open-xchange-linkedin (7.6.2-15) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2578)
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 29 Jun 2015 17:04:43 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 11:29:14 +0200
 
 open-xchange-linkedin (7.6.2-14) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2542)
 
- -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 29 Jun 2015 16:15:46 +0200
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 10:38:07 +0200
 
 open-xchange-linkedin (7.6.2-13) stable; urgency=medium
 
