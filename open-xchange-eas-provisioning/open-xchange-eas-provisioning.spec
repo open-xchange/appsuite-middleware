@@ -98,7 +98,7 @@ ox_add_property com.openexchange.mobile.configuration.generator.PemFile "" /opt/
 %config(noreplace) /opt/open-xchange/templates/*
 
 %changelog
-* Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
