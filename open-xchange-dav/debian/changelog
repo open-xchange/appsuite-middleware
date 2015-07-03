@@ -2,13 +2,13 @@ open-xchange-dav (7.6.2-22) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2578)
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 29 Jun 2015 17:04:21 +0200
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 11:28:57 +0200
 
 open-xchange-dav (7.6.2-21) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2542)
 
- -- Steffen Templin <marcus.klein@open-xchange.com>  Mon, 29 Jun 2015 16:15:30 +0200
+ -- Steffen Templin <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 10:37:49 +0200
 
 open-xchange-dav (7.6.2-20) stable; urgency=medium
 

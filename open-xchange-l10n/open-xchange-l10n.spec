@@ -726,9 +726,9 @@ done
 /opt/open-xchange/i18n/*en_GB*
 
 %changelog
-* Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2578)
-* Mon Jun 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-29 (2569)
