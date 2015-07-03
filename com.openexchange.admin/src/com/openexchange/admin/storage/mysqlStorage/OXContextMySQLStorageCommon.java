@@ -78,7 +78,8 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.Assignment;
+import com.openexchange.database.AssignmentInsertData;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -201,12 +202,12 @@ public class OXContextMySQLStorageCommon {
             loadDynamicAttributes(oxdb_read, cs);
             return cs;
         } finally {
-            closePreparedStatement(prep);
+            Databases.closeSQLStuff(prep);
             if (oxdb_read != null) {
                 try {
-                        cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
+                    cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
                 } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!",exp);
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
         }
@@ -395,7 +396,7 @@ public class OXContextMySQLStorageCommon {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closePreparedStatement(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -429,7 +430,7 @@ public class OXContextMySQLStorageCommon {
 
         try {
             final int serverId = ClientAdminThread.cache.getServerId();
-            ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+            ClientAdminThread.cache.getPool().writeAssignment(con, new AssignmentInsertData() {
                 @Override
                 public int getContextId() {
                     return i(ctx.getId());
@@ -568,63 +569,33 @@ public class OXContextMySQLStorageCommon {
         } catch (final SQLException e) {
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closePreparedStatement(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
     public void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
-        final HashSet<String> loginMappings = ctx.getLoginMappings();
-        final Integer ctxid = ctx.getId();
+        HashSet<String> loginMappings = ctx.getLoginMappings();
+        Integer ctxid = ctx.getId();
         PreparedStatement stmt = null;
-        PreparedStatement checkAvailable = null;
-        ResultSet found = null;
         try {
-            checkAvailable = configdb_write_con.prepareStatement("SELECT 1 FROM login2context WHERE login_info = ?");
             stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
             for (final String mapping : loginMappings) {
                 if (null != mapping) {
-                    checkAvailable.setString(1, mapping);
-                    found = checkAvailable.executeQuery();
-                    final boolean mappingTaken = found.next();
-                    found.close();
-
-                    if(mappingTaken) {
-                        throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.");
-                    }
-
                     stmt.setInt(1, ctxid.intValue());
                     stmt.setString(2, mapping);
-                    stmt.executeUpdate();
+                    try {
+                        stmt.executeUpdate();
+                    } catch (SQLException e) {
+                        throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.", e);
+                    }
                 }
             }
         } catch (final SQLException sql) {
             log.error("SQL Error", sql);
             throw sql;
         } finally {
-            closeResultSet(found);
-            closePreparedStatement(checkAvailable);
-            closePreparedStatement(stmt);
-
+            Databases.closeSQLStuff(stmt);
         }
     }
 
-    private void closeResultSet(final ResultSet rs) {
-        if (rs != null) {
-            try {
-                    rs.close();
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-        }
-    }
-
-    private void closePreparedStatement(final PreparedStatement stmt) {
-        if (stmt != null) {
-            try {
-                    stmt.close();
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-        }
-    }
 }

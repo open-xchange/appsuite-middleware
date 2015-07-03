@@ -71,6 +71,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
+import com.openexchange.database.AssignmentInsertData;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -210,7 +211,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void writeAssignment(Connection con, Assignment assign) throws OXException {
-        final boolean update = null != loadAssignment(con, assign.getContextId());
+        boolean update = assign instanceof AssignmentInsertData ? false : null != loadAssignment(con, assign.getContextId());
         Cache myCache = this.cache;
         if (null != myCache) {
             final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
