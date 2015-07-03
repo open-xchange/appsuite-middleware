@@ -185,12 +185,21 @@ public final class FolderServiceImpl implements FolderService {
 
     @Override
     public UserizedFolder getDefaultFolder(final User user, final String treeId, final ContentType contentType, final Type type, final Session session, final FolderServiceDecorator decorator) throws OXException {
+        /*
+         * prefer the default folder from config tree if possible
+         */
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
-        final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
-        if (null == folderStorage) {
-            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
+        String folderId = Tools.getConfiguredDefaultFolder(serverSession, contentType, type);
+        if (null == folderId) {
+            /*
+             * get default folder from storage, otherwise            
+             */
+            final FolderStorage folderStorage = FolderStorageRegistry.getInstance().getFolderStorageByContentType(treeId, contentType);
+            if (null == folderStorage) {
+                throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType.toString());
+            }
+            folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, type, new StorageParametersImpl(serverSession));
         }
-        final String folderId = folderStorage.getDefaultFolderID(serverSession.getUser(), treeId, contentType, type, new StorageParametersImpl(serverSession));
         return new GetPerformer(serverSession, decorator).doGet(treeId, folderId);
     }
 
