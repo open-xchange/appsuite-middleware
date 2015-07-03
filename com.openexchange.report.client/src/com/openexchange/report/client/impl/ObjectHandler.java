@@ -96,7 +96,7 @@ public class ObjectHandler {
         return (retval);
     }
 
-    public static Map<String, String> getServerConfiguration(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException {
+    protected static Map<String, String> getServerConfiguration(final MBeanServerConnection mbsc) throws IOException, InstanceNotFoundException, ReflectionException, MBeanException, MalformedObjectNameException, AttributeNotFoundException {
         final TabularData data = (TabularData) mbsc.getAttribute(new ObjectName(
             "com.openexchange.reporting",
             "name",
