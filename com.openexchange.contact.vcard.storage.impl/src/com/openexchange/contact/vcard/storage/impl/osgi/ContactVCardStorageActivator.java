@@ -54,10 +54,12 @@ import java.util.Hashtable;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageMetadataStore;
 import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageService;
+import com.openexchange.contact.vcard.storage.impl.DefaultVCardStorageFactory;
 import com.openexchange.contact.vcard.storage.impl.VCardCleaner;
 import com.openexchange.contact.vcard.storage.impl.VCardFilestoreLocationUpdater;
 import com.openexchange.database.DatabaseService;
@@ -86,7 +88,7 @@ public class ContactVCardStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigurationService.class, DatabaseService.class };
+        return new Class[] { ConfigurationService.class, DatabaseService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -95,15 +97,15 @@ public class ContactVCardStorageActivator extends HousekeepingActivator {
             LOG.info("starting bundle: com.openexchange.contact.vcard.storage.impl");
 
             registerService(FileLocationHandler.class, new VCardFilestoreLocationUpdater());
-            DefaultVCardStorageService vCardStorageService = new DefaultVCardStorageService();
+            VCardStorageFactory vCardStorageFactory = new DefaultVCardStorageFactory(new DefaultVCardStorageService());
             Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
             serviceProperties.put(EventConstants.EVENT_TOPIC, new String[] { VCardCleaner.EVENT_TOPIC });
-            registerService(EventHandler.class, new VCardCleaner(vCardStorageService), serviceProperties);
+            registerService(EventHandler.class, new VCardCleaner(getService(ConfigViewFactory.class), vCardStorageFactory), serviceProperties);
             registerService(VCardStorageMetadataStore.class, new DefaultVCardStorageMetadataStore(getService(DatabaseService.class)));
 
             boolean enabled = getService(ConfigurationService.class).getBoolProperty(COM_OPENEXCHANGE_CONTACT_STORE_V_CARDS, true);
             if (enabled) {
-                registerService(VCardStorageService.class, vCardStorageService);
+                registerService(VCardStorageFactory.class, vCardStorageFactory);
             }
         } catch (Exception exception) {
             LOG.error("error starting com.openexchange.contact.vcard.storage.impl", exception);

@@ -50,6 +50,7 @@
 package com.openexchange.contact.vcard.storage;
 
 import java.io.InputStream;
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -89,4 +90,11 @@ public interface VCardStorageService {
      * @throws OXException
      */
     boolean deleteVCard(String identifier, int contextId) throws OXException;
+
+    /**
+     * Signals the list of needed capabilities or <code>null</code>/empty list if nothing is needed.
+     *
+     * @return The list of needed capabilities or <code>null</code>
+     */
+    List<String> neededCapabilities();
 }

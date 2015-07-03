@@ -55,8 +55,10 @@ import java.util.EnumSet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.exception.OXException;
@@ -149,8 +151,12 @@ public abstract class ContactAction implements AJAXActionService {
      *
      * @return The vCard storage service, or <code>null</code> if not available
      */
-    protected VCardStorageService optVCardStorageService() throws OXException {
-        return serviceLookup.getOptionalService(VCardStorageService.class);
+    protected VCardStorageService optVCardStorageService(int contextId) {
+        VCardStorageFactory vCardStorageFactory = serviceLookup.getOptionalService(VCardStorageFactory.class);
+        if (vCardStorageFactory != null) {
+            return vCardStorageFactory.getVCardStorageService(serviceLookup.getService(ConfigViewFactory.class), contextId);
+        }
+        return null;
     }
 
     /**

@@ -49,64 +49,45 @@
 
 package com.openexchange.contact.vcard.storage.impl;
 
-import org.osgi.service.event.Event;
-import org.osgi.service.event.EventHandler;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
-import com.openexchange.event.CommonEvent;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.java.Strings;
 
 /**
- * {@link VCardCleaner}
+ * {@link DefaultVCardStorageFactory}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public class VCardCleaner implements EventHandler {
+public class DefaultVCardStorageFactory implements VCardStorageFactory {
 
-    public static final String EVENT_TOPIC = "com/openexchange/groupware/contact/delete";
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(DefaultVCardStorageFactory.class);
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardCleaner.class);
+    private final VCardStorageService vCardStorageService;
 
-    private final VCardStorageFactory vCardStorageFactory;
-
-    private final ConfigViewFactory configViewFactory;
-
-    /**
-     * Initializes a new {@link VCardCleaner}.
-     *
-     * @param vCardStorageFactory The underlying vCard storage
-     */
-    public VCardCleaner(ConfigViewFactory configViewFactory, VCardStorageFactory vCardStorageFactory) {
-        super();
-        this.vCardStorageFactory = vCardStorageFactory;
-        this.configViewFactory = configViewFactory;
+    public DefaultVCardStorageFactory(VCardStorageService vCardStorageService) {
+        this.vCardStorageService = vCardStorageService;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void handleEvent(Event event) {
-        if (null != event && EVENT_TOPIC.equals(event.getTopic()) && false == event.containsProperty(CommonEvent.REMOTE_MARKER)) {
-            CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
-            if (null != commonEvent && CommonEvent.DELETE == commonEvent.getAction()) {
-                int contextID = commonEvent.getContextId();
-                Contact contact = (Contact) commonEvent.getActionObj();
-                if (null != contact) {
-                    String vCardID = contact.getVCardId();
-                    if (!Strings.isEmpty(vCardID)) {
-                        try {
-                            VCardStorageService vCardStorageService = vCardStorageFactory.getVCardStorageService(configViewFactory, contextID);
-                            if (vCardStorageService != null) {
-                                vCardStorageService.deleteVCard(vCardID, contextID);
-                            }
-                        } catch (OXException oxException) {
-                            LOG.warn("Error while deleting the VCard with id {} in context {} from storage.", vCardID, contextID, oxException);
-                        }
-                    }
+    public VCardStorageService getVCardStorageService(ConfigViewFactory configViewFactory, int contextId) {
+        try {
+            for (String capability : this.vCardStorageService.neededCapabilities()) {
+                ConfigProperty<Boolean> filestoreCapability = configViewFactory.getView(-1, contextId).property(capability, boolean.class);
+                if (!filestoreCapability.get().booleanValue()) {
+                    LOG.info("Needed capability '{}' not available for context id {}. Unable to handle VCard for storage.", capability, contextId);
+                    return null;
                 }
             }
+        } catch (OXException oxException) {
+            LOG.warn("Unable to return requested VCardStorageService implementation.", oxException);
+            return null;
         }
+        return vCardStorageService;
     }
 }

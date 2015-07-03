@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,26 @@
  *
  */
 
-package com.openexchange.importexport.osgi;
+package com.openexchange.contact.vcard.storage;
 
-
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.ContactService;
-import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageFactory;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.generic.FolderUpdaterRegistry;
-import com.openexchange.importexport.actions.ExportActionFactory;
-import com.openexchange.importexport.actions.ImportActionFactory;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link ImportExportActivator}
+ * Factory to provide the registered {@link VCardStorageService} if all requirements to ensure a smooth usage are met.
  *
- * @author tobiasp
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class ImportExportActivator extends AJAXModuleActivator{
+public interface VCardStorageFactory {
 
-    public ImportExportActivator() {
-        super();
-    }
-
-	@Override
-	protected Class<?>[] getNeededServices() {
-		return new Class[]{
-		    ContactService.class,
-			FolderUpdaterRegistry.class,
-			ICalParser.class,
-			AppointmentSqlFactoryService.class,
-			CalendarCollectionService.class,
-			ConfigurationService.class,
-			ICalEmitter.class,
-			ConfigViewFactory.class,
-			VCardService.class
-		};
-	}
-
-	@Override
-	protected void startBundle() throws Exception {
-		ImportExportServices.LOOKUP.set(this);
-		registerModule(new ImportActionFactory(this), "import");
-		registerModule(new ExportActionFactory(this), "export");
-
-		track(VCardStorageFactory.class);
-		openTrackers();
-	}
-
-	@Override
-	protected void stopBundle() throws Exception {
-	    ImportExportServices.LOOKUP.set(null);
-	    super.stopBundle();
-	}
-
+    /**
+     * Returns the registered {@link VCardStorageService} if all requirements (like needed capabilities) are met.
+     *
+     * @param configViewFactory The {@link ConfigViewFactory}
+     * @param contextId The context identifier
+     * @return registered {@link VCardStorageService} if all requirements are met. Otherwise <code>null</code>
+     * @throws OXException
+     */
+    VCardStorageService getVCardStorageService(ConfigViewFactory configViewFactory, int contextId);
 }

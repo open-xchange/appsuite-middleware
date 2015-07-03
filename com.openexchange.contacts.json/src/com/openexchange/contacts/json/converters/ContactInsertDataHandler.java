@@ -56,9 +56,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.conversion.Data;
 import com.openexchange.conversion.DataArguments;
@@ -128,8 +130,15 @@ public final class ContactInsertDataHandler implements DataHandler {
             JSONArray jsonArray = new JSONArray();
             VCardService vCardService = services.getService(VCardService.class);
             ContactService contactService = services.getService(ContactService.class);
-            VCardStorageService vCardStorageService = contactService.supports(serverSession, folderID, ContactField.VCARD_ID) ?
-                services.getOptionalService(VCardStorageService.class) : null;
+
+            VCardStorageFactory vCardStorageFactory = services.getOptionalService(VCardStorageFactory.class);
+
+            VCardStorageService vCardStorageService = null;
+            if (vCardStorageFactory != null) {
+                vCardStorageService = contactService.supports(serverSession, folderID, ContactField.VCARD_ID) ?
+                    vCardStorageFactory.getVCardStorageService(services.getService(ConfigViewFactory.class), session.getContextId()) : null;
+            }
+
             searchIterator = vCardService.importVCards(inputStream, vCardService.createParameters(session).setKeepOriginalVCard(null != vCardStorageService));
             while (searchIterator.hasNext()) {
                 /*

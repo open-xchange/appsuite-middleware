@@ -54,9 +54,10 @@ import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilitySet;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONDataHandler;
@@ -76,7 +77,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ContactService.class, VCardService.class };
+        return new Class[] { ContactService.class, VCardService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -113,7 +114,7 @@ public class ContactJSONActivator extends AJAXModuleActivator {
         /*
          * track vCard storage service
          */
-        track(VCardStorageService.class);
+        track(VCardStorageFactory.class);
         openTrackers();
     }
 

@@ -51,7 +51,6 @@ package com.openexchange.consistency.osgi;
 
 import org.slf4j.Logger;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 
@@ -76,7 +75,6 @@ public final class ConsistencyActivator extends HousekeepingActivator {
 
         track(ManagementService.class, new MBeanRegisterer(context));
         trackService(VCardStorageMetadataStore.class);
-        trackService(VCardStorageService.class);
 
         openTrackers();
     }

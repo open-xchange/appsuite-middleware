@@ -145,7 +145,7 @@ public class GetVCardAction extends ContactAction {
         Contact contact = getContactService().getUser(session, session.getUserId());
         InputStream originalVCard = null;
         if (null != contact.getVCardId()) {
-            VCardStorageService vCardStorageService = optVCardStorageService();
+            VCardStorageService vCardStorageService = optVCardStorageService(session.getContextId());
             if (null != vCardStorageService) {
                 originalVCard = vCardStorageService.getVCard(contact.getVCardId(), session.getContextId());
             }
