@@ -567,14 +567,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     throw MimeMailException.handleMessagingException((MessagingException) cause, null, session);
                 }
             } else if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
-                final StringBuilder sb = new StringBuilder("Requested mail could not be found  (");
-                sb.append("folder=").append(paramContainer.getStringParam(AJAXServlet.PARAMETER_FOLDERID));
-                sb.append(", id=").append(paramContainer.getStringParam(AJAXServlet.PARAMETER_ID));
-                sb.append(", user=").append(session.getUserId());
-                sb.append(", context=").append(session.getContextId()).append(')');
-                sb.append("Most likely this is caused by concurrent access of multiple clients ");
-                sb.append("while one performed a delete on affected mail.");
-                LOG.warn(sb.toString(), e);
+                LOG.warn("Requested mail could not be found  (folder={}, id={}, user={}, context={}). Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", paramContainer.getStringParam(AJAXServlet.PARAMETER_FOLDERID), paramContainer.getStringParam(AJAXServlet.PARAMETER_ID), session.getUserId(), session.getContextId(), e);
             }
             throw e;
         }
