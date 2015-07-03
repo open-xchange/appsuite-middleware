@@ -287,6 +287,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
             // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
             conForConfigDB.commit();
+            // Force to re-initialize schema cache on next access
+            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != schemaCache) {
+                schemaCache.clearFor(poolId);
+            }
             LOG.info("Context {} deleted.", ctx.getId());
         } catch (final OXException e) {
             LOG.error("", e);
