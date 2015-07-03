@@ -1,3 +1,7 @@
+* 2015-07-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service 
+
 * 2015-07-01 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 38936: Prefer display name as sort name for distribution lists
