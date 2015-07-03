@@ -2487,7 +2487,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         } while (result.next());
                         return map;
                     } catch (PoolException e) {
-                        LOG.error("SQL Error", e);
+                        LOG.error("Pool Error", e);
                         throw new StorageException(e);
                     } catch (SQLException e) {
                         LOG.error("SQL Error", e);
