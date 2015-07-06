@@ -51,6 +51,7 @@ package com.openexchange.sessiond;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.Collections;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
@@ -143,6 +144,11 @@ public class AbstractSimSessiondService implements SessiondService {
     }
 
     @Override
+    public void removeUserSessionsGlobally(int userId, int contextId) throws OXException {
+        // Nope
+    }
+
+    @Override
     public Collection<Session> getSessions(final int userId, final int contextId) {
         return null;
     }
@@ -169,4 +175,15 @@ public class AbstractSimSessiondService implements SessiondService {
     public void removeContextSessionsGlobal(Set<Integer> contextIds) {
         // Nothing to do
     }
+
+    @Override
+    public Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException {
+        return Collections.emptyList();
+    }
+
 }

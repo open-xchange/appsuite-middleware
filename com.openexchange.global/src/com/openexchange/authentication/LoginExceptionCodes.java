@@ -151,9 +151,15 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A password is required to continue. Please choose one and try again.
      */
-    NEW_PASSWORD_REQUIRED("A password is required to continue. Please choose one and try again.", NEW_PASSWORD_REQUIRED_MSG, Category.CATEGORY_USER_INPUT, 23)
-
-    ;
+    NEW_PASSWORD_REQUIRED("A password is required to continue. Please choose one and try again.", NEW_PASSWORD_REQUIRED_MSG, Category.CATEGORY_USER_INPUT, 23),
+    /**
+     * Thrown on login attempts that target a disabled authentication mechanism. I.e. a proprietary login mechanism is used that bypasses
+     * the authentication service. In those cases an authentication service can be registered that always throws this exception, which
+     * in turn leads to responses that denote the unavailability of the used login mechanism (e.g. '403 Forbidden' for WebDAV requests).
+     *
+     * Authentication via this method is disabled.
+     */
+    AUTHENTICATION_DISABLED("Authentication via this method is disabled.", LoginExceptionMessages.AUTHENTICATION_DISABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 24);
 
     private final String message;
 
