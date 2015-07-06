@@ -366,25 +366,6 @@ public final class ServerActivator extends HousekeepingActivator {
         }
     }
 
-    private static int parseInt(final int index, final String[] sa, final int defaultValue) {
-        if (null == sa) {
-            return defaultValue;
-        }
-        if (index >= sa.length) {
-            return defaultValue;
-        }
-        final String toParse = sa[index];
-        if (null == toParse) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(toParse.trim());
-        } catch (NumberFormatException e) {
-            LOG.error("Not an integer: {}", toParse, e);
-            return defaultValue;
-        }
-    }
-
     @Override
     protected void startBundle() throws Exception {
         final BundleContext context = this.context;
