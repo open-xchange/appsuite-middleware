@@ -87,8 +87,8 @@ public class ConfigCascade implements ConfigViewFactory {
 
     @Override
     public ConfigView getView(final int user, final int context) {
-        if (user < 1) {
-            if (context < 1) {
+        if (user <= 0) {
+            if (context <= 0) {
                 return getView();
             }
             return new View(-1, context);
@@ -135,6 +135,7 @@ public class ConfigCascade implements ConfigViewFactory {
         final int user;
 
         View(int user, int context) {
+            super();
             this.user = user;
             this.context = context;
         }
