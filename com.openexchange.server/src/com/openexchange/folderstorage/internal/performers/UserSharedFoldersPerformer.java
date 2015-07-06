@@ -73,11 +73,8 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
-import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -86,57 +83,57 @@ import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link VisibleFoldersPerformer} - Serves the request.
+ * {@link UserSharedFoldersPerformer}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerformer {
+public class UserSharedFoldersPerformer extends AbstractUserizedFolderPerformer {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VisibleFoldersPerformer.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UserSharedFoldersPerformer.class);
 
     /**
-     * Initializes a new {@link VisibleFoldersPerformer} from given session.
+     * Initializes a new {@link UserSharedFoldersPerformer} from given session.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @throws OXException If passed session is invalid
      */
-    public VisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator) throws OXException {
+    public UserSharedFoldersPerformer(ServerSession session, FolderServiceDecorator decorator) throws OXException {
         super(session, decorator);
     }
 
     /**
-     * Initializes a new {@link VisibleFoldersPerformer} from given user-context-pair.
+     * Initializes a new {@link UserSharedFoldersPerformer} from given user-context-pair.
      *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      */
-    public VisibleFoldersPerformer(final User user, final Context context, final FolderServiceDecorator decorator) {
+    public UserSharedFoldersPerformer(User user, Context context, FolderServiceDecorator decorator) {
         super(user, context, decorator);
     }
 
     /**
-     * Initializes a new {@link VisibleFoldersPerformer}.
+     * Initializes a new {@link UserSharedFoldersPerformer}.
      *
      * @param session The session
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      * @throws OXException If passed session is invalid
      */
-    public VisibleFoldersPerformer(final ServerSession session, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
+    public UserSharedFoldersPerformer(ServerSession session, FolderServiceDecorator decorator, FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(session, decorator, folderStorageDiscoverer);
     }
 
     /**
-     * Initializes a new {@link VisibleFoldersPerformer}.
+     * Initializes a new {@link UserSharedFoldersPerformer}.
      *
      * @param user The user
      * @param context The context
      * @param decorator The optional folder service decorator
      * @param folderStorageDiscoverer The folder storage discoverer
      */
-    public VisibleFoldersPerformer(final User user, final Context context, final FolderServiceDecorator decorator, final FolderStorageDiscoverer folderStorageDiscoverer) {
+    public UserSharedFoldersPerformer(User user, Context context, FolderServiceDecorator decorator, FolderStorageDiscoverer folderStorageDiscoverer) {
         super(user, context, decorator, folderStorageDiscoverer);
     }
 
@@ -150,47 +147,25 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
      * @return The user-sensitive subfolders
      * @throws OXException If a folder error occurs
      */
-    public List<UserizedFolder[]> doVisibleFolders(final String treeId, final ContentType contentType, final boolean all, final Type type, final Type... otherTypes) throws OXException {
-        if (null == otherTypes || 0 == otherTypes.length) {
-            return Collections.<UserizedFolder[]> singletonList(doVisibleFolders(treeId, contentType, type, all));
-        }
-        final List<UserizedFolder[]> list = new ArrayList<UserizedFolder[]>(otherTypes.length + 1);
-        list.add(doVisibleFolders(treeId, contentType, type, all));
-        for (final Type otherType : otherTypes) {
-            list.add(doVisibleFolders(treeId, contentType, otherType, all));
-        }
-        return list;
-    }
-
-    /**
-     * Performs the <code>LIST</code> request.
-     *
-     * @param treeId The tree identifier
-     * @param parentId The parent folder identifier
-     * @param all <code>true</code> to get all subfolders regardless of their subscription status; otherwise <code>false</code> to only get
-     *            subscribed ones
-     * @return The user-sensitive subfolders
-     * @throws OXException If a folder error occurs
-     */
-    public UserizedFolder[] doVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all) throws OXException {
-        final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorageByContentType(treeId, contentType);
+    public UserizedFolder[] doSharedFolders(final String treeId, ContentType contentType) throws OXException {
+        FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorageByContentType(treeId, contentType);
         if (null == folderStorage) {
             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
         }
-        final boolean started = folderStorage.startTransaction(storageParameters, false);
+        boolean started = folderStorage.startTransaction(storageParameters, false);
         try {
-            final List<SortableId> allSubfolderIds;
+            final List<SortableId> allFolderIds;
             try {
-                allSubfolderIds = Arrays.asList(folderStorage.getVisibleFolders(treeId, contentType, type, storageParameters));
-            } catch (final UnsupportedOperationException e) {
+                allFolderIds = Arrays.asList(folderStorage.getUserSharedFolders(treeId, contentType, storageParameters));
+            } catch (UnsupportedOperationException e) {
                 LOG.warn("Operation is not supported for folder storage {} (content-type={})", folderStorage.getClass().getSimpleName(), contentType, e);
                 return new UserizedFolder[0];
             }
             /*
              * Sort them
              */
-            Collections.sort(allSubfolderIds);
-            final int size = allSubfolderIds.size();
+            Collections.sort(allFolderIds);
+            final int size = allFolderIds.size();
             final UserizedFolder[] subfolders = new UserizedFolder[size];
             /*
              * Get corresponding user-sensitive folders
@@ -201,7 +176,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
              */
             final Map<FolderStorage, TIntList> map = new HashMap<FolderStorage, TIntList>(4);
             for (int i = 0; i < size; i++) {
-                final String id = allSubfolderIds.get(i).getId();
+                final String id = allFolderIds.get(i).getId();
                 final FolderStorage tmp = folderStorageDiscoverer.getFolderStorage(treeId, id);
                 if (null == tmp) {
                     throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, id);
@@ -248,7 +223,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                             try {
                                 final List<String> ids = new ArrayList<String>(indexes.length);
                                 for (final int index : indexes) {
-                                    ids.add(allSubfolderIds.get(index).getId());
+                                    ids.add(allFolderIds.get(index).getId());
                                 }
                                 folders = tmp.getFolders(treeId, ids, newParameters);
                                 final Set<OXException> warnings = newParameters.getWarnings();
@@ -264,7 +239,7 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                  * Load them one-by-one
                                  */
                                 NextIndex: for (final int index : indexes) {
-                                    final String id = allSubfolderIds.get(index).getId();
+                                    final String id = allFolderIds.get(index).getId();
                                     /*
                                      * Get subfolder from appropriate storage
                                      */
@@ -279,12 +254,10 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                     /*
                                      * Check for subscribed status dependent on parameter "all"
                                      */
-                                    if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                        final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
-                                        if (userPermission.isVisible()) {
-                                            subfolders[index] =
-                                                getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
-                                        }
+                                    final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
+                                    if (userPermission.isVisible()) {
+                                        subfolders[index] =
+                                            getUserizedFolder(subfolder, userPermission, treeId, true, true, newParameters, openedStorages);
                                     }
                                 }
                             } else {
@@ -296,15 +269,10 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
                                 for (final int index : indexes) {
                                     if (j < size) {
                                         final Folder subfolder = folders.get(j++);
-                                        /*
-                                         * Check for subscribed status dependent on parameter "all"
-                                         */
-                                        if (all || (subfolder.isSubscribed() || subfolder.hasSubscribedSubfolders())) {
-                                            final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
-                                            if (userPermission.isVisible()) {
-                                                subfolders[index] =
-                                                    getUserizedFolder(subfolder, userPermission, treeId, all, true, newParameters, openedStorages);
-                                            }
+                                        final Permission userPermission = CalculatePermission.calculate(subfolder, performer, getAllowedContentTypes());
+                                        if (userPermission.isVisible()) {
+                                            subfolders[index] =
+                                                getUserizedFolder(subfolder, userPermission, treeId, true, true, newParameters, openedStorages);
                                         }
                                     }
                                 }
@@ -337,21 +305,6 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
              */
             ThreadPools.takeCompletionService(completionService, taskCount, FACTORY);
             final UserizedFolder[] ret = trimArray(subfolders);
-            /*
-             * 2nd check for proper parent
-             */
-            if (SharedType.getInstance().equals(type)) {
-                final int userId = storageParameters.getUserId();
-                final int len = FolderObject.SHARED_PREFIX.length();
-                final StringBuilder sb = new StringBuilder(FolderObject.SHARED_PREFIX);
-                for (final UserizedFolder userizedFolder : ret) {
-                    final int createdBy = userizedFolder.getCreatedBy();
-                    if (createdBy > 0 && createdBy != userId) {
-                        sb.setLength(len);
-                        userizedFolder.setParentID(sb.append(createdBy).toString());
-                    }
-                }
-            }
             /*
              * Commit
              */

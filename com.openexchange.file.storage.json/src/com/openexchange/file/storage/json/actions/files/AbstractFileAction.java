@@ -152,6 +152,17 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(results, new Date(timestamp), "infostore");
     }
 
+    /**
+     * Creates an ajax request result wrapping the supplied search iterator.
+     *
+     * @param searchIterator The search iterator to wrap as ajax result
+     * @param request The underlying infostore request
+     * @return The ajax request result
+     */
+    protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
+        return new AJAXRequestResult(searchIterator, null, "infostore");
+    }
+
     public AJAXRequestResult result(final Delta<File> delta, final InfostoreRequest request) throws OXException {
         final SearchIterator<File> results = delta.results();
         JSONArray array = null;

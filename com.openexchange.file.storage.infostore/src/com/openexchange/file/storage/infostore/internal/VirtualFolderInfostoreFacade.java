@@ -151,6 +151,11 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
+    public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        return Results.emptyTimedResult();
+    }
+
+    @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, ServerSession session) {
         return Results.emptyTimedResult();
     }

@@ -49,7 +49,18 @@
 
 package com.openexchange.folderstorage.database;
 
+import java.util.List;
+import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.SortableId;
+import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DatabaseFolderStorageUtility} - Utility methods for database folder storage.
@@ -159,6 +170,76 @@ public final class DatabaseFolderStorageUtility {
      */
     public static boolean hasSharedPrefix(final String str) {
         return null != str && str.startsWith(FolderObject.SHARED_PREFIX, 0);
+    }
+
+    /**
+     * Extracts the user's permission bits from the supplied storage paramters.
+     *
+     * @param storageParameters The storage parameters
+     * @return The permission bits
+     */
+    public static UserPermissionBits getUserPermissionBits(StorageParameters storageParameters) throws OXException {
+        Session session = storageParameters.getSession();
+        if (ServerSession.class.isInstance(session)) {
+            return ((ServerSession) session).getUserPermissionBits();
+        }
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(storageParameters.getUserId(), storageParameters.getContext());
+    }
+
+    /**
+     * Creates an array containing sortable identifiers from a list of folders.
+     *
+     * @param folders The folder to extract the identifiers for
+     * @return The extracted identifiers
+     */
+    public static SortableId[] extractIDs(List<FolderObject> folders) {
+        final SortableId[] ret = new SortableId[folders.size()];
+        for (int i = 0; i < ret.length; i++) {
+            final FolderObject folderObject = folders.get(i);
+            final String id = String.valueOf(folderObject.getObjectID());
+            ret[i] = new DatabaseId(id, i, folderObject.getFolderName());
+        }
+        return ret;
+    }
+
+    /**
+     * Localizes the display names of the supplied folders based on a specific locale.
+     *
+     * @param folders The folders
+     * @param locale The target locale
+     */
+    public static void localizeFolderNames(List<FolderObject> folders, Locale locale) throws OXException {
+        StringHelper stringHelper = null;
+        for (final FolderObject folderObject : folders) {
+            /*
+             * Check if folder is user's default folder and set locale-sensitive name
+             */
+            if (folderObject.isDefaultFolder()) {
+                final int module = folderObject.getModule();
+                if (FolderObject.CALENDAR == module) {
+                    {
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(locale);
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CALENDAR_FOLDER_NAME));
+                    }
+                } else if (FolderObject.CONTACT == module) {
+                    {
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(locale);
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_CONTACT_FOLDER_NAME));
+                    }
+                } else if (FolderObject.TASK == module) {
+                    {
+                        if (null == stringHelper) {
+                            stringHelper = StringHelper.valueOf(locale);
+                        }
+                        folderObject.setFolderName(stringHelper.getString(FolderStrings.DEFAULT_TASK_FOLDER_NAME));
+                    }
+                }
+            }
+        }
     }
 
 }

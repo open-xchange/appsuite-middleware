@@ -104,10 +104,11 @@ import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.session.ServerSession;
 
@@ -814,6 +815,39 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 return name + ' ' + counter;
             }
         }
+    }
+
+    protected static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
+        new ThreadPools.ExpectedExceptionFactory<OXException>() {
+
+            @Override
+            public Class<OXException> getType() {
+                return OXException.class;
+            }
+
+            @Override
+            public OXException newUnexpectedError(final Throwable t) {
+                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
+            }
+        };
+
+    /**
+     * Creates a newly allocated array containing all elements of specified array in the same order except <code>null</code> values.
+     *
+     * @param userizedFolders The array to trim
+     * @return A newly allocated copy-array with <code>null</code> elements removed
+     */
+    protected static UserizedFolder[] trimArray(final UserizedFolder[] userizedFolders) {
+        if (null == userizedFolders) {
+            return new UserizedFolder[0];
+        }
+        final List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
+        for (final UserizedFolder uf : userizedFolders) {
+            if (null != uf) {
+                l.add(uf);
+            }
+        }
+        return l.toArray(new UserizedFolder[l.size()]);
     }
 
 }

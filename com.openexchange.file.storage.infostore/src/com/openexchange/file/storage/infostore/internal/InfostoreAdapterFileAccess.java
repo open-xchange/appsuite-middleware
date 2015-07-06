@@ -543,6 +543,13 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
     }
 
     @Override
+    public SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException {
+        TimedResult<DocumentMetadata> documents = getInfostore(null).getUserSharedDocuments(
+            getMatching(fields), getMatching(sort), getSortDirection(order), -1, -1, sessionObj);
+        return new InfostoreTimedResult(documents).results();
+    }
+
+    @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
         final TimedResult<DocumentMetadata> versions = getInfostore(folderId).getVersions(ID(id), sessionObj);
         return new InfostoreTimedResult(versions);
