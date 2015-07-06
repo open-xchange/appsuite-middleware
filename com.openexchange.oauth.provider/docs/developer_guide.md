@@ -58,13 +58,13 @@ Authorization Flow
   </tbody>
 </table>
 
-The response is a redirect to a special App Suite login screen. E.g.:
+The response is a login screen. You propably want to display it within a popup window:
+![OAuth Login Screen](login_screen.png "OAuth Login Screen")
 
-    HTTP/1.1 302 Found
-    Location: https://ox.example.com/appsuite#login_type=oauth&client_id=ZGVmYXVsdA/db425f60355f4abb92f60f1720821dfbac35fa570fe646e482b0df2ab5eaa5cc&scope=read_contacts&state=1234&csrf_token=02ef297c73fb444aaddb7eb368853554&redirect_uri=https://myclient.com/oauth/callback&language=en_US
-    Set-Cookie: JSESSIONID=2413692048224419097.OX0; Path=/; Secure; HttpOnly
+After signing in the user gets display a screen where he can choose to grant or deny access to the requesting application:
+![OAuth Grant Screen](grant_screen.png "OAuth Grant Screen")
 
-The login screen will present all necessary information to the user, i.e. which app tries to obtain access for which scopes. The user can then decide to grant access (by providing his credentials) or to deny the request. In both cases as well as in certain error cases an authorization code or an error is provided to your application via another redirect:
+This screen will present all necessary information to the user, i.e. which app tries to obtain access for which scopes. The user can then decide to grant access (by providing his credentials) or to deny the request. In both cases as well as in certain error cases an authorization code or an error is provided to your application via another redirect:
 
     HTTP/1.1 302 Found
     Location: https://myclient.com/oauth/callback?code=07d3c9d7e6fc4e828c600bba0eee2ad0&state=1234
