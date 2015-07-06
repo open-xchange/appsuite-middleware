@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.share.servlet
 Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax,
+Import-Package: com.google.common.io;version="18.0.0",
+ com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.login,
  com.openexchange.ajax.osgi,

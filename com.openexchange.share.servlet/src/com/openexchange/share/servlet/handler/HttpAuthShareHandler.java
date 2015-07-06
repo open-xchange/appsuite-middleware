@@ -59,6 +59,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 
@@ -113,15 +114,18 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
         if (false == handles(share, target, request, response)) {
             return ShareHandlerReply.NEUTRAL;
         }
+
         Session session = null;
         try {
             /*
              * get, authenticate and login as associated guest user
              */
-            ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
+            ShareLoginConfiguration shareLoginConfig = ShareServletUtils.getShareLoginConfiguration();
             LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions());
+            ShareLoginMethod shareLoginMethod = getShareLoginMethod(share);
+            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), shareLoginMethod);
             if (null == loginResult) {
+                shareLoginMethod.sendUnauthorized(request, response);
                 return ShareHandlerReply.DENY;
             }
             session = loginResult.getSession();

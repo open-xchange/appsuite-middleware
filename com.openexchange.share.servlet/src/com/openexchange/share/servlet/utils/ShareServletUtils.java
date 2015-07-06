@@ -54,11 +54,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.AutoLoginTools;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
@@ -69,13 +71,17 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
-import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.UserService;
 
 
@@ -89,11 +95,65 @@ public final class ShareServletUtils {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServletUtils.class);
 
+    private static final AtomicReference<ShareLoginConfiguration> SHARE_LOGIN_CONFIG = new AtomicReference<ShareLoginConfiguration>();
+
     /**
      * Initializes a new {@link ShareServletUtils}.
      */
     private ShareServletUtils() {
         super();
+    }
+
+    /**
+     * Sets the login configuration for shares needed by redirecting handlers.
+     *
+     * @param configuration The login configuration for shares
+     */
+    public static void setShareLoginConfiguration(ShareLoginConfiguration configuration) {
+        SHARE_LOGIN_CONFIG.set(configuration);
+    }
+
+    /**
+     * Gets the login configuration for shares
+     *
+     * @return The login configuration for shares
+     */
+    public static ShareLoginConfiguration getShareLoginConfiguration() {
+        ShareLoginConfiguration config = SHARE_LOGIN_CONFIG.get();
+        if (config == null) {
+            throw new IllegalStateException("ShareServletUtils have not been initialized yet!");
+        }
+        return config;
+    }
+
+    public static boolean createSessionAndRedirect(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response, LoginMethodClosure loginMethod) throws OXException {
+        Session session = null;
+        try {
+            /*
+             * get, authenticate and login as associated guest user
+             */
+            ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
+            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
+            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), loginMethod);
+            if (null == loginResult) {
+                return false;
+            }
+            session = loginResult.getSession();
+            Tools.disableCaching(response);
+            LoginServlet.addHeadersAndCookies(loginResult, response);
+            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
+            /*
+             * construct & send redirect
+             */
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, loginConfig);
+            LOG.info("Redirecting share {} to {}...", share.getGuest().getBaseToken(), url);
+            response.sendRedirect(url);
+            return true;
+        } catch (IOException e) {
+            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
@@ -104,9 +164,10 @@ public final class ShareServletUtils {
      * @param response The response
      * @param loginConfig The login configuration to use
      * @param tranzient <code>true</code> to mark the session as transient, <code>false</code>, otherwise
+     * @param loginMethod The login method to use
      * @return The login result, or <code>null</code> if not successful
      */
-    public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
+    public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient, LoginMethodClosure loginMethod) throws OXException, IOException {
         /*
          * acquire guest information associated with the share
          */
@@ -136,11 +197,9 @@ public final class ShareServletUtils {
         /*
          * perform regular guest login
          */
-        ShareLoginMethod loginMethod = new ShareLoginMethod(context, user);
         Map<String, Object> properties = new HashMap<String, Object>();
         loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
         if (null == loginResult || null == loginResult.getSession()) {
-            loginMethod.sendUnauthorized(request, response);
             return null;
         }
         LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.",

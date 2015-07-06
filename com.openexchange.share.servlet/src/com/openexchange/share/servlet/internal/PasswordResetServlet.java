@@ -54,10 +54,13 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -65,16 +68,19 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
+import com.openexchange.login.internal.LoginMethodClosure;
+import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.DefaultRequestContext;
-import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
+import com.openexchange.share.servlet.auth.ShareAuthenticated;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -104,19 +110,16 @@ public class PasswordResetServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         try {
-            // Create a new HttpSession if it is missing
             request.getSession(true);
 
-            // Read share token
             String token = request.getParameter("share");
             if (Strings.isEmpty(token)) {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
-            // Get UUID to confirm
             String confirm = request.getParameter("confirm");
 
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
@@ -142,9 +145,9 @@ public class PasswordResetServlet extends HttpServlet {
             }
 
             String hash = getHash(storageUser.getUserPassword());
+            GuestShare guestShare = shareService.resolveToken(token);
             if (null == confirm) {
                 // Generate hash and send link to confirm
-                GuestShare guestShare = shareService.resolveToken(token);
 
                 /*
                  * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
@@ -155,26 +158,104 @@ public class PasswordResetServlet extends HttpServlet {
                 /*
                  * Redirect after notification was sent.
                  */
-                String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
+                String redirectUrl = ShareRedirectUtils.getLoginPageRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
                     URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
                     "reset_password");
-                response.setStatus(HttpServletResponse.SC_FOUND);
                 response.sendRedirect(redirectUrl);
             } else {
                 // Try to set new password
                 if (confirm.equals(hash)) {
-                    User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-                    UserImpl user = new UserImpl(guest);
-                    user.setPasswordMech(guest.getPasswordMech());
-                    userService.updateUser(user, context);
-                    userService.invalidateUser(context, guestID);
-
-                    response.sendRedirect(ShareLinks.generateExternal(DefaultRequestContext.newInstance(request, contextID, guestID), token));
+                    String redirectUrl = ShareRedirectUtils.getLoginPageRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
+                        URIUtil.encodeQuery(String.format(translate(ShareServletStrings.CHOOSE_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
+                        "reset_password") + "&confirm=" + URIUtil.encodeQuery(confirm);
+                    response.sendRedirect(redirectUrl);
                 } else {
                     LOG.debug("Bad attempt to reset password for share '{}'", token);
                     response.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
+            }
+        } catch (RateLimitedException e) {
+            e.send(response);
+        } catch (OXException e) {
+            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        try {
+            request.getSession(true);
+
+            String token = request.getParameter("share");
+            if (Strings.isEmpty(token)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            String confirm = request.getParameter("confirm");
+            if (Strings.isEmpty(confirm)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            String newPassword = request.getParameter("password");
+            if (Strings.isEmpty(newPassword)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
+
+            ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
+            GuestInfo guestInfo = shareService.resolveGuest(token);
+            if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
+                LOG.debug("Bad attempt to reset password for share '{}'", token);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
+            }
+
+            int contextID = guestInfo.getContextID();
+
+            UserService userService = ShareServiceLookup.getService(UserService.class, true);
+            final Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+
+            int guestID = guestInfo.getGuestID();
+            User storageUser = userService.getUser(guestID, context);
+
+            GuestService guestService = ShareServiceLookup.getService(GuestService.class);
+            if ((guestService != null) && (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) && (storageUser.isGuest()) && (guestService.isCrossContextGuestHandlingEnabled())) {
+                storageUser = guestService.alignUserWithGuest(storageUser, context.getContextId());
+            }
+
+            String hash = getHash(storageUser.getUserPassword());
+            if (confirm.equals(hash)) {
+                GuestShare guestShare = shareService.resolveToken(token);
+                User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+                UserImpl user = new UserImpl(guest);
+                user.setPasswordMech(guest.getPasswordMech());
+                user.setUserPassword(newPassword);
+                userService.updateUser(user, context);
+                userService.invalidateUser(context, guestID);
+
+                final User updatedGuest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
+                LoginMethodClosure loginMethod = new LoginMethodClosure() {
+                    @Override
+                    public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
+                        return new ShareAuthenticated(updatedGuest, context);
+                    }
+                };
+
+                if (!ShareServletUtils.createSessionAndRedirect(guestShare, guestShare.getSingleTarget(), request, response, loginMethod)) {
+                    LOG.debug("Bad attempt to reset password for share '{}'", token);
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                }
+            } else {
+                LOG.debug("Bad attempt to reset password for share '{}'", token);
+                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                return;
             }
         } catch (RateLimitedException e) {
             e.send(response);
@@ -193,6 +274,7 @@ public class PasswordResetServlet extends HttpServlet {
         md.update(toHash.getBytes("UTF-8"));
         md.update(loginConfig.getCookieHashSalt());
         byte[] hash = md.digest();
-        return com.openexchange.tools.encoding.Base64.encode(hash);
+        // URL safe encoding without padding. Don't use plain base64 here!
+        return BaseEncoding.base64Url().omitPadding().encode(hash);
     }
 }

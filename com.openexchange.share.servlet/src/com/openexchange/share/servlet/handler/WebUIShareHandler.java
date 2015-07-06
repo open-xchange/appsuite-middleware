@@ -51,23 +51,17 @@ package com.openexchange.share.servlet.handler;
 
 import java.io.IOException;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.ajax.LoginServlet;
-import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.login.LoginResult;
 import com.openexchange.notification.FullNameBuilder;
-import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -77,11 +71,10 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
+import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.share.servlet.utils.ShareRedirectUtils;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
-import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.user.UserService;
 
 /**
@@ -116,7 +109,12 @@ public class WebUIShareHandler extends AbstractShareHandler {
         switch (authMode) {
             case ANONYMOUS:
             case GUEST:
-                return createSessionAndRedirect(share, target, request, response);
+                ShareLoginMethod shareLoginMethod = getShareLoginMethod(share);
+                if (ShareServletUtils.createSessionAndRedirect(share, target, request, response, shareLoginMethod)) {
+                    return ShareHandlerReply.ACCEPT;
+                }
+
+                return ShareHandlerReply.DENY;
             case ANONYMOUS_PASSWORD:
             case GUEST_PASSWORD:
                 return redirectToLoginPage(share, target, request, response);
@@ -148,7 +146,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
                 message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle())));
             }
 
-            String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestInfo, target, getShareLoginConfiguration().getLoginConfig(), message.toString(), "INFO", "login");
+            String redirectUrl = ShareRedirectUtils.getLoginPageRedirectUrl(guestInfo, target, ShareServletUtils.getShareLoginConfiguration().getLoginConfig(), message.toString(), "INFO", "login");
             response.sendRedirect(redirectUrl);
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
@@ -156,102 +154,6 @@ public class WebUIShareHandler extends AbstractShareHandler {
         } catch (RuntimeException e) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    private ShareHandlerReply createSessionAndRedirect(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
-        Session session = null;
-        try {
-            /*
-             * get, authenticate and login as associated guest user
-             */
-            ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
-            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
-            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions());
-            if (null == loginResult) {
-                return ShareHandlerReply.DENY;
-            }
-            session = loginResult.getSession();
-            Tools.disableCaching(response);
-            LoginServlet.addHeadersAndCookies(loginResult, response);
-            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
-            /*
-             * construct & send redirect
-             */
-            String url = getRedirectURL(session, loginResult.getUser(), share, target, loginConfig);
-            LOG.info("Redirecting share {} to {}...", share.getGuest().getBaseToken(), url);
-            response.sendRedirect(url);
-            return ShareHandlerReply.ACCEPT;
-        } catch (IOException e) {
-            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    // --------------------------------------------------------------------------------------------------------- //
-
-    private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
-    private static final Pattern P_SESSION = Pattern.compile("[session]", Pattern.LITERAL);
-    private static final Pattern P_USER = Pattern.compile("[user]", Pattern.LITERAL);
-    private static final Pattern P_USER_ID = Pattern.compile("[user_id]", Pattern.LITERAL);
-    private static final Pattern P_CONTEXT_ID = Pattern.compile("[context_id]", Pattern.LITERAL);
-    private static final Pattern P_LANGUAGE = Pattern.compile("[language]", Pattern.LITERAL);
-    private static final Pattern P_MODULE = Pattern.compile("[module]", Pattern.LITERAL);
-    private static final Pattern P_FOLDER = Pattern.compile("[folder]", Pattern.LITERAL);
-    private static final Pattern P_ITEM = Pattern.compile("[item]", Pattern.LITERAL);
-    private static final Pattern P_STORE = Pattern.compile("[store]", Pattern.LITERAL);
-
-    /**
-     * Constructs the redirect URL pointing to the share in the web interface.
-     *
-     * @param session The session
-     * @param user The user
-     * @param share The share
-     * @param target The share target within the share, or <code>null</code> if not addressed
-     * @param loginConfig The login configuration to use
-     * @return The redirect URL
-     */
-    protected static String getRedirectURL(Session session, User user, GuestShare share, ShareTarget target, LoginConfiguration loginConfig) {
-        /*
-         * prepare url
-         */
-        StringBuilder stringBuilder = new StringBuilder("[uiwebpath]#!&session=[session]&store=[store]&user=[user]&user_id=[user_id]&context_id=[context_id]");
-        int module = share.getCommonModule();
-        String folder = share.getCommonFolder();
-        String item = null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
-        if (0 != module) {
-            stringBuilder.append("&m=[module]");
-        }
-        if (null != folder) {
-            stringBuilder.append("&f=[folder]");
-        }
-        if (null != item) {
-            stringBuilder.append("&i=[item]");
-        }
-        String redirectLink = stringBuilder.toString();
-        /*
-         * replace templates
-         */
-        String uiWebPath = loginConfig.getUiWebPath();
-        //        uiWebPath = "/ox6/index.html";
-        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(ShareRedirectUtils.getLoginPageUrl(uiWebPath)));
-        redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
-        redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
-        redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
-        redirectLink = P_CONTEXT_ID.matcher(redirectLink).replaceAll(String.valueOf(session.getContextId()));
-        redirectLink = P_LANGUAGE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(String.valueOf(user.getLocale())));
-        if (0 != module) {
-            String name = ShareServiceLookup.getService(ModuleSupport.class).getShareModule(module);
-            redirectLink = P_MODULE.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(name));
-        }
-        if (null != folder) {
-            redirectLink = P_FOLDER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(folder));
-        }
-        if (null != item) {
-            redirectLink = P_ITEM.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(item));
-        }
-        redirectLink = P_STORE.matcher(redirectLink).replaceAll(loginConfig.isSessiondAutoLogin() ? "true" : "false");
-        return redirectLink;
     }
 
     private String displayName(GuestShare share) throws OXException {

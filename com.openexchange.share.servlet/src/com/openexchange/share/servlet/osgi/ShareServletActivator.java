@@ -67,11 +67,11 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.servlet.handler.AbstractShareHandler;
 import com.openexchange.share.servlet.handler.WebUIShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
+import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.user.UserService;
 
 /**
@@ -103,7 +103,7 @@ public class ShareServletActivator extends HousekeepingActivator {
 
         // Initialize login configuration for shares
         ShareLoginConfiguration loginConfig = new ShareLoginConfiguration(getService(ConfigurationService.class));
-        AbstractShareHandler.setShareLoginConfiguration(loginConfig);
+        ShareServletUtils.setShareLoginConfiguration(loginConfig);
         // Dependently registers Servlets
         {
             Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + "))");
@@ -130,7 +130,7 @@ public class ShareServletActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(ShareServletActivator.class).info("stopping bundle: \"com.openexchange.share.servlet\"");
-        AbstractShareHandler.setShareLoginConfiguration(null);
+        ShareServletUtils.setShareLoginConfiguration(null);
         ShareServiceLookup.set(null);
         super.stopBundle();
     }
