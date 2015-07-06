@@ -53,30 +53,24 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Charsets;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.servlet.internal.ShareServiceLookup;
 import com.openexchange.tools.encoding.URLCoder;
 
 /**
- * {@link RedirectLocationBuilder}
+ * Builds a relative redirect location to the login page.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RedirectLocationBuilder {
-
-    private static final Pattern P_UIWEBPATH = Pattern.compile("[uiwebpath]", Pattern.LITERAL);
+public class LoginLocationBuilder {
 
     private final List<Entry<String, String>> parameters;
 
     /**
-     * Initializes a new {@link RedirectLocationBuilder}
+     * Initializes a new {@link LoginLocationBuilder}
      */
-    public RedirectLocationBuilder() {
+    public LoginLocationBuilder() {
         super();
         parameters = new ArrayList<Entry<String,String>>();
     }
@@ -87,7 +81,7 @@ public class RedirectLocationBuilder {
      * @param authentication The authentication mode
      * @return The builder
      */
-    public RedirectLocationBuilder loginType(AuthenticationMode authentication) {
+    public LoginLocationBuilder loginType(AuthenticationMode authentication) {
         switch (authentication) {
             case ANONYMOUS_PASSWORD:
                 return parameter("login_type", "anonymous");
@@ -104,7 +98,7 @@ public class RedirectLocationBuilder {
      * @param token The share token to append
      * @return The builder
      */
-    public RedirectLocationBuilder share(String token) {
+    public LoginLocationBuilder share(String token) {
         return parameter("share", token);
     }
 
@@ -114,7 +108,7 @@ public class RedirectLocationBuilder {
      * @param target The share target to append, or <code>null</code> if not specified
      * @return The builder
      */
-    public RedirectLocationBuilder target(ShareTarget target) {
+    public LoginLocationBuilder target(ShareTarget target) {
         return null != target ? parameter("target", target.getPath()) : this;
     }
 
@@ -126,10 +120,33 @@ public class RedirectLocationBuilder {
      * @param status The message status
      * @return The builder
      */
-    public RedirectLocationBuilder message(MessageType type, String message, String status) {
+    public LoginLocationBuilder message(MessageType type, String message, String status) {
         parameter("message_type", type.toString());
         parameter("message", message);
         parameter("status", status);
+        return this;
+    }
+
+    /**
+     * Sets the login name, i.e. the guest users email address.
+     *
+     * @param name The login name
+     * @return
+     */
+    public LoginLocationBuilder loginName(String name) {
+        parameter("login_name", name);
+        return this;
+    }
+
+    /**
+     * Adds an additional parameter to the builder instance.
+     *
+     * @param name The parameter name
+     * @param value The parameter value
+     * @return The builder
+     */
+    public LoginLocationBuilder parameter(String name, String value) {
+        parameters.add(new AbstractMap.SimpleEntry<String, String>(name, value));
         return this;
     }
 
@@ -140,58 +157,13 @@ public class RedirectLocationBuilder {
      */
     public String build() {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(getLoginLink()).append('#');
+        stringBuilder.append(ShareRedirectUtils.getLoginLink()).append("#!");
         if (0 < parameters.size()) {
-            stringBuilder.append(parameters.get(0).getKey()).append('=').append(URLCoder.encode(parameters.get(0).getValue(), Charsets.UTF_8));
-            for (int i = 1; i < parameters.size(); i++) {
+            for (int i = 0; i < parameters.size(); i++) {
                 stringBuilder.append('&').append(parameters.get(i).getKey()).append('=').append(URLCoder.encode(parameters.get(i).getValue(), Charsets.UTF_8));
             }
         }
         return stringBuilder.toString();
-    }
-
-    /**
-     * Adds an additional parameter to the builder instance.
-     *
-     * @param name The parameter name
-     * @param value The parameter value
-     * @return The builder
-     */
-    private RedirectLocationBuilder parameter(String name, String value) {
-        parameters.add(new AbstractMap.SimpleEntry<String, String>(name, value));
-        return this;
-    }
-
-    /**
-     * Gets the relative path to the login page as defined by the <code>com.openexchange.share.loginLink</code> and
-     * <code>com.openexchange.UIWebPath</code> configuration properties.
-     *
-     * @return The relative login link, e.g. <code>/appsuite/ui</code>
-     */
-    private static String getLoginLink() {
-        ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-        String loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
-        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite");
-        return P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
-    }
-
-    /**
-     * Trims trailing and leading slashes from the supplied path.
-     *
-     * @param path The path
-     * @return The trimmed path
-     */
-    private static String trimSlashes(String path) {
-        String pazz = path;
-        if (null != pazz && 0 < pazz.length()) {
-            if ('/' == pazz.charAt(0)) {
-                pazz = pazz.substring(1);
-            }
-            if (0 < pazz.length() && '/' == pazz.charAt(pazz.length() - 1)) {
-                pazz = pazz.substring(0, pazz.length() - 1);
-            }
-        }
-        return pazz;
     }
 
 }

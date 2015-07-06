@@ -49,24 +49,13 @@
 
 package com.openexchange.share.servlet.utils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.Translator;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
 
@@ -88,40 +77,6 @@ public class ShareRedirectUtils {
     private static final Pattern P_FOLDER = Pattern.compile("[folder]", Pattern.LITERAL);
     private static final Pattern P_ITEM = Pattern.compile("[item]", Pattern.LITERAL);
     private static final Pattern P_STORE = Pattern.compile("[store]", Pattern.LITERAL);
-
-    /**
-     * Generates a redirect url targeting the login page.
-     *
-     * @param guestInfo - the guest info
-     * @param target - target item or null if not defined
-     * @return String with a redirect url
-     * @throws OXException
-     */
-    public static String getLoginPageRedirectUrl(final GuestInfo guestInfo, final ShareTarget target, final LoginConfiguration loginConfiguration, String message, String messageType,
-        String status) throws OXException {
-        String loginPageLink = getLoginPageUrl(loginConfiguration);
-
-        // Build URL
-        StringBuilder url = new StringBuilder(loginPageLink);
-
-        // Start fragment portion
-        url.append('#');
-        if (null != guestInfo) {
-            url.append("share=").append(urlEncode(guestInfo.getBaseToken()));
-            if (AuthenticationMode.ANONYMOUS_PASSWORD == guestInfo.getAuthentication()) {
-                url.append('&').append("login_type=anonymous");
-            } else {
-                url.append('&').append("login_type=guest").append('&').append("login_name=").append(urlEncode(guestInfo.getEmailAddress()));
-            }
-        }
-        if (null != target) {
-            url.append('&').append("target=").append(urlEncode(target.getPath()));
-        }
-        if (!Strings.isEmpty(message) && !Strings.isEmpty(messageType) && !Strings.isEmpty(status)) {
-            url.append("&message=").append(message).append("&message_type=").append(messageType).append("&status=").append(status);
-        }
-        return url.toString();
-    }
 
     /**
      * Constructs the redirect URL pointing to the share in the web interface.
@@ -153,9 +108,7 @@ public class ShareRedirectUtils {
         /*
          * replace templates
          */
-        String uiWebPath = loginConfig.getUiWebPath();
-        //        uiWebPath = "/ox6/index.html";
-        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(ShareRedirectUtils.getLoginPageUrl(uiWebPath)));
+        redirectLink = P_UIWEBPATH.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(getLoginLink()));
         redirectLink = P_SESSION.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(session.getSessionID()));
         redirectLink = P_USER.matcher(redirectLink).replaceAll(Matcher.quoteReplacement(user.getMail()));
         redirectLink = P_USER_ID.matcher(redirectLink).replaceAll(Integer.toString(user.getId()));
@@ -175,62 +128,17 @@ public class ShareRedirectUtils {
         return redirectLink;
     }
 
-    public static String getErrorRedirectUrl(String message, String status) {
+    /**
+     * Gets the relative path to the login page as defined by the <code>com.openexchange.share.loginLink</code> and
+     * <code>com.openexchange.UIWebPath</code> configuration properties.
+     *
+     * @return The relative login link, e.g. <code>/appsuite/ui</code>
+     */
+    public static String getLoginLink() {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
+        String loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
         String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite");
-        StringBuilder url = new StringBuilder(getLoginPageUrl(uiWebPath));
-        url.append("#&login_type=guest");
-        if (!Strings.isEmpty(message) && !Strings.isEmpty(status)) {
-            url.append("&message=").append(message).append("&message_type=").append("ERROR").append("&status=").append(status);
-        }
-        return url.toString();
-    }
-
-    /**
-     * Returns the url to the login page based on the given information.
-     *
-     * @param loginConfiguration - login configuration
-     * @return String with the url to login
-     */
-    public static String getLoginPageUrl(final LoginConfiguration loginConfiguration) {
-        String uiWebPath = loginConfiguration.getUiWebPath();
-        return getLoginPageUrl(uiWebPath);
-    }
-
-    /**
-     * Returns the url to the login page based on the given information.
-     *
-     * @param uiWebPath - Path to ui
-     * @return String with the url to login
-     */
-    public static String getLoginPageUrl(String uiWebPath) {
-        /*
-         * get configured login link
-         */
-        String loginLink;
-        {
-            ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
-            loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
-        }
-        /*
-         * replace templates
-         */
-        loginLink = P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
-        return loginLink;
-    }
-
-    /**
-     * Translates a string into application/x-www-form-urlencoded format using encoding "ISO-8859-1".
-     *
-     * @param s - String to encode
-     * @return "ISO-8859-1" encoded string
-     */
-    public static String urlEncode(final String s) {
-        try {
-            return URLEncoder.encode(s, "ISO-8859-1");
-        } catch (final UnsupportedEncodingException e) {
-            return s;
-        }
+        return P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
     }
 
     /**
@@ -251,14 +159,4 @@ public class ShareRedirectUtils {
         }
         return pazz;
     }
-
-    public static String translate(String toTranslate, Locale locale) throws OXException {
-        TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class);
-        if (null == factory) {
-            throw ServiceExceptionCode.absentService(TranslatorFactory.class);
-        }
-        Translator translator = factory.translatorFor(locale);
-        return translator.translate(toTranslate);
-    }
-
 }

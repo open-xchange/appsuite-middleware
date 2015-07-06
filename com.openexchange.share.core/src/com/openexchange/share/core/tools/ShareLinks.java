@@ -90,7 +90,7 @@ public class ShareLinks {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();
-        StringBuilder fragment = new StringBuilder(64).append("!!&app=io.ox/").append(module).append("&folder=").append(folder);
+        StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
         if (Strings.isNotEmpty(item)) {
             fragment.append("&item=").append(item);
         }

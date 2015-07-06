@@ -92,4 +92,6 @@ public class ShareServletStrings implements LocalizableStrings {
 
     public static final String SHARE_NOT_FOUND = "The share you are looking for does not exist.";
 
+    public static final String INVALID_REQUEST = "We were unable to process your request.";
+
 }

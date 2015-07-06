@@ -53,7 +53,6 @@ import java.io.IOException;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.httpclient.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
@@ -73,7 +72,8 @@ import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.auth.ShareLoginMethod;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.share.servlet.utils.MessageType;
+import com.openexchange.share.servlet.utils.LoginLocationBuilder;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
 import com.openexchange.user.UserService;
 
@@ -137,17 +137,27 @@ public class WebUIShareHandler extends AbstractShareHandler {
             if (null == proxy) {
                 displayName = displayName(share);
                 if (Strings.isEmpty(displayName)) {
-                    message.append(URIUtil.encodeQuery(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET)));
+                    message.append(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET));
                 } else {
-                    message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName)));
+                    message.append(String.format(translator.translate(ShareServletStrings.SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME), displayName));
                 }
             } else {
                 String type = target.isFolder() ? translator.translate(ShareServletStrings.FOLDER) : translator.translate(ShareServletStrings.FILE);
-                message.append(URIUtil.encodeQuery(String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle())));
+                message.append(String.format(translator.translate(ShareServletStrings.SHARE_WITH_TARGET), displayName, type, proxy.getTitle()));
             }
 
-            String redirectUrl = ShareRedirectUtils.getLoginPageRedirectUrl(guestInfo, target, ShareServletUtils.getShareLoginConfiguration().getLoginConfig(), message.toString(), "INFO", "login");
-            response.sendRedirect(redirectUrl);
+            LoginLocationBuilder location = new LoginLocationBuilder()
+                .share(guestInfo.getBaseToken())
+                .loginType(guestInfo.getAuthentication())
+                .message(MessageType.INFO, message.toString(), "login");
+            if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
+                location.loginName(guestInfo.getEmailAddress());
+            }
+            if (target != null) {
+                location.target(target);
+            }
+
+            response.sendRedirect(location.build());
             return ShareHandlerReply.ACCEPT;
         } catch (IOException e) {
             throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
