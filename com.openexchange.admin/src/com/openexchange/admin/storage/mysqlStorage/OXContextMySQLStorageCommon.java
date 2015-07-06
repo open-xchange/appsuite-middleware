@@ -64,8 +64,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -591,7 +589,7 @@ public class OXContextMySQLStorageCommon {
             stmt.setString(2, mapping);
             stmt.executeUpdate();
         } catch (final SQLException e) {
-            if (isPrimaryKeyConstraintViolation(e)) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
                 throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.", e);
             }
             log.error("SQL Error", e);
@@ -599,28 +597,6 @@ public class OXContextMySQLStorageCommon {
         } finally {
             Databases.closeSQLStuff(stmt);
         }
-    }
-
-    private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
-
-    private boolean isPrimaryKeyConstraintViolation(SQLException e) {
-        /*
-         * SQLState 23000: Integrity Constraint Violation
-         * Error: 1586 SQLSTATE: 23000 (ER_DUP_ENTRY_WITH_KEY_NAME)
-         * Error: 1062 SQLSTATE: 23000 (ER_DUP_ENTRY)
-         * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'my-login-name' for key 'PRIMARY'
-         * Message: Duplicate entry '%s' for key '%s'
-         */
-        if ("23000".equals(e.getSQLState())) {
-            int errorCode = e.getErrorCode();
-            if (1062 == errorCode || 1586 == errorCode) {
-                Matcher matcher = DUPLICATE_KEY.matcher(e.getMessage());
-                if (matcher.matches() && "PRIMARY".equals(matcher.group(2))) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
 }
