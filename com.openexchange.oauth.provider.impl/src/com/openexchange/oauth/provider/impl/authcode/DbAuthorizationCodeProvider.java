@@ -59,7 +59,6 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.scope.Scope;
-import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.tools.UserizedToken;
 import com.openexchange.server.ServiceLookup;
 
