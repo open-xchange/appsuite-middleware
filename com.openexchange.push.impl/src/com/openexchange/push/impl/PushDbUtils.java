@@ -344,7 +344,10 @@ public class PushDbUtils {
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
-                return false;
+                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    return false;
+                }
+                throw e;
             }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
