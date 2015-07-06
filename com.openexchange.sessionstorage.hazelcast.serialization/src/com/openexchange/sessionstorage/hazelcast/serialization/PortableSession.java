@@ -360,7 +360,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     private static <T> T parseObjectFromString(String s, Class<T> clazz) {
         try {
-            return clazz.getConstructor(new Class[] {String.class }).newInstance(s);
+            return clazz.getConstructor(new Class[] { String.class }).newInstance(s);
         } catch (Exception e) {
             return null;
         }

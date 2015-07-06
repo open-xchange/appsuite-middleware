@@ -112,8 +112,7 @@ public enum Client {
     /**
      * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
      */
-    WEBDAV_VCARD("WEBDAV_VCARD"),
-    ;
+    WEBDAV_VCARD("WEBDAV_VCARD");
 
     private final String clientId;
 

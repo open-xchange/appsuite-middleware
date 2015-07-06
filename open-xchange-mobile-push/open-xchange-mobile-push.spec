@@ -43,7 +43,7 @@ Authors:
 
 %install
 export NO_BRP_CHECK_BYTECODE_VERSION=true
-ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
+ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
 %clean
 %{__rm} -rf %{buildroot}
@@ -58,3 +58,7 @@ ant -lib build/lib -Dbasedir=build -DjavaVersion=1.7 -DdestDir=%{buildroot} -Dpa
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
+* Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Initial mobile push release.

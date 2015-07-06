@@ -1,6 +1,6 @@
 * 2015-07-03 - tobias.friedrich@open-xchange.com
 
- - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service 
+ - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service
 
 * 2015-07-01 - tobias.friedrich@open-xchange.com
 
@@ -118,6 +118,10 @@
  - Fix for bug 38603: Added option "com.openexchange.smtp.sendPartial" to allow partial send in case one or more (but not all) recipients are considered to be invalid on message
                       transport
  - Fix for bug 38604: Aligned .yml configuration file to current T-Online page layout for contact subscription
+
+* 2015-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38592: Ensure existence of table 'configdb.context2push_registration'
 
 * 2015-06-02 - martin.herfurth@open-xchange.com
 

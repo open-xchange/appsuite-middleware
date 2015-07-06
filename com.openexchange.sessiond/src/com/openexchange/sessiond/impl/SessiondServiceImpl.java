@@ -142,9 +142,6 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         SessionHandler.removeContextSessions(contextId);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
         SessionHandler.removeContextSessionsGlobal(contextIds);
