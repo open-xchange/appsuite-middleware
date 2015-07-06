@@ -3,7 +3,7 @@
     <!-- Enable JMX default configurator -->
     <jmxConfigurator />
 
-    <!--    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework. 
+    <!--    Propagates changes made to the level of any logback-classic logger onto the java.util.logging framework.
             If this listener will be deleted, ox backend will add it programmatically.-->
     <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator"/>
 
@@ -65,5 +65,8 @@
     <!-- A switch to control which exceptions are logged to the log file -->
     <!-- Set this to DEBUG to log all exceptions -->
     <logger name="com.openexchange.ajax.requesthandler.DispatcherServlet" level="INFO"/>
+
+    <!-- Debug if POParser takes so much time to load PO files. -->
+    <logger name="com.openexchange.i18n.impl.POTranslationsDiscoverer" level="TRACE"/>
 
 </configuration>
