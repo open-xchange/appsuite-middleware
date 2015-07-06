@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.cache.memory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
@@ -323,6 +324,56 @@ public final class FolderMap {
             reloadFolder(folderId, treeId, wrapper.loadSubfolders, session);
         }
         return ret;
+    }
+
+    /**
+     * Removes the folder hierarchy.
+     *
+     * @param folderId the folder id
+     * @param treeId the tree id
+     * @param ids The optional set to collect removed identifiers
+     */
+    public void removeHierarchy(String folderId, String treeId, Set<String> ids) {
+        removeHierarchy(folderId, treeId, true, true, ids);
+    }
+
+    private void removeHierarchy(String folderId, String treeId, boolean parent, boolean children, Set<String> ids) {
+        Wrapper wrapper = map.remove(keyOf(folderId, treeId));
+        if (null == wrapper) {
+            return;
+        }
+
+        if (null != ids) {
+            ids.add(folderId);
+        }
+
+        Folder ret = wrapper.getValue();
+        if (null == ret) {
+            return;
+        }
+
+        if (parent) {
+            String parentID = ret.getParentID();
+            if (null != parentID) {
+                removeHierarchy(parentID, treeId, true, false, ids);
+            }
+        }
+
+        if (children) {
+            String[] subfolderIDs = ret.getSubfolderIDs();
+            if (null == subfolderIDs) {
+                for (Wrapper wr : map.values()) {
+                    Folder f = wr.getIfNotElapsed(maxLifeMillis);
+                    if (null != f && folderId.equals(f.getParentID())) {
+                        removeHierarchy(f.getID(), treeId, false, true, ids);
+                    }
+                }
+            } else {
+                for (String subId : subfolderIDs) {
+                    removeHierarchy(subId, treeId, false, true, ids);
+                }
+            }
+        }
     }
 
     /**

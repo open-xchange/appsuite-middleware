@@ -327,6 +327,21 @@ public interface InfostoreFacade extends TransactionAware {
     TimedResult<DocumentMetadata> getDocuments(long folderId, Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException;
 
     /**
+     * Gets all documents that are considered as "shared" by the user, i.e. those documents of the user that have been shared to at least
+     * one other entity.
+     *
+     * @param columns The columns to set in returned documents
+     * @param sort The sort-by field
+     * @param order The order; see {@link #ASC} or {@link #DESC}
+     * @param start The start index (inclusive), or <code>-1</code> to start at the beginning
+     * @param end The end index (exclusive), or <code>-1</code> for no limitation
+     * @param session The associated session
+     * @return The folder's documents
+     * @throws OXException If retrieval fails
+     */
+    TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException;
+
+    /**
      * Gets the document's versions.
      *
      * @param id The document identifier

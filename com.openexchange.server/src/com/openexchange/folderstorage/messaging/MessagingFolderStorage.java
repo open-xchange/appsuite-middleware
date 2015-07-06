@@ -222,7 +222,12 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
-        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
+        throw new UnsupportedOperationException("MessagingFolderStorage.getVisibleSubfolders()");
+    }
+
+    @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        throw new UnsupportedOperationException("MessagingFolderStorage.getSharedFolders()");
     }
 
     private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws OXException {

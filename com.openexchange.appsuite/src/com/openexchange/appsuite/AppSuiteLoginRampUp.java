@@ -72,5 +72,4 @@ public class AppSuiteLoginRampUp extends DefaultAppSuiteLoginRampUp {
     public boolean contributesTo(String client) {
         return "open-xchange-appsuite".equals(client);
     }
-
 }

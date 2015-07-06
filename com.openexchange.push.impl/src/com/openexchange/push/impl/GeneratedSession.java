@@ -79,7 +79,7 @@ public final class GeneratedSession implements Session, Serializable {
         super();
         this.userId = userId;
         this.contextId = contextId;
-        parameters = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
+        parameters = new ConcurrentHashMap<String, Object>(8);
         sessionId = UUIDs.getUnformattedString(UUID.randomUUID());
     }
 

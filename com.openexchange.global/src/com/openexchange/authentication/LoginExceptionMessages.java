@@ -106,6 +106,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // A password is required to continue. Please choose one and try again.
     public static final String NEW_PASSWORD_REQUIRED_MSG = "A password is required to continue. Please choose one and try again.";
 
+    // Authentication via this method is disabled.
+    public static final String AUTHENTICATION_DISABLED_MSG = "Authentication via this method is disabled.";
+
     private LoginExceptionMessages() {
         super();
     }

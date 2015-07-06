@@ -1758,6 +1758,36 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
+    public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        Metadata[] cols = addLastModifiedIfNeeded(columns);
+        Context context = session.getContext();
+        User user = session.getUser();
+        /*
+         * search documents shared by user
+         */
+        InfostoreIterator iterator = InfostoreIterator.sharedDocumentsByUser(context, user, cols, sort, order, start, end, db);
+        iterator.setCustomizer(new DocumentCustomizer() {
+
+            @Override
+            public DocumentMetadata handle(DocumentMetadata document) {
+                /*
+                 * assume document still shareable
+                 */
+                document.setShareable(true);
+                return document;
+            }
+        });
+        TimedResult<DocumentMetadata> timedResult = new InfostoreTimedResult(iterator);
+        if (contains(columns, Metadata.LOCKED_UNTIL_LITERAL)) {
+            timedResult = lockedUntilLoader.add(timedResult, context, (Map<Integer, List<Lock>>) null);
+        }
+        if (contains(columns, Metadata.OBJECT_PERMISSIONS_LITERAL)) {
+            timedResult = objectPermissionLoader.add(timedResult, context, (Map<Integer, List<ObjectPermission>>) null);
+        }
+        return timedResult;
+    }
+
+    @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, final ServerSession session) throws OXException {
         return getVersions(id, Metadata.HTTPAPI_VALUES_ARRAY, null, 0, session);
     }
@@ -2162,7 +2192,8 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
      * @param session The session
      * @param searchIterator The search iterator as fetched from the search engine
      * @param fields The requested fields
-     * @param permissionsByFolderID A map holding the effective permissions of all used folders during the search
+     * @param permissionsByFolderID A map holding the effective permissions of all used folders during the search, or <code>null</code> to
+     *                              assume all documents being readable & shareable by the current user
      * @return The enhanced search results
      */
     private SearchIterator<DocumentMetadata> postProcessSearch(ServerSession session, SearchIterator<DocumentMetadata> searchIterator, Metadata[] fields, final Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID) throws OXException {
@@ -2170,7 +2201,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * check requested metadata
          */
         int sharedFilesFolderID = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
-        boolean containsSharedFilesResults = permissionsByFolderID.containsKey(I(sharedFilesFolderID));
+        boolean containsSharedFilesResults = null != permissionsByFolderID && permissionsByFolderID.containsKey(I(sharedFilesFolderID));
         boolean addLocked = contains(fields, Metadata.LOCKED_UNTIL_LITERAL);
         boolean addNumberOfVersions = contains(fields, Metadata.NUMBER_OF_VERSIONS_LITERAL);
         boolean addObjectPermissions = contains(fields, Metadata.OBJECT_PERMISSIONS_LITERAL);
@@ -2209,6 +2240,13 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (addShareable || containsSharedFilesResults) {
             for (DocumentMetadata document : documents) {
                 int physicalFolderID = (int) document.getFolderId();
+                if (null == permissionsByFolderID) {
+                    /*
+                     * assume document shareable & readable at physical location
+                     */
+                    document.setShareable(true);
+                    continue;
+                }
                 EffectiveInfostoreFolderPermission folderPermission = permissionsByFolderID.get(I(physicalFolderID));
                 if (null != folderPermission && (folderPermission.canReadAllObjects() || folderPermission.canReadOwnObjects() && document.getCreatedBy() == session.getUserId())) {
                     /*

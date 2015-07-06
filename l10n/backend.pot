@@ -1325,34 +1325,34 @@ msgstr ""
 #.
 #. * register ajax module
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:88
 msgid "contacts"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:93
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
 msgid "identifier"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:93
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:94
 msgid "com.openexchange.contact.json"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:97
 msgid "com.openexchange.contact"
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
 #. - Read all your contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:124
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:125
 msgid "Read all your contacts."
 msgstr ""
 
 #. Application 'xyz' requires following permissions:
 #. - Create, modify and delete contacts.
 #. - ...
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:129
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contacts.json/src/com/openexchange/contacts/json/osgi/ContactJSONActivator.java:130
 msgid "Create, modify and delete contacts."
 msgstr ""
 
@@ -1841,6 +1841,53 @@ msgstr ""
 msgid ""
 "The file \"%1$s\" was not saved due to possible data loss. Please review the "
 "warnings for details."
+msgstr ""
+
+#. The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:97
+msgid ""
+"The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it "
+"into the account \"%3$s\"."
+msgstr ""
+
+#. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:100
+msgid ""
+"All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when "
+"moving it into the account \"%3$s\"."
+msgstr ""
+
+#. All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:103
+msgid ""
+"The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost "
+"when moving it into the account \"%3$s\"."
+msgstr ""
+
+#. The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:106
+msgid ""
+"The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other "
+"users when moving it into the account \"%3$s\"."
+msgstr ""
+
+#. The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:109
+msgid ""
+"The shared folder \"%1$s\" is no longer accessible by other users when "
+"moving it into the account \"%2$s\"."
+msgstr ""
+
+#. The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:112
+msgid ""
+"The file \"%1$s\" was not updated due to possible data loss. Please review "
+"the warnings for details."
+msgstr ""
+
+#. The associated %2$s account does no more exist
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:115
+msgid "The associated %2$s account does no more exist"
 msgstr ""
 
 #. Access denied.
@@ -7738,21 +7785,6 @@ msgstr ""
 msgid "No session found for identifier: %1$s"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
-msgid "\"%1$s\" is not a valid email address."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
-msgid ""
-"No notification mail could be sent to user \"%1$s\". We don't know his email "
-"address."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:66
-msgid "An error occurred, we were unable to send an email to \"%2$s\"."
-msgstr ""
-
 #. subject
 #. * $username has shared file "$filename" with you.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:65
@@ -8046,10 +8078,14 @@ msgid ""
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:89
-msgid "Your password has been reset."
+msgid "Please create a new password to regain access to your shares."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:91
+msgid "Your password has been reset."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:93
 msgid "The share you are looking for does not exist."
 msgstr ""
 
@@ -8063,6 +8099,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:68
 msgid "The link \"%1$s\" is invalid."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:62
+msgid "\"%1$s\" is not a valid email address."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:72
@@ -8101,6 +8142,16 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/groupware/TargetProxyTypeStrings.java:63
 msgid "image"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:64
+msgid ""
+"No notification mail could be sent to user \"%1$s\". We don't know his email "
+"address."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:66
+msgid "An error occurred, we were unable to send an email to \"%2$s\"."
 msgstr ""
 
 #. *

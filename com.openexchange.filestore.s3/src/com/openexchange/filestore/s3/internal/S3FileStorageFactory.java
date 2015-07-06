@@ -229,7 +229,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
 
     private ClientConfiguration getClientConfiguration(String filestoreID) {
         ClientConfiguration clientConfiguration = new ClientConfiguration();
-        String signerOverride = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".signerOverride");
+        String signerOverride = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".signerOverride", "S3SignerType");
         if (false == Strings.isEmpty(signerOverride)) {
             clientConfiguration.setSignerOverride(signerOverride);
         }

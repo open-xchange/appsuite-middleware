@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.io.FileReader;
@@ -63,6 +64,7 @@ import com.openexchange.admin.console.exception.OXConsolePluginException;
 import com.openexchange.admin.rmi.OXLoginInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -132,12 +134,15 @@ public abstract class CreateCore extends ContextAbstraction {
                 printError(null, null, e.getClass().getSimpleName() + ": " + e.getMessage(), parser);
                 sysexit(1);
             }
-            final String filename = (String) parser.getOptionValue(parser.getCsvImportOption());
 
-            if (null != filename) {
-                csvparsing(filename, auth);
+            SchemaSelectStrategy schemaSelectStrategy = parseCheckAndGetSchemaSelectStrategy(parser);
+
+            final String csvFile = (String) parser.getOptionValue(parser.getCsvImportOption());
+
+            if (null != csvFile) {
+                csvparsing(csvFile, auth);
             } else {
-                ctxid = maincall(parser, ctx, usr, auth).getId();
+                ctxid = maincall(parser, ctx, usr, auth, schemaSelectStrategy).getId();
             }
         } catch (final Exception e) {
             printErrors((null != ctxid) ? String.valueOf(ctxid) : null, null, e, parser);
@@ -154,13 +159,13 @@ public abstract class CreateCore extends ContextAbstraction {
 
     protected void csvparsing(final String filename, final Credentials auth) throws NotBoundException, IOException, InvalidDataException, StorageException, InvalidCredentialsException {
         // First check if we can login with the given credentials. Otherwise there's no need to continue
-        final OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME +OXLoginInterface.RMI_NAME);
+        final OXLoginInterface oxlgn = (OXLoginInterface) Naming.lookup(RMI_HOSTNAME + OXLoginInterface.RMI_NAME);
         oxlgn.login(auth);
 
         final CSVReader reader = new CSVReader(new FileReader(filename), ',', '"');
         int[] idarray = csvParsingCommon(reader);
         int linenumber = 2;
-        String [] nextLine;
+        String[] nextLine;
         lookupRMI();
         while ((nextLine = reader.readNext()) != null) {
             // nextLine[] is an array of values from the line
@@ -230,13 +235,37 @@ public abstract class CreateCore extends ContextAbstraction {
         }
     }
 
+    protected SchemaSelectStrategy parseCheckAndGetSchemaSelectStrategy(AdminParser parser) throws InvalidDataException {
+        parseAndSetSchemaOptions(parser);
+        if (schema != null && schemaStrategy != null) {
+            throw new InvalidDataException(SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR);
+        }
+
+        SchemaSelectStrategy retval;
+        if (schema != null) {
+            retval = SchemaSelectStrategy.schema(schema);
+        } else if (schemaStrategy != null) {
+            if (schemaStrategy.equals("automatic")) {
+                retval = SchemaSelectStrategy.automatic();
+            } else if (schemaStrategy.equals("in-memory")) {
+                retval = SchemaSelectStrategy.inMemory();
+            } else {
+                throw new InvalidDataException(SCHEMA_NAME_ERROR);
+            }
+        } else {
+            retval = SchemaSelectStrategy.automatic(); // default
+        }
+
+        return retval;
+    }
+
     protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
-    protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
+    protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
 
     protected abstract void setFurtherOptions(final AdminParser parser);
 

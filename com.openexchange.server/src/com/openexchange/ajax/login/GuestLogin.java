@@ -51,8 +51,6 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -61,17 +59,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
@@ -109,7 +104,6 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
             if (null == configService) {
                 throw ServiceExceptionCode.absentService(ConfigurationService.class);
             }
-            int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
 
             String body = AJAXServlet.getBody(httpRequest);
             if (Strings.isEmpty(body)) {
@@ -120,7 +114,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
 
                 pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
-                if (Strings.isEmpty(pass) && emptyGuestPasswords == 0) {
+                if (Strings.isEmpty(pass)) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
                 }
             } else {
@@ -130,8 +124,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 login = jBody.getString("login");
             }
 
-            final Map<String, Object> loginProperties = new HashMap<String, Object>(2);
-            loginProperties.put("requestParameters", httpRequest.getParameterMap());
+            final Map<String, Object> loginProperties = new HashMap<String, Object>(1);
             return new LoginInfo() {
                 @Override
                 public String getPassword() {
@@ -156,65 +149,8 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     @Override
     protected User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException {
         // Resolve the user
-        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null == userService) {
-            throw ServiceExceptionCode.absentService(UserService.class);
-        }
-        if (null == configService) {
-            throw ServiceExceptionCode.absentService(ConfigurationService.class);
-        }
-        int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
         User user = userService.getUser(share.getGuest().getGuestID(), context);
-        int loginCount = 0;
-        if (emptyGuestPasswords > 0) {
-            Set<String> loginsWithoutPassword = user.getAttributes().get("guestLoginWithoutPassword");
-            if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
-                try {
-                    loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
-                } catch (RuntimeException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-                }
-            }
-        }
-
-        // Check if setting a password was skipped
-        Map<String, Object> loginProperties = loginInfo.getProperties();
-        Map<String, String[]> requestParameters = (Map<String, String[]>) loginProperties.get("requestParameters");
-        String[] skips = requestParameters.get("skipButton");
-        if (skips != null && skips.length > 0 && Boolean.parseBoolean(skips[0])) {
-            if (share.getGuest().isPasswordSet()) {
-                throw INVALID_CREDENTIALS.create();
-            }
-
-            if (maySkip(emptyGuestPasswords, loginCount)) {
-                if (emptyGuestPasswords > 0) {
-                    // There's a fixed number of allowed skip operations so we need to count them
-                    userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
-                }
-                return user;
-            }
-
-            throw LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.create();
-        }
-
-        if (!share.getGuest().isPasswordSet()) {
-            if (Strings.isEmpty(loginInfo.getPassword())) {
-                throw LoginExceptionCodes.NEW_PASSWORD_REQUIRED.create();
-            } else {
-                try {
-                    UserImpl userToUpdate = new UserImpl(user);
-                    userToUpdate.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-                    userToUpdate.setUserPassword(PasswordMech.BCRYPT.encode(loginInfo.getPassword()));
-                    userService.updateUser(userToUpdate, context);
-                    return userToUpdate;
-                } catch (UnsupportedEncodingException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
-                } catch (NoSuchAlgorithmException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
-                }
-            }
-        }
 
         // Authenticate the user
         if (!userService.authenticate(user, loginInfo.getPassword())) {
@@ -233,14 +169,6 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
         }
 
         return user;
-    }
-
-    private static boolean maySkip(int emptyGuestPasswords, int loginCount) {
-        if (emptyGuestPasswords < 0 || emptyGuestPasswords > loginCount) {
-            return true;
-        }
-
-        return false;
     }
 
 }

@@ -59,6 +59,7 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
@@ -217,9 +218,10 @@ public abstract class OXContextStorageInterface {
      * @param ctx
      * @param admin_user
      * @param access
+     * @param schemaSelectStrategy
      * @throws StorageException
      */
-    public abstract Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException;
+    public abstract Context create(final Context ctx, final User admin_user, final UserModuleAccess access, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException;
 
     /**
      * @param ctx

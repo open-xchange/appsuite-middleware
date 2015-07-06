@@ -137,6 +137,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
+                change.setCurrentAppointment(original);
+                change.setType(ITipChange.Type.UPDATE);
+                analysis.addChange(change);
                 return analysis;
             }
             change.setType(ITipChange.Type.UPDATE);

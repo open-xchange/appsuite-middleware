@@ -52,7 +52,6 @@ package com.openexchange.file.storage.boxcom;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -68,7 +67,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxAccountAccess implements FileStorageAccountAccess, CapabilityAware {
+public final class BoxAccountAccess implements CapabilityAware {
 
     private final FileStorageAccount account;
     private final Session session;
@@ -77,10 +76,8 @@ public final class BoxAccountAccess implements FileStorageAccountAccess, Capabil
 
     /**
      * Initializes a new {@link BoxAccountAccess}.
-     *
-     * @throws OXException If initialization fails
      */
-    public BoxAccountAccess(FileStorageService service, FileStorageAccount account, Session session) throws OXException {
+    public BoxAccountAccess(FileStorageService service, FileStorageAccount account, Session session) {
         super();
         this.service = service;
         this.account = account;

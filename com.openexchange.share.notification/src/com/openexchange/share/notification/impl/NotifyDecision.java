@@ -51,7 +51,7 @@ package com.openexchange.share.notification.impl;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.share.core.performer.CreatedShare;
+import com.openexchange.share.CreatedShare;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 

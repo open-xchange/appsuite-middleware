@@ -83,6 +83,8 @@ import com.openexchange.quota.QuotaService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
@@ -90,6 +92,7 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.CreatedSharesImpl;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetUpdate;
@@ -220,24 +223,23 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<ShareInfo> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
-        List<ShareInfo> createdShares = new ArrayList<ShareInfo>(recipients.size());
-        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = addTargets(session, Collections.singletonList(target), recipients);
+    public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException {
+        CreatedShares created = addTargets(session, Collections.singletonList(target), recipients);
         for (ShareRecipient recipient : recipients) {
-            List<ShareInfo> shares = sharesPerRecipient.get(recipient);
-            if (null == shares || 1 != shares.size()) {
+            CreatedShare share = created.getShare(recipient);
+            if (null == share || 1 != share.size()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unexpected number of shares created for recipient " + recipient);
             }
-            createdShares.add(shares.get(0));
         }
-        return createdShares;
+        return created;
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
+    public CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
-            return Collections.emptyMap();
+            return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
         }
+
         ShareTool.validateTargets(targets);
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
@@ -251,7 +253,6 @@ public class DefaultShareService implements ShareService {
              * check quota restrictions
              */
             int expectedShares = targets.size() * recipients.size();
-            checkQuota(connectionHelper, session, expectedShares);
             /*
              * prepare guest users and resulting shares
              */
@@ -259,9 +260,9 @@ public class DefaultShareService implements ShareService {
             User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
             List<Share> sharesToStore = new ArrayList<Share>(expectedShares);
             for (ShareRecipient recipient : recipients) {
-                if (InternalRecipient.class.isInstance(recipient)) {
-                    InternalRecipient internal = (InternalRecipient) recipient;
-                    if (internal.getEntity() == session.getUserId()) {
+                if (recipient.isInternal()) {
+                    InternalRecipient internal = recipient.toInternal();
+                    if (!internal.isGroup() && internal.getEntity() == session.getUserId()) {
                         throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
                     }
                 }
@@ -283,6 +284,10 @@ public class DefaultShareService implements ShareService {
                 sharesPerRecipient.put(recipient, sharesForGuest);
             }
             /*
+             * Check quota for real shares only, i.e. don't count internals that have accidently been added via their email addresses
+             */
+            checkQuota(connectionHelper, session, sharesToStore.size() * targets.size());
+            /*
              * store shares & trigger collection of e-mail addresses
              */
             if (0 < sharesToStore.size()) {
@@ -291,7 +296,7 @@ public class DefaultShareService implements ShareService {
             connectionHelper.commit();
             LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
             collectAddresses(session, recipients);
-            return sharesPerRecipient;
+            return new CreatedSharesImpl(sharesPerRecipient);
         } finally {
             connectionHelper.finish();
         }

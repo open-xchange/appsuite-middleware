@@ -133,8 +133,7 @@ public class ContactResource extends CardDAVResource {
                     contact.removeDistributionLists();
                     contact.removeNumberOfDistributionLists();
                     factory.getContactService().createContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), contact);
-                    factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-                        Integer.toString(contact.getObjectID()), contact.getLastModified());
+                    factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact.getLastModified());
                 } catch (OXException e) {
                     throw protocolException(e);
                 }
@@ -144,9 +143,13 @@ public class ContactResource extends CardDAVResource {
                  */
                 vCardFileHolder = vCardImport.getVCard();
                 if (null != vCardFileHolder) {
-                    vCardID = factory.getVCardStorageService().saveVCard(vCardFileHolder.getStream(), factory.getSession().getContextId());
-                    LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
-                    contact.setVCardId(vCardID);
+                    int contextId = factory.getSession().getContextId();
+                    VCardStorageService vCardStorageService = factory.getVCardStorageService(contextId);
+                    if (vCardStorageService != null) {
+                        vCardID = vCardStorageService.saveVCard(vCardFileHolder.getStream(), contextId);
+                        LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
+                        contact.setVCardId(vCardID);
+                    }
                 }
                 /*
                  * save contact, trying again in case of recoverable errors
@@ -193,8 +196,7 @@ public class ContactResource extends CardDAVResource {
              */
             for (int i = 0; i < MAX_RETRIES && false == deleted; i++) {
                 try {
-                    factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-                        Integer.toString(contact.getObjectID()), contact.getLastModified());
+                    factory.getContactService().deleteContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact.getLastModified());
                     LOG.debug("{}: deleted.", getUrl());
                     deleted = true;
                     contact = null;
@@ -230,17 +232,20 @@ public class ContactResource extends CardDAVResource {
              */
             vCardFileHolder = vCardImport.getVCard();
             if (null != vCardFileHolder) {
-                vCardID = factory.getVCardStorageService().saveVCard(vCardFileHolder.getStream(), factory.getSession().getContextId());
-                LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
-                contact.setVCardId(vCardID);
+                int contextId = factory.getSession().getContextId();
+                VCardStorageService vCardStorageService = factory.getVCardStorageService(contextId);
+                if (vCardStorageService != null) {
+                    vCardID = vCardStorageService.saveVCard(vCardFileHolder.getStream(), contextId);
+                    LOG.debug("{}: saved original vCard in '{}'.", getUrl(), vCardID);
+                    contact.setVCardId(vCardID);
+                }
             }
             /*
              * update contact, trying again in case of recoverable errors
              */
             for (int i = 0; i < MAX_RETRIES && false == saved; i++) {
                 try {
-                    factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()),
-                        Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
+                    factory.getContactService().updateContact(factory.getSession(), Integer.toString(contact.getParentFolderID()), Integer.toString(contact.getObjectID()), contact, contact.getLastModified());
                     LOG.debug("{}: saved.", getUrl());
                     saved = true;
                 } catch (OXException e) {
@@ -344,12 +349,13 @@ public class ContactResource extends CardDAVResource {
         InputStream originalVCard = null;
         String vCardID = contact.getVCardId();
         if (null != vCardID) {
-            VCardStorageService vCardStorage = factory.getVCardStorageService();
+            int contextId = factory.getSession().getContextId();
+            VCardStorageService vCardStorage = factory.getVCardStorageService(contextId);
             if (null != vCardStorage) {
                 try {
-                    originalVCard = vCardStorage.getVCard(vCardID, factory.getSession().getContextId());
+                    originalVCard = vCardStorage.getVCard(vCardID, contextId);
                 } catch (OXException oxException) {
-                    LOG.warn("Error while retrieving VCard with id {} in context {} from storage.", vCardID, factory.getSession().getContextId(), oxException);
+                    LOG.warn("Error while retrieving VCard with id {} in context {} from storage.", vCardID, contextId, oxException);
                 }
             }
         }
@@ -377,7 +383,7 @@ public class ContactResource extends CardDAVResource {
      *
      * @param e the exception to handle
      * @return <code>true</code>, if the operation should be retried,
-     * <code>false</code>, otherwise.
+     *         <code>false</code>, otherwise.
      * @throws WebdavProtocolException
      */
     private boolean handle(OXException e) throws WebdavProtocolException {
@@ -455,12 +461,13 @@ public class ContactResource extends CardDAVResource {
      */
     private void deleteVCard(String vCardID) {
         if (null != vCardID) {
-            VCardStorageService vCardStorage = factory.getVCardStorageService();
+            int contextId = factory.getSession().getContextId();
+            VCardStorageService vCardStorage = factory.getVCardStorageService(contextId);
             if (null != vCardStorage) {
                 try {
-                    vCardStorage.deleteVCard(vCardID, factory.getSession().getContextId());
+                    vCardStorage.deleteVCard(vCardID, contextId);
                 } catch (OXException oxException) {
-                    LOG.warn("Error while deleting VCard with id {} in context {} from storage.", vCardID, factory.getSession().getContextId(), oxException);
+                    LOG.warn("Error while deleting VCard with id {} in context {} from storage.", vCardID, contextId, oxException);
                 }
             }
         }
@@ -472,7 +479,10 @@ public class ContactResource extends CardDAVResource {
      * @return <code>true</code> if storing the original vCard is possible, <code>false</code>, otherwise
      */
     private boolean isStoreOriginalVCard() {
-        if (null != factory.getVCardStorageService()) {
+        int contextId = factory.getSession().getContextId();
+        VCardStorageService vCardStorageService = factory.getVCardStorageService(contextId);
+
+        if (vCardStorageService != null) {
             String folderID = null == contact ? parentFolderID : String.valueOf(contact.getParentFolderID());
             try {
                 return factory.getContactService().supports(factory.getSession(), folderID, ContactField.VCARD_ID);

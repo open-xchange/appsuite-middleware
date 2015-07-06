@@ -233,7 +233,7 @@ public class IMAPStore extends Store
     protected final int defaultPort;	// default IMAP port
     protected final boolean isSSL;	// use SSL?
 
-    private final int blksize;		// Block size for data requested
+    private int blksize;		// Block size for data requested
 					// in FETCH requests. Defaults to
 					// 16K
 
@@ -1614,9 +1614,20 @@ public class IMAPStore extends Store
 
     /**
      * Get the block size to use for fetch requests on this Store.
+     *
+     * @return The block size
      */
-    int getFetchBlockSize() {
+    public int getFetchBlockSize() {
 	return blksize;
+    }
+
+    /**
+     * Sets the block size to use for fetch requests on this Store.
+     *
+     * @param blksize The block size
+     */
+    public void setFetchBlockSize(int blksize) {
+        this.blksize = blksize;
     }
 
     /**

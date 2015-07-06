@@ -292,6 +292,8 @@ public interface FolderService {
      */
     FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException;
 
+    FolderResponse<UserizedFolder[]> getUserSharedFolders(final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException;
+
     /**
      * Gets the subfolders of specified parent in given tree.
      *

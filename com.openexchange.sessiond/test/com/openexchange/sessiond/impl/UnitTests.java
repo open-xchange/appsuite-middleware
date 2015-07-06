@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond.impl;
 
+import junit.framework.JUnit4TestAdapter;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -67,6 +68,7 @@ public class UnitTests {
         final TestSuite tests = new TestSuite();
         tests.addTestSuite(Bug16158Test.class);
         tests.addTestSuite(Bug22838Test.class);
+        tests.addTest(new JUnit4TestAdapter(SessionHandlerTest.class));
         return tests;
     }
 }

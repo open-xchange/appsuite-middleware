@@ -72,6 +72,11 @@ public abstract class AbstractFileStorageFolderAccess implements FileStorageFold
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return null;
+    }
+
+    @Override
     public void clearFolder(final String folderId) throws OXException {
         clearFolder(folderId, true);
     }

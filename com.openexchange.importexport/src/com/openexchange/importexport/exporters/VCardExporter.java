@@ -243,7 +243,7 @@ public class VCardExporter implements Exporter {
             tmp.add(ContactField.VCARD_ID);
             fields = tmp.toArray(new ContactField[tmp.size()]);
         } else {
-            // In this case the original vcard must not be merged. Since the ContactMapper does not even map the VCARD_ID column it will not be considered when exporting. 
+            // In this case the original vcard must not be merged. Since the ContactMapper does not even map the VCARD_ID column it will not be considered when exporting.
             fields = ContactMapper.getInstance().getFields(fieldsToBeExported);
         }
 
@@ -331,7 +331,7 @@ public class VCardExporter implements Exporter {
         }
 
         InputStream originalVCard = null;
-        VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService();
+        VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
         if (vCardStorage != null && contactObj.getVCardId() != null) {
             originalVCard = vCardStorage.getVCard(contactObj.getVCardId(), session.getContextId());
         }

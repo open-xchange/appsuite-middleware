@@ -49,14 +49,15 @@
 
 package com.openexchange.groupware.notify.hostname.osgi;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.notify.hostname.internal.HostDataLoginHandler;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.osgi.DependentServiceStarter;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.systemname.SystemNameService;
 
 /**
@@ -64,70 +65,31 @@ import com.openexchange.systemname.SystemNameService;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class HostDataLoginHandlerRegisterer implements ServiceTrackerCustomizer<SystemNameService, SystemNameService> {
+public final class HostDataLoginHandlerRegisterer extends DependentServiceStarter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HostDataLoginHandlerRegisterer.class);
+    private static final Class<?>[] NEEDED = new Class<?>[] { SystemNameService.class, DispatcherPrefixService.class };
 
-    private final Lock lock = new ReentrantLock();
-    private final BundleContext context;
-    private final HostDataLoginHandler loginHandler;
+    private static final Class<?>[] OPTIONAL = new Class<?>[] { HostnameService.class };
 
-    private SystemNameService service = null;
-    private ServiceRegistration<LoginHandlerService> registration = null;
+    private ServiceRegistration<LoginHandlerService> registration;
 
-    public HostDataLoginHandlerRegisterer(BundleContext context, HostDataLoginHandler loginHandler) {
-        super();
-        this.context = context;
-        this.loginHandler = loginHandler;
+
+    public HostDataLoginHandlerRegisterer(BundleContext context) throws InvalidSyntaxException {
+        super(context, NEEDED, OPTIONAL);
+    }
+
+
+    @Override
+    protected void start(ServiceLookup services) throws Exception {
+        HostDataLoginHandler loginHandler = new HostDataLoginHandler(services);
+        registration = context.registerService(LoginHandlerService.class, loginHandler, null);
     }
 
     @Override
-    public SystemNameService addingService(ServiceReference<SystemNameService> reference) {
-        SystemNameService foundService = context.getService(reference);
-        boolean needsRegistration = false;
-        lock.lock();
-        try {
-            if (null == service) {
-                service = foundService;
-                needsRegistration = null == registration;
-            }
-        } finally {
-            lock.unlock();
-        }
-        if (!needsRegistration && registration != null) {
-            LOG.warn("Found multiple SysteNameService instances. Ignoring {}", service.getClass().getName());
-            foundService = null;
-            context.ungetService(reference);
-        }
-        if (needsRegistration) {
-            loginHandler.setSystemNameService(service);
-            registration = context.registerService(LoginHandlerService.class, loginHandler, null);
-        }
-        return foundService;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<SystemNameService> reference, SystemNameService foundService) {
-        // Nothing to do.
-    }
-
-    @Override
-    public void removedService(ServiceReference<SystemNameService> reference, SystemNameService foundService) {
-        ServiceRegistration<LoginHandlerService> unregister = null;
-        lock.lock();
-        try {
-            if (null != foundService && service == foundService) {
-                loginHandler.setSystemNameService(null);
-                service = null;
-                unregister = registration;
-                registration = null;
-            }
-        } finally {
-            lock.unlock();
-        }
-        if (null != unregister) {
-            unregister.unregister();
-            context.ungetService(reference);
+    protected void stop(ServiceLookup services) throws Exception {
+        if (registration != null) {
+            registration.unregister();
+            registration = null;
         }
     }
 }

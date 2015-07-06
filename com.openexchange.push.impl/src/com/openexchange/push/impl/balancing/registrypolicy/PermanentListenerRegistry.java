@@ -97,7 +97,7 @@ public class PermanentListenerRegistry implements ServiceTrackerCustomizer<Hazel
     public PermanentListenerRegistry(HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler, BundleContext context) {
         super();
         this.context = context;
-        localRegistry = new ConcurrentHashMap<PushUser, Owner>(256, 0.9f, 1);
+        localRegistry = new ConcurrentHashMap<PushUser, Owner>(256);
         this.notActiveExceptionHandler = notActiveExceptionHandler;
         blocker = new ConcurrentBlocker();
         hzInstancerRef = new AtomicReference<HazelcastInstance>();

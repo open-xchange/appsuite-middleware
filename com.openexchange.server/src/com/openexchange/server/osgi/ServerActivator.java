@@ -81,7 +81,6 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.customizer.folder.osgi.FolderFieldCollector;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
 import com.openexchange.ajax.requesthandler.AJAXRequestHandler;
-import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
@@ -99,7 +98,7 @@ import com.openexchange.configjump.client.ConfigJump;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.SystemConfig;
 import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.ConversionService;
@@ -117,6 +116,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.DatabaseServiceDBProvider;
 import com.openexchange.databaseold.Database;
 import com.openexchange.dataretention.DataRetentionService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.event.impl.EventFactoryServiceImpl;
 import com.openexchange.event.impl.EventQueue;
@@ -292,7 +292,7 @@ public final class ServerActivator extends HousekeepingActivator {
         IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
         CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
         StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class };
+        SearchService.class, DispatcherPrefixService.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -363,25 +363,6 @@ public final class ServerActivator extends HousekeepingActivator {
                     LOG.error("", e);
                 }
             }
-        }
-    }
-
-    private static int parseInt(final int index, final String[] sa, final int defaultValue) {
-        if (null == sa) {
-            return defaultValue;
-        }
-        if (index >= sa.length) {
-            return defaultValue;
-        }
-        final String toParse = sa[index];
-        if (null == toParse) {
-            return defaultValue;
-        }
-        try {
-            return Integer.parseInt(toParse.trim());
-        } catch (NumberFormatException e) {
-            LOG.error("Not an integer: {}", toParse, e);
-            return defaultValue;
         }
     }
 
@@ -459,7 +440,7 @@ public final class ServerActivator extends HousekeepingActivator {
 
         // vCard service & storage
         track(VCardService.class, new RegistryCustomizer<VCardService>(context, VCardService.class));
-        track(VCardStorageService.class, new RegistryCustomizer<VCardStorageService>(context, VCardStorageService.class));
+        track(VCardStorageFactory.class, new RegistryCustomizer<VCardStorageFactory>(context, VCardStorageFactory.class));
 
         // Data Retention Service
         track(DataRetentionService.class, new RegistryCustomizer<DataRetentionService>(context, DataRetentionService.class));
@@ -896,7 +877,7 @@ public final class ServerActivator extends HousekeepingActivator {
         // http.registerServlet(prefix+"contacts", new com.openexchange.ajax.Contact(), null, null);
         // http.registerServlet(prefix+"mail", new com.openexchange.ajax.Mail(), null, null);
 
-        final String prefix = Dispatcher.PREFIX.get();
+        final String prefix = getService(DispatcherPrefixService.class).getPrefix();
         http.registerServlet(prefix + "mail.attachment", new com.openexchange.ajax.MailAttachment(), null, null);
         // http.registerServlet(prefix+"calendar", new com.openexchange.ajax.Appointment(), null, null);
         // http.registerServlet(prefix+"config", new com.openexchange.ajax.ConfigMenu(), null, null);

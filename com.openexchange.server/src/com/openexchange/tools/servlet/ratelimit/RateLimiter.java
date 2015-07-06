@@ -71,8 +71,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.javacodegeeks.concurrent.LRUPolicy;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.ScheduledTimerTask;
@@ -777,7 +777,7 @@ public final class RateLimiter {
             if (null == result) {
                 // Check modules
                 {
-                    StringBuilder sb = new StringBuilder(asciiLowerCase(DefaultDispatcherPrefixService.getInstance().getPrefix()));
+                    StringBuilder sb = new StringBuilder(asciiLowerCase(ServerServiceRegistry.getServize(DispatcherPrefixService.class).getPrefix()));
                     int reslen = sb.length();
                     String lcRequestURI = asciiLowerCase(requestURI);
                     for (String module : modules()) {

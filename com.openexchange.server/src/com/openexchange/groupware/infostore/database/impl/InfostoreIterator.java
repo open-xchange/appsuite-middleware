@@ -166,6 +166,11 @@ public class InfostoreIterator implements SearchIterator<DocumentMetadata> {
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
     }
 
+    public static InfostoreIterator sharedDocumentsByUser(Context ctx, User user, Metadata[] metadata, Metadata sort, int order, int start, int end, DBProvider provider) {
+        String query = QUERIES.getSharedDocumentsByUserQuery(ctx.getContextId(), user.getId(), metadata, sort, order, start, end, new InfostoreQueryCatalog.DocumentWins());
+        return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());
+    }
+
     public static InfostoreIterator newSharedDocumentsForUser(final Context ctx, final User user, final Metadata[] metadata, final Metadata sort, final int order, final long since, final DBProvider provider) {
         final String query = QUERIES.getNewSharedDocumentsSince(ctx.getContextId(), user.getId(), user.getGroups(), since, metadata, sort, order, new InfostoreQueryCatalog.DocumentWins());
         return new InfostoreIterator(query, provider, ctx, metadata, new InfostoreQueryCatalog.DocumentWins());

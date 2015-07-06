@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
@@ -91,7 +92,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class,
-            IDGeneratorService.class, ConfigViewFactory.class, ManagedFileManagement.class };
+            IDGeneratorService.class, ConfigViewFactory.class, ManagedFileManagement.class, CapabilityService.class };
     }
 
     @Override
@@ -118,7 +119,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(SnippetService.class, new RdbSnippetService(), properties);
+            registerService(SnippetService.class, new RdbSnippetService(this), properties);
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;

@@ -77,7 +77,7 @@ public interface RequestContext {
 
     /**
      * Gets the server-side servlet prefix, e.g. <code>/appsuite/api/</code>.
-     * The prefix always has leading and trailing slashed.
+     * The prefix has always leading and trailing slashes.
      *
      * @return The servlet prefix
      */

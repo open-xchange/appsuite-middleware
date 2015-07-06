@@ -79,7 +79,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DefaultDispatcher;
-import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.config.SimConfigurationService;
@@ -285,7 +284,7 @@ public class OAuthDispatcherServletTest {
                 simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "oxdb1");
                 return simServerSession;
             }
-        });
+        }, "/ajax/");
         request = new SimHttpServletRequest();
         request.setMethod("GET");
 
@@ -303,7 +302,7 @@ public class OAuthDispatcherServletTest {
     private void prepareRequest(String action, String accessToken) {
         request.setServerName("appsuite.example.com");
         request.setServerPort(80);
-        request.setRequestURI(Dispatcher.PREFIX.get() + "oauth/modules/test");
+        request.setRequestURI("/ajax/" + "oauth/modules/test");
         request.setQueryString("action=" + action);
         request.setParameter("action", action);
         request.setContextPath("");

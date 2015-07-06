@@ -53,11 +53,7 @@ import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -68,14 +64,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
-import javax.mail.MessagingException;
 import javax.mail.Part;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -101,11 +94,8 @@ import com.openexchange.mail.json.writer.MessageWriter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.MimeDefaultSession;
-import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
-import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.parser.ContentProvider;
@@ -157,7 +147,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String VIRTUAL = "___VIRTUAL___";
     private static final String MULTIPART_ID = "___MP-ID___";
 
-    private static final int MAX_NESTED_MESSAGES_LEVELS = 10;
+    private static final int DEFAULT_MAX_NESTED_MESSAGES_LEVELS = 10;
 
     private static final class PlainTextContent {
 
@@ -248,10 +238,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private boolean includePlainText;
     private boolean exactLength;
     private final int maxContentSize;
-    /**
-     * Defines the current level of mail message nesting (of a maximum of 10)
-     */
     private int currentNestingLevel = 0;
+    private final int maxNestedMessageLevels;
 
     /**
      * Initializes a new {@link JsonMessageHandler}
@@ -265,7 +253,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(final int accountId, final String mailPath, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, new MailPath(mailPath), null, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1);
+        this(accountId, new MailPath(mailPath), null, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1, -1);
     }
 
     /**
@@ -283,7 +271,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @throws OXException If JSON message handler cannot be initialized
      */
     public JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1);
+        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, -1, -1);
     }
 
     /**
@@ -299,10 +287,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
      * @param token <code>true</code> to add attachment tokens
      * @param ttlMillis The tokens' timeout
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @param maxNestedMessageLevels The number of levels in which deep-parsing of nested messages takes place; otherwise only ID information is set; '<=0' falls back to default value (10)
      * @throws OXException If JSON message handler cannot be initialized
      */
-    public JsonMessageHandler(final int accountId, final MailPath mailPath, final MailMessage mail, final DisplayMode displayMode, final boolean embedded, final Session session, final UserSettingMail usm, final boolean token, final int ttlMillis, final int maxContentSize) throws OXException {
-        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, maxContentSize);
+    public JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
+        this(accountId, mailPath, mail, displayMode, embedded, session, usm, getContext(session), token, ttlMillis, maxContentSize, maxNestedMessageLevels);
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -315,7 +304,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     /**
      * Initializes a new {@link JsonMessageHandler} for internal usage
      */
-    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize) throws OXException {
+    private JsonMessageHandler(int accountId, MailPath mailPath, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail usm, Context ctx, boolean token, int ttlMillis, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         super();
         this.multiparts = new LinkedList<MultipartInfo>();
         this.embedded = DisplayMode.DOCUMENT.equals(displayMode) ? false : embedded;
@@ -331,6 +320,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
         this.mailPath = mailPath;
         this.maxContentSize = maxContentSize;
         this.jsonObject = new JSONObject(32);
+        this.maxNestedMessageLevels = 1; //maxNestedMessageLevels <= 0 ? DEFAULT_MAX_NESTED_MESSAGES_LEVELS : maxNestedMessageLevels;
         try {
             if (DisplayMode.MODIFYABLE.equals(this.displayMode) && null != mailPath) {
                 jsonObject.put(MailJSONField.MSGREF.getKey(), mailPath.toString());
@@ -1257,56 +1247,29 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleNestedMessage(final MailPart mailPart, final String id) throws OXException {
-        ThresholdFileHolder backup = null;
         try {
             JSONObject nestedObject;
-            if (currentNestingLevel < MAX_NESTED_MESSAGES_LEVELS) {
-                MailMessage nestedMail;
-                {
-                    Object content = mailPart.getContent();
-                    if (content instanceof MailMessage) {
-                        nestedMail = (MailMessage) content;
-                    } else if (content instanceof MimeMessage) {
-                        nestedMail = MimeMessageConverter.convertMessage((MimeMessage) content, false);
-                    } else if (content instanceof InputStream) {
-                        try {
-                            backup = new ThresholdFileHolder();
-                            backup.write((InputStream) content);
-                            FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
-                            nestedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
-                        } catch (IOException e) {
-                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                        } catch (MessagingException e) {
-                            throw MimeMailException.handleMessagingException(e);
-                        }
-                    } else if (content instanceof String) {
-                        try {
-                            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8")));
-                            nestedMail = MimeMessageConverter.convertMessage(mimeMessage, false);
-                        } catch (UnsupportedEncodingException e) {
-                            throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-                        } catch (MessagingException e) {
-                            throw MimeMailException.handleMessagingException(e);
-                        }
-                    } else {
-                        StringBuilder sb = new StringBuilder(128);
-                        sb.append("Ignoring nested message.").append("Cannot handle part's content which should be a RFC822 message according to its content type: ");
-                        sb.append((null == content ? "null" : content.getClass().getSimpleName()));
-                        LOG.error(sb.toString());
-                        return true;
-                    }
+            if (currentNestingLevel < maxNestedMessageLevels) {
+                // Get nested message from part
+                MailMessage nestedMail = MailMessageParser.getMessageContentFrom(mailPart);
+                if (null == nestedMail) {
+                    LOG.warn("Ignoring nested message. Cannot handle part's content which should be a RFC822 message according to its content type.");
+                    return true;
                 }
-                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize);
+
+                // Generate a dedicated JsonMessageHandler instance to parse the nested message
+                JsonMessageHandler msgHandler = new JsonMessageHandler(accountId, null, null, displayMode, embedded, session, usm, ctx, token, ttlMillis, maxContentSize, maxNestedMessageLevels);
                 msgHandler.setTimeZone(timeZone);
                 msgHandler.includePlainText = includePlainText;
                 msgHandler.attachHTMLAlternativePart = attachHTMLAlternativePart;
                 msgHandler.tokenFolder = tokenFolder;
                 msgHandler.tokenMailId = tokenMailId;
                 msgHandler.exactLength = exactLength;
-                msgHandler.currentNestingLevel++;
+                msgHandler.currentNestingLevel = currentNestingLevel + 1;
                 new MailMessageParser().parseMailMessage(nestedMail, msgHandler, id);
                 nestedObject = msgHandler.getJSONObject();
             } else {
+                // Only basic information
                 nestedObject = new JSONObject(3);
             }
             /*
@@ -1326,10 +1289,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } finally {
-            if (null != backup) {
-                backup.close();
-            }
         }
     }
 

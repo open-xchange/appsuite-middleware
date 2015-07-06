@@ -332,6 +332,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         });
     }
 
+    private static final int _5MB = 5242880; /* 5MB */
+
     /*-
      * Members
      */
@@ -1335,6 +1337,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             add(FetchProfile.Item.ENVELOPE);
             add(FetchProfile.Item.FLAGS);
             add(FetchProfile.Item.CONTENT_INFO);
+            add(FetchProfile.Item.SIZE);
             add(IMAPFolder.FetchProfileItem.HEADERS);
         }
     };
@@ -1410,17 +1413,38 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
             }
+
+            // Check existence
             if (msg == null || msg.isExpunged()) {
-                // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
-                // String.valueOf(msgUID), imapFolder
-                // .toString());
                 return null;
             }
             msg.setUID(msgUID);
             msg.setPeek(!markSeen);
-            final MailMessage mail;
+
+            // Convert to a MailMessage instance
+            MailMessage mail;
             try {
-                mail = MimeMessageConverter.convertMessage(msg, false);
+                long size = msg.getSize();
+                if (size > _5MB && isComplex(msg.getBodystructure())) {
+                    int blkSize = imapStore.getFetchBlockSize();
+                    try {
+                        // Copy complete MIME stream
+                        imapStore.setFetchBlockSize(_5MB);
+                        MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
+                        mail = MimeMessageConverter.convertMessage(copy, false);
+                        // Set flags and received date
+                        MimeMessageConverter.parseFlags(msg.getFlags(), mail);
+                        if (!mail.containsColorLabel()) {
+                            mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+                        }
+                        mail.setReceivedDate(msg.getReceivedDate());
+                    } finally {
+                        // Restore fetch block size
+                        imapStore.setFetchBlockSize(blkSize);
+                    }
+                } else {
+                    mail = MimeMessageConverter.convertMessage(msg, false);
+                }
                 mail.setFolder(fullName);
                 mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
@@ -1477,6 +1501,34 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    private boolean isComplex(BODYSTRUCTURE bodystructure) {
+        int threshold = 10;
+        return countNested(bodystructure, 0, threshold) >= threshold;
+    }
+
+    private int countNested(BODYSTRUCTURE bodystructure, int current, int threshold) {
+        int count = current;
+        if (count >= threshold) {
+            return count;
+        }
+
+        if (bodystructure.isNested()) {
+            count++;
+        }
+
+        BODYSTRUCTURE[] bodies = bodystructure.bodies;
+        if (null != bodies) {
+            for (BODYSTRUCTURE subbody : bodies) {
+                count = countNested(subbody, count, threshold);
+                if (count >= threshold) {
+                    return count;
+                }
+            }
+        }
+
+        return count;
     }
 
     private void setSeenFlag(final String fullName, final MailMessage mail, final IMAPMessage msg) {

@@ -8,6 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext;
 import com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials;
+import com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.soap.reseller.context.soap.dataobjects.User;
 
 
@@ -36,7 +37,8 @@ import com.openexchange.admin.soap.reseller.context.soap.dataobjects.User;
 @XmlType(name = "", propOrder = {
     "ctx",
     "adminUser",
-    "auth"
+    "auth",
+    "schemaSelectStrategy"
 })
 @XmlRootElement(name = "create")
 public class Create {
@@ -47,6 +49,8 @@ public class Create {
     protected User adminUser;
     @XmlElement(nillable = true)
     protected Credentials auth;
+    @XmlElement(name = "schema_select_strategy", nillable = true)
+    protected SchemaSelectStrategy schemaSelectStrategy;
 
     /**
      * Ruft den Wert der ctx-Eigenschaft ab.
@@ -118,6 +122,24 @@ public class Create {
      */
     public void setAuth(Credentials value) {
         this.auth = value;
+    }
+
+    /**
+     * Returns the schema select strategy.
+     *
+     * @return The {@link SchemaSelectStrategy}
+     */
+    public SchemaSelectStrategy getSchemaSelectStrategy() {
+        return schemaSelectStrategy;
+    }
+
+    /**
+     * Sets the schema select strategy.
+     *
+     * @param schemaSelectStrategy The {@link SchemaSelectStrategy}
+     */
+    public void setSchemaSelectStrategy(SchemaSelectStrategy schemaSelectStrategy) {
+        this.schemaSelectStrategy = schemaSelectStrategy;
     }
 
 }

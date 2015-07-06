@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>SAML Logout Response</title>
+  </head>
+
+  <body onload="document.forms[0].submit()">
+    <noscript>
+      <p>
+        <strong>Press <i>Logout</i> to proceed.</strong>
+      </p>
+    </noscript>
+    <form action="${action}" method="post">
+      <input type="hidden" name="SAMLResponse" value="${SAMLResponse}"/>
+      <#if RelayState?has_content>
+        <input type="hidden" name="RelayState" value="${RelayState}"/>
+      </#if>
+      <noscript>
+          <input type="submit" value="Logout"/>
+      </noscript>
+    </form>
+  </body>
+</html>

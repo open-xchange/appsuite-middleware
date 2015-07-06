@@ -326,6 +326,8 @@ public class Mail extends PermissionServlet implements UploadListener {
      */
     public static final String PARAMETER_MAX_SIZE = "max_size";
 
+    public static final String PARAMETER_ALLOW_NESTED_MESSAGES = "allow_nested_messages";
+
     public static final String PARAMETER_SAVE = "save";
 
     public static final String PARAMETER_SHOW_SRC = "src";

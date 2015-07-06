@@ -70,6 +70,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFile;
@@ -194,18 +195,21 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     private final ConfigurationService cs;
     private final TimerService timer;
+    private final DispatcherPrefixService dispatcherPrefixService;
     private final ConcurrentMap<String, ManagedFileImpl> files;
     private final PropertyListener propertyListener;
     private final AtomicReference<File> tmpDirReference;
     private final AtomicReference<ScheduledTimerTask> timerTaskReference;
 
+
     /**
      * Initializes a new {@link ManagedFileManagementImpl}.
      */
-    public ManagedFileManagementImpl(ConfigurationService cs, TimerService timer) {
+    public ManagedFileManagementImpl(ConfigurationService cs, TimerService timer, DispatcherPrefixService dispatcherPrefixService) {
         super();
         this.cs = cs;
         this.timer = timer;
+        this.dispatcherPrefixService = dispatcherPrefixService;
         files = new ConcurrentHashMap<String, ManagedFileImpl>();
 
         final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
@@ -292,7 +296,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
 
     @Override
     public ManagedFile createManagedFile(final File temporaryFile, int ttl) throws OXException {
-        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile, ttl);
+        final ManagedFileImpl mf = new ManagedFileImpl(this, UUID.randomUUID().toString(), temporaryFile, ttl, dispatcherPrefixService.getPrefix());
         mf.setSize(temporaryFile.length());
         files.put(mf.getID(), mf);
         return mf;
@@ -391,7 +395,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
             if (com.openexchange.java.Strings.isEmpty(id)) {
                 id = UUID.randomUUID().toString();
             }
-            mf = new ManagedFileImpl(this, id, tmpFile, optTtl);
+            mf = new ManagedFileImpl(this, id, tmpFile, optTtl, dispatcherPrefixService.getPrefix());
             mf.setSize(tmpFile.length());
         } while (!tmpDirReference.compareAndSet(directory, directory)); // Directory changed in the meantime
         files.put(mf.getID(), mf);

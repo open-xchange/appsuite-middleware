@@ -235,6 +235,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
 
     public static final String ACTION_ANONYMOUS = "anonymous";
 
+    public static final String ACTION_REDEEM_RESERVATION = "redeemReservation";
+
     public static final String ACTION_LOGOUT = "logout";
 
     public static final String ACTION_REDIRECT = "redirect";
@@ -242,6 +244,8 @@ public abstract class AJAXServlet extends HttpServlet implements UploadRegistry 
     public static final String ACTION_REDEEM = "redeem";
 
     public static final String ACTION_AUTOLOGIN = "autologin";
+
+    public static final String ACTION_SSO_LOGOUT = "ssoLogout";
 
     public static final String ACTION_SAVE_VERSIT = "saveVersit";
 

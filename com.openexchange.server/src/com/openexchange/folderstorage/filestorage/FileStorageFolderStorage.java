@@ -236,6 +236,23 @@ public final class FileStorageFolderStorage implements FolderStorage {
     }
 
     @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        if (false == FileStorageContentType.class.isInstance(contentType)) {
+            throw FolderExceptionErrorMessage.UNKNOWN_CONTENT_TYPE.create(contentType.toString());
+        }
+        IDBasedFolderAccess folderAccess = getFolderAccess(storageParameters);
+        FileStorageFolder[] sharedFolders = folderAccess.getUserSharedFolders();
+        if (null == sharedFolders) {
+            return null;
+        }
+        SortableId[] sortableIds = new SortableId[sharedFolders.length];
+        for (int i = 0; i < sharedFolders.length; i++) {
+            sortableIds[i] = new FileStorageId(sharedFolders[i].getId(), i, sharedFolders[i].getName());
+        }
+        return sortableIds;
+    }
+
+    @Override
     public ContentType[] getSupportedContentTypes() {
         return new ContentType[] { FileStorageContentType.getInstance() };
     }

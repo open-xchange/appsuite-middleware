@@ -101,4 +101,12 @@ public class ObjectFactory {
         return new Group();
     }
 
+    /**
+     * Create an instance of {@link SchemaSelectStrategy }
+     *
+     */
+    public SchemaSelectStrategy createSchemaSelectStrategy() {
+        return new SchemaSelectStrategy();
+    }
+
 }

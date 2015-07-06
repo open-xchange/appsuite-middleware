@@ -4,6 +4,12 @@ open-xchange-halo (7.8.0-0) unstable; urgency=medium
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 05 Nov 2014 09:40:59 +0100
 
+open-xchange-halo (7.6.2-20) stable; urgency=medium
+
+  * Build for patch 2015-06-29 (2569)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 24 Jun 2015 16:14:13 +0200
+
 open-xchange-halo (7.6.2-19) stable; urgency=medium
 
   * Build for patch 2015-06-08 (2540)
@@ -123,6 +129,12 @@ open-xchange-halo (7.6.2-0) unstable; urgency=medium
   * prepare for 7.6.2 release
 
  -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 17 Sep 2014 12:36:16 +0200
+
+open-xchange-halo (7.6.1-30) stable; urgency=medium
+
+  * Build for patch 2015-06-26 (2573)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Wed, 24 Jun 2015 12:08:12 +0200
 
 open-xchange-halo (7.6.1-29) stable; urgency=medium
 

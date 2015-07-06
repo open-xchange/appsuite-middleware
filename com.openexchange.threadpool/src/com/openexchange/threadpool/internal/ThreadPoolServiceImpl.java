@@ -266,9 +266,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             {
                 @SuppressWarnings("unchecked")
                 final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
-                if (null != mdcMap) {
-                    mdcMap.remove(com.openexchange.log.LogProperties.Name.TEMP_FILE.getName());
-                }
                 for (final Task<T> t : tasks) {
                     final CustomFutureTask<T> ftask = new CustomFutureTask<T>(t, mdcMap);
                     futures.add(ftask);
@@ -310,9 +307,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
             {
                 @SuppressWarnings("unchecked")
                 final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
-                if (null != mdcMap) {
-                    mdcMap.remove(com.openexchange.log.LogProperties.Name.TEMP_FILE.getName());
-                }
                 for (final Task<T> t : tasks) {
                     futures.add(new CustomFutureTask<T>(t, mdcMap));
                 }
@@ -394,9 +388,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
         @SuppressWarnings("unchecked")
         final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
-        if (null != mdcMap) {
-            mdcMap.remove(com.openexchange.log.LogProperties.Name.TEMP_FILE.getName());
-        }
         final CompletionService<T> completionService = new CustomExecutorCompletionService<T>(threadPoolExecutor, behavior, mdcMap);
         for (final Task<T> task : tasks) {
             completionService.submit(task);
@@ -445,9 +436,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
         @SuppressWarnings("unchecked")
         final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
-        if (null != mdcMap) {
-            mdcMap.remove(com.openexchange.log.LogProperties.Name.TEMP_FILE.getName());
-        }
         final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, mdcMap);
         threadPoolExecutor.execute(ftask);
         return ftask;
@@ -460,9 +448,6 @@ public final class ThreadPoolServiceImpl implements ThreadPoolService {
         }
         @SuppressWarnings("unchecked")
         final Map<String, Object> mdcMap = MDC.getCopyOfContextMap();
-        if (null != mdcMap) {
-            mdcMap.remove(com.openexchange.log.LogProperties.Name.TEMP_FILE.getName());
-        }
         final CustomFutureTask<T> ftask = new CustomFutureTask<T>(task, refusedExecutionBehavior, mdcMap);
         threadPoolExecutor.execute(ftask);
         return ftask;

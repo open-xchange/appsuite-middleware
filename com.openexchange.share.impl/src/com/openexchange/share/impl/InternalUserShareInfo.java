@@ -99,11 +99,6 @@ public class InternalUserShareInfo implements ShareInfo {
         return new GuestInfo() {
 
             @Override
-            public boolean isPasswordSet() {
-                return true;
-            }
-
-            @Override
             public RecipientType getRecipientType() {
                 return RecipientType.USER;
             }

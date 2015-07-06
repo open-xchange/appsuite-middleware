@@ -131,11 +131,4 @@ public interface GuestInfo {
      */
     Locale getLocale();
 
-    /**
-     * Checks if guest's password is set
-     *
-     * @return
-     */
-    boolean isPasswordSet();
-
 }

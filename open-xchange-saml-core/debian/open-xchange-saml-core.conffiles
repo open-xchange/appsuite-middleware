@@ -1,0 +1,4 @@
+opt/open-xchange/etc/saml.properties
+opt/open-xchange/etc/hazelcast/samlAuthnRequestInfos.properties
+opt/open-xchange/etc/hazelcast/samlAuthnResponseIDs.properties
+opt/open-xchange/etc/hazelcast/samlLogoutRequestInfos.properties

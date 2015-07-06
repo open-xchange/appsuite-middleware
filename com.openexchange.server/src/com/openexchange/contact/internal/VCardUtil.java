@@ -53,10 +53,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.conversion.DataExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -88,9 +90,9 @@ public class VCardUtil {
         VCardService vCardService = ServerServiceRegistry.getInstance().getService(VCardService.class, true);
         InputStream originalVCard = null;
         if (null != contact.getVCardId()) {
-            VCardStorageService vCardStorage = ServerServiceRegistry.getInstance().getService(VCardStorageService.class, false);
-            if (null != vCardStorage) {
-                originalVCard = vCardStorage.getVCard(contact.getVCardId(), session.getContextId());
+            VCardStorageService vCardStorageService = getVCardStorageService(session.getContextId());
+            if (vCardStorageService != null) {
+                originalVCard = vCardStorageService.getVCard(contact.getVCardId(), session.getContextId());
             }
         }
         try {
@@ -163,8 +165,9 @@ public class VCardUtil {
      * @return The imported contact
      */
     public static Contact importContactToFolder(InputStream inputStream, String folderID, ServerSession session) throws OXException {
-        ContactService contactService = ServerServiceRegistry.getServize(ContactService.class, true);
-        VCardStorageService vCardStorage = ServerServiceRegistry.getServize(VCardStorageService.class, false);
+        ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class, true);
+        VCardStorageService vCardStorage = getVCardStorageService(session.getContextId());
+
         boolean keepOriginalVCard = null != vCardStorage && contactService.supports(session, folderID, ContactField.VCARD_ID);
         VCardImport vCardImport = null;
         boolean saved = false;
@@ -175,13 +178,15 @@ public class VCardUtil {
             /*
              * store original vCard & remember vCard identifier
              */
-            IFileHolder originalVCard = vCardImport.getVCard();
-            if (null != originalVCard) {
-                try {
-                    vCardID = vCardStorage.saveVCard(originalVCard.getStream(), session.getContextId());
-                    contact.setVCardId(vCardID);
-                } finally {
-                    Streams.close(originalVCard);
+            if (vCardStorage != null) {
+                IFileHolder originalVCard = vCardImport.getVCard();
+                if (null != originalVCard) {
+                    try {
+                        vCardID = vCardStorage.saveVCard(originalVCard.getStream(), session.getContextId());
+                        contact.setVCardId(vCardID);
+                    } finally {
+                        Streams.close(originalVCard);
+                    }
                 }
             }
             /*
@@ -198,8 +203,16 @@ public class VCardUtil {
         }
     }
 
-	private VCardUtil() {
-		// prevent instantiation
-	}
+    public static VCardStorageService getVCardStorageService(int contextId) throws OXException {
+        VCardStorageFactory vCardStorageFactory = ServerServiceRegistry.getInstance().getService(VCardStorageFactory.class, false);
+        if (vCardStorageFactory != null) {
+            return vCardStorageFactory.getVCardStorageService(ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class), contextId);
+        }
+        return null;
+    }
+
+    private VCardUtil() {
+        // prevent instantiation
+    }
 
 }

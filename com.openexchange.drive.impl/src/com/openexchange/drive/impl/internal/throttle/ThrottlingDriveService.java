@@ -71,7 +71,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.core.performer.CreatedShares;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**

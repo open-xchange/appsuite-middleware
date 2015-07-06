@@ -52,9 +52,6 @@ package com.openexchange.snippet.rdb;
 import static com.openexchange.snippet.SnippetUtils.sanitizeContent;
 import static com.openexchange.snippet.rdb.Services.getService;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.procedure.TIntProcedure;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -71,6 +68,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -86,6 +85,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -99,7 +99,11 @@ import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.procedure.TIntProcedure;
 
 /**
  * {@link RdbSnippetManagement}
@@ -147,39 +151,49 @@ public final class RdbSnippetManagement implements SnippetManagement {
         return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
+    // ------------------------------------------------------------------------------------------------------
+
     private final int contextId;
-
     private final int userId;
-
     private final Session session;
-
     private final boolean supportsAttachments;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link RdbSnippetManagement}.
      */
-    public RdbSnippetManagement(final Session session) {
+    public RdbSnippetManagement(Session session, ServiceLookup services) {
         super();
+        this.services = services;
         this.session = session;
         this.userId = session.getUserId();
         this.contextId = session.getContextId();
 
         final ConfigViewFactory factory = Services.optService(ConfigViewFactory.class);
+        boolean defaultSupportsAttachments = false;
         if (null == factory) {
-            supportsAttachments = false;
+            supportsAttachments = defaultSupportsAttachments;
         } else {
             boolean supportsAttachments;
             try {
-                final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property(
-                    "com.openexchange.snippet.rdb.supportsAttachments",
-                    boolean.class);
-                supportsAttachments = property.isDefined() ? property.get().booleanValue() : true;
+                ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property("com.openexchange.snippet.rdb.supportsAttachments", boolean.class);
+                supportsAttachments = property.isDefined() ? property.get().booleanValue() : defaultSupportsAttachments;
             } catch (final Exception e) {
                 LOG.error("", e);
-                supportsAttachments = false;
+                supportsAttachments = defaultSupportsAttachments;
             }
             this.supportsAttachments = supportsAttachments;
         }
+    }
+
+    private boolean supportsAttachments() throws OXException {
+        if (!supportsAttachments) {
+            return false;
+        }
+
+        CapabilityService service = services.getService(CapabilityService.class);
+        CapabilitySet capabilities = service.getCapabilities(ServerSessionAdapter.valueOf(session));
+        return (capabilities.contains("filestore"));
     }
 
     private static Context getContext(final Session session) throws OXException {
@@ -436,7 +450,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             /*
              * Load attachments
              */
-            if (supportsAttachments) {
+            if (supportsAttachments()) {
                 stmt = con.prepareStatement("SELECT referenceId, fileName FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
                 pos = 0;
                 stmt.setInt(++pos, contextId);
@@ -456,7 +470,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                             attachment.setContentDisposition("attachment; filename=\"" + filename + "\"");
                             attachment.setStreamProvider(new QuotaFileStorageStreamProvider(referenceId, fileStorage));
                             attachments.add(attachment);
-                            
+
                             Object misc = snippet.getMisc();
                             final String imageId = SnippetUtils.getImageId(misc);
                             ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
@@ -503,7 +517,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
              */
             final int id = getIdGeneratorService().getId("com.openexchange.snippet.mime", contextId);
             // Store attachments
-            if (supportsAttachments) {
+            if (supportsAttachments()) {
                 final List<Attachment> attachments = snippet.getAttachments();
                 updateAttachments(id, attachments, false, getContext(session), userId, contextId, con);
             }
@@ -706,7 +720,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             /*
              * Update attachments
              */
-            if (supportsAttachments) {
+            if (supportsAttachments()) {
                 if (null != removeAttachments && !removeAttachments.isEmpty()) {
                     removeAttachments(id, removeAttachments, context, userId, contextId, con);
                 }
@@ -839,7 +853,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
         try {
             con.setAutoCommit(false); // BEGIN;
             rollback = true;
-            deleteSnippet(id, userId, contextId, supportsAttachments, con);
+            deleteSnippet(id, userId, contextId, supportsAttachments(), con);
             con.commit(); // COMMIT
             rollback = false;
         } catch (final SQLException e) {

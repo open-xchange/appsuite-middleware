@@ -3080,7 +3080,7 @@ public final class IMAPCommandsCollection {
                 boolean streamed = false;
                 if (p.isREV1()) {
                     /*-
-                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "65536");
                      *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {
@@ -3238,7 +3238,7 @@ public final class IMAPCommandsCollection {
                 boolean streamed = false;
                 if (p.isREV1()) {
                     /*-
-                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "65536");
                      *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {

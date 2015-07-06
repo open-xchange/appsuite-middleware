@@ -72,6 +72,7 @@ import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.helper.ImageUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.SimConfigurationService;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -85,7 +86,7 @@ import com.openexchange.tools.session.SimServerSession;
 
 /**
  * {@link ImageComparingTest}
- * 
+ *
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.6.0
  */
@@ -117,7 +118,7 @@ public class ImageComparingTest extends TestCase {
         final SimConfigurationService simConfigurationService = new SimConfigurationService();
         simConfigurationService.stringProperties.put("UPLOAD_DIRECTORY", "/tmp/");
         ServerServiceRegistry.getInstance().addService(ConfigurationService.class, simConfigurationService);
-        simManagedFileManagement = new ManagedFileManagementImpl(simConfigurationService, timerService);
+        simManagedFileManagement = new ManagedFileManagementImpl(simConfigurationService, timerService, new DefaultDispatcherPrefixService("/ajax/"));
         ServerServiceRegistry.getInstance().addService(ManagedFileManagement.class, simManagedFileManagement);
         PowerMockito.when(com.openexchange.tools.images.osgi.Services.getService(TimerService.class)).thenReturn(timerService);
     }
@@ -304,7 +305,7 @@ public class ImageComparingTest extends TestCase {
 
     /**
      * Asserts that a value is in range between rangeMin and rangeMax
-     * 
+     *
      * @param value the value to be tested
      * @param rangeMin the absolute minimum range
      * @param rangeMax the absolute maximum range

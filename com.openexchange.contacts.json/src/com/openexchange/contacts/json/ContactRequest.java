@@ -290,7 +290,7 @@ public class ContactRequest {
     	ContactField[] fields;
     	if (this.isInternalSort() || Arrays.contains(columnIDs, ContactMapper.getInstance().get(ContactField.SORT_NAME).getColumnID())) {
     		fields = new ContactField[] {
-    			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME,
+    			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.MARK_AS_DISTRIBUTIONLIST,
 				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY,
 				ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT };
     	} else {

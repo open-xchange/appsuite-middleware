@@ -122,6 +122,14 @@ public interface FileStorageFolderAccess extends FileStorageConstants {
     FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException;
 
     /**
+     * Gets all folders that are considered as "shared" by the user, i.e. those folders of the user that have been shared to at least
+     * one other entity.
+     *
+     * @return The shared folders, or <code>null</code> if there are none or sharing is not supported by the storage
+     */
+    FileStorageFolder[] getUserSharedFolders() throws OXException;
+
+    /**
      * Gets the account's root folder.
      * <p>
      * A convenience method for {@link #getFolder(String)} invoked with {@link FileStorageFolder#ROOT_FULLNAME}.

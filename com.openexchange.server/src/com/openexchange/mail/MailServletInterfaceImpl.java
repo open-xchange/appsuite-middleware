@@ -2839,7 +2839,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                  * Finally send mail
                  */
                 MailProperties properties = MailProperties.getInstance();
-                if ((properties.getRateLimitPrimaryOnly() && MailAccount.DEFAULT_ID == accountId) || !properties.getRateLimitPrimaryOnly()) {
+                if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
                     int rateLimit = properties.getRateLimit();
                     rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
                     transport.sendMailMessage(composedMail, ComposeType.NEW);

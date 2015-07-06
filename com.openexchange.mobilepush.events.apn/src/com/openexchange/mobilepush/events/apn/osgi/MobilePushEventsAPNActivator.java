@@ -58,6 +58,9 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -101,13 +104,15 @@ public class MobilePushEventsAPNActivator extends HousekeepingActivator {
             if (false == Strings.isEmpty(configuredKey)) {
                 final APNAccess access = createAccess(resourceName, password, production);
                 if(access != null) {
+                    Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                    dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
                     registerService(IOSAPNCertificateProvider.class, new IOSAPNCertificateProvider() {
 
                         @Override
                         public APNAccess getAccess() {
                             return access;
                         }
-                    }, 1);
+                    }, dictionary);
                 }
             }
             /*

@@ -49,9 +49,14 @@
 
 package com.openexchange.share.servlet.handler;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
-
+import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.GuestShare;
+import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.servlet.internal.ShareServiceLookup;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractShareHandler}
@@ -61,19 +66,6 @@ import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
  */
 public abstract class AbstractShareHandler implements ShareHandler {
 
-    private static final AtomicReference<ShareLoginConfiguration> SHARE_LOGIN_CONFIG = new AtomicReference<ShareLoginConfiguration>();
-
-    /**
-     * Sets the login configuration for shares needed by redirecting handlers.
-     *
-     * @param configuration The login configuration for shares
-     */
-    public static void setShareLoginConfiguration(ShareLoginConfiguration configuration) {
-        SHARE_LOGIN_CONFIG.set(configuration);
-    }
-
-    // --------------------------------------------------------------------------------------------------------- //
-
     /**
      * Initializes a new {@link AbstractShareHandler}.
      */
@@ -81,12 +73,13 @@ public abstract class AbstractShareHandler implements ShareHandler {
         super();
     }
 
-    /**
-     * Gets the login configuration for shares
-     *
-     * @return The login configuration for shares
-     */
-    protected ShareLoginConfiguration getShareLoginConfiguration() {
-        return SHARE_LOGIN_CONFIG.get();
+    protected ShareLoginMethod getShareLoginMethod(GuestShare share) throws OXException {
+        ContextService contextService = ShareServiceLookup.getService(ContextService.class, true);
+        UserService userService = ShareServiceLookup.getService(UserService.class, true);
+        Context context = contextService.getContext(share.getGuest().getContextID());
+        User guest = userService.getUser(share.getGuest().getGuestID(), context);
+        ShareLoginMethod shareLoginMethod = new ShareLoginMethod(context, guest);
+        return shareLoginMethod;
     }
+
 }
