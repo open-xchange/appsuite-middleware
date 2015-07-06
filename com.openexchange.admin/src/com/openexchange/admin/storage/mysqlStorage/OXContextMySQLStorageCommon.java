@@ -61,7 +61,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -573,26 +572,28 @@ public class OXContextMySQLStorageCommon {
         }
     }
 
-    public void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
-        HashSet<String> loginMappings = ctx.getLoginMappings();
-        Integer ctxid = ctx.getId();
+    public void fillLogin2ContextTable(Context ctx, Connection configdb_write_con) throws SQLException, StorageException {
+        int contextId = ctx.getId().intValue();
+        for (String mapping : ctx.getLoginMappings()) {
+            if (null != mapping) {
+                insertLogin2ContextMapping(mapping, contextId, configdb_write_con);
+            }
+        }
+    }
+
+    private void insertLogin2ContextMapping(String mapping, int contextId, Connection configdb_write_con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
         try {
             stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
-            for (final String mapping : loginMappings) {
-                if (null != mapping) {
-                    stmt.setInt(1, ctxid.intValue());
-                    stmt.setString(2, mapping);
-                    try {
-                        stmt.executeUpdate();
-                    } catch (SQLException e) {
-                        throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.", e);
-                    }
-                }
+            stmt.setInt(1, contextId);
+            stmt.setString(2, mapping);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.", e);
             }
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            throw sql;
+            log.error("SQL Error", e);
+            throw e;
         } finally {
             Databases.closeSQLStuff(stmt);
         }
