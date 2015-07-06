@@ -177,7 +177,7 @@ public enum DBPoolingExceptionCodes implements OXExceptionCode {
      */
     INVALID_GLOBALDB_CONFIGURATION(INVALID_GLOBALDB_CONFIGURATION_MSG, Category.CATEGORY_CONFIGURATION, 23),
     /**
-     * No global database for context group \"%1$s\" found.
+     * No global database for context group "%1$s" found.
      */
     NO_GLOBALDB_CONFIG_FOR_GROUP(NO_GLOBALDB_CONFIG_FOR_GROUP_MSG, Category.CATEGORY_CONFIGURATION, 24),
 
