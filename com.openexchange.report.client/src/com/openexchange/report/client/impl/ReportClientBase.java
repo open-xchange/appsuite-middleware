@@ -79,6 +79,8 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
 public class ReportClientBase extends AbstractJMXTools {
 
+    protected static final String TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND = "Too many arguments. Using the default (display and send)";
+
     protected static final String NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND = "No option selected. Using the default (display and send)";
 
     protected static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
@@ -171,6 +173,7 @@ public class ReportClientBase extends AbstractJMXTools {
             final String combi = (String) parser.getOptionValue(this.showcombi);
             if (null != combi) {
                 displayCombinationAndExit(combi);
+                return;
             }
 
             ReportMode mode = ReportMode.NONE;
@@ -186,13 +189,11 @@ public class ReportClientBase extends AbstractJMXTools {
                     mode = ReportMode.MULTIPLE;
                 } else {
                     mode = ReportMode.SENDONLY;
-//                    parser.parse(new String[] { "-x" });
+                    if (!(null != parser.getOptionValue(this.runAndDeliverOldReport))) {
+                        parser.parse(new String[] { "-x" });
+                    }
                 }
             }
-//            if (null != parser.getOptionValue(this.runAndDeliverOldReport)) {
-//                mode = ReportMode.SENDONLY;
-//            }
-
 
             if (null != parser.getOptionValue(this.displayonly)) {
                 if (ReportMode.SENDONLY == mode) {
@@ -227,6 +228,8 @@ public class ReportClientBase extends AbstractJMXTools {
                 return;
             }
 
+            // ... otherwise old report style
+
             final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
             List<ContextDetail> contextDetails = null;
             if (null != parser.getOptionValue(this.advancedreport)) {
@@ -252,7 +255,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     System.out.println(NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                 case MULTIPLE:
                     if (ReportMode.NONE != mode) {
-                        System.out.println("Too many arguments. Using the default (display and send)");
+                        System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                     }
                 case DISPLAYANDSEND:
                 default:
@@ -433,10 +436,10 @@ public class ReportClientBase extends AbstractJMXTools {
             e.printStackTrace();
             System.exit(1);
         }
-        System.exit(0);
+        return;
     }
 
-    private ObjectName getAppSuiteReportingName() {
+    protected ObjectName getAppSuiteReportingName() {
         try {
             return new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting");
         } catch (MalformedObjectNameException e) {
@@ -476,13 +479,13 @@ public class ReportClientBase extends AbstractJMXTools {
                     //$FALL-THROUGH$
                 case MULTIPLE:
                     if (ReportMode.NONE != mode) {
-                        System.out.println("Too many arguments. Using the default (display and send)");
+                        System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                     }
                     //$FALL-THROUGH$
                 case DISPLAYANDSEND:
                 default:
                     savereport = false;
-                    //                new TransportHandler().sendASReport(report, savereport);
+                    createTransportHandler().sendASReport(report, savereport);
                     printASReport(report);
                     break;
             }
