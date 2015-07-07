@@ -56,14 +56,18 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.osgi.service.event.Event;
+import org.osgi.service.event.EventAdmin;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
+import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.cache.memory.FolderMap;
@@ -71,6 +75,7 @@ import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.mail.dataobjects.MailFolder;
+import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
@@ -89,6 +94,30 @@ import com.openexchange.threadpool.ThreadPools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 final class CachingMailAccountStorage implements MailAccountStorageService {
+
+    // --------------------------------------- Constants for event --------------------------------------------------------------
+
+    private static final String PROP_DRAFTS_FULL_NAME = "com.openexchange.mailaccount.draftsFullName";
+    private static final String PROP_SENT_FULL_NAME = "com.openexchange.mailaccount.sentFullName";
+    private static final String PROP_SPAM_FULL_NAME = "com.openexchange.mailaccount.spamFullName";
+    private static final String PROP_TRASH_FULL_NAME = "com.openexchange.mailaccount.trashFullName";
+    private static final String PROP_CONFIRMED_SPAM_FULL_NAME = "com.openexchange.mailaccount.confirmedSpamFullName";
+    private static final String PROP_CONFIRMED_HAM_FULL_NAME = "com.openexchange.mailaccount.confirmedHamFullName";
+
+    private static final String PROP_DRAFTS_NAME = "com.openexchange.mailaccount.draftsName";
+    private static final String PROP_SENT_NAME = "com.openexchange.mailaccount.sentName";
+    private static final String PROP_SPAM_NAME = "com.openexchange.mailaccount.spamName";
+    private static final String PROP_TRASH_NAME = "com.openexchange.mailaccount.trashName";
+    private static final String PROP_CONFIRMED_SPAM_NAME = "com.openexchange.mailaccount.confirmedSpamName";
+    private static final String PROP_CONFIRMED_HAM_NAME = "com.openexchange.mailaccount.confirmedHamName";
+
+    private static final String PROP_ACCOUNT_ID = "com.openexchange.mailaccount.accountId";
+    private static final String PROP_USER_ID = "com.openexchange.mailaccount.userId";
+    private static final String PROP_CONTEXT_ID = "com.openexchange.mailaccount.contextId";
+
+    private static final String TOPIC_CHANGED_DEFAULT_FOLDERS = "com/openexchange/mailaccount/changeddefaultfolders";
+
+    // ---------------------------------------------------------------------------------------------------------------------------
 
     private static final String REGION_NAME = "MailAccount";
 
@@ -109,6 +138,49 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     RdbMailAccountStorage getDelegate() {
         return delegate;
+    }
+
+    private void postChangedDefaultFolders(int id, int[] indexes, String[] values, boolean isFullName, boolean distributeRemotely, int userId, int contextId) {
+        EventAdmin eventAdmin = ServerServiceRegistry.getInstance().getService(EventAdmin.class);
+        if (null != eventAdmin) {
+            Map<String, Object> properties = new HashMap<String, Object>(9);
+            properties.put(PROP_CONTEXT_ID, Integer.valueOf(contextId));
+            properties.put(PROP_USER_ID, Integer.valueOf(userId));
+            properties.put(PROP_ACCOUNT_ID, Integer.valueOf(id));
+
+            if (distributeRemotely) {
+                properties.put(CommonEvent.PUBLISH_MARKER, Boolean.TRUE);
+            }
+
+            if (null != indexes && null != values) {
+                for (int i = 0; i < indexes.length; i++) {
+                    switch (indexes[i]) {
+                        case StorageUtility.INDEX_DRAFTS:
+                            properties.put(isFullName ? PROP_DRAFTS_FULL_NAME : PROP_DRAFTS_NAME, values[i]);
+                            break;
+                        case StorageUtility.INDEX_SENT:
+                            properties.put(isFullName ? PROP_SENT_FULL_NAME : PROP_SENT_NAME, values[i]);
+                            break;
+                        case StorageUtility.INDEX_SPAM:
+                            properties.put(isFullName ? PROP_SPAM_FULL_NAME : PROP_SPAM_NAME, values[i]);
+                            break;
+                        case StorageUtility.INDEX_TRASH:
+                            properties.put(isFullName ? PROP_TRASH_FULL_NAME : PROP_TRASH_NAME, values[i]);
+                            break;
+                        case StorageUtility.INDEX_CONFIRMED_SPAM:
+                            properties.put(isFullName ? PROP_CONFIRMED_SPAM_FULL_NAME : PROP_CONFIRMED_SPAM_NAME, values[i]);
+                            break;
+                        case StorageUtility.INDEX_CONFIRMED_HAM:
+                            properties.put(isFullName ? PROP_CONFIRMED_HAM_FULL_NAME : PROP_CONFIRMED_HAM_NAME, values[i]);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+
+            eventAdmin.postEvent(new Event(TOPIC_CHANGED_DEFAULT_FOLDERS, properties));
+        }
     }
 
     static CacheKey newCacheKey(CacheService cacheService, int id, int userId, int contextId) {
@@ -163,18 +235,32 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
     public void clearFullNamesForMailAccount(int id, int userId, int contextId) throws OXException {
         delegate.clearFullNamesForMailAccount(id, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+
+        postChangedDefaultFolders(id, null, null, false, true, userId, contextId);
     }
 
     @Override
     public void clearFullNamesForMailAccount(int id, int[] indexes, int userId, int contextId) throws OXException {
         delegate.clearFullNamesForMailAccount(id, indexes, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+
+        postChangedDefaultFolders(id, null, null, false, true, userId, contextId);
     }
 
     @Override
     public void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException {
         delegate.setFullNamesForMailAccount(id, indexes, fullNames, userId, contextId);
         invalidateMailAccount(id, userId, contextId);
+
+        postChangedDefaultFolders(id, indexes, fullNames, true, true, userId, contextId);
+    }
+
+    @Override
+    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        delegate.setNamesForMailAccount(id, indexes, names, userId, contextId);
+        invalidateMailAccount(id, userId, contextId);
+
+        postChangedDefaultFolders(id, indexes, names, false, true, userId, contextId);
     }
 
     @Override
@@ -285,6 +371,11 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
             accounts[i] = getMailAccount0(ids[i], userId, contextId, con);
         }
         return accounts;
+    }
+
+    @Override
+    public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
+        return delegate.getRawMailAccount(id, userId, contextId);
     }
 
     @Override

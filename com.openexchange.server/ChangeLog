@@ -1,3 +1,7 @@
+* 2015-06-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39069: Optimize tokenized autocomplete patterns and don't allow more than 5 of them
+
 * 2015-06-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
@@ -9,7 +13,7 @@
 * 2015-08-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38260: Include distribution list entries when searching in contact module
- 
+
 * 2015-06-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 38600: Proper check if non-infostore file storage supports the "SEARCH_BY_TERM" capability

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,26 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.test;
+package com.openexchange.folderstorage;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.exception.OXException;
 
-import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
-import com.openexchange.contact.storage.rdb.search.AutoCompleteAdapterTest;
-import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 
 /**
- * {@link UnitTests}
+ * {@link ReinitializableFolderStorage} - Enhances {@link FolderStorage} interface.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class UnitTests {
+public interface ReinitializableFolderStorage extends FolderStorage {
 
     /**
-     * Initializes a new {@link UnitTests}.
-     */
-    public UnitTests() {
-        super();
-    }
-
-    /**
-     * Creates the unit test suite.
+     * Reinitializes the denoted tree.
      *
-     * @return The test suite
+     * @param treeId The tree identifier
+     * @param storageParameters The storage parameters
+     * @return <code>true</code> if reinitialized; otherwise <code>false</code>
+     * @throws OXException If re-initialization fails
      */
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(DeduplicatorTest.class);
-        tests.addTestSuite(AutoCompleteAdapterTest.class);        
-        return tests;
-    }
+    boolean reinitialize(String treeId, StorageParameters parameters) throws OXException;
+
 }
