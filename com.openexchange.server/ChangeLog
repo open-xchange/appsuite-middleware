@@ -1,3 +1,7 @@
+* 2015-07-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38783: Fixed NPE.
+
 * 2015-07-03 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service
