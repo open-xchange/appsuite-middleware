@@ -19,6 +19,7 @@ default:
 
     # Optional custom locations
     # logoutLocation: 'http://my.landing-page.tld'
+    # guestLogoutLocation: 'http://guest.landing-page.tld'
     # loginLocation: 'http://my.login-page.tld'
 
     # Defines basic styling for notification mails. If you
