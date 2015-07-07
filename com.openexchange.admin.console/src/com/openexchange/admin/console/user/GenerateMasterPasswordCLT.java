@@ -93,7 +93,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Create an {@link Option} with the {@link OptionBuilder}
-     *
+     * 
      * @param shortName short name of the option
      * @param longName long name of the option
      * @param hasArgs whether it has arguments
@@ -166,7 +166,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Invoke
-     *
+     * 
      * @param parameters
      * @throws IOException
      * @throws FileNotFoundException
@@ -175,41 +175,33 @@ public class GenerateMasterPasswordCLT {
         StringBuilder builder = new StringBuilder();
         String mpasswdFilename = parameters.get(Parameter.mpasswdfile);
         File file = new File(mpasswdFilename);
-        BufferedReader br = null;
-        try {
-            if (file.exists()) {
-                br = new BufferedReader(new FileReader(file));
-                String line;
-                boolean updated = false;
-                while ((line = br.readLine()) != null) {
-                    if (!line.startsWith("#") && !Strings.isEmpty(line)) {
-                        builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
-                        updated = true;
-                    } else {
-                        builder.append(line).append("\n");
-                    }
-                }
-                if (!updated) {
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            boolean updated = false;
+            while ((line = br.readLine()) != null) {
+                if (!line.startsWith("#") && !Strings.isEmpty(line)) {
                     builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
+                    updated = true;
+                } else {
+                    builder.append(line).append("\n");
                 }
-            } else {
+            }
+
+            if (!updated) {
                 builder.append(parameters.get(Parameter.adminuser)).append(":").append(parameters.get(Parameter.encryption)).append(":").append(parameters.get(Parameter.adminpass)).append("\n");
             }
+
             PrintWriter writer = new PrintWriter(file);
             writer.println(builder.toString());
             writer.close();
         } catch (FileNotFoundException e) {
             throw e;
-        } finally {
-            if (null != br) {
-                br.close();
-            }
         }
     }
 
     /**
      * Encrypt the specified password
-     *
+     * 
      * @param encryption The encryption algorithm
      * @param password The plain-text password to encrypt
      * @return The encrypted password
@@ -223,7 +215,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Initialise defaults
-     *
+     * 
      * @param parameters
      */
     private static void initParameters(Map<Parameter, String> parameters) {
@@ -235,7 +227,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Print usage
-     *
+     * 
      * @param exitCode
      */
     private static final void printUsage(int exitCode) {
@@ -247,7 +239,7 @@ public class GenerateMasterPasswordCLT {
 
     /**
      * Get valid encryption/hashing algorithms
-     *
+     * 
      * @return
      */
     private static String getValidEncHashAlgos() {
