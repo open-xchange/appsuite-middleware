@@ -4,7 +4,7 @@ Bundle-Name: Saml
 Bundle-SymbolicName: com.openexchange.saml
 Bundle-Version: 7.6.1
 Bundle-Vendor: Open-Xchange Inc.
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.io,
  com.hazelcast.config; resolution:=optional,
  com.hazelcast.core,
