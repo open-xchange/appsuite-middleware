@@ -1,7 +1,3 @@
-* 2015-07-07 - jan.bauerdick@open-xchange.com
-
- - Fix for bug 39437: Only read content of /opt/open-xchange/etc/mpasswd if this file exists
-
 * 2015-07-07 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38783: Fixed NPE.
