@@ -71,7 +71,6 @@ import org.osgi.service.event.EventAdmin;
 import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.DropBoxApi;
-import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.FoursquareApi;
 import org.scribe.builder.api.Google2Api;
@@ -844,8 +843,6 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
                 apiClass = YahooApi.class;
             } else if (serviceId.indexOf("foursquare") >= 0) {
                 apiClass = FoursquareApi.class;
-            } else if (serviceId.indexOf("facebook") >= 0) {
-                apiClass = FacebookApi.class;
             } else if (serviceId.indexOf("tumblr") >= 0) {
                 apiClass = TumblrApi.class;
             } else if (serviceId.indexOf("flickr") >= 0) {

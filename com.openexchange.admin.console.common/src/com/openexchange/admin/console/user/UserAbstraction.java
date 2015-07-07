@@ -1841,11 +1841,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setConfigOption(final AdminParser adminParser){
-        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.facebook=false|true'", false, false);
+        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false|true'", false, false);
     }
 
     protected final void setRemoveConfigOption(final AdminParser adminParser){
-        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.facebook'", false, false);
+        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
     }
 
     /**

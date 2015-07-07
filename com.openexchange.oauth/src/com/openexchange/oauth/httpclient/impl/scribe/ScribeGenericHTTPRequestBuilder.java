@@ -57,7 +57,6 @@ import org.scribe.builder.ServiceBuilder;
 import org.scribe.builder.api.Api;
 import org.scribe.builder.api.BoxApi;
 import org.scribe.builder.api.DropBoxApi;
-import org.scribe.builder.api.FacebookApi;
 import org.scribe.builder.api.FlickrApi;
 import org.scribe.builder.api.Google2Api;
 import org.scribe.builder.api.LinkedInApi;
@@ -124,8 +123,6 @@ public abstract class ScribeGenericHTTPRequestBuilder<T extends HTTPGenericReque
      */
     protected static Class<? extends Api> getProvider(final API api) {
         switch (api) {
-        case FACEBOOK:
-            return FacebookApi.class;
         case LINKEDIN:
             return LinkedInApi.class;
         case TWITTER:
