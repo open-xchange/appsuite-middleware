@@ -159,7 +159,12 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      *
      * Authentication via this method is disabled.
      */
-    AUTHENTICATION_DISABLED("Authentication via this method is disabled.", LoginExceptionMessages.AUTHENTICATION_DISABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 24);
+    AUTHENTICATION_DISABLED("Authentication via this method is disabled.", LoginExceptionMessages.AUTHENTICATION_DISABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 24),
+    /**
+     * The password is incorrect.
+     */
+    INVALID_GUEST_PASSWORD("Invalid credentials.", LoginExceptionMessages.INVALID_GUEST_PASSWORD_MSG, Category.CATEGORY_USER_INPUT, 25);
+
 
     private final String message;
 

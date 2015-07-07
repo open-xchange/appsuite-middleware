@@ -59,6 +59,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -158,10 +159,10 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
             if (guestService != null) {
                 boolean authenticate = guestService.authenticate(user, context.getContextId(), loginInfo.getPassword());
                 if (authenticate == false) {
-                    throw INVALID_CREDENTIALS.create();
+                    throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
                 }
             } else {
-                throw INVALID_CREDENTIALS.create();
+                throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
             }
         }
         if (!loginInfo.getUsername().equals(user.getMail())) {

@@ -109,6 +109,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Authentication via this method is disabled.
     public static final String AUTHENTICATION_DISABLED_MSG = "Authentication via this method is disabled.";
 
+    // The password is incorrect.
+    public static final String INVALID_GUEST_PASSWORD_MSG = "The password is incorrect.";
+
     private LoginExceptionMessages() {
         super();
     }
