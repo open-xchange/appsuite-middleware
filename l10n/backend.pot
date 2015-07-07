@@ -2547,6 +2547,11 @@ msgstr ""
 msgid "Authentication via this method is disabled."
 msgstr ""
 
+#. The password is incorrect.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/authentication/LoginExceptionMessages.java:113
+msgid "The password is incorrect."
+msgstr ""
+
 #. Too few (%d) login attributes.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.global/src/com/openexchange/configjump/ConfigJumpExceptionMessage.java:70
 msgid "Too few (%d) login attributes."
