@@ -175,7 +175,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
          */
         {
             Object altId = parameters.get(PARAM_ALTERNATIVE_ID);
-            writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
+            writer.writeUTF(PARAMETER_ALT_ID, null != altId && String.class.isInstance(altId) ? (String) altId : null);
         }
         {
             List<String> remoteParameterNames = new LinkedList<String>();
@@ -360,7 +360,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
 
     private static <T> T parseObjectFromString(String s, Class<T> clazz) {
         try {
-            return clazz.getConstructor(new Class[] {String.class }).newInstance(s);
+            return clazz.getConstructor(new Class[] { String.class }).newInstance(s);
         } catch (Exception e) {
             return null;
         }

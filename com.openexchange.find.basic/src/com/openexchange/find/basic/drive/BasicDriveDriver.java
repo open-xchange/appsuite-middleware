@@ -428,14 +428,15 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
      * Gets a value indicating whether the "search by term" capability is available based on the parameters of the supplied find request.
      *
      * @param session The current session
-     * @param fileAccess An existing file access reference, or <code>null</code> if not available
+     * @param idBasedFileAccess An existing file access reference, or <code>null</code> if not available
      * @param findRequest The find request
      * @return <code>true</code> if searching by term is supported, <code>false</code>, otherwise
      */
-    private static boolean supportsSearchByTerm(ServerSession session, IDBasedFileAccess fileAccess, AbstractFindRequest findRequest) throws OXException {
+    private static boolean supportsSearchByTerm(ServerSession session, IDBasedFileAccess idBasedFileAccess, AbstractFindRequest findRequest) throws OXException {
         /*
          * check capability of all concrete file storage if folder ID is specified
          */
+        IDBasedFileAccess fileAccess = idBasedFileAccess;
         if (null != findRequest.getFolderId()) {
             FolderID folderID = new FolderID(findRequest.getFolderId());
             return fileAccess.supports(folderID.getService(), folderID.getAccountId(), FileStorageCapability.SEARCH_BY_TERM);

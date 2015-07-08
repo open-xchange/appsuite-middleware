@@ -52,6 +52,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2016
     ox_add_property com.openexchange.smtp.ssl.ciphersuites "" $PFILE
+
+    # SoftwareChange_Request-2553
+    ox_add_property com.openexchange.smtp.sendPartial false $PFILE
 fi
 
 %clean
@@ -69,6 +72,8 @@ fi
 %changelog
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-26 (2573)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>

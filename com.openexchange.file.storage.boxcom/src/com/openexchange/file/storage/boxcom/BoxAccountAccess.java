@@ -52,9 +52,9 @@ package com.openexchange.file.storage.boxcom;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
@@ -67,24 +67,21 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class BoxAccountAccess implements FileStorageAccountAccess, CapabilityAware {
+public final class BoxAccountAccess implements CapabilityAware {
 
     private final FileStorageAccount account;
     private final Session session;
     private final FileStorageService service;
-    private final BoxAccess boxAccess;
+    private BoxAccess boxAccess;
 
     /**
      * Initializes a new {@link BoxAccountAccess}.
-     *
-     * @throws OXException If initialization fails
      */
-    public BoxAccountAccess(FileStorageService service, FileStorageAccount account, Session session) throws OXException {
+    public BoxAccountAccess(FileStorageService service, FileStorageAccount account, Session session) {
         super();
         this.service = service;
         this.account = account;
         this.session = session;
-        boxAccess = BoxAccess.accessFor(account, session);
     }
 
     @Override
@@ -103,22 +100,22 @@ public final class BoxAccountAccess implements FileStorageAccountAccess, Capabil
 
     @Override
     public void connect() throws OXException {
-        // Nope
+        boxAccess = BoxAccess.accessFor(account, session);
     }
 
     @Override
     public boolean isConnected() {
-        return true;
+        return null != boxAccess;
     }
 
     @Override
     public void close() {
-        // Nope
+        boxAccess = null;
     }
 
     @Override
     public boolean ping() throws OXException {
-        return true;
+        return BoxAccess.pingFor(account, session);
     }
 
     @Override
@@ -133,11 +130,19 @@ public final class BoxAccountAccess implements FileStorageAccountAccess, Capabil
 
     @Override
     public FileStorageFileAccess getFileAccess() throws OXException {
+        BoxAccess boxAccess = this.boxAccess;
+        if (null == boxAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new BoxFileAccess(boxAccess, account, session, this);
     }
 
     @Override
     public FileStorageFolderAccess getFolderAccess() throws OXException {
+        BoxAccess boxAccess = this.boxAccess;
+        if (null == boxAccess) {
+            throw FileStorageExceptionCodes.NOT_CONNECTED.create();
+        }
         return new BoxFolderAccess(boxAccess, account, session, this);
     }
 

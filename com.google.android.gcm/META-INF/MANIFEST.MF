@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Google Cloud Messaging for Android (GCM)
+Bundle-SymbolicName: com.google.android.gcm
+Bundle-Version: 1.0.2
+Bundle-Vendor: Google Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ClassPath: .,
+ lib/json_simple-1.1.jar
+Import-Package: 
+ org.slf4j
+Export-Package: com.google.android.gcm

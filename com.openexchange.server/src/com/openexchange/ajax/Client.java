@@ -66,6 +66,10 @@ public enum Client {
      */
     APPSUITE_UI("open-xchange-appsuite"),
     /**
+     * The client for Mobile Mail App: <code>"open-xchange-mailapp"</code>
+     */
+    MOBILE_APP("open-xchange-mailapp"),
+    /**
      * The client for USM/EAS: <code>"USM-EAS"</code>
      */
     USM_EAS("USM-EAS"),

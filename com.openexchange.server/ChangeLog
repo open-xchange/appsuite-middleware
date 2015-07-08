@@ -37,6 +37,10 @@
                       transport
  - Fix for bug 38604: Aligned .yml configuration file to current T-Online page layout for contact subscription
 
+* 2015-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38592: Ensure existence of table 'configdb.context2push_registration'
+
 * 2015-06-02 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38571: Added debug logging to track down unwanted notification mails.
@@ -54,6 +58,10 @@
 * 2015-05-28 - thorben.betten@open-xchange.com
 
  - Fix for bug 38502: Proper shut-down of DeferredActivator in case an error occurs on bundle start-up
+
+* 2015-05-28 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38260: Include distribution list entries when searching in contact module
 
 * 2015-05-27 - thorben.betten@open-xchange.com
 
@@ -181,6 +189,10 @@
 * 2015-03-18 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 37249: Ignore already processed images when updating a snippet.
+
+* 2015-03-16 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37213: Also consider remote sessions when trying to re-establish a terminated IMAP-IDLE listener
 
 * 2015-03-12 - thorben.betten@open-xchange.com
 

@@ -85,6 +85,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.BODY;
@@ -209,7 +210,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param fp The fetch profile to use
      * @throws MessagingException If initialization fails
      */
-    public MailMessageFetchIMAPCommand(final IMAPFolder imapFolder, final char separator, final boolean isRev1, final long[] uids, final FetchProfile fp) throws MessagingException {
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, long[] uids, FetchProfile fp) throws MessagingException {
         super(imapFolder);
         determineAttachmentByHeader = false;
         final int messageCount = imapFolder.getMessageCount();
@@ -554,10 +555,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             return ENVELOPE_ITEM_HANDLER;
         } else if (item instanceof RFC822SIZE) {
             return SIZE_ITEM_HANDLER;
-        } else if (item instanceof X_REAL_UID) {
-            return X_REAL_UID_ITEM_HANDLER;
-        } else if (item instanceof com.sun.mail.imap.protocol.X_MAILBOX) {
-            return X_MAILBOX_ITEM_HANDLER;
         } else {
             return null;
         }
@@ -717,7 +714,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
-                headerFields.remove(toLowerCase(name));
+                headerFields.remove(Strings.toLowerCase(name));
                 {
                     final HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
@@ -1010,7 +1007,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     for (Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
                         String name = names.nextElement().toString();
                         String value = cParams.get(name);
-                        if (!isEmpty(value)) {
+                        if (!com.openexchange.java.Strings.isEmpty(value)) {
                             try {
                                 contentType.setParameterErrorAware(name, MimeMessageUtility.decodeEnvelopeHeader(value));
                             } catch (OXException e) {
@@ -1127,42 +1124,16 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
 
         @Override
         public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            final long id = ((UID) item).uid;
+            long id = ((UID) item).uid;
             msg.setMailId(Long.toString(id));
             msg.setUid(id);
         }
 
         @Override
         public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
-            final long id = ((IMAPFolder) message.getFolder()).getUID(message);
+            long id = ((IMAPFolder) message.getFolder()).getUID(message);
             msg.setMailId(Long.toString(id));
             msg.setUid(id);
-        }
-    };
-
-    private static final FetchItemHandler X_REAL_UID_ITEM_HANDLER = new FetchItemHandler() {
-
-        @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            msg.setUid(((X_REAL_UID) item).uid);
-        }
-
-        @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
-            // Nothing
-        }
-    };
-
-    private static final FetchItemHandler X_MAILBOX_ITEM_HANDLER = new FetchItemHandler() {
-
-        @Override
-        public void handleItem(final Item item, final IDMailMessage msg, final org.slf4j.Logger logger) {
-            msg.setFolder(((com.sun.mail.imap.protocol.X_MAILBOX) item).mailbox);
-        }
-
-        @Override
-        public void handleMessage(final Message message, final IDMailMessage msg, final org.slf4j.Logger logger) throws MessagingException {
-            // Nothing
         }
     };
 
@@ -1171,8 +1142,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     static {
         MAP = new HashMap<Class<? extends Item>, FetchItemHandler>(8);
         MAP.put(UID.class, UID_ITEM_HANDLER);
-        MAP.put(X_REAL_UID.class, X_REAL_UID_ITEM_HANDLER);
-        MAP.put(com.sun.mail.imap.protocol.X_MAILBOX.class, X_MAILBOX_ITEM_HANDLER);
         MAP.put(INTERNALDATE.class, INTERNALDATE_ITEM_HANDLER);
         MAP.put(FLAGS.class, FLAGS_ITEM_HANDLER);
         MAP.put(ENVELOPE.class, ENVELOPE_ITEM_HANDLER);
@@ -1184,19 +1153,6 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * ++++++++++++++ End of item handlers ++++++++++++++
      */
 
-    public static final class FetchItem extends FetchProfile.Item {
-
-        /**
-         * Initializes a new {@link FetchItem}.
-         *
-         * @param name The name
-         */
-        protected FetchItem(String name) {
-            super(name);
-        }
-
-    }
-
     /**
      * This is the Envelope item. Despite of JavaMail's ENVELOPE item, this item does not include INTERNALDATE nor RFC822.SIZE; it solely
      * consists of the ENVELOPE.
@@ -1204,17 +1160,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * The Envelope is an aggregation of the common attributes of a Message. Implementations should include the following attributes: From,
      * To, Cc, Bcc, ReplyTo, Subject and Date. More items may be included as well.
      */
-    public static final FetchProfile.Item ENVELOPE_ONLY = new FetchItem("ENVELOPE_ONLY");
-
-    /**
-     * This is the X-MAILBOX item.
-     */
-    public static final FetchProfile.Item X_MAILBOX = new FetchItem("X-MAILBOX");
-
-    /**
-     * This is the X-REAL-UID item.
-     */
-    public static final FetchProfile.Item X_REAL_UID = new FetchItem("X-REAL-UID");
+    public static final FetchProfile.Item ENVELOPE_ONLY = new MimeStorageUtility.FetchItem("ENVELOPE_ONLY");
 
     /**
      * Turns given fetch profile into FETCH items to craft a FETCH command.
@@ -1224,9 +1170,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
      * @param loadBody <code>true</code> if message body should be loaded; otherwise <code>false</code>
      * @return The FETCH items to craft a FETCH command
      */
-    public static String getFetchCommand(final boolean isRev1, final FetchProfile fp, final boolean loadBody) {
-        final StringBuilder command = new StringBuilder(128);
-        final boolean sizeIncluded;
+    public static String getFetchCommand(boolean isRev1, FetchProfile fp, boolean loadBody) {
+        StringBuilder command = new StringBuilder(128);
+        boolean sizeIncluded;
         if (fp.contains(FetchProfile.Item.ENVELOPE)) {
             if (loadBody) {
                 command.append("INTERNALDATE");
@@ -1252,25 +1198,20 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         if (fp.contains(FetchProfile.Item.CONTENT_INFO)) {
             command.append(" BODYSTRUCTURE");
         }
-        if (fp.contains(UIDFolder.FetchProfileItem.UID)) {
+        boolean uidIncluded = fp.contains(UIDFolder.FetchProfileItem.UID);
+        if (uidIncluded) {
             command.append(" UID");
         }
-        if (fp.contains(X_MAILBOX)) {
-            command.append(" X-MAILBOX");
-        }
-        if (fp.contains(X_REAL_UID)) {
-            command.append(" X-REAL-UID");
-        }
-        boolean allHeaders = false;
-        if (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody) {
-            allHeaders = true;
+
+        boolean allHeaders = (fp.contains(IMAPFolder.FetchProfileItem.HEADERS) && !loadBody);
+        if (allHeaders) {
             if (isRev1) {
                 command.append(" BODY.PEEK[HEADER]");
             } else {
                 command.append(" RFC822.HEADER");
             }
         }
-        if (!sizeIncluded && fp.contains(IMAPFolder.FetchProfileItem.SIZE)) {
+        if (!sizeIncluded && fp.contains(FetchProfile.Item.SIZE)) {
             command.append(" RFC822.SIZE");
         }
         /*
@@ -1356,18 +1297,4 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         return null;
     }
-
-    /** Check for an empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

@@ -171,15 +171,20 @@ fi
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
-%config(noreplace) /opt/open-xchange/etc/*
 %dir %attr(755,open-xchange,root) /opt/open-xchange/etc/crawlers/
-%config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%attr(644,open-xchange,root) /opt/open-xchange/etc/crawlers/*
+%config(noreplace) /opt/open-xchange/etc/crawler.properties
 %config(noreplace) %attr(644,open-xchange,root) /opt/open-xchange/etc/googlesubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
+%config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
 %doc docs/
 
 %changelog
 * Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-26 (2573)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>

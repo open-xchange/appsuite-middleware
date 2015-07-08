@@ -59,6 +59,9 @@ public class ShortSessionContainerRotator implements Runnable {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShortSessionContainerRotator.class);
 
+    /**
+     * Initializes a new {@link ShortSessionContainerRotator}.
+     */
     public ShortSessionContainerRotator() {
         super();
     }

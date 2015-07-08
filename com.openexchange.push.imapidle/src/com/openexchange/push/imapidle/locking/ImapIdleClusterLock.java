@@ -51,7 +51,6 @@ package com.openexchange.push.imapidle.locking;
 
 import java.util.concurrent.TimeUnit;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 
 /**
@@ -83,26 +82,26 @@ public interface ImapIdleClusterLock {
     /**
      * Attempts to acquires the lock for given user
      *
-     * @param session The associated session
+     * @param sessionInfo The associated session
      * @return <code>true</code> if lock was acquired; otherwise <code>false</code> if another one acquired the lock before
      * @throws OXException
      */
-    boolean acquireLock(Session session) throws OXException;
+    boolean acquireLock(SessionInfo sessionInfo) throws OXException;
 
     /**
      * Refreshed the lock for given user.
      *
-     * @param session The associated session
+     * @param sessionInfo The associated session
      * @throws OXException If refresh operation fails
      */
-    void refreshLock(Session session) throws OXException;
+    void refreshLock(SessionInfo sessionInfo) throws OXException;
 
     /**
      * Releases the possibly held lock for given user.
      *
-     * @param session The associated session
+     * @param sessionInfo The associated session
      * @throws OXException If release operation fails
      */
-    void releaseLock(Session session) throws OXException;
+    void releaseLock(SessionInfo sessionInfo) throws OXException;
 
 }

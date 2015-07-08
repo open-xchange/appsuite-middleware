@@ -57,6 +57,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-messaging-sms"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-meta"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-mobile-config"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-mobile-push"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-munin-scripts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-munin-scripts-jolokia"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,open-xchange-parallels"/>

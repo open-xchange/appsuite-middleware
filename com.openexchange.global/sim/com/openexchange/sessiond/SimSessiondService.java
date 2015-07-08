@@ -220,6 +220,11 @@ public class SimSessiondService implements SessiondService {
     }
 
     @Override
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage) {
+        return getSessionByAlternativeId(altId);
+    }
+
+    @Override
     public Session getSessionByRandomToken(String randomToken, String localIp) {
         // TODO Auto-generated method stub
         return null;
@@ -282,4 +287,9 @@ public class SimSessiondService implements SessiondService {
         }
     }
 
+    @Override
+    public boolean storeSession(String sessionId) throws OXException {
+        // Nothing to do.
+        return true;
+    }
 }

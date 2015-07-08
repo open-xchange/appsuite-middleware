@@ -50,7 +50,6 @@
 package com.openexchange.push.imapidle.locking;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 
 /**
@@ -73,17 +72,17 @@ public class NoOpImapIdleClusterLock implements ImapIdleClusterLock {
     }
 
     @Override
-    public boolean acquireLock(Session session) throws OXException {
+    public boolean acquireLock(SessionInfo sessionInfo) throws OXException {
         return true;
     }
 
     @Override
-    public void refreshLock(Session session) throws OXException {
+    public void refreshLock(SessionInfo sessionInfo) throws OXException {
         // Empty
     }
 
     @Override
-    public void releaseLock(Session session) throws OXException {
+    public void releaseLock(SessionInfo sessionInfo) throws OXException {
         // Empty
     }
 
