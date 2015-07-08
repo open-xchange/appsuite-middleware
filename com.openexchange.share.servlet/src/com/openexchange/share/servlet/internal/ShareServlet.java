@@ -50,7 +50,6 @@
 package com.openexchange.share.servlet.internal;
 
 import java.io.IOException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
@@ -58,7 +57,6 @@ import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
-import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
@@ -79,13 +77,11 @@ import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ShareServlet extends HttpServlet {
+public class ShareServlet extends AbstractShareServlet {
 
     private static final long serialVersionUID = -598653369873570676L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
-
-    // --------------------------------------------------------------------------------------------------------------------------------- //
 
     private final RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry;
 
@@ -106,7 +102,8 @@ public class ShareServlet extends HttpServlet {
         Translator translator = Translator.EMPTY;
         GuestShare share = null;
         try {
-            translator = ShareServiceLookup.getService(TranslatorFactory.class, true).translatorFor(request.getLocale());
+            TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+            translator = translatorFactory.translatorFor(determineLocale(request, null));
 
             request.getSession(true);
 
@@ -141,6 +138,9 @@ public class ShareServlet extends HttpServlet {
                 }
             }
 
+            // Switch language for errors if appropriate
+            translator = translatorFactory.translatorFor(determineLocale(request, share.getGuest()));
+
             /*
              * Determine appropriate ShareHandler and handle the share
              */
@@ -152,14 +152,8 @@ public class ShareServlet extends HttpServlet {
             e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            LoginLocationBuilder location = new LoginLocationBuilder().message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY), "internal_error");
-            if (share != null) {
-                AuthenticationMode authMode = share.getGuest().getAuthentication();
-                if (authMode == AuthenticationMode.ANONYMOUS_PASSWORD || authMode == AuthenticationMode.GUEST_PASSWORD) {
-                    location.loginType(authMode);
-                }
-            }
-            response.sendRedirect(location.build());
+            String location = new LoginLocationBuilder().message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY), "internal_error").build();
+            response.sendRedirect(location);
         }
     }
 

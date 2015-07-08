@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
@@ -86,8 +84,6 @@ import com.openexchange.user.UserService;
  * @since v7.8.0
  */
 public class WebUIShareHandler extends AbstractShareHandler {
-
-    private static final Logger LOG = LoggerFactory.getLogger(WebUIShareHandler.class);
 
     /**
      * Initializes a new {@link WebUIShareHandler}.

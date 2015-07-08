@@ -47,36 +47,48 @@
  *
  */
 
-package com.openexchange.share.servlet;
+package com.openexchange.share.servlet.internal;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.Locale;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Strings;
+import com.openexchange.share.GuestInfo;
+
 
 /**
- * {@link ShareServletStrings}
+ * {@link AbstractShareServlet}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareServletStrings implements LocalizableStrings {
+public class AbstractShareServlet extends HttpServlet {
 
-    public static final String GUEST = "guest";
+    private static final long serialVersionUID = 5459701824808419752L;
 
-    public static final String FILE = "file";
+    /**
+     * Determines the locale for translations based on the request parameters/headers and guest info.
+     *
+     * @param request The servlet request
+     * @param guestInfo The guest info or <code>null</code>
+     * @return The locale
+     */
+    protected static Locale determineLocale(HttpServletRequest request, GuestInfo guestInfo) {
+        String langParam = request.getParameter("language");
+        if (Strings.isNotEmpty(langParam)) {
+            return new Locale(langParam);
+        }
 
-    public static final String FOLDER = "folder";
+        if (guestInfo != null) {
+            return guestInfo.getLocale();
+        }
 
-    public static final String SHARE_WITH_TARGET = "%1$s has shared the %2$s \"%3$s\" with you. Please log in to view it. ";
+        if (Strings.isNotEmpty(request.getHeader("Accept-Language"))) {
+            return request.getLocale();
+        }
 
-    public static final String SHARE_WITHOUT_TARGET = "Files have been shared with you. Please log in to view them. ";
-
-    public static final String SHARE_WITHOUT_TARGET_WITH_DISPLAYNAME = "%1$s has shared some files with you. ";
-
-    public static final String RESET_PASSWORD = "We sent a message to %1$s with further instructions on how to set a new password.";
-
-    public static final String CHOOSE_PASSWORD = "Please set a new password to regain access.";
-
-    public static final String SHARE_NOT_FOUND = "The share you are looking for does not exist.";
-
-    public static final String INVALID_REQUEST = "We were unable to process your request.";
+        return LocaleTools.DEFAULT_LOCALE;
+    }
 
 }

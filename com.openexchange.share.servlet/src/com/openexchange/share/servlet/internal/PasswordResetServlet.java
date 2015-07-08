@@ -54,7 +54,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.common.io.BaseEncoding;
@@ -95,7 +94,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class PasswordResetServlet extends HttpServlet {
+public class PasswordResetServlet extends AbstractShareServlet {
 
     private static final long serialVersionUID = -598655895873570676L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
@@ -117,7 +116,8 @@ public class PasswordResetServlet extends HttpServlet {
         Tools.disableCaching(response);
         Translator translator = Translator.EMPTY;
         try {
-            translator = ShareServiceLookup.getService(TranslatorFactory.class, true).translatorFor(request.getLocale());
+            TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+            translator = translatorFactory.translatorFor(determineLocale(request, null));
 
             request.getSession(true);
 
@@ -140,9 +140,9 @@ public class PasswordResetServlet extends HttpServlet {
                 return;
             }
 
-            translator = ShareServiceLookup.getService(TranslatorFactory.class, true).translatorFor(guestInfo.getLocale());
             int contextID = guestInfo.getContextID();
             int guestID = guestInfo.getGuestID();
+            translator = translatorFactory.translatorFor(determineLocale(request, guestInfo));
             Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
             User storageUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestID, context);
 
@@ -172,7 +172,6 @@ public class PasswordResetServlet extends HttpServlet {
                  */
                 String redirectUrl = new LoginLocationBuilder()
                     .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestShare.getGuest().getEmailAddress()), "reset_password_info")
-                    .loginType(AuthenticationMode.GUEST_PASSWORD)
                     .share(guestInfo.getBaseToken())
                     .build();
                 response.sendRedirect(redirectUrl);
@@ -180,7 +179,6 @@ public class PasswordResetServlet extends HttpServlet {
                 if (confirm.equals(hash)) {
                     LoginLocationBuilder redirectUrl = new LoginLocationBuilder()
                         .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestShare.getGuest().getEmailAddress()), "reset_password")
-                        .loginType(AuthenticationMode.GUEST_PASSWORD)
                         .parameter("confirm", confirm)
                         .share(guestInfo.getBaseToken());
                     response.sendRedirect(redirectUrl.build());
@@ -204,7 +202,8 @@ public class PasswordResetServlet extends HttpServlet {
         Tools.disableCaching(response);
         Translator translator = Translator.EMPTY;
         try {
-            translator = ShareServiceLookup.getService(TranslatorFactory.class, true).translatorFor(request.getLocale());
+            TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+            translator = translatorFactory.translatorFor(determineLocale(request, null));
 
             request.getSession(true);
 
@@ -241,7 +240,7 @@ public class PasswordResetServlet extends HttpServlet {
 
             int contextID = guestInfo.getContextID();
             int guestID = guestInfo.getGuestID();
-            translator = ShareServiceLookup.getService(TranslatorFactory.class, true).translatorFor(guestInfo.getLocale());
+            translator = translatorFactory.translatorFor(determineLocale(request, guestInfo));
             User storageUser = loadAndPrepareGuest(guestID, contextID);
 
             String hash = getHash(storageUser.getUserPassword());
