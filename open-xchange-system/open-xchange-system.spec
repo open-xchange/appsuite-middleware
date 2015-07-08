@@ -49,6 +49,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/lib/oxfunctions.sh
 
 %changelog
+* Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-06-29 (2578)
+* Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-06-29 (2542)
 * Wed Jun 24 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-06-26 (2573)
 * Wed Jun 24 2015 Carsten Hoeger <choeger@open-xchange.com>
