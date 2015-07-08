@@ -59,6 +59,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
+import javax.mail.Store;
 import javax.mail.StoreClosedException;
 import javax.mail.search.SearchException;
 import com.openexchange.exception.OXException;
@@ -80,6 +81,7 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
 import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
@@ -194,7 +196,9 @@ public final class IMAPSort {
                         /*
                          * The BYE response is always untagged, and indicates that the server is about to close the connection.
                          */
-                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                        Store store = imapFolder.getStore();
+                        ((IMAPStore) store).setAllowUnsafeConnectedCheck(false);
+                        throw new StoreClosedException(store, protocolException.getMessage());
                     }
                     final Throwable cause = protocolException.getCause();
                     if (cause instanceof StoreClosedException) {

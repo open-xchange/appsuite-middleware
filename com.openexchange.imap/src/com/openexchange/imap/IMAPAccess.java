@@ -1044,14 +1044,11 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
 
     @Override
     public boolean isConnected() {
-        /*-
-         *
         if (!connected) {
             return false;
         }
-        return (connected = ((imapStore != null) && imapStore.isConnected()));
-         */
-        return connected;
+        IMAPStore imapStore = this.imapStore;
+        return (connected = ((imapStore != null) && imapStore.isConnectedUnsafe()));
     }
 
     @Override
