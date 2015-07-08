@@ -1081,8 +1081,8 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), fulltime, cdao.getRecurrenceCalculator());
         }
         CalendarDataObject clone = cdao.clone();
-        RecurringResultsInterface rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, CalendarCollectionService.MAX_OCCURRENCESE);
-        RecurringResultInterface rresult = rresults.getRecurringResult(0);
+        RecurringResultsInterface rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
+        RecurringResultInterface rresult = rresults.getRecurringResult(rresults.size()-1);
         Date retval = new Date(rresult.getEnd());
 
         TimeZone tz = TimeZone.getTimeZone(tzid);
