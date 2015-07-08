@@ -53,10 +53,13 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
@@ -65,6 +68,7 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,6 +101,27 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
 
     @Override
     public CreatedShares perform() throws OXException {
+        boolean shareLinks = false;
+        boolean inviteGuests = false;
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null != capabilities && capabilities.contains("share_links")) {
+            shareLinks = true;
+        }
+        if (null != capabilities && capabilities.contains("invite_guests")) {
+            inviteGuests = true;
+        }
+        for (ShareRecipient recipient : recipients) {
+            if (RecipientType.ANONYMOUS.equals(recipient.getType()) && !shareLinks) {
+                throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+            }
+            if (RecipientType.GUEST.equals(recipient.getType()) && !inviteGuests) {
+                throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+            }
+        }
         /*
          * distinguish between internal and external recipients
          */

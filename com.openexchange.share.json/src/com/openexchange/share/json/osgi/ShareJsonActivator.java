@@ -52,6 +52,7 @@ package com.openexchange.share.json.osgi;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
@@ -89,7 +90,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, GroupService.class, ContactService.class,
+        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, GroupService.class, ContactService.class, CapabilityService.class,
             SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class};
     }
 

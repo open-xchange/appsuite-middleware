@@ -85,6 +85,10 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String NO_SHARING_WITH_YOURSELF = "You can't share with yourself.";
 
+    public static final String NO_SHARE_LINK_PERMISSION_MSG = "You don't have sufficient permissions to share a link.";
+
+    public static final String NO_INVITE_GUEST_PERMISSION_MSG = "You don't have sufficient permissions to invite guests.";
+
     /**
      * Prevent instantiation.
      */
