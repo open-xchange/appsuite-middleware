@@ -5,6 +5,7 @@
 * 2015-07-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 39347: Respect maximum numer of years during recurrence calculation.
+ - Fix for bug 39528: Bad usage of enumeration constants. Store confirmation message in separate attributes.
 
 * 2015-07-07 - martin.herfurth@open-xchange.com
 

@@ -61,6 +61,7 @@ import com.openexchange.ajax.writer.AppointmentWriter;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
+import com.openexchange.calendar.itip.ITipAttributes;
 import com.openexchange.calendar.itip.ITipDingeMacher;
 import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.exception.OXException;
@@ -92,14 +93,16 @@ public class DingeMacherAction extends AbstractITipAction {
         ITipAnalysis analysisToProcess = analysis.get(index);
         ITipDingeMacherFactoryService factory = getFactory();
         ITipAction action = ITipAction.valueOf(request.getParameter("action").toUpperCase());
+        ITipAttributes attributes = new ITipAttributes();
         if (request.containsParameter("message")) {
             String message = request.getParameter("message", String.class);
             if (message != null && !message.trim().equals("")) {
-                action.setMessage(message);
+                attributes.setConfirmationMessage(message);
             }
         }
         ITipDingeMacher macher = factory.getMacher(action);
-        List<Appointment> list = macher.perform(action, analysisToProcess, session);
+        
+        List<Appointment> list = macher.perform(action, analysisToProcess, session, attributes);
 
         if (list != null) {
             AppointmentWriter writer = new AppointmentWriter(tz).setSession(session);
