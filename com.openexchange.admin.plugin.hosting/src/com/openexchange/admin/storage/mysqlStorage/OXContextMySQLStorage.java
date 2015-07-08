@@ -96,6 +96,7 @@ import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -1043,7 +1044,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public Context create(final Context ctx, final User adminUser, final UserModuleAccess access, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
+    public Context create(final Context ctx, final User adminUser, final UserModuleAccess access, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException {
         if (null == adminUser) {
             throw new StorageException("Context administrator is not defined.");
         }
@@ -1086,9 +1087,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             }
             // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
             SchemaCacheRollback cacheRollback = null;
-            boolean error = true;
+            boolean rollback = false;
             try {
+                // Start transaction & mark to perform a roll-back if any error occurs
                 startTransaction(configCon);
+                rollback = true;
 
                 // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
                 cacheRollback = findOrCreateSchema(configCon, db, schemaSelectStrategy);
@@ -1096,23 +1099,33 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // Continue with context creation
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
-                final Context retval = writeContext(ctx, adminUser, access);
+                Context retval = writeContext(ctx, adminUser, access);
+
+                // Commit transaction and unmark to perform a roll-back
                 configCon.commit();
+                rollback = false;
+
+                // Null'ify SchemaCacheRollback instance due to successful commit
+                cacheRollback = null;
+
                 LOG.info("Context {} created!", retval.getId());
-                error = false;
                 return retval;
             } catch (SQLException e) {
-                rollback(configCon);
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw new StorageException(e.getMessage(), e);
+            } catch (ContextExistsException e) {
+                throw e;
             } catch (StorageException e) {
-                rollback(configCon);
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw e;
             } finally {
-                if (error && (null != cacheRollback)) {
-                    cacheRollback.rollback();
+                if (null != cacheRollback) {
+                    try { cacheRollback.rollback(); } catch (Exception x) { /*Ignore*/ }
                 }
+
+                if (rollback) {
+                    rollback(configCon);
+                    OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+                }
+
                 autocommit(configCon);
             }
         } finally {

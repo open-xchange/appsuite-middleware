@@ -110,14 +110,6 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             throw StorageException.wrapForRMI(e);
         }
 
-        if (tool.existsContext(ctx)) {
-            throw new ContextExistsException("Context already exists!");
-        }
-
-        if (ctx.getName() != null && tool.existsContextName(ctx.getName())) {
-            throw new InvalidDataException("Context " + ctx.getName() + " already exists!");
-        }
-
         try {
             if (!admin_user.mandatoryCreateMembersSet()) {
                 throw new InvalidDataException("Mandatory fields in admin user not set: " + admin_user.getUnsetMembers());
@@ -129,7 +121,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
         GenericChecks.checkValidMailAddress(admin_user.getPrimaryEmail());
     }
 
-    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException;
+    protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException;
 
     protected SchemaSelectStrategy getDefaultSchemaSelectStrategy() {
         return SchemaSelectStrategy.automatic();

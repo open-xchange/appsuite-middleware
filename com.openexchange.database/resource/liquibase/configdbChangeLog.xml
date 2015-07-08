@@ -147,4 +147,20 @@
           </createProcedure>
         </rollback>
     </changeSet>
+
+    <changeSet id="7.8.0:context:addcontextnameunique" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="context" columnNames="name"/>
+            </not>
+        </preConditions>
+        <comment>Creates a UNIQUE constraint on name column of the context table</comment>
+        <sql>
+            ALTER TABLE context ADD UNIQUE KEY `context_name_unique` (name)
+        </sql>
+        <rollback>
+            <dropIndex indexName="context_name_unique" tableName="context_server2db_pool"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

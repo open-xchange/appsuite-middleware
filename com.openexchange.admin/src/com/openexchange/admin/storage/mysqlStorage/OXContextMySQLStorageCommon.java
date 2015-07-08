@@ -69,6 +69,8 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -416,7 +418,17 @@ public class OXContextMySQLStorageCommon {
         return tmp.toArray(new String[tmp.size()]);
     }
 
-    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException {
+    /**
+     * Inserts context data to appropriate tables.
+     *
+     * @param ctx The context to add
+     * @param con The connection to the configdb
+     * @param db The database associated with the context
+     * @throws StorageException If a general storage error occurs
+     * @throws ContextExistsException If there is already a context with the same context identifier
+     * @throws InvalidDataException If there is already a context with the same name
+     */
+    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException, ContextExistsException, InvalidDataException {
         // dbid is the id in db_pool of database engine to use for next context
 
         // if read id -1 (not set by client ) or 0 (there is no read db for this
@@ -545,16 +557,28 @@ public class OXContextMySQLStorageCommon {
         return retval;
     }
 
-    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException {
+    /**
+     * <code>INSERT</code>s the data row into the "context" table.
+     *
+     * @param ctx The context to insert
+     * @param configdbCon A connection to the configdb
+     * @throws StorageException If a general SQL error occurs
+     * @throws ContextExistsException If there is already a context with the same context identifier
+     * @throws InvalidDataException If there is already a context with the same name
+     */
+    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException, ContextExistsException, InvalidDataException {
+        String name;
+        if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
+            name = ctx.getName();
+        } else {
+            name = ctx.getIdAsString();
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = configdbCon.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
             stmt.setInt(1, ctx.getId().intValue());
-            if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
-                stmt.setString(2, ctx.getName());
-            } else {
-                stmt.setString(2, ctx.getIdAsString());
-            }
+            stmt.setString(2, name);
             stmt.setBoolean(3, true);
             stmt.setInt(4, ctx.getFilestoreId().intValue());
             stmt.setString(5, ctx.getFilestore_name());
@@ -566,6 +590,12 @@ public class OXContextMySQLStorageCommon {
             stmt.setLong(6, quota_max_temp);
             stmt.executeUpdate();
         } catch (final SQLException e) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                throw new ContextExistsException("Context already exists!");
+            }
+            if (Databases.isKeyConflictInMySQL(e, "context_name_unique")) {
+                throw new InvalidDataException("Context " + name + " already exists!");
+            }
             throw new StorageException(e.getMessage(), e);
         } finally {
             Databases.closeSQLStuff(stmt);
