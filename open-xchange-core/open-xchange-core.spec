@@ -1201,6 +1201,10 @@ if [ "" = "$VALUE" ]; then
     ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
 fi
 
+# SoftwareChange_Request-2568
+ox_add_property com.openexchange.contact.storeVCards true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/etc/contact.properties
+
 # SoftwareChange_Request-2575
 ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
