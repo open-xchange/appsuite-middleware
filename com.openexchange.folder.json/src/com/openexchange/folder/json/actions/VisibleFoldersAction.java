@@ -217,13 +217,13 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
             final JSONObject ret = new JSONObject(4);
             final AdditionalFolderFieldList additionalFolderFieldList = Constants.ADDITIONAL_FOLDER_FIELD_LIST;
             if (null != privateFolders && privateFolders.length > 0) {
-                ret.put("private", FolderWriter.writeMultiple2Array(columns, privateFolders, session, additionalFolderFieldList));
+                ret.put("private", FolderWriter.writeMultiple2Array(request, columns, privateFolders, additionalFolderFieldList));
             }
             if (null != publicFolders && publicFolders.length > 0) {
-                ret.put("public", FolderWriter.writeMultiple2Array(columns, publicFolders, session, additionalFolderFieldList));
+                ret.put("public", FolderWriter.writeMultiple2Array(request, columns, publicFolders, additionalFolderFieldList));
             }
             if (null != sharedFolders && sharedFolders.length > 0) {
-                ret.put("shared", FolderWriter.writeMultiple2Array(columns, sharedFolders, session, additionalFolderFieldList));
+                ret.put("shared", FolderWriter.writeMultiple2Array(request, columns, sharedFolders, additionalFolderFieldList));
             }
             /*
              * Gather possible warnings

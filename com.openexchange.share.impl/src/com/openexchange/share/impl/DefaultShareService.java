@@ -193,6 +193,15 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
+    public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
+        int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(session.getContextId(), shares);
+        shares = removeInaccessible(session, shares);
+        return ShareTool.toShareInfos(services, session.getContextId(), shares);
+    }
+
+    @Override
     public ShareInfo getShare(Session session, String token, String path) throws OXException {
         List<ShareInfo> shareInfos = getShares(session, token);
         for (ShareInfo shareInfo : shareInfos) {
@@ -693,7 +702,6 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Filters out those shares from the supplied list where the session's user has no access to the targets.
-     * cleaning up guest users as needed.
      *
      * @param session The session
      * @param shares The shares
@@ -706,6 +714,9 @@ public class DefaultShareService implements ShareService {
             while (iterator.hasNext()) {
                 Share share = iterator.next();
                 ShareTarget target = share.getTarget();
+                if (target.getOwnedBy() == session.getUserId()) {
+                    continue;
+                }
                 if (false == moduleSupport.exists(target, session)) {
                     removeTargets(session.getContextId(), Collections.singletonList(target), Collections.singletonList(Integer.valueOf(share.getGuest())));
                     iterator.remove();

@@ -63,6 +63,7 @@ import com.googlecode.concurrentlinkedhashmap.ConcurrentLinkedHashMap;
 import com.googlecode.concurrentlinkedhashmap.Weighers;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentTypeDiscoveryService;
@@ -151,7 +152,7 @@ public final class FolderStorageActivator implements BundleActivator {
         }
 
         @Override
-        public Object renderJSON(final Object value) {
+        public Object renderJSON(AJAXRequestData requestData, final Object value) {
             return value == null ? JSONObject.NULL : value;
         }
 

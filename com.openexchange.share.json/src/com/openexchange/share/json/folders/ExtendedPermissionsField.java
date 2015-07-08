@@ -47,104 +47,95 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
+package com.openexchange.share.json.folders;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link BulkFolderField}
+ * {@link ExtendedPermissionsField}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-public class BulkFolderField implements AdditionalFolderField {
+public class ExtendedPermissionsField implements AdditionalFolderField {
 
-    private static final Object NULL = new Object();
-
-    private final AdditionalFolderField delegate;
-
-    private final Map<String, Object> values;
+    private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link BulkFolderField}.
+     * Initializes a new {@link ExtendedPermissionsField}.
      *
-     * @param delegate The delegate field
+     * @param services The service lookup reference
      */
-    public BulkFolderField(AdditionalFolderField delegate) {
+    public ExtendedPermissionsField(ServiceLookup services) {
         super();
-        values = new HashMap<String, Object>();
-        this.delegate = delegate;
+        this.services = services;
     }
 
     @Override
     public int getColumnID() {
-        return delegate.getColumnID();
+        return 3060;
     }
 
     @Override
     public String getColumnName() {
-        return delegate.getColumnName();
+        return "extended_permissions";
     }
 
     @Override
-    public Object getValue(FolderObject f, ServerSession session) {
-        String fn = f.getFullName();
-        if (fn == null) {
-            fn = Integer.toString(f.getObjectID());
-        }
-        if (!values.containsKey(fn)) {
-            getValues(Collections.singletonList(f), session);
-        }
-        Object value = values.get(fn);
-        return NULL == value ? null : value;
+    public Object getValue(FolderObject folder, ServerSession session) {
+        return getValues(Collections.singletonList(folder), session).iterator().next();
     }
 
     @Override
     public List<Object> getValues(List<FolderObject> folders, ServerSession session) {
-        List<FolderObject> fl = new ArrayList<FolderObject>(folders.size());
-        for (FolderObject f : folders) {
-            String fn = f.getFullName();
-            if (!values.containsKey(fn == null ? Integer.toString(f.getObjectID()) : fn)) {
-                fl.add(f);
+        if (null == folders) {
+            return null;
+        }
+        ExtendedPermissionResolver resolver = new ExtendedPermissionResolver(services, session);
+        resolver.cachePermissionEntities(folders);
+        List<Object> values = new ArrayList<Object>();
+        for (FolderObject folder : folders) {
+            List<OCLPermission> oclPermissions = folder.getPermissions();
+            if (null != oclPermissions) {
+                List<ExtendedPermission> extendedPermissions = new ArrayList<ExtendedPermission>(oclPermissions.size());
+                for (OCLPermission oclPermission : oclPermissions) {
+                    extendedPermissions.add(new ExtendedPermission(resolver, folder, oclPermission));
+                }
+                values.add(extendedPermissions);
+            } else {
+                values.add(null);
             }
         }
-        if (!fl.isEmpty()) {
-            warmUp(fl, session);
-        }
-        List<Object> vals = new ArrayList<Object>(folders.size());
-        for (FolderObject f : folders) {
-            String fn = f.getFullName();
-            Object value = values.get(fn == null ? Integer.toString(f.getObjectID()) : fn);
-            vals.add(NULL == value ? null : value);
-        }
-        return vals;
+        return values;
     }
 
     @Override
     public Object renderJSON(AJAXRequestData requestData, Object value) {
-        return delegate.renderJSON(requestData, value);
-    }
-
-    /**
-     * Loads the values for specified folders and puts resulting values into cache.
-     *
-     * @param folders The folders
-     * @param session The session
-     */
-    public void warmUp(List<FolderObject> folders, ServerSession session) {
-        List<Object> vals = delegate.getValues(folders, session);
-        int i = 0;
-        for (FolderObject f : folders) {
-            String fn = f.getFullName();
-            Object value = vals.get(i++);
-            values.put(fn == null ? Integer.toString(f.getObjectID()) : fn, null == value ? NULL : value);
+        if (null != value && List.class.isInstance(value)) {
+            try {
+                List<?> values = (List<?>) value;
+                JSONArray jsonArray = new JSONArray(values.size());
+                for (Object item : values) {
+                    if (ExtendedPermission.class.isInstance(item)) {
+                        jsonArray.put(((ExtendedPermission) item).toJSON(requestData));
+                    }
+                }
+                return jsonArray;
+            } catch (JSONException e) {
+                org.slf4j.LoggerFactory.getLogger(ExtendedPermissionsField.class).error("Error serializing extended permissions", e);
+            }
         }
+        return null;
     }
 
 }

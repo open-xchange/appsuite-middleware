@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -174,6 +175,17 @@ public class RdbShareStorage implements ShareStorage {
         ConnectionProvider provider = getReadProvider(contextID, parameters);
         try {
             return new ShareSelector(contextID).createdBy(createdBy).module(module).select(provider.get());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
+    public List<Share> loadSharesForTarget(int contextID, int module, String folder, String item, StorageParameters parameters) throws OXException {
+        ShareTarget target = new ShareTarget(module, folder, item);
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).targets(Collections.singletonList(target)).select(provider.get());
         } finally {
             provider.close();
         }

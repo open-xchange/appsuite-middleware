@@ -61,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
@@ -110,7 +111,7 @@ public class IsPublished implements AdditionalFolderField {
     }
 
     @Override
-    public Object renderJSON(final Object value) {
+    public Object renderJSON(AJAXRequestData requestData, final Object value) {
         return value;
     }
 

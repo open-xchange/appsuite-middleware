@@ -74,6 +74,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderFieldList;
 import com.openexchange.ajax.customizer.folder.BulkFolderField;
 import com.openexchange.ajax.meta.MetaContributor;
 import com.openexchange.ajax.meta.MetaContributorRegistry;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.folder.json.FolderField;
@@ -89,8 +90,8 @@ import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Streams;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link FolderWriter} - Write methods for folder module.
@@ -120,31 +121,26 @@ public final class FolderWriter {
      */
     private static final class AdditionalFolderFieldWriter implements FolderFieldWriter {
 
-        private final ServerSession serverSession;
-
         private final AdditionalFolderField aff;
+        private final AJAXRequestData requestData;
 
-        protected AdditionalFolderFieldWriter(final ServerSession serverSession, final AdditionalFolderField aff) {
-            this.serverSession = serverSession;
+        /**
+         * Initializes a new {@link AdditionalFolderFieldWriter}.
+         *
+         * @param requestData The underlying request data
+         * @param aff The additional folder field
+         */
+        protected AdditionalFolderFieldWriter(AJAXRequestData requestData, final AdditionalFolderField aff) {
+            super();
+            this.requestData = requestData;
             this.aff = aff;
         }
 
         @Override
         public void writeField(final JSONValuePutter jsonPutter, final UserizedFolder folder) throws JSONException {
-            final FolderObject fo = new FolderObject();
-            final int numFolderId = getUnsignedInteger(folder.getID());
-            if (numFolderId < 0) {
-                fo.setFullName(folder.getID());
-            } else {
-                fo.setObjectID(numFolderId);
-            }
-            fo.setFolderName(folder.getName());
-            fo.setModule(folder.getContentType().getModule());
-            if (null != folder.getType()) {
-                fo.setType(folder.getType().getType());
-            }
-            fo.setCreatedBy(folder.getCreatedBy());
-            jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(aff.getValue(fo, serverSession)));
+            FolderObject fo = turnIntoFolderObjects(new UserizedFolder[] { folder }).iterator().next();
+            Object value = aff.getValue(fo, requestData.getSession());
+            jsonPutter.put(jsonPutter.withKey() ? aff.getColumnName() : null, aff.renderJSON(requestData, value));
         }
     }
 
@@ -624,20 +620,46 @@ public final class FolderWriter {
                 fo.setType(folder.getType().getType());
             }
             fo.setCreatedBy(folder.getCreatedBy());
+            fo.setPermissions(turnIntoOCLPermissions(numFolderId, folder.getPermissions()));
             retval.add(fo);
         }
         return retval;
     }
 
     /**
+     * Converts an array of permissions as used in userized folders into a list of OCL permissions as used by folder objects.
+     *
+     * @param folderID The folder identifier
+     * @param permissions The permissions
+     * @return The OXL permissions
+     */
+    private static List<OCLPermission> turnIntoOCLPermissions(int folderID, Permission[] permissions) {
+        if (null == permissions) {
+            return null;
+        }
+        List<OCLPermission> oclPermissions = new ArrayList<OCLPermission>(permissions.length);
+        for (Permission permission : permissions) {
+            OCLPermission oclPermission = new OCLPermission(permission.getEntity(), folderID);
+            oclPermission.setAllPermission(permission.getFolderPermission(), permission.getReadPermission(),
+                permission.getWritePermission(), permission.getDeletePermission());
+            oclPermission.setFolderAdmin(permission.isAdmin());
+            oclPermission.setGroupPermission(permission.isGroup());
+            oclPermissions.add(oclPermission);
+        }
+        return oclPermissions;
+    }
+
+    /**
      * Writes requested fields of given folders into a JSON array consisting of JSON arrays.
      *
-     * @param fields The fields to write to each JSON array or <code>null</code> to write all
+     * @param requestData The underlying request data
+     * @param fields The fields to write or <code>null</code> to write all
      * @param folders The folders
+     * @param additionalFolderFieldList The additional folder fields to write
      * @return The JSON array carrying JSON arrays of given folders
      * @throws OXException If writing JSON array fails
      */
-    public static JSONArray writeMultiple2Array(final int[] fields, final UserizedFolder[] folders, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
+    public static JSONArray writeMultiple2Array(AJAXRequestData requestData, final int[] fields, final UserizedFolder[] folders, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? ALL_FIELDS : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
@@ -647,8 +669,8 @@ public final class FolderWriter {
             if (null == ffw) {
                 if (additionalFolderFieldList.knows(curCol)) {
                     final AdditionalFolderField aff = new BulkFolderField(additionalFolderFieldList.get(curCol));
-                    aff.getValues(turnIntoFolderObjects(folders), serverSession);
-                    ffw = new AdditionalFolderFieldWriter(serverSession, aff);
+                    aff.getValues(turnIntoFolderObjects(folders), requestData.getSession());
+                    ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
                     ffw = getPropertyByField(curCol, fieldSet);
                 }
@@ -690,12 +712,14 @@ public final class FolderWriter {
     /**
      * Writes requested fields of given folder into a JSON object.
      *
+     * @param requestData The underlying request data
      * @param fields The fields to write or <code>null</code> to write all
      * @param folder The folder
+     * @param additionalFolderFieldList The additional folder fields to write
      * @return The JSON object carrying requested fields of given folder
      * @throws OXException If writing JSON object fails
      */
-    public static JSONObject writeSingle2Object(final int[] fields, final UserizedFolder folder, final ServerSession serverSession, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
+    public static JSONObject writeSingle2Object(AJAXRequestData requestData, final int[] fields, final UserizedFolder folder, final AdditionalFolderFieldList additionalFolderFieldList) throws OXException {
         final int[] cols = null == fields ? getAllFields(additionalFolderFieldList) : fields;
         final FolderFieldWriter[] ffws = new FolderFieldWriter[cols.length];
         final TIntObjectMap<com.openexchange.folderstorage.FolderField> fieldSet = FolderFieldRegistry.getInstance().getFields();
@@ -705,7 +729,7 @@ public final class FolderWriter {
             if (null == ffw) {
                 if (additionalFolderFieldList.knows(curCol)) {
                     final AdditionalFolderField aff = additionalFolderFieldList.get(curCol);
-                    ffw = new AdditionalFolderFieldWriter(serverSession, aff);
+                    ffw = new AdditionalFolderFieldWriter(requestData, aff);
                 } else {
                     ffw = getPropertyByField(curCol, fieldSet);
                 }

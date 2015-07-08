@@ -59,6 +59,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
@@ -159,7 +160,7 @@ public class ExtAccountFolderField implements AdditionalFolderField {
     }
 
     @Override
-    public Object renderJSON(Object value) {
+    public Object renderJSON(AJAXRequestData requestData, Object value) {
         return value == null ? JSONObject.NULL : value;
     }
 

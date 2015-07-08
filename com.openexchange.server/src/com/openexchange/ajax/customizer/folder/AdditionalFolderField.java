@@ -50,6 +50,7 @@
 package com.openexchange.ajax.customizer.folder;
 
 import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.tools.session.ServerSession;
 
@@ -96,9 +97,10 @@ public interface AdditionalFolderField {
     /**
      * Renders passed value to its JSON representation
      *
+     * @param requestData The underlying request data, or <code>null</code> if not available
      * @param value The value
      * @return The JSON representation
      */
-    Object renderJSON(Object value);
+    Object renderJSON(AJAXRequestData requestData, Object value);
 
 }
