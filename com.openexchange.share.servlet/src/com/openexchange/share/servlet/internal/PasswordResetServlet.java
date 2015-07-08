@@ -171,14 +171,16 @@ public class PasswordResetServlet extends AbstractShareServlet {
                  * Redirect after notification was sent.
                  */
                 String redirectUrl = new LoginLocationBuilder()
-                    .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestShare.getGuest().getEmailAddress()), "reset_password_info")
+                    .status("reset_password_info")
+                    .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestShare.getGuest().getEmailAddress()))
                     .share(guestInfo.getBaseToken())
                     .build();
                 response.sendRedirect(redirectUrl);
             } else {
                 if (confirm.equals(hash)) {
                     LoginLocationBuilder redirectUrl = new LoginLocationBuilder()
-                        .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestShare.getGuest().getEmailAddress()), "reset_password")
+                        .status("reset_password")
+                        .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestShare.getGuest().getEmailAddress()))
                         .parameter("confirm", confirm)
                         .share(guestInfo.getBaseToken());
                     response.sendRedirect(redirectUrl.build());
@@ -310,14 +312,16 @@ public class PasswordResetServlet extends AbstractShareServlet {
 
     private static void sendInvalidRequest(Translator translator, HttpServletResponse response) throws IOException {
         String redirectUrl = new LoginLocationBuilder()
-            .message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST), "invalid_request")
+            .status("invalid_request")
+            .message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST))
             .build();
         response.sendRedirect(redirectUrl);
     }
 
     private static void sendInternalError(Translator translator, HttpServletResponse response) throws IOException {
         String redirectUrl = new LoginLocationBuilder()
-            .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY), "internal_error")
+            .status("internal_error")
+            .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
             .build();
         response.sendRedirect(redirectUrl);
     }

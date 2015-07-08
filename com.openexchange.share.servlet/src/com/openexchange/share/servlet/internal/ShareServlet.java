@@ -152,8 +152,11 @@ public class ShareServlet extends AbstractShareServlet {
             e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            String location = new LoginLocationBuilder().message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY), "internal_error").build();
-            response.sendRedirect(location);
+            String redirectUrl = new LoginLocationBuilder()
+                .status("internal_error")
+                .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
+                .build();
+            response.sendRedirect(redirectUrl);
         }
     }
 
@@ -184,7 +187,8 @@ public class ShareServlet extends AbstractShareServlet {
      */
     private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException, OXException {
         String redirectUrl = new LoginLocationBuilder()
-            .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND), "not_found")
+            .status("not_found")
+            .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND))
             .build();
         response.sendRedirect(redirectUrl);
         return;

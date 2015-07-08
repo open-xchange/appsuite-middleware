@@ -145,7 +145,7 @@ public class WebUIShareHandler extends AbstractShareHandler {
             LoginLocationBuilder location = new LoginLocationBuilder()
                 .share(guestInfo.getBaseToken())
                 .loginType(guestInfo.getAuthentication())
-                .message(MessageType.INFO, message.toString(), "login");
+                .message(MessageType.INFO, message.toString());
             if (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) {
                 location.loginName(guestInfo.getEmailAddress());
             }
