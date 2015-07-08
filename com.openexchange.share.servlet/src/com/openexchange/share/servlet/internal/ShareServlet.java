@@ -151,12 +151,16 @@ public class ShareServlet extends AbstractShareServlet {
         } catch (RateLimitedException e) {
             e.send(response);
         } catch (OXException e) {
-            LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            String redirectUrl = new LoginLocationBuilder()
-                .status("internal_error")
-                .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
-                .build();
-            response.sendRedirect(redirectUrl);
+            if (ShareExceptionCodes.INVALID_TOKEN.equals(e) || ShareExceptionCodes.UNKNOWN_SHARE.equals(e)) {
+                sendNotFound(response, translator);
+            } else {
+                LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+                String redirectUrl = new LoginLocationBuilder()
+                    .status("internal_error")
+                    .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
+                    .build();
+                response.sendRedirect(redirectUrl);
+            }
         }
     }
 
@@ -185,7 +189,7 @@ public class ShareServlet extends AbstractShareServlet {
      * @param response The HTTP servlet response to redirect
      * @param translator The translator
      */
-    private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException, OXException {
+    private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
         String redirectUrl = new LoginLocationBuilder()
             .status("not_found")
             .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND))
