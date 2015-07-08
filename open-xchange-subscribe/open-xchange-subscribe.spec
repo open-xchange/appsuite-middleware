@@ -26,8 +26,6 @@ Autoreqprov:   no
 Requires:      open-xchange-oauth >= @OXVERSION@
 Provides:      open-xchange-subscribe-crawler = %{version}
 Obsoletes:     open-xchange-subscribe-crawler < %{version}
-Provides:      open-xchange-subscribe-facebook = %{version}
-Obsoletes:     open-xchange-subscribe-facebook < %{version}
 Provides:      open-xchange-subscribe-json = %{version}
 Obsoletes:     open-xchange-subscribe-json < %{version}
 Provides:      open-xchange-subscribe-linkedin = %{version}

@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link TwitterOAuthServiceRegistry} - Container class for the service registry of <i>com.openexchange.oauth.facebook</i> bundle.
+ * {@link TwitterOAuthServiceRegistry} - Container class for the service registry of <i>com.openexchange.oauth.twitter</i> bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -70,7 +70,7 @@ public final class TwitterOAuthServiceRegistry {
     }
 
     /**
-     * Initializes a new {@link FacebookMessagingServiceRegistry}.
+     * Initializes a new {@link TwitterOAuthServiceRegistry}.
      */
     private TwitterOAuthServiceRegistry() {
         super();

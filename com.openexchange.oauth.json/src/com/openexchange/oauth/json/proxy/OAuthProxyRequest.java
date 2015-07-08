@@ -79,7 +79,6 @@ public class OAuthProxyRequest {
 	private final ServerSession session;
 
 	protected Map<API, List<Pattern>> whitelist = new HashMap<API,List<Pattern>>(){{
-		put(API.FACEBOOK, 	Arrays.asList(Pattern.compile("^https:\\/\\/graph\\.facebook\\.com")));
 		put(API.LINKEDIN, 	Arrays.asList(Pattern.compile("^http:\\/\\/api\\.linkedin\\.com")));
 		put(API.TWITTER,	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?twitter.com")));
 		put(API.YAHOO, 	Arrays.asList(Pattern.compile("^https?:\\/\\/(.*?\\.)?yahoo(apis)?\\.com")));

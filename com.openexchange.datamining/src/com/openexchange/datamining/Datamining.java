@@ -179,7 +179,6 @@ public class Datamining {
             Questions.reportAverageNumberOfContactsPerUserWhoHasCreatedContacts();
             Questions.reportNumberOfUsersWhoChangedTheirContactsInTheLast30Days();
             Questions.reportNumberOfUsersWithLinkedSocialNetworkingAccounts();
-            Questions.reportNumberOfUsersConnectedToFacebook();
             Questions.reportNumberOfUsersConnectedToLinkedIn();
             Questions.reportNumberOfUsersConnectedToTwitter();
             Questions.reportNumberOfUsersConnectedToGoogle();

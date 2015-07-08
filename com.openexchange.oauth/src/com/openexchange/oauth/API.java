@@ -54,10 +54,6 @@ package com.openexchange.oauth;
  */
 public enum API {
     /**
-     * Facebook
-     */
-    FACEBOOK,
-    /**
      * Twitter
      */
     TWITTER,

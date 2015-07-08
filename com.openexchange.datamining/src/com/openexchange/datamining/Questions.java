@@ -138,8 +138,6 @@ public class Questions {
 
     public static final String NUMBER_OF_USERS = "numberOfUsers";
 
-    public static final String NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK = "numberOfUsersConnectedToFacebook";
-
     public static final String NUMBER_OF_USERS_CONNECTED_TO_LINKEDIN = "numberOfUsersConnectedToLinkedIn";
 
     public static final String NUMBER_OF_USERS_CONNECTED_TO_TWITTER = "numberOfUsersConnectedToTwitter";
@@ -634,17 +632,6 @@ public class Questions {
         }
     }
 
-    public static void reportNumberOfUsersConnectedToFacebook() {
-    	String networkName = "facebook";
-        try {
-            Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK);
-            String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";
-            BigInteger numberOfInfostoreObjects = Datamining.countOverAllSchemata(sql);
-            Datamining.report(NUMBER_OF_USERS_CONNECTED_TO_FACEBOOK, numberOfInfostoreObjects.toString());
-        } catch (Exception e) {
-        }
-    }
-
     public static void reportNumberOfUsersConnectedToLinkedIn() {
     	String networkName = "linkedin";
         try {
@@ -734,7 +721,7 @@ public class Questions {
     }
 
     public static void reportNumberOfUsersConnectedToWebDe() {
-    	String networkName = "facebook";
+    	String networkName = "web";
         try {
             Datamining.allTheQuestions.add(NUMBER_OF_USERS_CONNECTED_TO_WEBDE);
             String sql = "SELECT COUNT(*) FROM (SELECT o.user, o.cid FROM oauthAccounts o where o.serviceId LIKE '%" + networkName + "%' UNION SELECT s.user_id, s.cid FROM subscriptions s where s.source_id LIKE '%" + networkName + "%') AS x;";

@@ -1164,18 +1164,6 @@ if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
     ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
 fi
 
-# SoftwareChange_Request-2444
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
-
-# v7.6.2 update tasks start here
-
-# Deletes remnants for removed Facebook subscription
-!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
-EOF
-fi
-
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
 

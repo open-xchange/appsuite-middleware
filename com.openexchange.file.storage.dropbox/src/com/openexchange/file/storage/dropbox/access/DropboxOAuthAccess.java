@@ -148,7 +148,7 @@ public final class DropboxOAuthAccess {
     private DropboxAPI<WebAuthSession> dropboxApi;
 
     /**
-     * Initializes a new {@link FacebookMessagingResource}.
+     * Initializes a new {@link DropboxOAuthAccess}.
      *
      * @param fsAccount The Dropbox account providing credentials and settings
      * @throws OXException
