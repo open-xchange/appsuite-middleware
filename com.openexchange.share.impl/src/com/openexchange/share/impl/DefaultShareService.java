@@ -149,10 +149,7 @@ public class DefaultShareService implements ShareService {
             }
             throw e;
         }
-        if (false == shareToken.matches(contextID, guest)) {
-            LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-        }
+        shareToken.verifyGuest(contextID, guest);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
         return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares, true);
@@ -166,10 +163,7 @@ public class DefaultShareService implements ShareService {
         ShareToken shareToken = new ShareToken(token);
         int contextID = session.getContextId();
         User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        if (false == shareToken.matches(contextID, guest)) {
-            LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-        }
+        shareToken.verifyGuest(contextID, guest);
         /*
          * get shares for guest and filter results as needed
          */
@@ -406,6 +400,7 @@ public class DefaultShareService implements ShareService {
         User guestUser;
         try {
             guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+            shareToken.verifyGuest(contextID, guestUser);
         } catch (OXException e) {
             if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
