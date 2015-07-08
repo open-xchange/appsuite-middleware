@@ -83,7 +83,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
 
-    private static enum RampUpKey {
+    public static enum RampUpKey {
 
         SERVER_CONFIG("serverConfig"),
         JSLOBS("jslobs"),
@@ -91,11 +91,9 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         FOLDER("folder"),
         FOLDER_LIST("folderlist"),
         USER("user"),
-        ACCOUNTS("accounts"),
+        ACCOUNTS("accounts");
 
-        ;
-
-        final String key;
+        public final String key;
         private RampUpKey(String key) {
             this.key = key;
         }
