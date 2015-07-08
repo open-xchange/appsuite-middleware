@@ -1321,6 +1321,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      * @param configCon a write connection to the configuration database that is already in a transaction.
      * @param db The database
      * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
+     * @return The possible cache roll-back instance to call if further processing fails
      */
     private SchemaCacheRollback findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
         if (CONTEXTS_PER_SCHEMA == 1) {
@@ -1341,7 +1342,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.automatic() : schemaSelectStrategy;
 
         // Determine the schema name according to effective strategy
-        SchemaCache schemaCache = null;
+        SchemaCacheRollback cacheRollback = null;
         switch (effectiveStrategy.getStrategy()) {
             case SCHEMA:
                 // Pre-defined schema name
@@ -1349,19 +1350,36 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 break;
             case IN_MEMORY:
                 // Get the schema name advertised by cache
-                schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
-                ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
-                SchemaResult schemaResult = schemaCache.getNextSchemaFor(db.getId().intValue(), this.CONTEXTS_PER_SCHEMA, closure);
-                if (null != schemaResult) {
-                    db.setScheme(schemaResult.getSchemaName());
-                    return schemaResult.getRollback();
-                }
-                //$FALL-THROUGH$
+                cacheRollback = inMemoryLookupSchema(configCon, db);
+                break;
             default:
-                autoFindOrCreateSchema(configCon, db);
+                automaticLookupSchema(configCon, db);
                 break;
         }
+        return cacheRollback;
+    }
+
+    private SchemaCacheRollback inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
+        // Get cache instance
+        SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
+        ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
+
+        // Get next known suitable schema
+        int poolId = db.getId().intValue();
+        SchemaResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
+        if (null != schemaResult) {
+            db.setScheme(schemaResult.getSchemaName());
+            return schemaResult.getRollback();
+        }
+
+        // No suitable schema known to cache. Therefore clear cache state & perform regular schema look-up/creation
+        schemaCache.clearFor(poolId);
+        autoFindOrCreateSchema(configCon, db, false);
         return null;
+    }
+
+    private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
+        autoFindOrCreateSchema(configCon, db, true);
     }
 
     /**
@@ -1369,11 +1387,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
      *
      * @param configCon The connection to configDb
      * @param db The database to get the schema for
+     * @param clearSchemaCache Whether schema cache is supposed to be cleared
      * @throws StorageException If a suitable schema cannot be found
      */
-    private void autoFindOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
+    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean clearSchemaCache) throws StorageException {
         // Clear schema cache once "live" schema information is requested
-        {
+        if (clearSchemaCache) {
             SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
             if (null != optCache) {
                 optCache.clearFor(db.getId().intValue());
@@ -1396,8 +1415,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             db.setScheme(schemaName);
         }
     }
-
-
 
     private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
         findOrCreateSchema(con, db, null);

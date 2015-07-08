@@ -126,6 +126,11 @@ public class InMemorySchemaCache implements SchemaCache {
                 schemaInfo.initializeWith(closure.getContextCountPerSchema(poolId, maxContexts));
             }
             SchemaCount schemaCount = schemaInfo.getAndIncrementNextSchema(maxContexts);
+            if (null == schemaCount) {
+                // No further schema available. Force reinitialization on next access attempt and return null.
+                schemaInfo.clear();
+                return null;
+            }
             String schemaName = schemaCount.name;
             return new SchemaResult(schemaName, new InMemoryRollback(schemaName, schemaCount.modCount, poolId, cache));
         }

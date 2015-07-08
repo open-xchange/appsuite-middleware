@@ -67,7 +67,7 @@ public interface SchemaCache {
      * @param poolId The identifier of the database pool
      * @param maxContexts The configured max. number of contexts allowed per schema
      * @param closure The closure to invoke to retrieve the current context-per-schema count
-     * @return The schema name according to cache's state
+     * @return The schema name according to cache's state or <code>null</code> if no suitable schema is known to the cache
      * @throws StorageException If next schema cannot be returned
      */
     SchemaResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException;
