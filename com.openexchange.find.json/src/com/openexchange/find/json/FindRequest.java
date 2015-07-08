@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -309,26 +310,22 @@ public class FindRequest {
     }
 
     /**
+     * Split pattern for CSV.
+     */
+    private static final Pattern SPLIT = Pattern.compile(" *, *");
+
+    /**
      * Gets the requested columns that shall be filled in the response items.
      *
      * @return An array of columns or <code>null</code>.
      */
-    public int[] getColumns() throws OXException {
+    public String[] getColumns() throws OXException {
         String valueStr = request.getParameter(AJAXServlet.PARAMETER_COLUMNS);
         if (null == valueStr) {
             return null;
         }
 
-        String[] valueStrArr = valueStr.split(",");
-        int[] values = new int[valueStrArr.length];
-        for (int i = 0; i < values.length; i++) {
-            try {
-                values[i] = Integer.parseInt(valueStrArr[i].trim());
-            } catch (final NumberFormatException e) {
-                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "columns", valueStr);
-            }
-        }
-        return values;
+        return SPLIT.split(valueStr);
     }
 
     private static Filter parseFilter(JSONObject jFilter) throws JSONException {

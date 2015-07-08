@@ -156,8 +156,8 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         // Fields
         int start = searchRequest.getStart();
         List<Field> fields = DEFAULT_FIELDS;
-        int[] columns = searchRequest.getColumns();
-        if (columns != null) {
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
             fields = Field.get(columns);
         }
 

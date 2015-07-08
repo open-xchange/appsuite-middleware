@@ -132,6 +132,7 @@ import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -150,6 +151,7 @@ import com.openexchange.mail.search.SubjectTerm;
 import com.openexchange.mail.search.ToTerm;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -243,13 +245,16 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
 
     @Override
     public SearchResult doSearch(final SearchRequest searchRequest, ServerSession session) throws OXException {
-        int[] requestedColumns = searchRequest.getColumns();
-        MailField[] mailFields = MailField.FIELDS_LOW_COST;
-        if (requestedColumns != null) {
-            mailFields = MailField.getMatchingFields(requestedColumns);
+        final MailField[] mailFields;
+        final String[] headers;
+        if (searchRequest.getColumns().isUnset()) {
+            mailFields = MailField.FIELDS_LOW_COST;
+            headers = null;
+        } else {
+            mailFields = MailField.getMatchingFields(searchRequest.getColumns().getIntColumns());
+            headers = searchRequest.getColumns().getStringColumns();
         }
 
-        final MailField[] fetchFields = mailFields;
         List<MailMessage> messages = accessMailStorage(searchRequest, session, new MailAccessClosure<List<MailMessage>>() {
             @Override
             public List<MailMessage> call(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess, MailFolder folder) throws OXException {
@@ -259,7 +264,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
                     messageStorage,
                     folder,
                     searchTerm,
-                    fetchFields,
+                    mailFields,
+                    headers,
                     searchRequest.getStart(),
                     searchRequest.getSize());
                 return messages;
@@ -401,15 +407,24 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             .build();
     }
 
-    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, int start, int size) throws OXException {
+    private static List<MailMessage> searchMessages(IMailMessageStorage messageStorage, MailFolder folder, SearchTerm<?> searchTerm, MailField[] fields, String headers[], int start, int size) throws OXException {
         MailSortField sortField = folder.isSent() ? MailSortField.SENT_DATE : MailSortField.RECEIVED_DATE;
-        MailMessage[] messages = messageStorage.searchMessages(
-            folder.getFullname(),
-            new IndexRange(start, start + size),
-            sortField,
-            OrderDirection.DESC,
-            searchTerm,
-            fields);
+        IndexRange indexRange = new IndexRange(start, start + size);
+        OrderDirection orderDirection = OrderDirection.DESC;
+        String fullname = folder.getFullname();
+
+        MailMessage[] messages;
+        if (null != headers && 0 < headers.length) {
+            if (messageStorage instanceof IMailMessageStorageExt) {
+                IMailMessageStorageExt ext = (IMailMessageStorageExt) messageStorage;
+                messages = ext.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields, headers);
+            } else {
+                messages = messageStorage.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields);
+                MessageUtility.enrichWithHeaders(fullname, messages, headers, messageStorage);
+            }
+        } else {
+            messages = messageStorage.searchMessages(fullname, indexRange, sortField, orderDirection, searchTerm, fields);
+        }
 
         List<MailMessage> resultMessages = new ArrayList<MailMessage>(messages.length);
         Collections.addAll(resultMessages, messages);

@@ -142,8 +142,8 @@ public class BasicTasksDriver extends AbstractContactFacetingModuleSearchDriver 
         searchObject.setStart(searchRequest.getStart());
         searchObject.setSize(searchRequest.getSize());
 
-        int[] fields = searchRequest.getColumns();
-        if (fields == null) {
+        int[] fields = searchRequest.getColumns().getIntColumns();
+        if (fields.length == 0) {
             fields = DEFAULT_TASKS_FIELDS;
         }
 
