@@ -1,3 +1,7 @@
+* 2015-07-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 39528: Bad usage of enumeration constants. Store confirmation message in separate attributes.
+
 * 2015-07-03 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service

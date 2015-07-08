@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,106 +49,32 @@
 
 package com.openexchange.calendar.itip;
 
-
 /**
- * {@link ITipAction}
+ * Additional, optional attributes for itip mechanisms.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public enum ITipAction {
+public class ITipAttributes {
+
+    private String confirmationMessage;
 
     /**
-     * Cases:
-     * 1. Create Appointment if not existing
-     * 2. Set user accepted
-     * 3. Add user to existing appointment if not participant (rights?!)
-     * 4. If Attendee: Answer with REPLY
+     * Sets a confirmation message.
+     * 
+     * @return The message
      */
-    ACCEPT,
+    public String getConfirmationMessage() {
+        return confirmationMessage;
+    }
 
     /**
-     * see accept
-     * (implicit ignore conflicts)
+     * Returns the confirmation message.
+     * 
+     * @param confirmationMessage The message
      */
-    DECLINE,
+    public void setConfirmationMessage(String confirmationMessage) {
+        this.confirmationMessage = confirmationMessage;
+    }
 
-    /**
-     * see accept
-     * (implicit ignore conflicts)
-     */
-    TENTATIVE,
-
-    /**
-     *
-     */
-    DELEGATE,
-
-    /**
-     * Create original appointment
-     * add user with status "none"
-     */
-    COUNTER,
-
-    /**
-     * see accept with "ignore conflicts"
-     */
-    ACCEPT_AND_IGNORE_CONFLICTS,
-
-    /**
-     * Cases:
-     * 1. Delete Appointment or sequence: Just delete.
-     * 2. Delete change exception: replace with delete exception
-     * 3. Delete occurrence: Create delete exception
-     */
-    DELETE,
-
-    /**
-     * does nothing
-     */
-    IGNORE,
-
-    /**
-     * Edit change exception
-     * See accept
-     */
-    ACCEPT_AND_REPLACE,
-
-    /**
-     * only mails
-     * Send a REFRESH mail
-     */
-    REFRESH,
-
-    /**
-     * only mails
-     * Send a REQUEST mail
-     */
-    SEND_APPOINTMENT,
-
-    /**
-     * for organizer:
-     * add participant
-     * Send a REQUEST mail
-     */
-    ACCEPT_PARTY_CRASHER,
-
-    /**
-     * for organizer:
-     * accept a counter -> change appointment
-     * Send a REQUEST mail
-     */
-    UPDATE,
-
-    /**
-     * just mail
-     * Send a DECLINECOUNTER mail
-     */
-    DECLINECOUNTER,
-
-    /**
-     * Create change exception
-     * If ORGANIZER: Send an ADD mail
-     * If Attendee: Send a REPLY
-     */
-    CREATE;
 }
