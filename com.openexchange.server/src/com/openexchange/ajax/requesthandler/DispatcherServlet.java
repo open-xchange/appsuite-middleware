@@ -88,12 +88,16 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.services.SessionInspector;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -251,61 +255,99 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
-    protected void initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        if (null != SessionUtility.getSessionObject(req, true)) {
-            return;
+    protected SessionResult<ServerSession> initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
+        ServerSession session = getSessionObject(req, true);
+        if (null != session) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, session);
         }
-        // Remember session
+
+        // Require SessionD service
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        ServerSession session;
-        boolean sessionParamFound;
-        {
-            String sessionId = req.getParameter(PARAMETER_SESSION);
-            if (sessionId != null && sessionId.length() > 0) {
-                try {
-                    session = SessionUtility.getSession(req, sessionId, sessiondService);
-                } catch (OXException e) {
-                    if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
-                        throw e;
-                    }
-                    // Got a wrong or missing secret
-                    String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
-                    if (!"null".equals(wrongSecret)) {
-                        // No information available or a differing secret
-                        throw e;
-                    }
-                    // Missing secret cookie
-                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+
+        // Check "session" parameter
+        String sessionId = req.getParameter(PARAMETER_SESSION);
+        boolean sessionParamFound = sessionId != null && sessionId.length() > 0;
+
+        // Associated module & action pair
+        Pair<String, String> pair = null;
+        boolean mayOmitSession = false;
+
+        // Check for possible session inspector chain
+        if (!SessionInspector.getInstance().getChain().isEmpty()) {
+            // Session inspectors available -- bypass those requests that do not require a session
+            if (!sessionParamFound) {
+                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+                String module = requestDataTools.getModule(PREFIX.get(), req);
+                String action = requestDataTools.getAction(req);
+                pair = new Pair<String, String>(module, action);
+                Dispatcher dispatcher = DISPATCHER.get();
+                mayOmitSession = dispatcher.mayOmitSession(module, action);
+                if (mayOmitSession) {
+                    return new SessionResult<ServerSession>(Reply.CONTINUE, session);
                 }
-                SessionUtility.verifySession(req, sessiondService, sessionId, session);
-                SessionUtility.rememberSession(req, session);
-                SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
-                sessionParamFound = true;
-            } else {
-                session = null;
-                sessionParamFound = false;
             }
         }
+
+        // Look-up & remember session
+        SessionResult<ServerSession> result;
+        if (sessionParamFound) {
+            try {
+                result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
+            } catch (OXException e) {
+                if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                    throw e;
+                }
+                // Got a wrong or missing secret
+                String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                if (!"null".equals(wrongSecret)) {
+                    // No information available or a differing secret
+                    throw e;
+                }
+                // Missing secret cookie
+                result = SessionUtility.getSession(SessionUtility.getHashSource(), req, resp, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+            }
+            if (Reply.STOP == result.getReply()) {
+                return result;
+            }
+            session = result.getSession();
+            if (null == session) {
+                // Should not occur
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            }
+            SessionUtility.verifySession(req, sessiondService, sessionId, session);
+            SessionUtility.rememberSession(req, session);
+            SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
+            sessionParamFound = true;
+        }
+
         // Check if associated request allows no session (if no "session" parameter was found)
-        boolean mayOmitSession = false;
         boolean mayUseFallbackSession = false;
         boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
-            AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            String module = requestDataTools.getModule(PREFIX.get(), req);
-            String action = requestDataTools.getAction(req);
+            String module, action;
+            if (null == pair) {
+                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+                module = requestDataTools.getModule(PREFIX.get(), req);
+                action = requestDataTools.getAction(req);
+            } else {
+                module = pair.getFirst();
+                action = pair.getSecond();
+            }
             Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
             mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
             mayPerformPublicSessionAuth = dispatcher.mayPerformPublicSessionAuth(module, action);
         }
+
         // Try public session
         if (!mayOmitSession) {
             SessionUtility.findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
         }
+
+        return new SessionResult<ServerSession>(Reply.CONTINUE, session);
     }
 
     @Override

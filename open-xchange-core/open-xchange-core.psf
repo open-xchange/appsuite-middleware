@@ -130,6 +130,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.sessiond"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.session.reservation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.sessionstorage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.sessionstorage.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.6.3,com.openexchange.snippet"/>

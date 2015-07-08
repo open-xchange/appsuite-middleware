@@ -62,6 +62,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -83,10 +84,14 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionSerializationInterceptor;
 import com.openexchange.sessiond.SessionCounter;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleaner;
+import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
+import com.openexchange.sessiond.serialization.PortableSessionFilterApplier.Action;
+import com.openexchange.sessiond.serialization.PortableUserSessionsCleaner;
 import com.openexchange.sessionstorage.SessionStorageExceptionCodes;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.AbstractTask;
@@ -237,7 +242,7 @@ public final class SessionHandler {
                 LOG.error("", e);
             }
         }
-        LOG.info("{} removal of user sessions: User={}, Context={}", (null != storageService ? "Remote" : "Local"), userId, contextId);
+        LOG.info("{} removal of user sessions: User={}, Context={}", (null != storageService ? "Remote" : "Local"), Integer.valueOf(userId), Integer.valueOf(contextId));
         return merge(retval, retval2);
     }
 
@@ -251,6 +256,18 @@ public final class SessionHandler {
         SessionHandler.removeRemoteContextSessions(contextIds);
 
         SessionHandler.removeContextSessions(contextIds);
+    }
+
+    /**
+     * Globally removes sessions associated to the given contexts. 'Globally' means sessions on all cluster nodes
+     *
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @throws OXException If operation fails
+     */
+    public static void removeUserSessionsGlobal(int userId, int contextId) throws OXException {
+        SessionHandler.removeRemoteUserSessions(userId, contextId);
+        SessionHandler.removeUserSessions(userId, contextId);
     }
 
     /**
@@ -310,6 +327,152 @@ public final class SessionHandler {
         }
     }
 
+    private static void removeRemoteUserSessions(int userId, int contextId) throws OXException {
+        LOG.debug("Trying to remove sessions for user {} in context {} from remote nodes", userId, contextId);
+        Map<Member, Integer> results = executeGlobalTask(new PortableUserSessionsCleaner(userId, contextId));
+        for (Member member : results.keySet()) {
+            Integer numOfRemovedSessions = results.get(member);
+            if (numOfRemovedSessions == null) {
+                LOG.warn("No sessions removed for user {} in context {} on remote node {}.", userId, contextId, member.getSocketAddress().toString());
+            } else {
+                LOG.info("Removed {} sessions for user {} in context {} on remote node {}", numOfRemovedSessions, userId, contextId, member.getSocketAddress().toString());
+            }
+        }
+    }
+
+    /**
+     * Removes all sessions from remote nodes that match the given filter (excluding this node).
+     *
+     * @param filter The filter
+     * @return The session IDs of all removed sessions
+     */
+    public static List<String> removeRemoteSessions(SessionFilter filter) throws OXException {
+        LOG.debug("Trying to remove sessions from remote nodes by filter '{}'", filter);
+        Map<Member, Collection<String>> results = executeGlobalTask(new PortableSessionFilterApplier(filter, Action.REMOVE));
+        List<String> sessionIds = new ArrayList<String>();
+        for (Member member : results.keySet()) {
+            Collection<String> memberSessionIds = results.get(member);
+            if (memberSessionIds != null) {
+                LOG.debug("Removed {} sessions on node {} for filter '{}'", memberSessionIds.size(), member.getSocketAddress().toString(), filter);
+                sessionIds.addAll(memberSessionIds);
+            }
+        }
+
+        return sessionIds;
+    }
+
+    /**
+     * Finds all sessions on remote nodes that match the given filter (excluding this node).
+     *
+     * @param filter The filter
+     * @return The session IDs of all found sessions
+     */
+    public static List<String> findRemoteSessions(SessionFilter filter) throws OXException {
+        LOG.debug("Trying to find sessions on remote nodes by filter '{}'", filter);
+        Map<Member, Collection<String>> results = executeGlobalTask(new PortableSessionFilterApplier(filter, Action.GET));
+        List<String> sessionIds = new ArrayList<String>();
+        for (Member member : results.keySet()) {
+            Collection<String> memberSessionIds = results.get(member);
+            if (memberSessionIds != null) {
+                LOG.debug("Found {} sessions on node {} for filter '{}'", memberSessionIds.size(), member.getSocketAddress().toString(), filter);
+                sessionIds.addAll(memberSessionIds);
+            }
+        }
+
+        return sessionIds;
+    }
+
+    /**
+     * Finds all local sessions that match the given filter and returns their IDs.
+     *
+     * @param filter The filter
+     * @return The found session IDs
+     */
+    public static List<String> findLocalSessions(SessionFilter filter) {
+        final SessionData sessionData = sessionDataRef.get();
+        if (null == sessionData) {
+            LOG.warn("\tSessionData instance is null.");
+            return Collections.emptyList();
+        }
+
+        List<Session> sessions = sessionData.filterSessions(filter);
+        List<String> sessionIds = new ArrayList<String>(sessions.size());
+        for (Session session : sessions) {
+            sessionIds.add(session.getSessionID());
+        }
+
+        return sessionIds;
+    }
+
+    /**
+     * Removes all local sessions that match the given filter and returns their IDs.
+     *
+     * @param filter The filter
+     * @return The session IDs
+     */
+    public static List<String> removeLocalSessions(SessionFilter filter) {
+        List<String> sessionIds = findLocalSessions(filter);
+        for (String sessionId : sessionIds) {
+            clearSession(sessionId);
+        }
+
+        return sessionIds;
+    }
+
+    /**
+     * Executes a callable on all hazelcast members but this one. The given callable must be a portable or in other ways
+     * serializable by hazelcast.
+     *
+     * @param callable The callable
+     * @return A map containing the result for each member. If execution failed or timed out, the entry for a member will be <code>null</code>!
+     */
+    private static <T> Map<Member, T> executeGlobalTask(Callable<T> callable) {
+        HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
+        if (hazelcastInstance == null) {
+            LOG.warn("Cannot find HazelcastInstance for remote execution of callable {}.", callable);
+            return Collections.emptyMap();
+        } else {
+            Member localMember = hazelcastInstance.getCluster().getLocalMember();
+            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+            if (!clusterMembers.remove(localMember)) {
+                LOG.warn("Couldn't remove local member from cluster members.");
+            }
+
+            if (clusterMembers.isEmpty()) {
+                LOG.debug("No other cluster members besides the local member. Execution of callable {} not necessary.");
+                return Collections.emptyMap();
+            } else {
+                int hzExecutionTimeout = getRemoteSessionTaskTimeout();
+                Map<Member, Future<T>> submitToMembers = hazelcastInstance.getExecutorService("default").submitToMembers(callable, clusterMembers);
+                Map<Member, T> results = new HashMap<Member, T>(submitToMembers.size(), 1.0f);
+                for (Member member : submitToMembers.keySet()) {
+                    Future<T> future = submitToMembers.get(member);
+                    T result = null;
+                    try {
+                        if (hzExecutionTimeout > 0) {
+                            result = future.get(hzExecutionTimeout, TimeUnit.SECONDS);
+                        } else {
+                            result = future.get();
+                        }
+                    } catch (TimeoutException e) {
+                        future.cancel(true);
+                        LOG.error("Executing callable {} on remote node {} took to longer than {} seconds and was aborted!", callable, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+                    } catch (InterruptedException e) {
+                        future.cancel(true);
+                        LOG.error("Executing callable {} on remote node {} took to longer than {} seconds and was aborted!", callable, member.getSocketAddress().toString(), Integer.valueOf(hzExecutionTimeout), e);
+                    } catch (ExecutionException e) {
+                        future.cancel(true);
+                        LOG.error("Executing callable {} on remote node {} failed!", callable, member.getSocketAddress().toString(), e.getCause());
+                    } finally {
+                        results.put(member, result);
+                    }
+                }
+
+                return results;
+            }
+        }
+    }
+
     /**
      * Returns the timeout (in seconds) configured to wait for remote invalidation of context sessions. Default value 0 means "no timeout"
      *
@@ -322,6 +485,21 @@ public final class SessionHandler {
             return 0;
         }
         return configurationService.getIntProperty("com.openexchange.remote.context.sessions.invalidation.timeout", 0);
+    }
+
+    /**
+     * Returns the timeout (in seconds) configured to wait for remote execution of session tasks. Default value 0 means "no timeout"
+     *
+     * @return timeout (in seconds) or 0 for no timeout
+     */
+    private static int getRemoteSessionTaskTimeout() {
+        int defaultValue = 300;
+        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        if (configurationService == null) {
+            LOG.info("ConfigurationService not available. No execution timeout for remote processing of session tasks available. Fallback to no timeout.");
+            return defaultValue;
+        }
+        return configurationService.getIntProperty("com.openexchange.remote.session.task.timeout", defaultValue);
     }
 
     /**
@@ -340,7 +518,7 @@ public final class SessionHandler {
                     cs.loadContext(contextId);
                 } catch (OXException e) {
                     if (2 == e.getCode() && "CTX".equals(e.getPrefix())) { // See com.openexchange.groupware.contexts.impl.ContextExceptionCodes.NOT_FOUND
-                        LOG.info("No such context {}", contextId);
+                        LOG.info("No such context {}", Integer.valueOf(contextId));
                         return;
                     }
                 }

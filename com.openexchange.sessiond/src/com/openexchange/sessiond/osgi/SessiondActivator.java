@@ -90,6 +90,8 @@ import com.openexchange.sessiond.impl.SessiondSessionSpecificRetrievalService;
 import com.openexchange.sessiond.impl.TokenSessionContainer;
 import com.openexchange.sessiond.portable.PortableTokenSessionControlFactory;
 import com.openexchange.sessiond.serialization.PortableContextSessionsCleanerFactory;
+import com.openexchange.sessiond.serialization.PortableSessionFilterApplierFactory;
+import com.openexchange.sessiond.serialization.PortableUserSessionsCleanerFactory;
 import com.openexchange.sessionstorage.SessionStorageService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
@@ -208,6 +210,43 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
 
     // ------------------------------------------------------------------------------------------------------------------------
 
+    private static class HazelcastInstanceTracker implements ServiceTrackerCustomizer<HazelcastInstance, HazelcastInstance> {
+
+        final BundleContext context;
+
+        final SessiondActivator activator;
+
+        public HazelcastInstanceTracker(BundleContext context, SessiondActivator activator) {
+            super();
+            this.context = context;
+            this.activator = activator;
+        }
+
+        @Override
+        public HazelcastInstance addingService(ServiceReference<HazelcastInstance> reference) {
+            HazelcastInstance hzInstance = context.getService(reference);
+            try {
+                activator.addService(HazelcastInstance.class, hzInstance);
+                return hzInstance;
+            } catch (RuntimeException e) {
+                LOG.warn("Couldn't initialize distributed token-session map.", e);
+            }
+            context.ungetService(reference);
+            return null;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
+            // Ignore
+        }
+
+        @Override
+        public void removedService(ServiceReference<HazelcastInstance> reference, HazelcastInstance hzInstance) {
+            activator.removeService(HazelcastInstance.class);
+            context.ungetService(reference);
+        }
+    }
+
     private volatile ServiceRegistration<EventHandler> eventHandlerRegistration;
 
     /**
@@ -261,6 +300,10 @@ public final class SessiondActivator extends HousekeepingActivator implements Ha
             registerService(SessiondService.class, serviceImpl);
             registerService(SessionCounter.class, SessionHandler.SESSION_COUNTER);
 
+            registerService(CustomPortableFactory.class, new PortableUserSessionsCleanerFactory());
+            registerService(CustomPortableFactory.class, new PortableSessionFilterApplierFactory());
+
+            track(HazelcastInstance.class, new HazelcastInstanceTracker(context, this));
             track(ManagementService.class, new ManagementRegisterer(context));
             track(ThreadPoolService.class, new ThreadPoolTracker(context));
             track(TimerService.class, new TimerServiceTracker(context));

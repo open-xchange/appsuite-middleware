@@ -1,0 +1,23 @@
+Source: open-xchange-saml-core
+Section: web
+Priority: optional
+Maintainer: Steffen Templin <steffen.templin@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), default-jdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-saml-core
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Core package to support SAML authentication
+ This package contains the core bundles to support SAML as authentication
+ mechanism. It must always be complemented by a custom implementation that
+ performs several deployment-specific tasks.
+
+Package: open-xchange-saml
+Priority: optional
+Architecture: all
+Depends: ${misc:Depends}, open-xchange-saml-core (>= @OXVERSION@), open-xchange-saml-backend
+Description: Meta package to install necessary components to support SAML authentication
+ Install this package and its dependencies will install the necessary components to support SAML authentication.

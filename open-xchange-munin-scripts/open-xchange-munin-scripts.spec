@@ -69,6 +69,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Wed Jun 24 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-06-26 (2573)
 * Wed Jun 10 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-06-08 (2539)
 * Wed Jun 10 2015 Carsten Hoeger <choeger@open-xchange.com>
