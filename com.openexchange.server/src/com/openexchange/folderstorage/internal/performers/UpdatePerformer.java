@@ -331,6 +331,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     doRenameVirtual(folder, storage, openedStorages);
                 }
             } else if (comparedPermissions.hasChanges() || cascadePermissions) {
+                /*
+                 * Check permissions of anonymous guest users
+                 */
+                checkAnonymousPermissions(comparedPermissions);
 
                 boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
                 if (!isRecursion) {
@@ -343,7 +347,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
                         processAddedGuestPermissions(storageFolder.getCreatedBy(), folderId, storageFolder.getContentType(),
-                            comparedPermissions.getAddedGuests(), transactionManager.getConnection());
+                            comparedPermissions.getNewGuestPermissions(), transactionManager.getConnection());
                     }
                     /*
                      * Change permissions either in real or in virtual storage
@@ -383,7 +387,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * delete existing shares for removed guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
-                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
+                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
                     }
                 } finally {
                     if (!isRecursion) {

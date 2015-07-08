@@ -98,6 +98,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.java.Strings;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.RequestContext;
@@ -107,6 +108,7 @@ import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.GuestRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.TimeZoneUtils;
@@ -699,6 +701,52 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             exitingPermissions.add(permission);
         }
         return permissionsPerTarget;
+    }
+
+    /**
+     * Verifies that all added or modified permissions for guest users are read-only if they are anonymous.
+     *
+     * @param comparedPermissions The compared permissions
+     * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
+     */
+    protected void checkAnonymousPermissions(ComparedPermissions comparedPermissions) throws OXException {
+        if (comparedPermissions.hasAddedGuests()) {
+            List<User> addedGuests = comparedPermissions.getAddedGuests();
+            for (User addedGuest : addedGuests) {
+                if (isAnonymous(addedGuest)) {
+                    checkReadOnly(comparedPermissions.getAddedGuestPermission(addedGuest));
+                }
+            }
+        }
+
+        if (comparedPermissions.hasModifiedGuests()) {
+            for (User guest : comparedPermissions.getModifiedGuests()) {
+                if (isAnonymous(guest)) {
+                    checkReadOnly(comparedPermissions.getModifiedGuestPermission(guest));
+                }
+            }
+        }
+
+        if (comparedPermissions.hasNewGuests()) {
+            for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
+                if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
+                    checkReadOnly(guestPermission);
+                }
+            }
+        }
+    }
+
+    private static void checkReadOnly(Permission p) throws OXException {
+        boolean writeFolder = p.getFolderPermission() > Permission.READ_FOLDER;
+        boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
+        boolean deleteItems = p.getDeletePermission() > Permission.NO_PERMISSIONS;
+        if (writeFolder || writeItems || deleteItems) {
+            throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create();
+        }
+    }
+
+    private static boolean isAnonymous(User guest) {
+        return Strings.isEmpty(guest.getMail());
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

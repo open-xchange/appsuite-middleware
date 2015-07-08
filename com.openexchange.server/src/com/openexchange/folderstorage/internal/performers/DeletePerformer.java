@@ -287,7 +287,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
          * process removed guest permissions
          */
         if (comparedPermissions.hasRemovedGuests()) {
-            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
+            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
         }
     }
 
