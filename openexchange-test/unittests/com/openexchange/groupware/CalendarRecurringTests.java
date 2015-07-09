@@ -1783,7 +1783,7 @@ public class CalendarRecurringTests extends TestCase {
         // Reload
         final CalendarDataObject tdao = csql.getObjectById(object_id, folder_id);
 
-        assertTrue("Delete exception not contained in recurring appointment", tdao.containsDeleteExceptions() && tdao.getDeleteException().length > 0);
+        assertTrue("Delete exception not contained in recurring appointment", tdao.containsDeleteExceptions() && tdao.getDeleteException() != null && tdao.getDeleteException().length > 0);
 
 
     }
