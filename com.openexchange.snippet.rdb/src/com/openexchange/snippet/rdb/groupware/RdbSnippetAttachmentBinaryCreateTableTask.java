@@ -65,82 +65,39 @@ import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
-import com.openexchange.snippet.db.Tables;
 import com.openexchange.snippet.rdb.Services;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
- * {@link RdbSnippetCreateTableTask}
+ * {@link RdbSnippetAttachmentBinaryCreateTableTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
+public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     /**
-     * Initializes a new {@link RdbSnippetCreateTableTask}.
+     * Initializes a new {@link RdbSnippetAttachmentBinaryCreateTableTask}.
      */
-    public RdbSnippetCreateTableTask() {
+    public RdbSnippetAttachmentBinaryCreateTableTask() {
         super();
     }
 
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetContentName() {
-        return "snippetContent";
+    private String getSnippetAttachmentBinaryName() {
+        return "snippetAttachmentBinary";
     }
 
-    private String getSnippetContentTable() {
-        return "CREATE TABLE "+getSnippetContentName()+" (" +
+    private String getSnippetAttachmentBinaryTable() {
+        return "CREATE TABLE "+getSnippetAttachmentBinaryName()+" (" +
                " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id INT4 unsigned NOT NULL," +
-               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-               " PRIMARY KEY (cid, user, id)" +
-               ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetAttachmentName() {
-        return "snippetAttachment";
-    }
-
-    private String getSnippetAttachmentTable() {
-        return "CREATE TABLE "+getSnippetAttachmentName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id INT4 unsigned NOT NULL," +
-               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-               " PRIMARY KEY (cid, user, id, referenceId(64))" +
-               ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetMiscName() {
-        return "snippetMisc";
-    }
-
-    private String getSnippetMiscTable() {
-        return "CREATE TABLE "+getSnippetMiscName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id INT4 unsigned NOT NULL," +
-               " json TEXT CHARACTER SET latin1 NOT NULL," +
-               " PRIMARY KEY (cid, user, id)" +
+               " referenceId VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
+               " data MEDIUMBLOB NOT NULL," +
+               " PRIMARY KEY (cid, referenceId)" +
                ") ENGINE=InnoDB";
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentTable(), getSnippetAttachmentTable(), getSnippetMiscTable() };
+        return new String[] { getSnippetAttachmentBinaryTable() };
     }
 
     @Override
@@ -150,24 +107,21 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] getDependencies() {
-        return NO_TABLES;
+        return new String[] { RdbSnippetCreateTableTask.class.getName() };
     }
 
     @Override
     public void perform(final PerformParameters params) throws com.openexchange.exception.OXException {
-        final int contextId = params.getContextId();
-        final DatabaseService ds = getService(DatabaseService.class);
-        final Connection writeCon = ds.getForUpdateTask(contextId);
+        int contextId = params.getContextId();
+        DatabaseService ds = getService(DatabaseService.class);
+        Connection writeCon = ds.getForUpdateTask(contextId);
         try {
-            createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
-            createTable(getSnippetContentName(), getSnippetContentTable(), writeCon);
-            createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
-            createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
+            createTable(getSnippetAttachmentBinaryName(), getSnippetAttachmentBinaryTable(), writeCon);
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
-        final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetCreateTableTask.class);
-        logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetCreateTableTask.class.getSimpleName());
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(RdbSnippetAttachmentBinaryCreateTableTask.class);
+        logger.info("UpdateTask ''{}'' successfully performed!", RdbSnippetAttachmentBinaryCreateTableTask.class.getSimpleName());
     }
 
     private void createTable(final String tablename, final String sqlCreate, final Connection writeCon) throws OXException {
@@ -215,12 +169,12 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] requiredTables() {
-        return NO_TABLES;
+        return new String[] { "snippetAttachment" };
     }
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { getSnippetAttachmentBinaryName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
