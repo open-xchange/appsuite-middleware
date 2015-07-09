@@ -89,7 +89,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
     private String getSnippetAttachmentBinaryTable() {
         return "CREATE TABLE "+getSnippetAttachmentBinaryName()+" (" +
                " cid INT4 unsigned NOT NULL," +
-               " referenceId VARCHAR(32) CHARACTER SET latin1 NOT NULL," +
+               " referenceId VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
                " data MEDIUMBLOB NOT NULL," +
                " PRIMARY KEY (cid, referenceId)" +
                ") ENGINE=InnoDB";

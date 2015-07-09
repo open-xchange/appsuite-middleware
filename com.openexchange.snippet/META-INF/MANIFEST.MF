@@ -5,7 +5,9 @@ Bundle-SymbolicName: com.openexchange.snippet
 Bundle-Version: 7.6.3
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.ajax.requesthandler,
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.ajax.requesthandler,
  com.openexchange.capabilities,
  com.openexchange.config.cascade,
  com.openexchange.conversion,

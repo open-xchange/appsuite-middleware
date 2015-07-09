@@ -748,7 +748,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
             // Check passed ones
             if (null != attachments && !attachments.isEmpty()) {
                 for (Attachment attachment : attachments) {
-                    String referenceId = UUIDs.getUnformattedStringFromRandom();
+                    String referenceId = null == attachment.getId() ? UUIDs.getUnformattedStringFromRandom() : attachment.getId();
                     stmt = con.prepareStatement("INSERT INTO snippetAttachmentBinary (cid, referenceId, data) VALUES (?, ?, ?)");
                     stmt.setInt(1, contextId);
                     stmt.setString(2, referenceId);
@@ -1032,10 +1032,14 @@ public final class RdbSnippetManagement implements SnippetManagement {
             boolean closeStuff = true;
             try {
                 con = databaseService.getReadOnly(contextId);
-                stmt = con.prepareStatement("SELECT data FROM snippetAttachmentBinary WHERE cid=? AND id=?");
+                stmt = con.prepareStatement("SELECT data FROM snippetAttachmentBinary WHERE cid=? AND referenceId=?");
                 stmt.setInt(1, contextId);
                 stmt.setString(2, referenceId);
                 rs = stmt.executeQuery();
+
+                if (false == rs.next()) {
+                    throw new IOException("No such attachment binary for reference identifier " + referenceId + " in context " + contextId);
+                }
 
                 InputStream stream = new ClosingInputStream(rs.getBinaryStream(1), rs, stmt, con, contextId, databaseService);
                 closeStuff = false; // Avoid preliminary closing
