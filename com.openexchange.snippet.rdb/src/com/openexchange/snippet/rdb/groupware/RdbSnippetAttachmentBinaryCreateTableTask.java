@@ -97,7 +97,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getSnippetAttachmentBinaryTable() };
+        return new String[] { getSnippetAttachmentBinaryName() };
     }
 
     @Override
