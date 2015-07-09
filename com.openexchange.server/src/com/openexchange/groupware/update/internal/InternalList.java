@@ -785,6 +785,9 @@ public final class InternalList {
         // Add vCardId column for del table if missing
         list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdToDelTask());
 
+        // Remove accounts related to facebook
+        list.add(new com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
