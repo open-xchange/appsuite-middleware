@@ -79,6 +79,8 @@ done
 
 %changelog
 * Fri Jul 03 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2015-07-02 (2611)
+* Fri Jul 03 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-06-29 (2578)
 * Fri Jul 03 2015 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2015-06-29 (2542)
