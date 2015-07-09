@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,68 +47,25 @@
  *
  */
 
-package com.openexchange.filestore.impl.osgi;
+package com.openexchange.filestore;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.filestore.FileStorage2ContextsResolver;
-import com.openexchange.filestore.FileStorageProvider;
-import com.openexchange.filestore.FileStorageService;
-import com.openexchange.filestore.impl.CompositeFileStorageService;
-import com.openexchange.filestore.impl.DbFileStorage2ContextsResolver;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link DefaultFileStorageActivator} - The activator for the {@link FileStorageService} service.
+ * {@link FileStorage2ContextsResolver} - Resolves a certain file storage to those contexts that either itself or at least of its users uses that file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class DefaultFileStorageActivator implements BundleActivator {
-
-    private volatile ServiceRegistration<FileStorageService> reg;
-    private volatile ServiceRegistration<FileStorage2ContextsResolver> reg2;
-    private volatile ServiceTracker<FileStorageProvider, FileStorageProvider> tracker;
+public interface FileStorage2ContextsResolver {
 
     /**
-     * Initializes a new {@link DefaultFileStorageActivator}.
+     * Gets the identifiers of all contexts that either itself or at least of its users uses the denoted file storage.
+     *
+     * @param fileStorageId The file storage identifier
+     * @return The identifiers of all contexts
+     * @throws OXException If identifiers cannot be returned
      */
-    public DefaultFileStorageActivator() {
-        super();
-    }
-
-    @Override
-    public void start(BundleContext context) throws Exception {
-        CompositeFileStorageService service = new CompositeFileStorageService(context);
-
-        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = new ServiceTracker<FileStorageProvider, FileStorageProvider>(context, FileStorageProvider.class, service);
-        this.tracker = tracker;
-        tracker.open();
-
-        reg = context.registerService(FileStorageService.class, service, null);
-        reg2 = context.registerService(FileStorage2ContextsResolver.class, new DbFileStorage2ContextsResolver(), null);
-    }
-
-    @Override
-    public void stop(BundleContext context) throws Exception {
-        ServiceRegistration<FileStorageService> reg = this.reg;
-        if (null != reg) {
-            reg.unregister();
-            this.reg = null;
-        }
-
-        ServiceRegistration<FileStorage2ContextsResolver> reg2 = this.reg2;
-        if (null != reg2) {
-            reg2.unregister();
-            this.reg2 = null;
-        }
-
-        ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = this.tracker;
-        if (null != tracker) {
-            tracker.close();
-            this.tracker = null;
-        }
-    }
+    int[] getIdsOfContextsUsing(int fileStorageId) throws OXException;
 
 }
