@@ -60,6 +60,7 @@ import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.subscribe.AbstractSubscribeService;
 import com.openexchange.tools.session.ServerSession;
 
@@ -102,7 +103,11 @@ public class HasSubscriptions implements AdditionalFolderField {
 
      @Override
     public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
-         if (!session.getUserPermissionBits().isSubscription()) {
+         if (null == session) {
+             return allFalse(folder.size());
+         }
+         UserPermissionBits permissionBits = session.getUserPermissionBits();
+         if (null == permissionBits || !permissionBits.isPublication()) {
              return allFalse(folder.size());
          }
          final List<String> folderIdsToQuery = new ArrayList<String>(folder.size());
