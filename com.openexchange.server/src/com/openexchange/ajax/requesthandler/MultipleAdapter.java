@@ -132,6 +132,7 @@ public class MultipleAdapter implements MultipleHandler {
         request.setAction(action);
         request.setServletRequestURI(path);
         request.setPathInfo(path);
+        request.setSession(session);
 
         return request;
     }
