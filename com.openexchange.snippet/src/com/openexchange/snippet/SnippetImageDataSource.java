@@ -52,7 +52,7 @@ package com.openexchange.snippet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import org.apache.commons.io.IOUtils;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
@@ -65,6 +65,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.image.ImageUtility;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -188,29 +189,33 @@ public class SnippetImageDataSource implements ImageDataSource {
 
             for (Attachment attachment : attachments) {
                 String contentId = attachment.getContentId();
-                if (MimeMessageUtility.equalsCID(cid, contentId)) {
-                    byte[] imageBytes;
+                if (MimeMessageUtility.equalsCID(cid, contentId) || MimeMessageUtility.equalsCID(cid, attachment.getId())) {
+                    ThresholdFileHolder sink = null;
+                    boolean closeSink = true;
                     try {
-                        imageBytes = IOUtils.toByteArray(attachment.getInputStream());
+                        sink = new ThresholdFileHolder();
+                        sink.write(attachment.getInputStream());
+
+                        properties.put(DataProperties.PROPERTY_ID, id);
+                        properties.put(DataProperties.PROPERTY_CONTENT_TYPE, attachment.getContentType());
+                        properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(sink.getLength()));
+                        properties.put(DataProperties.PROPERTY_NAME, determineFileName(attachment));
+
+                        InputStream in = sink.getClosingStream();
+                        closeSink = false;
+                        return new SimpleData<D>((D) (in), properties);
                     } catch (IOException e) {
                         throw DataExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                    } finally {
+                        if (closeSink) {
+                            Streams.close(sink);
+                        }
                     }
-
-                    properties.put(DataProperties.PROPERTY_ID, id);
-                    properties.put(DataProperties.PROPERTY_CONTENT_TYPE, attachment.getContentType());
-                    properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(imageBytes.length));
-                    properties.put(DataProperties.PROPERTY_NAME, determineFileName(attachment));
-
-                    return new SimpleData<D>((D) (new UnsynchronizedByteArrayInputStream(imageBytes)), properties);
                 }
             }
         }
 
-        LOG.warn(
-            "Requested a non-existing image in snippet: snippet-id={} context={} session-user={}\nReturning an empty image as fallback.",
-            id,
-            session.getContextId(),
-            session.getUserId());
+        LOG.warn("Requested a non-existing image in snippet: snippet-id={} context={} session-user={}\nReturning an empty image as fallback.", id, session.getContextId(), session.getUserId());
         properties.put(DataProperties.PROPERTY_CONTENT_TYPE, "image/jpg");
         properties.put(DataProperties.PROPERTY_SIZE, String.valueOf(0));
 
