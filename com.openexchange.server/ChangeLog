@@ -1,3 +1,7 @@
+* 2015-07-09 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 38946: Invalidate caches when rsync is used to move filestore
+
 * 2015-07-08 - martin.herfurth@open-xchange.com
 
  - Fix for bug 39528: Bad usage of enumeration constants. Store confirmation message in separate attributes.

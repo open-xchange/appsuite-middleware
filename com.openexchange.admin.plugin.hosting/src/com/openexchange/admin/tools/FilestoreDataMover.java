@@ -209,17 +209,21 @@ public class FilestoreDataMover implements Callable<Void> {
                 if (null != srcStorage && null != srcFiles) {
                     srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
                 }
-                ctx.setFilestoreId(dstStore.getId());
-                oxcox.changeStorageData(ctx);
-                final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-                Cache cache = cacheService.getCache("Filestore");
-                cache.clear();
-                Cache contextCache = cacheService.getCache("Context");
-                contextCache.remove(ctx.getId());
-                oxcox.enable(ctx);
             } catch (OXException e) {
                 throw new StorageException(e);
             }
+        }
+        try {
+            ctx.setFilestoreId(dstStore.getId());
+            oxcox.changeStorageData(ctx);
+            final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+            Cache cache = cacheService.getCache("Filestore");
+            cache.clear();
+            Cache contextCache = cacheService.getCache("Context");
+            contextCache.remove(ctx.getId());
+            oxcox.enable(ctx);
+        } catch (OXException e) {
+            throw new StorageException(e);
         }
     }
 
