@@ -65,6 +65,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Entity;
 import com.openexchange.publish.PublicationStorage;
 import com.openexchange.publish.helpers.AbstractPublicationService;
@@ -117,7 +118,8 @@ public class IsPublished implements AdditionalFolderField {
 
     @Override
     public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        if (!session.getUserPermissionBits().isPublication()) {
+        UserPermissionBits permissionBits = session.getUserPermissionBits();
+        if (null == permissionBits || !permissionBits.isPublication()) {
             return allFalse(folder.size());
         }
         List<Entity> folderIdsToQuery = new ArrayList<Entity>(folder.size());
