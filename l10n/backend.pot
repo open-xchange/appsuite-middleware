@@ -4025,6 +4025,20 @@ msgid ""
 "refers to all shares of one user in this context."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:76
+msgid ""
+"Quota exceeded for share links. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:78
+msgid ""
+"Quota exceeded for guest users. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some shares in order to create new ones. Please note: The quota "
+"refers to all shares of one user in this context."
+msgstr ""
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"
