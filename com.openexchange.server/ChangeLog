@@ -1,3 +1,7 @@
+* 2015-07-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service
+
 * 2015-07-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 38948: Return proper MIME message version after transport (which is stored into standard send folder)
