@@ -115,7 +115,6 @@ import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -539,7 +538,6 @@ public final class MimeMessageUtility {
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;
-    private static final String DEFAULT_ALT_PREFIX = DispatcherPrefixService.DEFAULT_ALT_PREFIX;
 
     private static final String FILE_ALIAS_APPENDIX = "file";
 
@@ -564,12 +562,8 @@ public final class MimeMessageUtility {
         if (tmp.indexOf('/' + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf('/' + FILE_ALIAS_APPENDIX, fromIndex) >= 0) {
             return true;
         }
-        final String altPrefix = DEFAULT_ALT_PREFIX.substring(1);
-        if (altPrefix.equals(prefix)) {
-            return false;
-        }
-        prefix = altPrefix;
-        return tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0;
+
+        return false;
     }
 
     /**
