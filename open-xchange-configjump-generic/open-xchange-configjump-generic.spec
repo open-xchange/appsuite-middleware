@@ -52,6 +52,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc config
 
 %changelog
 * Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-07-02 (2611)
+* Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-06-29 (2578)
 * Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-06-29 (2542)
