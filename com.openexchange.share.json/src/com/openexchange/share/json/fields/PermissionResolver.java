@@ -74,6 +74,7 @@ import com.openexchange.image.ImageLocation;
 import com.openexchange.java.util.Pair;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -98,6 +99,7 @@ public class PermissionResolver {
     private final ServiceLookup services;
     private final ServerSession session;
     private final Map<Integer, User> knownUsers;
+    private final Map<Integer, GuestInfo> knownGuests;
     private final Map<Integer, Contact> knownUserContacts;
     private final Map<Integer, Group> knownGroups;
 
@@ -112,6 +114,7 @@ public class PermissionResolver {
         this.services = services;
         this.session = session;
         knownGroups = new HashMap<Integer, Group>();
+        knownGuests = new HashMap<Integer, GuestInfo>();
         knownUserContacts = new HashMap<Integer, Contact>();
         knownUsers = new HashMap<Integer, User>();
     }
@@ -163,6 +166,26 @@ public class PermissionResolver {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets a specific guest.
+     *
+     * @param guestID The identifier of the guest to get
+     * @return The guest, or <code>null</code> if it can't be resolved
+     */
+    public GuestInfo getGuest(int guestID) {
+        Integer key = I(guestID);
+        GuestInfo guest = knownGuests.get(key);
+        if (null == guest) {
+            try {
+                guest = services.getService(ShareService.class).getGuest(session.getContextId(), guestID);
+                knownGuests.put(key, guest);
+            } catch (OXException e) {
+                getLogger(PermissionResolver.class).error("Error getting guest {}", key, e);
+            }
+        }
+        return guest;
     }
 
     /**

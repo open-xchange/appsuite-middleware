@@ -60,7 +60,6 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.DefaultRequestContext;
 
@@ -127,11 +126,6 @@ public abstract class ExtendedPermission {
 
     protected void addShareInfo(AJAXRequestData requestData, JSONObject jsonObject, ShareInfo share) throws JSONException {
         if (null != share) {
-            GuestInfo guest = share.getGuest();
-            jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
-//            jsonObject.putOpt("authentication", null != guest.getAuthentication() ? guest.getAuthentication().toString().toLowerCase() : null);
-//            jsonObject.put("base_token", guest.getBaseToken());
-//            jsonObject.put("token", share.getToken());
             if (null != requestData) {
                 jsonObject.putOpt("share_url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
             }
@@ -144,7 +138,7 @@ public abstract class ExtendedPermission {
             if (null != meta) {
                 jsonObject.put("meta", JSONCoercion.coerceToJSON(meta));
             }
-            jsonObject.putOpt("password", guest.getPassword());
+            jsonObject.putOpt("password", share.getGuest().getPassword());
         }
     }
 

@@ -411,6 +411,15 @@ public class DefaultShareService implements ShareService {
         return new DefaultGuestInfo(services, guestUser, shareToken);
     }
 
+    @Override
+    public GuestInfo getGuest(int contextId, int guestId) throws OXException {
+        User guestUser = services.getService(UserService.class).getUser(guestId, contextId);
+        if (false == guestUser.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestId));
+        }
+        return new DefaultGuestInfo(services, contextId, guestUser);
+    }
+
     /**
      * Gets all shares created in a specific context.
      *

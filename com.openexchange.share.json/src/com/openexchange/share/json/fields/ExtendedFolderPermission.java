@@ -56,7 +56,9 @@ import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.core.DefaultRequestContext;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -99,10 +101,15 @@ public class ExtendedFolderPermission extends ExtendedPermission {
         } else {
             User user = resolver.getUser(permission.getEntity());
             if (user.isGuest()) {
-                ShareInfo share = resolver.getShare(folder, permission.getEntity());
-                addShareInfo(requestData, jsonObject, share);
-                if (null != share && RecipientType.GUEST.equals(share.getGuest().getRecipientType())) {
+                GuestInfo guest = resolver.getGuest(user.getId());
+                jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
+                if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                    addShareInfo(requestData, jsonObject, resolver.getShare(folder, permission.getEntity()));
+                } else {
                     addUserInfo(requestData, jsonObject, user);
+                    if (null != requestData) {
+                        jsonObject.putOpt("share_url", ShareLinks.generateExternal(DefaultRequestContext.newInstance(requestData), guest.getBaseToken()));
+                    }
                 }
             } else {
                 addUserInfo(requestData, jsonObject, user);

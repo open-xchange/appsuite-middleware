@@ -259,4 +259,13 @@ public interface ShareService {
      */
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
+    /**
+     * Gets detailed guest information for specific a guest user.
+     *
+     * @param contextId The context identifier
+     * @param guestId The guest identifier
+     * @return The guest information
+     */
+    GuestInfo getGuest(int contextId, int guestId) throws OXException;
+
 }

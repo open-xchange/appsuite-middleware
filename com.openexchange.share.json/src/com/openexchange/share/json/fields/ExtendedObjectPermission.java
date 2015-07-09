@@ -55,7 +55,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.core.DefaultRequestContext;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -98,10 +100,15 @@ public class ExtendedObjectPermission extends ExtendedPermission {
         } else {
             User user = resolver.getUser(permission.getEntity());
             if (user.isGuest()) {
-                ShareInfo share = resolver.getShare(file, permission.getEntity());
-                addShareInfo(requestData, jsonObject, share);
-                if (null != share && RecipientType.GUEST.equals(share.getGuest().getRecipientType())) {
+                GuestInfo guest = resolver.getGuest(user.getId());
+                jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
+                if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                    addShareInfo(requestData, jsonObject, resolver.getShare(file, permission.getEntity()));
+                } else {
                     addUserInfo(requestData, jsonObject, user);
+                    if (null != requestData) {
+                        jsonObject.putOpt("share_url", ShareLinks.generateExternal(DefaultRequestContext.newInstance(requestData), guest.getBaseToken()));
+                    }
                 }
             } else {
                 addUserInfo(requestData, jsonObject, user);
