@@ -49,9 +49,20 @@
 
 package com.openexchange.mailmapping.impl;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.mailmapping.MailResolver;
@@ -59,7 +70,6 @@ import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
-
 
 /**
  * The {@link DefaultMailMappingService} tries to resolve an email address by consulting the loginmappings. The loginmapping of a context is supposed to point
@@ -73,18 +83,43 @@ public class DefaultMailMappingService implements MailResolver {
     /** The service look-up */
     private final ServiceLookup services;
 
+    /** Whether to look-up only by domain */
+    private final boolean lookUpByDomain;
+
+    /** The list of external domains */
+    private final Set<String> externalDomains;
+
     /**
      * Initializes a new {@link DefaultMailMappingService}.
      *
      * @param mailMappingActivator
      */
-     public DefaultMailMappingService(ServiceLookup services) {
+    public DefaultMailMappingService(ServiceLookup services) {
         super();
         this.services = services;
+        ConfigurationService service = services.getService(ConfigurationService.class);
+        lookUpByDomain = service.getBoolProperty("com.openexchange.mailmapping.lookUpByDomain", false);
+        Set<Object> set = service.getFile("external-domains.properties").keySet();
+        this.externalDomains = new HashSet<String>(set.size(), 0.9f);
+        for (Object domain : set) {
+            externalDomains.add(domain.toString());
+        }
     }
 
     @Override
     public ResolvedMail resolve(String mail) throws OXException {
+        return resolve(mail, lookUpByDomain);
+    }
+
+    /**
+     * Resolves specified E-Mail address
+     *
+     * @param mail The E-Mail address to resolve
+     * @param lookUpByDomain Whether look-up should happen by domain (not recommended as it requires appropriate login mappings) or by DB schema (reliably, but slower)
+     * @return The resolved E-Mail address or <code>null</code> if it could not be resolved
+     * @throws OXException If resolve operation fails
+     */
+    public ResolvedMail resolve(String mail, boolean lookUpByDomain) throws OXException {
         if (Strings.isEmpty(mail)) {
             return null;
         }
@@ -98,6 +133,14 @@ public class DefaultMailMappingService implements MailResolver {
         // Extract domain
         String domain = mail.substring(atSign + 1);
 
+        // Check against list of known external domains
+        {
+            String test = Strings.asciiLowerCase(domain);
+            if (externalDomains.contains(test)) {
+                return null;
+            }
+        }
+
         // Acquire needed services
         ContextService contexts = services.getService(ContextService.class);
         if (null == contexts) {
@@ -108,19 +151,99 @@ public class DefaultMailMappingService implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
-        // Map the domain name to a context id
+        return lookUpByDomain ? lookUpByDomain(mail, domain, contexts, users) : lookUpBySchema(mail, domain, users, contexts);
+    }
+
+    private ResolvedMail lookUpByDomain(String mail, String domain, ContextService contexts, UserService users) throws OXException {
+        // Map the domain name to a context identifier
         int cid = contexts.getContextId(domain);
         if (cid <= 0) {
             return null;
         }
-        Context context = contexts.getContext(cid);
-        // Search for a user with the mail address
-        User found = users.searchUser(mail, context, true);
+
+        // Search for a user with the mail address in that context
+        return lookUpInContext(mail, cid, users, contexts);
+    }
+
+    private ResolvedMail lookUpBySchema(String mail, String domain, UserService users, ContextService contexts) throws OXException {
+        ResolvedMail resolvedMail = lookUpByDomain(mail, domain, contexts, users);
+        if (null != resolvedMail) {
+            return resolvedMail;
+        }
+
+        DatabaseService databaseService = services.getService(DatabaseService.class);
+        if (null == databaseService) {
+            throw ServiceExceptionCode.absentService(DatabaseService.class);
+        }
+
+        List<Integer> contextIds = contexts.getAllContextIds();
+        Set<Integer> visited = new HashSet<Integer>(contextIds.size(), 0.9f);
+        for (Integer contextId : contextIds) {
+            if (visited.add(contextId)) {
+                // Search for a user with the mail address in that context's schema
+                resolvedMail = lookUpInSchema(mail, contextId.intValue(), databaseService);
+                if (null != resolvedMail) {
+                    return resolvedMail;
+                }
+
+                // Discard other contexts in that schema
+                int[] contextsInSameSchema = databaseService.getContextsInSameSchema(contextId.intValue());
+                if (null != contextsInSameSchema) {
+                    for (int i = contextsInSameSchema.length; i-- > 0;) {
+                        visited.add(Integer.valueOf(contextsInSameSchema[i]));
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private ResolvedMail lookUpInContext(String mail, int contextId, UserService users, ContextService contexts) throws OXException {
+        Context context = contexts.getContext(contextId);
+        User found;
+        try {
+            found = users.searchUser(mail, context, true);
+        } catch (OXException e) {
+            if (!e.equalsCode(14, "USR")) {
+                throw e;
+            }
+            found = null;
+        }
         if (found == null) {
             return null;
         }
 
-        return ResolvedMail.ACCEPT(found.getId(), context.getContextId());
+        return ResolvedMail.ACCEPT(found.getId(), contextId);
+    }
+
+    private ResolvedMail lookUpInSchema(String mail, int idOfContextInSchema, DatabaseService dbService) throws OXException {
+        Connection con = dbService.getReadOnly(idOfContextInSchema);
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT cid, id FROM user WHERE mail LIKE ?");
+            stmt.setString(1, mail);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return ResolvedMail.ACCEPT(result.getInt(2), result.getInt(1));
+            }
+
+            Databases.closeSQLStuff(result, stmt);
+            stmt = con.prepareStatement("SELECT cid, id FROM user_attribute WHERE name=? AND value LIKE ?");
+            stmt.setString(1, "alias");
+            stmt.setString(2, mail);
+            result = stmt.executeQuery();
+            if (result.next()) {
+                return ResolvedMail.ACCEPT(result.getInt(2), result.getInt(1));
+            }
+            return null;
+        } catch (SQLException e) {
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
+        } finally {
+            Databases.closeSQLStuff(result, stmt);
+            dbService.backReadOnly(idOfContextInSchema, con);
+        }
     }
 
 }

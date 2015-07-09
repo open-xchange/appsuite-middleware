@@ -1,3 +1,9 @@
+open-xchange-halo (7.6.2-23) stable; urgency=medium
+
+  * Build for patch 2015-07-02 (2611)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 03 Jul 2015 13:07:40 +0200
+
 open-xchange-halo (7.6.2-22) stable; urgency=medium
 
   * Build for patch 2015-06-29 (2578)
