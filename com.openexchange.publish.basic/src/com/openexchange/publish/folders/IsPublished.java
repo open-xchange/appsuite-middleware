@@ -118,6 +118,9 @@ public class IsPublished implements AdditionalFolderField {
 
     @Override
     public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
+        if (null == session) {
+            return allFalse(folder.size());
+        }
         UserPermissionBits permissionBits = session.getUserPermissionBits();
         if (null == permissionBits || !permissionBits.isPublication()) {
             return allFalse(folder.size());
