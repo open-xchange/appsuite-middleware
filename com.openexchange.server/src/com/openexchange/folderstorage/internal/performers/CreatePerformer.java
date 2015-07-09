@@ -284,7 +284,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
          */
         UserService userService = FolderStorageServices.requireService(UserService.class);
         Permission[] permissions = toCreate.getPermissions();
-        ComparedPermissions comparedPermissions = new ComparedPermissions(session.getContext(), permissions, new Permission[0], userService, transactionManager.getConnection());
+        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session.getContext(), permissions, new Permission[0], userService, transactionManager.getConnection());
         /*
          * Check permissions of anonymous guest users
          */

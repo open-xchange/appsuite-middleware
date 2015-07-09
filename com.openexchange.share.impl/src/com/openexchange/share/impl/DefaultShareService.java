@@ -438,12 +438,19 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public GuestInfo getGuest(int contextId, int guestId) throws OXException {
-        User guestUser = services.getService(UserService.class).getUser(guestId, contextId);
-        if (false == guestUser.isGuest()) {
-            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestId));
+    public GuestInfo getGuestInfo(int contextId, int userId) throws OXException {
+        try {
+            User user = services.getService(UserService.class).getUser(userId, contextId);
+            if (user.isGuest()) {
+                return new DefaultGuestInfo(services, contextId, user);
+            }
+        } catch (OXException e) {
+            if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
+                throw e;
+            }
         }
-        return new DefaultGuestInfo(services, contextId, guestUser);
+
+        return null;
     }
 
     /**

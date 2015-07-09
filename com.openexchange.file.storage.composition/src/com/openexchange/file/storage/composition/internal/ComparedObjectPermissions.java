@@ -49,155 +49,176 @@
 
 package com.openexchange.file.storage.composition.internal;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.ComparedPermissions;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link ComparedObjectPermissions}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class ComparedObjectPermissions {
+public class ComparedObjectPermissions extends ComparedPermissions<FileStorageObjectPermission, FileStorageGuestObjectPermission> {
 
-    private List<FileStorageGuestObjectPermission> addedGuestPermissions;
-    private List<FileStorageObjectPermission> removedGuestPermissions;
+    private final ShareService shareService;
 
-    /**
-     * Empty compared permissions with no added or removed guest permissions.
-     */
-    public static ComparedObjectPermissions EMPTY = new ComparedObjectPermissions((File) null, (File) null, null);
+    private final int contextId;
+
+    private final Map<Integer, GuestInfo> guestInfos = new HashMap<>();
 
     /**
      * Initializes a new {@link ComparedObjectPermissions}.
      *
+     * @param contextId The context ID
      * @param oldMetadata The old metadata, or <code>null</code> for new documents
      * @param newMetadata The new metadata
-     * @param modifiedColumns The modified columns as supplied by the client, or <code>null</code> if not available
+     * @throws OXException
      */
-    public ComparedObjectPermissions(File oldMetadata, File newMetadata, List<Field> modifiedColumns) {
-        this(null == oldMetadata ? null: oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions(), modifiedColumns);
+    public ComparedObjectPermissions(int contextId, File oldMetadata, File newMetadata) throws OXException {
+        this(contextId, null == oldMetadata ? null: oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions());
     }
 
     /**
      * Initializes a new {@link ComparedObjectPermissions}.
      *
+     * @param contextId The context ID
      * @param oldPermissions The old object permissions, or <code>null</code> for new documents
      * @param newPermissions The new object permissions
-     * @param modifiedColumns The modified columns as supplied by the client, or <code>null</code> if not available
+     * @throws OXException
      */
-    public ComparedObjectPermissions(List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions, List<Field> modifiedColumns) {
-        super();
-        if (null != modifiedColumns && false == modifiedColumns.contains(Field.OBJECT_PERMISSIONS)) {
-            /*
-             * no object permissions modified
-             */
-            addedGuestPermissions = Collections.emptyList();
-            removedGuestPermissions = Collections.emptyList();
-        } else {
-            /*
-             * diff old / new permissions
-             */
-            addedGuestPermissions = getAddedGuestPermissions(newPermissions);
-            removedGuestPermissions = getRemovedUserPermissions(oldPermissions, newPermissions);
+    public ComparedObjectPermissions(int contextId, List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions) throws OXException {
+        super(newPermissions, oldPermissions);
+        this.contextId = contextId;
+        shareService = Services.getService(ShareService.class);
+        if (shareService == null) {
+            throw ServiceExceptionCode.absentService(ShareService.class);
         }
+        calc();
     }
 
-    /**
-     * Gets a value indicating whether the comparison yielded added guest permissions or not.
-     *
-     * @return <code>true</code> if there is at least one added guest permission, <code>false</code>, otherwise
-     */
-    public boolean hasAddedGuestPermissions() {
-        return 0 < addedGuestPermissions.size();
-    }
-    /**
-     * Gets a value indicating whether the comparison yielded removed guest permissions or not.
-     *
-     * @return <code>true</code> if there is at least one removed guest permission, <code>false</code>, otherwise
-     */
-    public boolean hasRemovedGuestPermissions() {
-        return 0 < removedGuestPermissions.size();
+    @Override
+    protected boolean isSystemPermission(FileStorageObjectPermission p) {
+        return false;
     }
 
-    /**
-     * Gets all guest object permissions that are considered as "new", i.e. guest object permissions from the new document metadata that
-     * are not yet resolved to a guest user entity, i.e. those permissions that were newly added by the client.
-     *
-     * @return The new guest object permissions, or an empty list of none were found
-     */
-    public List<FileStorageGuestObjectPermission> getAddedGuestPermissions() {
-        return addedGuestPermissions;
+    @Override
+    protected boolean isUnresolvedGuestPermission(FileStorageObjectPermission p) {
+        return p instanceof FileStorageGuestObjectPermission;
     }
 
-    /**
-     * Gets all object permissions that were present in the object permissions of the old document metadata, but no longer appear in the
-     * object permissions of the new document metadata.
-     * <p/>
-     * <b>Note:</b>
-     * For now, this may both include regular internal users as well as guest users, while group permissions are ignored implicitly.
-     *
-     * @return The removed user object permissions
-     */
-    public List<FileStorageObjectPermission> getRemovedGuestPermissions() {
-        return removedGuestPermissions;
+    @Override
+    protected boolean isGroupPermission(FileStorageObjectPermission p) {
+        return p.isGroup();
     }
 
-    /**
-     * Extracts all guest object permissions from the supplied list that are not yet resolved to a guest user entity, i.e. those
-     * permissions that were newly added by the client.
-     *
-     * @param permissions The object permissions to extract the guest permissions from, or <code>null</code> if there are none
-     * @return The new guest object permissions, or an empty list of none were found
-     */
-    private static List<FileStorageGuestObjectPermission> getAddedGuestPermissions(List<FileStorageObjectPermission> permissions) {
-        if (null == permissions || 0 == permissions.size()) {
-            return Collections.emptyList();
-        }
-        List<FileStorageGuestObjectPermission> addedPermissions = new ArrayList<FileStorageGuestObjectPermission>();
-        for (FileStorageObjectPermission newPermission : permissions) {
-            if (FileStorageGuestObjectPermission.class.isInstance(newPermission) && 0 == newPermission.getEntity()) {
-                addedPermissions.add((FileStorageGuestObjectPermission) newPermission);
+    @Override
+    protected int getEntityId(FileStorageObjectPermission p) {
+        return p.getEntity();
+    }
+
+    @Override
+    protected boolean areEqual(FileStorageObjectPermission p1, FileStorageObjectPermission p2) {
+        if (p1 == null) {
+            if (p2 == null) {
+                return true;
             }
+
+            return false;
         }
-        return addedPermissions;
+
+        if (p2 == null) {
+            return false;
+        }
+
+        return p1.equals(p2);
     }
 
-    /**
-     * Extracts all object permissions that are present in the supplied old permission list, but no longer appear in the new object
-     * permissions. Group permissions are ignored implicitly.
-     *
-     * @param oldPermissions The old object permissions, or <code>null</code> if there are none
-     * @param newPermissions The new object permissions, or <code>null</code> if there are none
-     * @return The removed user object permissions
-     */
-    private static List<FileStorageObjectPermission> getRemovedUserPermissions(List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions) {
-        if (null == oldPermissions || 0 == oldPermissions.size()) {
-            return Collections.emptyList();
-        }
-        List<FileStorageObjectPermission> removedPermissions = new ArrayList<FileStorageObjectPermission>();
-        for (FileStorageObjectPermission oldPermission : oldPermissions) {
-            FileStorageObjectPermission matchingPermission = findByEntity(newPermissions, oldPermission.getEntity());
-            if (null == matchingPermission) {
-                removedPermissions.add(oldPermission);
-            }
-        }
-        return removedPermissions;
+    @Override
+    protected boolean isGuestUser(int userId) throws OXException {
+        return getGuestInfo(userId) != null;
     }
 
-    private static FileStorageObjectPermission findByEntity(List<FileStorageObjectPermission> permissions, int entity) {
-        if (null != permissions && 0 < permissions.size()) {
-            for (FileStorageObjectPermission permission : permissions) {
-                if (permission.getEntity() == entity) {
-                    return permission;
-                }
+    public GuestInfo getGuestInfo(int guestId) throws OXException {
+        GuestInfo guestInfo = guestInfos.get(guestId);
+        if (guestInfo == null) {
+            guestInfo = shareService.getGuestInfo(contextId, guestId);
+            if (guestInfo == null) {
+                guestInfo = NO_GUEST;
             }
+            guestInfos.put(guestId, guestInfo);
         }
-        return null;
+
+        if (guestInfo == NO_GUEST) {
+            return null;
+        }
+
+        return guestInfo;
     }
+
+    private static final GuestInfo NO_GUEST = new GuestInfo() {
+
+        @Override
+        public RecipientType getRecipientType() {
+            return null;
+        }
+
+        @Override
+        public String getPassword() {
+            return null;
+        }
+
+        @Override
+        public Locale getLocale() {
+            return null;
+        }
+
+        @Override
+        public int getGuestID() {
+            return 0;
+        }
+
+        @Override
+        public String getEmailAddress() {
+            return null;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return null;
+        }
+
+        @Override
+        public int getCreatedBy() {
+            return 0;
+        }
+
+        @Override
+        public int getContextID() {
+            return 0;
+        }
+
+        @Override
+        public String getBaseToken() {
+            return null;
+        }
+
+        @Override
+        public AuthenticationMode getAuthentication() {
+            return null;
+        }
+    };
 
 }

@@ -51,6 +51,8 @@ package com.openexchange.share.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -303,6 +305,13 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+        if (Strings.isNotEmpty(recipient.getPassword())) {
+            try {
+                guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
+            }
+        }
         recipient.setWasCreated(true);
         return guestUser;
     }

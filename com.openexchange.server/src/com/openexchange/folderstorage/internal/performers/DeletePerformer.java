@@ -277,7 +277,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         /*
          * check for any present guest permissions
          */
-        ComparedPermissions comparedPermissions = new ComparedPermissions(
+        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(
             session.getContext(), new Permission[0], folder.getPermissions(), FolderStorageServices.requireService(UserService.class), transactionManager.getConnection());
         /*
          * delete folder

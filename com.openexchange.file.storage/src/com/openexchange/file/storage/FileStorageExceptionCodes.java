@@ -308,6 +308,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details. | File save aborted: %2$s
      */
     FILE_SAVE_ABORTED("File save aborted: %2$s", Category.CATEGORY_CONFLICT, 61, FileStorageExceptionMessages.FILE_SAVE_ABORTED_MSG),
+    /**
+     * Invalid permissions (%1$d) for entity \"%2$d\" on object \"%3$s\".
+     */
+    INVALID_OBJECT_PERMISSIONS("Invalid permissions (%1$d) for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 62),
 
     ;
 

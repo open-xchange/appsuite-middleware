@@ -709,19 +709,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param comparedPermissions The compared permissions
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkAnonymousPermissions(ComparedPermissions comparedPermissions) throws OXException {
+    protected void checkAnonymousPermissions(ComparedFolderPermissions comparedPermissions) throws OXException {
         if (comparedPermissions.hasAddedGuests()) {
-            List<User> addedGuests = comparedPermissions.getAddedGuests();
-            for (User addedGuest : addedGuests) {
-                if (isAnonymous(addedGuest)) {
+            List<Integer> addedGuests = comparedPermissions.getAddedGuests();
+            for (Integer addedGuest : addedGuests) {
+                if (isAnonymous(comparedPermissions.getUser(addedGuest))) {
                     checkReadOnly(comparedPermissions.getAddedGuestPermission(addedGuest));
                 }
             }
         }
 
         if (comparedPermissions.hasModifiedGuests()) {
-            for (User guest : comparedPermissions.getModifiedGuests()) {
-                if (isAnonymous(guest)) {
+            for (Integer guest : comparedPermissions.getModifiedGuests()) {
+                if (isAnonymous(comparedPermissions.getUser(guest))) {
                     checkReadOnly(comparedPermissions.getModifiedGuestPermission(guest));
                 }
             }

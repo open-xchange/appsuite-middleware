@@ -231,7 +231,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final ComparedPermissions comparedPermissions = new ComparedPermissions(
+            final ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(
                 getContext(),
                 folder,
                 storageFolder,
