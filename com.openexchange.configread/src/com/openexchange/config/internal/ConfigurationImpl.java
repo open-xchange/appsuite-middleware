@@ -76,6 +76,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
+import org.ho.yaml.exception.YamlException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
@@ -714,7 +715,12 @@ public final class ConfigurationImpl implements ConfigurationService {
             return null;
         }
 
-        return Yaml.load(new String(yamlFiles.get(path)));
+        try {
+            return Yaml.load(Charsets.toString(yamlFiles.get(path), Charsets.UTF_8));
+        } catch (YamlException e) {
+            // Failed to load .yml file
+            throw new IllegalStateException("Failed to load YAML file '" + path + "'. Reason:" + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -726,8 +732,14 @@ public final class ConfigurationImpl implements ConfigurationService {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
                 final Entry<String, byte[]> entry = iter.next();
-                if (entry.getKey().startsWith(fldName)) {
-                    retval.put(entry.getKey(), Yaml.load(new String(entry.getValue(), Charsets.UTF_8)));
+                String pathName = entry.getKey();
+                if (pathName.startsWith(fldName)) {
+                    try {
+                        retval.put(pathName, Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8)));
+                    } catch (YamlException e) {
+                        // Failed to load .yml file
+                        throw new IllegalStateException("Failed to load YAML file '" + pathName + "'. Reason:" + e.getMessage(), e);
+                    }
                 }
             }
         }
