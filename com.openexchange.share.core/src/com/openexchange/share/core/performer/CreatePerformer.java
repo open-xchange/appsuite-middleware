@@ -59,6 +59,11 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
@@ -114,12 +119,41 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
         if (null != capabilities && capabilities.contains("invite_guests")) {
             inviteGuests = true;
         }
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (null == quotaService) {
+            throw ServiceExceptionCode.absentService(QuotaService.class);
+        }
+        QuotaProvider provider = quotaService.getProvider("share_links");
+        AccountQuota shareLinksQuota = null;
+        if (null != provider) {
+            shareLinksQuota = provider.getFor(session, "0");
+        }
+        provider = quotaService.getProvider("invite_guests");
+        AccountQuota inviteGuestsQuota = null;
+        if (null != provider) {
+            inviteGuestsQuota = provider.getFor(session, "0");
+        }
+
         for (ShareRecipient recipient : recipients) {
-            if (RecipientType.ANONYMOUS.equals(recipient.getType()) && !shareLinks) {
-                throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+            if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                if (!shareLinks) {
+                    throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                }
+                if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
+                    if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(targets.size()))) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
+                    }
+                }
             }
-            if (RecipientType.GUEST.equals(recipient.getType()) && !inviteGuests) {
-                throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+            if (RecipientType.GUEST.equals(recipient.getType())) {
+                if (!inviteGuests) {
+                    throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+                }
+                if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
+                    if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(targets.size()))) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
+                    }
+                }
             }
         }
         /*

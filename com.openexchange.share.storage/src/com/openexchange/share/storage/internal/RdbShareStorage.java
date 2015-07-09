@@ -258,6 +258,54 @@ public class RdbShareStorage implements ShareStorage {
         }
     }
 
+    @Override
+    public int countGuests(int contextId, int createdBy, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextId, parameters);
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND created_by = ? AND u.mail <> \"\"");
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = provider.get();
+            stmt = con.prepareStatement(sb.toString());
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, createdBy);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return 0;
+    }
+
+    @Override
+    public int countLinks(int contextId, int createdBy, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextId, parameters);
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND created_by = ? AND u.mail = \"\"");
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = provider.get();
+            stmt = con.prepareStatement(sb.toString());
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, createdBy);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return 0;
+    }
+
     private static int[] insertOrUpdateShares(Connection connection, int contextID, List<Share> shares) throws SQLException, OXException {
         ShareField[] updatableFields = {
             ShareField.EXPIRES, ShareField.META, ShareField.MODIFIED, ShareField.MODIFIED_BY

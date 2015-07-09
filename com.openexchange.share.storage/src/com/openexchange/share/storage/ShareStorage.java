@@ -202,6 +202,28 @@ public interface ShareStorage {
     int countShares(int contextID, int userId, StorageParameters parameters) throws OXException;
 
     /**
+     * Counts the number of currently created guest users for the given user id.
+     *
+     * @param contextID The context ID
+     * @param userId The user Id to count for
+     * @param parameters The storage parameters
+     * @return The number of created guest users for the user within the context
+     * @throws OXException
+     */
+    int countGuests(int contextId, int userId, StorageParameters parameters) throws OXException;
+
+    /**
+     * Counts the number of currently created share links for the given user id.
+     *
+     * @param contextID The context ID
+     * @param userId The user Id to count for
+     * @param parameters The storage parameters
+     * @return The number of created share links for the user within the context
+     * @throws OXException
+     */
+    int countLinks(int contextId, int userId, StorageParameters parameters) throws OXException;
+
+    /**
      * Loads all shares that were created by a specific user, optionally restricted for a single module.
      *
      * @param contextID The context ID
