@@ -78,7 +78,7 @@ public class SharesAction extends AbstractFileAction {
         IDBasedFileAccess fileAccess = request.getFileAccess();
         Field sortingField = request.getSortingField();
         SortDirection sortDirection = request.getSortingOrder();
-        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(request.getColumns(), sortingField, sortDirection);
+        SearchIterator<File> searchIterator = fileAccess.getUserSharedDocuments(request.getFieldsToLoad(), sortingField, sortDirection);
         if (Field.CREATED_BY.equals(sortingField)) {
             searchIterator = CreatedByComparator.resort(request.getSession(), searchIterator, sortDirection);
         }

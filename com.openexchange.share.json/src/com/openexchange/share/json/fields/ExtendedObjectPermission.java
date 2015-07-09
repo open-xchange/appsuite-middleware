@@ -47,67 +47,67 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
+package com.openexchange.share.json.fields;
 
-import java.util.List;
-import com.openexchange.ajax.customizer.AdditionalFieldsUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.session.ServerSession;
-
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link SimFolderField}
+ * {@link ExtendedObjectPermission}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class SimFolderField implements AdditionalFolderField {
+public class ExtendedObjectPermission extends ExtendedPermission {
 
-    private int columnId;
-    private String columnName;
-    private Object value;
-    private Object jsonValue;
+    private final File file;
+    private final FileStorageObjectPermission permission;
 
-    @Override
-    public int getColumnID() {
-        return columnId;
+    /**
+     * Initializes a new {@link ExtendedObjectPermission}.
+     *
+     * @param permissionResolver The permission resolver
+     * @param folder The folder
+     * @param parentPermission The underlying permissions
+     */
+    public ExtendedObjectPermission(PermissionResolver permissionResolver, File file, FileStorageObjectPermission parentPermission) {
+        super(permissionResolver);
+        this.permission = parentPermission;
+        this.file = file;
     }
 
-    @Override
-    public String getColumnName() {
-        return columnName;
-    }
+    /**
+     * Serializes the extended permissions as JSON.
+     *
+     * @param requestData The underlying request data, or <code>null</code> if not available
+     * @return The serialized extended permissions
+     */
+    public JSONObject toJSON(AJAXRequestData requestData) throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("entity", permission.getEntity());
+        jsonObject.put("bits", permission.getPermissions());
 
-    @Override
-    public Object getValue(FolderObject folder, ServerSession session) {
-        return value;
-    }
-
-    @Override
-    public Object renderJSON(AJAXRequestData requestData, Object value) {
-        return jsonValue;
-    }
-
-    public void setColumnId(int columnId) {
-        this.columnId = columnId;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public void setJsonValue(Object jsonValue) {
-        this.jsonValue = jsonValue;
-    }
-
-    @Override
-    public List<Object> getValues(List<FolderObject> folder, ServerSession session) {
-        return AdditionalFieldsUtils.bulk(this, folder, session);
+        if (permission.isGroup()) {
+            jsonObject.put("group", permission.isGroup());
+            addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
+        } else {
+            User user = resolver.getUser(permission.getEntity());
+            if (user.isGuest()) {
+                ShareInfo share = resolver.getShare(file, permission.getEntity());
+                addShareInfo(requestData, jsonObject, share);
+                if (null != share && RecipientType.GUEST.equals(share.getGuest().getRecipientType())) {
+                    addUserInfo(requestData, jsonObject, user);
+                }
+            } else {
+                addUserInfo(requestData, jsonObject, user);
+            }
+        }
+        return jsonObject;
     }
 
 }

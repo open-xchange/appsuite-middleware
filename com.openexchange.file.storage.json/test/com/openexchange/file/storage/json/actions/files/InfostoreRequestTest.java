@@ -79,22 +79,22 @@ public class InfostoreRequestTest extends FileTest {
 
     public void testShouldGetColumns() throws OXException {
         request().param("columns", "1,700,702");
-        assertEquals(Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), request.getColumns());
+        assertEquals(Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), request.getFieldsToLoad());
     }
 
     public void testShouldGetColumnsByName() throws OXException {
         request().param("columns", "id,title,filename");
-        assertEquals(Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), request.getColumns());
+        assertEquals(Arrays.asList(File.Field.ID, File.Field.TITLE, File.Field.FILENAME), request.getFieldsToLoad());
     }
 
     public void testColumnsDefaultToAllColumns() throws OXException {
-        assertEquals(Arrays.asList(File.Field.values()), request().getColumns());
+        assertEquals(Arrays.asList(File.Field.values()), request().getFieldsToLoad());
     }
 
     public void testUnknownColumns() {
         request().param("columns", "1,700,702,1023");
         try {
-            request.getColumns();
+            request.getFieldsToLoad();
             fail("Expected Exception");
         } catch (final OXException x) {
             assertTrue(true);
@@ -104,7 +104,7 @@ public class InfostoreRequestTest extends FileTest {
     public void testInvalidColumnString() {
         request().param("columns", "1,700,702,niceColumn");
         try {
-            request.getColumns();
+            request.getFieldsToLoad();
             fail("Expected Exception");
         } catch (final OXException x) {
             assertTrue(true);

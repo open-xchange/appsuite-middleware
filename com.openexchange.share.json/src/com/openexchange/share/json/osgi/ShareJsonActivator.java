@@ -49,6 +49,7 @@
 
 package com.openexchange.share.json.osgi;
 
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
@@ -68,7 +69,8 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.json.ShareActionFactory;
 import com.openexchange.share.json.ShareInfoResultConverter;
-import com.openexchange.share.json.folders.ExtendedPermissionsField;
+import com.openexchange.share.json.fields.ExtendedObjectPermissionsField;
+import com.openexchange.share.json.fields.ExtendedFolderPermissionsField;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.user.UserService;
 
@@ -106,7 +108,8 @@ public class ShareJsonActivator extends AJAXModuleActivator {
 
         registerModule(new ShareActionFactory(this), "share/management");
         registerService(ResultConverter.class, new ShareInfoResultConverter(getService(ModuleSupport.class)));
-        registerService(AdditionalFolderField.class, new ExtendedPermissionsField(this));
+        registerService(AdditionalFolderField.class, new ExtendedFolderPermissionsField(this));
+        registerService(AdditionalFileField.class, new ExtendedObjectPermissionsField(this));
     }
 
 }

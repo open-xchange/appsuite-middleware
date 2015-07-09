@@ -84,7 +84,7 @@ public class SearchAction extends AbstractFileAction {
         IDBasedFileAccess fileAccess = request.getFileAccess();
         SearchIterator<File> results = fileAccess.search(
             request.getSearchQuery(),
-            request.getColumns(),
+            request.getFieldsToLoad(),
             request.getSearchFolderId(),
             sortingField,
             sortingOrder,

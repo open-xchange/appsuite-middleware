@@ -47,16 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
+package com.openexchange.ajax.customizer;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.ajax.customizer.AdditionalField;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link AdditionalFieldsUtils} - Utility class for <code>AdditionalFolderField</code>s.
+ * {@link AdditionalFieldsUtils} - Utility class for <code>AdditionalField</code>s.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
@@ -64,19 +64,19 @@ import com.openexchange.tools.session.ServerSession;
 public class AdditionalFieldsUtils {
 
     /**
-     * Performs a bulk retrieval of passed field's values for given folders.
+     * Performs a bulk retrieval of passed field's values for given items.
      *
      * @param field The field from which to retrieve the values
-     * @param folders The folders for which to retrieve the values
+     * @param items The items for which to retrieve the values
      * @param session The associated session
-     * @return The values for given folders
+     * @return The values for given items
      */
-    public static List<Object> bulk(AdditionalFolderField field, List<FolderObject> folders, ServerSession session) {
-        List<Object> retval = new ArrayList<Object>(folders.size());
-        for(FolderObject f : folders) {
-            retval.add(field.getValue(f, session));
+    public static <T> List<Object> bulk(AdditionalField<T> field, List<T> items, ServerSession session) {
+        List<Object> retval = new ArrayList<Object>(items.size());
+        for (T item : items) {
+            retval.add(field.getValue(item, session));
         }
-
         return retval;
     }
+
 }

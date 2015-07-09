@@ -47,17 +47,24 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
+package com.openexchange.ajax.customizer.file;
 
 import com.openexchange.ajax.customizer.AdditionalField;
-import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 
 /**
- * {@link AdditionalFolderField}
+ * {@link AdditionalFileField}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public interface AdditionalFolderField extends AdditionalField<FolderObject> {
+public interface AdditionalFileField extends AdditionalField<File> {
+
+    /**
+     * Gets the regular fields that are required for constructing the additional field value.
+     *
+     * @return The required fields, or <code>null</code> / empty array if there are none
+     */
+    Field[] getRequiredFields();
 
 }

@@ -102,7 +102,7 @@ public class AllAction extends AbstractFileAction {
 
         TimedResult<File> documents;
         if ((null == indexes) || Field.CREATED_BY.equals(sortingField)) {
-            documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder);
+            documents = fileAccess.getDocuments(folderId, request.getFieldsToLoad(), sortingField, sortingOrder);
 
             if (Field.CREATED_BY.equals(sortingField)) {
                 ServerSession serverSession = request.getSession();
@@ -115,7 +115,7 @@ public class AllAction extends AbstractFileAction {
                 documents = slice(documents, indexes);
             }
         } else {
-            documents = fileAccess.getDocuments(folderId, request.getColumns(), sortingField, sortingOrder, Range.valueOf(indexes));
+            documents = fileAccess.getDocuments(folderId, request.getFieldsToLoad(), sortingField, sortingOrder, Range.valueOf(indexes));
         }
 
         return result( documents, request );

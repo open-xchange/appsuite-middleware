@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.folders;
+package com.openexchange.share.json.fields;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
@@ -60,6 +60,8 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.contact.ContactService;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contact.ContactUtil;
@@ -81,11 +83,11 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ExtendedPermissionResolver}
+ * {@link PermissionResolver}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ExtendedPermissionResolver {
+public class PermissionResolver {
 
     private static final ContactField[] CONTACT_FIELDS = {
         ContactField.INTERNAL_USERID, ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED,
@@ -100,12 +102,12 @@ public class ExtendedPermissionResolver {
     private final Map<Integer, Group> knownGroups;
 
     /**
-     * Initializes a new {@link ExtendedPermissionResolver}.
+     * Initializes a new {@link PermissionResolver}.
      *
      * @param services The service lookup reference
      * @param session The server session
      */
-    public ExtendedPermissionResolver(ServiceLookup services, ServerSession session) {
+    public PermissionResolver(ServiceLookup services, ServerSession session) {
         super();
         this.services = services;
         this.session = session;
@@ -118,20 +120,44 @@ public class ExtendedPermissionResolver {
      * Gets information about the share behind a guest permission entity of a specific folder.
      *
      * @param folder The folder to get the share for
-     * @param permission The guest permission entity to get the share for
+     * @param guestID The guest entity to get the share for
      * @return The share, or <code>null</code> if not found
      */
-    public ShareInfo getShare(FolderObject folder, OCLPermission permission) {
-        String module = services.getService(ModuleSupport.class).getShareModule(folder.getModule());
+    public ShareInfo getShare(FolderObject folder, int guestID) {
+        return getShare(folder.getModule(), String.valueOf(folder.getObjectID()), null, guestID);
+    }
+
+    /**
+     * Gets information about the share behind a guest permission entity of a specific folder.
+     *
+     * @param file The file to get the share for
+     * @param guestID The guest entity to get the share for
+     * @return The share, or <code>null</code> if not found
+     */
+    public ShareInfo getShare(File file, int guestID) {
+        return getShare(FolderObject.INFOSTORE, file.getFolderId(), file.getId(), guestID);
+    }
+
+    /**
+     * Gets information about the share behind a guest permission entity of a specific folder or file.
+     *
+     * @param moduleID The module identifier
+     * @param folder The folder
+     * @param item The item, or <code>null</code> if not applicable
+     * @param guestID The guest entity to get the share for
+     * @return The share, or <code>null</code> if not found
+     */
+    private ShareInfo getShare(int moduleID, String folder, String item, int guestID) {
+        String module = services.getService(ModuleSupport.class).getShareModule(moduleID);
         List<ShareInfo> shares = null;
         try {
-            shares = services.getService(ShareService.class).getShares(session, module, String.valueOf(folder.getObjectID()), null);
+            shares = services.getService(ShareService.class).getShares(session, module, folder, item);
         } catch (OXException e) {
-            getLogger(ExtendedPermissionResolver.class).error("Error shares for folder {}", I(folder.getObjectID()), e);
+            getLogger(PermissionResolver.class).error("Error shares for folder {}, item {} in module {}", folder, item, module, e);
         }
         if (null != shares && 0 < shares.size()) {
             for (ShareInfo share : shares) {
-                if (share.getGuest().getGuestID() == permission.getEntity()) {
+                if (share.getGuest().getGuestID() == guestID) {
                     return share;
                 }
             }
@@ -153,7 +179,7 @@ public class ExtendedPermissionResolver {
                 try {
                     return imageData.getFirst().generateUrl(imageData.getSecond(), session);
                 } catch (OXException e) {
-                    getLogger(ExtendedPermissionResolver.class).error("Error generating image URL for user {}", I(userID), e);
+                    getLogger(PermissionResolver.class).error("Error generating image URL for user {}", I(userID), e);
                 }
             }
         }
@@ -174,7 +200,7 @@ public class ExtendedPermissionResolver {
                 group = services.getService(GroupService.class).getGroup(session.getContext(), groupID);
                 knownGroups.put(key, group);
             } catch (OXException e) {
-                getLogger(ExtendedPermissionResolver.class).error("Error getting group {}", key, e);
+                getLogger(PermissionResolver.class).error("Error getting group {}", key, e);
             }
         }
         return group;
@@ -194,7 +220,7 @@ public class ExtendedPermissionResolver {
                 user = services.getService(UserService.class).getUser(userID, session.getContext());
                 knownUsers.put(key, user);
             } catch (OXException e) {
-                getLogger(ExtendedPermissionResolver.class).error("Error getting user {}", key, e);
+                getLogger(PermissionResolver.class).error("Error getting user {}", key, e);
             }
         }
         return user;
@@ -215,9 +241,9 @@ public class ExtendedPermissionResolver {
                 knownUserContacts.put(key, userContact);
             } catch (OXException e) {
                 if ("CON-0125".equals(e.getErrorCode())) {
-                    getLogger(ExtendedPermissionResolver.class).debug("Error getting user contact {}", key, e);
+                    getLogger(PermissionResolver.class).debug("Error getting user contact {}", key, e);
                 } else {
-                    getLogger(ExtendedPermissionResolver.class).error("Error getting user contact {}", key, e);
+                    getLogger(PermissionResolver.class).error("Error getting user contact {}", key, e);
                 }
             }
         }
@@ -229,7 +255,7 @@ public class ExtendedPermissionResolver {
      *
      * @param folders The folders to cache the permission entities for
      */
-    public void cachePermissionEntities(List<FolderObject> folders) {
+    public void cacheFolderPermissionEntities(List<FolderObject> folders) {
         /*
          * collect user- and group identifiers
          */
@@ -248,6 +274,43 @@ public class ExtendedPermissionResolver {
                 }
             }
         }
+        cachePermissionEntities(userIDs, groupIDs);
+    }
+
+    /**
+     * Caches the permission entities found in the supplied list of files.
+     *
+     * @param files The files to cache the permission entities for
+     */
+    public void cacheFilePermissionEntities(List<File> files) {
+        /*
+         * collect user- and group identifiers
+         */
+        Set<Integer> userIDs = new HashSet<Integer>();
+        Set<Integer> groupIDs = new HashSet<Integer>();
+        for (File file : files) {
+            List<FileStorageObjectPermission> objectPermissions = file.getObjectPermissions();
+            if (null == objectPermissions ) {
+                continue;
+            }
+            for (FileStorageObjectPermission objectPermission : objectPermissions) {
+                if (objectPermission.isGroup()) {
+                    groupIDs.add(I(objectPermission.getEntity()));
+                } else {
+                    userIDs.add(I(objectPermission.getEntity()));
+                }
+            }
+        }
+        cachePermissionEntities(userIDs, groupIDs);
+    }
+
+    /**
+     * Caches the permission entities found in the supplied list of folders.
+     *
+     * @param userIDs The identifiers of the users to cache
+     * @param groupIDs The identifiers of the groups to cache
+     */
+    private void cachePermissionEntities(Set<Integer> userIDs, Set<Integer> groupIDs) {
         /*
          * fetch users & user contacts
          */
@@ -258,7 +321,7 @@ public class ExtendedPermissionResolver {
                     knownUsers.put(I(user.getId()), user);
                 }
             } catch (OXException e) {
-                getLogger(ExtendedPermissionResolver.class).error("Error getting users for permission entities", e);
+                getLogger(PermissionResolver.class).error("Error getting users for permission entities", e);
             }
             SearchIterator<Contact> searchIterator = null;
             try {
@@ -268,7 +331,7 @@ public class ExtendedPermissionResolver {
                     knownUserContacts.put(I(userContact.getInternalUserId()), userContact);
                 }
             } catch (OXException e) {
-                getLogger(ExtendedPermissionResolver.class).error("Error getting user contacts for permission entities", e);
+                getLogger(PermissionResolver.class).error("Error getting user contacts for permission entities", e);
                 e.printStackTrace();
             } finally {
                 SearchIterators.close(searchIterator);
@@ -283,7 +346,7 @@ public class ExtendedPermissionResolver {
                 try {
                     knownGroups.put(groupID, groupService.getGroup(session.getContext(), i(groupID)));
                 } catch (OXException e) {
-                    getLogger(ExtendedPermissionResolver.class).error("Error getting groups for permission entities", e);
+                    getLogger(PermissionResolver.class).error("Error getting groups for permission entities", e);
                 }
             }
         }

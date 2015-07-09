@@ -103,9 +103,6 @@ public class HasSubscriptions implements AdditionalFolderField {
 
      @Override
     public List<Object> getValues(final List<FolderObject> folder, final ServerSession session) {
-         if (null == session) {
-             return allFalse(folder.size());
-         }
          UserPermissionBits permissionBits = session.getUserPermissionBits();
          if (null == permissionBits || !permissionBits.isPublication()) {
              return allFalse(folder.size());

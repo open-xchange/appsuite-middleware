@@ -47,17 +47,59 @@
  *
  */
 
-package com.openexchange.ajax.customizer.folder;
+package com.openexchange.ajax.customizer;
 
-import com.openexchange.ajax.customizer.AdditionalField;
-import com.openexchange.groupware.container.FolderObject;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AdditionalFolderField}
+ * {@link AdditionalField}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since 7.8.0
  */
-public interface AdditionalFolderField extends AdditionalField<FolderObject> {
+public interface AdditionalField<T> {
+
+    /**
+     * Gets the column identifier
+     *
+     * @return The column identifier
+     */
+    int getColumnID();
+
+    /**
+     * Gets the column name
+     *
+     * @return The column name
+     */
+    String getColumnName();
+
+    /**
+     * Gets the value for given folder
+     *
+     * @param folder The folder
+     * @param session The associated session
+     * @return The value
+     */
+    Object getValue(T item, ServerSession session);
+
+    /**
+     * Gets the multiple value for given folder
+     *
+     * @param folder The folder
+     * @param session The associated session
+     * @return The multiple values
+     */
+    List<Object> getValues(List<T> items, ServerSession session);
+
+    /**
+     * Renders passed value to its JSON representation
+     *
+     * @param requestData The underlying request data, or <code>null</code> if not available
+     * @param value The value
+     * @return The JSON representation
+     */
+    Object renderJSON(AJAXRequestData requestData, Object value);
 
 }

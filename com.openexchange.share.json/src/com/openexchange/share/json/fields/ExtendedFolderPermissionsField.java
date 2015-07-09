@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.folders;
+package com.openexchange.share.json.fields;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -62,21 +62,21 @@ import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ExtendedPermissionsField}
+ * {@link ExtendedFolderPermissionsField}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ExtendedPermissionsField implements AdditionalFolderField {
+public class ExtendedFolderPermissionsField implements AdditionalFolderField {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ExtendedPermissionsField}.
+     * Initializes a new {@link ExtendedFolderPermissionsField}.
      *
      * @param services The service lookup reference
      */
-    public ExtendedPermissionsField(ServiceLookup services) {
+    public ExtendedFolderPermissionsField(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -101,15 +101,15 @@ public class ExtendedPermissionsField implements AdditionalFolderField {
         if (null == folders) {
             return null;
         }
-        ExtendedPermissionResolver resolver = new ExtendedPermissionResolver(services, session);
-        resolver.cachePermissionEntities(folders);
+        PermissionResolver resolver = new PermissionResolver(services, session);
+        resolver.cacheFolderPermissionEntities(folders);
         List<Object> values = new ArrayList<Object>();
         for (FolderObject folder : folders) {
             List<OCLPermission> oclPermissions = folder.getPermissions();
             if (null != oclPermissions) {
-                List<ExtendedPermission> extendedPermissions = new ArrayList<ExtendedPermission>(oclPermissions.size());
+                List<ExtendedFolderPermission> extendedPermissions = new ArrayList<ExtendedFolderPermission>(oclPermissions.size());
                 for (OCLPermission oclPermission : oclPermissions) {
-                    extendedPermissions.add(new ExtendedPermission(resolver, folder, oclPermission));
+                    extendedPermissions.add(new ExtendedFolderPermission(resolver, folder, oclPermission));
                 }
                 values.add(extendedPermissions);
             } else {
@@ -126,13 +126,13 @@ public class ExtendedPermissionsField implements AdditionalFolderField {
                 List<?> values = (List<?>) value;
                 JSONArray jsonArray = new JSONArray(values.size());
                 for (Object item : values) {
-                    if (ExtendedPermission.class.isInstance(item)) {
-                        jsonArray.put(((ExtendedPermission) item).toJSON(requestData));
+                    if (ExtendedFolderPermission.class.isInstance(item)) {
+                        jsonArray.put(((ExtendedFolderPermission) item).toJSON(requestData));
                     }
                 }
                 return jsonArray;
             } catch (JSONException e) {
-                org.slf4j.LoggerFactory.getLogger(ExtendedPermissionsField.class).error("Error serializing extended permissions", e);
+                org.slf4j.LoggerFactory.getLogger(ExtendedFolderPermissionsField.class).error("Error serializing extended permissions", e);
             }
         }
         return null;

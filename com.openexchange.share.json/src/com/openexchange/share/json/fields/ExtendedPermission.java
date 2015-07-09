@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.json.folders;
+package com.openexchange.share.json.fields;
 
 import java.util.Date;
 import java.util.Map;
@@ -57,78 +57,39 @@ import org.json.JSONObject;
 import com.openexchange.ajax.fields.ContactFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.DefaultRequestContext;
-import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link ExtendedPermission}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ExtendedPermission {
+public abstract class ExtendedPermission {
 
-    private final ExtendedPermissionResolver resolver;
-    private final FolderObject folder;
-    private final OCLPermission permission;
+    protected final PermissionResolver resolver;
 
     /**
      * Initializes a new {@link ExtendedPermission}.
      *
      * @param permissionResolver The permission resolver
-     * @param folder The folder
-     * @param parentPermission The underlying OCL permissions
      */
-    public ExtendedPermission(ExtendedPermissionResolver permissionResolver, FolderObject folder, OCLPermission parentPermission) {
+    protected ExtendedPermission(PermissionResolver permissionResolver) {
         super();
-        this.permission = parentPermission;
         this.resolver = permissionResolver;
-        this.folder = folder;
     }
 
-    /**
-     * Serializes the extended permissions as JSON.
-     *
-     * @param requestData The underlying request data, or <code>null</code> if not available
-     * @return The serialized extended permissions
-     */
-    public JSONObject toJSON(AJAXRequestData requestData) throws JSONException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("entity", permission.getEntity());
-        jsonObject.put("bit", Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
-            permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin()));
-        if (permission.isGroupPermission()) {
-            jsonObject.put("group", permission.isGroupPermission());
-            addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
-        } else {
-            User user = resolver.getUser(permission.getEntity());
-            if (user.isGuest()) {
-                ShareInfo share = resolver.getShare(folder, permission);
-                addShareInfo(requestData, jsonObject, resolver.getShare(folder, permission));
-                if (null != share && RecipientType.GUEST.equals(share.getGuest().getRecipientType())) {
-                    addUserInfo(requestData, jsonObject, user);
-                }
-            } else {
-                addUserInfo(requestData, jsonObject, user);
-            }
-        }
-        return jsonObject;
-    }
-
-    private void addGroupInfo(AJAXRequestData requestData, JSONObject jsonObject, Group group) throws JSONException {
+    protected void addGroupInfo(AJAXRequestData requestData, JSONObject jsonObject, Group group) throws JSONException {
         if (null != group) {
             jsonObject.put(ContactFields.DISPLAY_NAME, group.getDisplayName());
         }
     }
 
-    private void addUserInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException {
+    protected void addUserInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException {
         if (null != user) {
             Contact userContact = resolver.getUserContact(user.getId());
             if (null != userContact) {
@@ -139,7 +100,7 @@ public class ExtendedPermission {
         }
     }
 
-    private void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, Contact userContact) throws JSONException {
+    protected void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, Contact userContact) throws JSONException {
         if (null != userContact) {
             jsonObject.putOpt(ContactFields.DISPLAY_NAME, userContact.getDisplayName());
             JSONObject jsonContact = new JSONObject();
@@ -152,7 +113,7 @@ public class ExtendedPermission {
         }
     }
 
-    private void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException {
+    protected void addContactInfo(AJAXRequestData requestData, JSONObject jsonObject, User user) throws JSONException {
         if (null != user) {
             jsonObject.putOpt(ContactFields.DISPLAY_NAME, user.getDisplayName());
             JSONObject jsonContact = new JSONObject();
@@ -164,7 +125,7 @@ public class ExtendedPermission {
         }
     }
 
-    private void addShareInfo(AJAXRequestData requestData, JSONObject jsonObject, ShareInfo share) throws JSONException {
+    protected void addShareInfo(AJAXRequestData requestData, JSONObject jsonObject, ShareInfo share) throws JSONException {
         if (null != share) {
             GuestInfo guest = share.getGuest();
             jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());

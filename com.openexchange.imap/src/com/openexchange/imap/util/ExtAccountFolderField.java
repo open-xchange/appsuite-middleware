@@ -57,7 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.mail.MessagingException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import com.openexchange.ajax.customizer.folder.AdditionalFieldsUtils;
+import com.openexchange.ajax.customizer.AdditionalFieldsUtils;
 import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.caching.Cache;
