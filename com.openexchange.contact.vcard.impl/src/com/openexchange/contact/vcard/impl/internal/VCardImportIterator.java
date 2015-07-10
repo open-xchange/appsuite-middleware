@@ -61,9 +61,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
+import ezvcard.Ezvcard;
+import ezvcard.Ezvcard.WriterChainText;
 import ezvcard.VCard;
 import ezvcard.ValidationWarnings;
-import ezvcard.io.scribe.ScribeIndex;
 import ezvcard.io.text.VCardReader;
 
 /**
@@ -95,25 +96,35 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         warnings = new ArrayList<OXException>();
         vCardStream = new VCardInputStream(inputStream, parameters.getMaxVCardSize());
         reader = new VCardReader(vCardStream);
-        reader.setScribeIndex(new ScribeIndex());
-        if (parameters.isKeepOriginalVCard()) {
-            vCardStream.setSink(new ThresholdFileHolder());
+    }
+
+    /**
+     * Imports the first vCard from the underlying input stream and optionally merges the data into an existing contact.
+     *
+     * @param contact The contact to merge the vCard into, or <code>null</code> to import as a new contact
+     * @return The vCard import, or <code>null</code> if there is no first vCard
+     * @throws OXException
+     */
+    public VCardImport first(Contact contact) throws OXException {
+        if (null != next) {
+            throw new IllegalStateException("first() can't be invoked after hasNext() or next()");
         }
-        next = readNext();
-        if (null == next) {
-            throw VCardExceptionCodes.NO_VCARD.create();
-        }
+        return readNext(contact);
     }
 
     @Override
     public boolean hasNext() throws OXException {
-        return null != next;
+        if (null == next) {
+            next = readNext(null);
+            return null != next;
+        }
+        return true;
     }
 
     @Override
     public VCardImport next() throws OXException {
-        VCardImport next = this.next;
-        this.next = readNext();
+        VCardImport next = null != this.next ? this.next : readNext(null);
+        this.next = null;
         return next;
     }
 
@@ -149,9 +160,10 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
     /**
      * Reads & imports the next vCard from the stream.
      *
+     * @param contact The contact to merge the next vCard into, or <code>null</code> to import as a new contact
      * @return The vCard import result, or <code>null</code> if there is none
      */
-    private VCardImport readNext() throws OXException {
+    private VCardImport readNext(Contact contact) throws OXException {
         List<OXException> warnings = new ArrayList<OXException>();
         VCard vCard = null;
         try {
@@ -173,23 +185,30 @@ public class VCardImportIterator implements SearchIterator<VCardImport> {
         /*
          * import vCard
          */
-        Contact contact = mapper.importVCard(vCard, null, parameters, warnings);
+        contact = mapper.importVCard(vCard, contact, parameters, warnings);
         if (false == parameters.isSkipValidation()) {
             ValidationWarnings validationWarnings = vCard.validate(
                 null != vCard.getVersion() ? vCard.getVersion() : ezvcard.VCardVersion.valueOfByStr(parameters.getVersion().getVersion()));
             warnings.addAll(VCardExceptionUtils.getValidationWarnings(validationWarnings));
         }
         /*
-         * switch to next file holder if needed
+         * store original vCard in file holder if requested
          */
-        ThresholdFileHolder vCardHolder = null;
+        ThresholdFileHolder originalVCard = null;
         if (parameters.isKeepOriginalVCard()) {
-            vCardHolder = vCardStream.setSink(new ThresholdFileHolder());
+            originalVCard = new ThresholdFileHolder();
+            WriterChainText writerChain = Ezvcard.write(vCard).prodId(false);
+            try {
+                writerChain.go(originalVCard.asOutputStream());
+            } catch (IOException e) {
+                Streams.close(originalVCard);
+                throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            }
         }
         /*
          * construct & return vCard import result
          */
-        return new DefaultVCardImport(contact, warnings, vCardHolder);
+        return new DefaultVCardImport(contact, warnings, originalVCard);
     }
 
 }

@@ -63,8 +63,6 @@ import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.ContactSanitizer;
 import com.openexchange.subscribe.crawler.internal.Mappings;
 import com.openexchange.subscribe.crawler.internal.PagePartSequence;
-import com.openexchange.tools.versit.VersitException;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * This step takes HtmlPages that each contain contact information and converts them to ContactObjects for OX
@@ -148,11 +146,8 @@ public class ContactObjectsByHTMLAnchorsAndPagePartSequenceStep extends Abstract
                     contactObjects.add(contact);
                 }
 
-            } catch (final VersitException e) {
-                exception = e;
-            } catch (final ConverterException e) {
+            } catch (final OXException e) {
                 LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
-
                 exception = e;
             } catch (final IOException e) {
                 exception = e;

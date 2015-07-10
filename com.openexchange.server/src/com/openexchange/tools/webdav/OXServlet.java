@@ -65,6 +65,8 @@ import org.jdom2.JDOMException;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
@@ -203,6 +205,11 @@ public abstract class OXServlet extends WebDavServlet {
         @Override
         public boolean isTransient() {
             return OXServlet.isTransient(interfaze);
+        }
+
+        @Override
+        public String getLanguage() {
+            return LoginTools.parseLanguage(req);
         }
     }
 
@@ -361,6 +368,8 @@ public abstract class OXServlet extends WebDavServlet {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
                     addUnauthorizedHeader(req, resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                } else if (LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e)) {
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 } else {
                     LOG.error("", e);
                     resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());

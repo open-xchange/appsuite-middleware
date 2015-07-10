@@ -163,7 +163,7 @@ public class LoginCounterImpl implements LoginCounterService {
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {
-                StringBuilder sb = new StringBuilder("SELECT cid, id, name, value FROM user_attribute WHERE name REGEXP ?");
+                StringBuilder sb = new StringBuilder("SELECT ua.cid, ua.id, ua.name, ua.value FROM user_attribute ua JOIN user u on ua.id = u.id AND ua.cid = u.cid WHERE ua.name REGEXP ? AND u.guestCreatedBy = 0");
                 if (regex == null) {
                     regex = ".*";
                 }

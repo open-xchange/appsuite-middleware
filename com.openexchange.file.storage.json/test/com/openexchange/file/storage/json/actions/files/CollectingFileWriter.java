@@ -51,7 +51,6 @@ package com.openexchange.file.storage.json.actions.files;
 
 import java.util.List;
 import java.util.TimeZone;
-import org.json.JSONArray;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.json.FileMetadataWriter;
@@ -69,14 +68,9 @@ public class CollectingFileWriter extends FileMetadataWriter {
     private List<Field> columns;
     private TimeZone timeZone;
 
-    @Override
-    public JSONArray write(SearchIterator<File> files, List<Field> columns, TimeZone timeZone) {
-        this.files = files;
-        this.columns = columns;
-        this.timeZone = timeZone;
-        return new JSONArray();
+    public CollectingFileWriter() {
+        super(null);
     }
-
 
     public SearchIterator<File> getFiles() {
         return files;

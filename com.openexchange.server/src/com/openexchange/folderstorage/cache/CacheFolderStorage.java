@@ -1292,6 +1292,29 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
     }
 
     @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
+        }
+        boolean started = startTransaction(Mode.WRITE_AFTER_READ, storageParameters, folderStorage);
+        try {
+            SortableId[] ret = folderStorage.getUserSharedFolders(treeId, contentType, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+                started = false;
+            }
+            return ret;
+        } catch (RuntimeException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+        }
+    }
+
+    @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         Folder parent = getFolder(treeId, parentId, storageParameters);
         String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
@@ -1418,7 +1441,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
             storageVersion = getFolder(treeId, oldFolderId, storageParameters);
         }
         boolean isMove = null != folder.getParentID();
-        String oldParentId = isMove ? storageVersion.getParentID() : null;
+        String oldParentId = storageVersion.getParentID();
         {
             UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
             updatePerformer.setCheck4Duplicates(false);
@@ -1447,10 +1470,10 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
         int contextId = storageParameters.getContextId();
         {
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            List<String> ids = isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId);
-            folderMapManagement.dropFor(ids, treeId, userId, contextId, session);
+            List<String> ids = new ArrayList<String>(isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId, oldParentId));
+            folderMapManagement.dropHierarchyFor(ids, treeId, userId, contextId);
             if (!treeId.equals(realTreeId)) {
-                folderMapManagement.dropFor(ids, realTreeId, userId, contextId, session);
+                folderMapManagement.dropHierarchyFor(ids, realTreeId, userId, contextId);
             }
 
             List<Serializable> keys = new LinkedList<Serializable>();

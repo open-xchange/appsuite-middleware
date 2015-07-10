@@ -52,21 +52,27 @@ package com.openexchange.share.core.performer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.groupware.TargetUpdate;
-import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
@@ -78,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<ShareInfo>>> {
+public class CreatePerformer extends AbstractPerformer<CreatedShares> {
 
     private final List<ShareRecipient> recipients;
 
@@ -99,20 +105,61 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> perform() throws OXException {
+    public CreatedShares perform() throws OXException {
+        boolean shareLinks = false;
+        boolean inviteGuests = false;
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null != capabilities && capabilities.contains("share_links")) {
+            shareLinks = true;
+        }
+        if (null != capabilities && capabilities.contains("invite_guests")) {
+            inviteGuests = true;
+        }
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (null == quotaService) {
+            throw ServiceExceptionCode.absentService(QuotaService.class);
+        }
+        QuotaProvider provider = quotaService.getProvider("share_links");
+        AccountQuota shareLinksQuota = null;
+        if (null != provider) {
+            shareLinksQuota = provider.getFor(session, "0");
+        }
+        provider = quotaService.getProvider("invite_guests");
+        AccountQuota inviteGuestsQuota = null;
+        if (null != provider) {
+            inviteGuestsQuota = provider.getFor(session, "0");
+        }
+
+        for (ShareRecipient recipient : recipients) {
+            if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                if (!shareLinks) {
+                    throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                }
+                if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
+                    if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(targets.size()))) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
+                    }
+                }
+            }
+            if (RecipientType.GUEST.equals(recipient.getType())) {
+                if (!inviteGuests) {
+                    throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+                }
+                if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
+                    if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(targets.size()))) {
+                        throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
+                    }
+                }
+            }
+        }
         /*
          * distinguish between internal and external recipients
          */
-        List<ShareRecipient> internalRecipients = filterRecipients(recipients, RecipientType.USER, RecipientType.GROUP);
-        List<ShareRecipient> externalRecipients = filterRecipients(recipients, RecipientType.ANONYMOUS, RecipientType.GUEST);
-        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(internalRecipients.size() + externalRecipients.size());
-        for (ShareRecipient recipient : internalRecipients) {
-            InternalRecipient internal = (InternalRecipient) recipient;
-            if (internal.getEntity() == session.getUserId()) {
-                throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
-            }
-            targetPermissions.add(new TargetPermission(internal.getEntity(), internal.isGroup(), internal.getBits()));
-        }
+        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(recipients.size());
         /*
          * prepare transaction
          */
@@ -135,20 +182,14 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
             /*
              * create shares & corresponding guest user entities for external recipients first
              */
-            Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient;
-            if (0 < externalRecipients.size()) {
-                sharesPerRecipient = getShareService().addTargets(session, targets, externalRecipients);
-                /*
-                 * add appropriate target permissions for corresponding guest entities
-                 * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target
-                 */
-                for (Map.Entry<ShareRecipient, List<ShareInfo>> entry : sharesPerRecipient.entrySet()) {
-                    ShareRecipient shareRecipient = entry.getKey();
-                    ShareInfo shareInfo = entry.getValue().get(0);
-                    targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), false, shareRecipient.getBits()));
-                }
-            } else {
-                sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>();
+            CreatedShares sharesPerRecipient = getShareService().addTargets(session, targets, recipients);
+            /*
+             * add appropriate target permissions for corresponding guest entities
+             * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target
+             */
+            for (ShareRecipient shareRecipient : recipients) {
+                CreatedShare share = sharesPerRecipient.getShare(shareRecipient);
+                targetPermissions.add(new TargetPermission(share.getGuestInfo().getGuestID(), false, shareRecipient.getBits()));
             }
             /*
              * adjust folder & object permissions of share targets
@@ -165,7 +206,6 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
             /*
              * add internal users (not affected by sharing) to the resulting list for completeness
              */
-            sharesPerRecipient.putAll(getShareService().addTargets(session, targets, internalRecipients));
             return sharesPerRecipient;
         } catch (OXException e) {
             Databases.rollback(writeCon);
@@ -181,26 +221,6 @@ public class CreatePerformer extends AbstractPerformer<Map<ShareRecipient, List<
                 update.close();
             }
         }
-    }
-
-    /**
-     * Gets a filtered map only containing the share recipients of the specified type.
-     *
-     * @param recipients The recipients to filter
-     * @param types The allowed types
-     * @return The filtered recipients
-     */
-    private static List<ShareRecipient> filterRecipients(List<ShareRecipient> recipients, RecipientType...types) {
-        List<ShareRecipient> filteredRecipients = new ArrayList<ShareRecipient>();
-        for (ShareRecipient recipient : recipients) {
-            for (RecipientType allowedType : types) {
-                if (allowedType == recipient.getType()) {
-                    filteredRecipients.add(recipient);
-                    break;
-                }
-            }
-        }
-        return filteredRecipients;
     }
 
 }

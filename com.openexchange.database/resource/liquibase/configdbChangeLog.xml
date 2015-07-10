@@ -4,6 +4,7 @@
     Hints:
        - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG table
        - use failOnError param to define if a successful execution of the ChangeSet is required
+       - DDLs for the configdb have additionally be considered within the configdb.sql file (for new installations)
  ************************************************************************************* -->
 
 <databaseChangeLog xmlns="urn:liquibase"
@@ -101,7 +102,7 @@
     <!-- ************** Release 7.8.0 starts here ************** -->
     <!-- ******************************************************* -->
 
-     <changeSet id="7.8.0:drop_stored_procedure_configdb_id" author="lars.hoogestraat@open-xchange.com">
+     <changeSet id="7.8.0:drop_stored_procedure_configdb_id" author="lars.hoogestraat@open-xchange.com" failOnError="false">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select COUNT(1) from mysql.proc WHERE name='get_configdb_id'</sqlCheck>
         </preConditions>
@@ -127,7 +128,7 @@
         </rollback>
     </changeSet>
 
-     <changeSet id="7.8.0:drop_stored_procedure_context_id" author="lars.hoogestraat@open-xchange.com">
+     <changeSet id="7.8.0:drop_stored_procedure_context_id" author="lars.hoogestraat@open-xchange.com" failOnError="false">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select COUNT(1) from mysql.proc WHERE name='get_context_id'</sqlCheck>
         </preConditions>
@@ -169,4 +170,20 @@
             <dropTable tableName="replicationMonitor" />
         </rollback>
     </changeSet>
+
+    <changeSet id="7.8.0:context:addcontextnameunique" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists tableName="context" columnNames="name"/>
+            </not>
+        </preConditions>
+        <comment>Creates a UNIQUE constraint on name column of the context table</comment>
+        <sql>
+            ALTER TABLE context ADD UNIQUE KEY `context_name_unique` (name)
+        </sql>
+        <rollback>
+            <dropIndex indexName="context_name_unique" tableName="context_server2db_pool"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

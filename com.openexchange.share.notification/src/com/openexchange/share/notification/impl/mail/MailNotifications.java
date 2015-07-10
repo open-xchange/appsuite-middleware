@@ -86,7 +86,6 @@ public class MailNotifications {
     public static class PasswordResetConfirmBuilder extends AbstractNotificationBuilder<PasswordResetConfirmBuilder, PasswordResetConfirmNotification<InternetAddress>, InternetAddress> {
 
         private String shareUrl;
-        private String accountName;
         private String pwResetUrl;
 
         protected PasswordResetConfirmBuilder() {
@@ -113,27 +112,15 @@ public class MailNotifications {
             return this;
         }
 
-        /**
-         * Sets the name of the guest users account, e.g. his email address
-         *
-         * @param accountName The name
-         */
-        public PasswordResetConfirmBuilder setAccountName(String accountName) {
-            this.accountName = accountName;
-            return this;
-        }
-
         @Override
         protected PasswordResetConfirmNotification<InternetAddress> doBuild() {
             checkGreaterZero(guestID, "guestID");
-            checkNotNull(accountName, "accountName");
             checkNotNull(shareUrl, "shareUrl");
             checkNotNull(pwResetUrl, "pwResetUrl");
 
             DefaultPasswordResetConfirmNotification<InternetAddress> notification = new DefaultPasswordResetConfirmNotification<>(Transport.MAIL);
             notification.apply(this);
             notification.setGuestID(guestID);
-            notification.setAccountName(accountName);
             notification.setShareUrl(shareUrl);
             notification.setConfirmPasswordResetUrl(pwResetUrl);
             return notification;

@@ -49,6 +49,7 @@
 
 package com.openexchange.share.core.tools;
 
+import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Strings;
 import com.openexchange.share.RequestContext;
@@ -65,26 +66,17 @@ import com.openexchange.share.core.ShareConstants;
 public class ShareLinks {
 
     /**
-     * Generates a share link for a guest user with only the base token set.
+     * Generates a share link for a guest user based on the passed share token.
+     * The token can be a base token or an absolute one.
      *
      * @param context The request context
-     * @param baseToken The guest users base token
+     * @param shareToken The share token
      * @return The link
      */
-    public static String generateExternal(RequestContext context, String baseToken) {
-        return generateExternal0(context, baseToken, null);
-    }
-
-    /**
-     * Generates a share link for a guest user with a concrete share target path.
-     *
-     * @param context The request context
-     * @param baseToken The guest users base token
-     * @param targetPath The share targets path
-     * @return The link
-     */
-    public static String generateExternal(RequestContext context, String baseToken, String targetPath) {
-        return generateExternal0(context, baseToken, targetPath);
+    public static String generateExternal(RequestContext context, String shareToken) {
+        return prepare(context)
+            .setPath(serverPath(context, "/" + shareToken))
+            .toString();
     }
 
     /**
@@ -98,17 +90,15 @@ public class ShareLinks {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();
-        StringBuilder stringBuilder = prepare(context)
-            .append("/appsuite/ui#!!&app=io.ox/")
-            .append(module)
-            .append("&folder=")
-            .append(folder);
-
+        StringBuilder fragment = new StringBuilder(64).append("!&app=io.ox/").append(module).append("&folder=").append(folder);
         if (Strings.isNotEmpty(item)) {
-            stringBuilder.append("&item=").append(item);
+            fragment.append("&item=").append(item);
         }
 
-        return stringBuilder.toString();
+        return prepare(context)
+            .setPath("/appsuite/ui")
+            .setFragment(fragment.toString())
+            .toString();
     }
 
     /**
@@ -120,36 +110,21 @@ public class ShareLinks {
      * @return The link
      */
     public static String generateConfirmPasswordReset(RequestContext context, String baseShareToken, String confirmToken) {
-        StringBuilder stringBuilder = prepare(context)
-            .append(context.getServletPrefix())
-            .append(ShareConstants.SHARE_SERVLET)
-            .append("/reset/password?")
-            .append("share=")
-            .append(baseShareToken)
-            .append("&confirm=")
-            .append(confirmToken);
-
-
-        return stringBuilder.toString();
+            return prepare(context)
+                .setPath(serverPath(context, "/reset/password"))
+                .addParameter("share", baseShareToken)
+                .addParameter("confirm", confirmToken)
+                .toString();
     }
 
-    private static String generateExternal0(RequestContext context, String baseToken, String targetPath) {
-        StringBuilder stringBuilder = prepare(context)
-            .append(context.getServletPrefix())
-            .append(ShareConstants.SHARE_SERVLET).append('/')
-            .append(baseToken);
-
-        if (null != targetPath) {
-            stringBuilder.append('/').append(targetPath);
-        }
-        return stringBuilder.toString();
+    private static URIBuilder prepare(RequestContext context) {
+        return new URIBuilder()
+            .setScheme(context.getProtocol())
+            .setHost(context.getHostname());
     }
 
-    private static StringBuilder prepare(RequestContext context) {
-        return new StringBuilder()
-            .append(context.getProtocol())
-            .append("://")
-            .append(context.getHostname());
+    private static String serverPath(RequestContext context, String endpoint) {
+        return context.getServletPrefix() + ShareConstants.SHARE_SERVLET + endpoint;
     }
 
 }

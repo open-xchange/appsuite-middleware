@@ -83,7 +83,7 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String SUBJECT_SHARED_FOLDER = "%1$s has shared the folder \"%2$s\" with you.";
 
     /** $username has shared $number folders with you. */
-    public static final String SUBJECT_SHARED_FOLDERS = "%1$s has shared %2$ folders with you.";
+    public static final String SUBJECT_SHARED_FOLDERS = "%1$s has shared %2$d folders with you.";
 
     // detailed body
     /** $username ($user_email) has shared file "$filename" with you. */
@@ -169,37 +169,31 @@ public class NotificationStrings implements LocalizableStrings {
 
 
     // expires
-    /** The link will expire at $preformatted_date */
-    public static final String LINK_EXPIRE = "The link will expire at %1$s";
+    /** The link will expire on $preformatted_date */
+    public static final String LINK_EXPIRE = "The link will expire on %1$s";
 
     /*
      * Password reset confirm mails
      */
 
-    public static final String PWRC_SUBJECT = "Password Reset";
+    /**
+     * OX App Suite - Forgot your password?
+     */
+    public static final String PWRC_SUBJECT = "%1$s - Forgot your password?";
 
     public static final String PWRC_GREETING = "Hello,";
 
-    /** We received a request to reset the password to your account: */
-    public static final String PWRC_REQUESTRECEIVED = "We received a request to reset the password to your account:";
+    /** we got informed that you forgot your password. You can set a new password here: */
+    public static final String PWRC_REQUESTRECEIVED = "we got informed that you forgot your password. You can set a new password here:";
 
-    /** You can set a new password here:*/
-    public static final String PWRC_SET_NEW_PWD = "You can set a new password here:";
+    /** Set password */
+    public static final String PWRC_LINK_LABEL = "Set password";
 
-    /** Reset password */
-    public static final String PWRC_LINK_LABEL = "Reset password";
+    /** If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one. */
+    public static final String PWRC_IGNORE = "If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.";
 
-    /** If you didn't request this, please ignore this email. Your password won't change until you access the button above and create a new one. */
-    public static final String PWRC_IGNORE = "If you didn't request this, please ignore this email. Your password won't change until you access the button above and create a new one.";
-
-    /** This is an automated email, please do not reply. */
-    public static final String PWRC_AUTOMATED_MAIL = "This is an automated email, please do not reply.";
-
-    /** Thanks,*/
-    public static final String PWRC_THANKS = "Thanks,";
-
-    /** The $product Team*/
-    public static final String PWRC_THE_TEAM = "The %1$s Team";
+    /** This is an automated message, please do not reply. */
+    public static final String PWRC_AUTOMATED_MAIL = "This is an automated message, please do not reply.";
 
     // An error occurred for user 'unknown'
     public static final String UNKNOWN_USER_NAME = "unknown";

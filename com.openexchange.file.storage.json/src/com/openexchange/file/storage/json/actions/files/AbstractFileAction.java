@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
-import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
@@ -128,12 +127,6 @@ public abstract class AbstractFileAction implements AJAXActionService {
         }
     } // End of enum Param
 
-    private static final FileMetadataWriter FILE_WRITER = new FileMetadataWriter();
-
-    protected FileMetadataWriter getWriter() {
-        return FILE_WRITER;
-    }
-
     public abstract AJAXRequestResult handle(InfostoreRequest request) throws OXException;
 
     /**
@@ -152,32 +145,26 @@ public abstract class AbstractFileAction implements AJAXActionService {
         return new AJAXRequestResult(results, new Date(timestamp), "infostore");
     }
 
-    public AJAXRequestResult result(final Delta<File> delta, final InfostoreRequest request) throws OXException {
-        final SearchIterator<File> results = delta.results();
-        JSONArray array = null;
-        try {
-            array = getWriter().write(results, request.getColumns(), request.getTimezone());
-        } finally {
-            results.close();
-        }
-        final SearchIterator<File> deleted = delta.getDeleted();
-        try {
-            while (deleted.hasNext()) {
-                array.put(deleted.next().getId());
-            }
-        } finally {
-            deleted.close();
-        }
-
-        return new AJAXRequestResult(array, new Date(delta.sequenceNumber()));
+    /**
+     * Creates an ajax request result wrapping the supplied search iterator.
+     *
+     * @param searchIterator The search iterator to wrap as ajax result
+     * @param request The underlying infostore request
+     * @return The ajax request result
+     */
+    protected AJAXRequestResult results(SearchIterator<File> searchIterator, InfostoreRequest request) throws OXException {
+        return new AJAXRequestResult(searchIterator, null, "infostore");
     }
 
-    public AJAXRequestResult result(final File file, final InfostoreRequest request) throws OXException {
+    protected AJAXRequestResult result(Delta<File> delta, InfostoreRequest request) throws OXException {
+        return new AJAXRequestResult(delta, new Date(delta.sequenceNumber()), "infostore");
+    }
+
+    protected AJAXRequestResult result(final File file, final InfostoreRequest request) throws OXException {
         return new AJAXRequestResult(file, new Date(file.getSequenceNumber()), "infostore");
     }
 
-
-    public AJAXRequestResult result(final List<String> ids, final InfostoreRequest request) throws OXException {
+    protected AJAXRequestResult result(final List<String> ids, final InfostoreRequest request) throws OXException {
         final JSONArray array = new JSONArray();
         try {
             for (final String id : ids) {

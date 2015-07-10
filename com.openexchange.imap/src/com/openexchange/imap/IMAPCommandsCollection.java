@@ -2271,7 +2271,9 @@ public final class IMAPCommandsCollection {
                         /*
                          * The BYE response is always untagged, and indicates that the server is about to close the connection.
                          */
-                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                        Store store = imapFolder.getStore();
+                        ((IMAPStore) store).setAllowUnsafeConnectedCheck(false);
+                        throw new StoreClosedException(store, protocolException.getMessage());
                     }
                     final Throwable cause = protocolException.getCause();
                     if (cause instanceof StoreClosedException) {
@@ -3080,7 +3082,7 @@ public final class IMAPCommandsCollection {
                 boolean streamed = false;
                 if (p.isREV1()) {
                     /*-
-                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "65536");
                      *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {
@@ -3238,7 +3240,7 @@ public final class IMAPCommandsCollection {
                 boolean streamed = false;
                 if (p.isREV1()) {
                     /*-
-                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "65536");
                      *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {

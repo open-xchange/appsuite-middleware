@@ -555,7 +555,7 @@ public class IMAPDefaultFolderChecker {
                         if (!expectedName.equals(names[i])) {
                             LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                             names[i] = expectedName;
-                            namesToSet.put(i, expectedFullName);
+                            namesToSet.put(i, expectedName);
                         }
                     }
                     fullNames[i] = null;
@@ -583,7 +583,7 @@ public class IMAPDefaultFolderChecker {
                             if (!expectedName.equals(names[i])) {
                                 LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
                                 names[i] = expectedName;
-                                namesToSet.put(i, expectedFullName);
+                                namesToSet.put(i, expectedName);
                             }
                         }
                         fullNames[i] = null;

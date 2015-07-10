@@ -216,14 +216,12 @@ public class QueryAction extends RTAction {
                 }
             }
 
-            
-            
             // If the sequence number isn't correct, wait for a given time until a valid sequence was constructed from incoming Stanzas
             if (!customActionResults.containsKey(CARESULT_DONE)) {
                 try {
                     if(!handled.await(request.isSet("timeout") ? request.getIntParameter("timeout") : TIMEOUT, TimeUnit.SECONDS)) {
-                        LOG.debug("Timeout while waiting for correct sequence/handling Stanza:{}", new StanzaWriter().write(stanza));
-                        customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.SEQUENCE_INVALID.create());
+                        LOG.debug("Timeout while waiting for handling Stanza:{} \n CustomActionResults contains: {}", new StanzaWriter().write(stanza), customActionResults);
+                        customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create());
                     }
                 } catch (InterruptedException e) {
                     customActionResults.put(CARESULT_EXCEPTION, RealtimeExceptionCodes.RESULT_MISSING.create(e));

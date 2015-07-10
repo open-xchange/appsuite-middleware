@@ -74,6 +74,26 @@ public interface CustomPortable extends Portable {
     public static final int PORTABLE_CONTEXT_SESSIONS_CLEANER_CLASS_ID = 19;
 
     /**
+     * Unique id for PortableUserSessionsCleaner
+     */
+    public static final int PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID = 24;
+
+    /**
+     * Unique id for PortableSessionFilterApplier
+     */
+    public static final int PORTABLE_SESSIONS_FILTER_APPLIER_CLASS_ID = 25;
+
+    /**
+     * Unique id for PortableAuthnRequestInfo
+     */
+    public static final int PORTABLE_SAML_AUTHN_REQUEST_INFO = 300;
+
+    /**
+     * Unique id for PortableLogoutRequestInfo
+     */
+    public static final int PORTABLE_SAML_LOGOUT_REQUEST_INFO = 301;
+
+    /**
      * Gets the ID of the dynamic portable factory.<p/>
      *
      * Make sure to supply {@link CustomPortable#FACTORY_ID} here.
@@ -114,7 +134,10 @@ public interface CustomPortable extends Portable {
      * <li><code>  20</code>: com.openexchange.oauth.provider.internal.authcode.portable.PortableAuthCodeInfo</li>
      * <li><code>  21</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMapEntry</li>
      * <li><code>  22</code>: com.openexchange.realtime.hazelcast.serialization.util.PortableIDToOXExceptionMap</li>
-     *
+     * <li><code>  23</code>: com.openexchange.session.reservation.impl.portable.PortableReservation</li>
+     * <li><code>  24</code>: com.openexchange.sessiond.serialization.PortableUserSessionsCleaner, used via
+     * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID}</li>
+     * <li><code>  25</code>: com.openexchange.sessiond.serialization.PortableSessionFilterApplier</li>     *
      *
      * <li><code>  101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
      * <li><code>  102</code>: com.openexchange.push.impl.portable.PortablePushUser</li>
@@ -127,6 +150,9 @@ public interface CustomPortable extends Portable {
      *
      * <li><code>  200</code>: com.openexchange.office.hazelcast.serialization.PortableID</li>
      * <li><code>  201</code>: com.openexchange.office.hazelcast.serialization.PortableDocumentState</li>
+     *
+     * <li><code>  300</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
+     * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
      * </ul>
      *
      * @return The class ID

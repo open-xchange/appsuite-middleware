@@ -268,6 +268,7 @@ public interface ConfigurationService {
      *
      * @param filename
      * @return The parsed data
+     * @throws IllegalStateException If .yml file cannot be loaded
      */
     public Object getYaml(String filename);
 
@@ -277,6 +278,7 @@ public interface ConfigurationService {
      *
      * @param dirName
      * @return A map mapping filename to the object that was parsed.
+     * @throws IllegalStateException If .yml file cannot be loaded
      */
     public Map<String, Object> getYamlInFolder(String dirName);
 

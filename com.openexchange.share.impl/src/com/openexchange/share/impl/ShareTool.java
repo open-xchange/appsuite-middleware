@@ -87,7 +87,6 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.share.tools.PasswordUtility;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
@@ -128,16 +127,19 @@ public class ShareTool {
      * @return The authentication mode
      */
     public static AuthenticationMode getAuthenticationMode(User guest) {
-        AuthenticationMode authMode = AuthenticationMode.ANONYMOUS;
-        if (guest.getUserPassword() != null) {
-            String passwordMech = guest.getPasswordMech();
-            if (ShareCryptoService.PASSWORD_MECH_ID.equals(passwordMech)) {
-                authMode = AuthenticationMode.ANONYMOUS_PASSWORD;
+        if (Strings.isEmpty(guest.getMail())) {
+            if (guest.getUserPassword() == null) {
+                return AuthenticationMode.ANONYMOUS;
             } else {
-                authMode = AuthenticationMode.GUEST_PASSWORD;
+                return AuthenticationMode.ANONYMOUS_PASSWORD;
+            }
+        } else {
+            if (guest.getUserPassword() == null) {
+                return AuthenticationMode.GUEST;
+            } else {
+                return AuthenticationMode.GUEST_PASSWORD;
             }
         }
-        return authMode;
     }
 
     /**
@@ -152,6 +154,9 @@ public class ShareTool {
                 return Strings.isEmpty(((AnonymousRecipient) recipient).getPassword()) ?
                     AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
             case GUEST:
+                if (((GuestRecipient) recipient).getPassword() == null) {
+                    return AuthenticationMode.GUEST;
+                }
                 return AuthenticationMode.GUEST_PASSWORD;
             default:
                 return null;
@@ -205,7 +210,7 @@ public class ShareTool {
         perms.add(Permission.DENIED_PORTAL);
         perms.add(Permission.EDIT_PUBLIC_FOLDERS);
         perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
-        if (AuthenticationMode.GUEST_PASSWORD == authentication) {
+        if (AuthenticationMode.GUEST == authentication || AuthenticationMode.GUEST_PASSWORD == authentication) {
             perms.add(Permission.EDIT_PASSWORD);
         }
         for (Integer module : modules) {
@@ -298,7 +303,6 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        guestUser.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
         recipient.setWasCreated(true);
         return guestUser;
     }

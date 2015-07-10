@@ -311,20 +311,7 @@ public class PushDbUtils {
 
     private static boolean insertPushRegistration(int userId, int contextId, String clientId, Connection con) throws OXException {
         PreparedStatement stmt = null;
-        ResultSet rs = null;
         try {
-            stmt = con.prepareStatement("SELECT 1 FROM registeredPush WHERE cid=? AND user=? AND client=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, userId);
-            stmt.setString(3, clientId);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return false;
-            }
-
-            Databases.closeSQLStuff(rs, stmt);
-            rs = null;
-
             stmt = con.prepareStatement("INSERT INTO registeredPush (cid,user,client) VALUES (?,?,?)");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
@@ -333,14 +320,17 @@ public class PushDbUtils {
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
-                return false;
+                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    return false;
+                }
+                throw e;
             }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Databases.closeSQLStuff(rs, stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -354,7 +344,10 @@ public class PushDbUtils {
                 stmt.executeUpdate();
                 return true;
             } catch (SQLException e) {
-                return false;
+                if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    return false;
+                }
+                throw e;
             }
         } catch (SQLException e) {
             throw PushExceptionCodes.SQL_ERROR.create(e, e.getMessage());

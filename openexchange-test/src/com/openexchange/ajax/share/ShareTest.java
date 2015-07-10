@@ -80,6 +80,7 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
+import com.openexchange.ajax.share.GuestClient.ClientConfig;
 import com.openexchange.ajax.share.actions.AllRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
@@ -221,6 +222,41 @@ public abstract class ShareTest extends AbstractAJAXSession {
         FolderObject privateFolder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId());
         privateFolder.setParentFolderID(parent);
         return insertFolder(api, privateFolder);
+    }
+
+    /**
+     * Inserts a public folder below folder 2 or folder 15 if its a drive folder.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertPublicFolder(EnumAPI api, int module) throws Exception {
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(randomUID());
+        folder.setModule(module);
+        folder.setType(FolderObject.PUBLIC);
+        OCLPermission perm1 = new OCLPermission();
+        perm1.setEntity(client.getValues().getUserId());
+        perm1.setGroupPermission(false);
+        perm1.setFolderAdmin(true);
+        perm1.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
+        if (module == FolderObject.INFOSTORE) {
+            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        } else {
+            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        }
+
+        InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, true);
+        InsertResponse response = client.execute(request);
+        response.fillObject(folder);
+        return folder;
     }
 
     /**
@@ -568,6 +604,21 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return new GuestClient(url, username, password);
     }
 
+    /**
+     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the given user name but
+     * sets no password and simulates the "skip password" behavior.
+     *
+     * @param url The share URL
+     * @param username The username, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(String url, String username) throws Exception {
+        ClientConfig clientConfig = new GuestClient.ClientConfig(url)
+            .setUsername(username)
+            .setSkipPassword(true);
+        return new GuestClient(clientConfig);
+    }
+
     protected boolean awaitGuestCleanup(int guestID, long timeout) throws Exception {
         long until = System.currentTimeMillis() + timeout;
         do {
@@ -659,7 +710,11 @@ public abstract class ShareTest extends AbstractAJAXSession {
                 assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
             }
         } else if (RecipientType.GUEST.equals(expected.getType())) {
-            assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+            if (null == ((GuestRecipient) expected).getPassword()) {
+                assertEquals("Wrong authentication", AuthenticationMode.GUEST, actual.getAuthentication());
+            } else {
+                assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+            }
         }
     }
 

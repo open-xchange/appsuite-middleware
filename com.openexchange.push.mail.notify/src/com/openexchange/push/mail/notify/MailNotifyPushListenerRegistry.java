@@ -105,7 +105,7 @@ public final class MailNotifyPushListenerRegistry {
      */
     public MailNotifyPushListenerRegistry(boolean useOXLogin, boolean useEmailAddress) {
         super();
-        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048, 0.9f, 1);
+        mboxId2Listener = new ConcurrentHashMap<String, MailNotifyPushListener>(2048);
         this.useOXLogin = useOXLogin;
         this.useEmailAddress = useEmailAddress;
         notificationsQueue = new MailNotifyDelayQueue();
@@ -373,14 +373,12 @@ public final class MailNotifyPushListenerRegistry {
      * @return The stop result
      */
     private StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, String mboxId, int userId, int contextId) {
-        MailNotifyPushListener listener = mboxId2Listener.get(mboxId);
+        MailNotifyPushListener listener = mboxId2Listener.remove(mboxId);
         if (null != listener) {
             if (!stopIfPermanent && listener.isPermanent()) {
+                mboxId2Listener.put(mboxId, listener);
                 return StopResult.NONE;
             }
-
-            // Remove
-            mboxId2Listener.remove(mboxId);
 
             boolean reconnected;
             {

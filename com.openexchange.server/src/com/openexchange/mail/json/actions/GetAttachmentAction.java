@@ -73,6 +73,7 @@ import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -94,6 +95,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -105,6 +107,7 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeStructureFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -227,12 +230,20 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 String tmp = req.getParameter(Mail.PARAMETER_UNSEEN);
                 unseen = (tmp != null && ("1".equals(tmp) || Boolean.parseBoolean(tmp)));
             }
+            boolean asJson = AJAXRequestDataTools.parseBoolParameter("as_json", req.getRequest());
             if (sequenceId == null && imageContentId == null) {
                 throw MailExceptionCode.MISSING_PARAM.create(new StringBuilder().append(PARAMETER_MAILATTCHMENT).append(" | ").append(PARAMETER_MAILCID).toString());
             }
 
             // Get mail interface
             MailServletInterface mailInterface = getMailInterface(req);
+
+            if (asJson) {
+                if (sequenceId == null) {
+                    throw MailExceptionCode.MISSING_PARAM.create(PARAMETER_MAILATTCHMENT);
+                }
+                imageContentId = null;
+            }
 
             long size = -1L; /* mail system does not provide exact size */
             MailPart mailPart = null;
@@ -290,6 +301,28 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     mailPart = mailInterface.getMessageAttachment(folderPath, uid, sequenceId, !saveToDisk);
                     if (mailPart == null) {
                         throw MailExceptionCode.NO_ATTACHMENT_FOUND.create(sequenceId);
+                    }
+                }
+
+                if (asJson && mailPart.getContentType().startsWith("message/rfc822")) {
+                    MailMessage nestedMailMessage = MailMessageParser.getMessageContentFrom(mailPart);
+                    if (null != nestedMailMessage) {
+                        nestedMailMessage.setAccountId(mailInterface.getAccountID());
+
+                        // Prepare request/result objects
+                        AJAXRequestData requestData = req.getRequest();
+                        requestData.putParameter("embedded", "true");
+                        requestData.putParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, "false");
+                        AJAXRequestResult requestResult = new AJAXRequestResult(nestedMailMessage, "mail");
+
+                        // Generate JSON reperesentation
+                        JSONObject jNestedMail = MailConverter.getInstance().convertSingle4Get(nestedMailMessage, ParamContainer.getInstance(requestData), req.getSession(), mailInterface);
+                        jNestedMail.remove(MailJSONField.UNREAD.getKey());
+                        jNestedMail.remove(MailJSONField.FLAGS.getKey());
+                        jNestedMail.remove(MailJSONField.USER.getKey());
+                        jNestedMail.remove(MailJSONField.COLOR_LABEL.getKey());
+                        jNestedMail.remove(MailJSONField.MODIFIED.getKey());
+                        return requestResult;
                     }
                 }
 
@@ -568,16 +601,18 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
             // Store
             String id = attachmentStorage.storeAttachment(mailPart, StoreOperation.SIMPLE_STORE, storeProps, session);
+            MailPart updatedMailPart = attachmentStorage.getAttachment(id, session);
 
-            /*
-             * JSON response object
-             */
+            // File name can differ from expected filename
+            String newFilename = updatedMailPart.getFileName();
+
+            // JSON response object
             JSONObject jFileData = new JSONObject(8);
             jFileData.put("mailFolder", folderPath);
             jFileData.put("mailUID", uid);
             jFileData.put("id", id);
             jFileData.put("folder_id", destFolderID);
-            jFileData.put("filename", mailPart.getFileName());
+            jFileData.put("filename", newFilename);
             return new AJAXRequestResult(jFileData, "json");
         } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());

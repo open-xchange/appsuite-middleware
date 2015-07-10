@@ -56,6 +56,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -63,6 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareCryptoService;
@@ -141,6 +144,14 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     public Void perform() throws OXException {
         if (false == needsGuestUpdate() && false == needsTargetUpdate() && false == needsPermissionUpdate()) {
             return null;
+        }
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null == capabilities || !capabilities.contains("share_links")) {
+            throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
         }
         /*
          * prepare transaction

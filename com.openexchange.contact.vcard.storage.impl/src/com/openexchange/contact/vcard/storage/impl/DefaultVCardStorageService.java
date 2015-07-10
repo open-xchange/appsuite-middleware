@@ -50,6 +50,8 @@
 package com.openexchange.contact.vcard.storage.impl;
 
 import java.io.InputStream;
+import java.util.Collections;
+import java.util.List;
 import org.apache.commons.lang.Validate;
 import com.openexchange.contact.vcard.storage.VCardStorageExceptionCodes;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
@@ -115,6 +117,14 @@ public class DefaultVCardStorageService implements VCardStorageService {
 
         QuotaFileStorage fileStorage = getFileStorage(contextId);
         return fileStorage.deleteFile(identifier);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> neededCapabilities() {
+        return Collections.singletonList("com.openexchange.capability.filestore");
     }
 
     /**

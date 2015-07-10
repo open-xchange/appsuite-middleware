@@ -709,7 +709,7 @@ public class RecurringCalculation {
                 if (calc.getActualMaximum(Calendar.DAY_OF_MONTH) >= day_or_type) {
                     calc.set(Calendar.DAY_OF_MONTH, day_or_type);
                     start_of_series = calc.getTimeInMillis();
-                    calc.setFirstDayOfWeek(2); // TODO: Make this configurable
+                    calc.setFirstDayOfWeek(Calendar.MONDAY); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
                         final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;
@@ -963,7 +963,7 @@ public class RecurringCalculation {
                 if (calc.getActualMaximum(Calendar.DAY_OF_MONTH) >= day_or_type) {
                     calc.set(Calendar.DAY_OF_MONTH, day_or_type);
                     start_of_series = calc.getTimeInMillis();
-                    calc.setFirstDayOfWeek(2); // TODO: Make this configurable
+                    calc.setFirstDayOfWeek(Calendar.MONDAY); // TODO: Make this configurable
                     final long range = calc.getTimeInMillis();
                     if (range >= sst && range <= end_of_series) {
                         final long end_of_occurrence = range + diff + recurrence_calculator * Constants.MILLI_DAY;

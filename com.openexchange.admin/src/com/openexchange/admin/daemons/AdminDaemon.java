@@ -143,7 +143,6 @@ public class AdminDaemon {
         set.add(regexHelper.literalPattern("com.openexchange.html"));
         set.add(regexHelper.literalPattern("com.openexchange.i18n"));
         set.add(regexHelper.literalPattern("com.openexchange.management"));
-        set.add(regexHelper.literalPattern("com.openexchange.messaging.facebook"));
         set.add(regexHelper.literalPattern("com.openexchange.messaging.generic"));
         set.add(regexHelper.literalPattern("com.openexchange.messaging"));
         set.add(regexHelper.literalPattern("com.openexchange.monitoring"));

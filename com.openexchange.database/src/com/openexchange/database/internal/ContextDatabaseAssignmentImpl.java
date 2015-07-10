@@ -58,10 +58,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
@@ -70,6 +71,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
+import com.openexchange.database.AssignmentInsertData;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.exception.OXException;
@@ -209,7 +211,7 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
 
     @Override
     public void writeAssignment(Connection con, Assignment assign) throws OXException {
-        final boolean update = null != loadAssignment(con, assign.getContextId());
+        boolean update = assign instanceof AssignmentInsertData ? false : null != loadAssignment(con, assign.getContextId());
         Cache myCache = this.cache;
         if (null != myCache) {
             final CacheKey key = myCache.newCacheKey(assign.getContextId(), assign.getServerId());
@@ -329,32 +331,57 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     public String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
-        List<String> retval = new LinkedList<String>();
         try {
             stmt = con.prepareStatement(NOTFILLED);
             stmt.setInt(1, poolId);
             stmt.setInt(2, maxContexts);
             result = stmt.executeQuery();
+            List<String> retval = new LinkedList<String>();
             while (result.next()) {
                 String schema = result.getString(1);
                 int count = result.getInt(2);
                 LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
                 retval.add(schema);
             }
+            return retval.toArray(new String[retval.size()]);
         } catch (final SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(result, stmt);
         }
-        return retval.toArray(new String[retval.size()]);
     }
 
     @Override
-    public void lock(Connection con) throws OXException {
-        Statement stmt = null;
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
         try {
-            stmt = con.createStatement();
-            stmt.execute("SELECT COUNT(*) FROM context_server2db_pool FOR UPDATE");
+            stmt = con.prepareStatement(NOTFILLED);
+            stmt.setInt(1, poolId);
+            stmt.setInt(2, maxContexts);
+            result = stmt.executeQuery();
+            Map<String, Integer> retval = new LinkedHashMap<String, Integer>(32, 0.9F);
+            while (result.next()) {
+                String schema = result.getString(1);
+                int count = result.getInt(2);
+                LOG.debug("schema {} is filled with {} contexts.", schema, I(count));
+                retval.put(schema, I(count));
+            }
+            return retval;
+        } catch (final SQLException e) {
+            throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    @Override
+    public void lock(Connection con, int writePoolId) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("SELECT COUNT(*) FROM context_server2db_pool WHERE write_db_pool_id=? FOR UPDATE");
+            stmt.setInt(1, writePoolId);
+            stmt.execute();
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {

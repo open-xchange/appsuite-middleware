@@ -66,7 +66,8 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -274,11 +275,11 @@ public class ShareHelper {
                 String fileID = new FileID(service, account, document.getFolderId(), document.getId()).toUniqueID();
                 ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
                 shareTarget.setOwnedBy(owner);
-                List<ShareInfo> shares = shareService.addTarget(session, shareTarget, shareRecipients);
+                CreatedShares shares = shareService.addTarget(session, shareTarget, shareRecipients);
                 for (int i = 0; i < guestPermissions.size(); i++) {
                     FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
-                    ShareInfo share = shares.get(i);
-                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuest().getGuestID(), false, guestPermission.getPermissions()));
+                    CreatedShare share = shares.getShare(guestPermission.getRecipient());
+                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuestInfo().getGuestID(), false, guestPermission.getPermissions()));
                 }
 
                 List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();

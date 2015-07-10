@@ -223,6 +223,10 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
      * Folder updated aborted: %2$s
      */
     FOLDER_UPDATE_ABORTED(FolderExceptionErrorMessage.FOLDER_UPDATE_ABORTED_MSG, Category.CATEGORY_CONFLICT, 1038, FolderExceptionMessages.FOLDER_UPDATE_ABORTED_MSG_DISPLAY),
+    /**
+     * The set folder permissions are invalid.
+     */
+    INVALID_PERMISSIONS(FolderExceptionErrorMessage.INVALID_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 1039),
     ;
 
     private static final String PREFIX = "FLD";
@@ -341,6 +345,9 @@ public enum FolderExceptionErrorMessage implements DisplayableOXExceptionCode {
 
     // Folder update aborted: %1$s
     private static final String FOLDER_UPDATE_ABORTED_MSG = "Folder update aborted: %2$s";
+
+    // The set folder permissions are invalid.
+    private static final String INVALID_PERMISSIONS_MSG = "The set folder permissions are invalid.";
 
     /**
      * The prefix for this error codes.

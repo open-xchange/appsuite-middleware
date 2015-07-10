@@ -73,11 +73,11 @@ import static com.openexchange.file.storage.File.Field.VERSION_COMMENT;
 import static com.openexchange.json.JSONAssertion.assertValidates;
 import static com.openexchange.time.TimeTools.D;
 import java.util.Arrays;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 import com.openexchange.json.JSONAssertion;
 
 /**
@@ -87,12 +87,12 @@ import com.openexchange.json.JSONAssertion;
  */
 public class FileWriterTest extends FileTest {
 
-    FileMetadataWriter writer = new FileMetadataWriter();
+    FileMetadataWriter writer = new FileMetadataWriter(null);
 
     public void testWriteFileAsArray() throws JSONException {
         DefaultFile f = createFile();
 
-        JSONArray array = writer.writeArray(f, Arrays.asList(
+        JSONArray array = writer.writeArray(new JsonFieldHandler(new TestFriendlyInfostoreRequest()), f, Arrays.asList(
             CATEGORIES,
             COLOR_LABEL,
             CREATED,
@@ -113,7 +113,7 @@ public class FileWriterTest extends FileTest {
             TITLE,
             URL,
             VERSION,
-            VERSION_COMMENT), null);
+            VERSION_COMMENT));
 
         assertNotNull(array);
 
@@ -166,17 +166,16 @@ public class FileWriterTest extends FileTest {
     }
 
     public void testTimezone() throws JSONException {
-        TimeZone tz = TimeZone.getTimeZone("GMT-2");
         DefaultFile f = new DefaultFile();
         f.setCreated(D("Today at 10:00"));
         f.setLastModified(D("Today at 12:00"));
         f.setLockedUntil(D("Today at 20:00"));
 
-        JSONArray array = writer.writeArray(f, Arrays.asList(
+        JSONArray array = writer.writeArray(new JsonFieldHandler(new TestFriendlyInfostoreRequest("GMT-2")), f, Arrays.asList(
             CREATED,
             LAST_MODIFIED,
             LAST_MODIFIED_UTC,
-            LOCKED_UNTIL), tz);
+            LOCKED_UNTIL));
 
         assertNotNull(array);
 
@@ -189,7 +188,7 @@ public class FileWriterTest extends FileTest {
     public void testWriteAsObject() {
         DefaultFile file = createFile();
 
-        JSONObject object = writer.write(file, null);
+        JSONObject object = writer.write(new TestFriendlyInfostoreRequest(), file);
 
 
         /*assertValidates(new JSONAssertion().isObject()

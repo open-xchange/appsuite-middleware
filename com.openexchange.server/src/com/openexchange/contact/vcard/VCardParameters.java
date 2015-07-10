@@ -205,4 +205,26 @@ public interface VCardParameters {
      */
     VCardParameters setKeepOriginalVCard(boolean keepOriginalVCard);
 
+    /**
+     * Gets a value indicating whether the previously imported binary <code>PHOTO</code> value should be removed to reduce the file size
+     * when storing the original vCard or not.
+     * <p/>
+     * This setting is only effective if <code>keepOriginalVCard</code> is <code>true</code>.
+     *
+     * @return <code>true</code> if binary value of the imported <code>PHOTO</code> property should be removed, <code>false</code>, otherwise
+     */
+    boolean isRemoveImageFromKeptVCard();
+
+    /**
+     * Sets a value indicating whether the previously imported binary <code>PHOTO</code> value should be removed to reduce the file size
+     * when storing the original vCard or not.
+     * <p/>
+     * This setting is only effective if <code>keepOriginalVCard</code> is <code>true</code>.
+     *
+     * @param removeImageFromKeptVCard <code>true</code> if binary value of the imported <code>PHOTO</code> property should be removed,
+     *                                 <code>false</code>, otherwise
+     * @return A self reference
+     */
+    VCardParameters setRemoveImageFromKeptVCard(boolean removeImageFromKeptVCard);
+
 }

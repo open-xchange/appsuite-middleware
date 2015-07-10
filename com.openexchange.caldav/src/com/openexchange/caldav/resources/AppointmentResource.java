@@ -184,7 +184,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
             Date clientLastModified = this.object.getLastModified();
             if (clientLastModified.before(originalAppointment.getLastModified())) {
-                throw super.protocolException(HttpServletResponse.SC_CONFLICT);
+                throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
             }
             /*
              * update appointment

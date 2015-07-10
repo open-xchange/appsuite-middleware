@@ -29,13 +29,11 @@ Autoreqprov:   no
 Requires:       open-xchange-core >= @OXVERSION@
 Requires:       open-xchange-oauth >= @OXVERSION@
 Requires:       open-xchange-xerces
-Provides:       open-xchange-messaging-facebook = %{version}
 Provides:       open-xchange-messaging-generic = %{version}
 Provides:       open-xchange-messaging-json = %{version}
 Provides:       open-xchange-messaging-rss = %{version}
 Provides:       open-xchange-messaging-twitter = %{version}
 Provides:       open-xchange-twitter = %{version}
-Obsoletes:      open-xchange-messaging-facebook < %{version}
 Obsoletes:      open-xchange-messaging-generic < %{version}
 Obsoletes:      open-xchange-messaging-json < %{version}
 Obsoletes:      open-xchange-messaging-rss < %{version}
@@ -73,7 +71,7 @@ if [ ${1:-0} -eq 2 ]; then
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
 
-    CONFFILES="facebookmessaging.properties rssmessaging.properties twittermessaging.properties twitter.properties"
+    CONFFILES="rssmessaging.properties twittermessaging.properties twitter.properties"
     for FILE in ${CONFFILES}; do
         ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc $FILE
     done
@@ -98,6 +96,18 @@ fi
 %dir /opt/open-xchange/etc/
 
 %changelog
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-07-10
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-07-02 (2611)
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2578)
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2542)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>

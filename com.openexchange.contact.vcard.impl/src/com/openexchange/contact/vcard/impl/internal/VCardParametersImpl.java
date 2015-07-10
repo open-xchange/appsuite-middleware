@@ -72,6 +72,7 @@ public class VCardParametersImpl implements VCardParameters {
     private boolean skipValidation;
     private long maxVCardSize;
     private boolean keepOriginalVCard;
+    private boolean removeImageFromKeptVCard;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -176,6 +177,17 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setKeepOriginalVCard(boolean keepOriginalVCard) {
         this.keepOriginalVCard = keepOriginalVCard;
+        return this;
+    }
+
+    @Override
+    public boolean isRemoveImageFromKeptVCard() {
+        return removeImageFromKeptVCard;
+    }
+
+    @Override
+    public VCardParameters setRemoveImageFromKeptVCard(boolean removeImageFromKeptVCard) {
+        this.removeImageFromKeptVCard = removeImageFromKeptVCard;
         return this;
     }
 

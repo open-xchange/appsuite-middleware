@@ -74,6 +74,7 @@ import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
@@ -93,6 +94,7 @@ import ezvcard.property.Photo;
 public class PhotoMapping extends AbstractMapping {
 
     private static final String X_ABCROP_RECTANGLE = "X-ABCROP-RECTANGLE";
+    private static final byte[] PHOTO_PLACEHOLDER = "X-OX-IMAGE1".getBytes(Charsets.US_ASCII);
 
     /**
      * Initializes a new {@link PhotoMapping}.
@@ -196,6 +198,14 @@ public class PhotoMapping extends AbstractMapping {
             contact.setImage1(imageData);
             contact.setNumberOfImages(1);
             contact.setImageContentType(getMimeType(photo.getContentType()));
+            if (null != parameters && parameters.isKeepOriginalVCard() && parameters.isRemoveImageFromKeptVCard()) {
+                /*
+                 * replace photo after successful import to reduce memory footprint
+                 */
+                if (null != photo.getData()) {
+                    photo.setData(PHOTO_PLACEHOLDER, photo.getContentType());
+                }
+            }
         }
     }
 

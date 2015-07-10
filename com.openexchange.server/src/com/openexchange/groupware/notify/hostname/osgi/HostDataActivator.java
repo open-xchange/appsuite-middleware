@@ -49,14 +49,9 @@
 
 package com.openexchange.groupware.notify.hostname.osgi;
 
-import java.util.Stack;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.groupware.notify.hostname.internal.HostDataLoginHandler;
-import com.openexchange.osgi.Tools;
-import com.openexchange.systemname.SystemNameService;
+import org.osgi.framework.InvalidSyntaxException;
 
 /**
  * {@link HostDataActivator}
@@ -65,22 +60,22 @@ import com.openexchange.systemname.SystemNameService;
  */
 public final class HostDataActivator implements BundleActivator {
 
-    private final Stack<ServiceTracker<?, ?>> trackers = new Stack<ServiceTracker<?, ?>>();
+    private HostDataLoginHandlerRegisterer registerer;
 
     public HostDataActivator() {
         super();
     }
 
     @Override
-    public void start(BundleContext context) {
-        HostDataLoginHandler loginHandler = new HostDataLoginHandler();
-        trackers.push(new ServiceTracker<HostnameService, HostnameService>(context, HostnameService.class, new HostnameCustomizer(context, loginHandler)));
-        trackers.push(new ServiceTracker<SystemNameService, SystemNameService>(context, SystemNameService.class, new HostDataLoginHandlerRegisterer(context, loginHandler)));
-        Tools.open(trackers);
+    public void start(BundleContext context) throws InvalidSyntaxException {
+        registerer = new HostDataLoginHandlerRegisterer(context);
+        registerer.open();
     }
 
     @Override
     public void stop(BundleContext context) {
-        Tools.close(trackers);
+        if (registerer != null) {
+            registerer.close();
+        }
     }
 }

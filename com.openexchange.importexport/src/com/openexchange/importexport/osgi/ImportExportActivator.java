@@ -55,7 +55,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -95,8 +95,8 @@ public class ImportExportActivator extends AJAXModuleActivator{
 		ImportExportServices.LOOKUP.set(this);
 		registerModule(new ImportActionFactory(this), "import");
 		registerModule(new ExportActionFactory(this), "export");
-		
-		track(VCardStorageService.class);
+
+		track(VCardStorageFactory.class);
 		openTrackers();
 	}
 

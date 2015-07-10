@@ -582,10 +582,10 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
 
 
     @Override
-    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext create(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
+    public com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext create(com.openexchange.admin.soap.reseller.context.reseller.soap.dataobjects.ResellerContext ctx,com.openexchange.admin.soap.reseller.context.soap.dataobjects.User adminUser,com.openexchange.admin.soap.reseller.context.rmi.dataobjects.Credentials auth, com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException_Exception , DuplicateExtensionException_Exception , StorageException_Exception , RemoteException_Exception , InvalidDataException_Exception , ContextExistsException_Exception    {
         final OXContextInterface contextInterface = getContextInterface();
         try {
-            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth)));
+            return context2Soap(contextInterface.create(soap2Context(ctx), soap2User(adminUser), soap2Credentials(auth), soap2SchemaSelectStrategy(schemaSelectStrategy)));
         } catch (final RemoteException e) {
             com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException faultDetail = new com.openexchange.admin.soap.reseller.context.reseller.soap.RemoteException();
             com.openexchange.admin.soap.reseller.context.rmi.RemoteException value = new com.openexchange.admin.soap.reseller.context.rmi.RemoteException();
@@ -889,6 +889,30 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             credentials.setPassword(password);
         }
         return credentials;
+    }
+
+    private static com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy soap2SchemaSelectStrategy(com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidDataException_Exception {
+        if (schemaSelectStrategy == null) {
+            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
+        }
+
+        if (schemaSelectStrategy.getSchemaName() != null && schemaSelectStrategy.getStrategy() != null) {
+            throw new InvalidDataException_Exception("Setting schema_name and schema_select_strategy at the same time is not possible.");
+        }
+
+        if (schemaSelectStrategy.getSchemaName() != null) {
+            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.schema(schemaSelectStrategy.getSchemaName());
+        } else if (schemaSelectStrategy.getStrategy() != null) {
+            if (schemaSelectStrategy.getStrategy().equals("automatic")) {
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic();
+            } else if (schemaSelectStrategy.getStrategy().equals("in-memory")) {
+                return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.inMemory();
+            } else {
+                throw new InvalidDataException_Exception("Invalid parameter value for schema-select-strategy. Possible values: \"automatic\", \"in-memory\"");
+            }
+        }
+
+        return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
     }
 
     private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");

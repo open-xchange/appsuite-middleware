@@ -4,6 +4,36 @@ open-xchange-guard-backend (7.8.0-0) unstable; urgency=low
 
  -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 20 Feb 2015 09:11:39 +0100
 
+open-xchange-guard-backend (7.6.2-6) stable; urgency=medium
+
+  * Build for patch 2015-07-10
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 03 Jul 2015 16:07:16 +0200
+
+open-xchange-guard-backend (7.6.2-5) stable; urgency=medium
+
+  * Build for patch 2015-07-02 (2611)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 03 Jul 2015 13:07:36 +0200
+
+open-xchange-guard-backend (7.6.2-4) stable; urgency=medium
+
+  * Build for patch 2015-06-29 (2578)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 03 Jul 2015 11:29:05 +0200
+
+open-xchange-guard-backend (7.6.2-3) stable; urgency=medium
+
+  * Build for patch 2015-06-29 (2542)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 03 Jul 2015 10:37:57 +0200
+
+open-xchange-guard-backend (7.6.2-2) stable; urgency=medium
+
+  * Build for patch 2015-06-29 (2569)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 24 Jun 2015 16:14:10 +0200
+
 open-xchange-guard-backend (7.6.2-1) stable; urgency=medium
 
   * Build for patch 2015-06-08 (2540)

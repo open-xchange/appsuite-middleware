@@ -69,7 +69,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.subscribe.helpers.HTTPToolkit;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 public class LinkedInXMLParser {
 
@@ -99,7 +98,7 @@ public class LinkedInXMLParser {
             if (null != imageUrl) {
                 HTTPToolkit.loadImageFromURL(contact, imageUrl);
             }
-        } catch (final ConverterException e) {
+        } catch (final OXException e) {
             LOG.error("", e);
         }
 
@@ -229,7 +228,7 @@ public class LinkedInXMLParser {
                 if (null != imageUrl) {
                     HTTPToolkit.loadImageFromURL(contact, imageUrl);
                 }
-            } catch (final ConverterException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
             }
 

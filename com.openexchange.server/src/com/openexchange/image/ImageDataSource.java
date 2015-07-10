@@ -142,6 +142,7 @@ public interface ImageDataSource extends DataSource {
      *
      * @param requestData The AJAXRequestData to parse
      * @return The resulting image location
+     * @throws IllegalArgumentException If parse attempt fails
      */
     ImageLocation parseRequest(AJAXRequestData requestData);
 

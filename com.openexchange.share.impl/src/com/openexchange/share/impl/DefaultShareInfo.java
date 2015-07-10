@@ -105,7 +105,7 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
             return ShareLinks.generateExternal(context, guestInfo.getBaseToken());
         }
 
-        return ShareLinks.generateExternal(context, guestInfo.getBaseToken(), target.getPath());
+        return ShareLinks.generateExternal(context, getToken());
     }
 
 }

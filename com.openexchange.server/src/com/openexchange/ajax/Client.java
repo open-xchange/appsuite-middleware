@@ -93,8 +93,26 @@ public enum Client {
      * The client for Outlook Update 2: <code>"com.open-xchange.updater.olox2"</code>
      */
     OUTLOOK_UPDATER2("com.open-xchange.updater.olox2"),
-
-    ;
+    /**
+     * The client for CardDAV: <code>"CARDDAV"</code>
+     */
+    CARDDAV("CARDDAV"),
+    /**
+     * The client for CalDAV: <code>"CALDAV"</code>
+     */
+    CALDAV("CALDAV"),
+    /**
+     * The client for WebDAV iCal: <code>"WEBDAV_ICAL"</code>
+     */
+    WEBDAV_ICAL("WEBDAV_ICAL"),
+    /**
+     * The client for WebDav InfoStore: <code>"WEBDAV_INFOSTORE"</code>
+     */
+    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE"),
+    /**
+     * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
+     */
+    WEBDAV_VCARD("WEBDAV_VCARD");
 
     private final String clientId;
 

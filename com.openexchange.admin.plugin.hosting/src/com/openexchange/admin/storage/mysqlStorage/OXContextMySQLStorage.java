@@ -92,12 +92,21 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
+import com.openexchange.admin.schemacache.DefaultContextCountPerSchemaClosure;
+import com.openexchange.admin.schemacache.SchemaCache;
+import com.openexchange.admin.schemacache.SchemaCacheProvider;
+import com.openexchange.admin.schemacache.SchemaCacheRollback;
+import com.openexchange.admin.schemacache.SchemaResult;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.I18nServices;
 import com.openexchange.admin.storage.interfaces.OXToolStorageInterface;
@@ -201,43 +210,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } catch (final ServiceException e) {
             LOG.error("", e);
         }
-        // we need the right connection and scheme for this context
-        final int poolId;
-        final Connection conForContext;
-        try {
-            poolId = cache.getDBPoolIdForContextId(ctx.getId().intValue());
-            final String scheme = cache.getSchemeForContextId(ctx.getId().intValue());
-            conForContext = cache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
-            LOG.debug("Connection and scheme fetched for context {}", ctx.getId());
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        final List<TableObject> sorted_tables;
-        try {
-            // fetch tables which can contain context data and sort these tables magically by foreign keys
-            LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
-            final List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
-            LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
-            // sort the tables by references (foreign keys)
-            sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
-            LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
-            // loop through tables and execute delete statements on each table
-            deleteContextData(ctx, conForContext, sorted_tables);
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } catch (final StorageException e) {
-            throw new StorageException(e.getMessage());
-        } finally {
-            // must be pushed back here, because in the "deleteContextFromConfigDB" the connection is "reset" in the pool.
-            // else we would get an not nice error in the logfile from the dbpool
-            try {
-                cache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
-            } catch (final PoolException e) {
-                LOG.error("Pool Error", e);
-            }
-        }
         final Connection conForConfigDB;
         try {
             conForConfigDB = cache.getConnectionForConfigDB();
@@ -261,9 +233,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     QuotaFileStorage.getInstance(storageURI, gwCtx).remove();
                 } catch (final OXException e) {
                     simpleDelete = true;
-                    LOG.error(
-                        "File storage implementation failed to remove the file storage. Continuing with hard delete of file storage.",
-                        e);
+                    LOG.error("File storage implementation failed to remove the file storage. Trying to hard-delete the file storage contents.", e);
                 }
             }
             if (simpleDelete) {
@@ -274,11 +244,55 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
             LOG.debug("Filestore delete(cid={}) from disc finished!", ctx.getId());
+
+            // we need the right connection and scheme for this context
+            final int poolId;
+            final Connection conForContext;
+            try {
+                poolId = cache.getDBPoolIdForContextId(ctx.getId().intValue());
+                final String scheme = cache.getSchemeForContextId(ctx.getId().intValue());
+                conForContext = cache.getWRITENoTimeoutConnectionForPoolId(poolId, scheme);
+                LOG.debug("Connection and scheme fetched for context {}", ctx.getId());
+            } catch (final PoolException e) {
+                LOG.error("Pool Error", e);
+                throw new StorageException(e);
+            }
+            final List<TableObject> sorted_tables;
+            try {
+                // fetch tables which can contain context data and sort these tables magically by foreign keys
+                LOG.debug("Fetching table structure from database scheme for context {}", ctx.getId());
+                final List<TableObject> fetchTableObjects = fetchTableObjects(conForContext);
+                LOG.debug("Table structure fetched for context {}\nTry to find foreign key dependencies between tables and sort table for context {}", ctx.getId(), ctx.getId());
+                // sort the tables by references (foreign keys)
+                sorted_tables = sortTableObjects(fetchTableObjects, conForContext);
+                LOG.debug("Dependencies found and tables sorted for context {}", ctx.getId());
+                // loop through tables and execute delete statements on each table
+                deleteContextData(ctx, conForContext, sorted_tables);
+            } catch (final SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } catch (final StorageException e) {
+                throw new StorageException(e.getMessage());
+            } finally {
+                // must be pushed back here, because in the "deleteContextFromConfigDB" the connection is "reset" in the pool.
+                // else we would get an not nice error in the logfile from the dbpool
+                try {
+                    cache.pushWRITENoTimeoutConnectionForPoolId(poolId, conForContext);
+                } catch (final PoolException e) {
+                    LOG.error("Pool Error", e);
+                }
+            }
+
             // Execute delete context from configdb AND the drop database command if this context is the last one
             conForConfigDB.setAutoCommit(false);
             contextCommon.deleteContextFromConfigDB(conForConfigDB, ctx.getId().intValue());
             // submit delete to database under any circumstance before the filestore gets deleted.see bug 9947
             conForConfigDB.commit();
+            // Force to re-initialize schema cache on next access
+            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != schemaCache) {
+                schemaCache.clearFor(poolId);
+            }
             LOG.info("Context {} deleted.", ctx.getId());
         } catch (final OXException e) {
             LOG.error("", e);
@@ -671,6 +685,13 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             deleteSchemeFromDatabaseIfEmpty(ox_db_write_con, configdb_write_con, source_database_id, scheme);
             configdb_write_con.commit();
             ox_db_write_con.commit();
+
+            // Force to re-initialize schema cache on next access
+            SchemaCache schemaCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != schemaCache) {
+                schemaCache.clearFor(source_database_id);
+                schemaCache.clearFor(target_database_id.getId().intValue());
+            }
         } catch (final TargetDatabaseException tde) {
             LOG.error("Exception caught while moving data for context {} to target database {}", ctx.getId(), target_database_id, tde);
             LOG.error("Target database rollback starts for context {}", ctx.getId());
@@ -1023,7 +1044,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     @Override
-    public Context create(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
+    public Context create(final Context ctx, final User adminUser, final UserModuleAccess access, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException {
         if (null == adminUser) {
             throw new StorageException("Context administrator is not defined.");
         }
@@ -1064,25 +1085,47 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error(e.getMessage(), e);
                 throw new StorageException(e.getMessage());
             }
-            // Two separate try-catch blocks are necessary because rollback only works after starting a transaction.
+            // Two separate try-catch blocks are necessary because roll-back only works after starting a transaction.
+            SchemaCacheRollback cacheRollback = null;
+            boolean rollback = false;
             try {
+                // Start transaction & mark to perform a roll-back if any error occurs
                 startTransaction(configCon);
-                findOrCreateSchema(configCon, db);
+                rollback = true;
+
+                // Set next suitable schema (dependent on strategy) in passed com.openexchange.admin.rmi.dataobjects.Database instance
+                cacheRollback = findOrCreateSchema(configCon, db, schemaSelectStrategy);
+
+                // Continue with context creation
                 contextCommon.fillContextAndServer2DBPool(ctx, configCon, db);
                 contextCommon.fillLogin2ContextTable(ctx, configCon);
-                final Context retval = writeContext(ctx, adminUser, access);
+                Context retval = writeContext(ctx, adminUser, access);
+
+                // Commit transaction and unmark to perform a roll-back
                 configCon.commit();
+                rollback = false;
+
+                // Null'ify SchemaCacheRollback instance due to successful commit
+                cacheRollback = null;
+
                 LOG.info("Context {} created!", retval.getId());
                 return retval;
             } catch (SQLException e) {
-                rollback(configCon);
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw new StorageException(e.getMessage(), e);
+            } catch (ContextExistsException e) {
+                throw e;
             } catch (StorageException e) {
-                rollback(configCon);
-                OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
                 throw e;
             } finally {
+                if (null != cacheRollback) {
+                    try { cacheRollback.rollback(); } catch (Exception x) { /*Ignore*/ }
+                }
+
+                if (rollback) {
+                    rollback(configCon);
+                    OXContextMySQLStorageCommon.deleteEmptySchema(i(db.getId()), db.getScheme());
+                }
+
                 autocommit(configCon);
             }
         } finally {
@@ -1286,10 +1329,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     /**
+     * Looks-up the next suitable schema dependent on given strategy (fall-back is {@link Strategy#AUTOMATIC automatic}).
+     *
      * @param configCon a write connection to the configuration database that is already in a transaction.
+     * @param db The database
+     * @param schemaSelectStrategy The optional strategy to use; may be <code>null</code>
+     * @return The possible cache roll-back instance to call if further processing fails
      */
-    private void findOrCreateSchema(final Connection configCon, final Database db) throws StorageException {
+    private SchemaCacheRollback findOrCreateSchema(final Connection configCon, final Database db, SchemaSelectStrategy schemaSelectStrategy) throws StorageException {
         if (CONTEXTS_PER_SCHEMA == 1) {
+            // Ignore strategy as there shall be only one schema per context
             int schemaUnique;
             try {
                 schemaUnique = IDGenerator.getId(configCon);
@@ -1299,9 +1348,71 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             String schemaName = db.getName() + '_' + schemaUnique;
             db.setScheme(schemaName);
             OXUtilStorageInterface.getInstance().createDatabase(db);
-            return;
+            return null;
         }
 
+        // The effective strategy
+        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
+
+        // Determine the schema name according to effective strategy
+        SchemaCacheRollback cacheRollback = null;
+        switch (effectiveStrategy.getStrategy()) {
+            case SCHEMA:
+                // Pre-defined schema name
+                db.setScheme(effectiveStrategy.getSchema());
+                break;
+            case IN_MEMORY:
+                // Get the schema name advertised by cache
+                cacheRollback = inMemoryLookupSchema(configCon, db);
+                break;
+            default:
+                automaticLookupSchema(configCon, db);
+                break;
+        }
+        return cacheRollback;
+    }
+
+    private SchemaCacheRollback inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {
+        // Get cache instance
+        SchemaCache schemaCache = SchemaCacheProvider.getInstance().getSchemaCache();
+        ContextCountPerSchemaClosure closure = new DefaultContextCountPerSchemaClosure(configCon, ClientAdminThread.cache.getPool());
+
+        // Get next known suitable schema
+        int poolId = db.getId().intValue();
+        SchemaResult schemaResult = schemaCache.getNextSchemaFor(poolId, this.CONTEXTS_PER_SCHEMA, closure);
+        if (null != schemaResult) {
+            db.setScheme(schemaResult.getSchemaName());
+            return schemaResult.getRollback();
+        }
+
+        // No suitable schema known to cache. Therefore clear cache state & perform regular schema look-up/creation
+        schemaCache.clearFor(poolId);
+        autoFindOrCreateSchema(configCon, db, false);
+        return null;
+    }
+
+    private void automaticLookupSchema(Connection configCon, Database db) throws StorageException {
+        autoFindOrCreateSchema(configCon, db, true);
+    }
+
+    /**
+     * Looks-up the next suitable schema.
+     *
+     * @param configCon The connection to configDb
+     * @param db The database to get the schema for
+     * @param clearSchemaCache Whether schema cache is supposed to be cleared
+     * @throws StorageException If a suitable schema cannot be found
+     */
+    private void autoFindOrCreateSchema(Connection configCon, Database db, boolean clearSchemaCache) throws StorageException {
+        // Clear schema cache once "live" schema information is requested
+        if (clearSchemaCache) {
+            SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
+            if (null != optCache) {
+                optCache.clearFor(db.getId().intValue());
+            }
+        }
+
+        // Freshly determine the next schema to use
         String schemaName = getNextUnfilledSchemaFromDB(db.getId(), configCon);
         if (schemaName == null) {
             int schemaUnique;
@@ -1319,7 +1430,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void createDatabaseAndMappingForContext(Database db, Connection con, int contextId) throws StorageException {
-        findOrCreateSchema(con, db);
+        findOrCreateSchema(con, db, null);
         try {
             updateContextServer2DbPool(db, con, contextId);
         } catch (PoolException e) {
@@ -1371,7 +1482,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         OXAdminPoolInterface pool = ClientAdminThread.cache.getPool();
         final String[] unfilledSchemas;
         try {
-            pool.lock(con);
+            pool.lock(con, i(poolId));
             unfilledSchemas = pool.getUnfilledSchemas(con, i(poolId), this.CONTEXTS_PER_SCHEMA);
         } catch (PoolException e) {
             LOG.error("Pool Error", e);

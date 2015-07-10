@@ -51,6 +51,7 @@ package com.openexchange.database.internal;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import org.osgi.framework.FrameworkUtil;
 import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
@@ -240,6 +241,11 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+        return contextAssignment.getContextCountPerSchema(con, poolId, maxContexts);
+    }
+
+    @Override
     public void invalidate(final int... contextIds) {
         contextAssignment.invalidateAssignment(contextIds);
     }
@@ -255,8 +261,7 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
-    public void lock(Connection con) throws OXException {
-        contextAssignment.lock(con);
+    public void lock(Connection con, int writePoolId) throws OXException {
+        contextAssignment.lock(con, writePoolId);
     }
-
 }

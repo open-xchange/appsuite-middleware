@@ -17,7 +17,7 @@
 	<classpathentry kind="lib" path="lib/apache-mime4j-0.6.jar"/>
 	<classpathentry kind="lib" path="lib/ical4j-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/backport-util-concurrent-3.1.jar"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet_2.5.0.v201103041518.jar" sourcepath="/com.openexchange.bundles/source/servlet-api-2.5-sources.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/javax.servlet_2.5.0.v201103041518.jar" sourcepath="/com.openexchange.bundles/source/javax.servlet.source_2.5.0.v201103041518.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.lang_2.6.0.v201205030909.jar" sourcepath="/com.openexchange.bundles/source/org.apache.commons.lang.source_2.6.0.v201205030909.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/slf4j-api-1.7.5.jar"/>
@@ -63,7 +63,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.twitter"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.publish.online.infostore"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.rss"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.messaging.facebook"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.crawler"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.html"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tx"/>

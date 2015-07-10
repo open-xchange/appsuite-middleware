@@ -387,10 +387,11 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     private static MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> doGetInstance(Session session, int accountId) throws OXException {
         Object tmp = session.getParameter("com.openexchange.mail.lookupMailAccessCache");
         if (null == tmp || toBool(tmp)) {
-            // Look-up cached, already connected instance
-            final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = getMailAccessCache().removeMailAccess(session, accountId);
-            if (mailAccess != null) {
-                return mailAccess;
+            // Look-up cached & already connected instance
+            for (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess; (mailAccess = getMailAccessCache().removeMailAccess(session, accountId)) != null;) {
+                if (mailAccess.isConnected()) {
+                    return mailAccess;
+                }
             }
         }
 

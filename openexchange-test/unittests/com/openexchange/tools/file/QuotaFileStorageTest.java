@@ -53,6 +53,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URI;
 import java.sql.Connection;
+import java.util.Map;
 import junit.framework.TestCase;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
@@ -253,7 +254,12 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        public void lock(Connection con) {
+        public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+            return null;
+        }
+
+        @Override
+        public void lock(Connection con, int poolId) {
             // Nothing to do
         }
 

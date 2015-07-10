@@ -568,11 +568,11 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         }
     }
 
-    protected void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
-        transport(smtpMessage, recipients, transport, smtpConfig, null);
+    protected MimeMessage transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+        return transport(smtpMessage, recipients, transport, smtpConfig, null);
     }
 
-    protected void transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo mtaInfo) throws OXException {
+    protected MimeMessage transport(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig, final MtaStatusInfo mtaInfo) throws OXException {
         // Prepare addresses
         prepareAddresses(recipients);
 
@@ -621,8 +621,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                    transportAlt(messageToSend, recipients, transport, smtpConfig);
-                    return;
+                    return transportAlt(messageToSend, recipients, transport, smtpConfig);
                 }
             } else if (e.getNextException() instanceof IOException) {
                 if (e.getNextException().getMessage().equals("Maximum message size is exceeded.")) {
@@ -636,6 +635,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         } finally {
             listenerChain.onAfterMessageTransport(messageToSend, exception, session);
         }
+        return messageToSend;
     }
 
     /*
@@ -774,8 +774,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 }
             }
 
-            sendMimeMessage(mimeMessage, allRecipients, mtaStatusInfo);
-            return MimeMessageConverter.convertMessage(mimeMessage);
+            MimeMessage sentMimeMessage = sendMimeMessage(mimeMessage, allRecipients, mtaStatusInfo);
+            return MimeMessageConverter.convertMessage(sentMimeMessage);
         } catch (final MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
         } catch (final IOException e) {
@@ -794,8 +794,8 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
             throw handleMessagingException(e, smtpConfig);
         }
 
-        sendMimeMessage(smtpMessage, allRecipients, null);
-        return MimeMessageConverter.convertMessage(smtpMessage);
+        MimeMessage sentMimeMessage = sendMimeMessage(smtpMessage, allRecipients, null);
+        return MimeMessageConverter.convertMessage(sentMimeMessage);
     }
 
     @Override
@@ -803,36 +803,35 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         sendMimeMessage(mimeMessage, allRecipients, null);
     }
 
-    private void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients, MtaStatusInfo mtaStatusInfo) throws OXException {
-        final SMTPConfig smtpConfig = getTransportConfig();
+    private MimeMessage sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients, MtaStatusInfo mtaStatusInfo) throws OXException {
+        SMTPConfig smtpConfig = getTransportConfig();
         try {
-            /*
-             * Check recipients
-             */
-            final Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
+            // Check recipients
+            Address[] recipients = allRecipients == null ? mimeMessage.getAllRecipients() : allRecipients;
             processAddressHeader(mimeMessage);
-            final boolean poisoned = checkRecipients(recipients);
+
+            // Check if "poisoned"
+            boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
                 saveChangesSafe(mimeMessage, true);
-            } else {
-                try {
-                    final long start = System.currentTimeMillis();
-                    final Transport transport = getSMTPSession().getTransport(SMTP);
-                    try {
-                        connectTransport(transport, smtpConfig);
-                        saveChangesSafe(mimeMessage, true);
-                        transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                    } catch (final javax.mail.AuthenticationFailedException e) {
-                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
-                    } finally {
-                        transport.close();
-                    }
-                } catch (final MessagingException e) {
-                    throw handleMessagingException(e, smtpConfig);
-                }
+                return mimeMessage;
             }
-        } catch (final MessagingException e) {
+
+            // Do the transport
+            Transport transport = getSMTPSession().getTransport(SMTP);
+            try {
+                long start = System.currentTimeMillis();
+                connectTransport(transport, smtpConfig);
+                saveChangesSafe(mimeMessage, true);
+                MimeMessage sentMimeMessage = transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
+                mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                return sentMimeMessage;
+            } catch (javax.mail.AuthenticationFailedException e) {
+                throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+            } finally {
+                transport.close();
+            }
+        } catch (MessagingException e) {
             throw handleMessagingException(e, smtpConfig);
         }
     }
@@ -908,7 +907,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
         return userId;
     }
 
-    private void transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
+    private MimeMessage transportAlt(final MimeMessage smtpMessage, final Address[] recipients, final Transport transport, final SMTPConfig smtpConfig) throws OXException {
         try {
             final MimeMessageDataSource dataSource = new MimeMessageDataSource(smtpMessage, smtpConfig, smtpConfig.getSession());
             smtpMessage.setDataHandler(new DataHandler(dataSource));
@@ -928,6 +927,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     }
                 }
             });
+            return smtpMessage;
         } catch (final MessagingException me) {
             throw handleMessagingException(me, smtpConfig);
         }

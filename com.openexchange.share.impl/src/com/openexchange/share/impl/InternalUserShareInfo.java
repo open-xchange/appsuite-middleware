@@ -50,7 +50,6 @@
 package com.openexchange.share.impl;
 
 import java.util.Locale;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
@@ -99,17 +98,12 @@ public class InternalUserShareInfo implements ShareInfo {
         return new GuestInfo() {
 
             @Override
-            public boolean isPasswordSet() {
-                return true;
-            }
-
-            @Override
             public RecipientType getRecipientType() {
                 return RecipientType.USER;
             }
 
             @Override
-            public String getPassword() throws OXException {
+            public String getPassword() {
                 return null;
             }
 

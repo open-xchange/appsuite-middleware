@@ -118,6 +118,7 @@ import com.openexchange.groupware.userconfiguration.RdbUserPermissionBitsStorage
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -253,6 +254,76 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
             throw new StorageException(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContext(contextId, con);
+                } catch (final PoolException e) {
+                    log.error("Error pushing connection to pool for context {}!", ctx.getId(), e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public void changeMailAddressPersonal(Context ctx, User user, String personal) throws StorageException {
+        int contextId = ctx.getId().intValue();
+        int userId = user.getId().intValue();
+
+        // SQL resources
+        Connection con = null;
+        PreparedStatement stmt = null;
+        boolean rollback = false;
+        boolean autocommit = false;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            con.setAutoCommit(false); // BEGIN
+            autocommit = true;
+            rollback = true;
+
+            stmt = con.prepareStatement("UPDATE user_mail_account SET personal=? WHERE cid=? AND user=? AND id=?");
+            if (Strings.isEmpty(personal)) {
+                stmt.setNull(1, java.sql.Types.VARCHAR);
+            } else {
+                stmt.setString(1, personal);
+            }
+            stmt.setInt(2, contextId);
+            stmt.setInt(3, userId);
+            stmt.setInt(4, MailAccount.DEFAULT_ID);
+            stmt.executeUpdate();
+            Databases.closeSQLStuff(stmt);
+            stmt = null;
+
+            con.commit(); // COMMIT
+            rollback = false;
+
+            // Invalidate cache
+            {
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                if (null != cacheService) {
+                    try {
+                        Cache cache = cacheService.getCache("MailAccount");
+                        cache.remove(cacheService.newCacheKey(ctx.getId().intValue(), Integer.toString(0), Integer.toString(userId)));
+                        cache.invalidateGroup(ctx.getId().toString());
+                    } catch (final OXException e) {
+                        log.error("", e);
+                    }
+                }
+            }
+
+        } catch (final SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+            if (rollback) {
+                rollback(con);
+            }
+            if (autocommit) {
+                autocommit(con);
+            }
             if (null != con) {
                 try {
                     cache.pushConnectionForContext(contextId, con);

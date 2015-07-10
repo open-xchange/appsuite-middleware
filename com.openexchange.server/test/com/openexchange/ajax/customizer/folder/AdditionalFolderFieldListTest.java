@@ -127,7 +127,7 @@ public class AdditionalFolderFieldListTest extends TestCase {
         AdditionalFolderField field3 = fields.get(23);
         assertNotNull(field3);
         assertEquals(null, field3.getValue(null, null));
-        assertEquals(null, field3.renderJSON(null));
+        assertEquals(null, field3.renderJSON(null, null));
     }
 
 }

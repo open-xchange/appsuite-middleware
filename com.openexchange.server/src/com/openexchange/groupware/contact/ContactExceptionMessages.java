@@ -138,6 +138,8 @@ public class ContactExceptionMessages implements LocalizableStrings {
 
     public final static String INCORRECT_STRING_DISPLAY = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
 
+    public final static String TOO_MANY_PATTERNS_DISPLAY = "The query \"%1$s\" contains too many patterns. Please shorten the query and try again.";
+
     private ContactExceptionMessages() {
         super();
     }

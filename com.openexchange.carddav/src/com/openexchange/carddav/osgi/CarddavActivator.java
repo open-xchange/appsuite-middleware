@@ -55,7 +55,7 @@ import com.openexchange.carddav.servlet.CarddavPerformer;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -96,7 +96,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * track vCard storage service
              */
-            trackService(VCardStorageService.class);
+            trackService(VCardStorageFactory.class);
             openTrackers();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);

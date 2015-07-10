@@ -189,7 +189,7 @@ public final class MessageWriter {
      * @throws OXException If writing message fails
      */
     public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter) throws OXException {
-        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1);
+        return writeMailMessage(accountId, mail, displayMode, embedded, session, settings, warnings, token, tokenTimeout, mimeFilter, null, false, -1, -1);
     }
 
     /**
@@ -204,16 +204,17 @@ public final class MessageWriter {
      * @param tokenTimeout
      * @param mimeFilter The MIME filter
      * @param maxContentSize maximum number of bytes that is will be returned for content. '<=0' means unlimited.
+     * @param maxNestedMessageLevels The number of levels in which deep-parsing of nested messages takes place; otherwise only ID information is set; '<=0' falls back to default value (10)
      * @token <code>true</code> to add attachment tokens
      * @return The written JSON object
      * @throws OXException If writing message fails
      */
-    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize) throws OXException {
+    public static JSONObject writeMailMessage(int accountId, MailMessage mail, DisplayMode displayMode, boolean embedded, Session session, UserSettingMail settings, Collection<OXException> warnings, boolean token, int tokenTimeout, MimeFilter mimeFilter, TimeZone optTimeZone, boolean exactLength, int maxContentSize, int maxNestedMessageLevels) throws OXException {
         MailPath mailPath;
         String fullName = mail.getFolder();
         String mailId = mail.getMailId();
         if (fullName != null && mailId != null) {
-            mailPath = new MailPath(accountId, fullName, mailId);
+            mailPath = new MailPath(getAccountIdFor(accountId, mail), fullName, mailId);
         } else if (mail.getMsgref() != null) {
             mailPath = mail.getMsgref();
         } else {
@@ -234,7 +235,7 @@ public final class MessageWriter {
         }
 
         try {
-            JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout, maxContentSize);
+            JsonMessageHandler handler = new JsonMessageHandler(accountId, mailPath, mail, displayMode, embedded, session, usm, token, tokenTimeout, maxContentSize, maxNestedMessageLevels);
             handler.setExactLength(exactLength);
             if (null != optTimeZone) {
                 handler.setTimeZone(optTimeZone);
@@ -280,6 +281,18 @@ public final class MessageWriter {
             }
             throw e;
         }
+    }
+
+    private static int getAccountIdFor(int accountId, MailMessage mail) {
+        if (!(mail instanceof Delegatized)) {
+            return accountId;
+        }
+
+        int accId = ((Delegatized) mail).getUndelegatedAccountId();
+        if (accId < 0) {
+            return accountId;
+        }
+        return accId;
     }
 
     /**

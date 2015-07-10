@@ -191,6 +191,11 @@ public class LoginPerformerTest {
             public String getAuthId() {
                 return null;
             }
+
+            @Override
+            public String getLanguage() {
+                return null;
+            }
         };
     }
 

@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.console.context;
 
 import java.net.MalformedURLException;
@@ -57,6 +58,7 @@ import com.openexchange.admin.rmi.OXContextInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
@@ -95,12 +97,13 @@ public class Create extends CreateCore {
         setAddAccessRightCombinationNameOption(parser);
         setModuleAccessOptions(parser);
 
+        setSchemaOptions(parser);
     }
 
     @Override
-    protected Context maincall(final AdminParser parser, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException {
+    protected Context maincall(final AdminParser parser, final Context ctx, final User usr, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException {
         // get rmi ref
-        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        final OXContextInterface oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
 
         // add login mappings
         ctxabs.parseAndSetAddLoginMapping(parser);
@@ -110,7 +113,7 @@ public class Create extends CreateCore {
         ctxabs.changeMappingSetting(oxctx, ctx, auth, false);
         ctx.setFilestoreId(ctxabs.getStoreid());
         final Integer db = ctxabs.getDatabaseid();
-        if( null != db ) {
+        if (null != db) {
             ctx.setWriteDatabase(new Database(db));
         }
 
@@ -130,19 +133,19 @@ public class Create extends CreateCore {
 
         String accessCombinationName = parseAndSetAccessCombinationName(parser);
 
-        if(!parsed_access.equals(NO_RIGHTS_ACCESS) && null != accessCombinationName){
+        if (!parsed_access.equals(NO_RIGHTS_ACCESS) && null != accessCombinationName) {
             // BOTH WAYS TO SPECIFY ACCESS RIGHTS ARE INVALID!
             throw new InvalidDataException(ACCESS_COMBINATION_NAME_AND_ACCESS_RIGHTS_DETECTED_ERROR);
         }
 
-        if (null != accessCombinationName ) {
+        if (null != accessCombinationName) {
             // Client supplied access combination name. create context with this name
-            createdctx = oxctx.create(ctx, usr, accessCombinationName, auth);
-        }else if(!parsed_access.equals(NO_RIGHTS_ACCESS)){
+            createdctx = oxctx.create(ctx, usr, accessCombinationName, auth, schemaSelectStrategy);
+        } else if (!parsed_access.equals(NO_RIGHTS_ACCESS)) {
             // Client supplied access attributes
-            createdctx = oxctx.create(ctx, usr,parsed_access, auth);
-        }else{
-            createdctx = oxctx.create(ctx, usr, auth);
+            createdctx = oxctx.create(ctx, usr, parsed_access, auth, schemaSelectStrategy);
+        } else {
+            createdctx = oxctx.create(ctx, usr, auth, schemaSelectStrategy);
         }
 
         // TODO: We have to add a cleanup here. If creation of mappings fails the context should be deleted
@@ -151,22 +154,22 @@ public class Create extends CreateCore {
 
     @Override
     protected void lookupRMI() throws MalformedURLException, RemoteException, NotBoundException {
-        this.csv_oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME +OXContextInterface.RMI_NAME);
+        this.csv_oxctx = (OXContextInterface) Naming.lookup(RMI_HOSTNAME + OXContextInterface.RMI_NAME);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return this.csv_oxctx.create(ctx, usr, accessCombiName, auth);
+    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, accessCombiName, auth, schemaSelectStrategy);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return this.csv_oxctx.create(ctx, usr, access, auth);
+    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, access, auth, schemaSelectStrategy);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return this.csv_oxctx.create(ctx, usr, auth);
+    protected Context simpleMainCall(Context ctx, User usr, Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, auth, schemaSelectStrategy);
     }
 
 }

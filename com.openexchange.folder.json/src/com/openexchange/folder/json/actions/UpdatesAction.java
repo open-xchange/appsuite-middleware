@@ -169,14 +169,14 @@ public final class UpdatesAction extends AbstractFolderAction {
         /*
          * Write subfolders as JSON arrays to JSON array
          */
-        final JSONArray resultArray = FolderWriter.writeMultiple2Array(columns, result[0], session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        final JSONArray resultArray = FolderWriter.writeMultiple2Array(request, columns, result[0], Constants.ADDITIONAL_FOLDER_FIELD_LIST);
 
         try {
             final JSONArray jsonArray2 =
                 FolderWriter.writeMultiple2Array(
+                    request,
                     new int[] { FolderField.ID.getColumn() },
                     result[1],
-                    session,
                     Constants.ADDITIONAL_FOLDER_FIELD_LIST);
             final int len = jsonArray2.length();
             for (int i = 0; i < len; i++) {

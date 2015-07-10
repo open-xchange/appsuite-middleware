@@ -58,7 +58,6 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.tools.PasswordUtility;
 
 /**
  * {@link DefaultGuestInfo}
@@ -123,11 +122,18 @@ public class DefaultGuestInfo implements GuestInfo {
     }
 
     @Override
-    public String getPassword() throws OXException {
+    public String getPassword() {
         if (AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication()) {
             String cryptedPassword = guestUser.getUserPassword();
             if (false == Strings.isEmpty(cryptedPassword)) {
-                return services.getService(ShareCryptoService.class).decrypt(cryptedPassword);
+                try {
+                    return services.getService(ShareCryptoService.class).decrypt(cryptedPassword);
+                } catch (OXException e) {
+                    org.slf4j.LoggerFactory.getLogger(DefaultGuestInfo.class).error(
+                        "Error decrypting password '{}' for guest user {} in context {}",
+                        cryptedPassword, Integer.valueOf(getGuestID()), Integer.valueOf(contextID), e);
+                    return cryptedPassword;
+                }
             }
         }
         return null;
@@ -139,6 +145,7 @@ public class DefaultGuestInfo implements GuestInfo {
         case ANONYMOUS:
         case ANONYMOUS_PASSWORD:
             return RecipientType.ANONYMOUS;
+        case GUEST:
         case GUEST_PASSWORD:
             return RecipientType.GUEST;
         default:
@@ -200,15 +207,6 @@ public class DefaultGuestInfo implements GuestInfo {
     public String toString() {
         return "DefaultGuestInfo [guestID=" + getGuestID() + ", baseToken=" + getBaseToken() + ", eMailAddress=" + getEmailAddress()
             + ", contextID=" + contextID + "]";
-    }
-
-    @Override
-    public boolean isPasswordSet() {
-        if (AuthenticationMode.GUEST_PASSWORD == getAuthentication()) {
-            String userPassword = guestUser.getUserPassword();
-            return !PasswordUtility.INITIAL_GUEST_PASSWORD.equals(userPassword);
-        }
-        return AuthenticationMode.ANONYMOUS_PASSWORD == getAuthentication();
     }
 
 }

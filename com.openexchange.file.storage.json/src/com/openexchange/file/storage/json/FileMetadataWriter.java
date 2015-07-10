@@ -49,26 +49,21 @@
 
 package com.openexchange.file.storage.json;
 
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.TimeZone;
+import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AbstractFileFieldHandler;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageGuestObjectPermission;
-import com.openexchange.file.storage.FileStorageObjectPermission;
-import com.openexchange.file.storage.meta.FileFieldGet;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.mime.ContentType;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * {@link FileMetadataWriter}
@@ -82,186 +77,129 @@ public class FileMetadataWriter {
      */
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileMetadataWriter.class);
 
+    private final FileFieldCollector fieldCollector;
+
     /**
-     * The {@link JSONHandler} constant.
+     * Initializes a new {@link FileMetadataWriter}.
+     *
+     * @param fieldCollector The collector for additional file fields, or <code>null</code> if not available
      */
-    protected static final JSONHandler JSON = new JSONHandler();
-
-    public JSONArray write(final SearchIterator<File> files, final List<File.Field> columns, final TimeZone timeZone) throws OXException {
-        final JSONArray array = new JSONArray(32);
-        while (files.hasNext()) {
-            array.put(writeArray(files.next(), columns, timeZone));
-        }
-        files.close();
-        return array;
+    public FileMetadataWriter(FileFieldCollector fieldCollector) {
+        super();
+        this.fieldCollector = fieldCollector;
     }
 
-    public JSONArray writeArray(final File f, final List<File.Field> columns, final TimeZone tz) {
-        final JSONArray array = new JSONArray(columns.size());
-        for (final Field field : columns) {
-            array.put( writeAttribute(f, field, tz));
-        }
-        return array;
-    }
-
-
-    private Object writeAttribute(final File f, final Field field, final TimeZone tz) {
-        return field.handle(JSON, f, tz);
-    }
-
-
-    private static class JSONHandler extends AbstractFileFieldHandler {
-
-        private static final TimeZone UTC = TimeZone.getTimeZone("UTC");
-
-        private final FileFieldGet get = new FileFieldGet();
-
-        protected JSONHandler() {
-            super();
-        }
-
-        @Override
-        public Object handle(final Field field, final Object... args) {
-            final Object value = field.doSwitch(get, args);
-            if (File.Field.FILE_MIMETYPE == field) {
-                if (null == value) {
-                    return value;
-                }
-                final String ct = value.toString();
-                if (ct.indexOf(';') <= 0) {
-                    return value;
-                }
-                try {
-                    return ContentType.getBaseType(ct);
-                } catch (final OXException e) {
-                    return value;
-                }
-            }
-            if ((value == null) && (field == File.Field.LOCKED_UNTIL)) {
-                return Integer.valueOf(0);
-            }
-            if (Date.class.isInstance(value)) {
-                final Date d = (Date) value;
-                TimeZone tz = get(1, TimeZone.class, args);
-                if (field == Field.LAST_MODIFIED_UTC) {
-                    tz = UTC;
-                }
-                if (field == File.Field.LOCKED_UNTIL && (d == null || d.getTime() <= System.currentTimeMillis())) {
-                    return Integer.valueOf(0);
-                }
-                return writeDate((Date) value, tz);
-            }
-
-            switch (field) {
-            case CATEGORIES:
-                return handleCategories((String) value);
-            case META:
-                try {
-                    if (value == null) {
-                        return null;
-                    }
-                    return JSONCoercion.coerceToJSON(value);
-                } catch (JSONException e) {
-                    LOG.error("", e);
-                    return null;
-                }
-            case OBJECT_PERMISSIONS:
-                if (value != null && value instanceof List<?>) {
-                    List<?> list = (List<?>) value;
-                    JSONArray jPermissions = new JSONArray(list.size());
-                    for (Object obj : list) {
-                        if (obj instanceof FileStorageGuestObjectPermission) {
-                            FileStorageGuestObjectPermission permission = (FileStorageGuestObjectPermission) obj;
-                            ShareRecipient recipient = permission.getRecipient();
-                            JSONObject json = new JSONObject();
-                            try {
-                                json.put("type", recipient.getType().toString().toLowerCase());
-                                json.put("bits", permission.getPermissions());
-                                switch (recipient.getType()) {
-                                case ANONYMOUS:
-                                    json.putOpt("password", ((AnonymousRecipient) recipient).getPassword());
-                                    break;
-                                case GUEST:
-                                    GuestRecipient guestRecipient = (GuestRecipient) recipient;
-                                    json.putOpt("password", guestRecipient.getPassword());
-                                    json.putOpt("mail_address", guestRecipient.getEmailAddress());
-                                    json.putOpt("display_name", guestRecipient.getDisplayName());
-                                    json.putOpt("contact_id", guestRecipient.getContactID());
-                                    json.putOpt("contact_folder", guestRecipient.getContactFolder());
-                                    break;
-                                default:
-                                    throw new UnsupportedOperationException("Unable to write recipients of type " + recipient.getType());
-                                }
-                                jPermissions.put(json);
-                            } catch (JSONException e) {
-                                LOG.error("", e);
-                                return null;
-                            }
-                        } else if (obj instanceof FileStorageObjectPermission) {
-                            FileStorageObjectPermission permission = (FileStorageObjectPermission) obj;
-                            JSONObject json = new JSONObject(3);
-                            try {
-                                json.put("entity", permission.getEntity());
-                                json.put("group", permission.isGroup());
-                                json.put("bits", permission.getPermissions());
-                                jPermissions.put(json);
-                            } catch (JSONException e) {
-                                LOG.error("", e);
-                                return null;
-                            }
-                        }
-                    }
-
-                    return jPermissions;
-                }
-
-                return null;
-            default: // do nothing;
-            }
-
-            return value;
-        }
-
-        private Object writeDate(final Date date, final TimeZone tz) {
-            final int offset = (tz == null) ? 0 : tz.getOffset(date.getTime());
-            long time = date.getTime() + offset;
-            // Happens on infinite locks.
-            if (time < 0) {
-                time = Long.MAX_VALUE;
-            }
-            return Long.valueOf(time);
-        }
-
-        private JSONArray handleCategories(final String value) {
-            if (value == null) {
-                return null;
-            }
-            final String[] strings = Strings.splitByComma(value);
-            final JSONArray array = new JSONArray();
-            for (final String string : strings) {
-                array.put(string);
-            }
-
-            return array;
-        }
-
-    }
-
-    public JSONObject write(final File file, final TimeZone timezone) {
+    /**
+     * Serializes a single file with all metadata to JSON.
+     *
+     * @param request The underlying infostore request
+     * @param file The file to write
+     * @return A JSON object holding the serialized file
+     */
+    public JSONObject write(AJAXInfostoreRequest request, final File file) {
+        final JsonFieldHandler handler = new JsonFieldHandler(request);
         return File.Field.inject(new AbstractFileFieldHandler() {
 
             @Override
-            public Object handle(final Field field, final Object... args) {
-                final JSONObject o = get(0, JSONObject.class, args);
+            public Object handle(Field field, Object... args) {
+                JSONObject jsonObject = get(0, JSONObject.class, args);
                 try {
-                    o.put(field.getName(), JSON.handle(field, file, timezone));
-                } catch (final JSONException e) {
+                    jsonObject.put(field.getName(), handler.handle(field, file));
+                } catch (JSONException e) {
                     LOG.error("Error writing field: {}", field.getName(), e);
                 }
-                return o;
+                return jsonObject;
             }
-
         }, new JSONObject());
+    }
+
+    /**
+     * Serializes all files from a search iterator to JSON.
+     *
+     * @param request The underlying infostore request
+     * @param searchIterator A search iterator for the files to write
+     * @return A JSON array holding all serialized files based on the requested columns
+     */
+    public JSONArray write(AJAXInfostoreRequest request, SearchIterator<File> searchIterator) throws OXException {
+        int[] columns = request.getRequestedColumns();
+        List<Field> fields = Field.get(columns);
+        try {
+            if (columns.length == fields.size()) {
+                /*
+                 * prefer to write iteratively if only regular file fields requested
+                 */
+                JsonFieldHandler handler = new JsonFieldHandler(request);
+                JSONArray filesArray = new JSONArray(32);
+                while (searchIterator.hasNext()) {
+                    filesArray.put(writeArray(handler, searchIterator.next(), fields));
+                }
+                return filesArray;
+            } else {
+                /*
+                 * convert pre-loaded files to allow batch retrieval for additional fields
+                 */
+                return write(request, SearchIterators.asList(searchIterator));
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+    }
+
+    /**
+     * Serializes a list of files to JSON.
+     *
+     * @param request The underlying infostore request
+     * @param files The files to write
+     * @return A JSON array holding all serialized files based on the requested columns
+     */
+    public JSONArray write(AJAXInfostoreRequest request, List<File> files) throws OXException {
+        /*
+         * pre-load additional field values
+         */
+        int[] columns = request.getRequestedColumns();
+        Map<Integer, List<Object>> additionalFieldValues = null;
+        if (null != fieldCollector) {
+            List<AdditionalFileField> additionalFields = fieldCollector.getFields(columns);
+            if (0 < additionalFields.size()) {
+                additionalFieldValues = new HashMap<Integer, List<Object>>(additionalFields.size());
+                for (AdditionalFileField additionalField : additionalFields) {
+                    List<Object> values = additionalField.getValues(files, request.getSession());
+                    additionalFieldValues.put(Integer.valueOf(additionalField.getColumnID()), values);
+                }
+            }
+        }
+        /*
+         * serialize each file to json
+         */
+        JsonFieldHandler handler = new JsonFieldHandler(request);
+        JSONArray filesArray = new JSONArray(files.size());
+        for (int i = 0; i < files.size(); i++) {
+            File file = files.get(i);
+            JSONArray fileArray = new JSONArray(columns.length);
+            for (int column : columns) {
+                Field field = Field.get(column);
+                if (null != field) {
+                    fileArray.put(field.handle(handler, file));
+                } else {
+                    List<Object> fieldValues = null != additionalFieldValues ? additionalFieldValues.get(Integer.valueOf(column)) : null;
+                    if (null != fieldValues) {
+                        fileArray.put(fieldCollector.getField(column).renderJSON(request.getRequestData(), fieldValues.get(i)));
+                    } else {
+                        fileArray.put(JSONObject.NULL);
+                    }
+                }
+            }
+            filesArray.put(fileArray);
+        }
+        return filesArray;
+    }
+
+    JSONArray writeArray(JsonFieldHandler handler, File f, List<File.Field> columns) {
+        JSONArray array = new JSONArray(columns.size());
+        for (Field field : columns) {
+            array.put(field.handle(handler, f));
+        }
+        return array;
     }
 
 }

@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 
 /**
@@ -59,30 +58,21 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
  */
 public final class DefaultDispatcherPrefixService implements DispatcherPrefixService {
 
-    private static final DefaultDispatcherPrefixService INSTANCE = new DefaultDispatcherPrefixService();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static DefaultDispatcherPrefixService getInstance() {
-        return INSTANCE;
-    }
-
-    private final AtomicReference<String> prefixRef;
+    private final String prefix;
 
     /**
      * Initializes a new {@link DefaultDispatcherPrefixService}.
+     *
+     * @param prefix The dispatcher servlet prefix (e.g. /appsuite/api/)
      */
-    private DefaultDispatcherPrefixService() {
+    public DefaultDispatcherPrefixService(String prefix) {
         super();
-        prefixRef = Dispatcher.PREFIX;
+        this.prefix = prefix;
     }
 
     @Override
     public String getPrefix() {
-        return prefixRef.get();
+        return prefix;
     }
 
 }

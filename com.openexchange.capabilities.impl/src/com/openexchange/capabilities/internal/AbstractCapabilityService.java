@@ -320,7 +320,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             if (null != cachedCapabilitySet) {
                 capabilities = cachedCapabilitySet;
                 if (computeCapabilityFilters) {
-                    applyUIFilter(capabilities, isGuest(serverSession));
+                    applyUIFilter(capabilities);
                 }
                 return capabilities;
             }
@@ -509,6 +509,13 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             }
         }
 
+        // is guest?
+        if (isGuest(serverSession)) {
+            capabilities.add(getCapability("guest"));
+            capabilities.remove(getCapability("share_links"));
+            capabilities.remove(getCapability("invite_guests"));
+        }
+
         // Put in cache
         if (!serverSession.isAnonymous() && !serverSession.isTransient()) {
             final Cache cache = optCache();
@@ -518,7 +525,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
         }
 
         if (computeCapabilityFilters) {
-            applyUIFilter(capabilities, isGuest(serverSession));
+            applyUIFilter(capabilities);
         }
 
         //        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
@@ -543,19 +550,6 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      * @param capabilitiesToFilter - the capabilities the filter should be applied on
      */
     protected void applyUIFilter(CapabilitySet capabilitiesToFilter) {
-        applyUIFilter(capabilitiesToFilter, false);
-    }
-
-    /**
-     * Applies the filter on capabilities for JSON requests and if services (e. g. PasswordChangeService) are not available.
-     *
-     * @param capabilitiesToFilter - the capabilities the filter should be applied on
-     * @param isGuest <code>true</code> if the associated user is a guest; otherwise <code>false</code>
-     */
-    protected void applyUIFilter(CapabilitySet capabilitiesToFilter, boolean isGuest) {
-        if (isGuest) {
-            return;
-        }
         final PermissionAvailabilityServiceRegistry registry = this.registry;
         if (registry != null) {
             final Map<Permission, PermissionAvailabilityService> serviceList = registry.getServiceMap();

@@ -49,32 +49,42 @@
 
 package com.openexchange.share.servlet.internal;
 
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import javax.servlet.http.HttpServlet;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.httpclient.util.URIUtil;
+import com.google.common.io.BaseEncoding;
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.login.internal.LoginMethodClosure;
+import com.openexchange.login.internal.LoginResultImpl;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.servlet.ShareServletStrings;
-import com.openexchange.share.servlet.utils.ShareRedirectUtils;
-import com.openexchange.share.tools.PasswordUtility;
+import com.openexchange.share.servlet.auth.ShareAuthenticated;
+import com.openexchange.share.servlet.utils.MessageType;
+import com.openexchange.share.servlet.utils.LoginLocationBuilder;
+import com.openexchange.share.servlet.utils.ShareServletUtils;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.user.UserService;
 
@@ -84,14 +94,12 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class PasswordResetServlet extends HttpServlet {
+public class PasswordResetServlet extends AbstractShareServlet {
 
     private static final long serialVersionUID = -598655895873570676L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PasswordResetServlet.class);
 
     private final ShareLoginConfiguration loginConfig;
-
-    // --------------------------------------------------------------------------------------------------------------------------------- //
 
     /**
      * Initializes a new {@link PasswordResetServlet}.
@@ -104,48 +112,55 @@ public class PasswordResetServlet extends HttpServlet {
     }
 
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Tools.disableCaching(response);
+        Translator translator = Translator.EMPTY;
         try {
-            // Create a new HttpSession if it is missing
+            TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+            translator = translatorFactory.translatorFor(determineLocale(request, null));
+
             request.getSession(true);
 
-            // Read share token
             String token = request.getParameter("share");
             if (Strings.isEmpty(token)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                sendInvalidRequest(translator, response);
                 return;
             }
 
-            // Get UUID to confirm
-            String confirm = request.getParameter("confirm");
-
             ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
-            GuestInfo guestInfo = shareService.resolveGuest(token);
+            GuestShare guestShare = shareService.resolveToken(token);
+            if (guestShare == null) {
+                sendInvalidRequest(translator, response);
+                return;
+            }
 
+            GuestInfo guestInfo = guestShare.getGuest();
             if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
-                LOG.debug("Bad attempt to reset password for share '{}'", token);
-                response.sendError(HttpServletResponse.SC_FORBIDDEN);
+                sendInvalidRequest(translator, response);
                 return;
             }
 
             int contextID = guestInfo.getContextID();
-
-            UserService userService = ShareServiceLookup.getService(UserService.class, true);
-            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
-
             int guestID = guestInfo.getGuestID();
-            User storageUser = userService.getUser(guestID, context);
+            translator = translatorFactory.translatorFor(determineLocale(request, guestInfo));
+            Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+            User storageUser = ShareServiceLookup.getService(UserService.class, true).getUser(guestID, context);
 
             GuestService guestService = ShareServiceLookup.getService(GuestService.class);
-            if ((guestService != null) && (guestInfo.getAuthentication() == AuthenticationMode.GUEST_PASSWORD) && (storageUser.isGuest()) && (guestService.isCrossContextGuestHandlingEnabled())) {
+            if (guestService != null && guestService.isCrossContextGuestHandlingEnabled()) {
                 storageUser = guestService.alignUserWithGuest(storageUser, context.getContextId());
             }
 
-            String hash = getHash(storageUser.getUserPassword());
-            if (null == confirm) {
-                // Generate hash and send link to confirm
-                GuestShare guestShare = shareService.resolveToken(token);
+            String userPassword = storageUser.getUserPassword();
+            if (userPassword == null) {
+                // Should not happen due to previous auth mode check but a race condition could cause a NPE here
+                sendInvalidRequest(translator, response);
+                return;
+            }
 
+            String hash = getHash(userPassword);
+            String confirm = request.getParameter("confirm");
+            if (Strings.isEmpty(confirm)) {
                 /*
                  * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
                  */
@@ -155,52 +170,134 @@ public class PasswordResetServlet extends HttpServlet {
                 /*
                  * Redirect after notification was sent.
                  */
-                String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                    URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                    "reset_password");
-                response.setStatus(HttpServletResponse.SC_FOUND);
+                String redirectUrl = new LoginLocationBuilder()
+                    .status("reset_password_info")
+                    .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.RESET_PASSWORD), guestShare.getGuest().getEmailAddress()))
+                    .share(guestInfo.getBaseToken())
+                    .build();
                 response.sendRedirect(redirectUrl);
             } else {
-                // Try to set new password
                 if (confirm.equals(hash)) {
-                    GuestShare guestShare = shareService.resolveToken(token);
-                    User guest = userService.getUser(guestInfo.getGuestID(), guestInfo.getContextID());
-
-                    UserImpl user = new UserImpl(guest);
-                    user.setPasswordMech(guest.getPasswordMech());
-                    user.setUserPassword(PasswordUtility.INITIAL_GUEST_PASSWORD);
-                    userService.updateUser(user, context);
-                    userService.invalidateUser(context, guestID);
-                    ShareServiceLookup.getService(GuestService.class).updateGuestUser(user, guestInfo.getContextID());
-                    String status = "require_password";
-                    int emptyGuestPasswords = loginConfig.getEmptyGuestPasswords();
-                    if (emptyGuestPasswords > 0) {
-                        String count = ShareServiceLookup.getService(UserService.class).getUserAttribute("guestLoginWithoutPassword", guestInfo.getGuestID(), context);
-                        int loginCount = null != count ? Integer.parseInt(count) : 0;
-                        if (emptyGuestPasswords > loginCount) {
-                            status = "ask_password";
-                        }
-                    }
-                    String redirectUrl = ShareRedirectUtils.getRedirectUrl(guestShare.getGuest(), guestShare.getSingleTarget(), this.loginConfig.getLoginConfig(),
-                        URIUtil.encodeQuery(String.format(translate(ShareServletStrings.RESET_PASSWORD_DONE, guestShare.getGuest().getLocale()), guestShare.getGuest().getEmailAddress())), "INFO",
-                        status);
-                    response.setStatus(HttpServletResponse.SC_FOUND);
-                    response.sendRedirect(redirectUrl);
+                    LoginLocationBuilder redirectUrl = new LoginLocationBuilder()
+                        .status("reset_password")
+                        .message(MessageType.INFO, String.format(translator.translate(ShareServletStrings.CHOOSE_PASSWORD), guestShare.getGuest().getEmailAddress()))
+                        .parameter("confirm", confirm)
+                        .share(guestInfo.getBaseToken());
+                    response.sendRedirect(redirectUrl.build());
                 } else {
-                    LOG.debug("Bad attempt to reset password for share '{}'", token);
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN);
-                    return;
+                    sendInvalidRequest(translator, response);
                 }
             }
         } catch (RateLimitedException e) {
             e.send(response);
         } catch (OXException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendInternalError(translator, response);
         } catch (NoSuchAlgorithmException e) {
             LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            sendInternalError(translator, response);
         }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        Tools.disableCaching(response);
+        Translator translator = Translator.EMPTY;
+        try {
+            TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+            translator = translatorFactory.translatorFor(determineLocale(request, null));
+
+            request.getSession(true);
+
+            String token = request.getParameter("share");
+            if (Strings.isEmpty(token)) {
+                sendInvalidRequest(translator, response);
+                return;
+            }
+
+            String confirm = request.getParameter("confirm");
+            if (Strings.isEmpty(confirm)) {
+                sendInvalidRequest(translator, response);
+                return;
+            }
+
+            String newPassword = request.getParameter("password");
+            if (Strings.isEmpty(newPassword)) {
+                sendInvalidRequest(translator, response);
+                return;
+            }
+
+            ShareService shareService = ShareServiceLookup.getService(ShareService.class, true);
+            GuestShare guestShare = shareService.resolveToken(token);
+            if (guestShare == null) {
+                sendInvalidRequest(translator, response);
+                return;
+            }
+
+            GuestInfo guestInfo = guestShare.getGuest();
+            if (AuthenticationMode.GUEST_PASSWORD != guestInfo.getAuthentication()) {
+                sendInvalidRequest(translator, response);
+                return;
+            }
+
+            int contextID = guestInfo.getContextID();
+            int guestID = guestInfo.getGuestID();
+            translator = translatorFactory.translatorFor(determineLocale(request, guestInfo));
+            User storageUser = loadAndPrepareGuest(guestID, contextID);
+
+            String hash = getHash(storageUser.getUserPassword());
+            if (confirm.equals(hash)) {
+                Context context = ShareServiceLookup.getService(ContextService.class, true).getContext(contextID);
+                User updatedGuest = updatePassword(guestID, context, newPassword);
+                if (!ShareServletUtils.createSessionAndRedirect(guestShare, guestShare.getSingleTarget(), request, response, loginMethod(updatedGuest, context))) {
+                    sendInternalError(translator, response);
+                }
+            } else {
+                sendInvalidRequest(translator, response);
+            }
+        } catch (RateLimitedException e) {
+            e.send(response);
+        } catch (OXException e) {
+            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            sendInternalError(translator, response);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("Error processing reset-password '{}': {}", request.getPathInfo(), e.getMessage(), e);
+            sendInternalError(translator, response);
+        }
+    }
+
+    private static LoginMethodClosure loginMethod(final User user, final Context context) {
+        return new LoginMethodClosure() {
+            @Override
+            public Authenticated doAuthentication(LoginResultImpl retval) throws OXException {
+                return new ShareAuthenticated(user, context);
+            }
+        };
+    }
+
+    private User updatePassword(int userId, Context context, String newPassword) throws OXException {
+        UserService userService = ShareServiceLookup.getService(UserService.class, true);
+        User guest = userService.getUser(userId, context);
+        UserImpl user = new UserImpl(guest);
+        user.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+        try {
+            user.setUserPassword(PasswordMech.BCRYPT.encode(newPassword));
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
+        }
+        userService.updateUser(user, context);
+        userService.invalidateUser(context, userId);
+        return userService.getUser(userId, context);
+    }
+
+    private User loadAndPrepareGuest(int userId, int contextId) throws OXException {
+        UserService userService = ShareServiceLookup.getService(UserService.class, true);
+        User storageUser = userService.getUser(userId, contextId);
+        GuestService guestService = ShareServiceLookup.getService(GuestService.class);
+        if (guestService != null && guestService.isCrossContextGuestHandlingEnabled()) {
+            return guestService.alignUserWithGuest(storageUser, contextId);
+        }
+        return storageUser;
     }
 
     private String getHash(String toHash) throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -209,6 +306,25 @@ public class PasswordResetServlet extends HttpServlet {
         md.update(toHash.getBytes("UTF-8"));
         md.update(loginConfig.getCookieHashSalt());
         byte[] hash = md.digest();
-        return com.openexchange.tools.encoding.Base64.encode(hash);
+        // URL safe encoding without padding. Don't use plain base64 here!
+        return BaseEncoding.base64Url().omitPadding().encode(hash);
     }
+
+    private static void sendInvalidRequest(Translator translator, HttpServletResponse response) throws IOException {
+        String redirectUrl = new LoginLocationBuilder()
+            .status("invalid_request")
+            .message(MessageType.ERROR, translator.translate(ShareServletStrings.INVALID_REQUEST))
+            .build();
+        response.sendRedirect(redirectUrl);
+    }
+
+    private static void sendInternalError(Translator translator, HttpServletResponse response) throws IOException {
+        String redirectUrl = new LoginLocationBuilder()
+            .status("internal_error")
+            .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
+            .build();
+        response.sendRedirect(redirectUrl);
+    }
+
 }
+

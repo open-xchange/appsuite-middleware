@@ -49,11 +49,16 @@
 
 package com.openexchange.contact.storage.rdb.test;
 
+import junit.framework.JUnit4TestAdapter;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import com.openexchange.contact.storage.rdb.internal.DeduplicatorTest;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
+import com.openexchange.contact.storage.rdb.search.AutoCompleteAdapterTest;
+import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 
 /**
  * {@link UnitTests}
@@ -63,7 +68,8 @@ import com.openexchange.contact.storage.rdb.internal.RdbContactStorageTest;
 @RunWith(Suite.class)
 @SuiteClasses({
     DeduplicatorTest.class,
-    RdbContactStorageTest.class
+    RdbContactStorageTest.class,
+    AutocompleteAdapter.class
 })
 public class UnitTests {
 
@@ -74,4 +80,15 @@ public class UnitTests {
         super();
     }
 
+    /**
+     * Creates the unit test suite.
+     *
+     * @return The test suite
+     */
+    public static Test suite() {
+        TestSuite tests = new TestSuite();
+        tests.addTest(new JUnit4TestAdapter(DeduplicatorTest.class));
+        tests.addTest(new JUnit4TestAdapter(AutoCompleteAdapterTest.class));
+        return tests;
+    }
 }

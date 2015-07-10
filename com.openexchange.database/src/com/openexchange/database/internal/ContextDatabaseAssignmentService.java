@@ -50,6 +50,7 @@
 package com.openexchange.database.internal;
 
 import java.sql.Connection;
+import java.util.Map;
 import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
 
@@ -110,5 +111,16 @@ interface ContextDatabaseAssignmentService {
 
     String[] getUnfilledSchemas(Connection con, int poolId, int maxContexts) throws OXException;
 
-    void lock(Connection con) throws OXException;
+    /**
+     * Gets the number of contexts per schema that are located in given database identified by <code>poolId</code>.
+     *
+     * @param con The connection to the config database
+     * @param poolId The pool identifier
+     * @param maxContexts The max. number of contexts per schema
+     * @return A maping providing the count per schema
+     * @throws OXException If schema count cannot be returned
+     */
+    Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException;
+
+    void lock(Connection con, int writePoolId) throws OXException;
 }

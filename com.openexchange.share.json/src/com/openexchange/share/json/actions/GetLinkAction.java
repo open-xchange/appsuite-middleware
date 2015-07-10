@@ -60,7 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
@@ -110,13 +110,13 @@ public class GetLinkAction extends AbstractShareAction {
              * create share
              */
             CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
-            ShareInfo share = createPerformer.perform().get(recipient).get(0);
+            CreatedShare share = createPerformer.perform().getShare(recipient);
             /*
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
-            jResult.put("token", share.getGuest().getBaseToken());
+            jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
+            jResult.put("token", share.getToken());
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

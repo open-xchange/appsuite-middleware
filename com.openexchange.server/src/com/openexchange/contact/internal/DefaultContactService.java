@@ -438,7 +438,6 @@ public abstract class DefaultContactService implements ContactService {
         return this.doCheckIfFolderContainsForeignObjects(session, folderID);
     }
 
-
 	/*
 	 * -----------------------------------------------------------------------------------------------------------------------------------
 	 */

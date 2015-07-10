@@ -86,7 +86,6 @@ import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.parser.FolderParser;
 import com.openexchange.ajax.parser.MessagingFolderParser;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.ajax.writer.FolderWriter;
 import com.openexchange.ajax.writer.FolderWriter.FolderFieldWriter;
 import com.openexchange.ajax.writer.MessagingFolderWriter;
@@ -259,7 +258,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase(ACTION_GET)) {
             actionGetFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via GET on module folders"));
         }
     }
 
@@ -279,7 +278,7 @@ public class Folder extends SessionServlet implements OXExceptionConstants {
         } else if (actionStr.equalsIgnoreCase("removetestfolders")) {
             actionPutRemoveTestFolder(req, resp);
         } else {
-            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on "+DefaultDispatcherPrefixService.getInstance().getPrefix() + "folders"));
+            throw getWrappingOXException(new Exception("Action \"" + actionStr + "\" NOT supported via PUT on module folders"));
         }
     }
 

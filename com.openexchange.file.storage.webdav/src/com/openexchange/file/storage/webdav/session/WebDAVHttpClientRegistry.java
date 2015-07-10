@@ -112,7 +112,7 @@ public final class WebDAVHttpClientRegistry {
      * @param contextId The context identifier
      * @param userId The user identifier
      * @param accountId The account identifier
-     * @return <code>true</code> if such a facebook session is present; otherwise <code>false</code>
+     * @return <code>true</code> if such a session is present; otherwise <code>false</code>
      */
     public boolean containsClient(final int contextId, final int userId, final String accountId) {
         final ConcurrentMap<String, HttpClient> inner = map.get(SimpleKey.valueOf(contextId, userId));
@@ -177,9 +177,9 @@ public final class WebDAVHttpClientRegistry {
     }
 
     /**
-     * Gets a {@link Iterator iterator} over the facebook sessions in this registry.
+     * Gets a {@link Iterator iterator} over the sessions in this registry.
      *
-     * @return A {@link Iterator iterator} over the facebook sessions in this registry.
+     * @return A {@link Iterator iterator} over the sessions in this registry.
      */
     Iterator<ConcurrentMap<String, HttpClient>> iterator() {
         return map.values().iterator();

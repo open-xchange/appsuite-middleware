@@ -59,6 +59,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.events.subscribe.DriveSubscriptionStore;
 import com.openexchange.drive.DriveService;
@@ -214,6 +215,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
             final String route = requestData.getRoute();
             final int port = null != requestData.optHttpServletRequest() ? requestData.optHttpServletRequest().getServerPort() : -1;
             final String host = determineHost(requestData, session);
+            final String prefix = Services.getService(DispatcherPrefixService.class).getPrefix();
             hostData = new HostData() {
 
                 @Override
@@ -234,6 +236,11 @@ public abstract class AbstractDriveAction implements AJAXActionService {
                 @Override
                 public String getHost() {
                     return host;
+                }
+
+                @Override
+                public String getDispatcherPrefix() {
+                    return prefix;
                 }
             };
         }

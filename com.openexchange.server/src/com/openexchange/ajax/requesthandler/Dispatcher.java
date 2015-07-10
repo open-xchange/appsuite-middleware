@@ -67,7 +67,13 @@ public interface Dispatcher {
      * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
      * <p>
      * All requests starting with this prefix are directed to dispatcher framework.
+     *
+     * @deprecated Use {@link DispatcherPrefixService} instead! Classes of the AJAX framework (i.e.
+     *             non-module-specific classes below the com.openexchange.ajax package might also
+     *             use {@link Dispatchers#getPrefix()} after the framework is guaranteed to be initialized.
+     *
      */
+    @Deprecated
     public static final AtomicReference<String> PREFIX = new AtomicReference<String>(DispatcherPrefixService.DEFAULT_PREFIX);
 
     /**

@@ -175,7 +175,7 @@ public final class UpdateAction extends AbstractFolderAction {
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         final FolderResponse<Void> response = folderService.updateFolder(folder, timestamp, session, new FolderServiceDecorator().put("permissions", request.getParameter("permissions"))
             .put("altNames", request.getParameter("altNames")).put("autorename", request.getParameter("autorename")).put("suppressUnifiedMail", isSuppressUnifiedMail(request, session))
-            .put("cascadePermissions", cascadePermissions).put("ignoreWarnings", Boolean.valueOf(ignoreWarnings)).put(id, folderService));
+            .put("cascadePermissions", cascadePermissions).put("ignoreWarnings", Boolean.valueOf(ignoreWarnings)).put(id, folderService).put("ajaxRequestData", request));
         /*
          * Invoke folder.getID() to obtain possibly new folder identifier
          */

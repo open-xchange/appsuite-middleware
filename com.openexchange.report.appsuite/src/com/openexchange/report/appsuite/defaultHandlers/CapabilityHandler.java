@@ -70,7 +70,6 @@ import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.tools.file.QuotaFileStorage;
 
-
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
  * the total number of users that have these settings, admins, and deactivated users.
@@ -80,7 +79,6 @@ import com.openexchange.tools.file.QuotaFileStorage;
 public class CapabilityHandler implements ReportUserHandler, ReportContextHandler, UserReportCumulator, ContextReportCumulator, ReportFinishingTouches {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CapabilityHandler.class);
-
 
     @Override
     public boolean appliesTo(String reportType) {
@@ -101,7 +99,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         }
     }
 
-
     @Override
     public void runUserReport(UserReport userReport) {
         try {
@@ -119,7 +116,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             Collections.sort(c);
 
             StringBuilder cString = new StringBuilder();
-            for(String cap: c) {
+            for (String cap : c) {
                 cString.append(cap).append(",");
             }
 
@@ -142,7 +139,6 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             } else {
                 userReport.set("macdetail", "mailadmin", Boolean.FALSE);
             }
-
         } catch (OXException e) {
             LOG.error("", e);
         }
@@ -152,7 +148,18 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     // So we have to count every unique combination of capabilities
     @Override
     public void merge(UserReport userReport, ContextReport contextReport) {
+        if (userReport.getUser().isGuest()) {
+            handleGuests(userReport, contextReport);
+        } else {
+            handleInternalUser(userReport, contextReport);
+        }
+    }
 
+    /**
+     * @param userReport
+     * @param contextReport
+     */
+    private void handleInternalUser(UserReport userReport, ContextReport contextReport) {
         // Retrieve the capabilities String and List from the userReport
         String capString = userReport.get("macdetail", "capabilities", String.class);
         ArrayList capSet = userReport.get("macdetail", "capabilityList", ArrayList.class);
@@ -168,12 +175,26 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         } else if (userReport.get("macdetail", "disabled", Boolean.class)) {
             incCount(counts, "disabled");
         }
-        // Always increase the total count
+
         incCount(counts, "total");
 
         // For the given set of capabilities, remember the counts and a plain old array list of capabilities
         contextReport.set("macdetail", capString, counts);
         contextReport.set("macdetail-lists", capString, capSet);
+    }
+
+    /**
+     * @param userReport
+     * @param contextReport
+     */
+    private void handleGuests(UserReport userReport, ContextReport contextReport) {
+        HashMap<String, Long> guestCounts = contextReport.get("macdetail", "guests", HashMap.class);
+
+        if (guestCounts == null) {
+            guestCounts = new HashMap<String, Long>();
+        }
+        incCount(guestCounts, "guests");
+        contextReport.set("macdetail", "guests", guestCounts);
     }
 
     private void incCount(HashMap<String, Long> counts, String count) {
@@ -196,7 +217,10 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
 
         String quotaSpec = "fileQuota[" + quota + "]";
 
-        for(Map.Entry<String, Object> entry: macdetail.entrySet()) {
+        for (Map.Entry<String, Object> entry : macdetail.entrySet()) {
+            if (entry.getKey().equalsIgnoreCase("guests")) { // at this moment, do ignore guest entries
+                continue;
+            }
             // The report contains a count of unique capablities + quotas, so our identifier is the
             // alphabetically sorted and comma separated String of capabilities combined with a quota specification
             String capSpec = entry.getKey() + "," + quotaSpec;
@@ -232,9 +256,8 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         report.set("macdetail", "capabilitySets", values);
     }
 
-
     private void add(HashMap<String, Object> savedCounts, HashMap<String, Object> counts) {
-        for(Map.Entry<String, Object> entry: counts.entrySet()) {
+        for (Map.Entry<String, Object> entry : counts.entrySet()) {
             if (entry.getValue() instanceof Long) {
                 Long value = (Long) savedCounts.get(entry.getKey());
                 if (value == null) {
@@ -244,8 +267,5 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
         }
     }
-
-
-
 
 }

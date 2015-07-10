@@ -115,6 +115,7 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -534,7 +535,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
+    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
         SyncSession syncSession = new SyncSession(session);
         DriveStorage storage = syncSession.getStorage();
         Map<String, String> folderIds = new HashMap<String, String>();
@@ -644,7 +645,7 @@ public class DriveServiceImpl implements DriveService {
                 DriveShare driveShare = new DriveShare(shareInfo.getShare());
                 driveShare.setTarget(driveShareTarget);
                 driveShareInfo.setDriveShare(driveShare);
-                
+
                 if (file != null) {
                     driveShareTarget.setName(file.getFileName());
                 }
@@ -655,12 +656,12 @@ public class DriveServiceImpl implements DriveService {
 
         return retval;
     }
-    
+
     private StoredChecksum calculateChecksum(String folderId, File file, SyncSession syncSession) throws OXException {
         if (file != null) {
             return ChecksumProvider.getChecksum(syncSession, file);
         }
-        
+
         return ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderId)).get(0);
     }
 

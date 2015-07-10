@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json;
 
 import java.util.Date;
+import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
@@ -57,8 +58,11 @@ import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.json.actions.files.AJAXInfostoreRequest;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
+import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -71,29 +75,71 @@ public class FileConverter implements ResultConverter {
 
     private final FileMetadataWriter writer;
 
-    public FileConverter() {
+    /**
+     * Initializes a new {@link FileConverter}.
+     *
+     * @param fieldCollector The collector for additional file fields
+     */
+    public FileConverter(FileFieldCollector fieldCollector) {
         super();
-        writer = new FileMetadataWriter();
+        writer = new FileMetadataWriter(fieldCollector);
     }
 
     @Override
     public void convert(final AJAXRequestData requestData, final AJAXRequestResult result, final ServerSession session, final Converter converter) throws OXException {
-        final AJAXInfostoreRequest iReq = new AJAXInfostoreRequest(requestData, session);
+        AJAXInfostoreRequest infostoreRequest = new AJAXInfostoreRequest(requestData, session);
         Object resultObject = result.getResultObject();
-
-        if (resultObject instanceof File) {
-            resultObject = writer.write((File) resultObject, iReq.getTimezone());
+        if (File.class.isInstance(resultObject)) {
+            /*
+             * write single file result
+             */
+            resultObject = writer.write(infostoreRequest, (File) resultObject);
+        } else if (SearchIterator.class.isInstance(resultObject)) {
+            /*
+             * write search iterator result
+             */
+            SearchIterator<File> searchIterator = null;
+            try {
+                searchIterator = (SearchIterator<File>) resultObject;
+                resultObject = writer.write(infostoreRequest, searchIterator);
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
+        } else if (Delta.class.isInstance(resultObject)) {
+            /*
+             * write delta result
+             */
+            SearchIterator<File> newAndModifiedIterator = null;
+            SearchIterator<File> deletedIterator = null;
+            try {
+                Delta<File> deltaResult = (Delta<File>) resultObject;
+                newAndModifiedIterator = deltaResult.results();
+                JSONArray jsonArray = writer.write(infostoreRequest, newAndModifiedIterator);
+                deletedIterator = deltaResult.getDeleted();
+                while (deletedIterator.hasNext()) {
+                    jsonArray.put(deletedIterator.next().getId());
+                }
+                resultObject = jsonArray;
+            } finally {
+                SearchIterators.close(newAndModifiedIterator);
+                SearchIterators.close(deletedIterator);
+            }
         } else if (TimedResult.class.isInstance(resultObject)) {
-            @SuppressWarnings("unchecked")
-            TimedResult<File> timedResult = (TimedResult<File>) resultObject;
-            resultObject = writer.write(timedResult.results(), iReq.getColumns(), iReq.getTimezone());
-            result.setTimestamp(new Date(timedResult.sequenceNumber()));
-        } else if (resultObject instanceof SearchIterator) {
-            @SuppressWarnings("unchecked")
-            final SearchIterator<File> iterator = (SearchIterator<File>) resultObject;
-            resultObject = writer.write(iterator, iReq.getColumns(), iReq.getTimezone());
+            /*
+             * write timed files result
+             */
+            SearchIterator<File> searchIterator = null;
+            try {
+                TimedResult<File> timedResult = (TimedResult<File>) resultObject;
+                result.setTimestamp(new Date(timedResult.sequenceNumber()));
+                searchIterator = timedResult.results();
+                resultObject = writer.write(infostoreRequest, searchIterator);
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
+        } else {
+            throw new UnsupportedOperationException("unknown result object");
         }
-
         result.setResultObject(resultObject);
     }
 

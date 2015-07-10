@@ -73,6 +73,10 @@ public final class QuotaExceptionMessages implements LocalizableStrings {
 
     public static final String QUOTA_EXCEEDED_SHARES_MSG = "Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please delete some shares in order to create new ones. Please note: The quota refers to all shares of one user in this context.";
 
+    public static final String QUOTA_EXCEEDED_SHARE_LINKS_MSG = "Quota exceeded for share links. Quota limit: %2$s. Quota used: %1$s. Please delete some shares in order to create new ones. Please note: The quota refers to all shares of one user in this context.";
+
+    public static final String QUOTA_EXCEEDED_INVITE_GUESTS_MSG = "Quota exceeded for guest users. Quota limit: %2$s. Quota used: %1$s. Please delete some shares in order to create new ones. Please note: The quota refers to all shares of one user in this context.";
+
     /**
      * Initializes a new {@link QuotaExceptionMessages}.
      */

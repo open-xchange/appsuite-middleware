@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.internal.performers;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -69,7 +70,7 @@ import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.osgi.UserServiceHolder;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.groupware.contexts.Context;
@@ -77,8 +78,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link CreatePerformer} - Serves the <code>CREATE</code> request.
@@ -279,19 +282,19 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * check for any present guest permissions
          */
-        ComparedPermissions comparedPermissions = new ComparedPermissions(
-            session.getContext(), toCreate.getPermissions(), new Permission[0], UserServiceHolder.requireUserService(), transactionManager.getConnection());
+        UserService userService = FolderStorageServices.requireService(UserService.class);
+        Permission[] permissions = toCreate.getPermissions();
+        ComparedPermissions comparedPermissions = new ComparedPermissions(session.getContext(), permissions, new Permission[0], userService, transactionManager.getConnection());
+        /*
+         * Check permissions of anonymous guest users
+         */
+        checkAnonymousPermissions(comparedPermissions);
+
         if (comparedPermissions.hasNewGuests()) {
             /*
              * create "plain" folder without guests first...
              */
-            List<GuestPermission> addedGuests = comparedPermissions.getAddedGuests();
-            List<Permission> plainPermissions = new ArrayList<Permission>();
-            for (Permission permission : toCreate.getPermissions()) {
-                if (false == addedGuests.contains(permission)) {
-                    plainPermissions.add(permission);
-                }
-            }
+            List<Permission> plainPermissions = comparedPermissions.getAddedPermissions();
             Folder plainFolder = (Folder) toCreate.clone();
             plainFolder.setPermissions(plainPermissions.toArray(new Permission[plainPermissions.size()]));
             parentStorage.createFolder(plainFolder, storageParameters);
@@ -299,8 +302,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             /*
              * setup shares and guest users, enrich previously skipped guest permissions with real entities
              */
-            processAddedGuestPermissions(
-                session.getUserId(), folderID, plainFolder.getContentType(), addedGuests, transactionManager.getConnection());
+            processAddedGuestPermissions(session.getUserId(), folderID, plainFolder.getContentType(), comparedPermissions.getNewGuestPermissions(), transactionManager.getConnection());
             /*
              * update with re-added guest permissions
              */

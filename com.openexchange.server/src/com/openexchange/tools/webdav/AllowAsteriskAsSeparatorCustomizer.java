@@ -150,6 +150,11 @@ public class AllowAsteriskAsSeparatorCustomizer implements LoginCustomizer {
             public boolean isTransient() {
                 return loginReq.isTransient();
             }
+
+            @Override
+            public String getLanguage() {
+                return loginReq.getLanguage();
+            }
         };
     }
 }

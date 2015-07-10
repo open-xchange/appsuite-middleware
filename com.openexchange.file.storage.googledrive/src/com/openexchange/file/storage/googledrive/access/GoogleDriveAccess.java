@@ -148,7 +148,7 @@ public final class GoogleDriveAccess {
     private volatile long lastAccessed;
 
     /**
-     * Initialises a new {@link FacebookMessagingResource}.
+     * Initialises a new {@link GoogleDriveAccess}.
      *
      * @param fsAccount The Google Drive account providing credentials and settings
      * @param session The session

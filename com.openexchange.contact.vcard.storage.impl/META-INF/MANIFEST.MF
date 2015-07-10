@@ -8,6 +8,7 @@ Eclipse-BuddyPolicy: registered
 Bundle-ClassPath: .
 Bundle-SymbolicName: com.openexchange.contact.vcard.storage.impl
 Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.contact.vcard.storage,
  com.openexchange.database,
  com.openexchange.event,

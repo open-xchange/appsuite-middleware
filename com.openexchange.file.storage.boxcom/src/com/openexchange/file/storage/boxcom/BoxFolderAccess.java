@@ -172,6 +172,11 @@ public final class BoxFolderAccess extends AbstractBoxResourceAccess implements 
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         return perform(new BoxClosure<FileStorageFolder[]>() {
 

@@ -7,6 +7,7 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.group.GroupService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -28,6 +29,7 @@ public class ShareNotificationActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ContextService.class,
             UserService.class,
+            GroupService.class,
             ServerConfigService.class,
             TranslatorFactory.class,
             ModuleSupport.class,

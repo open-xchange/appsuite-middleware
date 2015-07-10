@@ -414,6 +414,11 @@ public final class MailFolderStorage implements FolderStorage {
         }
     }
 
+    @Override
+    public SortableId[] getUserSharedFolders(final String treeId, final ContentType contentType, final StorageParameters storageParameters) throws OXException {
+        throw new UnsupportedOperationException("MailFolderStorage.getUserSharedFolders()");
+    }
+
     private static void addSubfolders(final String fullname, final List<MailFolder> folders, final IMailFolderStorage folderStorage) throws OXException {
         final MailFolder[] subfolders = folderStorage.getSubfolders(fullname, false);
         for (final MailFolder subfolder : subfolders) {

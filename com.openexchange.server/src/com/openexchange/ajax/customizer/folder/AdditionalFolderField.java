@@ -49,9 +49,8 @@
 
 package com.openexchange.ajax.customizer.folder;
 
-import java.util.List;
+import com.openexchange.ajax.customizer.AdditionalField;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link AdditionalFolderField}
@@ -59,46 +58,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  *
  */
-public interface AdditionalFolderField {
-
-    /**
-     * Gets the column identifier
-     *
-     * @return The column identifier
-     */
-    int getColumnID();
-
-    /**
-     * Gets the column name
-     *
-     * @return The column name
-     */
-    String getColumnName();
-
-    /**
-     * Gets the value for given folder
-     *
-     * @param folder The folder
-     * @param session The associated session
-     * @return The value
-     */
-    Object getValue(FolderObject folder, ServerSession session);
-
-    /**
-     * Gets the multiple value for given folder
-     *
-     * @param folder The folder
-     * @param session The associated session
-     * @return The multiple values
-     */
-    List<Object> getValues(List<FolderObject> folder, ServerSession session);
-
-    /**
-     * Renders passed value to its JSON representation
-     *
-     * @param value The value
-     * @return The JSON representation
-     */
-    Object renderJSON(Object value);
+public interface AdditionalFolderField extends AdditionalField<FolderObject> {
 
 }

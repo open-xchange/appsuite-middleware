@@ -55,6 +55,7 @@ import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.jslob.json.JSlobActionFactory;
 import com.openexchange.jslob.json.converter.JSlobJSONResultConverter;
 import com.openexchange.jslob.json.rest.jslob.JSlobRestServlet;
@@ -71,7 +72,7 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { JSlobServiceRegistry.class, ThreadPoolService.class };
+        return new Class<?>[] { JSlobServiceRegistry.class, ThreadPoolService.class, DispatcherPrefixService.class };
     }
 
     @Override
@@ -80,12 +81,13 @@ public class JSlobJSONActivator extends AJAXModuleActivator {
         registerModule(new JSlobActionFactory(this), "jslob");
         registerService(ResultConverter.class, new JSlobJSONResultConverter());
 
+        final DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
         track(HttpService.class, new SimpleRegistryListener<HttpService>() {
 
             @Override
             public void added(final ServiceReference<HttpService> ref, final HttpService service) {
                 try {
-                    service.registerServlet("/jslob", new JSlobRestServlet(), null, null);
+                    service.registerServlet("/jslob", new JSlobRestServlet(dispatcherPrefixService.getPrefix()), null, null);
                 } catch (final ServletException e) {
                     log.error("Servlet registration failed: {}", JSlobRestServlet.class.getName(), e);
                 } catch (final NamespaceException e) {

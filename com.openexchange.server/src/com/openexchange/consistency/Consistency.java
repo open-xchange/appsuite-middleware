@@ -660,16 +660,6 @@ public abstract class Consistency implements ConsistencyMBean {
                 DBUtils.closeSQLStuff(rs, stmt);
                 stmt = null;
             }
-            if (DBUtils.tableExists(con, "snippetAttachment")) {
-                stmt = con.prepareStatement("SELECT referenceId FROM snippetAttachment WHERE cid=?");
-                stmt.setInt(1, ctx.getContextId());
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    retval.add(rs.getString(1));
-                }
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt = null;
-            }
         } catch (final SQLException e) {
             throw AttachmentExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {

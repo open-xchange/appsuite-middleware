@@ -135,12 +135,17 @@ public class WebdavGetAction extends WebdavHeadAction {
 	}
 
 	private List<ByteRange> getRanges(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
-		final String byteRanges = req.getHeader("Bytes");
-		if(req.getResource().isCollection()) {
-			return new ArrayList<ByteRange>();
-		}
+	    WebdavResource resource = req.getResource();
+	    if (null == resource || resource.isCollection()) {
+	        return Collections.emptyList();
+	    }
+        Long resourceLength = resource.getLength();
+        if (null == resourceLength || 0 >= resourceLength.longValue()) {
+            return Collections.emptyList();
+        }
 
-		final long length = req.getResource().getLength();
+		final String byteRanges = req.getHeader("Bytes");
+		final long length = resourceLength.longValue();
 
 		final List<ByteRange> retVal = new ArrayList<ByteRange>();
 		if(byteRanges != null) {

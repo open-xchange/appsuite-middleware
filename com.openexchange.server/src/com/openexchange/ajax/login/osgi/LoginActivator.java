@@ -50,13 +50,14 @@
 package com.openexchange.ajax.login.osgi;
 
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
+import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
@@ -64,10 +65,14 @@ import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.format.CompositeLoginFormatter;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.ServiceSet;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.osgi.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.session.reservation.Enhancer;
+import com.openexchange.session.reservation.SessionReservationService;
 import com.openexchange.tokenlogin.TokenLoginService;
 
 /**
@@ -123,15 +128,37 @@ public class LoginActivator extends HousekeepingActivator {
         ServiceSet<LoginRampUpService> rampUp = new ServiceSet<LoginRampUpService>();
         track(LoginRampUpService.class, rampUp);
 
-        final Filter filter = context.createFilter("(|(" + Constants.OBJECTCLASS + '=' + ConfigurationService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + HttpService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + DispatcherPrefixService.class.getName() + ")(" + Constants.OBJECTCLASS + '=' + LoginRequestHandler.class.getName() + "))");
-        rememberTracker(new ServiceTracker<Object, Object>(context, filter, new LoginServletRegisterer(context, rampUp)));
+        LoginServletRegisterer loginServletRegisterer = new LoginServletRegisterer(context, rampUp);
+        final RedeemReservationLogin redeemReservationLogin = new RedeemReservationLogin();
+        loginServletRegisterer.addLoginRequestHandler(LoginServlet.ACTION_REDEEM_RESERVATION, redeemReservationLogin);
+
+        Filter filter = Tools.generateServiceFilter(context,
+            ConfigurationService.class,
+            HttpService.class,
+            DispatcherPrefixService.class,
+            LoginRequestHandler.class);
+        rememberTracker(new ServiceTracker<Object, Object>(context, filter, loginServletRegisterer));
 
         track(TokenLoginService.class, new TokenLoginCustomizer(context));
+        track(SessionReservationService.class, new SessionReservationCustomizer(context));
+        track(Enhancer.class, new SimpleRegistryListener<Enhancer>() {
+            @Override
+            public void added(ServiceReference<Enhancer> ref, Enhancer service) {
+                redeemReservationLogin.addEnhancer(service);
+            }
+
+            @Override
+            public void removed(ServiceReference<Enhancer> ref, Enhancer service) {
+                redeemReservationLogin.removeEnhancer(service);
+            }
+        });
         openTrackers();
 
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         final String loginFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.login");
         final String logoutFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.logout");
         LoginPerformer.setLoginFormatter(new CompositeLoginFormatter(loginFormat, logoutFormat));
+
+
     }
 }

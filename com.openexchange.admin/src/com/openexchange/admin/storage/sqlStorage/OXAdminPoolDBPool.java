@@ -51,6 +51,7 @@ package com.openexchange.admin.storage.sqlStorage;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DatabaseService;
@@ -279,6 +280,16 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws PoolException {
+        try {
+            return getService().getContextCountPerSchema(con, poolId, maxContexts);
+        } catch (OXException e) {
+            log.error("Error getting unfilled schemas", e);
+            throw new PoolException(e.getMessage());
+        }
+    }
+
+    @Override
     public int getWritePool(int contextId) throws PoolException {
         try {
             return getService().getWritablePool(contextId);
@@ -299,9 +310,9 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
-    public void lock(Connection con) throws PoolException {
+    public void lock(Connection con, int writePoolId) throws PoolException {
         try {
-            getService().lock(con);
+            getService().lock(con, writePoolId);
         } catch (OXException e) {
             log.error("Error locking context_server2db_pool table", e);
             throw new PoolException(e.getMessage());

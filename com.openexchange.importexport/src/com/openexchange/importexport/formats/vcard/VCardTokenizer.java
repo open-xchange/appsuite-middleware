@@ -58,10 +58,6 @@ import java.util.List;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.ICalendar;
-import com.openexchange.tools.versit.VCard;
-import com.openexchange.tools.versit.old.VCalendar10;
-import com.openexchange.tools.versit.old.VCard21;
 
 /**
  * This mighty class splits a given VCard file into several chunks/tokens (from each BEGIN to END), returns them, plus the VersitDefinition,
@@ -120,13 +116,13 @@ public class VCardTokenizer {
 
                 if (compLine.startsWith("VERSION")) {
                     if (potentialCard && currLine.trim().endsWith(VCARD_V3)) {
-                        currentChunk.setVersitDefinition(VCard.definition);
+                        currentChunk.setVersitDefinition(VCARD_V3);
                     } else if (potentialCard && compLine.endsWith(VCARD_V21)) {
-                        currentChunk.setVersitDefinition(VCard21.definition);
+                        currentChunk.setVersitDefinition(VCARD_V21);
                     } else if (potentialCalendar && compLine.endsWith(VCALENDAR)) {
-                        currentChunk.setVersitDefinition(VCalendar10.definition);
+                        currentChunk.setVersitDefinition(VCALENDAR);
                     } else if (potentialCalendar && compLine.endsWith(ICALENDAR)) {
-                        currentChunk.setVersitDefinition(ICalendar.definition);
+                        currentChunk.setVersitDefinition(ICALENDAR);
                     }
                 } else if (compLine.startsWith("BEGIN") && compLine.endsWith("VCALENDAR")) {
                     potentialCalendar = true;

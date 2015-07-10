@@ -1164,18 +1164,6 @@ if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
     ox_set_property html.style.background-position "\",N,top,bottom,center,left,right,\"" /opt/open-xchange/etc/whitelist.properties
 fi
 
-# SoftwareChange_Request-2444
-PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
-if ! grep "com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask" >/dev/null $PFILE; then
-    cat >> $PFILE <<EOF
-
-# v7.6.2 update tasks start here
-
-# Deletes remnants for removed Facebook subscription
-!com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask
-EOF
-fi
-
 # SoftwareChange_Request-2456
 ox_add_property com.openexchange.caching.jcs.remoteInvalidationForPersonalFolders false /opt/open-xchange/etc/cache.properties
 
@@ -1190,6 +1178,12 @@ ox_add_property com.openexchange.subscribe.createModifyEnabled false /opt/open-x
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy "" /opt/open-xchange/etc/autoconfig.properties
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
 ox_add_property com.openexchange.mail.autoconfig.ispdb.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+
+# SoftwareChange_Request-2541
+VALUE=$(ox_read_property com.openexchange.hazelcast.maxOperationTimeout /opt/open-xchange/etc/hazelcast.properties)
+if [ "5000" = "$VALUE" ]; then
+    ox_set_property com.openexchange.hazelcast.maxOperationTimeout 30000 /opt/open-xchange/etc/hazelcast.properties
+fi
 
 # SoftwareChange_Request-2546
 VALUE=$(ox_read_property com.openexchange.push.allowedClients /opt/open-xchange/etc/mail-push.properties)
@@ -1206,6 +1200,13 @@ VALUE=$(ox_read_property com.openexchange.IPCheckWhitelist /opt/open-xchange/etc
 if [ "" = "$VALUE" ]; then
     ox_set_property com.openexchange.IPCheckWhitelist "\"open-xchange-mailapp\"" /opt/open-xchange/etc/server.properties
 fi
+
+# SoftwareChange_Request-2568
+ox_add_property com.openexchange.contact.storeVCards true /opt/open-xchange/etc/contact.properties
+ox_add_property com.openexchange.contact.maxVCardSize 4194304 /opt/open-xchange/etc/contact.properties
+
+# SoftwareChange_Request-2575
+ox_add_property com.openexchange.capability.mobile_mail_app false /opt/open-xchange/etc/permissions.properties
 
 PROTECT="configdb.properties mail.properties management.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
@@ -1247,6 +1248,18 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-07-10
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-07-02 (2611)
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2578)
+* Fri Jul 03 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2542)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-26 (2573)
+* Wed Jun 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-06-29 (2569)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-06-08 (2540)
 * Wed Jun 10 2015 Marcus Klein <marcus.klein@open-xchange.com>

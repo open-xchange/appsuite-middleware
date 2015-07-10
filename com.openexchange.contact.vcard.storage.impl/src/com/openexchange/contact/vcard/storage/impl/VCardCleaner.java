@@ -51,6 +51,8 @@ package com.openexchange.contact.vcard.storage.impl;
 
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
@@ -69,16 +71,19 @@ public class VCardCleaner implements EventHandler {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(VCardCleaner.class);
 
-    private final VCardStorageService vCardStorage;
+    private final VCardStorageFactory vCardStorageFactory;
+
+    private final ConfigViewFactory configViewFactory;
 
     /**
      * Initializes a new {@link VCardCleaner}.
      *
-     * @param vCardStorage The underlying vCard storage
+     * @param vCardStorageFactory The underlying vCard storage
      */
-    public VCardCleaner(VCardStorageService vCardStorage) {
+    public VCardCleaner(ConfigViewFactory configViewFactory, VCardStorageFactory vCardStorageFactory) {
         super();
-        this.vCardStorage = vCardStorage;
+        this.vCardStorageFactory = vCardStorageFactory;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -92,7 +97,10 @@ public class VCardCleaner implements EventHandler {
                     String vCardID = contact.getVCardId();
                     if (!Strings.isEmpty(vCardID)) {
                         try {
-                            vCardStorage.deleteVCard(vCardID, contextID);
+                            VCardStorageService vCardStorageService = vCardStorageFactory.getVCardStorageService(configViewFactory, contextID);
+                            if (vCardStorageService != null) {
+                                vCardStorageService.deleteVCard(vCardID, contextID);
+                            }
                         } catch (OXException oxException) {
                             LOG.warn("Error while deleting the VCard with id {} in context {} from storage.", vCardID, contextID, oxException);
                         }

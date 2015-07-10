@@ -76,8 +76,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class MailNotificationHandler implements ShareNotificationHandler<InternetAddress> {
 
-    private final TransportProvider transportProvider;
-
     private final ServiceLookup services;
 
     /**
@@ -86,7 +84,6 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
      */
     public MailNotificationHandler(ServiceLookup services) throws OXException {
         super();
-        this.transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
         this.services = services;
     }
 
@@ -118,6 +115,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
     }
 
     private void sendShareCreated(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        TransportProvider transportProvider = getTransportProvider();
         ShareCreatedNotification<InternetAddress> casted = (ShareCreatedNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ShareCreatedMail.init(casted, transportProvider, services).compose();
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
@@ -128,9 +126,14 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
     }
 
     private void sendPasswordResetConfirm(ShareNotification<InternetAddress> notification) throws UnsupportedEncodingException, OXException, MessagingException {
+        TransportProvider transportProvider = getTransportProvider();
         PasswordResetConfirmNotification<InternetAddress> casted = (PasswordResetConfirmNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ConfirmPasswordResetMail.init(casted, transportProvider, services).compose();
         sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
+    }
+
+    private TransportProvider getTransportProvider() {
+        return TransportProviderRegistry.getTransportProvider("smtp");
     }
 
     private static void sendMail(MailTransport transport, ComposedMailMessage mail) throws OXException {

@@ -68,11 +68,12 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     private File file;
     private TargetProxyType proxyType;
+    private final boolean isPublic;
 
-
-    public FileTargetProxy(File file) {
+    public FileTargetProxy(File file, boolean isPublic) {
         super();
         this.file = file;
+        this.isPublic = isPublic;
     }
 
     @Override
@@ -111,8 +112,8 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     public File getFile() {
         return file;
-    };
-    
+    }
+
     @Override
     public TargetProxyType getProxyType() {
         if (proxyType == null) {
@@ -120,6 +121,12 @@ public class FileTargetProxy extends AbstractTargetProxy {
         }
         return proxyType;
     }
+
+    @Override
+    public boolean isPublic() {
+        return isPublic;
+    }
+
 
     private static final PermissionConverter<FileStorageObjectPermission> CONVERTER = new PermissionConverter<FileStorageObjectPermission>() {
 

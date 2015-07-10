@@ -547,12 +547,17 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int unreadMsgs = mail.getUnreadMessages();
             mail.setUnreadMessages(unreadMsgs < 0 ? 0 : unreadMsgs + 1);
         }
-        final List<OXException> warnings = new ArrayList<OXException>(2);
-        final int maxContentSize = AJAXRequestDataTools.parseIntParameter(paramContainer.getStringParam(Mail.PARAMETER_MAX_SIZE), -1);
-        final boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
+        List<OXException> warnings = new ArrayList<OXException>(2);
+        int maxContentSize = AJAXRequestDataTools.parseIntParameter(paramContainer.getStringParam(Mail.PARAMETER_MAX_SIZE), -1);
+        boolean allowNestedMessages;
+        {
+            String str = paramContainer.getStringParam(Mail.PARAMETER_ALLOW_NESTED_MESSAGES);
+            allowNestedMessages = null == str ? true : AJAXRequestDataTools.parseBoolParameter(str);
+        }
+        boolean exactLength = AJAXRequestDataTools.parseBoolParameter(paramContainer.getStringParam("exact_length"));
         JSONObject jMail;
         try {
-            jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, token, ttlMillis, mimeFilter, timeZone, exactLength, maxContentSize);
+            jMail = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, token, ttlMillis, mimeFilter, timeZone, exactLength, maxContentSize, allowNestedMessages ? -1 : 1);
         } catch (final OXException e) {
             if (MailExceptionCode.MESSAGING_ERROR.equals(e)) {
                 final Throwable cause = e.getCause();
@@ -562,14 +567,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                     throw MimeMailException.handleMessagingException((MessagingException) cause, null, session);
                 }
             } else if (MailExceptionCode.MAIL_NOT_FOUND.equals(e) || MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.equals(e)) {
-                final StringBuilder sb = new StringBuilder("Requested mail could not be found  (");
-                sb.append("folder=").append(paramContainer.getStringParam(AJAXServlet.PARAMETER_FOLDERID));
-                sb.append(", id=").append(paramContainer.getStringParam(AJAXServlet.PARAMETER_ID));
-                sb.append(", user=").append(session.getUserId());
-                sb.append(", context=").append(session.getContextId()).append(')');
-                sb.append("Most likely this is caused by concurrent access of multiple clients ");
-                sb.append("while one performed a delete on affected mail.");
-                LOG.warn(sb.toString(), e);
+                LOG.warn("Requested mail could not be found  (folder={}, id={}, user={}, context={}). Most likely this is caused by concurrent access of multiple clients while one performed a delete on affected mail.", paramContainer.getStringParam(AJAXServlet.PARAMETER_FOLDERID), paramContainer.getStringParam(AJAXServlet.PARAMETER_ID), session.getUserId(), session.getContextId(), e);
             }
             throw e;
         }
@@ -644,8 +642,9 @@ public final class MailConverter implements ResultConverter, MailActionConstants
          */
         DisplayMode displayMode = AbstractMailAction.detectDisplayMode(true, view, usmNoSave);
         int maxContentSize = AJAXRequestDataTools.parseIntParameter(requestData.getParameter(Mail.PARAMETER_MAX_SIZE), -1);
+        boolean allowNestedMessages = AJAXRequestDataTools.parseBoolParameter(Mail.PARAMETER_ALLOW_NESTED_MESSAGES, requestData, true);
         List<OXException> warnings = new ArrayList<OXException>(2);
-        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize);
+        JSONObject jsonObject = MessageWriter.writeMailMessage(mail.getAccountId(), mail, displayMode, embedded, session, usmNoSave, warnings, false, -1, null, null, false, maxContentSize, allowNestedMessages ? -1 : 1);
 
         {
             String csid = (String) result.getParameter("csid");
