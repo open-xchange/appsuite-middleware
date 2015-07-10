@@ -59,6 +59,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.database.provider.DBProvider;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
@@ -66,7 +67,6 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
-import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -231,7 +231,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    protected FileStorage getFileStorage(final Context ctx) {
+    protected List<FileStorage> getFileStorages(final Context ctx) {
         throw new UnsupportedOperationException();
     }
 
