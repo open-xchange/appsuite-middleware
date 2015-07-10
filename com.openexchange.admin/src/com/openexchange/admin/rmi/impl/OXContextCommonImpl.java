@@ -124,7 +124,7 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
     protected abstract Context createmaincall(final Context ctx, final User admin_user, Database db, UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException;
 
     protected SchemaSelectStrategy getDefaultSchemaSelectStrategy() {
-        return SchemaSelectStrategy.automatic();
+        return SchemaSelectStrategy.getDefault();
     }
 
     protected Context createcommon(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws InvalidCredentialsException, ContextExistsException, InvalidDataException, StorageException {

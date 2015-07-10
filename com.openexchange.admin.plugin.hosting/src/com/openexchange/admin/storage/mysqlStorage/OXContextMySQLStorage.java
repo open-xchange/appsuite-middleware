@@ -1352,7 +1352,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         // The effective strategy
-        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.automatic() : schemaSelectStrategy;
+        SchemaSelectStrategy effectiveStrategy = null == schemaSelectStrategy ? SchemaSelectStrategy.getDefault() : schemaSelectStrategy;
 
         // Determine the schema name according to effective strategy
         SchemaCacheRollback cacheRollback = null;

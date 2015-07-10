@@ -67,6 +67,7 @@ import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 
 public abstract class ContextAbstraction extends UserAbstraction {
@@ -81,7 +82,9 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected enum ContextConstants implements CSVConstants {
         contextname(CONTEXT_INITIAL_CONSTANTS_VALUE, OPT_NAME_CONTEXT_NAME_LONG, false),
         quota(CONTEXT_INITIAL_CONSTANTS_VALUE + 1, OPT_QUOTA_LONG, true),
-        lmapping(CONTEXT_INITIAL_CONSTANTS_VALUE + 2, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false);
+        lmapping(CONTEXT_INITIAL_CONSTANTS_VALUE + 2, OPT_CONTEXT_ADD_LOGIN_MAPPINGS_LONG, false),
+        schema(CONTEXT_INITIAL_CONSTANTS_VALUE + 3, SCHEMA_OPT, false),
+        schemaStrategy(CONTEXT_INITIAL_CONSTANTS_VALUE + 4, SCHEMA_STRATEGY_OPT, false);
 
         private final String string;
 
@@ -152,7 +155,7 @@ public abstract class ContextAbstraction extends UserAbstraction {
     protected String dbname = null;
     protected String schema;
     protected String schemaStrategy;
-    
+
     protected final String SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR = "You can not specify \"schema\" and \"schema-strategy\" at the same time.";
     protected final String SCHEMA_NAME_ERROR = "Invalid value for \"schema\". Available values: \"automatic\", \"in-memory\"";
 
@@ -451,6 +454,34 @@ public abstract class ContextAbstraction extends UserAbstraction {
         });
 
         return context;
+    }
+
+    protected SchemaSelectStrategy getSchemaSelectStrategy(String[] nextLine, int[] idArray) throws InvalidDataException {
+        int schemaId = idArray[ContextConstants.schema.getIndex()];
+        int strategyId = idArray[ContextConstants.schemaStrategy.getIndex()];
+
+        if (schemaId != -1 && strategyId != -1) {
+            if (nextLine[schemaId].length() > 0 && nextLine[strategyId].length() > 0) {
+                throw new InvalidDataException(SCHEMA_NAME_AND_SCHEMA_STRATEGY_ERROR);
+            }
+        }
+
+        if (schemaId != -1 && nextLine[schemaId].length() > 0) {
+            return SchemaSelectStrategy.schema(nextLine[schemaId]);
+        }
+
+        if (strategyId != -1 && nextLine[strategyId].length() > 0) {
+            String strategyName = nextLine[strategyId];
+            if (strategyName.equals("automatic")) {
+                return SchemaSelectStrategy.automatic();
+            } else if (strategyName.equals("in-memory")) {
+                return SchemaSelectStrategy.inMemory();
+            } else {
+                throw new InvalidDataException(SCHEMA_NAME_ERROR);
+            }
+        }
+
+        return SchemaSelectStrategy.getDefault();
     }
 
     /**
