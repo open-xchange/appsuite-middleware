@@ -80,6 +80,67 @@ public class DbFileStorage2ContextsResolver implements FileStorage2ContextsResol
     }
 
     @Override
+    public int[] getIdsOfFileStoragesUsedBy(int contextId) throws OXException {
+        DatabaseService databaseService = Services.requireService(DatabaseService.class);
+
+        TIntSet usedFileStorages = new TIntHashSet(8);
+
+        {
+            Connection configDBCon = databaseService.getReadOnly();
+            try {
+                addUsingContext(contextId, usedFileStorages, configDBCon);
+            } finally {
+                databaseService.backReadOnly(configDBCon);
+            }
+        }
+
+        Connection schemaCon = databaseService.getReadOnly(contextId);
+        try {
+            addUsingUsers(contextId, usedFileStorages, schemaCon);
+        } finally {
+            databaseService.backReadOnly(contextId, schemaCon);
+        }
+
+        return usedFileStorages.toArray();
+    }
+
+    private void addUsingContext(int contextId, TIntSet usedFileStorages, Connection configDBCon) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = configDBCon.prepareStatement("SELECT filestore_id FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                usedFileStorages.add(rs.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    private void addUsingUsers(int contextId, TIntSet usedFileStorages, Connection schemaCon) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = schemaCon.prepareStatement("SELECT DISTINCT filestore_id FROM user WHERE cid=? AND filestore_id>0");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                usedFileStorages.add(rs.getInt(1));
+            }
+        } catch (SQLException e) {
+            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------
+
+    @Override
     public int[] getIdsOfContextsUsing(int fileStorageId) throws OXException {
         DatabaseService databaseService = Services.requireService(DatabaseService.class);
 
@@ -151,7 +212,7 @@ public class DbFileStorage2ContextsResolver implements FileStorage2ContextsResol
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = configDBCon.prepareStatement("SELECT cid FROM context ORDER BY cid");
+            stmt = configDBCon.prepareStatement("SELECT cid FROM context");
             rs = stmt.executeQuery();
             TIntList cids = new TIntLinkedList();
             while (rs.next()) {

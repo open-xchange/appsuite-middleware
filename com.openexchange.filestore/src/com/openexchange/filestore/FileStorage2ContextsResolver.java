@@ -52,7 +52,7 @@ package com.openexchange.filestore;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorage2ContextsResolver} - Resolves a certain file storage to those contexts that either itself or at least of its users uses that file storage.
+ * {@link FileStorage2ContextsResolver} - Resolves a certain file storage to those contexts that either itself or at least one of context's users use that file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
@@ -67,5 +67,14 @@ public interface FileStorage2ContextsResolver {
      * @throws OXException If identifiers cannot be returned
      */
     int[] getIdsOfContextsUsing(int fileStorageId) throws OXException;
+
+    /**
+     * Gets the identifiers of those file storages that are used by given context. The one used by itself and the ones used by context's users.
+     *
+     * @param contextId The context identifier
+     * @return The identifiers of used file storages
+     * @throws OXException If identifiers cannot be returned
+     */
+    int[] getIdsOfFileStoragesUsedBy(int contextId) throws OXException;
 
 }
