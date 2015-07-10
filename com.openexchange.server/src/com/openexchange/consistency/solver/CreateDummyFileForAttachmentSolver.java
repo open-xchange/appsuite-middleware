@@ -51,11 +51,12 @@ package com.openexchange.consistency.solver;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.FileStorage;
 
 /**
  * {@link CreateDummyFileForAttachment}
@@ -69,8 +70,8 @@ public class CreateDummyFileForAttachmentSolver extends CreateDummyFileSolver im
 
     private final AttachmentBase attachments;
 
-    public CreateDummyFileForAttachmentSolver(final AttachmentBase attachments, final FileStorage storage) {
-        super(storage);
+    public CreateDummyFileForAttachmentSolver(final AttachmentBase attachments, final List<FileStorage> storages) {
+        super(storages);
         this.attachments = attachments;
     }
 
@@ -83,7 +84,7 @@ public class CreateDummyFileForAttachmentSolver extends CreateDummyFileSolver im
         final Iterator<String> it = problems.iterator();
         for (int k = 0; k < size; k++) {
             try {
-                final String identifier = createDummyFile();
+                final String identifier = createDummyFile(storages.get(0));
                 final String old_identifier = it.next();
                 attachments.setTransactional(true);
                 attachments.startTransaction();

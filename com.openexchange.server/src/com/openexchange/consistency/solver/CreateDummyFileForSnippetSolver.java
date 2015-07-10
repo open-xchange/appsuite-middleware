@@ -53,11 +53,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.tools.file.FileStorage;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -70,8 +71,8 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CreateDummyFileForSnippetSolver.class);
 
-    public CreateDummyFileForSnippetSolver(final FileStorage storage) {
-        super(storage);
+    public CreateDummyFileForSnippetSolver(final List<FileStorage> storages) {
+        super(storages);
     }
 
     @Override
@@ -99,7 +100,7 @@ public class CreateDummyFileForSnippetSolver extends CreateDummyFileSolver imple
                 }
                 // Partly recoverable
                 if (DBUtils.tableExists(con, "snippetAttachment")) {
-                    final String identifier = createDummyFile();
+                    final String identifier = createDummyFile(storages.get(0));
                     stmt = con.prepareStatement("UPDATE snippetAttachment SET referenceId=? WHERE cid=? AND referenceId=?");
                     int pos = 0;
                     stmt.setString(++pos, identifier);

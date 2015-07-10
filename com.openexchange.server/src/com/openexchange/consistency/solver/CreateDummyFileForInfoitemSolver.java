@@ -49,12 +49,14 @@
 
 package com.openexchange.consistency.solver;
 
-import java.text.MessageFormat;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
-import com.openexchange.tools.file.FileStorage;
 
 /**
  * {@link CreateDummyFileForInfostoreItemSolver}
@@ -68,8 +70,8 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
 
     private final DatabaseImpl database;
 
-    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final FileStorage storage) {
-        super(storage);
+    public CreateDummyFileForInfoitemSolver(final DatabaseImpl database, final List<FileStorage> storages) {
+        super(storages);
         this.database = database;
     }
 
@@ -80,13 +82,18 @@ public class CreateDummyFileForInfoitemSolver extends CreateDummyFileSolver impl
          */
         for (final String old_identifier : problems) {
             try {
-                final String identifier = createDummyFile();
-                database.startTransaction();
-                final int changed =
-                    database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
-                database.commit();
-                if (changed == 1) {
-                    LOG.info(MessageFormat.format("Modified entry for identifier {0} in context {1} to new dummy identifier {2}", old_identifier, ctx.getContextId(), identifier));
+                int fsOwner = database.getDocumentHolderFor(old_identifier, ctx);
+                if (fsOwner > 0) {
+                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, ctx.getContextId());
+                    String identifier = createDummyFile(storage);
+                    database.startTransaction();
+                    int changed = database.modifyDocument(old_identifier, identifier, "\nCaution! The file has changed", "text/plain", ctx);
+                    database.commit();
+                    if (changed == 1) {
+                        LOG.info("Modified entry for identifier {} in context {} to new dummy identifier {}", old_identifier, ctx.getContextId(), identifier);
+                    }
+                } else {
+                    LOG.warn("No document holder found for identifier {} in context {}", old_identifier, ctx.getContextId());
                 }
             } catch (final OXException e) {
                 LOG.error("", e);

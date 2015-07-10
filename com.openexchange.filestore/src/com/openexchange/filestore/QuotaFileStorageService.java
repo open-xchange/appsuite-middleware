@@ -96,6 +96,16 @@ public interface QuotaFileStorageService {
     QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException;
 
     /**
+     * Gets the appropriate URI pointing to proper file storage for specified user (or context in case <tt>userId</tt> is <code>-1</code>).
+     *
+     * @param userId The user identifier; pass <code>-1</code> to access context-specific file storage
+     * @param contextId The context identifier
+     * @return The URI pointing to file storage
+     * @throws OXException If URI cannot be returned
+     */
+    URI getFileStorageUriFor(int userId, int contextId) throws OXException;
+
+    /**
      * Invalidates the cache entries bound to given context
      *
      * @param contextId The context identifier

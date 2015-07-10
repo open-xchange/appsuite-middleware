@@ -53,11 +53,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorage2ContextsResolver;
+import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.impl.osgi.Services;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -78,6 +87,75 @@ public class DbFileStorage2ContextsResolver implements FileStorage2ContextsResol
     public DbFileStorage2ContextsResolver() {
         super();
     }
+
+    @Override
+    public List<FileStorage> getFileStoragesUsedBy(int contextId, boolean quotaAware) throws OXException {
+        DatabaseService databaseService = Services.requireService(DatabaseService.class);
+
+        // Get appropriate service
+        QuotaFileStorageService qfsService = FileStorages.getQuotaFileStorageService();
+
+        List<FileStorage> fileStorages = new LinkedList<FileStorage>();
+        if (quotaAware) {
+            // Add the one used by context itself
+            fileStorages.add(qfsService.getQuotaFileStorage(contextId));
+
+            // Add the ones referenced by context's users
+            Set<FsInfo> infos = retrieveFileStoragesFromUsers(contextId, databaseService);
+            for (FsInfo fsInfo : infos) {
+                fileStorages.add(qfsService.getQuotaFileStorage(fsInfo.owner, contextId));
+            }
+        } else {
+            // Get raw service to obtain non-quota-aware instances
+            FileStorageService fsService = FileStorages.getFileStorageService();
+
+            // Add the one used by context itself
+            fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(contextId).getUri()));
+
+            //Add the ones referenced by context's users
+            Set<FsInfo> infos = retrieveFileStoragesFromUsers(contextId, databaseService);
+            for (FsInfo fsInfo : infos) {
+                fileStorages.add(fsService.getFileStorage(qfsService.getQuotaFileStorage(fsInfo.owner, contextId).getUri()));
+            }
+        }
+
+        return fileStorages;
+    }
+
+    private Set<FsInfo> retrieveFileStoragesFromUsers(int contextId, DatabaseService databaseService) throws OXException {
+        Connection schemaCon = databaseService.getReadOnly(contextId);
+        try {
+            return retrieveFileStoragesFromUsers(contextId, schemaCon);
+        } finally {
+            databaseService.backReadOnly(contextId, schemaCon);
+        }
+    }
+
+    private Set<FsInfo> retrieveFileStoragesFromUsers(int contextId, Connection schemaCon) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = schemaCon.prepareStatement("SELECT id, filestore_id, filestore_owner FROM user WHERE cid=? AND filestore_id>0");
+            stmt.setInt(1, contextId);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptySet();
+            }
+
+            // Create sorted set
+            Set<FsInfo> infos = new TreeSet<FsInfo>();
+            do {
+                infos.add(new FsInfo(rs.getInt(1), rs.getInt(2), rs.getInt(3)));
+            } while (rs.next());
+            return infos;
+        } catch (SQLException e) {
+            throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
 
     @Override
     public int[] getIdsOfFileStoragesUsedBy(int contextId) throws OXException {
@@ -223,6 +301,57 @@ public class DbFileStorage2ContextsResolver implements FileStorage2ContextsResol
             throw QuotaFileStorageExceptionCodes.SQLSTATEMENTERROR.create(e);
         } finally {
             Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    private static final class FsInfo implements Comparable<FsInfo> {
+
+        final int fileStorageId;
+        final int owner;
+        private final int hash;
+
+        FsInfo(int userId, int fileStorageId, int owner) {
+            super();
+            this.fileStorageId = fileStorageId;
+            this.owner = owner > 0 ? owner : userId;
+            int prime = 31;
+            int result = prime * 1 + fileStorageId;
+            result = prime * result + owner;
+            hash = result;
+        }
+
+        @Override
+        public int compareTo(FsInfo o) {
+            int result = this.fileStorageId < o.fileStorageId ? -1 : (this.fileStorageId == o.fileStorageId ? 0 : 1);
+            if (0 == result) {
+                result = this.owner < o.owner ? -1 : (this.owner == o.owner ? 0 : 1);
+            }
+            return result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof FsInfo)) {
+                return false;
+            }
+            FsInfo other = (FsInfo) obj;
+            if (fileStorageId != other.fileStorageId) {
+                return false;
+            }
+            if (owner != other.owner) {
+                return false;
+            }
+            return true;
         }
     }
 

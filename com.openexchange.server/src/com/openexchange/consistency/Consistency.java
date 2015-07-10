@@ -83,7 +83,9 @@ import com.openexchange.consistency.solver.RemoveFileSolver;
 import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
+import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentExceptionCodes;
 import com.openexchange.groupware.contexts.Context;
@@ -91,8 +93,6 @@ import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.internal.Tools;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -113,7 +113,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -189,7 +189,7 @@ public abstract class Consistency implements ConsistencyMBean {
             final DoNothingSolver doNothing = new DoNothingSolver();
             final RecordSolver recorder = new RecordSolver();
             final Context ctx = getContext(contextId);
-            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
             return recorder.getProblems();
         } catch (final OXException e) {
             LOG.error("", e);
@@ -391,7 +391,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, recorder, recorder, recorder, recorder, doNothing, recorder, getDatabase(), getAttachments(), getFileStorages(ctx));
             retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
@@ -402,7 +402,7 @@ public abstract class Consistency implements ConsistencyMBean {
         final DoNothingSolver doNothing = new DoNothingSolver();
         for (final Context ctx : contexts) {
             final RecordSolver recorder = new RecordSolver();
-            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorage(ctx));
+            checkOneContext(ctx, doNothing, doNothing, doNothing, doNothing, recorder, doNothing, getDatabase(), getAttachments(), getFileStorages(ctx));
             retval.put(Integer.valueOf(ctx.getContextId()), recorder.getProblems());
         }
         return retval;
@@ -484,10 +484,10 @@ public abstract class Consistency implements ConsistencyMBean {
         final DatabaseImpl database = getDatabase();
         final AttachmentBase attachments = getAttachments();
         for (final Context ctx : contexts) {
-            final FileStorage storage = getFileStorage(ctx);
+            List<FileStorage> storages = getFileStorages(ctx);
 
-            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storage, this, ctx);
-            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storage);
+            final ResolverPolicy resolvers = ResolverPolicy.parse(policy, database, attachments, storages, this, ctx);
+            checkOneContext(ctx, resolvers.dbsolver, resolvers.attachmentsolver, resolvers.snippetsolver, new DeleteBrokenPreviewReferencesSolver(), resolvers.filesolver, resolvers.vCardSolver, database, attachments, storages);
 
             /*
              * The ResourceCache might store resources in the filestorage. Depending on its configuration (preview.properties)
@@ -505,7 +505,7 @@ public abstract class Consistency implements ConsistencyMBean {
             } else {
                 filesToIgnore = getPreviewCacheFileStoreLocationsperContext(ctx);
             }
-            recalculateUsage(storage, filesToIgnore);
+            recalculateUsage(storages, filesToIgnore);
         }
     }
 
@@ -542,41 +542,52 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor) throws OXException {
+    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> storages) throws OXException {
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
         LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
-        try {
-            stor.recreateStateFile();
-        } catch (OXException e) {
-            if (FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
-                // Does not (yet) exist
-                Object[] logArgs = e.getLogArgs();
-                LOG.info("Cannot check files in filestore for context {} since associated filestore does not (yet) exist: {}", ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
-                return;
-            }
+        for (FileStorage stor : storages) {
+            try {
+                stor.recreateStateFile();
+            } catch (OXException e) {
+                if (FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
+                    // Does not (yet) exist
+                    Object[] logArgs = e.getLogArgs();
+                    LOG.info("Cannot check files in filestore{} for context {} since associated filestore does not (yet) exist: {}", ((stor instanceof QuotaFileStorage) ? " "+((QuotaFileStorage) stor).getUri() : ""), ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
+                    return;
+                }
 
-            throw e;
+                throw e;
+            }
         }
 
-        LOG.info("Listing all files in filestore");
-        final SortedSet<String> filestoreset = stor.getFileList();
+        // Get files residing in file storages
+        LOG.info("Listing all files in filestores");
+        SortedSet<String> filestoreset = new TreeSet<String>();
+        for (FileStorage stor : storages) {
+            filestoreset.addAll(stor.getFileList());
+        }
         LOG.info("Found {} files in the filestore for this context", filestoreset.size());
-        LOG.info("Loading all attachments");
-        final SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(ctx);
+
+        // Get the referenced ones
+        SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(ctx);
         LOG.info("Found {} attachments", attachmentset.size());
-        final SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(ctx);
+
+        SortedSet<String> snippetset = getSnippetFileStoreLocationsperContext(ctx);
         LOG.info("Found {} snippets", snippetset.size());
-        final SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(ctx);
+
+        SortedSet<String> previewset = getPreviewCacheFileStoreLocationsperContext(ctx);
         LOG.info("Found {} previews", previewset.size());
-        final SortedSet<String> vcardset = getVCardFileStoreLocationsperContext(ctx);
+
+        SortedSet<String> vcardset = getVCardFileStoreLocationsperContext(ctx);
         LOG.info("Found {} vCards", vcardset.size());
-        SortedSet<String> dbfileset;
+
         try {
             LOG.info("Loading all infostore filestore locations");
-            dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
+            SortedSet<String> dbfileset = database.getDocumentFileStoreLocationsperContext(ctx);
             LOG.info("Found {} infostore filepaths", dbfileset.size());
+
             final SortedSet<String> joineddbfileset = new TreeSet<String>(dbfileset);
             joineddbfileset.addAll(attachmentset);
             joineddbfileset.addAll(snippetset);
@@ -671,14 +682,16 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void recalculateUsage(final FileStorage storage, final Set<String> filesToIgnore) {
-        try {
-            if (storage instanceof QuotaFileStorage) {
-                output("Recalculating usage...");
-                ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
+    private void recalculateUsage(final List<FileStorage> storages, final Set<String> filesToIgnore) {
+        for (FileStorage storage : storages) {
+            try {
+                if (storage instanceof QuotaFileStorage) {
+                    output("Recalculating usage...");
+                    ((QuotaFileStorage) storages).recalculateUsage(filesToIgnore);
+                }
+            } catch (final OXException e) {
+                erroroutput(e);
             }
-        } catch (final OXException e) {
-            erroroutput(e);
         }
     }
 
@@ -688,7 +701,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     protected abstract AttachmentBase getAttachments();
 
-    protected abstract FileStorage getFileStorage(Context ctx) throws OXException;
+    protected abstract List<FileStorage> getFileStorages(Context ctx) throws OXException;
 
     protected abstract List<Context> getContextsForFilestore(int filestoreId) throws OXException;
 
@@ -718,7 +731,7 @@ public abstract class Consistency implements ConsistencyMBean {
             this.vCardSolver = vCardSolver;
         }
 
-        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final FileStorage stor, final Consistency consistency, final Context context) throws OXException {
+        public static ResolverPolicy parse(final String list, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> storages, final Consistency consistency, final Context context) throws OXException {
             final String[] options = list.split("\\s*,\\s*");
             ProblemSolver dbsolver = new DoNothingSolver();
             ProblemSolver attachmentsolver = new DoNothingSolver();
@@ -735,7 +748,7 @@ public abstract class Consistency implements ConsistencyMBean {
                 final String action = tuple[1];
                 if ("missing_file_for_infoitem".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        dbsolver = new CreateDummyFileForInfoitemSolver(database, stor);
+                        dbsolver = new CreateDummyFileForInfoitemSolver(database, storages);
                     } else if ("delete".equals(action)) {
                         dbsolver = new DeleteInfoitemSolver(database);
                     } else {
@@ -743,7 +756,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_file_for_attachment".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        attachmentsolver = new CreateDummyFileForAttachmentSolver(attach, stor);
+                        attachmentsolver = new CreateDummyFileForAttachmentSolver(attach, storages);
                     } else if ("delete".equals(action)) {
                         attachmentsolver = new DeleteAttachmentSolver(attach);
                     } else {
@@ -751,7 +764,7 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_file_for_snippet".equals(condition)) {
                     if ("create_dummy".equals(action)) {
-                        snippetsolver = new CreateDummyFileForSnippetSolver(stor);
+                        snippetsolver = new CreateDummyFileForSnippetSolver(storages);
                     } else if ("delete".equals(action)) {
                         snippetsolver = new DeleteSnippetSolver();
                     } else {
@@ -766,9 +779,9 @@ public abstract class Consistency implements ConsistencyMBean {
                     }
                 } else if ("missing_entry_for_file".equals(condition)) {
                     if ("create_admin_infoitem".equals(action)) {
-                        filesolver = new CreateInfoitemSolver(database, stor, consistency.getAdmin(context));
+                        filesolver = new CreateInfoitemSolver(database, storages, consistency.getAdmin(context));
                     } else if ("delete".equals(action)) {
-                        filesolver = new RemoveFileSolver(stor);
+                        filesolver = new RemoveFileSolver(storages);
                     } else {
                         filesolver = new DoNothingSolver();
                     }
