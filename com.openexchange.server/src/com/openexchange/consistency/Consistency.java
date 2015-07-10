@@ -106,6 +106,13 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Consistency.class);
 
+    /**
+     * Initializes a new {@link Consistency}.
+     */
+    protected Consistency() {
+        super();
+    }
+
     @Override
     public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
         try {
