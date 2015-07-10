@@ -105,7 +105,7 @@ public class OsgiOXConsistency extends Consistency {
 
     @Override
     protected List<Context> getContextsForFilestore(final int filestoreId) throws OXException {
-        int[] ids = FileStorages.getIdsOfContextsUsing(filestoreId);
+        int[] ids = FileStorages.getFileStorage2ContextsResolver().getIdsOfContextsUsing(filestoreId);
         return loadContexts(ids);
     }
 
