@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,80 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.notification;
 
-import static org.junit.Assert.assertEquals;
-import java.util.Random;
-import org.junit.Test;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.share.core.tools.ShareToken;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * {@link ShareTokenTest}
+ * Encapsulates the IDs of different entities to notify about shares.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareTokenTest {
+public class Entities {
 
-    @Test
-    public void testSomeCombinations() throws Exception {
-        Random r = new Random();
-        for (int i = 0; i < 100000; i++) {
-            int userId = r.nextInt(Integer.MAX_VALUE);
-            int contextId = r.nextInt(Integer.MAX_VALUE);
-            assertToken(new int[] {userId, contextId});
-//            System.out.println(token);
-        }
+    private final Map<Integer, Integer> users;
 
-        assertToken(new int[] {0, 0});
-        assertToken(new int[] {0, Integer.MAX_VALUE});
-        assertToken(new int[] {Integer.MAX_VALUE, 0});
-        assertToken(new int[] {1, 1});
-        assertToken(new int[] {1, Integer.MAX_VALUE});
-        assertToken(new int[] {Integer.MAX_VALUE, 1});
+    private final Map<Integer, Integer> groups;
+
+    public Entities() {
+        super();
+        users = new LinkedHashMap<>();
+        groups = new LinkedHashMap<>();
     }
 
-    private static String assertToken(int[] cidAndUid) throws Exception {
-        UserImpl testGuest = new UserImpl();
-        testGuest.setId(cidAndUid[1]);
-        ShareToken.assignBaseToken(testGuest);
-        ShareToken token = new ShareToken(cidAndUid[0], testGuest);
-        assertEquals(cidAndUid[0], token.getContextID());
-        assertEquals(cidAndUid[1], token.getUserID());
-        return token.getToken();
+    /**
+     * Adds a user entity.
+     *
+     * @param userId The user ID
+     * @param permissionBits The permission bits as folder permission bit mask
+     */
+    public void addUser(int userId, int permissionBits) {
+        users.put(userId, permissionBits);
+    }
+
+    /**
+     * Adds a group entity.
+     *
+     * @param groupId The group ID
+     * @param permissionBits The permission bits as folder permission bit mask
+     */
+    public void addGroupt(int groupId, int permissionBits) {
+        groups.put(groupId, permissionBits);
+    }
+
+    public Set<Integer> getUsers() {
+        return users.keySet();
+    }
+
+    public Set<Integer> getGroups() {
+        return groups.keySet();
+    }
+
+    /**
+     * Gets the permission bits of a contained user entity.
+     *
+     * @param userId The user ID
+     * @return The permission bits as folder permission bit mask
+     */
+    public int getUserPermissionBits(int userId) {
+        return users.get(userId);
+    }
+
+    /**
+     * Gets the permission bits of a contained group entity.
+     *
+     * @param groupId The group ID
+     * @return The permission bits as folder permission bit mask
+     */
+    public int getGroupPermissionBits(int groupId) {
+        return groups.get(groupId);
+    }
+
+    public int size() {
+        return users.size() + groups.size();
     }
 
 }

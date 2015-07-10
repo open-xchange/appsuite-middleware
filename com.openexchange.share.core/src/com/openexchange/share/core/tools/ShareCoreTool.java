@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,16 @@
  *
  */
 
-package com.openexchange.share.impl;
-
-import static org.junit.Assert.assertEquals;
-import java.util.Random;
-import org.junit.Test;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.share.core.tools.ShareToken;
-
+package com.openexchange.share.core.tools;
 
 /**
- * {@link ShareTokenTest}
+ * {@link ShareCoreTool}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareTokenTest {
+public class ShareCoreTool {
 
-    @Test
-    public void testSomeCombinations() throws Exception {
-        Random r = new Random();
-        for (int i = 0; i < 100000; i++) {
-            int userId = r.nextInt(Integer.MAX_VALUE);
-            int contextId = r.nextInt(Integer.MAX_VALUE);
-            assertToken(new int[] {userId, contextId});
-//            System.out.println(token);
-        }
 
-        assertToken(new int[] {0, 0});
-        assertToken(new int[] {0, Integer.MAX_VALUE});
-        assertToken(new int[] {Integer.MAX_VALUE, 0});
-        assertToken(new int[] {1, 1});
-        assertToken(new int[] {1, Integer.MAX_VALUE});
-        assertToken(new int[] {Integer.MAX_VALUE, 1});
-    }
-
-    private static String assertToken(int[] cidAndUid) throws Exception {
-        UserImpl testGuest = new UserImpl();
-        testGuest.setId(cidAndUid[1]);
-        ShareToken.assignBaseToken(testGuest);
-        ShareToken token = new ShareToken(cidAndUid[0], testGuest);
-        assertEquals(cidAndUid[0], token.getContextID());
-        assertEquals(cidAndUid[1], token.getUserID());
-        return token.getToken();
-    }
 
 }

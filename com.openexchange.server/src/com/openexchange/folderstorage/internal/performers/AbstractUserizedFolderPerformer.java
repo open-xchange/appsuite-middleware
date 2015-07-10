@@ -76,6 +76,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -104,6 +105,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
@@ -649,30 +651,34 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
             return;
         }
 
-        Set<Integer> addedPermissions = new HashSet<>();
+        Entities entities = new Entities();
+        List<Integer> modifiedGuests = comparedPermissions.getModifiedGuests();
         for (Permission p : permissions) {
-            // gather all user entities except the one executing this operation
-            if (!p.isGroup() && p.getEntity() != session.getUserId()) {
-                addedPermissions.add(p.getEntity());
+            // gather all new user entities except the one executing this operation
+            if (!p.isGroup() && p.getEntity() != session.getUserId() && !modifiedGuests.contains(p.getEntity())) {
+                entities.addUser(p.getEntity(), Permissions.createPermissionBits(p));
             }
         }
 
-        addedPermissions.removeAll(comparedPermissions.getModifiedGuests()); // remove modified so only the added ones remain
-        if (addedPermissions.isEmpty()) {
+        for (Permission p : comparedPermissions.getAddedGroupPermissions()) {
+            entities.addGroupt(p.getEntity(), Permissions.createPermissionBits(p));
+        }
+
+        if (entities.size() == 0) {
             return;
         }
 
         ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
         RequestContext requestContext = Tools.getRequestContext(session, decorator);
         if (requestContext == null) {
-            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.", addedPermissions.toString());
+            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.");
             Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
             logger.warn("Cannot send out notification mails for new guests because the necessary request context could not be constructed.", e);
             if (storageParameters != null) {
                 storageParameters.addWarning(e);
             }
         } else {
-            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, new ArrayList<>(addedPermissions), new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, requestContext);
+            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, requestContext);
             if (storageParameters != null) {
                 for (OXException warning : warnings) {
                     storageParameters.addWarning(warning);

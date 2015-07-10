@@ -60,6 +60,7 @@ import com.openexchange.java.Autoboxing;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.share.storage.StorageParameters;
 

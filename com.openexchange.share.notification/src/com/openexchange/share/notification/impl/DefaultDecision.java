@@ -50,13 +50,16 @@
 package com.openexchange.share.notification.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -104,6 +107,47 @@ public class DefaultDecision implements NotifyDecision {
             boolean onlyPublics = true;
             ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
             for (ShareTarget target : share.getTargets()) {
+                TargetProxy proxy = moduleSupport.load(target, session);
+                onlyPublics &= proxy.isPublic();
+            }
+
+            if (onlyPublics) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean notifyAboutCreatedShare(Transport transport, User user, boolean asGroupMember, int bits, List<ShareTarget> targets, Session session) throws OXException {
+        if (targets.size() == 0) {
+            return false;
+        }
+
+        if (ShareTool.isAnonymousGuest(user)) {
+            return false;
+        }
+
+        if (!user.isGuest()) {
+            boolean notifyInternalUsers = requireService(ConfigurationService.class, services).getBoolProperty("com.openexchange.share.notifyInternal", true);
+            if (!notifyInternalUsers) {
+                return false;
+            }
+
+            /*
+             * If the/all target(s) are public internals shall only be notified if
+             *  - they are user entities, no groups
+             *  - they will be admins of any target
+             */
+            int[] permissionBits = Permissions.parsePermissionBits(bits);
+            if (!asGroupMember && permissionBits[4] > 0) {
+                return true;
+            }
+
+            boolean onlyPublics = true;
+            ModuleSupport moduleSupport = requireService(ModuleSupport.class, services);
+            for (ShareTarget target : targets) {
                 TargetProxy proxy = moduleSupport.load(target, session);
                 onlyPublics &= proxy.isPublic();
             }

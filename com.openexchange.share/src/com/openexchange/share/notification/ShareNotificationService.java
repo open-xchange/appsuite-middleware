@@ -85,7 +85,7 @@ public interface ShareNotificationService {
      */
     List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, RequestContext requestContext);
 
-    List<OXException> sendShareCreatedNotifications(Transport transport, List<Integer> userIds, ShareTarget target, Session session, RequestContext requestContext);
+    List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, ShareTarget target, Session session, RequestContext requestContext);
 
     /**
      * Send a notification mail that requests a confirmation for a requested password reset from the user.

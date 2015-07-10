@@ -12,6 +12,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.impl.DefaultNotificationService;
@@ -37,6 +38,7 @@ public class ShareNotificationActivator extends HousekeepingActivator {
             ConfigViewFactory.class,
             TemplateService.class,
             HtmlService.class,
+            ShareService.class
         };
     }
 
