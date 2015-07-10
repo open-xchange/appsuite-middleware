@@ -93,9 +93,8 @@ public class ExtendedObjectPermission extends ExtendedPermission {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("entity", permission.getEntity());
         jsonObject.put("bits", permission.getPermissions());
-
         if (permission.isGroup()) {
-            jsonObject.put("group", permission.isGroup());
+            jsonObject.put("type", "group");
             addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
         } else {
             User user = resolver.getUser(permission.getEntity());
@@ -111,6 +110,7 @@ public class ExtendedObjectPermission extends ExtendedPermission {
                     }
                 }
             } else {
+                jsonObject.put("type", "user");
                 addUserInfo(requestData, jsonObject, user);
             }
         }

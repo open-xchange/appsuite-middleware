@@ -96,7 +96,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
         jsonObject.put("bits", Permissions.createPermissionBits(permission.getFolderPermission(), permission.getReadPermission(),
             permission.getWritePermission(), permission.getDeletePermission(), permission.isFolderAdmin()));
         if (permission.isGroupPermission()) {
-            jsonObject.put("group", permission.isGroupPermission());
+            jsonObject.put("type", "group");
             addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
         } else {
             User user = resolver.getUser(permission.getEntity());
@@ -112,6 +112,7 @@ public class ExtendedFolderPermission extends ExtendedPermission {
                     }
                 }
             } else {
+                jsonObject.put("type", "user");
                 addUserInfo(requestData, jsonObject, user);
             }
         }

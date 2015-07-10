@@ -88,7 +88,7 @@ public class ExtendedFolderPermissionsField implements AdditionalFolderField {
 
     @Override
     public String getColumnName() {
-        return "extended_permissions";
+        return "com.openexchange.share.extendedPermissions";
     }
 
     @Override
