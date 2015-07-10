@@ -135,8 +135,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         super(storageParameters, folderStorageDiscoverer);
     }
 
-    private static final String RECURSION_MARKER = UpdatePerformer.class.getName() + ".RECURSION_MARKER";
-
     /**
      * Performs the <code>UPDATE</code> request.
      *

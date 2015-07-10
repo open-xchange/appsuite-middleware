@@ -51,6 +51,7 @@ package com.openexchange.share.notification.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -72,6 +73,7 @@ import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.RequestContext;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
@@ -179,6 +181,12 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
 
         return warnings;
+    }
+
+    @Override
+    public List<OXException> sendShareCreatedNotifications(Transport transport, List<Integer> userIds, ShareTarget target, Session session, RequestContext requestContext) {
+        // TODO Auto-generated method stub
+        return Collections.emptyList();
     }
 
     @Override
