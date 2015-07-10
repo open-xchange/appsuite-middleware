@@ -98,9 +98,9 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Strings;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
@@ -713,7 +713,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasAddedGuests()) {
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer addedGuest : addedGuests) {
-                if (isAnonymous(comparedPermissions.getUser(addedGuest))) {
+                if (isAnonymous(comparedPermissions.getGuestInfo(addedGuest))) {
                     checkReadOnly(comparedPermissions.getAddedGuestPermission(addedGuest));
                 }
             }
@@ -721,7 +721,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
 
         if (comparedPermissions.hasModifiedGuests()) {
             for (Integer guest : comparedPermissions.getModifiedGuests()) {
-                if (isAnonymous(comparedPermissions.getUser(guest))) {
+                if (isAnonymous(comparedPermissions.getGuestInfo(guest))) {
                     checkReadOnly(comparedPermissions.getModifiedGuestPermission(guest));
                 }
             }
@@ -745,8 +745,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
-    private static boolean isAnonymous(User guest) {
-        return Strings.isEmpty(guest.getMail());
+    private static boolean isAnonymous(GuestInfo guestInfo) {
+        return guestInfo.getRecipientType() == RecipientType.ANONYMOUS;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

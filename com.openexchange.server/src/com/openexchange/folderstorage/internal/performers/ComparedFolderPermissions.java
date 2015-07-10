@@ -49,8 +49,8 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.sql.Connection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
@@ -58,8 +58,10 @@ import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.ComparedPermissions;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.user.UserService;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * Helper class to calculate a diff of the folder permissions on an update request.
@@ -70,9 +72,8 @@ import com.openexchange.user.UserService;
 public class ComparedFolderPermissions extends ComparedPermissions<Permission, GuestPermission> {
 
     private final Context context;
-    private final UserService userService;
-    private final Connection connection;
-    private final Map<Integer, User> users = new HashMap<>();;
+    private final ShareService shareService;
+    private final Map<Integer, GuestInfo> guestInfos;
 
     /**
      * Initializes a new {@link ComparedFolderPermissions}.
@@ -80,15 +81,14 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
      * @param context The context
      * @param newPermissions The new permissions
      * @param originalPermissions The original permissions
-     * @param userService The user service
-     * @param connection The database connection used to load users, or <code>null</code>
+     * @param shareService The share service
      * @throws OXException
      */
-    public ComparedFolderPermissions(Context context, Permission[] newPermissions, Permission[] originalPermissions, UserService userService, Connection connection) throws OXException {
+    public ComparedFolderPermissions(Context context, Permission[] newPermissions, Permission[] originalPermissions, ShareService shareService) throws OXException {
         super(newPermissions, originalPermissions);
         this.context = context;
-        this.userService = userService;
-        this.connection = connection;
+        this.shareService = shareService;
+        guestInfos = new HashMap<>();
         calc();
     }
 
@@ -98,12 +98,11 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
      * @param context The context
      * @param newFolder The modified object sent by the client; not <code>null</code>
      * @param origFolder The original object loaded from the storage; not <code>null</code>
-     * @param userService The user service; not <code>null</code>
-     * @param connection The database connection used to load users, or <code>null</code>
+     * @param shareService The share service
      * @throws OXException If errors occur when loading additional data for the comparison
      */
-    public ComparedFolderPermissions(Context context, Folder newFolder, Folder origFolder, UserService userService, Connection connection) throws OXException {
-        this(context, newFolder.getPermissions(), origFolder.getPermissions(), userService, connection);
+    public ComparedFolderPermissions(Context context, Folder newFolder, Folder origFolder, ShareService shareService) throws OXException {
+        this(context, newFolder.getPermissions(), origFolder.getPermissions(), shareService);
     }
 
     @Override
@@ -145,22 +144,77 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
 
     @Override
     protected boolean isGuestUser(int userId) throws OXException {
-        return getUser(userId).isGuest();
+        return getGuestInfo(userId) != null;
     }
 
-    public User getUser(int userId) throws OXException {
-        User user = users.get(userId);
-        if (user != null) {
-            return user;
+    public GuestInfo getGuestInfo(int guestId) throws OXException {
+        GuestInfo guestInfo = guestInfos.get(guestId);
+        if (guestInfo == null) {
+            guestInfo = shareService.getGuestInfo(context.getContextId(), guestId);
+            if (guestInfo == null) {
+                guestInfo = NO_GUEST;
+            }
+            guestInfos.put(guestId, guestInfo);
         }
 
-        if (connection == null) {
-            user =  userService.getUser(userId, context.getContextId());
-        } else {
-            user = userService.getUser(connection, userId, context);
+        if (guestInfo == NO_GUEST) {
+            return null;
         }
-        users.put(userId, user);
-        return user;
+
+        return guestInfo;
     }
+
+    private static final GuestInfo NO_GUEST = new GuestInfo() {
+
+        @Override
+        public RecipientType getRecipientType() {
+            return null;
+        }
+
+        @Override
+        public String getPassword() {
+            return null;
+        }
+
+        @Override
+        public Locale getLocale() {
+            return null;
+        }
+
+        @Override
+        public int getGuestID() {
+            return 0;
+        }
+
+        @Override
+        public String getEmailAddress() {
+            return null;
+        }
+
+        @Override
+        public String getDisplayName() {
+            return null;
+        }
+
+        @Override
+        public int getCreatedBy() {
+            return 0;
+        }
+
+        @Override
+        public int getContextID() {
+            return 0;
+        }
+
+        @Override
+        public String getBaseToken() {
+            return null;
+        }
+
+        @Override
+        public AuthenticationMode getAuthentication() {
+            return null;
+        }
+    };
 
 }

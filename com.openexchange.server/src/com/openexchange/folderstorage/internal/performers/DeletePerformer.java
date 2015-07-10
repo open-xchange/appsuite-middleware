@@ -69,8 +69,8 @@ import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link DeletePerformer} - Serves the <code>DELETE</code> request.
@@ -277,8 +277,8 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         /*
          * check for any present guest permissions
          */
-        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(
-            session.getContext(), new Permission[0], folder.getPermissions(), FolderStorageServices.requireService(UserService.class), transactionManager.getConnection());
+        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session.getContext(), new Permission[0], folder.getPermissions(), shareService);
         /*
          * delete folder
          */

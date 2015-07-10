@@ -49,9 +49,7 @@
 
 package com.openexchange.folderstorage.internal.performers;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
@@ -61,7 +59,6 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
-import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -78,10 +75,9 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link CreatePerformer} - Serves the <code>CREATE</code> request.
@@ -282,9 +278,9 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * check for any present guest permissions
          */
-        UserService userService = FolderStorageServices.requireService(UserService.class);
         Permission[] permissions = toCreate.getPermissions();
-        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session.getContext(), permissions, new Permission[0], userService, transactionManager.getConnection());
+        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session.getContext(), permissions, new Permission[0], shareService);
         /*
          * Check permissions of anonymous guest users
          */

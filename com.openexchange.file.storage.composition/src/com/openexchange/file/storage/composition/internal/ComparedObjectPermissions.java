@@ -77,7 +77,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
 
     private final int contextId;
 
-    private final Map<Integer, GuestInfo> guestInfos = new HashMap<>();
+    private final Map<Integer, GuestInfo> guestInfos;
 
     /**
      * Initializes a new {@link ComparedObjectPermissions}.
@@ -106,6 +106,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
         if (shareService == null) {
             throw ServiceExceptionCode.absentService(ShareService.class);
         }
+        guestInfos = new HashMap<>();
         calc();
     }
 

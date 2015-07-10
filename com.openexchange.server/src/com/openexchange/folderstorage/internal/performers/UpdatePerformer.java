@@ -79,7 +79,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link UpdatePerformer} - Serves the <code>UPDATE</code> request.
@@ -231,13 +230,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(
-                getContext(),
-                folder,
-                storageFolder,
-                FolderStorageServices.requireService(UserService.class),
-                transactionManager.getConnection());
 
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(getContext(), folder, storageFolder, shareService);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {
