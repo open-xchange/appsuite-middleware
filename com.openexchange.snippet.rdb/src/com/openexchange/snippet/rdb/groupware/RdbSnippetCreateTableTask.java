@@ -220,7 +220,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetName(), getSnippetContentName(), getSnippetAttachmentName(), getSnippetMiscName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
