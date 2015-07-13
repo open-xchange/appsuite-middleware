@@ -77,6 +77,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
 
 /**
  * {@link AutoLoginTools}
@@ -85,7 +87,7 @@ import com.openexchange.sessiond.SessiondService;
  */
 public class AutoLoginTools {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(AutoLoginTools.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AutoLoginTools.class);
 
     /**
      * Re-authenticates an auto-login result using the supplied credentials. This includes checking if the user/context information
@@ -168,9 +170,11 @@ public class AutoLoginTools {
                      * try to auto-login once matching session- and secret cookies found
                      */
                     if (null != sessionID && null != secret) {
+                        LOG.debug("Successfully looked up session- & secret-cookie pair for hash {}, continuing auto-login procedure.", hash);
                         return tryAutoLogin(loginConfig, request, sessionID, secret);
                     }
                 }
+                LOG.debug("No session- & secret-cookie pair for hash {} found, aborting auto-login procedure.", hash);
             } catch (OXException e) {
                 if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
                     /*
@@ -187,6 +191,82 @@ public class AutoLoginTools {
         return null;
     }
 
+    /**
+     * Tries to lookup an existing guest session by looking up the <code>open-xchange-share-..."</code> cookie supplied with the request.
+     *
+     * @param loginConfig A reference to the login configuration
+     * @param request The request to try and perform the auto-login for
+     * @param response The corresponding response
+     * @return The login result if a valid session was found, or <code>null</code>, otherwise
+     */
+    public static LoginResult tryGuestAutologin(LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        Cookie[] cookies = request.getCookies();
+        if (loginConfig.isSessiondAutoLogin() && null != cookies && 0 < cookies.length) {
+            /*
+             * extract share token from supplied cookies, based on the "plain" request hash
+             */
+            String client = LoginTools.parseClient(request, false, loginConfig.getDefaultClient());
+            String shareCookieName = LoginServlet.SHARE_PREFIX + HashCalculator.getInstance().getHash(request, client);
+            String shareToken = null;
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().startsWith(shareCookieName)) {
+                    shareToken = cookie.getValue();
+                    break;
+                }
+            }
+            if (null != shareToken) {
+                /*
+                 * lookup the share & try to auto-login based on the guest's request hash
+                 */
+                LOG.debug("Successfully looked up share token {} from {}, continuing auto-login procedure.", shareToken, shareCookieName);
+                LoginResult loginResult = null;
+                try {
+                    GuestInfo guest = ServerServiceRegistry.getInstance().getService(ShareService.class).resolveGuest(shareToken);
+                    return loginResult = tryGuestAutologin(guest, loginConfig, request, response);
+                } finally {
+                    /*
+                     * ensure guest session cookie is removed in case there's no login result
+                     */
+                    if (null == loginResult) {
+                        SessionUtility.removeOXCookies(request, response, Collections.singletonList(shareCookieName));
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Tries to lookup a specific, existing guest session by the cookies supplied with the request.
+     *
+     * @param guest The guest user to try the auto login for
+     * @param loginConfig A reference to the login configuration
+     * @param request The request to try and perform the auto-login for
+     * @param response The corresponding response
+     * @return The login result if a valid session was found, or <code>null</code>, otherwise
+     */
+    public static LoginResult tryGuestAutologin(GuestInfo guest, LoginConfiguration loginConfig, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        /*
+         * try to auto-login based on the guest's request hash
+         */
+        String client = LoginTools.parseClient(request, false, loginConfig.getDefaultClient());
+        String userAgent = HashCalculator.getUserAgent(request);
+        String guestHash = HashCalculator.getInstance().getHash(request, userAgent, client,
+            new String[] { String.valueOf(guest.getContextID()), String.valueOf(guest.getGuestID()) });
+        LoginResult loginResult = null;
+        try {
+            return loginResult = tryAutologin(loginConfig, request, response, guestHash);
+        } finally {
+            /*
+             * ensure guest session cookie is removed in case there's no login result
+             */
+            if (null == loginResult) {
+                String shareCookieName = HashCalculator.getInstance().getHash(request, userAgent, client);
+                SessionUtility.removeOXCookies(request, response, Collections.singletonList(shareCookieName));
+            }
+        }
+    }
+
     private static LoginResult tryAutoLogin(LoginConfiguration loginConfig, HttpServletRequest request, String sessionID, String secret) throws OXException {
         /*
          * lookup matching session
@@ -196,8 +276,10 @@ public class AutoLoginTools {
             /*
              * not found / not matching
              */
+            LOG.debug("Session {} not found, aborting auto-login procedure.", sessionID);
             return null;
         }
+        LOG.debug("Successfully looked up session {}, verifying if session is valid.", sessionID);
         /*
          * check & take over remote IP
          */
@@ -217,13 +299,14 @@ public class AutoLoginTools {
         /*
          * wrap valid session into login result & return
          */
+        LOG.debug("Auto-login successful for session {} of user {} in context {}.", sessionID, user.getId(), context.getContextId());
         return new LoginResultImpl(session, context, user);
     }
 
     private static Session getSession(String sessionID) {
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (null == sessiondService) {
-            LOGGER.error("", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
+            LOG.error("", ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName()));
             return null;
         }
         return sessiondService.getSession(sessionID);

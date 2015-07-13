@@ -49,6 +49,8 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
@@ -840,7 +842,7 @@ public final class SessionUtility {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, getPublicSessionCookieName(req)));
+        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, SHARE_PREFIX + hash, getPublicSessionCookieName(req)));
     }
 
     /**

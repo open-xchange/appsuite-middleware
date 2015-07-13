@@ -49,8 +49,12 @@
 
 package com.openexchange.ajax.login;
 
+import static com.openexchange.ajax.LoginServlet.SECRET_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
+import static com.openexchange.ajax.LoginServlet.configureCookie;
+import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
+import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
-import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -59,7 +63,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.BasicAuthenticationService;
@@ -95,7 +98,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.http.Cookies;
 
 
 /**
@@ -126,7 +128,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         try {
             doLogin(req, resp);
         } catch (final OXException e) {
-            LoginServlet.logAndSendException(resp, e);
+            logAndSendException(resp, e);
         }
     }
 
@@ -139,32 +141,33 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
      * @throws OXException If an Open-Xchange Server error occurs
      */
     protected void doLogin(final HttpServletRequest httpRequest, final HttpServletResponse httpResponse) throws IOException, OXException {
+
+        // Get the share's token & target
+        final String token = httpRequest.getParameter("share");
+        if (null == token) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("share");
+        }
+
+        // Get the ShareService to obtain associated share
+        ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
+        if (null == shareService) {
+            throw ServiceExceptionCode.absentService(ShareService.class);
+        }
+
+        // Get the share
+        final GuestShare share = shareService.resolveToken(token);
+        if (null == share) {
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
+        }
+        String targetPath = httpRequest.getParameter("target");
+        final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
+
         final LoginConfiguration conf = this.conf;
         LoginClosure loginClosure = new LoginClosure() {
 
             @Override
             public LoginResult doLogin(final HttpServletRequest req) throws OXException {
                 try {
-                    // Get the share's token & target
-                    String token = req.getParameter("share");
-                    String targetPath = req.getParameter("target");
-                    if (null == token) {
-                        throw AjaxExceptionCodes.MISSING_PARAMETER.create("share");
-                    }
-
-                    // Get the ShareService to obtain associated share
-                    ShareService shareService = ServerServiceRegistry.getInstance().getService(ShareService.class);
-                    if (null == shareService) {
-                        throw ServiceExceptionCode.absentService(ShareService.class);
-                    }
-
-                    // Get the share
-                    final GuestShare share = shareService.resolveToken(token);
-                    if (null == share) {
-                        throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-                    }
-                    final ShareTarget target = Strings.isEmpty(targetPath) ? null : share.resolveTarget(targetPath);
-
                     // Check for matching authentication mode
                     if (false == checkAuthenticationMode(share.getGuest().getAuthentication())) {
                         throw INVALID_CREDENTIALS.create();
@@ -293,40 +296,16 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
         LoginCookiesSetter cookiesSetter = new LoginCookiesSetter() {
 
             @Override
-            public void setLoginCookies(Session session, HttpServletRequest httpRequest, HttpServletResponse httpResponse, LoginConfiguration loginConfiguration) throws OXException {
-                Cookie cookie = new Cookie(LoginServlet.SECRET_PREFIX + session.getHash(), session.getSecret());
-                cookie.setPath("/");
-                String serverName = httpRequest.getServerName();
-                if (httpRequest.isSecure() || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
-                    cookie.setSecure(true);
-                }
+            public void setLoginCookies(Session session, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig) throws OXException {
                 /*
-                 * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
-                 * value causes the cookie to be deleted.
+                 * set secret, share and public session cookies
                  */
-                cookie.setMaxAge(-1);
-                final String domain = getDomainValue(serverName);
-                if (null != domain) {
-                    cookie.setDomain(domain);
-                }
-                httpResponse.addCookie(cookie);
-
+                String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseClient(request, false, loginConfig.getDefaultClient()));
+                response.addCookie(configureCookie(new Cookie(SHARE_PREFIX + hash, share.getGuest().getBaseToken()), request, loginConfig));
+                response.addCookie(configureCookie(new Cookie(SECRET_PREFIX + session.getHash(), session.getSecret()), request, loginConfig));
                 String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
                 if (null != altId) {
-                    cookie = new Cookie(LoginServlet.getPublicSessionCookieName(httpRequest), altId);
-                    cookie.setPath("/");
-                    if (httpRequest.isSecure() || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
-                        cookie.setSecure(true);
-                    }
-                    /*
-                     * A negative value means that the cookie is not stored persistently and will be deleted when the Web browser exits. A zero
-                     * value causes the cookie to be deleted.
-                     */
-                    cookie.setMaxAge(-1);
-                    if (null != domain) {
-                        cookie.setDomain(domain);
-                    }
-                    httpResponse.addCookie(cookie);
+                    response.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(request), altId), request, loginConfig));
                 }
             }
         };
