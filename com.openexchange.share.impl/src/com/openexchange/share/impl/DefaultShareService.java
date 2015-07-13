@@ -77,9 +77,11 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
-import com.openexchange.quota.Quota;
+import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -99,7 +101,6 @@ import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.cleanup.GuestLastModifiedMarker;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
-import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -879,28 +880,39 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     protected void checkQuota(ConnectionHelper connectionHelper, Session session, int additionalQuotaUsage) throws OXException {
-        QuotaService quotaService = services.getService(QuotaService.class);
-        if (quotaService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
-        }
-
-        ShareQuotaProvider provider = (ShareQuotaProvider) quotaService.getProvider("share");
-        if (provider == null) {
-            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
-            return;
-        }
 
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         if (viewFactory == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
 
-        Quota quota = provider.getAmountQuota(session, connectionHelper.getConnection(), connectionHelper.getParameters(), viewFactory);
-
-        if (!quota.isUnlimited() && quota.willExceed(additionalQuotaUsage)) {
-            long limit = quota.getLimit();
-            long usage = quota.getUsage();
-            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.create(usage, limit);
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (null == quotaService) {
+            throw ServiceExceptionCode.absentService(QuotaService.class);
+        }
+        QuotaProvider provider = quotaService.getProvider("share_links");
+        AccountQuota shareLinksQuota = null;
+        if (null != provider) {
+            shareLinksQuota = provider.getFor(session, "0");
+        } else {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+        }
+        provider = quotaService.getProvider("invite_guests");
+        AccountQuota inviteGuestsQuota = null;
+        if (null != provider) {
+            inviteGuestsQuota = provider.getFor(session, "0");
+        } else {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+        }
+        if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
+            if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
+            }
+        }
+        if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
+            if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
+            }
         }
     }
 
