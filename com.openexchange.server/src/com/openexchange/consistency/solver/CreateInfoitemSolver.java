@@ -50,7 +50,6 @@
 package com.openexchange.consistency.solver;
 
 import java.text.MessageFormat;
-import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -58,9 +57,7 @@ import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.filestore.FileStorage;
-import com.openexchange.filestore.FileStorages;
-import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.tools.file.FileStorage;
 
 /**
  * {@link CreateInfoitemSolver}
@@ -84,14 +81,13 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
     private final DatabaseImpl database;
 
-    private final List<FileStorage> storages;
+    private final FileStorage storage;
 
     private final User admin;
 
-    public CreateInfoitemSolver(final DatabaseImpl database, final List<FileStorage> storages, final User admin) {
-        super();
+    public CreateInfoitemSolver(final DatabaseImpl database, final FileStorage storage, final User admin) {
         this.database = database;
-        this.storages = storages;
+        this.storage = storage;
         this.admin = admin;
     }
 
@@ -106,46 +102,36 @@ public class CreateInfoitemSolver implements ProblemSolver {
 
         for (final String identifier : problems) {
             try {
-                int fsOwner = database.getDocumentHolderFor(identifier, ctx);
-                if (fsOwner > 0) {
-                    QuotaFileStorage storage = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(fsOwner, ctx.getContextId());
-                    try {
-                        document.setFileSize(storage.getFileSize(identifier));
-                        document.setFileMIMEType(storage.getMimeType(identifier));
-                        database.startTransaction();
-                        final int[] numbers = database.saveDocumentMetadata(identifier, document, admin, ctx);
-                        database.commit();
-                        if (numbers[2] == 1) {
-                            LOG.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
-                        }
-                    } catch (final OXException e) {
-                        LOG.error("", e);
-                        try {
-                            database.rollback();
-                            return;
-                        } catch (final OXException e1) {
-                            LOG.debug("", e1);
-                        }
-                    } catch (final RuntimeException e) {
-                        LOG.error("", e);
-                        try {
-                            database.rollback();
-                            return;
-                        } catch (final OXException e1) {
-                            LOG.debug("", e1);
-                        }
-                    } finally {
-                        try {
-                            database.finish();
-                        } catch (final OXException e) {
-                            LOG.debug("", e);
-                        }
-                    }
-                } else {
-                    LOG.warn("No document holder found for identifier {} in context {}", identifier, ctx.getContextId());
+                document.setFileSize(storage.getFileSize(identifier));
+                document.setFileMIMEType(storage.getMimeType(identifier));
+                database.startTransaction();
+                final int[] numbers = database.saveDocumentMetadata(identifier, document, admin, ctx);
+                database.commit();
+                if (numbers[2] == 1) {
+                    LOG.info(MessageFormat.format("Dummy entry for {0} in database created. The admin of this context has now a new document", identifier));
                 }
-            } catch (OXException e) {
+            } catch (final OXException e) {
                 LOG.error("", e);
+                try {
+                    database.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("", e1);
+                }
+            } catch (final RuntimeException e) {
+                LOG.error("", e);
+                try {
+                    database.rollback();
+                    return;
+                } catch (final OXException e1) {
+                    LOG.debug("", e1);
+                }
+            } finally {
+                try {
+                    database.finish();
+                } catch (final OXException e) {
+                    LOG.debug("", e);
+                }
             }
         }
     }

@@ -276,13 +276,7 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         provider.setCommitsTransaction(false);
     }
 
-    /**
-     * Closes given SQL resources.
-     *
-     * @param stmt The optional statement to close
-     * @param rs The optional result set to close
-     */
-    public void close(PreparedStatement stmt, ResultSet rs) {
+    protected void close(final PreparedStatement stmt, final ResultSet rs) {
         DBUtils.closeSQLStuff(rs, stmt);
     }
 
