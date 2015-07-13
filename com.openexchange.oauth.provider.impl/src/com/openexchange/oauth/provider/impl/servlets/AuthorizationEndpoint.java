@@ -129,9 +129,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AuthorizationEndpoint extends OAuthEndpoint {
 
-    /**
-     *
-     */
     private static final String STRING_SPLITTER = "#split#";
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
@@ -673,11 +670,11 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         try {
             URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
             URI actualReferer = new URI(referer);
-            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
+            if (!stringsEqual(expectedReferer.getScheme(), actualReferer.getScheme())) {
                 return true;
             }
 
-            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
+            if (!stringsEqual(expectedReferer.getHost(), actualReferer.getHost())) {
                 return true;
             }
 
@@ -685,7 +682,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return true;
             }
 
-            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
+            if (!stringsEqual(normalizePath(expectedReferer.getPath()), normalizePath(actualReferer.getPath()))) {
                 return true;
             }
         } catch (URISyntaxException e) {
@@ -693,6 +690,38 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         return false;
+    }
+
+    /**
+     * Null-safe method for comparing two strings
+     *
+     * @param str1 string or <code>null</code>
+     * @param str2 string or <code>null</code>
+     * @return <code>true</code> if both strings are <code>null</code> or equal
+     */
+    private static boolean stringsEqual(String str1, String str2) {
+        if (str1 != null && str2 != null) {
+            return str1.equals(str2);
+        }
+
+        return str1 == null && str2 == null;
+    }
+
+    /**
+     * Normalizes a servlet path for comparison by removing the dispatcher prefix if present.
+     *
+     * @param path The path or <code>null</code>
+     * @return The normalized path or <code>null</code> if the input was also <code>null</code>
+     */
+    private static String normalizePath(String path) {
+        if (path != null) {
+            int index = path.indexOf(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
+            if (index >= 0) {
+                return path.substring(index);
+            }
+        }
+
+        return null;
     }
 
     /**

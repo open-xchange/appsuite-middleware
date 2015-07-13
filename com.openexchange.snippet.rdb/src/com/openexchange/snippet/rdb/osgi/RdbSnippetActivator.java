@@ -53,7 +53,6 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
@@ -71,8 +70,10 @@ import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.rdb.RdbSnippetFilestoreLocationUpdater;
 import com.openexchange.snippet.rdb.RdbSnippetService;
 import com.openexchange.snippet.rdb.Services;
+import com.openexchange.snippet.rdb.groupware.RdbSnippetAttachmentBinaryCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetDeleteListener;
+import com.openexchange.snippet.rdb.groupware.RdbSnipptetFixAttachmentPrimaryKey;
 
 /**
  * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
@@ -92,7 +93,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, GenericConfigurationStorageService.class, ContextService.class, CacheService.class, CryptoService.class,
-            IDGeneratorService.class, ConfigViewFactory.class, ManagedFileManagement.class, CapabilityService.class };
+            IDGeneratorService.class, ConfigViewFactory.class, ManagedFileManagement.class };
     }
 
     @Override
@@ -102,11 +103,13 @@ public class RdbSnippetActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
             /*
-             * Register groupware stuff
+             * Register Groupware stuff
              */
-            final RdbSnippetCreateTableTask createTableTask = new RdbSnippetCreateTableTask();
-            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
+            RdbSnippetCreateTableTask createTableTask = new RdbSnippetCreateTableTask();
+            RdbSnippetAttachmentBinaryCreateTableTask binaryCreateTableTask = new RdbSnippetAttachmentBinaryCreateTableTask();
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask, new RdbSnipptetFixAttachmentPrimaryKey(), binaryCreateTableTask));
             registerService(CreateTableService.class, createTableTask);
+            registerService(CreateTableService.class, binaryCreateTableTask);
             registerService(DeleteListener.class, new RdbSnippetDeleteListener());
 
             /*

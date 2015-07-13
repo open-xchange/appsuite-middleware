@@ -653,20 +653,18 @@ public class DatabaseImpl extends DBService {
     }
 
     public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
-        final SortedSet<String> _strReturnArray = new TreeSet<String>();
         Connection con = getReadConnection(ctx);
-
-        final StringBuilder SQL = new StringBuilder(
-            "SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement(SQL.toString());
+            stmt = con.prepareStatement("SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
             stmt.setInt(1, ctx.getContextId());
             result = stmt.executeQuery();
+            SortedSet<String> _strReturnArray = new TreeSet<String>();
             while (result.next()) {
                 _strReturnArray.add(result.getString(1));
             }
+            return _strReturnArray;
         } catch (final SQLException e) {
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
@@ -674,7 +672,6 @@ public class DatabaseImpl extends DBService {
             close(stmt, result);
             releaseReadConnection(ctx, con);
         }
-        return _strReturnArray;
     }
 
     public TimedResult<DocumentMetadata> getVersions(final int id, final Metadata[] columns, final Metadata sort, final int order, final Context ctx) throws OXException {

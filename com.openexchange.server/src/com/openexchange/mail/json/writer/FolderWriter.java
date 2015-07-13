@@ -611,7 +611,7 @@ public final class FolderWriter {
                                 fo.setModule(FolderObject.MAIL);
                                 fo.setType(FolderObject.PRIVATE);
                                 fo.setCreatedBy(-1);
-                                putter.put(folderField.getColumnName(), folderField.renderJSON(folderField.getValue(fo, session)));
+                                putter.put(folderField.getColumnName(), folderField.renderJSON(null, folderField.getValue(fo, session)));
                             } catch (final JSONException e) {
                                 throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                             }

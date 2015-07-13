@@ -79,6 +79,12 @@ import com.openexchange.tools.console.TableWriter.ColumnFormat.Align;
 
 public class ReportClientBase extends AbstractJMXTools {
 
+    protected static final String CSV_NOT_SUPPORTED_MSG = "CSV support for appsuite report style not available. Please execute again with additional parameter '-o'.";
+
+    protected static final String ADVANCED_NOT_SUPPORTED_MSG = "Advanced output for appsuite report style not available. Please execute again with additional parameter '-o'.";
+
+    protected static final String TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND = "Too many arguments. Using the default (display and send)";
+
     protected static final String NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND = "No option selected. Using the default (display and send)";
 
     protected static final String NO_REPORT_FOUND_MSG = "No report found. Please generate a report first by using parameter -e or -x or having a look into the CLT help (-h)!";
@@ -155,6 +161,7 @@ public class ReportClientBase extends AbstractJMXTools {
 
     private CLIOption getAsReport = null;
 
+    // After changing to appsuite report as default -x does nothing. To be backward compatible -x will still be accepted.
     private CLIOption runAndDeliverAsReport = null;
 
     private CLIOption runAndDeliverOldReport = null;
@@ -171,6 +178,7 @@ public class ReportClientBase extends AbstractJMXTools {
             final String combi = (String) parser.getOptionValue(this.showcombi);
             if (null != combi) {
                 displayCombinationAndExit(combi);
+                return;
             }
 
             ReportMode mode = ReportMode.NONE;
@@ -186,13 +194,9 @@ public class ReportClientBase extends AbstractJMXTools {
                     mode = ReportMode.MULTIPLE;
                 } else {
                     mode = ReportMode.SENDONLY;
-//                    parser.parse(new String[] { "-x" });
+                    parser.parse(new String[] { "-x" });
                 }
             }
-//            if (null != parser.getOptionValue(this.runAndDeliverOldReport)) {
-//                mode = ReportMode.SENDONLY;
-//            }
-
 
             if (null != parser.getOptionValue(this.displayonly)) {
                 if (ReportMode.SENDONLY == mode) {
@@ -209,23 +213,34 @@ public class ReportClientBase extends AbstractJMXTools {
 
             // Is one of the appsuite report options set? In that case do something completely different.
 
-            if (null != parser.getOptionValue(this.runAsReport)) {
-                runASReport(parser.getOptionValue(this.asReportType), initConnection);
-                inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
-                return;
-            } else if (null != parser.getOptionValue(this.inspectAsReports)) {
-                inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
-                return;
-            } else if (null != parser.getOptionValue(this.cancelAsReports)) {
-                cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
-                return;
-            } else if (null != parser.getOptionValue(this.getAsReport)) {
-                getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
-                return;
-            } else if (null != parser.getOptionValue(this.runAndDeliverAsReport)) {
-                runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
-                return;
+            if (null == parser.getOptionValue(this.runAndDeliverOldReport)) {
+                if (null != parser.getOptionValue(this.csv)) {
+                    System.out.println(CSV_NOT_SUPPORTED_MSG);
+                }
+                if (null != parser.getOptionValue(this.advancedreport)) {
+                    System.out.println(ADVANCED_NOT_SUPPORTED_MSG);
+                }
+                if (null != parser.getOptionValue(this.runAsReport)) {
+                    runASReport(parser.getOptionValue(this.asReportType), initConnection);
+                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    return;
+                } else if (null != parser.getOptionValue(this.inspectAsReports)) {
+                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    return;
+                } else if (null != parser.getOptionValue(this.cancelAsReports)) {
+                    cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
+                    return;
+                } else if (null != parser.getOptionValue(this.getAsReport)) {
+                    getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
+                    return;
+                } else {
+                    // run and deliver AS report is no default
+                    runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
+                    return;
+                }
             }
+
+            // ... otherwise old report style
 
             final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
             List<ContextDetail> contextDetails = null;
@@ -252,7 +267,7 @@ public class ReportClientBase extends AbstractJMXTools {
                     System.out.println(NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                 case MULTIPLE:
                     if (ReportMode.NONE != mode) {
-                        System.out.println("Too many arguments. Using the default (display and send)");
+                        System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                     }
                 case DISPLAYANDSEND:
                 default:
@@ -433,10 +448,10 @@ public class ReportClientBase extends AbstractJMXTools {
             e.printStackTrace();
             System.exit(1);
         }
-        System.exit(0);
+        return;
     }
 
-    private ObjectName getAppSuiteReportingName() {
+    protected ObjectName getAppSuiteReportingName() {
         try {
             return new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting");
         } catch (MalformedObjectNameException e) {
@@ -476,13 +491,13 @@ public class ReportClientBase extends AbstractJMXTools {
                     //$FALL-THROUGH$
                 case MULTIPLE:
                     if (ReportMode.NONE != mode) {
-                        System.out.println("Too many arguments. Using the default (display and send)");
+                        System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
                     }
                     //$FALL-THROUGH$
                 case DISPLAYANDSEND:
                 default:
                     savereport = false;
-                    //                new TransportHandler().sendASReport(report, savereport);
+                    createTransportHandler().sendASReport(report, savereport);
                     printASReport(report);
                     break;
             }

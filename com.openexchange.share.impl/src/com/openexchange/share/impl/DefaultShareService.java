@@ -77,9 +77,11 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
-import com.openexchange.quota.Quota;
+import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -99,7 +101,6 @@ import com.openexchange.share.groupware.TargetUpdate;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.cleanup.GuestLastModifiedMarker;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
-import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
@@ -149,10 +150,7 @@ public class DefaultShareService implements ShareService {
             }
             throw e;
         }
-        if (false == shareToken.matches(contextID, guest)) {
-            LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-        }
+        shareToken.verifyGuest(contextID, guest);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
         shares = removeExpired(contextID, shares);
         return 0 == shares.size() ? null : new ResolvedGuestShare(services, contextID, guest, shares, true);
@@ -166,10 +164,7 @@ public class DefaultShareService implements ShareService {
         ShareToken shareToken = new ShareToken(token);
         int contextID = session.getContextId();
         User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        if (false == shareToken.matches(contextID, guest)) {
-            LOG.warn("Token mismatch for guest user {} and share token {}, cancelling token resolve request.", guest, shareToken);
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-        }
+        shareToken.verifyGuest(contextID, guest);
         /*
          * get shares for guest and filter results as needed
          */
@@ -190,6 +185,15 @@ public class DefaultShareService implements ShareService {
             shares = removeInaccessible(session, shares);
         }
         return ShareTool.toShareInfos(services, contextID, shares, false);
+    }
+
+    @Override
+    public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
+        int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(session.getContextId(), shares);
+        shares = removeInaccessible(session, shares);
+        return ShareTool.toShareInfos(services, session.getContextId(), shares);
     }
 
     @Override
@@ -397,6 +401,7 @@ public class DefaultShareService implements ShareService {
         User guestUser;
         try {
             guestUser = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+            shareToken.verifyGuest(contextID, guestUser);
         } catch (OXException e) {
             if (UserExceptionCode.USER_NOT_FOUND.equals(e)) {
                 LOG.debug("Guest user for share token {} not found, unable to resolve token.", shareToken, e);
@@ -405,6 +410,15 @@ public class DefaultShareService implements ShareService {
             throw e;
         }
         return new DefaultGuestInfo(services, guestUser, shareToken);
+    }
+
+    @Override
+    public GuestInfo getGuest(int contextId, int guestId) throws OXException {
+        User guestUser = services.getService(UserService.class).getUser(guestId, contextId);
+        if (false == guestUser.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestId));
+        }
+        return new DefaultGuestInfo(services, contextId, guestUser);
     }
 
     /**
@@ -693,7 +707,6 @@ public class DefaultShareService implements ShareService {
 
     /**
      * Filters out those shares from the supplied list where the session's user has no access to the targets.
-     * cleaning up guest users as needed.
      *
      * @param session The session
      * @param shares The shares
@@ -706,6 +719,9 @@ public class DefaultShareService implements ShareService {
             while (iterator.hasNext()) {
                 Share share = iterator.next();
                 ShareTarget target = share.getTarget();
+                if (target.getOwnedBy() == session.getUserId()) {
+                    continue;
+                }
                 if (false == moduleSupport.exists(target, session)) {
                     removeTargets(session.getContextId(), Collections.singletonList(target), Collections.singletonList(Integer.valueOf(share.getGuest())));
                     iterator.remove();
@@ -864,28 +880,39 @@ public class DefaultShareService implements ShareService {
      * @throws OXException
      */
     protected void checkQuota(ConnectionHelper connectionHelper, Session session, int additionalQuotaUsage) throws OXException {
-        QuotaService quotaService = services.getService(QuotaService.class);
-        if (quotaService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(QuotaService.class.getName());
-        }
-
-        ShareQuotaProvider provider = (ShareQuotaProvider) quotaService.getProvider("share");
-        if (provider == null) {
-            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
-            return;
-        }
 
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         if (viewFactory == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
 
-        Quota quota = provider.getAmountQuota(session, connectionHelper.getConnection(), connectionHelper.getParameters(), viewFactory);
-
-        if (!quota.isUnlimited() && quota.willExceed(additionalQuotaUsage)) {
-            long limit = quota.getLimit();
-            long usage = quota.getUsage();
-            throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARES.create(usage, limit);
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (null == quotaService) {
+            throw ServiceExceptionCode.absentService(QuotaService.class);
+        }
+        QuotaProvider provider = quotaService.getProvider("share_links");
+        AccountQuota shareLinksQuota = null;
+        if (null != provider) {
+            shareLinksQuota = provider.getFor(session, "0");
+        } else {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+        }
+        provider = quotaService.getProvider("invite_guests");
+        AccountQuota inviteGuestsQuota = null;
+        if (null != provider) {
+            inviteGuestsQuota = provider.getFor(session, "0");
+        } else {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+        }
+        if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
+            if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
+            }
+        }
+        if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
+            if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
+            }
         }
     }
 

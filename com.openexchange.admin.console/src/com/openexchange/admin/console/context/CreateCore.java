@@ -172,6 +172,7 @@ public abstract class CreateCore extends ContextAbstraction {
             Context context;
             try {
                 context = getContext(nextLine, idarray);
+                SchemaSelectStrategy schemaSelectStrategy = getSchemaSelectStrategy(nextLine, idarray);
                 try {
                     applyExtensionValuesFromCSV(nextLine, idarray, context);
                     final User adminuser = getUser(nextLine, idarray);
@@ -179,15 +180,15 @@ public abstract class CreateCore extends ContextAbstraction {
                     final Context createdCtx;
                     if (-1 != i) {
                         // create call
-                        createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth);
+                        createdCtx = simpleMainCall(context, adminuser, nextLine[i], auth, schemaSelectStrategy);
                     } else {
                         final UserModuleAccess moduleacess = getUserModuleAccess(nextLine, idarray);
                         if (!NO_RIGHTS_ACCESS.equals(moduleacess)) {
                             // with module access
-                            createdCtx = simpleMainCall(context, adminuser, moduleacess, auth);
+                            createdCtx = simpleMainCall(context, adminuser, moduleacess, auth, schemaSelectStrategy);
                         } else {
                             // without module access
-                            createdCtx = simpleMainCall(context, adminuser, auth);
+                            createdCtx = simpleMainCall(context, adminuser, auth, schemaSelectStrategy);
                         }
 
                     }
@@ -253,17 +254,17 @@ public abstract class CreateCore extends ContextAbstraction {
                 throw new InvalidDataException(SCHEMA_NAME_ERROR);
             }
         } else {
-            retval = SchemaSelectStrategy.automatic(); // default
+            retval = SchemaSelectStrategy.getDefault(); // default
         }
 
         return retval;
     }
 
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final String accessCombiName, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
-    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
+    protected abstract Context simpleMainCall(final Context ctx, final User usr, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException;
 
     protected abstract Context maincall(final AdminParser parser, Context ctx, User usr, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, MalformedURLException, NotBoundException, ContextExistsException, NoSuchContextException;
 

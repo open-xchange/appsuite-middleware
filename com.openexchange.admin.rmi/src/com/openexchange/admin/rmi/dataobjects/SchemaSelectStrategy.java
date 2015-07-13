@@ -99,6 +99,15 @@ public class SchemaSelectStrategy implements Serializable {
         return new SchemaSelectStrategy(Strategy.SCHEMA, schemaName);
     }
 
+    /**
+     * Creates the default strategy
+     *
+     * @return The defualt strategy
+     */
+    public static SchemaSelectStrategy getDefault() {
+        return automatic();
+    }
+
     // --------------------------------------------------------------------------------------------------------------------------
 
     private final Strategy strategy;

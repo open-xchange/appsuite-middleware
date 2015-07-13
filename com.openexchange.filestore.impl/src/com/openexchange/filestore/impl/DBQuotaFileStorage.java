@@ -141,11 +141,11 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
     }
 
     /**
-     * Increases the QuotaUsage.
+     * Increases the quota usage.
      *
-     * @param usage by that the QuotaUsage has to be increased
-     * @return true if Quota is full
-     * @throws OXException on Database errors
+     * @param usage The value by which the quota is supposed to be increased
+     * @return <code>true</code> if quota is exceeded; otherwise <code>false</code>
+     * @throws OXException If a database error occurs
      */
     protected boolean incUsage(long usage) throws OXException {
         DatabaseService db = getDatabaseService();
@@ -343,31 +343,27 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         if (0 < sizeHint) {
             checkAvailable(sizeHint);
         }
+
         String file = null;
-        String retval = null;
-        final boolean full;
         try {
-
+            // Store new file
             file = fileStorage.saveNewFile(is);
-            final long fileSize = fileStorage.getFileSize(file);
-            retval = file;
+            String retval = file;
 
-            full = incUsage(fileSize);
-
+            // Check against quota limitation
+            boolean full = incUsage(fileStorage.getFileSize(file));
             if (full) {
-                retval = null;
-                fileStorage.deleteFile(file);
+                throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
             }
-        } catch (final OXException q) {
+
+            // Null'ify reference (to avoid preliminary deletion) & return new file identifier
+            file = null;
+            return retval;
+        } finally {
             if (file != null) {
                 fileStorage.deleteFile(file);
             }
-            throw q;
         }
-        if (full) {
-            throw QuotaFileStorageExceptionCodes.STORE_FULL.create();
-        }
-        return retval;
     }
 
     /**

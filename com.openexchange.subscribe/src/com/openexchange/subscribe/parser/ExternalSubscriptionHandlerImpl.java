@@ -87,14 +87,12 @@ public class ExternalSubscriptionHandlerImpl extends ContactHandler {
 ////            return new XingContactParser().getXingContactsForUser(subscription.getUserName(), subscription.getPassword());
 ////        } else if ("linkedin".equalsIgnoreCase(subscription.getExternalService())) {
 ////            return new LinkedInContactParser().getLinkedInContactsForUser(subscription.getUserName(), subscription.getPassword());
-////        } else if ("facebook".equalsIgnoreCase(subscription.getExternalService())) {
-////            return new FacebookContactParser().getFacebookContactsForUser(subscription.getUserName(), subscription.getPassword());
 ////        }
 ////        return null;
 ////    }
 //
 //    public String[] getServices() {
-//        return new String[]{"xing", "linkedin", "facebook"};
+//        return new String[]{"xing", "linkedin"};
 //    }
 //
 //    private static final class XingSubscriptionSession implements Session {

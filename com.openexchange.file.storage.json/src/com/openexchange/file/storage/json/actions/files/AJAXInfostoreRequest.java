@@ -68,6 +68,7 @@ import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
@@ -81,6 +82,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.files.AbstractFileAction.Param;
+import com.openexchange.file.storage.json.osgi.FileFieldCollector;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.infostore.utils.InfostoreConfigUtils;
@@ -109,11 +111,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
     private static final String JSON = "json";
 
-    private static final FileMetadataParser PARSER = FileMetadataParser.getInstance();
-
     // ---------------------------------------------------------------------------------------------------------------------------------
 
-    private List<Field> columns;
+    private final ServerSession session;
+    private List<Field> fieldsToLoad;
+    private int[] requestedColumns;
     private byte[] contentData;
     private List<File.Field> fields;
     private File file;
@@ -122,9 +124,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private Map<String, String> folderMapping;
     private Map<String, Set<String>> versionMapping;
     private List<String> folders;
-    private List<String> idVersions;
     private List<String> ids;
-    private final ServerSession session;
     private Field sortingField;
     private String[] versions;
 	protected AJAXRequestData data;
@@ -174,33 +174,19 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public List<Field> getColumns() throws OXException {
-        if (columns != null) {
-            return columns;
+    public List<Field> getFieldsToLoad() throws OXException {
+        if (null == fieldsToLoad) {
+            parseColumns();
         }
+        return fieldsToLoad;
+    }
 
-        final String parameter = data.getParameter(PARAM_COLUMNS);
-        if (parameter == null || parameter.length() == 0) {
-            return columns = Arrays.asList(File.Field.values());
+    @Override
+    public int[] getRequestedColumns() throws OXException {
+        if (null == requestedColumns) {
+            parseColumns();
         }
-        final String[] columnStrings = Strings.splitByComma(parameter);
-        final List<Field> fields = new ArrayList<Field>(columnStrings.length);
-        final List<String> unknownColumns = new ArrayList<String>(columnStrings.length);
-
-        for (final String columnNumberOrName : columnStrings) {
-            final Field field = Field.get(columnNumberOrName);
-            if (field == null) {
-                unknownColumns.add(columnNumberOrName);
-            } else {
-                fields.add(field);
-            }
-        }
-
-        if (!unknownColumns.isEmpty()) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_COLUMNS, unknownColumns.toString());
-        }
-
-        return columns = fields;
+        return requestedColumns;
     }
 
     @Override
@@ -454,7 +440,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     }
 
     @Override
-    public TimeZone getTimezone() throws OXException {
+    public TimeZone getTimezone() {
         String parameter = data.getParameter(PARAM_TIMEZONE);
         if (parameter == null) {
             parameter = getSession().getUser().getTimeZone();
@@ -561,6 +547,11 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return requireBody();
     }
 
+    @Override
+    public Document getCachedDocument() {
+        return this.data.getProperty(DocumentAction.DOCUMENT);
+    }
+
     private int getInt(final Param param) {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
@@ -595,7 +586,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             // Initialize
             List<String> ids = new ArrayList<String>(length);
             List<String> folders = new ArrayList<String>(length);
-            List<String> idVersions = new ArrayList<String>(length);
             Map<String, String> folderMapping = new HashMap<String, String>(length);
             Map<String, Set<String>> versionMapping = new HashMap<String, Set<String>>(length);
 
@@ -632,7 +622,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
 
                     // Add to id-to-versions mapping
                     final String version = tuple.optString(PARAM_VERSION, FileStorageFileAccess.CURRENT_VERSION);
-                    idVersions.add(version);
                     Set<String> list = versionMapping.get(id);
                     if (null == list) {
                         list = new LinkedHashSet<String>(2);
@@ -645,7 +634,6 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             // Assign to members
             this.ids = ids;
             this.folders = folders;
-            this.idVersions = idVersions;
             this.folderMapping = folderMapping;
             this.versionMapping = versionMapping;
             return true;
@@ -713,8 +701,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
-        file = PARSER.parse(object);
-        fields = PARSER.getFields(object);
+        FileMetadataParser parser = FileMetadataParser.getInstance();
+        file = parser.parse(object);
+        fields = parser.getFields(object);
         if (uploadFile != null) {
             if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
@@ -754,10 +743,64 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
     }
 
-    @Override
-    public Document getCachedDocument() {
-        return this.data.getProperty(DocumentAction.DOCUMENT);
-    }
+    /**
+     * Parses the requests <code>columns</code> parameter and sets the {@link #fieldsToLoad} and {@link #requestedColumns} members for
+     * this infostore request.
+     */
+    private void parseColumns() throws OXException {
+        String columnsParameter = data.getParameter(PARAM_COLUMNS);
+        if (Strings.isEmpty(columnsParameter)) {
+            /*
+             * use all known file fields
+             */
+            fieldsToLoad = Arrays.asList(Field.values());
+            requestedColumns = new int[fieldsToLoad.size()];
+            for (int i = 0; i < requestedColumns.length; i++) {
+                requestedColumns[i] = fieldsToLoad.get(i).getNumber();
+            }
+        } else {
+            /*
+             * use requested file fields only
+             */
+            List<String> unknownColumns = new ArrayList<String>(0);
+            String[] columns = Strings.splitByComma(columnsParameter);
+            fieldsToLoad = new ArrayList<Field>(columns.length);
+            requestedColumns = new int[columns.length];
+            for (int i = 0; i < columns.length; i++) {
+                /*
+                 * try regular file field first
+                 */
+                Field field = Field.get(columns[i]);
+                if (null != field) {
+                    fieldsToLoad.add(field);
+                    requestedColumns[i] = field.getNumber();
+                    continue;
+                }
 
+                /*
+                 * check additionally registered file fields
+                 */
+                FileFieldCollector fieldCollector = Services.getFieldCollector();
+                if (null != fieldCollector) {
+                    AdditionalFileField additionalField = fieldCollector.getField(columns[i]);
+                    if (null != additionalField) {
+                        Field[] requiredFields = additionalField.getRequiredFields();
+                        if (null != requiredFields && 0 < requiredFields.length) {
+                            fieldsToLoad.addAll(Arrays.asList(requiredFields));
+                        }
+                        requestedColumns[i] = additionalField.getColumnID();
+                        continue;
+                    }
+                }
+                /*
+                 * unknown column
+                 */
+                unknownColumns.add(columns[i]);
+            }
+            if (0 < unknownColumns.size()) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(PARAM_COLUMNS, unknownColumns.toString());
+            }
+        }
+    }
 
 }

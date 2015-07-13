@@ -200,7 +200,7 @@ public class SearchTest extends InfostoreAJAXTest {
 	public void testPermissions() throws Exception {
 		final String sessionId2 = this.getSecondSessionId();
 		final Response res = search(getSecondWebConversation(), getHostName(), sessionId2, "*", COLS, folderId);
-		assertTitles(res);
+		assertEquals("IFO-0400", res.getException().getErrorCode());
 	}
 
 	public void testCategories() throws Exception {

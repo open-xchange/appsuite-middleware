@@ -1022,7 +1022,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
 
     private static com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy soap2SchemaSelectStrategy(SchemaSelectStrategy schemaSelectStrategy) throws InvalidDataException_Exception {
         if (schemaSelectStrategy == null) {
-            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic(); // default
+            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
         }
 
         if (schemaSelectStrategy.getSchemaName() != null && schemaSelectStrategy.getStrategy() != null) {
@@ -1041,7 +1041,7 @@ public class OXContextServicePortTypeImpl implements OXContextServicePortType {
             }
         }
 
-        return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic(); // default
+        return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
     }
 
     private static com.openexchange.admin.rmi.dataobjects.Filestore soap2Filestore(final Filestore soapFilestore) {

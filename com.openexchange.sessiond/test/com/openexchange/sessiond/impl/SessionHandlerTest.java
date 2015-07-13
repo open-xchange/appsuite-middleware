@@ -58,6 +58,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.osgi.service.event.EventAdmin;
 import com.hazelcast.config.Config;
 import com.hazelcast.core.Hazelcast;
 import com.hazelcast.core.HazelcastInstance;
@@ -66,10 +68,9 @@ import com.hazelcast.nio.serialization.PortableFactory;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.server.SimpleServiceLookup;
+import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
-import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
 import com.openexchange.threadpool.SimFactory;
 
@@ -99,9 +100,11 @@ public class SessionHandlerTest {
         });
         hz1 = Hazelcast.newHazelcastInstance(config);
         hz2 = Hazelcast.newHazelcastInstance(config);
-        SimpleServiceLookup lookup = new SimpleServiceLookup();
-        lookup.add(HazelcastInstance.class, hz1);
-        Services.setServiceLookup(lookup);
+
+        ServiceRegistry serviceLookup = new ServiceRegistry();
+        serviceLookup.addService(EventAdmin.class, Mockito.mock(EventAdmin.class));
+        serviceLookup.addService(HazelcastInstance.class, hz1);
+        com.openexchange.sessiond.osgi.Services.setServiceLookup(serviceLookup);
     }
 
     @AfterClass

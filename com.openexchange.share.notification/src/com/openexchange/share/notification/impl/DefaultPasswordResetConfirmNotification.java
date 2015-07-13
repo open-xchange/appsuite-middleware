@@ -60,7 +60,6 @@ import com.openexchange.share.notification.ShareNotificationService.Transport;
  */
 public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotification<T> implements PasswordResetConfirmNotification<T> {
 
-    private String accountName;
     private int guestId;
     private String shareUrl;
     private String pwResetUrl;
@@ -75,11 +74,6 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
     }
 
     @Override
-    public String getAccountName() {
-        return accountName;
-    }
-
-    @Override
     public String getShareUrl() {
         return shareUrl;
     }
@@ -87,10 +81,6 @@ public class DefaultPasswordResetConfirmNotification<T> extends AbstractNotifica
     @Override
     public String getConfirmPasswordResetUrl() {
         return pwResetUrl;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
     }
 
     public void setGuestID(int guestId) {

@@ -155,15 +155,16 @@ public class ShareToken {
     }
 
     /**
-     * Gets a value indicating whether this share token is associated to the supplied guest user or not.
+     * Verifies that this token belongs to the given guest user.
      *
-     * @param contextID The context identifier of the guest user to check
-     * @param guestUser The guest user to check
-     * @return <code>true</code> if the guest user matches this token, <code>false</code>, otherwise
-     * @throws OXException
+     * @param contextID The context identifier of the guest user
+     * @param guestUser The guest user
+     * @throws OXException {@link ShareExceptionCodes#INVALID_TOKEN} if this token does not belong to the passed guest user.
      */
-    public boolean matches(int contextID, User guestUser) throws OXException {
-        return equals(new ShareToken(contextID, guestUser));
+    public void verifyGuest(int contextID, User guestUser) throws OXException {
+        if (!equals(new ShareToken(contextID, guestUser))) {
+            throw ShareExceptionCodes.INVALID_TOKEN.create(getToken());
+        }
     }
 
     private static int getContextObfuscator(String baseToken) {

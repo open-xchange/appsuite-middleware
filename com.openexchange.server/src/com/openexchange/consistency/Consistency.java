@@ -106,6 +106,13 @@ public abstract class Consistency implements ConsistencyMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Consistency.class);
 
+    /**
+     * Initializes a new {@link Consistency}.
+     */
+    protected Consistency() {
+        super();
+    }
+
     @Override
     public List<String> listMissingFilesInContext(final int contextId) throws MBeanException {
         try {
@@ -652,16 +659,6 @@ public abstract class Consistency implements ConsistencyMBean {
             con = Database.get(ctx, false);
             if (DBUtils.tableExists(con, "snippet")) {
                 stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND refType=1");
-                stmt.setInt(1, ctx.getContextId());
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    retval.add(rs.getString(1));
-                }
-                DBUtils.closeSQLStuff(rs, stmt);
-                stmt = null;
-            }
-            if (DBUtils.tableExists(con, "snippetAttachment")) {
-                stmt = con.prepareStatement("SELECT referenceId FROM snippetAttachment WHERE cid=?");
                 stmt.setInt(1, ctx.getContextId());
                 rs = stmt.executeQuery();
                 while (rs.next()) {

@@ -116,7 +116,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
                " id INT4 unsigned NOT NULL," +
                " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
                " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-               " PRIMARY KEY (cid, user, id)" +
+               " PRIMARY KEY (cid, user, id, referenceId(64))" +
                ") ENGINE=InnoDB";
     }
 
@@ -220,7 +220,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentName(), getSnippetAttachmentTable(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetName(), getSnippetContentName(), getSnippetAttachmentName(), getSnippetMiscName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {

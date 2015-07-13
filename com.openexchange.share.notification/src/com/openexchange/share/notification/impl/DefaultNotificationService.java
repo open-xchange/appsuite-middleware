@@ -199,7 +199,6 @@ public class DefaultNotificationService implements ShareNotificationService {
                 .setContextID(guestInfo.getContextID())
                 .setGuestID(guestInfo.getGuestID())
                 .setLocale(guest.getLocale())
-                .setAccountName(mailAddress)
                 .setRequestContext(requestContext)
                 .setShareUrl(ShareLinks.generateExternal(requestContext, baseToken))
                 .setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(requestContext, baseToken, confirmToken))

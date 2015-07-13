@@ -133,7 +133,7 @@ public class SharesAction extends AbstractFolderAction {
          */
         int[] columns = parseIntArrayParameter(AJAXServlet.PARAMETER_COLUMNS, request);
         UserizedFolder[] folderShares = folderResponse.getResponse();
-        JSONArray jsonFolders = FolderWriter.writeMultiple2Array(columns, folderShares, session, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
+        JSONArray jsonFolders = FolderWriter.writeMultiple2Array(request, columns, folderShares, Constants.ADDITIONAL_FOLDER_FIELD_LIST);
         return new AJAXRequestResult(jsonFolders, getLastModified(folderShares)).addWarnings(folderResponse.getWarnings());
     }
 

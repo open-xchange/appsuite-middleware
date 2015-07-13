@@ -158,18 +158,18 @@ public class Create extends CreateCore {
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return this.csv_oxctx.create(ctx, usr, accessCombiName, auth);
+    protected Context simpleMainCall(Context ctx, User usr, String accessCombiName, Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, accessCombiName, auth, schemaSelectStrategy);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return this.csv_oxctx.create(ctx, usr, access, auth);
+    protected Context simpleMainCall(Context ctx, User usr, UserModuleAccess access, Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, access, auth, schemaSelectStrategy);
     }
 
     @Override
-    protected Context simpleMainCall(Context ctx, User usr, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
-        return this.csv_oxctx.create(ctx, usr, auth);
+    protected Context simpleMainCall(Context ctx, User usr, Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException, ContextExistsException {
+        return this.csv_oxctx.create(ctx, usr, auth, schemaSelectStrategy);
     }
 
 }

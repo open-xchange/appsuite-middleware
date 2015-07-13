@@ -68,13 +68,6 @@ public interface PasswordResetConfirmNotification<T> extends ShareNotification<T
     int getGuestID();
 
     /**
-     * Get the guest users account name (probably his email address)
-     *
-     * @return The account name
-     */
-    String getAccountName();
-
-    /**
      * Gets the URL to the according share.
      *
      * @return The URL

@@ -121,6 +121,7 @@ import com.openexchange.event.impl.EventQueue;
 import com.openexchange.event.impl.TaskEventInterface;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.filestore.impl.CompositeFileStorageService;
 import com.openexchange.filestore.impl.DBQuotaFileStorageService;
@@ -823,6 +824,7 @@ public final class Init {
         final FileStorageService fileStorageStarter = new CompositeFileStorageService(null);
         FileStorage.setFileStorageStarter(fileStorageStarter);
         final DatabaseService dbService = (DatabaseService) services.get(DatabaseService.class);
+        FileStorages.setFileStorageService(fileStorageStarter);
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
         serviceLookup.add(DatabaseService.class, dbService);
@@ -837,6 +839,7 @@ public final class Init {
         InfostoreFacadeImpl.setQuotaFileStorageService(qfss);
         services.put(QuotaFileStorageService.class, qfss);
         TestServiceRegistry.getInstance().addService(QuotaFileStorageService.class, qfss);
+        FileStorages.setQuotaFileStorageService(qfss);
     }
 
     public static void startAndInjectDatabaseUpdate() throws OXException {

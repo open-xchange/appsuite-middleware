@@ -48,7 +48,8 @@ CREATE TABLE context (
     filestore_passwd VARCHAR(32),
     quota_max INT8,
     PRIMARY KEY (cid),
-    INDEX (filestore_id)
+    INDEX (filestore_id),
+    UNIQUE KEY `context_name_unique` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 CREATE TABLE filestore (

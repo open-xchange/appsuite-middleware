@@ -893,7 +893,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
 
     private static com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy soap2SchemaSelectStrategy(com.openexchange.admin.soap.reseller.context.soap.dataobjects.SchemaSelectStrategy schemaSelectStrategy) throws InvalidDataException_Exception {
         if (schemaSelectStrategy == null) {
-            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic(); // default
+            return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
         }
 
         if (schemaSelectStrategy.getSchemaName() != null && schemaSelectStrategy.getStrategy() != null) {
@@ -912,7 +912,7 @@ public class OXResellerContextServicePortTypeImpl implements OXResellerContextSe
             }
         }
 
-        return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.automatic(); // default
+        return com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.getDefault(); // default
     }
 
     private static final Pattern URL_PATTERN = Pattern.compile("^(.*?://)?(.*?)(:(.*?))?$");

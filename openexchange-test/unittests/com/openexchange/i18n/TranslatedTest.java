@@ -85,8 +85,6 @@ public class TranslatedTest {
         com.openexchange.groupware.i18n.Groups.class,
         com.openexchange.groupware.i18n.MailStrings.class,
         com.openexchange.groupware.i18n.Notifications.class,
-        com.openexchange.messaging.facebook.FormStrings.class,
-        com.openexchange.messaging.facebook.NameStrings.class,
         com.openexchange.messaging.rss.FormStrings.class,
         com.openexchange.messaging.twitter.FormStrings.class,
         com.openexchange.publish.online.infostore.FormStrings.class,

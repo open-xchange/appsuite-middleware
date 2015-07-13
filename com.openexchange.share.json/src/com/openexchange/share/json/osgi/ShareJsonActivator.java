@@ -49,21 +49,29 @@
 
 package com.openexchange.share.json.osgi;
 
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
+import com.openexchange.ajax.customizer.folder.AdditionalFolderField;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.quota.QuotaService;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.json.ShareActionFactory;
 import com.openexchange.share.json.ShareInfoResultConverter;
+import com.openexchange.share.json.fields.ExtendedObjectPermissionsField;
+import com.openexchange.share.json.fields.ExtendedFolderPermissionsField;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.user.UserService;
 
@@ -85,8 +93,8 @@ public class ShareJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class,
-            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class};
+        return new Class<?>[] { ShareService.class, UserService.class, ContextService.class, GroupService.class, ContactService.class, CapabilityService.class,
+            SessiondService.class, ShareCryptoService.class, ShareNotificationService.class, DatabaseService.class, ModuleSupport.class, QuotaService.class };
     }
 
     @Override
@@ -101,7 +109,8 @@ public class ShareJsonActivator extends AJAXModuleActivator {
 
         registerModule(new ShareActionFactory(this), "share/management");
         registerService(ResultConverter.class, new ShareInfoResultConverter(getService(ModuleSupport.class)));
-
+        registerService(AdditionalFolderField.class, new ExtendedFolderPermissionsField(this));
+        registerService(AdditionalFileField.class, new ExtendedObjectPermissionsField(this));
     }
 
 }

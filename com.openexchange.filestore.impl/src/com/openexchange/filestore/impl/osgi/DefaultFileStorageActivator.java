@@ -53,9 +53,11 @@ import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.filestore.FileStorage2ContextsResolver;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.impl.CompositeFileStorageService;
+import com.openexchange.filestore.impl.DbFileStorage2ContextsResolver;
 
 /**
  * {@link DefaultFileStorageActivator} - The activator for the {@link FileStorageService} service.
@@ -66,7 +68,15 @@ import com.openexchange.filestore.impl.CompositeFileStorageService;
 public class DefaultFileStorageActivator implements BundleActivator {
 
     private volatile ServiceRegistration<FileStorageService> reg;
+    private volatile ServiceRegistration<FileStorage2ContextsResolver> reg2;
     private volatile ServiceTracker<FileStorageProvider, FileStorageProvider> tracker;
+
+    /**
+     * Initializes a new {@link DefaultFileStorageActivator}.
+     */
+    public DefaultFileStorageActivator() {
+        super();
+    }
 
     @Override
     public void start(BundleContext context) throws Exception {
@@ -77,6 +87,7 @@ public class DefaultFileStorageActivator implements BundleActivator {
         tracker.open();
 
         reg = context.registerService(FileStorageService.class, service, null);
+        reg2 = context.registerService(FileStorage2ContextsResolver.class, new DbFileStorage2ContextsResolver(), null);
     }
 
     @Override
@@ -85,6 +96,12 @@ public class DefaultFileStorageActivator implements BundleActivator {
         if (null != reg) {
             reg.unregister();
             this.reg = null;
+        }
+
+        ServiceRegistration<FileStorage2ContextsResolver> reg2 = this.reg2;
+        if (null != reg2) {
+            reg2.unregister();
+            this.reg2 = null;
         }
 
         ServiceTracker<FileStorageProvider, FileStorageProvider> tracker = this.tracker;

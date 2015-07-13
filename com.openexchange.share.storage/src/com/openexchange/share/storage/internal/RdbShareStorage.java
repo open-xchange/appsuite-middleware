@@ -55,6 +55,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -180,6 +181,17 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    public List<Share> loadSharesForTarget(int contextID, int module, String folder, String item, StorageParameters parameters) throws OXException {
+        ShareTarget target = new ShareTarget(module, folder, item);
+        ConnectionProvider provider = getReadProvider(contextID, parameters);
+        try {
+            return new ShareSelector(contextID).targets(Collections.singletonList(target)).select(provider.get());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public void storeShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException {
         ConnectionProvider provider = getWriteProvider(contextID, parameters);
         try {
@@ -244,6 +256,54 @@ public class RdbShareStorage implements ShareStorage {
         } finally {
             provider.close();
         }
+    }
+
+    @Override
+    public int countGuests(int contextId, int createdBy, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextId, parameters);
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND created_by = ? AND u.mail <> \"\"");
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = provider.get();
+            stmt = con.prepareStatement(sb.toString());
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, createdBy);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return 0;
+    }
+
+    @Override
+    public int countLinks(int contextId, int createdBy, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getReadProvider(contextId, parameters);
+        StringBuilder sb = new StringBuilder("SELECT COUNT(*) FROM share s JOIN user u ON s.cid = u.cid AND s.guest = u.id WHERE s.cid = ? AND created_by = ? AND u.mail = \"\"");
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            con = provider.get();
+            stmt = con.prepareStatement(sb.toString());
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, createdBy);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+        return 0;
     }
 
     private static int[] insertOrUpdateShares(Connection connection, int contextID, List<Share> shares) throws SQLException, OXException {

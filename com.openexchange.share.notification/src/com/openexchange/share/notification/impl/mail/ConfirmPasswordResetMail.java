@@ -81,14 +81,10 @@ public class ConfirmPasswordResetMail extends NotificationMail {
 
     private static final String PWRC_GREETING = "pwrc_greeting";
     private static final String PWRC_REQUESTRECEIVED = "pwrc_requestreceived";
-    private static final String PWRC_ACCOUNT = "pwrc_account";
-    private static final String PWRC_SET_NEW_PWD = "pwrc_set_new_pwd";
     private static final String PWRC_LINK = "pw_reset_confirm_link";
     private static final String PWRC_LINK_LABEL = "pw_reset_confirm_link_label";
     private static final String PWRC_IGNORE = "pwrc_ignore";
     private static final String PWRC_AUTOMATED_MAIL = "pwrc_automated_mail";
-    private static final String PWRC_THANKS = "pwrc_thanks";
-    private static final String PWRC_THE_TEAM = "pwrc_the_team";
 
     private ConfirmPasswordResetMail(MailData mailData) {
         super(mailData);
@@ -117,12 +113,12 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         FooterImage footerImage = basicTemplate.applyFooter(vars);
 
         // Compile HTML
-        String htmlContent = compileTemplate("notify.share.pwreset.confirm.mail.html.tmpl", vars, services); // TODO
+        String htmlContent = compileTemplate("notify.share.pwreset.confirm.mail.html.tmpl", vars, services);
 
         MailData mailData = new MailData();
         mailData.sender = null;
         mailData.recipient = notification.getTransportInfo();
-        mailData.subject = translator.translate(NotificationStrings.PWRC_SUBJECT);
+        mailData.subject = String.format(translator.translate(NotificationStrings.PWRC_SUBJECT), serverConfig.getProductName());
         mailData.htmlContent = htmlContent;
         mailData.footerImage = footerImage;
         mailData.context = context;
@@ -138,14 +134,10 @@ public class ConfirmPasswordResetMail extends NotificationMail {
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(PWRC_GREETING, translator.translate(NotificationStrings.PWRC_GREETING));
         vars.put(PWRC_REQUESTRECEIVED, translator.translate(NotificationStrings.PWRC_REQUESTRECEIVED));
-        vars.put(PWRC_ACCOUNT, notification.getAccountName());
-        vars.put(PWRC_SET_NEW_PWD, translator.translate(NotificationStrings.PWRC_SET_NEW_PWD));
         vars.put(PWRC_LINK, notification.getConfirmPasswordResetUrl());
         vars.put(PWRC_LINK_LABEL, translator.translate(NotificationStrings.PWRC_LINK_LABEL));
         vars.put(PWRC_IGNORE, translator.translate(NotificationStrings.PWRC_IGNORE));
         vars.put(PWRC_AUTOMATED_MAIL, translator.translate(NotificationStrings.PWRC_AUTOMATED_MAIL));
-        vars.put(PWRC_THANKS, translator.translate(NotificationStrings.PWRC_THANKS));
-        vars.put(PWRC_THE_TEAM, String.format(translator.translate(NotificationStrings.PWRC_THE_TEAM), serverConfig.getProductName()));
         return vars;
     }
 

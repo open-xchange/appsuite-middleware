@@ -82,7 +82,7 @@ public class ListAction extends AbstractFileAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        List<Field> columns = request.getColumns();
+        List<Field> columns = request.getFieldsToLoad();
         boolean copy = false;
         if(!columns.contains(File.Field.FOLDER_ID)) {
             columns = new ArrayList<File.Field>(columns);

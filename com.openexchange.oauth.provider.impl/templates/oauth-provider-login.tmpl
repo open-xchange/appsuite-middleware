@@ -58,8 +58,8 @@
             </div>
           </fieldset>
           <div class="pure-controls">
-            <button class="pure-button" type="submit" value="true" onClick="window.close();">${cancelLabel?html}</button>
-            <button class="pure-button pure-button-primary" type="submit" value="false">${loginLabel?html}</button>
+            <button class="pure-button" type="submit" name="access_denied" value="true">${cancelLabel?html}</button>
+            <button class="pure-button pure-button-primary" type="submit" name="sign_in" value="true">${loginLabel?html}</button>
           </div>
 
           <input name="client_id" type="hidden" value="${clientId}">

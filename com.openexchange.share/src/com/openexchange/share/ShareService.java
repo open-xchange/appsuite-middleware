@@ -70,8 +70,20 @@ public interface ShareService {
      *
      * @param token The guest users base token
      * @return The guest share, containing all shares the user has access to, or <code>null</code> if no valid share could be looked up
+     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
      */
     GuestShare resolveToken(String token) throws OXException;
+
+    /**
+     * Resolves the guest associated to the given token.
+     *
+     * @param token - the token the GuestInfo should be resolved for
+     * @return GuestInfo with information about the guest associated to the token
+     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
+     */
+    GuestInfo resolveGuest(String token) throws OXException;
 
     /**
      * Resolves the supplied base token to a list of shares. If the session's user is the guest user behind the base token himself, the
@@ -81,6 +93,8 @@ public interface ShareService {
      * @param session The session
      * @param token The token to resolve
      * @return A list of shares the guest user behind the token has access to, or <code>null</code> if no valid share could be looked up
+     * @throws OXException If any of the passed tokens is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
      */
     List<ShareInfo> getShares(Session session, String token) throws OXException;
 
@@ -93,6 +107,8 @@ public interface ShareService {
      * @param token The token to resolve
      * @param path The path to the share target
      * @return The share info, or <code>null</code> if no valid share could be looked up
+     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
      */
     ShareInfo getShare(Session session, String token, String path) throws OXException;
 
@@ -224,6 +240,17 @@ public interface ShareService {
     List<ShareInfo> getAllShares(Session session, String module) throws OXException;
 
     /**
+     * Gets all shares for a specific target.
+     *
+     * @param session The session
+     * @param module The module
+     * @param folder The folder
+     * @param item The item, or <code>null</code> if not applicable
+     * @return The shares, or an empty list if there are none
+     */
+    List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException;
+
+    /**
      * Gets all users that shared something to specified guest.
      *
      * @param contextId The context identifier
@@ -233,12 +260,12 @@ public interface ShareService {
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
     /**
-     * Resolves the guest associated to the given token.
+     * Gets detailed guest information for specific a guest user.
      *
-     * @param token - the token the GuestInfo should be resolved for
-     * @return GuestInfo with information about the guest associated to the token
-     * @throws OXException
+     * @param contextId The context identifier
+     * @param guestId The guest identifier
+     * @return The guest information
      */
-    GuestInfo resolveGuest(String token) throws OXException;
+    GuestInfo getGuest(int contextId, int guestId) throws OXException;
 
 }

@@ -426,9 +426,6 @@ public final class InternalList {
         // Creates new Contact fields (First Name); Last Name); Company) for Kana based search in japanese environments.
         list.add(new com.openexchange.groupware.update.tasks.ContactFieldsForJapaneseKanaSearch());
 
-        // Remove facebook subscriptions to force use of new oauth
-        list.add(new com.openexchange.groupware.update.tasks.FacebookCrawlerSubscriptionRemoverTask());
-
         // Remove linkedin subscriptions to force use of new oauth
         list.add(new com.openexchange.groupware.update.tasks.LinkedInCrawlerSubscriptionsRemoverTask());
 
@@ -756,11 +753,6 @@ public final class InternalList {
         // Check for possibly preset message format preference in JSLob and aligns the DB value accordingly
         list.add(new com.openexchange.groupware.update.tasks.CheckForPresetMessageFormatInJSLob());
 
-        // +++++++++++++++++++++++++++++++++ Version 7.6.2 starts here. +++++++++++++++++++++++++++++++++
-
-        // Delete remnants for removed Facebook subscription
-        list.add(new com.openexchange.groupware.update.tasks.DeleteFacebookContactSubscriptionRemnantsTask());
-
         // +++++++++++++++++++++++++++++++++ Version 7.8.0 starts here. +++++++++++++++++++++++++++++++++
 
         // Adds permissions to system- and root-folders for the virtual guest group.
@@ -792,6 +784,9 @@ public final class InternalList {
 
         // Add vCardId column for del table if missing
         list.add(new com.openexchange.groupware.update.tasks.ContactAddVCardIdToDelTask());
+
+        // Remove accounts related to facebook
+        list.add(new com.openexchange.groupware.update.tasks.RemoveFacebookAccountsTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }

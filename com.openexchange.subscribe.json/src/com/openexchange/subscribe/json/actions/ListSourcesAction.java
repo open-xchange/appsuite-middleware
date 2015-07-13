@@ -78,7 +78,7 @@ public class ListSourcesAction extends AbstractSubscribeSourcesAction {
 
     private static final String[] FIELDS = new String[] { "id", "displayName", "icon", "module", "formDescription" };
 
-    private static final Set<String> IGNOREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("com.openexchange.subscribe.crawler.facebook", "com.openexchange.subscribe.crawler.gmx")));
+    private static final Set<String> IGNOREES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("com.openexchange.subscribe.crawler.gmx")));
 
     @Override
     public AJAXRequestResult perform(SubscribeRequest subscribeRequest) throws OXException {

@@ -196,6 +196,30 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         return storage;
     }
 
+    /**
+     * Determines the appropriate file storage path for given user/context pair<br>
+     * (while user information might not be set (<code>userId &lt;= 0</code>) for calls accessing the context-associated file storage)
+     * <p>
+     * Either <span style="margin-left: 0.1in;">''<i>context</i> + <code>"_ctx_store"</code>''</span><br>
+     * or <span style="margin-left: 0.1in;">''<i>context</i> + <code>"_ctx_"</code> + <i>user</i> + <code>"_user_store"</code>''</span>
+     * <hr>
+     * Assuming <code>contextId=57462</code>, <code>userId=5</code>, and <code>ownerId=2</code>
+     * <p>
+     * <ul>
+     * <li>If <code>userId &lt;= 0</code> the context-associated file storage is returned --&gt; <code>"57462_ctx_store"</code></li><br>
+     * <li>Otherwise the user is examined if a dedicated file storage is referenced. If no dedicated file storage is referenced
+     *     (<code>user.getFilestoreId() &lt;= 0</code>) the context-associated file storage is returned  --&gt; <code>"57462_ctx_store"</code></li><br>
+     * <li>In case <code>user.getFilestoreId() &gt; 0</code> is signaled, the user is further checked if that referenced file storage is assigned to another user instance acting as owner.
+     *     If <code>user.getFileStorageOwner() &lt;= 0</code> the user itself is returned as owner --&gt; <code>"57462_ctx_5_user_store"</code></li><br>
+     * <li>In case <code>user.getFileStorageOwner() &gt; 0</code> the owner is returned --&gt; <code>"57462_ctx_2_user_store"</code></li><br>
+     * </ul>
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param fsOwner The reference for the file storage owner
+     * @return The appropriate file storage information to pass the proper URI to the <code>FileStorage</code> instance
+     * @throws OXException If file storage information cannot be returned
+     */
     private FileStorageInfo getFileStorageInfoFor(int userId, int contextId, IntReference fsOwner) throws OXException {
         ContextService contextService = Services.requireService(ContextService.class);
         if (userId <= 0) {

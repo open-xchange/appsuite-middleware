@@ -60,7 +60,7 @@ import com.openexchange.ajax.framework.Header;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.json.FileMetadataWriter;
-import com.openexchange.java.util.TimeZones;
+import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 
 /**
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
@@ -101,8 +101,8 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
         if (fields == null) {
             fields = Field.values();
         }
-        FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter();
-        return writer.write(data, TimeZones.UTC).toString();
+        FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
+        return writer.write(new TestFriendlyInfostoreRequest("UTC"), data).toString();
     }
 
     public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {

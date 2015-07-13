@@ -91,7 +91,7 @@ public class UpdatesAction extends AbstractFileAction {
         Delta<File> delta = fileAccess.getDelta(
             request.getFolderId(),
             timestamp == FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER ? FileStorageFileAccess.DISTANT_PAST : timestamp,
-            request.getColumns(),
+            request.getFieldsToLoad(),
             sortingField,
             sortingOrder,
             request.getIgnore().contains("deleted"));

@@ -94,6 +94,7 @@ import com.openexchange.admin.storage.interfaces.OXUserStorageInterface;
 import com.openexchange.admin.storage.interfaces.OXUtilStorageInterface;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPoolExtension;
 import com.openexchange.admin.taskmanagement.TaskManager;
+import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.DatabaseDataMover;
 import com.openexchange.admin.tools.filestore.FilestoreDataMover;
 import com.openexchange.admin.tools.filestore.PostProcessTask;
@@ -1092,39 +1093,39 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
     }
 
     @Override
-    protected Context createmaincall(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException {
+    protected Context createmaincall(final Context ctx, final User admin_user, final Database db, final UserModuleAccess access, final Credentials auth, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException {
         validateloginmapping(ctx);
-        final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+        OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
 
-        final String DEFAULT_ACCESS_COMBINATION_NAME = ClientAdminThreadExtended.cache.getProperties().getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
+        String DEFAULT_ACCESS_COMBINATION_NAME = ClientAdminThreadExtended.cache.getProperties().getProp("NEW_CONTEXT_DEFAULT_ACCESS_COMBINATION_NAME", "NOT_DEFINED");
+
         // If not defined or access combination name does NOT exist, use hardcoded fallback!
-        UserModuleAccess createaccess = null;
+        UserModuleAccess createaccess;
         if (access == null) {
             if (DEFAULT_ACCESS_COMBINATION_NAME.equals("NOT_DEFINED") || ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true) == null) {
-                createaccess = ClientAdminThread.cache.getDefaultUserModuleAccess();
+                createaccess = AdminCache.getDefaultUserModuleAccess().clone();
             } else {
-                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true);
+                createaccess = ClientAdminThread.cache.getNamedAccessCombination(DEFAULT_ACCESS_COMBINATION_NAME, true).clone();
             }
         } else {
-            createaccess = access;
+            createaccess = access.clone();
         }
-        createaccess = createaccess.clone();
 
-        Context ret = ctx;
-        ret = oxcox.create(ret, admin_user, createaccess, schemaSelectStrategy == null ? getDefaultSchemaSelectStrategy() : schemaSelectStrategy);
+        Context ret = oxcox.create(ctx, admin_user, createaccess, schemaSelectStrategy == null ? getDefaultSchemaSelectStrategy() : schemaSelectStrategy);
+
         if (isAnyPluginLoaded()) {
-            final PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
+            PluginInterfaces pluginInterfaces = PluginInterfaces.getInstance();
             if (null != pluginInterfaces) {
-                for (final OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
+                for (OXContextPluginInterface contextInterface : pluginInterfaces.getContextPlugins().getServiceList()) {
                     try {
                         ret = contextInterface.postCreate(ret, admin_user, createaccess, auth);
-                    } catch (final PluginException e) {
+                    } catch (PluginException e) {
                         LOGGER.error("", e);
                         // callPluginMethod delete may fail here for what ever reason.
                         // this must not prevent us from cleaning up the rest
                         try {
                             contextInterface.delete(ctx, auth);
-                        } catch (final Exception e1) {
+                        } catch (Exception e1) {
                             LOGGER.error("", e);
                         }
                         oxcox.delete(ret);
@@ -1133,6 +1134,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
         }
+
         return ret;
     }
 
