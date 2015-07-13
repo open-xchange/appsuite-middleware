@@ -70,6 +70,8 @@ import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppenderMBean;
 import com.openexchange.logging.LogConfigReloadable;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.LogbackConfiguration;
@@ -270,6 +272,15 @@ public class Activator implements BundleActivator {
                         final LogbackConfiguration logbackConfiguration = new LogbackConfiguration(loggerContext, turboFilterList, serviceImpl);
                         this.logbackConfiguration = logbackConfiguration;
                         managementService.registerMBean(logbackConfObjName, logbackConfiguration);
+
+                        // Register Logstash Appender MBean
+                        {
+                            boolean logstash = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
+                            if (logstash) {
+                                final ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
+                                managementService.registerMBean(logstashConfName, LogstashSocketAppender.getInstance());
+                            }
+                        }
                         return managementService;
                     } catch (final Exception e) {
                         LOGGER.error("Could not register LogbackConfigurationMBean", e);

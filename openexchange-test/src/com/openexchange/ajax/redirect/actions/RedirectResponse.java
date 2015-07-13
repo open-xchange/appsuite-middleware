@@ -58,11 +58,22 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public final class RedirectResponse extends AbstractAJAXResponse {
 
-    private final String location;
+    private final int statusCode;
+    private final String reasonPhrase, location;
 
-    RedirectResponse(String location) {
+    RedirectResponse(int statusCode, String reasonPhrase, String location) {
         super(null);
+        this.statusCode = statusCode;
+        this.reasonPhrase = reasonPhrase;
         this.location = location;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    public String getReasonPhrase() {
+        return reasonPhrase;
     }
 
     public String getLocation() {

@@ -51,10 +51,8 @@ package com.openexchange.oauth.httpclient.impl.scribe;
 
 import java.io.File;
 import java.io.InputStream;
-
 import org.scribe.model.OAuthRequest;
 import org.scribe.model.Verb;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.http.client.builder.HTTPMultipartPostRequestBuilder;
 import com.openexchange.oauth.httpclient.OAuthHTTPRequestBuilder;
@@ -113,5 +111,17 @@ public class ScribeHTTPMultipartPostRequestBuilder extends
 	public Verb getVerb() {
 		return Verb.POST;
 	}
+
+    @Override
+    public HTTPMultipartPostRequestBuilder stringPart(String fieldName, String fieldValue) {
+        // Nothing to do
+        return null;
+    }
+
+    @Override
+    public HTTPMultipartPostRequestBuilder part(String string, InputStream stream, String contentType, long length, String realName) throws OXException {
+     // Nothing to do
+        return null;
+    }
 
 }

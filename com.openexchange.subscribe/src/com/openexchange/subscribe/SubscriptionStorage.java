@@ -71,6 +71,8 @@ public interface SubscriptionStorage extends SecretEncryptionStrategy<EncryptedF
 
     public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId) throws OXException;
 
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId) throws OXException;
+
     public void updateSubscription(Subscription subscription) throws OXException;
 
     public void deleteAllSubscriptionsForUser(int userId, Context ctx) throws OXException;

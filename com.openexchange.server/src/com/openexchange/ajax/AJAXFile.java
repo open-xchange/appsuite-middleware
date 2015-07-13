@@ -80,7 +80,6 @@ import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
-import com.openexchange.groupware.EnumComponent;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.groupware.upload.impl.UploadQuotaChecker;
 import com.openexchange.java.Streams;
@@ -151,7 +150,7 @@ public final class AJAXFile extends PermissionServlet {
     private void actionKeepAlive(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         ServerSession session = getSessionObject(req);
         try {
-            ResponseWriter.write(actionKeepAlive(session, ParamContainer.getInstance(req, EnumComponent.UPLOAD, resp)), resp.getWriter(), localeFrom(session));
+            ResponseWriter.write(actionKeepAlive(session, ParamContainer.getInstance(req, resp)), resp.getWriter(), localeFrom(session));
         } catch (final JSONException e) {
             final Response response = new Response(session);
             response.setException(OXJSONExceptionCodes.JSON_WRITE_ERROR.create(e, new Object[0]));

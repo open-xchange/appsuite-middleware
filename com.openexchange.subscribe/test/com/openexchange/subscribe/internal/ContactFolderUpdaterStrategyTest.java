@@ -50,6 +50,7 @@
 package com.openexchange.subscribe.internal;
 
 import java.util.Date;
+import org.junit.Test;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -115,7 +116,6 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         final Contact contact = new Contact();
         contact.setGivenName("");
         contact.setSurName("");
-
         contact.setCompany("Wunderwerk GmbH");
 
         final Contact contact2 = new Contact();
@@ -143,8 +143,6 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         final int score = strategy.calculateSimilarityScore(contact, contact2, null);
 
         assertTrue("First name and email address should suffice", score >= strategy.getThreshold(null));
-
-
     }
 
     public void testNullValuesShouldNotChangeResult() throws OXException {
@@ -170,4 +168,37 @@ public class ContactFolderUpdaterStrategyTest extends TestCase {
         assertTrue("Two completely empty objects should match, too", score > strategy.getThreshold(null));
     }
 
+    @Test
+    public void testCalculateSimilarityScore_mobileEqual_increaseSimilarityScore() throws OXException {
+        // First name is not enough
+        Contact contact = new Contact();
+        contact.setGivenName("Hans");
+        contact.setCellularTelephone1("0000-0000000");
+
+        Contact candidate = new Contact();
+        candidate.setGivenName("Hans");
+        candidate.setEmail1("hans@example.com");
+        candidate.setCellularTelephone1("0000-0000000");
+
+        int score = strategy.calculateSimilarityScore(contact, candidate, null);
+
+        assertTrue("Score to low. CellularTelephone is equal.", score >= strategy.getThreshold(null));
+    }
+
+    @Test
+    public void testCalculateSimilarityScore_mobileDifferent_smallScore() throws OXException {
+        // First name is not enough
+        Contact contact = new Contact();
+        contact.setGivenName("Hans");
+        contact.setCellularTelephone1("0000-0000000");
+
+        Contact candidate = new Contact();
+        candidate.setGivenName("Hans");
+        candidate.setEmail1("hans@example.com");
+        candidate.setCellularTelephone1("1111-1111111");
+
+        int score = strategy.calculateSimilarityScore(contact, candidate, null);
+
+        assertTrue("Score to high. Only GivenName is equal.", score < strategy.getThreshold(null));
+    }
 }

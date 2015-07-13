@@ -46,11 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.http.grizzly.util;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import javax.servlet.http.HttpServletRequest;
 import org.junit.Assert;
 import org.junit.Before;
@@ -86,12 +87,11 @@ public class RequestToolsTest {
         RequestTools.USM_PATH_CACHE.invalidateAll();
     }
 
-
     @Test
     public void testIsIgnoredEasRequest_noEASRequest_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn("/No_EAS_Request");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(SYNC, PING));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC, PING));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertFalse("Non EAS request should return false for definition of 'ignore eas request'", ignoredEasRequest);
@@ -102,7 +102,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getParameter(RequestTools.EAS_CMD)).thenReturn("Sync");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(SYNC, PING));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC, PING));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertTrue("Given command is defined as beeing ignored!", ignoredEasRequest);
@@ -113,7 +113,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getParameter(RequestTools.EAS_CMD)).thenReturn("Sync");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(PING));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(PING));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredEasRequest);
@@ -124,7 +124,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getParameter(RequestTools.EAS_CMD)).thenReturn("thisIsNotAValidRequest");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(PING));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(PING));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredEasRequest);
@@ -135,7 +135,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getQueryString()).thenReturn("jAAJBAp2MTQwRGV2aWNlAApTbWFydFBob25l");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(PING));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(PING));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertFalse(ignoredEasRequest);
@@ -146,7 +146,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getQueryString()).thenReturn("jAAJBAp2MTQwRGV2aWNlAApTbWFydFBob25l");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(SYNC));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertTrue(ignoredEasRequest);
@@ -157,7 +157,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.EAS_URI_DEFAULT);
         Mockito.when(servletRequest.getQueryString()).thenReturn("ZGZhZHNmYWRzZHNmYWRzZmRmYWRz");
 
-        Set<String> ignoredEasCommands = new HashSet<String>(Arrays.asList(SYNC));
+        Set<String> ignoredEasCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC));
 
         boolean ignoredEasRequest = RequestTools.isIgnoredEasRequest(servletRequest, ignoredEasCommands);
         Assert.assertFalse(ignoredEasRequest);
@@ -167,7 +167,7 @@ public class RequestToolsTest {
     public void testIsIgnoredUSMRequest_noUsmRequest_ReturnFalse() {
         Mockito.when(servletRequest.getRequestURI()).thenReturn("/No_USM_Request");
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(SYNC_UPDATE_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertFalse("Non USM request should return false for definition of 'ignore usm request'", ignoredUsmRequest);
@@ -178,7 +178,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH);
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertTrue("Given command is defined as beeing ignored but was not!", ignoredUsmRequest);
@@ -189,7 +189,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH);
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(PING_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(PING_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
@@ -200,7 +200,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn("/thisIsNotAValidPath");
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
@@ -211,7 +211,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(null);
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertFalse("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
@@ -222,7 +222,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH);
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(SYNC_UPDATE_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertTrue("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);
@@ -238,7 +238,7 @@ public class RequestToolsTest {
         Mockito.when(servletRequest.getRequestURI()).thenReturn(RequestTools.USM_URI_DEFAULT);
         Mockito.when(servletRequest.getPathInfo()).thenReturn(SYNC_UPDATE_PATH, PING_PATH);
 
-        Set<String> ignoredUsmCommands = new HashSet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
+        Set<String> ignoredUsmCommands = new CopyOnWriteArraySet<String>(Arrays.asList(SYNC_UPDATE_PATH, PING_PATH));
 
         boolean ignoredUsmRequest = RequestTools.isIgnoredUsmRequest(servletRequest, ignoredUsmCommands);
         Assert.assertTrue("Given command is defined as not beeing ignored but was not ignored!", ignoredUsmRequest);

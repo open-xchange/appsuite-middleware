@@ -72,7 +72,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class AddPrimaryKeyTask extends UpdateTaskAdapter {
-    
+
     private final DatabaseService dbService;
 
     /**
@@ -92,11 +92,13 @@ public class AddPrimaryKeyTask extends UpdateTaskAdapter {
         Connection con = dbService.getForUpdateTask(cid);
         Column column = new Column("uuid", "BINARY(16) NOT NULL");
         try {
-            con.setAutoCommit(false);
-            setUUID(con);
-            Tools.modifyColumns(con, "presenceSubscriptions", column);
-            Tools.createPrimaryKey(con, "presenceSubscriptions", new String[] { column.name });
-            con.commit();
+            if (!Tools.hasPrimaryKey(con, "presenceSubscriptions")) {
+                con.setAutoCommit(false);
+                setUUID(con);
+                Tools.modifyColumns(con, "presenceSubscriptions", column);
+                Tools.createPrimaryKey(con, "presenceSubscriptions", new String[] { column.name });
+                con.commit();
+            }
         } catch (SQLException e) {
             DBUtils.rollback(con);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -116,7 +118,7 @@ public class AddPrimaryKeyTask extends UpdateTaskAdapter {
     public String[] getDependencies() {
         return new String[] { "com.openexchange.realtime.presence.subscribe.database.AddUUIDColumnTask" };
     }
-    
+
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;

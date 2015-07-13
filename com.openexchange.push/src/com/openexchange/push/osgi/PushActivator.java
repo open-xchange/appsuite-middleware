@@ -49,22 +49,9 @@
 
 package com.openexchange.push.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
 import org.osgi.service.event.EventAdmin;
-import org.osgi.service.event.EventConstants;
-import org.osgi.service.event.EventHandler;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.event.EventFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
-import com.openexchange.push.PushListenerService;
-import com.openexchange.push.PushManagerService;
-import com.openexchange.push.internal.PushEventHandler;
-import com.openexchange.push.internal.PushManagerRegistry;
-import com.openexchange.push.internal.ServiceRegistry;
-import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link PushActivator} - The activator for push bundle.
@@ -81,52 +68,19 @@ public final class PushActivator extends HousekeepingActivator {
     }
 
     @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { EventAdmin.class, EventFactoryService.class };
+    }
+
+    @Override
     public void startBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
-        try {
-            log.info("starting bundle: com.openexchange.push");
-
-            // Initialize and open service tracker for push manager services
-            PushManagerRegistry.init();
-            track(PushManagerService.class, new PushManagerServiceTracker(context));
-            track(ConfigurationService.class, new WhitelistServiceTracker(context));
-
-            // Thread pool service tracker
-            track(ConfigurationService.class, new RegistryServiceTrackerCustomizer<ConfigurationService>(context, ServiceRegistry.getInstance(), ConfigurationService.class));
-            track(EventFactoryService.class, new RegistryServiceTrackerCustomizer<EventFactoryService>(context, ServiceRegistry.getInstance(), EventFactoryService.class));
-            track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, ServiceRegistry.getInstance(), ThreadPoolService.class));
-            track(EventAdmin.class, new RegistryServiceTrackerCustomizer<EventAdmin>(context, ServiceRegistry.getInstance(), EventAdmin.class));
-
-            openTrackers();
-
-            registerService(PushListenerService.class, PushManagerRegistry.getInstance());
-
-            // Register event handler to detect removed sessions
-            final Dictionary<String, Object> serviceProperties = new Hashtable<String, Object>(1);
-            serviceProperties.put(EventConstants.EVENT_TOPIC, SessiondEventConstants.getAllTopics());
-            registerService(EventHandler.class, new PushEventHandler(), serviceProperties);
-        } catch (Exception e) {
-            log.error("Failed start-up of bundle com.openexchange.push", e);
-            throw e;
-        }
+        Services.setServiceLookup(this);
     }
 
     @Override
     public void stopBundle() throws Exception {
-        final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PushActivator.class);
-        try {
-            log.info("stopping bundle: com.openexchange.push");
-            super.stopBundle();
-            PushManagerRegistry.shutdown();
-        } catch (Exception e) {
-            log.error("Failed shut-down of bundle com.openexchange.push", e);
-            throw e;
-        }
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return null;
+        Services.setServiceLookup(null);
+        super.stopBundle();
     }
 
 }

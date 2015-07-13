@@ -69,7 +69,7 @@ public final class ImapIdleDeleteListener implements DeleteListener {
         if (DeleteEvent.TYPE_USER == event.getType()) {
             ImapIdlePushManagerService instance = ImapIdlePushManagerService.getInstance();
             if (null != instance) {
-                instance.stopListener(false, event.getId(), event.getContext().getContextId());
+                instance.stopListener(false, true, event.getId(), event.getContext().getContextId());
             }
         }
     }

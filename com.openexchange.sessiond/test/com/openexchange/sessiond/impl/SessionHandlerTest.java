@@ -66,10 +66,11 @@ import com.hazelcast.nio.serialization.PortableFactory;
 import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.serialization.CustomPortable;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionFilter;
+import com.openexchange.sessiond.osgi.Services;
 import com.openexchange.sessiond.serialization.PortableSessionFilterApplier;
-import com.openexchange.sessiond.services.SessiondServiceRegistry;
 import com.openexchange.threadpool.SimFactory;
 
 
@@ -98,7 +99,9 @@ public class SessionHandlerTest {
         });
         hz1 = Hazelcast.newHazelcastInstance(config);
         hz2 = Hazelcast.newHazelcastInstance(config);
-        SessiondServiceRegistry.getServiceRegistry().addService(HazelcastInstance.class, hz1);
+        SimpleServiceLookup simpleServiceLookup = new SimpleServiceLookup();
+        simpleServiceLookup.add(HazelcastInstance.class, hz1);
+        Services.setServiceLookup(simpleServiceLookup);
     }
 
     @AfterClass

@@ -59,6 +59,7 @@ import com.openexchange.folder.FolderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.user.UserService;
 import com.openexchange.user.UserServiceInterceptor;
 import com.openexchange.user.UserServiceInterceptorRegistry;
 import com.openexchange.userconf.UserConfigurationService;
@@ -83,7 +84,7 @@ public class ContactServiceActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactStorageRegistry.class, ContextService.class, FolderService.class, ConfigurationService.class,
-            UserConfigurationService.class, UserPermissionService.class, ThreadPoolService.class };
+            UserConfigurationService.class, UserPermissionService.class, ThreadPoolService.class, UserService.class };
     }
 
     @Override

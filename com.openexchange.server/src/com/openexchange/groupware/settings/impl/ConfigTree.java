@@ -102,7 +102,8 @@ public final class ConfigTree {
      */
     public Setting optSettingByPath(final String path) {
         final String[] pathParts = SPLIT.split(path, 0);
-        return new ValueSetting(optSettingByPath(tree, pathParts));
+        Setting setting = optSettingByPath(tree, pathParts);
+        return null == setting ? null : new ValueSetting(setting);
     }
 
     /**
@@ -359,6 +360,7 @@ public final class ConfigTree {
             com.openexchange.groupware.settings.tree.modules.mail.DefaultAddress.class,
             com.openexchange.groupware.settings.tree.modules.mail.DefaultSeparator.class,
             com.openexchange.groupware.settings.tree.modules.mail.DeleteMail.class,
+            com.openexchange.groupware.settings.tree.modules.mail.SaveNoCopy.class,
             com.openexchange.groupware.settings.tree.modules.mail.DisplayReceiptNotification.class,
             com.openexchange.groupware.settings.tree.modules.mail.UnifiedInboxEnablement.class,
             com.openexchange.groupware.settings.tree.modules.mail.UnifiedInboxIdentifier.class,

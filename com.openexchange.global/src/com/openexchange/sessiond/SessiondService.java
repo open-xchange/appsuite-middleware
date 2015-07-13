@@ -50,6 +50,7 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -80,6 +81,15 @@ public interface SessiondService {
      * @throws OXException If creating the session fails
      */
     public Session addSession(AddSessionParameter parameterObject) throws OXException;
+
+    /**
+     * Stores the session associated with given identifier into session storage (if such a session exists).
+     *
+     * @param sessionId The session identifier
+     * @return <code>true</code> if stored; otherwise <code>false</code>
+     * @throws OXException If storing the session fails
+     */
+    public boolean storeSession(String sessionId) throws OXException;
 
     /**
      * Replaces the currently stored password in session identified through given session identifier with specified <code>newPassword</code>.
@@ -134,6 +144,14 @@ public interface SessiondService {
     Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException;
 
     /**
+     * Removes all sessions belonging to given contexts from this and all other cluster nodes.
+     *
+     * @param contextIds - Set with the context identifiers to remove sessions for
+     * @throws OXException - if removing session fails on one of the remote nodes
+     */
+    public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException;
+
+    /**
      * Gets the number of active sessions belonging to given user in specified context.
      *
      * @param userId The user identifier
@@ -179,6 +197,15 @@ public interface SessiondService {
      * @return Return the session object or null if no session exists for the given alternative identifier or if the session is expired
      */
     public Session getSessionByAlternativeId(String altId);
+
+    /**
+     * Get the session object related to the given alternative identifier.
+     *
+     * @param altId The alternative identifier
+     * @param lookupSessionStorage Whether to allow to look-up session storage, too
+     * @return Return the session object or null if no session exists for the given alternative identifier or if the session is expired
+     */
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage);
 
     /**
      * Get the session object related to the given random token.

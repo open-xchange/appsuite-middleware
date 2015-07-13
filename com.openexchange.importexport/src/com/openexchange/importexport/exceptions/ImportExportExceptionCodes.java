@@ -171,7 +171,10 @@ public enum ImportExportExceptionCodes implements DisplayableOXExceptionCode {
     IOEXCEPTION_RETRY("Something went wrong reading from specified file. Please try again.", CATEGORY_TRY_AGAIN, 1316,
         ImportExportExceptionMessages.IOEXCEPTION_RETRY_MSG),
     LIMIT_EXCEEDED("Import limit exceeded. Only imported the first %1$s contacts", CATEGORY_WARNING, 1317,
-        ImportExportExceptionMessages.LIMIT_EXCEEDED_MSG)
+        ImportExportExceptionMessages.LIMIT_EXCEEDED_MSG),
+    /** The character encoding \"%1$s\" is not supported. Please choose another one. */
+    UNSUPPORTED_CHARACTER_ENCODING("Unsupported charset: \"%1$s\"", CATEGORY_USER_INPUT, 1318, ImportExportExceptionMessages.UNSUPPORTED_CHARACTER_ENCODING_MSG),
+
     ;
 
     private String message;

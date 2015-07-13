@@ -50,6 +50,9 @@
 package com.openexchange.ajax.container;
 
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
@@ -64,6 +67,7 @@ public final class ByteArrayFileHolder implements IFileHolder {
     private String contentType;
     private String disposition;
     private String delivery;
+    private final List<Runnable> tasks;
 
     /**
      * Initializes a new {@link ByteArrayFileHolder}.
@@ -72,6 +76,19 @@ public final class ByteArrayFileHolder implements IFileHolder {
         super();
         this.bytes = bytes;
         contentType = "application/octet-stream";
+        tasks = new LinkedList<Runnable>();
+    }
+
+    @Override
+    public List<Runnable> getPostProcessingTasks() {
+        return tasks;
+    }
+
+    @Override
+    public void addPostProcessingTask(Runnable task) {
+        if (null != task) {
+            tasks.add(task);
+        }
     }
 
     @Override
@@ -87,6 +104,11 @@ public final class ByteArrayFileHolder implements IFileHolder {
     @Override
     public InputStream getStream() {
         return new UnsynchronizedByteArrayInputStream(bytes);
+    }
+
+    @Override
+    public RandomAccess getRandomAccess() throws OXException {
+        return new ByteArrayRandomAccess(bytes);
     }
 
     @Override

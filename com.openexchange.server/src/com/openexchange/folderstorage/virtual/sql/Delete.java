@@ -55,8 +55,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -88,21 +92,76 @@ public final class Delete {
         super();
     }
 
-    private static final String SQL_DELETE_SUBS =
-        "DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    /**
+     * (Hard-) Deletes all folder entries for specified tree.
+     *
+     * @param cid The context identifier
+     * @param tree The tree identifier
+     * @param user The user identifier
+     * @param session The associated session
+     * @return <code>true</code> if one or more folder were deleted; otherwise <code>false</code>
+     * @throws OXException If delete fails
+     */
+    public static boolean deleteTree(int cid, int tree, int user, Session session) throws OXException {
+        DatabaseService databaseService = Services.getService(DatabaseService.class);
+        // Get a connection
+        Connection con = databaseService.getWritable(cid);
+        boolean modified = false;
+        boolean rollback = false;
+        try {
+            List<String> folderIds = getFoldersForTree(cid, tree, user, con);
+            if (folderIds.isEmpty()) {
+                return false;
+            }
 
-    private static final String SQL_DELETE_INSERT_SUBS =
-        "INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+            con.setAutoCommit(false); // BEGIN
+            rollback = true;
+            for (String folderId : folderIds) {
+                deleteFolder(cid, tree, user, folderId, false, true, session, con);
+            }
+            modified = true;
+            con.commit(); // COMMIT
+            rollback = false;
+            return true;
+        } catch (SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                DBUtils.rollback(con); // ROLLBACK
+            }
+            DBUtils.autocommit(con);
+            if (modified) {
+                databaseService.backWritable(cid, con);
+            } else {
+                databaseService.backWritableAfterReading(cid, con);
+            }
+        }
+    }
 
-    private static final String SQL_DELETE_PERMS = "DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+    private static List<String> getFoldersForTree(int cid, int tree, int user, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT folderId FROM virtualTree WHERE cid = ? AND tree = ? AND user = ?");
+            stmt.setInt(1, cid);
+            stmt.setInt(2, tree);
+            stmt.setInt(3, user);
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
 
-    private static final String SQL_DELETE_INSERT_PERMS =
-        "INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-
-    private static final String SQL_DELETE = "DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
-
-    private static final String SQL_DELETE_INSERT =
-        "INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?";
+            List<String> folderIds = new LinkedList<String>();
+            do {
+                folderIds.add(rs.getString(1));
+            } while (rs.next());
+            return folderIds;
+        } catch (final SQLException e) {
+            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
 
     /**
      * Deletes specified folder.
@@ -112,26 +171,29 @@ public final class Delete {
      * @param user The user identifier
      * @param folderId The folder identifier
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
-     * @throws FolderException If delete fails
+     * @throws OXException If delete fails
      */
     public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Session session) throws OXException {
-        final DatabaseService databaseService = Services.getService(DatabaseService.class);
+        DatabaseService databaseService = Services.getService(DatabaseService.class);
         // Get a connection
-        final Connection con = databaseService.getWritable(cid);
+        Connection con = databaseService.getWritable(cid);
+        boolean rollback = false;
         try {
             con.setAutoCommit(false); // BEGIN
+            rollback = true;
+
             deleteFolder(cid, tree, user, folderId, backup, session, con);
+
             con.commit(); // COMMIT
+            rollback = false;
         } catch (final SQLException e) {
-            DBUtils.rollback(con); // ROLLBACK
             throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } catch (final OXException e) {
-            DBUtils.rollback(con); // ROLLBACK
-            throw e;
-        } catch (final Exception e) {
-            DBUtils.rollback(con); // ROLLBACK
+        } catch (final RuntimeException e) {
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(con); // ROLLBACK
+            }
             DBUtils.autocommit(con);
             databaseService.backWritable(cid, con);
         }
@@ -146,42 +208,50 @@ public final class Delete {
      * @param folderId The folder identifier
      * @param backup <code>true</code> to backup folder data prior to deletion; otherwise <code>false</code>
      * @param con The connection to use
-     * @throws FolderException If delete fails
+     * @throws OXException If delete fails
      */
     public static void deleteFolder(final int cid, final int tree, final int user, final String folderId, final boolean backup, final Session session, final Connection con) throws OXException {
+        deleteFolder(cid, tree, user, folderId, backup, false, session, con);
+    }
+
+    private static void deleteFolder(int cid, int tree, int user, String folderId, boolean backup, boolean force, Session session, Connection con) throws OXException {
         if (null == con) {
             deleteFolder(cid, tree, user, folderId, backup, session);
             return;
         }
         PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT shadow FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
-            int pos = 1;
-            stmt.setInt(pos++, cid);
-            stmt.setInt(pos++, tree);
-            stmt.setInt(pos++, user);
-            stmt.setString(pos, folderId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return;
+        if (false == force) {
+            // Check for default folder first
+            ResultSet rs = null;
+            try {
+                stmt = con.prepareStatement("SELECT shadow FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
+                int pos = 1;
+                stmt.setInt(pos++, cid);
+                stmt.setInt(pos++, tree);
+                stmt.setInt(pos++, user);
+                stmt.setString(pos, folderId);
+                rs = stmt.executeQuery();
+                if (!rs.next()) {
+                    return;
+                }
+                final String shadow = rs.getString(1);
+                if ("default".equals(shadow)) {
+                    throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(folderId, Integer.valueOf(user), Integer.valueOf(cid));
+                }
+            } catch (final SQLException e) {
+                throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                DBUtils.closeSQLStuff(rs, stmt);
+                rs = null;
+                stmt = null;
             }
-            final String shadow = rs.getString(1);
-            if ("default".equals(shadow)) {
-                throw FolderExceptionErrorMessage.FOLDER_NOT_DELETEABLE.create(folderId, Integer.valueOf(user), Integer.valueOf(cid));
-            }
-        } catch (final SQLException e) {
-            throw FolderExceptionErrorMessage.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            rs = null;
         }
         if (backup) {
             /*
              * Backup folder data
              */
             try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT);
+                stmt = con.prepareStatement("INSERT INTO virtualBackupTree SELECT * FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -197,7 +267,7 @@ public final class Delete {
              * Backup permission data
              */
             try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT_PERMS);
+                stmt = con.prepareStatement("INSERT INTO virtualBackupPermission SELECT * FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -213,7 +283,7 @@ public final class Delete {
              * Backup subscribe data
              */
             try {
-                stmt = con.prepareStatement(SQL_DELETE_INSERT_SUBS);
+                stmt = con.prepareStatement("INSERT INTO virtualBackupSubscription SELECT * FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
                 int pos = 1;
                 stmt.setInt(pos++, cid);
                 stmt.setInt(pos++, tree);
@@ -230,7 +300,7 @@ public final class Delete {
          * Delete subscribe data
          */
         try {
-            stmt = con.prepareStatement(SQL_DELETE_SUBS);
+            stmt = con.prepareStatement("DELETE FROM virtualSubscription WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
@@ -246,7 +316,7 @@ public final class Delete {
          * Delete permission data
          */
         try {
-            stmt = con.prepareStatement(SQL_DELETE_PERMS);
+            stmt = con.prepareStatement("DELETE FROM virtualPermission WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);
@@ -262,7 +332,7 @@ public final class Delete {
          * Delete folder data
          */
         try {
-            stmt = con.prepareStatement(SQL_DELETE);
+            stmt = con.prepareStatement("DELETE FROM virtualTree WHERE cid = ? AND tree = ? AND user = ? AND folderId = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, tree);

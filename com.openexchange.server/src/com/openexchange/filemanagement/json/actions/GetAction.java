@@ -50,7 +50,10 @@
 package com.openexchange.filemanagement.json.actions;
 
 import java.io.File;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.SessionServlet;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -67,6 +70,7 @@ import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,18 +95,37 @@ public final class GetAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
         try {
-            final String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
+            String id = requestData.getParameter(AJAXServlet.PARAMETER_ID);
             if (id == null || id.length() == 0) {
                 throw UploadException.UploadCode.MISSING_PARAM.create(AJAXServlet.PARAMETER_ID).setAction(AJAXServlet.ACTION_GET);
             }
-            final ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            final ManagedFile file = management.getByID(id);
-            /*
-             * Content type
-             */
-            final String fileName = file.getFileName();
-            final String disposition = file.getContentDisposition();
-            final ContentType contentType = new ContentType(file.getContentType());
+
+            // Look-up managed file
+            ManagedFileManagement management = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
+            ManagedFile file;
+            try {
+                file = management.getByID(id);
+            } catch (OXException e) {
+                if (requestData.setResponseHeader("Content-Type", "text/html; charset=UTF-8")) {
+                    if (ManagedFileExceptionErrorMessage.NOT_FOUND.equals(e) || ManagedFileExceptionErrorMessage.FILE_NOT_FOUND.equals(e)) {
+                        try {
+                            HttpServletResponse resp = requestData.optHttpServletResponse();
+                            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                            String desc = "An error occurred inside the server which prevented it from fulfilling the request.";
+                            SessionServlet.writeErrorPage(HttpServletResponse.SC_NOT_FOUND, desc, resp);
+                            return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                        } catch (IOException ioe) {
+                            throw AjaxExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
+                        }
+                    }
+                }
+                throw e;
+            }
+
+            // Content type
+            String fileName = file.getFileName();
+            String disposition = file.getContentDisposition();
+            ContentType contentType = new ContentType(file.getContentType());
             if (null != fileName) {
                 // Resolve Content-Type by file name if set to default
                 if (contentType.startsWith("application/octet-stream")) {
@@ -117,22 +140,18 @@ public final class GetAction implements AJAXActionService {
                 // Set as "name" parameter
                 contentType.setParameter("name", fileName);
             }
-            /*
-             * Write from content's input stream to response output stream
-             */
-            final File tmpFile = file.getFile();
-            final FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), null, null);
-            /*
-             * Parameterize file holder
-             */
+
+            // Write from content's input stream to response output stream
+            File tmpFile = file.getFile();
+            FileHolder fileHolder = new FileHolder(FileHolder.newClosureFor(tmpFile), tmpFile.length(), null, null);
+
+            // Parameterize file holder
             if (fileName != null) {
                 fileHolder.setName(fileName);
             }
             fileHolder.setContentType(contentType.toString());
             fileHolder.setDisposition(disposition);
-            /*
-             * Return result
-             */
+
             return new AJAXRequestResult(fileHolder, "file");
         } catch (final RuntimeException e) {
             throw ManagedFileExceptionErrorMessage.IO_ERROR.create(e, e.getMessage());

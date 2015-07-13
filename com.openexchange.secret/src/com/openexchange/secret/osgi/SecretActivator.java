@@ -70,6 +70,7 @@ import com.openexchange.secret.impl.ReservedToken;
 import com.openexchange.secret.impl.Token;
 import com.openexchange.secret.impl.TokenBasedSecretService;
 import com.openexchange.secret.impl.TokenList;
+import com.openexchange.secret.impl.TokenRow;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 
 /**
@@ -133,7 +134,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
             /*
              * Get pattern from configuration
              */
-            String pattern = configurationService.getProperty("com.openexchange.secret.secretSource", "\"<list>\"");
+            String pattern = configurationService.getProperty("com.openexchange.secret.secretSource", "\"<password>\"");
             if (pattern.charAt(0) == '"') {
                 pattern = pattern.substring(1);
             }
@@ -172,7 +173,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
                         tl.add(rt);
                     }
                 }
-                tokenBasedSecretService = new TokenBasedSecretService(tl);
+                tokenBasedSecretService = new TokenBasedSecretService(new TokenRow(tl));
                 tokenList = TokenList.newInstance(Collections.singleton(tl));
             }
             // Checks if SecretService is configured to use a password
@@ -190,7 +191,7 @@ public class SecretActivator extends HousekeepingActivator implements Reloadable
                 }
             });
 
-            final Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
+            Hashtable<String, Object> properties = new Hashtable<String, Object>(1);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(tokenBasedSecretService.getRanking()));
             registerService(SecretService.class, tokenBasedSecretService, properties);
         }

@@ -52,6 +52,8 @@ package com.openexchange.snippet.json.converter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,11 +64,15 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
+import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.text.HtmlProcessing;
+import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.Property;
 import com.openexchange.snippet.Snippet;
+import com.openexchange.snippet.SnippetImageDataSource;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -105,7 +111,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
             final Object resultObject = result.getResultObject();
             if (resultObject instanceof Snippet) {
                 final Snippet snippet = (Snippet) resultObject;
-                result.setResultObject(convertSnippet(snippet), "json");
+                result.setResultObject(convertSnippet(snippet, requestData.getSession()), "json");
                 return;
             }
             /*
@@ -114,7 +120,7 @@ public class SnippetJSONResultConverter implements ResultConverter {
             @SuppressWarnings("unchecked") final Collection<Snippet> snippets = (Collection<Snippet>) resultObject;
             final JSONArray jArray = new JSONArray();
             for (final Snippet snippet : snippets) {
-                jArray.put(convertSnippet(snippet));
+                jArray.put(convertSnippet(snippet, requestData.getSession()));
             }
             result.setResultObject(jArray, "json");
         } catch (final JSONException e) {
@@ -122,14 +128,20 @@ public class SnippetJSONResultConverter implements ResultConverter {
         }
     }
 
-    private JSONObject convertSnippet(final Snippet snippet) throws JSONException {
+    private JSONObject convertSnippet(Snippet snippet, Session session) throws JSONException, OXException {
         final JSONObject json = new JSONObject();
         int itg = snippet.getAccountId();
         if (itg >= 0) {
             json.put(Property.ACCOUNT_ID.getPropName(), itg);
         }
+        String snippetId = snippet.getId();
+        if (null != snippetId) {
+            json.put(Property.ID.getPropName(), snippetId);
+        }
+
         String tmp = snippet.getContent();
         if (null != tmp) {
+            tmp = processContent(tmp, snippetId, session);
             json.put("content", tmp);
         }
         itg = snippet.getCreatedBy();
@@ -139,10 +151,6 @@ public class SnippetJSONResultConverter implements ResultConverter {
         tmp = snippet.getDisplayName();
         if (null != tmp) {
             json.put(Property.DISPLAY_NAME.getPropName(), tmp);
-        }
-        tmp = snippet.getId();
-        if (null != tmp) {
-            json.put(Property.ID.getPropName(), tmp);
         }
         final Object misc = snippet.getMisc();
         if (null != misc) {
@@ -213,6 +221,55 @@ public class SnippetJSONResultConverter implements ResultConverter {
         } catch (final Exception e) {
             return null;
         }
+    }
+
+    private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static final Pattern CID_PATTERN = Pattern.compile("(?:src=cid:([^\\s>]*))|(?:src=\"cid:([^\"]*)\")", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String processContent(String content, String snippetId, Session session) throws OXException {
+        if (null == snippetId) {
+            return content;
+        }
+
+        Matcher imgMatcher = IMG_PATTERN.matcher(content);
+        StringBuffer sb = new StringBuffer(content.length());
+
+        if (imgMatcher.find()) {
+            StringBuilder linkBuilder = new StringBuilder(256);
+            /*
+             * Replace inline images with Content-ID
+             */
+            do {
+                String imgTag = imgMatcher.group();
+                {
+                    Matcher cidMatcher = CID_PATTERN.matcher(imgTag);
+                    StringBuffer cidBuffer = new StringBuffer(imgTag.length());
+                    if (cidMatcher.find()) {
+                        do {
+                            // Extract Content-ID
+                            String cid = cidMatcher.group(2);
+                            if (cid == null) {
+                                cid = cidMatcher.group(1);
+                            }
+                            linkBuilder.setLength(0);
+
+                            // Build image location
+                            ImageLocation imageLocation = new ImageLocation.Builder(cid).id(snippetId).optImageHost(HtmlProcessing.imageHost()).build();
+                            SnippetImageDataSource imgSource = SnippetImageDataSource.getInstance();
+                            String imageURL = imgSource.generateUrl(imageLocation, session);
+                            linkBuilder.append("src=").append('"').append(imageURL).append('"').append(" id=\"").append(cid).append("\" ").append("onmousedown=\"return false;\" oncontextmenu=\"return false;\"");
+
+                            cidMatcher.appendReplacement(cidBuffer, Matcher.quoteReplacement( 0 == linkBuilder.length() ? cidMatcher.group() : linkBuilder.toString()));
+                        } while (cidMatcher.find());
+                    }
+                    cidMatcher.appendTail(cidBuffer);
+                    imgMatcher.appendReplacement(sb, Matcher.quoteReplacement(cidBuffer.toString()));
+                }
+            } while (imgMatcher.find());
+        }
+        imgMatcher.appendTail(sb);
+        return sb.toString();
     }
 
 }

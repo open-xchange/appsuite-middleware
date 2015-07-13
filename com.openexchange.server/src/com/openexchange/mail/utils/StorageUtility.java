@@ -295,7 +295,7 @@ public final class StorageUtility {
      * @param sortField The sort field
      * @return The prepared mail fields for search
      */
-    public static MailFields prepareMailFieldsForSearch(final MailField[] mailFields, final MailSortField sortField) {
+    public static MailFields prepareMailFieldsForSearch(MailField[] mailFields, MailSortField sortField) {
         final MailFields usedFields = new MailFields(mailFields);
         usedFields.add(MailField.toField(sortField.getListField()));
 

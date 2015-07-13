@@ -233,7 +233,7 @@ public class Bug32698Test {
         this.tokenLoginServiceImpl2.changeBackingMapToHz();
 
         String localToken = this.tokenLoginServiceImpl.acquireToken(this.session);
-        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
+        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
         Assert.assertNotNull(returnedSession);
         String localToken2 = this.tokenLoginServiceImpl.acquireToken(this.session);
         Assert.assertFalse(localToken.equals(localToken2));
@@ -253,9 +253,9 @@ public class Bug32698Test {
         this.tokenLoginServiceImpl2.changeBackingMapToHz();
 
         String localToken = this.tokenLoginServiceImpl.acquireToken(this.session);
-        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
+        Session returnedSession = this.tokenLoginServiceImpl2.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
         Assert.assertNotNull(returnedSession);
-        Session returnedSession2 = this.tokenLoginServiceImpl.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash");
+        Session returnedSession2 = this.tokenLoginServiceImpl.redeemToken(localToken, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
 
         Assert.assertFalse(returnedSession.equals(returnedSession2));
 

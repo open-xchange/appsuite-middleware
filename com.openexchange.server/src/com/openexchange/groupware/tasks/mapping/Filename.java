@@ -53,6 +53,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.groupware.container.CommonObject;
+import com.openexchange.groupware.tasks.AttributeNames;
 import com.openexchange.groupware.tasks.Mapper;
 import com.openexchange.groupware.tasks.Mapping;
 import com.openexchange.groupware.tasks.Task;
@@ -86,7 +87,7 @@ public final class Filename implements Mapper<String> {
 
     @Override
     public String getDisplayName() {
-        throw new UnsupportedOperationException();
+        return AttributeNames.FILENAME;
     }
 
     @Override

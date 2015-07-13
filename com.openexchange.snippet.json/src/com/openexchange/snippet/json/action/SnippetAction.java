@@ -60,10 +60,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.mime.ContentType;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -181,7 +184,6 @@ public abstract class SnippetAction implements AJAXActionService {
      * @throws OXException If performing request fails for any reason
      * @throws JSONException If a JSON error occurs
      */
-    @SuppressWarnings("unused")
     protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException {
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
@@ -200,6 +202,19 @@ public abstract class SnippetAction implements AJAXActionService {
      */
     public List<Method> getRESTMethods() {
         return Collections.emptyList();
+    }
+
+    /**
+     * @param snippet
+     * @return
+     * @throws OXException
+     */
+    protected String getContentSubType(DefaultSnippet snippet) throws OXException {
+        if (snippet.getMisc() == null) {
+            return "plain";
+        }
+        final String ct = SnippetUtils.parseContentTypeFromMisc(snippet.getMisc());
+        return new ContentType(ct).getSubType();
     }
 
 }

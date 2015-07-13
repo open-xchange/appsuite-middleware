@@ -76,8 +76,8 @@ public final class TransportProviderServiceTracker implements ServiceTrackerCust
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TransportProviderServiceTracker.class);
 
     private final BundleContext context;
-    private ServiceRegistration<CapabilityChecker> capabilityChecker;
-    private ServiceTracker<CapabilityService, CapabilityService> capabilityServiceTracker;
+    volatile ServiceRegistration<CapabilityChecker> capabilityChecker;
+    private volatile ServiceTracker<CapabilityService, CapabilityService> capabilityServiceTracker;
 
     /**
      * Initializes a new {@link TransportProviderServiceTracker}

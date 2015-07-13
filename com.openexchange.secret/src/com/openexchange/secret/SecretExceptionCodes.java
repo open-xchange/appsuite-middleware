@@ -73,8 +73,7 @@ public enum SecretExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.
      */
-    EMPTY_SECRET("Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.",
-        CATEGORY_CONFIGURATION, 3),
+    EMPTY_SECRET("Secret is empty. Please check configuration and set a valid secret source in file 'secret.properties'.", CATEGORY_CONFIGURATION, 3),
 
     ;
 
@@ -84,7 +83,7 @@ public enum SecretExceptionCodes implements DisplayableOXExceptionCode {
     public static String PREFIX = "SCR";
 
     private String displayMessage;
-    
+
     private Category category;
 
     private int detailNumber;
@@ -97,7 +96,7 @@ public enum SecretExceptionCodes implements DisplayableOXExceptionCode {
         this.detailNumber = detailNumber;
         this.category = category;
     }
-    
+
     private SecretExceptionCodes(String message, Category category, int detailNumber) {
         this(message, null, category, detailNumber);
     }
@@ -111,7 +110,7 @@ public enum SecretExceptionCodes implements DisplayableOXExceptionCode {
     public String getMessage() {
         return message;
     }
-    
+
     @Override
     public String getDisplayMessage() {
         return displayMessage;

@@ -70,6 +70,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.htmlparser.jericho.Attribute;
+import net.htmlparser.jericho.Attributes;
+import net.htmlparser.jericho.Element;
+import net.htmlparser.jericho.HTMLElementName;
+import net.htmlparser.jericho.OutputDocument;
 import net.htmlparser.jericho.Renderer;
 import net.htmlparser.jericho.Segment;
 import net.htmlparser.jericho.Source;
@@ -99,10 +104,10 @@ import com.openexchange.html.HtmlServices;
 import com.openexchange.html.internal.jericho.JerichoParser;
 import com.openexchange.html.internal.jericho.JerichoParser.ParsingDeniedException;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandler;
+import com.openexchange.html.internal.jericho.handler.UrlReplacerJerichoHandler;
 import com.openexchange.html.internal.parser.HtmlParser;
 import com.openexchange.html.internal.parser.handler.HTMLFilterHandler;
 import com.openexchange.html.internal.parser.handler.HTMLImageFilterHandler;
-import com.openexchange.html.internal.parser.handler.HTMLURLReplacerHandler;
 import com.openexchange.html.services.ServiceRegistry;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Charsets;
@@ -544,6 +549,35 @@ public final class HtmlServiceImpl implements HtmlService {
         return sanitize(htmlContent, optConfigName, dropExternalImages, modified, cssPrefix, -1).getContent();
     }
 
+    private String normalize(String str) {
+        boolean needsCheck = false;
+        int length = str.length();
+        for (int i = 0; !needsCheck && i < length; i++) {
+            needsCheck = str.charAt(i) >= 128;
+        }
+
+        if (!needsCheck) {
+            return str;
+        }
+
+        StringBuilder tmp = new StringBuilder(length);
+        OneCharSequence helper = null;
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (c < 128) {
+                tmp.append(c);
+            } else {
+                if (null == helper) {
+                    helper = new OneCharSequence(c);
+                } else {
+                    helper.setCharacter(c);
+                }
+                tmp.append(Normalizer.normalize(helper, Form.NFKC));
+            }
+        }
+        return tmp.toString();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -558,23 +592,15 @@ public final class HtmlServiceImpl implements HtmlService {
 
             // Normalize the string
             {
-                int length = html.length();
-                StringBuilder tmp = new StringBuilder(length);
-                OneCharSequence helper = null;
-                for (int i = 0; i < length; i++) {
-                    char c = html.charAt(i);
-                    if (c < 128) {
-                        tmp.append(c);
-                    } else {
-                        if (null == helper) {
-                            helper = new OneCharSequence(c);
-                        } else {
-                            helper.setCharacter(c);
-                        }
-                        tmp.append(Normalizer.normalize(helper, Form.NFKC));
-                    }
+                Matcher matcher = PATTERN_URL.matcher(html);
+                if (matcher.find()) {
+                    StringBuffer sb = new StringBuffer(html.length());
+                    do {
+                        matcher.appendReplacement(sb, Matcher.quoteReplacement(normalize(matcher.group())));
+                    } while (matcher.find());
+                    matcher.appendTail(sb);
+                    html = sb.toString();
                 }
-                html = tmp.toString();
             }
 
             // Perform one-shot sanitizing
@@ -1428,18 +1454,17 @@ public final class HtmlServiceImpl implements HtmlService {
     @Override
     public String getConformHTML(final String htmlContent, final String charset, final boolean replaceUrls) {
         if (null == htmlContent || 0 == htmlContent.length()) {
-            /*
-             * Nothing to do...
-             */
+            // Nothing to do...
             return htmlContent;
         }
-        /*
-         * Validate
-         */
-        String html = validate(htmlContent);
-        /*
-         * Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
-         */
+
+        // Drop superfluous <div> tags from sanitizing
+        String html = dropSuperfluousDivTags(htmlContent);
+
+        // Validate
+        html = validate(html);
+
+        // Check for meta tag in validated HTML content which indicates documents content type. Add if missing.
         final int headTagLen = TAG_S_HEAD.length();
         final int start = html.indexOf(TAG_S_HEAD) + headTagLen;
         if (start >= headTagLen) {
@@ -1466,15 +1491,52 @@ public final class HtmlServiceImpl implements HtmlService {
             }
         }
         html = processDownlevelRevealedConditionalComments(html);
-        /*
-         * Check URLs
-         */
+
+        // Check URLs
         if (replaceUrls) {
-            final HTMLURLReplacerHandler handler = new HTMLURLReplacerHandler(this, html.length());
-            HtmlParser.parse(html, handler);
+            UrlReplacerJerichoHandler handler = new UrlReplacerJerichoHandler(html.length());
+            JerichoParser.getInstance().parse(html, handler);
             html = handler.getHTML();
         }
+
         return html;
+    }
+
+    /**
+     * Drops superfluous <code>&lt;div&gt;</code> tags from given HTML content that were yielded from previous sanitizing.
+     * <p>
+     * E.g.
+     * <p>
+     * <code>"&lt;div id="ox-7bf62dbb34"&gt;&lt;p&gt;Some text&lt;/p&gt;&lt;/div&gt;"</code>
+     * &nbsp;&nbsp;---&gt;&nbsp;&nbsp;&nbsp;
+     * <code>"&lt;p&gt;Some text&lt;/p&gt;"</code>
+     *
+     * @param htmlContent The HTML content to process
+     * @return The processed HTML content
+     */
+    private static String dropSuperfluousDivTags(final String htmlContent) {
+        Source source = new Source(htmlContent);
+        source.fullSequentialParse();
+        OutputDocument outputDocument = new OutputDocument(source);
+
+        List<Element> divElements = source.getAllElements(HTMLElementName.DIV);
+        if (null != divElements && !divElements.isEmpty()) {
+            // Iterate <div> tags
+            for (Element divElement : divElements) {
+                Attributes attributes = divElement.getAttributes();
+                if (null != attributes && attributes.size() == 1) {
+                    Attribute idAttribute = attributes.get("id");
+                    if (null != idAttribute) {
+                        String idValue = idAttribute.getValue();
+                        if (null != idValue && idValue.startsWith("ox-")) {
+                            outputDocument.replace(divElement, divElement.getContent());
+                        }
+                    }
+                }
+            }
+        }
+
+        return outputDocument.toString();
     }
 
     private static boolean occursWithin(final String str, final int start, final int end, final boolean ignorecase, final String... searchStrings) {
@@ -1818,6 +1880,8 @@ public final class HtmlServiceImpl implements HtmlService {
         props.setIgnoreQuestAndExclam(false);
         props.setUseCdataForScriptAndStyle(false);
         props.setIgnoreQuestAndExclam(true);
+        props.setAddNewlineToHeadAndBody(true);
+        props.setCharset("UTF-8");
         return props;
     }
 
@@ -1872,6 +1936,28 @@ public final class HtmlServiceImpl implements HtmlService {
         return ret;
     }
 
+    private static final Pattern END_TAG_FORBIDDEN_PATTERN = Pattern.compile("<(area|base|basefont|br|col|frame|hr|img|input|isindex|link|meta|param)([ \\t\\n\\x0B\\f\\r])([^>]*)/>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    private static String obeyForbiddenEndTags(String html) {
+        Matcher m = END_TAG_FORBIDDEN_PATTERN.matcher(html);
+        if (false == m.find()) {
+            return html;
+        }
+        StringBuffer sb = new StringBuffer(html.length());
+        StringBuilder tmp = new StringBuilder(64);
+        do {
+            tmp.setLength(0);
+            tmp.append('<').append(m.group(1));
+            String appendix = m.group(3);
+            if (!Strings.isEmpty(appendix)) {
+                tmp.append(m.group(2)).append(appendix);
+            }
+            tmp.append('>');
+            m.appendReplacement(sb, Matcher.quoteReplacement(tmp.toString()));
+        } while (m.find());
+        m.appendTail(sb);
+        return sb.toString();
+    }
 
     protected static String validateWithHtmlCleaner(final String htmlContent) {
         try {
@@ -1880,33 +1966,34 @@ public final class HtmlServiceImpl implements HtmlService {
              *
              * Clean...
              */
-            String preprocessed = preprocessWithJSoup(htmlContent);
+            boolean preprocessWithJSoup = false;
+            String preprocessed = preprocessWithJSoup ? preprocessWithJSoup(htmlContent) : htmlContent;
             preprocessed = replaceSpecialEntities(preprocessed);
             final TagNode htmlNode = newHtmlCleaner().clean(preprocessed);
-            /*
-             * Check for presence of HTML namespace
-             */
+
+            // Check for presence of HTML namespace
             if (!htmlNode.hasAttribute("xmlns")) {
                 final Map<String, String> attributes = new HashMap<String, String>(1);
                 attributes.put("xmlns", "http://www.w3.org/1999/xhtml");
                 htmlNode.setAttributes(attributes);
             }
-            /*
-             * Serialize
-             */
+
+            // Serialize
             final UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(htmlContent.length());
             newSerializer().write(htmlNode, writer, "UTF-8");
             final StringBuilder buffer = writer.getBuffer();
-            /*
-             * Insert DOCTYPE if absent
-             */
+
+            // Insert DOCTYPE if absent
             if (buffer.indexOf("<!DOCTYPE") < 0) {
                 buffer.insert(0, DOCTYPE_DECL);
             }
-            /*
-             * Keep Unicode representation of 'copy' and 'reg' intact
-             */
-            return keepUnicodeForEntities(buffer.toString());
+
+            // Keep Unicode representation of 'copy' and 'reg' intact
+            String result = keepUnicodeForEntities(buffer.toString());
+
+            // Obey forbidden end tags
+            result = obeyForbiddenEndTags(result);
+            return result;
         } catch (final UnsupportedEncodingException e) {
             // Cannot occur
             LOG.error("HtmlCleaner library failed to pretty-print HTML content with an unsupported encoding", e);

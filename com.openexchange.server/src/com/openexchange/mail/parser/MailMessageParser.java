@@ -140,6 +140,31 @@ public final class MailMessageParser {
         }
     };
 
+    private static final class ContentProviderImpl implements ContentProvider {
+
+        private final ContentType contentType;
+        private final MailPart mailPart;
+        private final String mailId;
+        private final String folder;
+
+        ContentProviderImpl(ContentType contentType, MailPart mailPart, String mailId, String folder) {
+            super();
+            this.contentType = contentType;
+            this.mailPart = mailPart;
+            this.mailId = mailId;
+            this.folder = folder;
+        }
+
+        @Override
+        public String getContent() throws OXException {
+            try {
+                return readContent(mailPart, contentType, mailId, folder);
+            } catch (IOException e) {
+                throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
+            }
+        }
+    }
+
     private static interface InlineDetector {
 
         public boolean isInline(String disposition, String fileName);
@@ -412,52 +437,59 @@ public final class MailMessageParser {
                 }
             } else {
                 if (isInline) {
-                    final String content = readContent(mailPart, contentType, mailId, folder);
-                    final UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
-                    if (uuencodedMP.isUUEncoded()) {
-                        /*
-                         * UUEncoded content detected. Handle normal text.
-                         */
-                        if (!handler.handleInlineUUEncodedPlainText(
-                            uuencodedMP.getCleanText(),
-                            contentType,
-                            uuencodedMP.getCleanText().length(),
-                            fileName,
-                            getSequenceId(prefix, partCount))) {
-                            stop = true;
-                            return;
-                        }
-                        /*
-                         * Now handle uuencoded attachments
-                         */
-                        final int count = uuencodedMP.getCount();
-                        if (count > 0) {
-                            for (int a = 0; a < count; a++) {
-                                /*
-                                 * Increment part count by 1
-                                 */
-                                partCount++;
-                                if (!handler.handleInlineUUEncodedAttachment(
-                                    uuencodedMP.getBodyPart(a),
-                                    MailMessageParser.getSequenceId(prefix, partCount))) {
-                                    stop = true;
-                                    return;
+                    if (null != mailPart.getFileName()) {
+                        contentType.setParameter("realfilename", mailPart.getFileName());
+                    }
+                    try {
+                        String content = readContent(mailPart, contentType, mailId, folder);
+                        UUEncodedMultiPart uuencodedMP = new UUEncodedMultiPart(content);
+                        if (uuencodedMP.isUUEncoded()) {
+                            /*
+                             * UUEncoded content detected. Handle normal text.
+                             */
+                            if (!handler.handleInlineUUEncodedPlainText(
+                                uuencodedMP.getCleanText(),
+                                contentType,
+                                uuencodedMP.getCleanText().length(),
+                                fileName,
+                                getSequenceId(prefix, partCount))) {
+                                stop = true;
+                                return;
+                            }
+                            /*
+                             * Now handle uuencoded attachments
+                             */
+                            int count = uuencodedMP.getCount();
+                            if (count > 0) {
+                                for (int a = 0; a < count; a++) {
+                                    /*
+                                     * Increment part count by 1
+                                     */
+                                    partCount++;
+                                    if (!handler.handleInlineUUEncodedAttachment(
+                                        uuencodedMP.getBodyPart(a),
+                                        MailMessageParser.getSequenceId(prefix, partCount))) {
+                                        stop = true;
+                                        return;
+                                    }
                                 }
                             }
+                        } else {
+                            /*
+                             * Just non-encoded plain text
+                             */
+                            if (!handler.handleInlinePlainText(
+                                content,
+                                contentType,
+                                size,
+                                fileName,
+                                MailMessageParser.getSequenceId(prefix, partCount))) {
+                                stop = true;
+                                return;
+                            }
                         }
-                    } else {
-                        /*
-                         * Just non-encoded plain text
-                         */
-                        if (!handler.handleInlinePlainText(
-                            content,
-                            contentType,
-                            size,
-                            fileName,
-                            MailMessageParser.getSequenceId(prefix, partCount))) {
-                            stop = true;
-                            return;
-                        }
+                    } finally {
+                        contentType.removeParameter("realfilename");
                     }
                 } else {
                     /*
@@ -486,9 +518,16 @@ public final class MailMessageParser {
                     mailPart.setSequenceId(getSequenceId(prefix, partCount));
                 }
                 if (isInline) {
-                    if (!handler.handleInlineHtml(readContent(mailPart, contentType, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
-                        stop = true;
-                        return;
+                    if (null != mailPart.getFileName()) {
+                        contentType.setParameter("realfilename", mailPart.getFileName());
+                    }
+                    try {
+                        if (!handler.handleInlineHtml(new ContentProviderImpl(contentType, mailPart, mailId, folder), contentType, size, fileName, mailPart.getSequenceId())) {
+                            stop = true;
+                            return;
+                        }
+                    } finally {
+                        contentType.removeParameter("realfilename");
                     }
                 } else {
                     if (!handler.handleAttachment(mailPart, false, lcct, fileName, mailPart.getSequenceId())) {
@@ -842,7 +881,11 @@ public final class MailMessageParser {
          * SUBJECT
          */
         {
-            final String subj = mail.getSubject();
+            String subj = mail.getSubject();
+            if (subj == null) { // in case no subject was set
+                subj = "";
+            }
+
             subject = subj;
             handler.handleSubject(subj);
         }
@@ -964,15 +1007,15 @@ public final class MailMessageParser {
      * @param baseMimeType The base MIME type to look up an appropriate file extension if <code>rawFileName</code> is <code>null</code>
      * @return The generated filename
      */
-    public static String generateFilename(final String sequenceId, final String baseMimeType) {
+    public static String generateFilename(String sequenceId, String baseMimeType) {
         return getFileName(null, sequenceId, baseMimeType);
     }
 
-    private static String readContent(final MailPart mailPart, final ContentType contentType, final String mailId, final String folder) throws OXException, IOException {
+    static String readContent(MailPart mailPart, ContentType contentType, String mailId, String folder) throws OXException, IOException {
         /*
          * Read content
          */
-        final String content = MimeMessageUtility.readContent(mailPart, contentType);
+        String content = MimeMessageUtility.readContent(mailPart, contentType);
         if (null == content) {
             throw MailExceptionCode.MAIL_NOT_FOUND.create(mailId, folder);
         }

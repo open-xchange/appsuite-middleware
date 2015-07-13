@@ -49,7 +49,10 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -62,11 +65,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
@@ -607,18 +613,12 @@ public final class Tools {
      * @param request The request to be evaluated.
      * @return <code>true</code> if the request is multipart; <code>false</code> otherwise.
      */
-    public static final boolean isMultipartContent(final HttpServletRequest request) {
+    public static final boolean isMultipartContent(HttpServletRequest request) {
         if (null == request) {
             return false;
         }
-        final String contentType = request.getContentType();
-        if (contentType == null) {
-            return false;
-        }
-        if (toLowerCase(contentType).startsWith(MULTIPART)) {
-            return true;
-        }
-        return false;
+        String contentType = request.getContentType();
+        return null != contentType && asciiLowerCase(contentType).startsWith(MULTIPART);
     }
 
     /**
@@ -671,16 +671,156 @@ public final class Tools {
         return new AuthCookie(cookie);
     }
 
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
+    /**
+     * Sends an error response having a JSON body using given HTTP response
+     *
+     * @param httpResponse The HTTP response to use
+     * @param statusCode The HTTP status code
+     * @param body The associated JSON body
+     * @throws IOException If an I/O error occurs
+     */
+    public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
+        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
     }
+
+    /**
+     * Sends an error response having a JSON body using given HTTP response
+     *
+     * @param httpResponse The HTTP response to use
+     * @param statusCode The HTTP status code
+     * @param additionalHeaders Optional additional headers to apply to HTTP response
+     * @param body The associated JSON body
+     * @throws IOException If an I/O error occurs
+     */
+    public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders, String body) throws IOException {
+        httpResponse.reset();
+
+        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+            httpResponse.setHeader(header.getKey(), header.getValue());
+        }
+
+        httpResponse.setContentType("application/json;charset=UTF-8");
+        httpResponse.setStatus(statusCode);
+        PrintWriter writer = httpResponse.getWriter();
+        writer.write(body);
+        writer.flush();
+    }
+
+    /**
+     * Sends an error response w/o body data using given HTTP response
+     *
+     * @param httpResponse The HTTP response
+     * @param statusCode The HTTP status code
+     * @throws IOException If an I/O error occurs
+     */
+    public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
+        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
+    }
+
+    /**
+     * Sends an error response w/o body data using given HTTP response
+     *
+     * @param httpResponse The HTTP response
+     * @param statusCode The HTTP status code
+     * @param additionalHeaders Optional additional headers to apply to HTTP response
+     * @throws IOException If an I/O error occurs
+     */
+    public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode, Map<String, String> additionalHeaders) throws IOException {
+        httpResponse.reset();
+        httpResponse.setContentType(null);
+        for (Entry<String, String> header : additionalHeaders.entrySet()) {
+            httpResponse.setHeader(header.getKey(), header.getValue());
+        }
+
+        httpResponse.sendError(statusCode);
+    }
+
+    /**
+     * Sends an HTML error page to HTTP response.
+     * @param httpResponse The HTTP response
+     * @param statusCode The HTTP status code
+     * @param desc The error description
+     *
+     * @throws IOException If an I/O error occurs
+     */
+    public static void sendErrorPage(HttpServletResponse httpResponse, int statusCode, String desc) throws IOException {
+        httpResponse.reset();
+        httpResponse.setContentType("text/html; charset=UTF-8");
+        httpResponse.setHeader("Content-Disposition", "inline");
+        httpResponse.setStatus(statusCode);
+        PrintWriter writer = httpResponse.getWriter();
+        writer.write(getErrorPage(statusCode, null, desc));
+        writer.flush();
+    }
+
+    /**
+     * Generates a simple error page for given arguments.
+     *
+     * @param statusCode The status code; e.g. <code>404</code>
+     * @param msg The optional status message; e.g. <code>"Not Found"</code>
+     * @param desc The optional status description; e.g. <code>"The requested URL was not found on this server."</code>
+     * @return A simple error page
+     */
+    public static String getErrorPage(int statusCode, String msg, String desc) {
+        String msg0 = null == msg ? HttpStatus.getStatusText(statusCode) : msg;
+
+        StringBuilder sb = new StringBuilder(512);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE html>").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        {
+            sb.append("<title>").append(statusCode);
+            if (null != msg0) {
+                sb.append(' ').append(msg0);
+            }
+            sb.append("</title>").append(lineSep);
+        }
+
+        sb.append("</head><body>").append(lineSep);
+
+        sb.append("<h1>");
+        if (null == msg0) {
+            sb.append(statusCode);
+        } else {
+            sb.append(msg0);
+        }
+        sb.append("</h1>").append(lineSep);
+
+        String desc0 = null == desc ? msg0 : desc;
+        if (null != desc0) {
+            sb.append("<p>").append(desc0).append("</p>").append(lineSep);
+        }
+
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
+    private static final Pattern PATTERN_BYTE_RANGES = Pattern.compile("^bytes=\\d*-\\d*(,\\d*-\\d*)*$");
+
+    /**
+     * Checks if given HTTP request provides a "Range" header, whose value matches format "bytes=n-n,n-n,n-n..."
+     *
+     * @param req The HTTP request to check
+     * @return <code>true</code> if request queries a byte range; otherwise <code>false</code>
+     */
+    public static boolean hasRangeHeader(HttpServletRequest req) {
+        if (null == req) {
+            return false;
+        }
+        return isByteRangeHeader(req.getHeader("Range"));
+    }
+
+    /**
+     * Checks if given "Range" header matches format "bytes=n-n,n-n,n-n..."
+     *
+     * @param range The "Range" header
+     * @return <code>true</code> for a byte range; otherwise <code>false</code>
+     */
+    public static boolean isByteRangeHeader(String range) {
+        // Range header should match format "bytes=n-n,n-n,n-n...".
+        return ((null != range) && PATTERN_BYTE_RANGES.matcher(range).matches());
+    }
+
 }

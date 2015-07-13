@@ -84,6 +84,36 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // ZIP archive exceeds max. allowed size of %1$s
     public static final String ARCHIVE_MAX_SIZE_EXCEEDED_MSG = "ZIP archive exceeds max. allowed size of %1$s";
 
+    // The file storage account is currently not accessible.
+    public static final String ACCOUNT_NOT_ACCESSIBLE_MSG = "The file storage account is currently not accessible.";
+
+    // The folder \"%1$s\" cannot be moved to \"%2$s\".
+    public static final String FOLDER_MOVE_NOT_SUPPORTED_MSG = "The folder \"%1$s\" cannot be moved to \"%2$s\".";
+
+    // The file \"%1$s\" cannot be moved to \"%2$s\".
+    public static final String FILE_MOVE_NOT_SUPPORTED_MSG = "The file \"%1$s\" cannot be moved to \"%2$s\".";
+
+    // The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+    public static final String LOSS_OF_NOTES_MSG = "The notes of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".";
+
+    // All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+    public static final String LOSS_OF_VERSIONS_MSG = "All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".";
+
+    // All previous versions of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".
+    public static final String LOSS_OF_CATEGORIES_MSG = "The assigned categories of the file \"%1$s\" in folder \"%2$s\" are lost when moving it into the account \"%3$s\".";
+
+    // The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".
+    public static final String LOSS_OF_FILE_SHARES_MSG = "The shared file \"%1$s\" in folder \"%2$s\" is no longer accessible by other users when moving it into the account \"%3$s\".";
+
+    // The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".
+    public static final String LOSS_OF_FOLDER_SHARES_MSG = "The shared folder \"%1$s\" is no longer accessible by other users when moving it into the account \"%2$s\".";
+
+    // The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.
+    public static final String FILE_UPDATE_ABORTED_MSG = "The file \"%1$s\" was not updated due to possible data loss. Please review the warnings for details.";
+
+    // The associated %2$s account does no more exist
+    public static final String ACCOUNT_NOT_FOUND_MSG = "The associated %2$s account does no more exist";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

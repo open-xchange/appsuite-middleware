@@ -122,9 +122,9 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
     }
 
     @Override
-    public void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
+    public int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, ServerSession session) throws OXException {
         boolean wasCreation = InfostoreFacade.NEW == document.getId();
-        super.saveDocument(document, data, sequenceNumber, session);
+        int result = super.saveDocument(document, data, sequenceNumber, session);
         if (wasCreation) {
             fireEvent(FileStorageEventHelper.buildCreateEvent(
                 session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName()));
@@ -138,12 +138,13 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
              * being called from super class
              */
         }
+        return result;
     }
 
     @Override
-    protected void saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
+    protected int saveDocument(DocumentMetadata document, InputStream data, long sequenceNumber, Metadata[] modifiedColumns, boolean ignoreVersion, long offset, ServerSession session) throws OXException {
         boolean wasCreation = InfostoreFacade.NEW == document.getId();
-        super.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, offset, session);
+        int result = super.saveDocument(document, data, sequenceNumber, modifiedColumns, ignoreVersion, offset, session);
         if (wasCreation) {
             /*
              * leads to
@@ -156,6 +157,7 @@ public class EventFiringInfostoreFacadeImpl extends InfostoreFacadeImpl implemen
             fireEvent(FileStorageEventHelper.buildUpdateEvent(
                 session, SERVICE_ID, ACCOUNT_ID, getFolderID(document), getFileID(document), document.getFileName()));
         }
+        return result;
     }
 
     @Override

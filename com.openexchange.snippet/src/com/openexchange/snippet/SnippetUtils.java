@@ -89,8 +89,8 @@ public final class SnippetUtils {
             return content;
         }
         try {
-            String retval = service.getConformHTML(content, "UTF-8");
-            retval = service.sanitize(retval, null, false, null, null);
+            // String retval = service.getConformHTML(content, "UTF-8");
+            String retval = service.sanitize(content, null, false, null, null);
 
             int start = retval.indexOf("<body>");
             if (start >= 0) {
@@ -152,6 +152,26 @@ public final class SnippetUtils {
     public static String parseContentTypeFromMisc(final JSONObject misc) {
         String cts = misc.optString("content-type", null);
         return null == cts ? "text/plain" : cts;
+    }
+
+    /**
+     * Get the image identifier stored in the misc JSONObject of the snippet.
+     * 
+     * @param misc The misc JSONObject of the snippet
+     * @return The image identifier or null
+     * @throws OXException
+     */
+    public static String getImageId(final Object misc) throws OXException {
+        String imageId = null;
+        try {
+            if (misc != null) {
+                JSONObject m = new JSONObject(misc.toString());
+                imageId = m.optString("imageId");
+            }
+        } catch (JSONException e) {
+            throw OXJSONExceptionCodes.JSON_BUILD_ERROR.create(e);
+        }
+        return imageId;
     }
 
 }

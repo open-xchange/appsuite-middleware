@@ -424,7 +424,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Gets the name of the confirmed ham folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the confirmed ham folder
      */
@@ -435,7 +435,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Gets the name of the confirmed spam folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the confirmed spam folder
      */
@@ -506,7 +506,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Gets the name of the draft folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the draft folder
      */
@@ -517,7 +517,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Gets the name of the sent folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the sent folder
      */
@@ -528,7 +528,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Gets the name of the spam folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the spam folder
      */
@@ -539,7 +539,7 @@ public final class UserSettingMail implements Cloneable, Serializable {
     /**
      * Gets the name of the trash folder.
      * <p>
-     * <b>Note</b>: This is only the name, not its fullname.
+     * <b>Note</b>: This is only the name, not its full name.
      *
      * @return The name of the trash folder
      */

@@ -50,6 +50,9 @@
 
 package com.openexchange.passwordchange;
 
+import java.util.List;
+import java.util.Map;
+import com.openexchange.authentication.Cookie;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;
 
@@ -62,12 +65,11 @@ import com.openexchange.session.Session;
 public final class PasswordChangeEvent {
 
     private final Session session;
-
     private final Context ctx;
-
     private final String newPassword;
-
     private final String oldPassword;
+    private final Map<String, List<String>> headers;
+    private final Cookie[] cookies;
 
     /**
      * Initializes a new {@link PasswordChangeEvent}
@@ -78,10 +80,35 @@ public final class PasswordChangeEvent {
      * @param oldPassword The old password (needed for verification)
      */
     public PasswordChangeEvent(final Session session, final Context ctx, final String newPassword, final String oldPassword) {
+        this(session, ctx, newPassword, oldPassword, null, null);
+    }
+
+    public PasswordChangeEvent(Session session, Context ctx, String newPassword, String oldPassword, Map<String, List<String>> headers, Cookie[] cookies) {
+        super();
         this.session = session;
         this.ctx = ctx;
         this.newPassword = newPassword;
         this.oldPassword = oldPassword;
+        this.headers = headers;
+        this.cookies = cookies;
+    }
+
+    /**
+     * Gets the associated cookies
+     *
+     * @return The cookies or <code>null</code>
+     */
+    public Cookie[] getCookies() {
+        return cookies;
+    }
+
+    /**
+     * Gets the associated headers
+     *
+     * @return The headers or <code>null</code>
+     */
+    public Map<String, List<String>> getHeaders() {
+        return headers;
     }
 
     /**

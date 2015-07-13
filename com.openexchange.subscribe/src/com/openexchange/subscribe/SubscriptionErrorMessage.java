@@ -132,6 +132,11 @@ public enum SubscriptionErrorMessage implements DisplayableOXExceptionCode {
      * The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us. It is in the provider's responsibility. For this reason, the subscription cannot be completed.
      */
     ABORT_IDENTITY_CONFIRMATION(CATEGORY_USER_INPUT, 90113, SubscriptionErrorStrings.ABORT_IDENTITY_CONFIRMATION_DISPLAY, SubscriptionErrorStrings.ABORT_IDENTITY_CONFIRMATION_DISPLAY),
+    /**
+     * Such a subscription from source %1$s does already exist for user %2$s in context %3$s
+     */
+    DUPLICATE_SUBSCRIPTION(CATEGORY_USER_INPUT, 90113, SubscriptionErrorStrings.DUPLICATE_SUBSCRIPTION_DISPLAY, SubscriptionErrorStrings.DUPLICATE_SUBSCRIPTION_DISPLAY),
+
     ;
 
     private static final String SQL_ERROR = "A SQL error occurred.";

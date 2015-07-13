@@ -1,3 +1,7 @@
+* 2014-10-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 34959: Retrieve context identifier by name if absent in call's argument
+
 * 2011-10-19 - choeger@open-xchange.com
 
  - Use the new stabilized SOAP API from SoftwareChange_Request-860
@@ -11,9 +15,9 @@
 * 2011-09-07 - choeger@open-xchange.com
 
  - RMI API Change: Restrictions will now be exchanged as Java array and no longer as HashSet
- - New Feature: Subadmin can create further subadmins (extra permission required, maxdepth: 1) 
+ - New Feature: Subadmin can create further subadmins (extra permission required, maxdepth: 1)
  - add new restrictions using new updaterestrictions commandline
- 
+
 * 2011-08-08 - choeger@open-xchange.com
 
  - Bugfix #20032 - SOAP api breaks when userAttributesForSOAP are set within user object

@@ -163,7 +163,8 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 context.ungetService(reference);
             }
         };
-        configTracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
+        ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
+        this.configTracker = configTracker;
         configTracker.open();
         /*
          * track HazelcastInstanceNotActiveException
@@ -192,12 +193,14 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 return notActiveException;
             }
         };
-        inactiveTracker = new ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>(context, HazelcastInstanceNotActiveException.class, stc);
+        ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = new ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException>(context, HazelcastInstanceNotActiveException.class, stc);
+        this.inactiveTracker = inactiveTracker;
         inactiveTracker.open();
         /*
          * track ManagementService
          */
-        managementTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
+        ServiceTracker<ManagementService, ManagementService> managementTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
+        this.managementTracker = managementTracker;
         managementTracker.open();
     }
 

@@ -50,6 +50,9 @@
 package com.openexchange.ajax.importexport.actions;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
@@ -68,17 +71,35 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
     public static final String IMPORT_URL = "/ajax/import";
 
     private final Action action;
-
     private final int folderId;
-
     private final InputStream upload;
+    private final Parameter[] additionalParameters;
 
-    public AbstractImportRequest(final Action action, final int folderId,
-        final InputStream upload) {
+    /**
+     * Initializes a new {@link AbstractImportRequest}.
+     *
+     * @param action The import action
+     * @param folderId The target folder identifier
+     * @param upload The input stream to upload
+     */
+    public AbstractImportRequest(Action action, int folderId, InputStream upload) {
+        this(action, folderId, upload, (Parameter[]) null);
+    }
+
+    /**
+     * Initializes a new {@link AbstractImportRequest}.
+     *
+     * @param action The import action
+     * @param folderId The target folder identifier
+     * @param upload The input stream to upload
+     * @param additionalParameters Additional parameters to include in the request
+     */
+    public AbstractImportRequest(Action action, int folderId, InputStream upload, Parameter...additionalParameters) {
         super();
         this.action = action;
         this.folderId = folderId;
         this.upload = upload;
+        this.additionalParameters = additionalParameters;
     }
 
     @Override
@@ -98,11 +119,14 @@ public abstract class AbstractImportRequest<T extends AbstractAJAXResponse> impl
 
     @Override
     public Parameter[] getParameters() {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()),
-            new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId),
-            new FileParameter("file", action.fileName, upload, action.format.getMimeType())
-        };
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_ACTION, action.getName()));
+        parameters.add(new Parameter(AJAXServlet.PARAMETER_FOLDERID, folderId));
+        parameters.add(new FileParameter("file", action.fileName, upload, action.format.getMimeType()));
+        if (null != additionalParameters && 0 < additionalParameters.length) {
+            parameters.addAll(Arrays.asList(additionalParameters));
+        }
+        return parameters.toArray(new Parameter[parameters.size()]);
     }
 
     protected enum Action {

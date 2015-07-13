@@ -50,13 +50,13 @@
 package com.openexchange.calendar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.CalendarObject;
@@ -310,35 +310,40 @@ public class AppointmentDiff {
 
     // Diagnostic Methods
 
+    /**
+     * Checks if the appointment diff contains <b>only</b> state changes
+     *
+     * @return <code>true</code> for <b>only</b> state changes; otherwise <code>false</code>
+     */
     public boolean isAboutStateChangesOnly() {
-
         // First, let's see if any fields besides the state tracking fields have changed
         HashSet<String> differing = new HashSet<String>(differingFieldNames);
-
-        for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
-            differing.remove(field);
-        }
+        differing.removeAll(Arrays.asList(CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS));
         if (!differing.isEmpty()) {
             return false;
         }
 
+        return isAboutStateChanges();
+    }
+
+    /**
+     * Checks if the appointment diff contains any state changes
+     *
+     * @return <code>true</code> for any state changes; otherwise <code>false</code>
+     */
+    public boolean isAboutStateChanges() {
         // Hm, okay, so now let's see if any participants were added or removed. That also means this mail is not only about state changes.
         for(String field: new String[]{CalendarFields.PARTICIPANTS, CalendarFields.USERS, CalendarFields.CONFIRMATIONS}) {
             FieldUpdate update = getUpdateFor(field);
-            if (update == null) {
-                continue;
+            if (update != null) {
+                Difference extraInfo = (Difference) update.getExtraInfo();
+                if (extraInfo.getAdded().isEmpty() && extraInfo.getRemoved().isEmpty()) {
+                    return true;
+                }
             }
-            Difference extraInfo = (Difference) update.getExtraInfo();
-            if (!extraInfo.getAdded().isEmpty()) {
-                return false;
-            }
-            if (!extraInfo.getRemoved().isEmpty()) {
-                return false;
-            }
-
         }
 
-        return true;
+        return false;
     }
 
     public boolean isAboutCertainParticipantsStateChangeOnly(String identifier) {

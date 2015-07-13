@@ -1,0 +1,35 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The sessionstorage utility bundle for Hazelcast serialization
+Bundle-SymbolicName: com.openexchange.sessionstorage.hazelcast.serialization
+Bundle-Version: 7.6.2
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
+ com.hazelcast.instance,
+ com.hazelcast.logging,
+ com.hazelcast.map,
+ com.hazelcast.multimap,
+ com.hazelcast.nio,
+ com.hazelcast.nio.serialization,
+ com.hazelcast.query,
+ com.hazelcast.queue,
+ com.hazelcast.transaction,
+ com.hazelcast.util,
+ com.openexchange.hazelcast.serialization,
+ com.openexchange.java,
+ com.openexchange.java.util,
+ com.openexchange.session,
+ com.openexchange.sessionstorage,
+ org.apache.commons.codec,
+ org.apache.commons.codec.binary,
+ org.apache.commons.codec.digest,
+ org.apache.commons.codec.net,
+ org.apache.commons.lang,
+ org.apache.commons.lang.exception,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.slf4j
+Export-Package: com.openexchange.sessionstorage.hazelcast.serialization
+Bundle-Activator: com.openexchange.sessionstorage.hazelcast.serialization.osgi.PortableSessionActivator

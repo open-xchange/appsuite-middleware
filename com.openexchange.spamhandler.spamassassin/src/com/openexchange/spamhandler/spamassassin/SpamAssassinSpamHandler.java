@@ -49,6 +49,7 @@
 
 package com.openexchange.spamhandler.spamassassin;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +57,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import org.apache.spamassassin.spamc.Spamc;
@@ -419,21 +419,32 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         }
     }
 
-    private PlainAndNestedMessages separatePlainAndNestedMessages(final String[] mailIDs, final MailMessage[] mails) {
+    private PlainAndNestedMessages separatePlainAndNestedMessages(String[] mailIDs, MailMessage[] mails) {
         /*
          * Separate the plain from the nested messages inside spam folder
          */
-        final List<String> plainIDs = new ArrayList<String>(mailIDs.length);
-        final List<String> extractIDs = new ArrayList<String>(mailIDs.length);
+        List<String> plainIDs = new ArrayList<String>(mailIDs.length);
+        List<String> extractIDs = new ArrayList<String>(mailIDs.length);
         for (int i = 0; i < mails.length; i++) {
-            final String spamHdr = mails[i].getFirstHeader(MessageHeaders.HDR_X_SPAM_FLAG);
-            final String spamChecker = mails[i].getFirstHeader("X-Spam-Checker-Version");
-            final ContentType contentType = mails[i].getContentType();
-            if (spamHdr != null && "yes".regionMatches(true, 0, spamHdr, 0, 3) && contentType.isMimeType(MimeTypes.MIME_MULTIPART_ALL) && (spamChecker == null ? true : spamChecker.toLowerCase(
-                Locale.ENGLISH).indexOf("spamassassin") != -1)) {
-                extractIDs.add(mailIDs[i]);
-            } else {
-                plainIDs.add(mailIDs[i]);
+            MailMessage mail = mails[i];
+            if (null != mail) {
+                boolean add2plainIDs = true;
+
+                String spamHdr = asciiLowerCase(mail.getFirstHeader(MessageHeaders.HDR_X_SPAM_FLAG));
+                if (spamHdr != null && spamHdr.startsWith("yes")) {
+                    String spamChecker = asciiLowerCase(mail.getFirstHeader("X-Spam-Checker-Version"));
+                    if ((spamChecker == null) || (asciiLowerCase(spamChecker).indexOf("spamassassin") >= 0)) {
+                        ContentType contentType = mail.getContentType();
+                        if (contentType.startsWith("multipart/")) {
+                            extractIDs.add(mailIDs[i]);
+                            add2plainIDs = false;
+                        }
+                    }
+                }
+
+                if (add2plainIDs) {
+                    plainIDs.add(mailIDs[i]);
+                }
             }
         }
         return new PlainAndNestedMessages(extractIDs.toArray(new String[extractIDs.size()]), plainIDs.toArray(new String[plainIDs.size()]));
@@ -441,26 +452,28 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
 
     private void spamdMessageProcessing(MailMessage[] mails, SpamdSettings spamdSettings, boolean spam, int accountId, MailAccess<?, ?> mailAccess, Session session) throws OXException {
         for (final MailMessage mail : mails) {
-            // ...then get the plaintext of the mail as spamhandler is not able to cope with our mail objects ;-) ...
-            String fullName = mail.getFolder();
-            String mailId = mail.getMailId();
-            final String source = mailAccess.getMessageStorage().getMessage(fullName, mailId, false).getSource();
+            if (null != mail) {
+                // ...then get the plaintext of the mail as spamhandler is not able to cope with our mail objects ;-) ...
+                String fullName = mail.getFolder();
+                String mailId = mail.getMailId();
+                final String source = mailAccess.getMessageStorage().getMessage(fullName, mailId, false).getSource();
 
-            // ...last send the plaintext over to the spamassassin daemon
-            sendToSpamd(source, spam, spamdSettings, mailId, fullName, accountId, session);
+                // ...last send the plaintext over to the spamassassin daemon
+                sendToSpamd(source, spam, spamdSettings, mailId, fullName, accountId, session);
+            }
         }
     }
 
     private void unwrap(final UnwrapParameter parameterObject, final String[] mailIDs, final SpamdSettings spamdSettings, final int accountId, final Session session) throws OXException {
-        final MailAccess<?, ?> mailAccess = parameterObject.getMailAccess();
+        MailAccess<?, ?> mailAccess = parameterObject.getMailAccess();
         /*
          * Mark as ham. In contrast to mark as spam this is a very time sucking operation. In order to deal with the original messages
          * that are wrapped inside a SpamAssassin-created message it must be extracted. Therefore we need to access message's content
          * and cannot deal only with UIDs
          */
-        final MailMessage[] mails = mailAccess.getMessageStorage().getMessages(parameterObject.getSpamFullname(), mailIDs, FIELDS_HEADER_CT);
-        final PlainAndNestedMessages plainAndNestedMessages = separatePlainAndNestedMessages(mailIDs, mails);
-        final String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
+        MailMessage[] mails = mailAccess.getMessageStorage().getMessages(parameterObject.getSpamFullname(), mailIDs, FIELDS_HEADER_CT);
+        PlainAndNestedMessages plainAndNestedMessages = separatePlainAndNestedMessages(mailIDs, mails);
+        String confirmedHamFullname = mailAccess.getFolderStorage().getConfirmedHamFolder();
         /*
          * Copy plain messages to confirmed ham and INBOX
          */
@@ -468,13 +481,13 @@ public final class SpamAssassinSpamHandler extends SpamHandler {
         /*
          * Handle spamassassin messages
          */
-        final String[] nestedMessages = plainAndNestedMessages.getNestedMessages();
+        String[] nestedMessages = plainAndNestedMessages.getNestedMessages();
 
-        final MailMessage[] nestedMails = getNestedMailsAndHandleOthersAsPlain(parameterObject, confirmedHamFullname, nestedMessages, spamdSettings, accountId, session);
+        MailMessage[] nestedMails = getNestedMailsAndHandleOthersAsPlain(parameterObject, confirmedHamFullname, nestedMessages, spamdSettings, accountId, session);
         if (null != spamdSettings) {
             spamdMessageProcessing(nestedMails, spamdSettings, false, accountId, mailAccess, session);
         }
-        final String[] ids = mailAccess.getMessageStorage().appendMessages(confirmedHamFullname, nestedMails);
+        String[] ids = mailAccess.getMessageStorage().appendMessages(confirmedHamFullname, nestedMails);
         if (parameterObject.isMove()) {
             mailAccess.getMessageStorage().copyMessages(confirmedHamFullname, FULLNAME_INBOX, ids, true);
             mailAccess.getMessageStorage().deleteMessages(parameterObject.getSpamFullname(), nestedMessages, true);

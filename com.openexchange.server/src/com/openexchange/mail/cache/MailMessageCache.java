@@ -75,11 +75,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  */
 public final class MailMessageCache {
 
-    /**
-     * Constant for the {@link SuppressWarnings} annotation to suppress unchecked type conversion.
-     */
-    private static final String ANNOT_UNCHECKED = "unchecked";
-
     private static interface MailFieldUpdater {
 
         public void updateField(MailMessage mail, Object newValue);
@@ -264,7 +259,7 @@ public final class MailMessageCache {
      * Updates cached message
      *
      * @param uids The messages' identifiers; pass <code>null</code>  update all cached message of given folder
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param fullName The full name
      * @param userId The user identifier
      * @param cid The context identifier
@@ -284,7 +279,7 @@ public final class MailMessageCache {
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
@@ -308,7 +303,7 @@ public final class MailMessageCache {
     /**
      * Updates cached message
      *
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param fullName The full name
      * @param userId The user identifier
      * @param cid The context identifier
@@ -324,7 +319,7 @@ public final class MailMessageCache {
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
@@ -348,8 +343,8 @@ public final class MailMessageCache {
     /**
      * Detects if cache holds messages belonging to given user.
      *
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      * @return <code>true</code> if messages are present; otherwise <code>false</code>
      */
     public boolean containsUserMessages(int userId, int cid) {
@@ -363,10 +358,10 @@ public final class MailMessageCache {
     /**
      * Detects if cache holds messages belonging to a certain folder.
      *
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param fullName The folder full name
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      * @return <code>true</code> if cache holds messages belonging to a certain folder; otherwise <code>false</code>
      */
     public boolean containsFolderMessages(int accountId, String fullName, int userId, int cid) {
@@ -375,7 +370,7 @@ public final class MailMessageCache {
             return false;
         }
         CacheKey mapKey = getMapKey(userId, cid);
-        @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+        @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
             (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
         if (map == null) {
             return false;
@@ -386,8 +381,8 @@ public final class MailMessageCache {
     /**
      * Removes the messages cached for a user.
      *
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      * @throws OXException
      */
     public void removeUserMessages(int userId, int cid) throws OXException {
@@ -411,10 +406,10 @@ public final class MailMessageCache {
     /**
      * Removes cached messages belonging to a certain folder.
      *
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param fullName The folder full name
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      */
     public void removeFolderMessages(int accountId, String fullName, int userId, int cid) {
         Cache cache = this.cache;
@@ -425,7 +420,7 @@ public final class MailMessageCache {
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
@@ -439,11 +434,11 @@ public final class MailMessageCache {
     /**
      * Removes the messages appearing in given UIDs belonging to a certain folder.
      *
-     * @param uids The mail IDs; pass <code>null</code> to remove all associated with folder
-     * @param accountId The account ID
+     * @param uids The mail identifiers; pass <code>null</code> to remove all associated with folder
+     * @param accountId The account identifier
      * @param fullName The folder full name
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      */
     public void removeMessages(String[] uids, int accountId, String fullName, int userId, int cid) {
         Cache cache = this.cache;
@@ -454,7 +449,7 @@ public final class MailMessageCache {
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (map == null) {
                 return;
@@ -474,10 +469,10 @@ public final class MailMessageCache {
      * mail server.
      *
      * @param uids The UIDs
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param fullName The folder full name
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      * @return An array of {@link MailMessage} containing the fetched messages or <code>null</code>
      */
     public MailMessage[] getMessages(String[] uids, int accountId, String fullName, int userId, int cid) {
@@ -489,8 +484,8 @@ public final class MailMessageCache {
         Lock readLock = getLock(mapKey).readLock();
         readLock.lock();
         try {
-            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
-                (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
+            @SuppressWarnings("unchecked")
+            DoubleKeyMap<CacheKey, String, MailMessage> map = (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (null == map) {
                 return null;
             }
@@ -500,16 +495,12 @@ public final class MailMessageCache {
             }
             MailMessage[] retval = new MailMessage[uids.length];
             for (int i = 0; i < retval.length; i++) {
-                /*
-                 * TODO: Return cloned version ???
-                 */
-                retval[i] = map.getValue(entryKey, uids[i]);
-                if (null == retval[i]) {
-                    /*
-                     * Not all desired messages can be served from cache
-                     */
+                MailMessage fromCache = map.getValue(entryKey, uids[i]);
+                if (null == fromCache) {
+                    // Not all desired messages can be served from cache
                     return null;
                 }
+                retval[i] = fromCache;
             }
             return retval;
         } finally {
@@ -520,24 +511,25 @@ public final class MailMessageCache {
     /**
      * Puts given messages into cache.
      *
-     * @param accountId The account ID
+     * @param accountId The account identifier
      * @param mails The messages to cache
-     * @param userId The user ID
-     * @param cid The context ID
+     * @param userId The user identifier
+     * @param cid The context identifier
      * @throws OXException If cache put fails
      */
     public void putMessages(int accountId, MailMessage[] mails, int userId, int cid) throws OXException {
         Cache cache = this.cache;
         if (null == cache) {
             return;
-        } else if ((mails == null) || (mails.length == 0)) {
+        }
+        if ((mails == null) || (mails.length == 0)) {
             return;
         }
         CacheKey mapKey = getMapKey(userId, cid);
         Lock writeLock = getLock(mapKey).writeLock();
         writeLock.lock();
         try {
-            @SuppressWarnings(ANNOT_UNCHECKED) DoubleKeyMap<CacheKey, String, MailMessage> map =
+            @SuppressWarnings("unchecked") DoubleKeyMap<CacheKey, String, MailMessage> map =
                 (DoubleKeyMap<CacheKey, String, MailMessage>) cache.get(mapKey);
             if (null == map) {
                 map = new DoubleKeyMap<CacheKey, String, MailMessage>(MailMessage.class);
@@ -562,9 +554,9 @@ public final class MailMessageCache {
         return cache.newCacheKey(cid, userId);
     }
 
-    private CacheKey getEntryKey(int accountId, String fullname) {
+    private CacheKey getEntryKey(int accountId, String fullName) {
         Cache cache = this.cache;
-        return cache.newCacheKey(accountId, fullname);
+        return cache.newCacheKey(accountId, fullName);
     }
 
 }

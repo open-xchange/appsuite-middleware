@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONObject;
 import com.openexchange.crypto.CryptoService;
@@ -152,6 +153,9 @@ public abstract class AbstractSubscribeService implements SubscribeService {
     public void subscribe(final Subscription subscription) throws OXException {
         checkCreate(subscription);
         modifyIncoming(subscription);
+        if (checkForDuplicate()) {
+            doCheckForDuplicate(subscription);
+        }
         STORAGE.get().rememberSubscription(subscription);
         modifyOutgoing(subscription);
     }
@@ -183,14 +187,13 @@ public abstract class AbstractSubscribeService implements SubscribeService {
 
     public void modifyIncoming(final Subscription subscription) throws OXException {
         Object accountIDObject = subscription.getConfiguration().get("account");
-        Integer accountId = null;
         if (JSONObject.NULL == accountIDObject) {
             throw SubscriptionErrorMessage.NO_OAUTH_ACCOUNT_GIVEN.create();
         }
     }
 
     public void modifyOutgoing(final Subscription subscription) throws OXException {
-
+        // Empty body
     }
 
     @Override
@@ -402,6 +405,66 @@ public abstract class AbstractSubscribeService implements SubscribeService {
         STORAGE.get().deleteAllSubscriptionsWhereConfigMatches(query, getSubscriptionSource().getId(), context);
     }
 
+    // Check for duplicate
+
+    /**
+     * Signals if a check for a duplicate subscription is supposed to be performed
+     *
+     * @return <code>true</code> to check for a duplicate subscription; otherwise <code>false</code>
+     */
+    public boolean checkForDuplicate() {
+        return false;
+    }
+
+    /**
+     * Performs the check for a duplicate subscription
+     *
+     * @param subscription The subscription to check for
+     * @throws OXException If there is a duplicate subscription
+     */
+    public void doCheckForDuplicate(Subscription subscription) throws OXException {
+        Map<String, Object> configuration = subscription.getConfiguration();
+        if (null == configuration) {
+            // Cannot check for possible duplicate
+            return;
+        }
+
+        List<Subscription> subscriptions = STORAGE.get().getSubscriptionsOfUser(subscription.getContext(), subscription.getUserId(), subscription.getSource().getId());
+        for (Subscription existingSubscription : subscriptions) {
+            Map<String, Object> existingConfiguration = existingSubscription.getConfiguration();
+            if (null != existingConfiguration && isEqualConfiguration(configuration, existingConfiguration)) {
+                throw SubscriptionErrorMessage.DUPLICATE_SUBSCRIPTION.create(subscription.getSource().getId(), subscription.getUserId(), subscription.getContext().getContextId());
+            }
+        }
+    }
+
+    private boolean isEqualConfiguration(Map<String, Object> config1, Map<String, Object> config2) {
+        if (config2.size() != config1.size()) {
+            return false;
+        }
+
+        try {
+            for (Entry<String, Object> e : config1.entrySet()) {
+                String key = e.getKey();
+                Object value = e.getValue();
+                if (value == null) {
+                    if (!(config2.get(key) == null && config2.containsKey(key))) {
+                        return false;
+                    }
+                } else {
+                    if (!value.equals(config2.get(key))) {
+                        return false;
+                    }
+                }
+            }
+        } catch (ClassCastException unused) {
+            return false;
+        } catch (NullPointerException unused) {
+            return false;
+        }
+
+        return true;
+    }
 
     // Permission Checks
 

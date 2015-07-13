@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Cluster Lock Bundle
 Bundle-SymbolicName: com.openexchange.cluster.lock
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.core,
@@ -10,6 +10,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.hazelcast.configuration,
  com.openexchange.osgi,
  com.openexchange.server,
+ com.openexchange.timer,
  org.osgi.framework,
  org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.5"

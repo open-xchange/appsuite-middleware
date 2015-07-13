@@ -121,6 +121,11 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // This folder is a virtual folder that cannot contain documents. Please choose another folder.
     public static final String NO_DOCUMENTS_IN_VIRTUAL_FOLDER_MSG_DISPLAY = "This folder is a virtual folder that cannot contain documents. Please choose another folder.";
 
+    // Unsupported character "%1$s" in field "%2$s". Please remove that character.
+    public static final String INVALID_CHARACTER_MSG_DISPLAY = "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that character.";
+
+    // Unsupported character. Please correct your input.
+    public static final String INVALID_CHARACTER_SIMPLE_MSG_DISPLAY = "Unsupported character. Please correct your input.";
 
     private InfostoreExceptionMessages() {
         super();

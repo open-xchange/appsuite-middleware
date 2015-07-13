@@ -274,10 +274,25 @@ public final class FolderCache {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
                 imapFullName = fullName;
             }
-            if (!"INBOX".equals(imapFullName) && !ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session).exists()) {
-                f = folderStorage.checkForNamespaceFolder(imapFullName);
-                if (null == f) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+            boolean exists = "INBOX".equals(imapFullName) || ListLsubCache.getCachedLISTEntry(imapFullName, folderStorage.getAccountId(), f, session).exists();
+            if (!exists) {
+                // Check existence through EXAMINE
+                try {
+                    f.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        f.close(false);
+                    }
+                }
+
+                if (!exists) {
+                    f = folderStorage.checkForNamespaceFolder(imapFullName, f);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
                 }
             }
             return IMAPFolderConverter.convertFolder(f, session, folderStorage.getImapAccess(), folderStorage.getContext());

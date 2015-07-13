@@ -63,6 +63,7 @@ public abstract class Document {
     private String name, mimeType, etag;
     private long size;
     private long lastModified;
+    private File file;
 
     /**
      * Initializes a new {@link Document}.
@@ -85,6 +86,25 @@ public abstract class Document {
         this.etag = other.getEtag();
         this.size = other.getSize();
         this.lastModified = other.getLastModified();
+        this.file = other.getFile();
+    }
+
+    /**
+     * Gets the file metadata.
+     *
+     * @return The metadata, or <code>null</code> if not set.
+     */
+    public File getFile() {
+        return file;
+    }
+
+    /**
+     * Sets the file metadata.
+     *
+     * @param file The metadata to set
+     */
+    public void setFile(File file) {
+        this.file = file;
     }
 
     /**

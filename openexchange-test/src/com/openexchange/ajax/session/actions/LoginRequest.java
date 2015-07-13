@@ -50,6 +50,7 @@
 package com.openexchange.ajax.session.actions;
 
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 
 /**
@@ -61,9 +62,9 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     private static final String PARAM_PASSWORD = "password";
 
     private static final String PARAM_NAME = "name";
-    
+
     private static final String PARAM_TOKEN = "token";
-    
+
     private static final String PARAM_SECRET = "secret";
 
     private final boolean failOnError;
@@ -73,7 +74,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
      */
     public LoginRequest(TokenLoginParameters parameters, boolean failOnError) {
         super(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_REDEEM_TOKEN),
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, LoginServlet.ACTION_REDEEM_TOKEN),
             new URLParameter(LoginFields.AUTHID_PARAM, parameters.getAuthId()),
             new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()),
             new URLParameter(LoginFields.VERSION_PARAM, parameters.getVersion()),
@@ -81,7 +82,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             new FieldParameter(PARAM_SECRET, parameters.getSecret())});
         this.failOnError = failOnError;
     }
-    
+
     public LoginRequest(TokenLoginParameters parameters) {
         this(parameters, true);
     }
@@ -109,7 +110,7 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
     public LoginResponseParser getParser() {
         return new LoginResponseParser(failOnError);
     }
-    
+
     public static class TokenLoginParameters {
 
         String token, secret, authId, client, version;

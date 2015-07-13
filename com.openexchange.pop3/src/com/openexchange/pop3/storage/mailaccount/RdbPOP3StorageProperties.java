@@ -54,12 +54,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.pop3.POP3Access;
 import com.openexchange.pop3.POP3ExceptionCode;
 import com.openexchange.pop3.storage.POP3StorageProperties;
 import com.openexchange.session.Session;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * {@link RdbPOP3StorageProperties} - Database-backed implementation of {@link POP3StorageProperties}.
@@ -68,26 +70,20 @@ import com.openexchange.session.Session;
  */
 public final class RdbPOP3StorageProperties implements POP3StorageProperties {
 
-    private static final String TABLE_NAME = "user_mail_account_properties";
-
     private final int cid;
-
     private final int user;
-
     private final int accountId;
 
     /**
      * Initializes a new {@link RdbPOP3StorageProperties}.
      */
-    public RdbPOP3StorageProperties(final POP3Access pop3Access) {
+    public RdbPOP3StorageProperties(POP3Access pop3Access) {
         super();
         final Session s = pop3Access.getSession();
         cid = s.getContextId();
         user = s.getUserId();
         accountId = pop3Access.getAccountId();
     }
-
-    private static final String SQL_DROP_PROPERTIES = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ?";
 
     /**
      * Drops all properties related to specified POP3 account.
@@ -98,10 +94,10 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
      * @param con The connection to use
      * @throws OXException If dropping properties fails
      */
-    public static void dropProperties(final int accountId, final int user, final int cid, final Connection con) throws OXException {
+    public static void dropProperties(int accountId, int user, int cid, Connection con) throws OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement(SQL_DROP_PROPERTIES);
+            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -114,8 +110,6 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
         }
     }
 
-    private static final String SQL_SELECT = "SELECT value FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
-
     /**
      * Gets the named property related to specified POP3 account.
      *
@@ -126,11 +120,11 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
      * @param con The connection to use
      * @throws OXException If dropping properties fails
      */
-    public static String getProperty(final int accountId, final int user, final int cid, final String propertyName, final Connection con) throws OXException {
+    public static String getProperty(int accountId, int user, int cid, String propertyName, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_SELECT);
+            stmt = con.prepareStatement("SELECT value FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -141,24 +135,35 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
                 return rs.getString(1);
             }
             return null;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
         }
     }
 
-    private static final String SQL_INSERT = "INSERT INTO " + TABLE_NAME + " (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)";
-
-    private static final String SQL_DELETE = "DELETE FROM " + TABLE_NAME + " WHERE cid = ? AND user = ? AND id = ? AND name = ?";
-
     @Override
-    public void addProperty(final String propertyName, final String propertyValue) throws OXException {
-        final Connection con = Database.get(cid, true);
+    public void addProperty(String propertyName, String propertyValue) throws OXException {
+        Connection con = Database.get(cid, true);
+        try {
+            try {
+                addProperty(propertyName, propertyValue, false, con);
+            } catch (SQLIntegrityConstraintViolationException e) {
+                addProperty(propertyName, propertyValue, true, con);
+            }
+        } catch (SQLException e) {
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Database.back(cid, true, con);
+        }
+    }
+
+    private void addProperty(String propertyName, String propertyValue, boolean disableForeignKeyChecks, Connection con) throws SQLException {
         PreparedStatement stmt = null;
+        boolean restoreConstraints = false;
         try {
             // Delete possibly existing mapping
-            stmt = con.prepareStatement(SQL_DELETE);
+            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -166,8 +171,12 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             stmt.setString(pos++, propertyName);
             stmt.executeUpdate();
             closeSQLStuff(null, stmt);
+
             // Insert new mapping
-            stmt = con.prepareStatement(SQL_INSERT);
+            if (disableForeignKeyChecks) {
+                restoreConstraints = disableForeignKeyChecks(con);
+            }
+            stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
             pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
@@ -175,17 +184,30 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
             stmt.setString(pos++, propertyName);
             stmt.setString(pos++, propertyValue);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
+            if (restoreConstraints) {
+                try {
+                    DBUtils.enableMysqlForeignKeyChecks(con);
+                } catch (Exception e) {
+                    org.slf4j.LoggerFactory.getLogger(RdbPOP3StorageProperties.class).error("Failed to enable foregn key checks", e);
+                }
+            }
+        }
+    }
+
+    private boolean disableForeignKeyChecks(Connection con) {
+        try {
+            DBUtils.disableMysqlForeignKeyChecks(con);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
     }
 
     @Override
-    public String getProperty(final String propertyName) throws OXException {
-        final Connection con = Database.get(cid, false);
+    public String getProperty(String propertyName) throws OXException {
+        Connection con = Database.get(cid, false);
         try {
             return getProperty(accountId, user, cid, propertyName, con);
         } finally {
@@ -194,23 +216,45 @@ public final class RdbPOP3StorageProperties implements POP3StorageProperties {
     }
 
     @Override
-    public void removeProperty(final String propertyName) throws OXException {
-        final Connection con = Database.get(cid, true);
+    public void removeProperty(String propertyName) throws OXException {
+        Connection con = Database.get(cid, true);
+        try {
+            try {
+                removeProperty(propertyName, false, con);
+            } catch (SQLIntegrityConstraintViolationException e) {
+                removeProperty(propertyName, true, con);
+            }
+        } catch (SQLException e) {
+            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            Database.back(cid, true, con);
+        }
+    }
+
+    private void removeProperty(String propertyName, boolean disableForeignKeyChecks, Connection con) throws SQLException {
         PreparedStatement stmt = null;
+        boolean restoreConstraints = false;
         try {
             // Delete possibly existing mapping
-            stmt = con.prepareStatement(SQL_DELETE);
+            if (disableForeignKeyChecks) {
+                restoreConstraints = disableForeignKeyChecks(con);
+            }
+            stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
             int pos = 1;
             stmt.setInt(pos++, cid);
             stmt.setInt(pos++, user);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, propertyName);
             stmt.executeUpdate();
-        } catch (final SQLException e) {
-            throw POP3ExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(null, stmt);
-            Database.back(cid, true, con);
+            if (restoreConstraints) {
+                try {
+                    DBUtils.enableMysqlForeignKeyChecks(con);
+                } catch (Exception e) {
+                    org.slf4j.LoggerFactory.getLogger(RdbPOP3StorageProperties.class).error("Failed to enable foregn key checks", e);
+                }
+            }
         }
     }
 

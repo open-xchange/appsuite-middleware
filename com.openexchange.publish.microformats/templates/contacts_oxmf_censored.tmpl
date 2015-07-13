@@ -1,7 +1,6 @@
-<#--                                                                             --> 
-<#--                                                                             --> 
-<#--   For more extensive templates, and examples, see http://ox.io              --> 
-<#--                                                                             --> 
+<#--                                                                             -->
+<#--                                                                             -->
+<#--                                                                             -->
 
 <#macro display key value title>
 	<#if value != "">
@@ -47,7 +46,7 @@
 <#macro render key value title>
 	<#if value != "">
 		<tr>
-			<td class="key">${title}:</td> 
+			<td class="key">${title}:</td>
 			<td class="${key} value">${value?html}</td>
 		</tr>
 	</#if>
@@ -56,7 +55,7 @@
 <#macro render_mail key value title>
 	<#if value != "">
 		<tr>
-			<td class="key">${title}:</td> 
+			<td class="key">${title}:</td>
 			<td class="value"><a href="mailto:${value?html}"><span class="${key}">${value?html}</span></a></td>
 		</tr>
 	</#if>
@@ -149,7 +148,7 @@
 		color: #446;
 	}
 	#nav li, #nav ul {
-		list-style-type: none; 
+		list-style-type: none;
 		margin: 0;
 		padding: 0;
 		left-indent: 0;
@@ -191,7 +190,7 @@
 		</ul>
 	</div>
 	</#if>
-	
+
 	<div id="contacts">
 		<#list contacts as contact>
 		<div class="ox_contact" id="contact_${contacts?seq_index_of(contact)}">
@@ -199,19 +198,19 @@
 			<table class="a_contact">
 				<@render_name contact=contact />
 				<@render key="ox_displayName" title="Display name" value=contact.displayName!"" />
-				<@render key="ox_company" title="Company" value=contact.company!"" /> 
-				<@render key="ox_profession" title="Profession" value=contact.profession!"" /> 
-				<@render key="ox_department" title="Department" value=contact.department!"" /> 
-				<@render key="ox_position" title="Position" value=contact.position!"" /> 
-				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" /> 
-				<@render key="ox_url" title="Url" value=contact.uRL!"" /> 
-				<@render key="ox_note" title="Note" value=contact.note!"" /> 
+				<@render key="ox_company" title="Company" value=contact.company!"" />
+				<@render key="ox_profession" title="Profession" value=contact.profession!"" />
+				<@render key="ox_department" title="Department" value=contact.department!"" />
+				<@render key="ox_position" title="Position" value=contact.position!"" />
+				<@render key="ox_employeeType" title="Employee type" value=contact.employeeType!"" />
+				<@render key="ox_url" title="Url" value=contact.uRL!"" />
+				<@render key="ox_note" title="Note" value=contact.note!"" />
 			</table>
 		<div class="back"><a href="#nav">Back to the top</a></div>
 		</div>
 		</#list>
 	</div>
-	
+
 	<#if (contacts?size > 0)>
 	<div id="disclaimer">
 		${privacy}

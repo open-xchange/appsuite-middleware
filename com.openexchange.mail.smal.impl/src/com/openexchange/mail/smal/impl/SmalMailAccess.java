@@ -342,7 +342,7 @@ public final class SmalMailAccess extends MailAccess<SmalFolderStorage, SmalMess
             throw MailExceptionCode.NOT_CONNECTED.create();
         }
         if (null == logicTools) {
-            logicTools = new MailLogicTools(session, accountId);
+            logicTools = new SmalMailLogicTools(session, accountId, this);
         }
         return logicTools;
     }

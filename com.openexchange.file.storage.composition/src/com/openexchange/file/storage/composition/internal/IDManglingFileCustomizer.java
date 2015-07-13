@@ -49,7 +49,9 @@
 
 package com.openexchange.file.storage.composition.internal;
 
+import java.io.InputStream;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
 import com.openexchange.groupware.results.CustomizableDelta;
 import com.openexchange.groupware.results.CustomizableTimedResult;
@@ -95,4 +97,29 @@ public class IDManglingFileCustomizer implements Customizer<File> {
     public static File fixIDs(final File file, final String service, final String account) {
         return new IDManglingFile(file, service, account);
     }
+
+    /**
+     * Adjusts the file- and folder identifiers returned by the encapsulated metadata reference provided via {@link Document#getFile}.
+     *
+     * @param document The document to adjust the IDs for
+     * @param service The service identifier to apply
+     * @param account The account identifier to apply
+     * @return The adjusted document
+     */
+    public static Document fixIDs(final Document document, final String service, final String account) {
+        return new Document(document) {
+
+            @Override
+            public InputStream getData() throws OXException {
+                return document.getData();
+            }
+
+            @Override
+            public File getFile() {
+                File file = super.getFile();
+                return null == file ? null : fixIDs(file, service, account);
+            }
+        };
+    }
+
 }

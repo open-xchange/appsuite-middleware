@@ -53,6 +53,7 @@ import java.util.Collection;
 import javax.mail.FetchProfile;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.search.AndTerm;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -144,8 +145,22 @@ public final class SizeTerm extends SearchTerm<ComparablePattern<Integer>> {
 
     @Override
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
+        /*
+         * IMAP only allows LT and GT
+         */
         final ComparablePattern<Integer> pattern = getPattern();
-        return new javax.mail.search.SizeTerm(pattern.getComparisonType().getType(), pattern.getPattern().intValue());
+        switch (pattern.getComparisonType()) {
+            case EQUALS:
+                return new AndTerm(
+                    new javax.mail.search.SizeTerm(ComparisonType.GREATER_THAN.getType(), pattern.getPattern().intValue() - 1),
+                    new javax.mail.search.SizeTerm(ComparisonType.LESS_THAN.getType(), pattern.getPattern().intValue() + 1));
+            case GREATER_EQUALS:
+                return new javax.mail.search.SizeTerm(ComparisonType.GREATER_THAN.getType(), pattern.getPattern().intValue() - 1);
+            case LESS_EQUALS:
+                return new javax.mail.search.SizeTerm(ComparisonType.LESS_THAN.getType(), pattern.getPattern().intValue() + 1);
+            default:
+                return new javax.mail.search.SizeTerm(pattern.getComparisonType().getType(), pattern.getPattern().intValue());
+        }
     }
 
     @Override

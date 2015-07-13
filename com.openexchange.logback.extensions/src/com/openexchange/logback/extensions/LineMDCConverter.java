@@ -52,7 +52,6 @@ package com.openexchange.logback.extensions;
 import static ch.qos.logback.core.util.OptionHelper.extractDefaultReplacement;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.regex.Pattern;
 import ch.qos.logback.classic.pattern.MDCConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 
@@ -65,12 +64,14 @@ public class LineMDCConverter extends MDCConverter {
 
     private String key;
     private String defaultValue = "";
+    private final String ls;
 
     /**
      * Initializes a new {@link LineMDCConverter}.
      */
     public LineMDCConverter() {
         super();
+        this.ls = System.getProperty("line.separator");
     }
 
     @Override
@@ -101,36 +102,48 @@ public class LineMDCConverter extends MDCConverter {
             return outputMDCForAllKeys(mdcPropertyMap);
         }
 
-        final String value = mdcPropertyMap.get(key);
-        return value == null ? defaultValue : sanitizeString(value);
+        String value = mdcPropertyMap.get(key);
+        if (null == value) {
+            return defaultValue;
+        }
+
+        StringBuilder buf = new StringBuilder(32);
+        sanitizeString(value, buf);
+        return buf.toString();
     }
 
     /**
      * if no key is specified, return all the values present in the MDC, in the format "key0=value0\nkey1=value1..."
      */
-    private String outputMDCForAllKeys(final Map<String, String> mdcPropertyMap) {
-        final String ls = System.getProperty("line.separator");
-        final StringBuilder buf = new StringBuilder(1250);
-        for (final Map.Entry<String, String> entry : new TreeMap<String, String>(mdcPropertyMap).entrySet()) {
+    private String outputMDCForAllKeys(Map<String, String> mdcPropertyMap) {
+        StringBuilder buf = new StringBuilder(1250);
+        for (Map.Entry<String, String> entry : new TreeMap<String, String>(mdcPropertyMap).entrySet()) {
             // format: key0=value0\nkey1=value1
-            final String name = entry.getKey();
+            String name = entry.getKey();
             if (!"__threadId".equals(name)) {
-                buf.append(' ').append(name).append('=').append(sanitizeString(entry.getValue())).append(ls);
+                buf.append(' ').append(name).append('=');
+                sanitizeString(entry.getValue(), buf);
+                buf.append(ls);
             }
         }
         return buf.toString();
     }
 
-    private static final Pattern PATTERN_CONTROL = Pattern.compile("[\\x00-\\x1F\\x7F]+");
-
     /**
      * Replaces control characters with space characters.
      */
-    private static String sanitizeString(final String str) {
+    private static void sanitizeString(String str, StringBuilder buf) {
         if (isEmpty(str)) {
-            return str;
+            return;
         }
-        return PATTERN_CONTROL.matcher(str).replaceAll(" ");
+
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char ch = str.charAt(i);
+            if (ch > 0x1F && ch < 0x7F) {
+                buf.append(ch);
+            }
+        }
     }
 
     /**

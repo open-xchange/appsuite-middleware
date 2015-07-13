@@ -59,14 +59,15 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.session.Session;
 
 public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
 
     /**
      * Initializes a new {@link UpdateDocumentAction}.
      */
-    public UpdateDocumentAction() {
-        super();
+    public UpdateDocumentAction(Session session) {
+        super(session);
     }
 
     /**
@@ -81,8 +82,8 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
      * @param The sequence number to catch concurrent modifications
      */
     public UpdateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata document,
-        DocumentMetadata oldDocument, Metadata[] modifiedColums, long sequenceNumber) {
-        this(provider, queryCatalog, context, Collections.singletonList(document), Collections.singletonList(oldDocument), modifiedColums, sequenceNumber);
+        DocumentMetadata oldDocument, Metadata[] modifiedColums, long sequenceNumber, Session session) {
+        this(provider, queryCatalog, context, Collections.singletonList(document), Collections.singletonList(oldDocument), modifiedColums, sequenceNumber, session);
     }
 
     /**
@@ -96,9 +97,8 @@ public class UpdateDocumentAction extends AbstractDocumentUpdateAction {
      * @param modifiedColums The columns to update
      * @param The sequence number to catch concurrent modifications
      */
-    public UpdateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber) {
-        super(provider, queryCatalog, context, documents, oldDocuments, modifiedColums, sequenceNumber);
+    public UpdateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber, Session session) {
+        super(provider, queryCatalog, context, documents, oldDocuments, modifiedColums, sequenceNumber, session);
     }
 
     @Override

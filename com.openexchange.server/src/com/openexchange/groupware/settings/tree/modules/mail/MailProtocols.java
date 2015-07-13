@@ -104,7 +104,7 @@ public class MailProtocols implements PreferencesItemService {
                     final UserConfiguration userConfig, final Setting setting) throws OXException {
                 final List<Protocol> protocols = MailProviderRegistry.getProtocols();
                 if (null == protocols || protocols.isEmpty()) {
-                    setting.setSingleValue("null");
+                    setting.setSingleValue(null);
                 } else {
                     final JSONArray jArray = new JSONArray();
                     for (final Protocol protocol : protocols) {

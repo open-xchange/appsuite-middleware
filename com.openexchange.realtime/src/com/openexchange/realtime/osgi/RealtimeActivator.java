@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.context.ContextService;
 import com.openexchange.conversion.simple.SimpleConverter;
 import com.openexchange.conversion.simple.SimplePayloadConverter;
@@ -80,6 +81,7 @@ import com.openexchange.realtime.payload.converter.impl.DurationToJSONConverter;
 import com.openexchange.realtime.payload.converter.impl.JSONToDurationConverter;
 import com.openexchange.realtime.synthetic.DevNullChannel;
 import com.openexchange.realtime.synthetic.SyntheticChannel;
+import com.openexchange.realtime.util.RealtimeReloadable;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -115,12 +117,12 @@ public class RealtimeActivator extends HousekeepingActivator {
         realtimeConfig.start();
 
         managementHouseKeeper.addManagementObject(realtimeConfig.getManagementObject());
-        
+
         IDManager idManager = new IDManager();
         ID.ID_MANAGER_REF.set(idManager);
         RealtimeJanitors.getInstance().addJanitor(idManager);
 
-        //Add the node-wide cleanup service and start tracking Janitors 
+        //Add the node-wide cleanup service and start tracking Janitors
         LocalRealtimeCleanupImpl localRealtimeCleanup = new LocalRealtimeCleanupImpl(context);
         rememberTracker(localRealtimeCleanup);
         registerService(LocalRealtimeCleanup.class, localRealtimeCleanup);
@@ -137,7 +139,7 @@ public class RealtimeActivator extends HousekeepingActivator {
                 SyntheticChannel.GLOBAL_CLEANUP_REF.set(null);
             }
         });
-        
+
         synth = new SyntheticChannel(this, localRealtimeCleanup);
         RealtimeJanitors.getInstance().addJanitor(synth);
         TimerService timerService = getService(TimerService.class);
@@ -163,6 +165,8 @@ public class RealtimeActivator extends HousekeepingActivator {
         PayloadTreeNode.CONVERTER = converter;
 
         registerService(PayloadTreeConverter.class, converter);
+
+        registerService(Reloadable.class, RealtimeReloadable.getInstance());
 
         registerService(Channel.class, new DevNullChannel());
         registerService(SimplePayloadConverter.class, new DurationToJSONConverter());

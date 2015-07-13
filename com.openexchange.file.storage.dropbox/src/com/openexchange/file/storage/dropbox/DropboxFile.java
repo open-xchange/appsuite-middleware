@@ -91,6 +91,7 @@ public final class DropboxFile extends DefaultFile {
         sequenceNumber = null != modified ? modified.getTime() : 0;
         setVersion(entry.rev);
         setIsCurrentVersion(true);
+        setNumberOfVersions(1);
         setFileSize(entry.bytes);
         setFileMIMEType(Strings.isEmpty(entry.mimeType) ?
             DropboxServices.getService(MimeTypeMap.class).getContentType(entry.fileName()) : entry.mimeType);

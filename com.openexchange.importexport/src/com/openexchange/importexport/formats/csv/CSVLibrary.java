@@ -49,10 +49,12 @@
 
 package com.openexchange.importexport.formats.csv;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.EnumMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
@@ -278,6 +281,59 @@ public final class CSVLibrary {
         } finally {
             if (close) {
                 Streams.close(isr);
+            }
+        }
+    }
+
+    /**
+     * Reads one or more lines from the supplied input stream.
+     *
+     * @param inputStream The input stream to read from
+     * @param charset The charset to use
+     * @param close <code>true</code> to close the input stream after reading, <code>false</code>, otherwise
+     * @param maxLines The maximum number of lines to read, or <code>-1</code> to read all available lines
+     * @return The read data
+     */
+    public static String readLines(InputStream inputStream, Charset charset, boolean close, int maxLines) throws OXException{
+        InputStreamReader inputStreamReader = null;
+        try {
+            inputStreamReader = new InputStreamReader(inputStream, charset);
+            StringBuilder stringBuilder = new StringBuilder(8192);
+            /*
+             * special handling for UTF-8 byte order mark (taken over from previous implementation)
+             */
+            if (Charsets.UTF_8_NAME.equalsIgnoreCase(charset.name())) {
+                char[] buf = new char[8];
+                int length = -1;
+                if ((length = inputStreamReader.read(buf)) > 0) {
+                    int offset = lengthOfBOM(buf);
+                    stringBuilder.append(buf, offset, length - offset);
+                }
+            }
+            /*
+             * read line by line
+             */
+            int lines = 0;
+            BufferedReader reader = new BufferedReader(inputStreamReader);
+            for (String line = reader.readLine(); null != line; line = reader.readLine()) {
+                stringBuilder.append(line).append('\n');
+                if (0 < maxLines && ++lines >= maxLines) {
+                    break;
+                }
+            }
+            return stringBuilder.toString();
+        } catch (UnsupportedEncodingException e) {
+            LOG.error("", e);
+            throw ImportExportExceptionCodes.UTF8_ENCODE_FAILED.create(e);
+        } catch (IOException e) {
+            if ("Bad file descriptor".equals(e.getMessage())) {
+                // Stream is already closed
+                throw ImportExportExceptionCodes.IOEXCEPTION_RETRY.create(e);
+            }
+            throw ImportExportExceptionCodes.IOEXCEPTION.create(e);
+        } finally {
+            if (close) {
+                Streams.close(inputStreamReader);
             }
         }
     }

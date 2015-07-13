@@ -53,11 +53,13 @@ import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
+import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
@@ -243,11 +245,18 @@ public final class ContextDatabaseAssignmentImpl implements ContextDatabaseAssig
     }
 
     @Override
-    public void invalidateAssignment(int contextId) {
+    public void invalidateAssignment(int... contextIds) {
         Cache myCache = this.cache;
         if (null != myCache) {
             try {
-                myCache.remove(myCache.newCacheKey(contextId, Server.getServerId()));
+                int serverId = Server.getServerId();
+                if (contextIds != null && contextIds.length > 0) {
+                    List<Serializable> keys = new ArrayList<Serializable>(contextIds.length);
+                    for (int contextId : contextIds) {
+                        keys.add(myCache.newCacheKey(contextId, serverId));
+                    }
+                    myCache.remove(keys);
+                }
             } catch (final OXException e) {
                 LOG.error("Error while removing database assignment from cache.", e);
             }

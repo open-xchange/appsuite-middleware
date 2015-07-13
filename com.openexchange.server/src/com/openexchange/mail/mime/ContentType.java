@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.toUpperCase;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.Iterator;
 import java.util.Locale;
@@ -940,9 +941,20 @@ public class ContentType extends ParameterizedHeader {
      * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */
-    public String toString(final boolean skipEmptyParams) {
+    public String toString(boolean skipEmptyParams) {
+        return toString(skipEmptyParams, false);
+    }
+
+    /**
+     * Returns a RFC2045 style (ASCII-only) string representation of this content type.
+     *
+     * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
+     * @param upperCase <code>true</code> to write base type upper-case; otherwise <code>false</code>
+     * @return A RFC2045 style (ASCII-only) string representation of this content type
+     */
+    public String toString(boolean skipEmptyParams, boolean upperCase) {
         final StringBuilder sb = new StringBuilder(64);
-        sb.append(primaryType).append(DELIMITER).append(subType);
+        sb.append(upperCase ? toUpperCase(primaryType) : primaryType).append(DELIMITER).append(upperCase ? toUpperCase(subType) : subType);
         if (null != parameterList) {
             parameterList.appendRFC2045String(sb, skipEmptyParams);
         }

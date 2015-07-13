@@ -54,6 +54,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.utils.Metadata;
+import com.openexchange.session.Session;
 
 public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListAction {
 
@@ -64,8 +65,8 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
     /**
      * Initializes a new {@link AbstractDocumentUpdateAction}.
      */
-    protected AbstractDocumentUpdateAction() {
-        super();
+    protected AbstractDocumentUpdateAction(Session session) {
+        super(session);
     }
 
     /**
@@ -80,8 +81,8 @@ public abstract class AbstractDocumentUpdateAction extends AbstractDocumentListA
      * @param The sequence number to catch concurrent modifications
      */
     protected AbstractDocumentUpdateAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber) {
-        super(provider, queryCatalog, context, documents);
+        List<DocumentMetadata> documents, List<DocumentMetadata> oldDocuments, Metadata[] modifiedColums, long sequenceNumber, Session session) {
+        super(provider, queryCatalog, context, documents, session);
         setOldDocuments(oldDocuments);
         setModified(modifiedColums);
         setTimestamp(sequenceNumber);

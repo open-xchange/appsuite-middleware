@@ -343,8 +343,8 @@ public class OXGroupMySQLStorage extends OXGroupSQLStorage implements OXMySQLDef
         final int groupId;
         try {
             con.setAutoCommit(false);
-            final String identifier = group.getName();
-            final String displayName = group.getDisplayname();
+            String identifier = group.getName();
+            String displayName = group.getDisplayname();
             groupId = IDGenerator.getId(ctxId, com.openexchange.groupware.Types.PRINCIPAL, con);
             con.commit();
             int gidNumber = -1;

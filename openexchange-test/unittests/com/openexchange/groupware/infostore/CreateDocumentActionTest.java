@@ -10,7 +10,7 @@ public class CreateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		final CreateDocumentAction createAction = new CreateDocumentAction();
+		final CreateDocumentAction createAction = new CreateDocumentAction(null);
 		createAction.setProvider(getProvider());
 		createAction.setContext(getContext());
 		createAction.setDocuments(getDocuments());

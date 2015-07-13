@@ -1028,13 +1028,13 @@ public class DatabaseImpl extends DBService {
 
             final InfostoreQueryCatalog catalog = new InfostoreQueryCatalog();
 
-            final DeleteAllDocumentsAction deleteDocumentAction = new DeleteAllDocumentsAction();
+            final DeleteAllDocumentsAction deleteDocumentAction = new DeleteAllDocumentsAction(session);
             deleteDocumentAction.setProvider(getProvider());
             deleteDocumentAction.setContext(ctx);
             deleteDocumentAction.setDocuments(documents);
             deleteDocumentAction.setQueryCatalog(catalog);
 
-            final DeleteAllVersionsAction deleteVersionAction = new DeleteAllVersionsAction();
+            final DeleteAllVersionsAction deleteVersionAction = new DeleteAllVersionsAction(session);
             deleteVersionAction.setProvider(getProvider());
             deleteVersionAction.setContext(ctx);
             deleteVersionAction.setDocuments(versions);

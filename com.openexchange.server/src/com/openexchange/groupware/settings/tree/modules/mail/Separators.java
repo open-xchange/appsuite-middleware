@@ -147,7 +147,7 @@ public class Separators implements PreferencesItemService {
                     }
 
                     if (retval.isEmpty()) {
-                        setting.setSingleValue("null");
+                        setting.setSingleValue(null);
                     } else {
                         setting.setSingleValue(retval.toString());
                     }

@@ -2,6 +2,7 @@
 package com.openexchange.admin.soap.context.soap;
 
 import javax.xml.ws.WebFault;
+import com.openexchange.admin.rmi.exceptions.OXContextException;
 
 
 /**
@@ -12,6 +13,13 @@ import javax.xml.ws.WebFault;
 
 @WebFault(name = "OXContextException", targetNamespace = "http://soap.admin.openexchange.com")
 public class OXContextException_Exception extends java.lang.Exception {
+
+    public static OXContextException_Exception getFaultFor(OXContextException e) {
+        com.openexchange.admin.soap.context.soap.OXContextException faultDetail = new com.openexchange.admin.soap.context.soap.OXContextException();
+        com.openexchange.admin.soap.context.exceptions.OXContextException value = new com.openexchange.admin.soap.context.exceptions.OXContextException();
+        faultDetail.setOXContextException(value);
+        return new OXContextException_Exception(e.getMessage(), faultDetail, e);
+    }
 
     private com.openexchange.admin.soap.context.soap.OXContextException oxContextException;
 

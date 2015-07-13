@@ -51,6 +51,7 @@ package com.openexchange.ajax.request;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -61,9 +62,11 @@ import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.fields.CommonFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.fields.ResponseFields;
+import com.openexchange.ajax.helper.ParamContainer;
 import com.openexchange.ajax.tools.JSONUtil;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailJSONField;
@@ -89,7 +92,7 @@ public final class MailRequest {
     static final String PARAMETER_FOLDERID = AJAXServlet.PARAMETER_FOLDERID;
 
     private static enum CollectableOperation {
-        MOVE, COPY, STORE_FLAG, COLOR_LABEL;
+        MOVE, COPY, STORE_FLAG, COLOR_LABEL, GET;
     }
 
     /**
@@ -101,6 +104,8 @@ public final class MailRequest {
 
         void requestPerformed(ServerSession session, JSONWriter writer, JSONObject jsonObject, MailServletInterface mailInterface) throws OXException, JSONException;
     }
+
+    private static final Handler GET_HANDLER;
 
     private static final Map<String, Handler> HANDERS_MAP;
 
@@ -163,17 +168,20 @@ public final class MailRequest {
                 }
             }
         });
-        m.put(AJAXServlet.ACTION_GET, new Handler() {
+        {
+            Handler h = new Handler() {
 
-            @Override
-            public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
-                if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
-                    MAIL_SERVLET.actionPutGet(session, writer, jsonObject, mailInterface);
-                } else {
-                    MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
+                @Override
+                public void requestPerformed(final ServerSession session, final JSONWriter writer, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+                    if (jsonObject.has(DATA) && !jsonObject.isNull(DATA)) {
+                        MAIL_SERVLET.actionPutGet(session, writer, jsonObject, mailInterface);
+                    } else {
+                        MAIL_SERVLET.actionGetMessage(session, writer, jsonObject, mailInterface);
+                    }
                 }
-            }
-        });
+            };
+            GET_HANDLER = h;
+        }
         m.put(AJAXServlet.ACTION_GET_STRUCTURE, new Handler() {
 
             @Override
@@ -274,7 +282,7 @@ public final class MailRequest {
      * @param jsonObject - the instance of <code>{@link JSONObject}</code> keeping request's data
      * @param mailInterface - the instance of <code>{@link MailServletInterface}</code> to access mail module
      */
-    public void action(final String action, final JSONObject jsonObject, final MailServletInterface mailInterface) throws OXException, JSONException {
+    public void action(String action, JSONObject jsonObject, MailServletInterface mailInterface) throws OXException, JSONException {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
@@ -282,11 +290,13 @@ public final class MailRequest {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("action");
         }
 
-        final String act = toLowerCase(action);
-        final Handler handler = HANDERS_MAP.get(act);
-        if (null != handler) {
-            handler.requestPerformed(session, writer, jsonObject, mailInterface);
-            return;
+        String act = Strings.asciiLowerCase(action);
+        {
+            Handler handler = HANDERS_MAP.get(act);
+            if (null != handler) {
+                handler.requestPerformed(session, writer, jsonObject, mailInterface);
+                return;
+            }
         }
 
         if (AJAXServlet.ACTION_UPDATE.equals(act)) {
@@ -301,6 +311,12 @@ public final class MailRequest {
             }
         } else if (AJAXServlet.ACTION_COPY.equals(act)) {
             handleMultiple(jsonObject, mailInterface, CollectableOperation.COPY);
+        } else if (AJAXServlet.ACTION_GET.equals(act)) {
+            if (isCollectableGet(jsonObject)) {
+                handleMultiple(jsonObject, mailInterface, CollectableOperation.GET);
+            } else {
+                GET_HANDLER.requestPerformed(session, writer, jsonObject, mailInterface);
+            }
         } else {
             throw MailExceptionCode.UNKNOWN_ACTION.create(action);
         }
@@ -377,6 +393,24 @@ public final class MailRequest {
         return jsonObject.has(PARAMETER_ID) && jsonObject.has(DATA) && jsonObject.getJSONObject(DATA).has(COLORLABEL);
     }
 
+    public static boolean isCollectableGet(final JSONObject jsonObject) {
+        if (jsonObject.has(DATA)) {
+            return false;
+        }
+        Object object = jsonObject.opt("format");
+        if (null != object && !"json".equalsIgnoreCase(object.toString())) {
+            return false;
+        }
+        object = jsonObject.opt(Mail.PARAMETER_SAVE);
+        if (null != object && Integer.parseInt(object.toString()) > 0) {
+            return false;
+        }
+        if (null == jsonObject.opt(PARAMETER_ID)) {
+            return false;
+        }
+        return true;
+    }
+
     private static abstract class CollectObject {
 
         public static CollectObject newInstance(final JSONObject jsonObject, final CollectableOperation op, final Mail mailServlet) throws OXException {
@@ -389,6 +423,8 @@ public final class MailRequest {
                 return new FlagsCollectObject(jsonObject, mailServlet);
             case COLOR_LABEL:
                 return new ColorCollectObject(jsonObject, mailServlet);
+            case GET:
+                return new GetCollectObject(jsonObject, mailServlet);
             default:
                 /*
                  * Cannot occur since all enums are covered in switch-case-statement
@@ -408,7 +444,7 @@ public final class MailRequest {
          */
         protected CollectObject(final Mail mailServlet) {
             super();
-            this.mailIDs = new ArrayList<String>();
+            this.mailIDs = new LinkedList<String>();
             this.mailServlet = mailServlet;
         }
 
@@ -446,7 +482,7 @@ public final class MailRequest {
          * @param dataObject
          * @throws OXException If a JSON error occurs
          */
-        public final void addCollectable(final JSONObject jsonObject) throws  OXException {
+        public void addCollectable(final JSONObject jsonObject) throws  OXException {
             mailIDs.add(JSONUtil.requireString(PARAMETER_ID, jsonObject));
         }
 
@@ -455,7 +491,7 @@ public final class MailRequest {
          *
          * @return A newly created array of long containing this object's mail IDs.
          */
-        protected final String[] getMailIDs() {
+        protected String[] getMailIDs() {
             return mailIDs.toArray(new String[mailIDs.size()]);
         }
     }
@@ -574,32 +610,48 @@ public final class MailRequest {
         }
     }
 
-    private static String getOpName(final CollectableOperation op) {
-        switch (op) {
-        case MOVE:
-            return "Move";
-        case COPY:
-            return "Copy";
-        case STORE_FLAG:
-            return "Store Flag";
-        case COLOR_LABEL:
-            return "Color Label";
-        default:
-            throw new InternalError("Unknown collectable operation: " + op);
-        }
-    }
+    private static final class GetCollectObject extends CollectObject {
 
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
+        private final String folder;
+        private final List<ParamContainer> containers;
+
+        public GetCollectObject(final JSONObject dataObject, final Mail mailServlet) throws OXException {
+            super(mailServlet);
+            this.folder = JSONUtil.requireString(PARAMETER_FOLDERID, dataObject);
+            containers = new LinkedList<ParamContainer>();
+            ParamContainer container = ParamContainer.getInstance(dataObject);
+            containers.add(container);
+            mailIDs.add(container.getStringParam(PARAMETER_ID));
         }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
+
+        @Override
+        public boolean collectable(final JSONObject dataObject, final CollectableOperation op) throws OXException {
+            if (!CollectableOperation.GET.equals(op) || !folder.equals(JSONUtil.requireString(PARAMETER_FOLDERID, dataObject))) {
+                return false;
+            }
+            ParamContainer container = ParamContainer.getInstance(dataObject);
+            String id = container.getStringParam(PARAMETER_ID);
+            if (null == id) {
+                return false;
+            }
+            containers.add(container);
+            mailIDs.add(id);
+            return true;
         }
-        return builder.toString();
+
+        @Override
+        public void addCollectable(JSONObject jsonObject) throws OXException {
+            // Nothing to do
+        }
+
+        @Override
+        public CollectableOperation getOperation() {
+            return CollectableOperation.GET;
+        }
+
+        @Override
+        public void performOperations(final ServerSession session, final OXJSONWriter writer, final MailServletInterface mailInterface) throws JSONException {
+            mailServlet.actionGetGetMessageMultiple(session, writer, getMailIDs(), containers.toArray(new ParamContainer[containers.size()]), folder, mailInterface);
+        }
     }
 }

@@ -49,13 +49,16 @@
 
 package com.openexchange.file.storage.googledrive.access;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.drive.Drive;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.googledrive.AbstractGoogleDriveAccess;
 import com.openexchange.file.storage.googledrive.GoogleDriveExceptionCodes;
 import com.openexchange.google.api.client.GoogleApiClients;
 import com.openexchange.oauth.OAuthAccount;
@@ -72,6 +75,18 @@ public final class GoogleDriveAccess {
     private static final long RECHECK_THRESHOLD = 2700;
 
     /**
+     * Drops the Google Drive access for given Google Drive account.
+     *
+     * @param fsAccount The Google Drive account providing credentials and settings
+     * @param session The user session
+     */
+    public static void dropFor(FileStorageAccount fsAccount, Session session) {
+        GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
+        registry.purgeUserAccess(session.getContextId(), session.getUserId(), accountId);
+    }
+
+    /**
      * Gets the Google Drive access for given Google Drive account.
      *
      * @param fsAccount The Google Drive account providing credentials and settings
@@ -80,8 +95,8 @@ public final class GoogleDriveAccess {
      * @throws OXException If a Google Drive access could not be created
      */
     public static GoogleDriveAccess accessFor(FileStorageAccount fsAccount, Session session) throws OXException {
-        final GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
-        final String accountId = fsAccount.getId();
+        GoogleDriveAccessRegistry registry = GoogleDriveAccessRegistry.getInstance();
+        String accountId = fsAccount.getId();
         GoogleDriveAccess googleDriveAccess = registry.getAccess(session.getContextId(), session.getUserId(), accountId);
         if (null == googleDriveAccess) {
             final GoogleDriveAccess newInstance = new GoogleDriveAccess(fsAccount, session);
@@ -93,6 +108,32 @@ public final class GoogleDriveAccess {
             googleDriveAccess.ensureNotExpired(session);
         }
         return googleDriveAccess;
+    }
+
+    /**
+     * Pings the Google Drive account.
+     *
+     * @param fsAccount The Google Drive account providing credentials and settings
+     * @param session The user session
+     * @return <code>true</code> on successful ping attempt; otherwise <code>false</code>
+     * @throws OXException If Google Drive account could not be pinged
+     */
+    public static boolean pingFor(FileStorageAccount fsAccount, Session session) throws OXException {
+        GoogleDriveAccess googleDriveAccess = accessFor(fsAccount, session);
+        try {
+            Drive drive = googleDriveAccess.getDrive(session);
+            drive.about().get().execute();
+            return true;
+        } catch (final HttpResponseException e) {
+            if (401 == e.getStatusCode() || 403 == e.getStatusCode()) {
+                return false;
+            }
+            throw AbstractGoogleDriveAccess.handleHttpResponseError(null, e);
+        } catch (final IOException e) {
+            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
     }
 
     // -------------------------------------------------------------------------------------------------------------------- //

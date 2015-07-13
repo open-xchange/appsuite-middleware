@@ -64,6 +64,10 @@ public class ContextExceptionMessage implements LocalizableStrings {
     public final static String NO_CONNECTION_TO_CONTEXT_MSG = "Could not connect to the context storage.";
     public final static String NO_MAPPING_MSG = "The account \"%1$s\" was not found.";
 
+    // This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+    // This should happen in very rare conditions and is not visible to the client.
+    public static final String CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY = "Denied concurrent update of user attributes.";
+
     /**
      * Initializes a new {@link ContextExceptionMessage}.
      */

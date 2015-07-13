@@ -49,12 +49,14 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import static com.openexchange.oauth.OAuthConstants.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.oauth.DefaultOAuthToken;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -84,6 +86,15 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
          */
         // http://wiki.oauth.net/w/page/12238555/Signed-Callback-URLs
         // http://developer.linkedin.com/message/4568
+
+        /*
+         * Check for reported oauth problems
+         */
+        String oauth_problem = request.getParameter(OAuthConstants.URLPARAM_OAUTH_PROBLEM);
+        if(!Strings.isEmpty(oauth_problem)) {
+            throw fromOauthProblem(oauth_problem, request, service);
+        }
+
         String oauthToken = request.getParameter(OAuthConstants.URLPARAM_OAUTH_TOKEN);
         if (oauthToken == null) {
             oauthToken = request.getParameter("access_token");
@@ -95,6 +106,7 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
         if (uuid == null) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(OAuthConstants.SESSION_PARAM_UUID);
         }
+
         /*
          * Get request token secret from session parameters
          */
@@ -164,5 +176,82 @@ public abstract class AbstractOAuthTokenAction extends AbstractOAuthAJAXActionSe
             isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
         }
         return isWhitespace;
+    }
+
+    /**
+     * Create the correct {@link OAuthExceptionCode} by mapping the incoming problem against the known problems in {@link OAuthConstants}
+     *
+     * @param oauth_problem the incoming problem
+     * @param request the associated {@link AJAXRequestData}
+     * @param service
+     * @return the correct {@link OAuthExceptionCode} based on the known problems in {@link OAuthConstants} or
+     */
+    public static OXException fromOauthProblem(String oauth_problem, AJAXRequestData request, OAuthServiceMetaData service) {
+        final String displayName = service.getDisplayName();
+        if (OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_CONSUMER_KEY_REFUSED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_CONSUMER_KEY_REFUSED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_CONSUMER_KEY_REJECTED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_CONSUMER_KEY_REJECTED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_CONSUMER_KEY_UNKNOWN.create(displayName);
+        }
+        if (OAUTH_PROBLEM_NONCE_USED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_NONCE_USED.create();
+        }
+        if (OAUTH_PROBLEM_PARAMETER_ABSENT.equals(oauth_problem)) {
+            String absent_parameters = request.getParameter(URLPARAM_OAUTH_PARAMETERS_ABSENT);
+            absent_parameters = Strings.isEmpty(absent_parameters) ? "unknown" : absent_parameters;
+            return OAuthExceptionCodes.OAUTH_PROBLEM_PARAMETER_ABSENT.create(absent_parameters);
+        }
+        if (OAUTH_PROBLEM_PARAMETER_REJECTED.equals(oauth_problem)) {
+            String rejected_parameters = request.getParameter(URLPARAM_OAUTH_PARAMETERS_REJECTED);
+            rejected_parameters = Strings.isEmpty(rejected_parameters) ? "unknown" : rejected_parameters;
+            return OAuthExceptionCodes.OAUTH_PROBLEM_PARAMETER_REJECTED.create(rejected_parameters);
+        }
+        if (OAUTH_PROBLEM_PERMISSION_DENIED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_PERMISSION_DENIED.create();
+        }
+        if (OAUTH_PROBLEM_PERMISSION_UNKNOWN.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_PERMISSION_UNKNOWN.create();
+        }
+        if (OAUTH_PROBLEM_SIGNATURE_INVALID.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_SIGNATURE_INVALID.create();
+        }
+        if (OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_SIGNATURE_METHOD_REJECTED.create();
+        }
+        if (OAUTH_PROBLEM_TIMESTAMP_REFUSED.equals(oauth_problem)) {
+            String acceptable_timestamps = request.getParameter(URLPARAM_OAUTH_ACCEPTABLE_TIMESTAMPS);
+            acceptable_timestamps = Strings.isEmpty(acceptable_timestamps) ? "unknown" : acceptable_timestamps;
+            return OAuthExceptionCodes.OAUTH_PROBLEM_TIMESTAMP_REFUSED.create(acceptable_timestamps);
+        }
+        if (OAUTH_PROBLEM_TOKEN_EXPIRED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_TOKEN_EXPIRED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_TOKEN_REJECTED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_TOKEN_REJECTED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_TOKEN_REVOKED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_TOKEN_REVOKED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_TOKEN_USED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_TOKEN_USED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_USER_REFUSED.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_USER_REFUSED.create(displayName);
+        }
+        if (OAUTH_PROBLEM_VERIFIER_INVALID.equals(oauth_problem)) {
+            return OAuthExceptionCodes.OAUTH_PROBLEM_VERIFIER_INVALID.create();
+        }
+        if (OAUTH_PROBLEM_VERSION_REJECTED.equals(oauth_problem)) {
+            String acceptable_versions = request.getParameter(URLPARAM_OAUTH_PARAMETERS_ABSENT);
+            acceptable_versions = Strings.isEmpty(acceptable_versions) ? "unknown" : acceptable_versions;
+        }
+        return OAuthExceptionCodes.OAUTH_PROBLEM_UNEXPECTED.create(oauth_problem);
     }
 }

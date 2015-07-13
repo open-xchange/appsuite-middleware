@@ -52,12 +52,15 @@ package com.openexchange.group.internal;
 import static com.openexchange.group.internal.SQLStrings.INSERT_GROUP;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -217,31 +220,28 @@ public class RdbGroupStorage extends GroupStorage {
         final Connection con = DBPool.pickup(context);
         PreparedStatement stmt = null;
         ResultSet result = null;
-        Group group = null;
         try {
             stmt = con.prepareStatement(SELECT_GROUPS + " AND id = ?");
             stmt.setLong(1, context.getContextId());
             stmt.setInt(2, gid);
             result = stmt.executeQuery();
-            if (result.next()) {
-                group = new Group();
-                int pos = 1;
-                group.setIdentifier(result.getInt(pos++));
-                group.setSimpleName(result.getString(pos++));
-                group.setDisplayName(result.getString(pos++));
-                group.setLastModified(new Date(result.getLong(pos++)));
-            } else {
+            if (!result.next()) {
                 throw LdapExceptionCode.GROUP_NOT_FOUND.create(Integer.valueOf(gid), Integer.valueOf(context.getContextId())).setPrefix("GRP");
             }
+            int pos = 1;
+            Group group = new Group();
+            group.setIdentifier(result.getInt(pos++));
+            group.setSimpleName(result.getString(pos++));
+            group.setDisplayName(result.getString(pos++));
+            group.setLastModified(new Date(result.getLong(pos++)));
             group.setMember(selectMember(con, context, group.getIdentifier()));
+            return group;
         } catch (final SQLException e) {
-            throw LdapExceptionCode.SQL_ERROR.create(e,
-                e.getMessage()).setPrefix("GRP");
+            throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("GRP");
         } finally {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return group;
     }
 
     @Override
@@ -263,13 +263,12 @@ public class RdbGroupStorage extends GroupStorage {
         }
         PreparedStatement stmt = null;
         ResultSet result = null;
-        Group[] groups = null;
         try {
             stmt = con.prepareStatement(statement + " AND lastModified>?");
             stmt.setLong(1, context.getContextId());
             stmt.setLong(2, modifiedSince.getTime());
             result = stmt.executeQuery();
-            final List<Group> tmp = new ArrayList<Group>();
+            List<Group> tmp = new LinkedList<Group>();
             while (result.next()) {
                 final Group group = new Group();
                 int pos = 1;
@@ -281,7 +280,7 @@ public class RdbGroupStorage extends GroupStorage {
                     group.getIdentifier()));
                 tmp.add(group);
             }
-            groups = tmp.toArray(new Group[tmp.size()]);
+            return tmp.toArray(new Group[tmp.size()]);
         } catch (final SQLException e) {
             throw LdapExceptionCode.SQL_ERROR.create(e,
                 e.getMessage()).setPrefix("GRP");
@@ -289,7 +288,6 @@ public class RdbGroupStorage extends GroupStorage {
             closeSQLStuff(result, stmt);
             DBPool.closeReaderSilent(context, con);
         }
-        return groups;
     }
 
 
@@ -316,7 +314,7 @@ public class RdbGroupStorage extends GroupStorage {
             stmt.setString(2, sqlPattern);
             stmt.setString(3, sqlPattern);
             result = stmt.executeQuery();
-            final List<Group> groups = new ArrayList<Group>();
+            List<Group> groups = new ArrayList<Group>();
             while (result.next()) {
                 final Group group = new Group();
                 int pos = 1;
@@ -357,7 +355,7 @@ public class RdbGroupStorage extends GroupStorage {
             stmt = con.prepareStatement(SELECT_GROUPS);
             stmt.setLong(1, context.getContextId());
             result = stmt.executeQuery();
-            final List<Group> tmp = new ArrayList<Group>();
+            List<Group> tmp = new ArrayList<Group>();
             while (result.next()) {
                 final Group group = new Group();
                 int pos = 1;
@@ -385,22 +383,19 @@ public class RdbGroupStorage extends GroupStorage {
         final String getMember = "SELECT member FROM groups_member WHERE cid=? AND id=?";
         PreparedStatement stmt = null;
         ResultSet result = null;
-        final List<Integer> tmp = new ArrayList<Integer>();
+        TIntList tmp = new TIntLinkedList();
         try {
             stmt = con.prepareStatement(getMember);
             stmt.setLong(1, ctx.getContextId());
             stmt.setInt(2, groupId);
             result = stmt.executeQuery();
             while (result.next()) {
-                tmp.add(Integer.valueOf(result.getInt(1)));
+                tmp.add(result.getInt(1));
             }
         } finally {
             closeSQLStuff(result, stmt);
         }
-        final int[] member = new int[tmp.size()];
-        for (int i = 0; i < member.length; i++) {
-            member[i] = tmp.get(i).intValue();
-        }
-        return member;
+        return tmp.toArray();
     }
+
 }

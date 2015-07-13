@@ -844,10 +844,10 @@ public class AJAXRequestData {
         }
         if (name.equals(AJAXServlet.PARAMETER_COLUMNS)) {
             if (parameter.equals("all")) {
-                return AbstractMailAction.COLUMNS_ALL_ALIAS;
+                return AbstractMailAction.FIELDS_ALL_ALIAS;
             }
             if (parameter.equals("list")) {
-                return AbstractMailAction.COLUMNS_LIST_ALIAS;
+                return AbstractMailAction.FIELDS_LIST_ALIAS;
             }
         }
         final String[] sa = SPLIT.split(parameter, 0);

@@ -73,6 +73,15 @@ public interface FolderService {
     Map<Integer, ContentType> getAvailableContentTypes();
 
     /**
+     * Reinitializes the denoted tree (if necessary).
+     *
+     * @param treeId The tree identifier
+     * @param session The session
+     * @throws OXException If re-initialization fails
+     */
+    void reinitialize(String treeId, Session session) throws OXException;
+
+    /**
      * Checks the consistency of given tree.
      *
      * @param treeId The tree identifier

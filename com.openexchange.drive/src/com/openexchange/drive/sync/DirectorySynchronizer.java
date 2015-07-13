@@ -253,10 +253,11 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                         return 1;
                     }
                     /*
-                     * let client synchronize the directory
+                     * create directory on server, let client synchronize the directory
                      */
+                    result.addActionForServer(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
                     result.addActionForClient(new SyncDirectoryAction(comparison.getClientVersion(), comparison));
-                    return 1;
+                    return 2;
                 } else {
                     /*
                      * not allowed, indicate as error with quarantine flag

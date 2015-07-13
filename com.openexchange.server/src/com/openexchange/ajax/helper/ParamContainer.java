@@ -59,8 +59,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.EnumComponent;
 
 /**
  * ParamContainer
@@ -78,12 +78,9 @@ public abstract class ParamContainer {
 
         private final Map<String, String> map;
 
-        private final EnumComponent component;
-
-        public MapParamContainer(final Map<String, String> map, final EnumComponent component) {
+        public MapParamContainer(Map<String, String> map) {
             super();
             this.map = map;
-            this.component = component;
         }
 
         @Override
@@ -234,19 +231,14 @@ public abstract class ParamContainer {
     private static final class HttpParamContainer extends ParamContainer {
 
         private final HttpServletRequest req;
-
-        private final EnumComponent component;
-
         private final HttpServletResponse resp;
 
         /**
          * @param req
-         * @param component
          * @param resp
          */
-        public HttpParamContainer(final HttpServletRequest req, final EnumComponent component, final HttpServletResponse resp) {
+        public HttpParamContainer(HttpServletRequest req, HttpServletResponse resp) {
             this.req = req;
-            this.component = component;
             this.resp = resp;
         }
 
@@ -402,16 +394,12 @@ public abstract class ParamContainer {
 
         private final JSONObject jo;
 
-        private final EnumComponent component;
-
         /**
          * @param jo
-         * @param component
          */
-        public JSONParamContainer(final JSONObject jo, final EnumComponent component) {
+        public JSONParamContainer(JSONObject jo) {
             super();
             this.jo = jo;
-            this.component = component;
         }
 
         @Override
@@ -570,18 +558,170 @@ public abstract class ParamContainer {
         }
     }
 
+    private static final class RequestDataParamContainer extends ParamContainer {
+
+        private final AJAXRequestData requestData;
+
+        /**
+         * @param requestData
+         */
+        public RequestDataParamContainer(AJAXRequestData requestData) {
+            super();
+            this.requestData = requestData;
+        }
+
+        @Override
+        public Set<String> getParameterNames() {
+            return requestData.getParameters().keySet();
+        }
+
+        @Override
+        public Date checkDateParam(final String paramName) throws OXException {
+            String value = requestData.checkParameter(paramName);
+
+            try {
+                return new Date(Long.parseLong(value));
+            } catch (NumberFormatException e) {
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+            }
+        }
+
+        @Override
+        public int[] checkIntArrayParam(final String paramName) throws OXException {
+            String value = requestData.checkParameter(paramName);
+
+            String[] tmp = SPLIT.split(value, 0);
+            final int[] intArray = new int[tmp.length];
+            for (int i = 0; i < tmp.length; i++) {
+                try {
+                    intArray[i] = Integer.parseInt(tmp[i]);
+                } catch (NumberFormatException e) {
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int checkIntParam(final String paramName) throws OXException {
+            String value = requestData.checkParameter(paramName);
+
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+            }
+        }
+
+        @Override
+        public long checkLongParam(final String paramName) throws OXException {
+            String value = requestData.checkParameter(paramName);
+
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+            }
+        }
+
+        @Override
+        public String checkStringParam(final String paramName) throws OXException {
+            return requestData.checkParameter(paramName);
+        }
+
+        @Override
+        public Date getDateParam(final String paramName) throws OXException {
+            String value = requestData.getParameter(paramName);
+            if (null == value) {
+                return null;
+            }
+
+            try {
+                return new Date(Long.parseLong(value));
+            } catch (NumberFormatException e) {
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+            }
+        }
+
+        @Override
+        public String getHeader(final String hdrName) {
+            return null;
+        }
+
+        @Override
+        public int[] getIntArrayParam(final String paramName) throws OXException {
+            String value = requestData.getParameter(paramName);
+            if (null == value) {
+                return null;
+            }
+
+            String[] tmp = SPLIT.split(value, 0);
+            final int[] intArray = new int[tmp.length];
+            for (int i = 0; i < tmp.length; i++) {
+                try {
+                    intArray[i] = Integer.parseInt(tmp[i]);
+                } catch (NumberFormatException e) {
+                    throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+                }
+            }
+            return intArray;
+        }
+
+        @Override
+        public int getIntParam(final String paramName) throws OXException {
+            String value = requestData.getParameter(paramName);
+            if (null == value) {
+                return NOT_FOUND;
+            }
+
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException e) {
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+            }
+        }
+
+        @Override
+        public long getLongParam(final String paramName) throws OXException {
+            String value = requestData.getParameter(paramName);
+            if (null == value) {
+                return NOT_FOUND;
+            }
+
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                throw ParamContainerExceptionCode.BAD_PARAM_VALUE.create(value, paramName);
+            }
+        }
+
+        @Override
+        public String getStringParam(final String paramName) throws OXException {
+            return requestData.getParameter(paramName);
+        }
+
+        @Override
+        public HttpServletResponse getHttpServletResponse() {
+            return requestData.optHttpServletResponse();
+        }
+    }
+
     public static final int NOT_FOUND = -9999;
 
-    public static ParamContainer getInstance(final HttpServletRequest req, final EnumComponent component, final HttpServletResponse resp) {
-        return new HttpParamContainer(req, component, resp);
+    public static ParamContainer getInstance(final HttpServletRequest req, final HttpServletResponse resp) {
+        return new HttpParamContainer(req, resp);
     }
 
-    public static ParamContainer getInstance(final JSONObject jo, final EnumComponent component) {
-        return new JSONParamContainer(jo, component);
+    public static ParamContainer getInstance(final JSONObject jo) {
+        return new JSONParamContainer(jo);
     }
 
-    public static ParamContainer getInstance(final Map<String, String> map, final EnumComponent component) {
-        return new MapParamContainer(map, component);
+    public static ParamContainer getInstance(final AJAXRequestData requestData) {
+        return new RequestDataParamContainer(requestData);
+    }
+
+    public static ParamContainer getInstance(final Map<String, String> map) {
+        return new MapParamContainer(map);
     }
 
     /**

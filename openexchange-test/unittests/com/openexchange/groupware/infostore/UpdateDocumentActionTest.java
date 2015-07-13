@@ -7,7 +7,7 @@ import com.openexchange.tx.UndoableAction;
 
 public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 
-	CreateDocumentAction create = new CreateDocumentAction();
+	CreateDocumentAction create = new CreateDocumentAction(null);
 
 	@Override
 	public void setUp() throws Exception {
@@ -27,7 +27,7 @@ public class UpdateDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		final UpdateDocumentAction update = new UpdateDocumentAction();
+		final UpdateDocumentAction update = new UpdateDocumentAction(null);
 		update.setProvider(getProvider());
 		update.setContext(getContext());
 		update.setDocuments(getUpdatedDocuments());

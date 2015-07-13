@@ -84,16 +84,26 @@ public class UserContact {
 	private final User user;
 	private final Contact contact;
 
-	/**
-	 * Initializes a new {@link UserContact}.
-	 *
-	 * @param contact the contact
-	 * @param user the user
-	 */
+    /**
+     * Initializes a new {@link UserContact}.
+     *
+     * @param contact the contact
+     * @param user the user
+     */
     public UserContact(final Contact contact, final User user) {
         super();
         this.contact = contact;
         this.user = user;
+    }
+
+    /**
+     * Initializes a new {@link UserContact} based on a the supplied user. Contact information is added in a virtual way, based on the
+     * basic properties also available in the user reference.
+     *
+     * @param user The user
+     */
+    public UserContact(User user) {
+        this(getVirtualContact(user), user);
     }
 
     /**
@@ -229,6 +239,22 @@ public class UserContact {
             return ja;
         }
         return values.iterator().next();
+    }
+
+    /**
+     * Creates a "virtual" contact for the supplied user, taking over the most basic properties.
+     *
+     * @param user The user to generate the virtual contact for
+     * @return The virtual contact
+     */
+    private static Contact getVirtualContact(User user) {
+        Contact contact = new Contact();
+        contact.setInternalUserId(user.getId());
+        contact.setDisplayName(user.getDisplayName());
+        contact.setSurName(user.getSurname());
+        contact.setGivenName(user.getGivenName());
+        contact.setEmail1(user.getMail());
+        return contact;
     }
 
     /**

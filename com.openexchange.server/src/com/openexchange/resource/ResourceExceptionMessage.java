@@ -65,44 +65,34 @@ public class ResourceExceptionMessage implements LocalizableStrings {
         super();
     }
 
-    /**
-     * No resource group found for identifier \"%1$d\".
-     */
+    // No resource group found for identifier \"%1$d\".
     public final static String RESOURCEGROUP_NOT_FOUND_MSG_DISPLAY = "No resource group found for identifier \"%1$d\".";
 
-    /**
-     * Found resource groups with the same identifier %1$d.
-     */
+    // Found resource groups with the same identifier %1$d.
     public final static String RESOURCEGROUP_CONFLICT_MSG_DISPLAY = "Found resource groups with the same identifier \"%1$d\".";
 
-    /**
-     * No resource found with identifier \"%1$d\".
-     */
+    // No resource found with identifier \"%1$d\".
     public final static String RESOURCE_NOT_FOUND_MSG_DISPLAY = "No resource found with identifier \"%1$d\".";
 
-    /**
-     * Found resource(s) with same identifier \"%1$s\".
-     */
+    // Found resource(s) with same identifier \"%1$s\".
     public final static String RESOURCE_CONFLICT_MSG_DISPLAY = "Found resource(s) with same identifier \"%1$s\".";
 
-    /**
-     * You do not have the appropriate permissions to modify resources.
-     */
+    // You do not have the appropriate permissions to modify resources.
     public final static String PERMISSION_MSG_DISPLAY = "You do not have the appropriate permissions to modify resources.";
 
-    /**
-     * The provided resource identifier \"%1$s\" contains invalid characters.
-     */
+    // The provided resource identifier \"%1$s\" contains invalid characters.
     public final static String INVALID_RESOURCE_IDENTIFIER_MSG_DISPLAY = "The provided resource identifier \"%1$s\" contains invalid characters.";
 
-    /**
-     * The provided E-Mail address \"%1$s\" for resource is invalid.
-     */
+    // The provided E-Mail address \"%1$s\" for resource is invalid.
     public final static String INVALID_RESOURCE_MAIL_MSG_DISPLAY = "The provided E-Mail address \"%1$s\" for resource is invalid.";
 
-    /**
-     * The selected resource \"%1$s\" has been changed in the meantime.
-     */
+    // There is already a resource with E-Mail address "%1$s". Please choose another one.
+    public final static String RESOURCE_CONFLICT_MAIL_MSG_DISPLAY = "There is already a resource with E-Mail address \"%1$s\". Please choose another one.";
+
+    // The selected resource \"%1$s\" has been changed in the meantime.
     public final static String CONCURRENT_MODIFICATION_MSG_DISPLAY = "The selected resource \"%1$s\" has been changed in the meantime.";
+
+    // Missing mandatory field(s) in given resource.
+    public static final String MANDATORY_FIELD_MSG_DISPLAY = "Missing mandatory field(s) in given resource.";
 
 }

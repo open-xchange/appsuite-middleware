@@ -151,7 +151,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
      * ############################ MEMBER SECTION ############################
      */
 
-    private static final String PREFIX = "open-xchange-";
+    private static final String PREFIX = "open-xchange-managedfile-";
 
     private static final String SUFFIX = ".tmp";
 

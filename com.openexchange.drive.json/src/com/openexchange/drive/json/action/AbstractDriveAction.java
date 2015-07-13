@@ -52,6 +52,7 @@ package com.openexchange.drive.json.action;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
+import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -67,6 +68,7 @@ import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
@@ -113,7 +115,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         }
         int apiVersion = requestData.containsParameter("apiVersion") ? requestData.getParameter("apiVersion", Integer.class).intValue() : 0;
         DefaultDriveSession driveSession = new DefaultDriveSession(
-            session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData));
+            session, rootFolderID, extractHostData(requestData, session), apiVersion, extractClientVersion(requestData), extractLocale(requestData));
         /*
          * extract device name information if present
          */
@@ -167,6 +169,23 @@ public abstract class AbstractDriveAction implements AJAXActionService {
         } catch (IllegalArgumentException e) {
             throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(e, "version", version);
         }
+    }
+
+    /**
+     * Extracts a possible set locale override from the supplied request data.
+     *
+     * @param requestData The request data
+     * @return The locale, or <code>null</code> if not set
+     */
+    private static Locale extractLocale(AJAXRequestData requestData) {
+        Locale localeOverride = null;
+        if (requestData.containsParameter("locale")) {
+            localeOverride = LocaleTools.getLocale(requestData.getParameter("locale"));
+        }
+        if (null == localeOverride && requestData.containsParameter("language")) {
+            localeOverride = LocaleTools.getLocale(requestData.getParameter("language"));
+        }
+        return localeOverride;
     }
 
     /**

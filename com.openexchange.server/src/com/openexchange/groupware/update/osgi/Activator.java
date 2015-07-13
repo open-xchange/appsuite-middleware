@@ -83,7 +83,12 @@ public class Activator extends HousekeepingActivator {
         final ConfigurationService configService = getService(ConfigurationService.class);
 
         ExcludedList.getInstance().configure(configService);
-        InternalList.getInstance().start();
+        try {
+            InternalList.getInstance().start();
+        } catch (Error e) {
+            // Helps finding errors in a lot of static code initialization.
+            e.printStackTrace();
+        }
 
         rememberTracker(new ServiceTracker<UpdateTaskProviderService, UpdateTaskProviderService>(context, UpdateTaskProviderService.class, new UpdateTaskCustomizer(context)));
         rememberTracker(new ServiceTracker<CacheService, CacheService>(context, CacheService.class.getName(), new CacheCustomizer(context)));
@@ -98,5 +103,4 @@ public class Activator extends HousekeepingActivator {
         InternalList.getInstance().stop();
         super.stopBundle();
     }
-
 }

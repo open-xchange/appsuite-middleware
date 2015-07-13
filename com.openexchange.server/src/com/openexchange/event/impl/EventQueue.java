@@ -716,18 +716,17 @@ public final class EventQueue {
         } finally {
             // Just in case another Thread also stopped the queue, we have to
             // wake that one up as well
-            signalAll(ALL_EVENTS_PROCESSED);
-            SHUTDOWN_LOCK.unlock();
+            try {
+                signalAll(ALL_EVENTS_PROCESSED);
+            } finally {
+                SHUTDOWN_LOCK.unlock();
+            }
         }
     }
 
     private static void signalAll(final Condition condition) {
         if (null != condition) {
-            try {
-                condition.signalAll();
-            } catch (final Exception e) {
-                // Ignore
-            }
+            condition.signalAll();
         }
     }
 

@@ -133,24 +133,41 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             availableAttributes.add(Attribute.TRANSPORT_AUTH_LITERAL);
         }
 
-        if (accountDescription.getId() >= 0 && null == accountDescription.getPassword()) {
-            /*
-             * ID is delivered, but password not set. Thus load from storage version.
-             */
-            final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+        // Check for tree parameter
+        boolean tree;
+        {
+            String tmp = requestData.getParameter("tree");
+            tree = AJAXRequestDataTools.parseBoolParameter(tmp);
+        }
 
-            try {
-                final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                if (null != password) {
-                    accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+        if (accountDescription.getId() >= 0) {
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+            MailAccount storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+
+            boolean checkPassword = true;
+            if (null == accountDescription.getPassword()) {
+                checkPassword = false;
+                // Identifier is given, but password not set. Thus load from storage version.
+                try {
+                    String password = storageMailAccount.getPassword();
+                    if (null != password) {
+                        String decryptedPassword = MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                        accountDescription.setPassword(decryptedPassword);
+                    }
+                } catch (OXException e) {
+                    if (!CryptoErrorMessage.BadPassword.equals(e)) {
+                        throw e;
+                    }
+                    storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
+                    storageMailAccount = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId());
+                    String decryptedPassword = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                    accountDescription.setPassword(decryptedPassword);
                 }
-            } catch (final OXException e) {
-                if (!CryptoErrorMessage.BadPassword.equals(e)) {
-                    throw e;
-                }
-                storageService.invalidateMailAccounts(session.getUserId(), session.getContextId());
-                final String password = storageService.getMailAccount(accountDescription.getId(), session.getUserId(), session.getContextId()).getPassword();
-                accountDescription.setPassword(MailPasswordUtil.decrypt(password, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer()));
+            }
+
+            // Check for any modifications that would justify validation
+            if (!tree && !hasValidationReason(accountDescription, storageMailAccount, checkPassword, session)) {
+                return new AJAXRequestResult(Boolean.TRUE);
             }
         }
 
@@ -159,22 +176,82 @@ public final class ValidateAction extends AbstractMailAccountTreeAction {
             // Deny validation of Unified Mail account
             throw MailAccountExceptionCodes.UNIFIED_INBOX_ACCOUNT_VALIDATION_FAILED.create();
         }
-        // Check for tree parameter
-        final boolean tree;
-        {
-            final String tmp = requestData.getParameter("tree");
-            tree = AJAXRequestDataTools.parseBoolParameter(tmp);
-        }
+
         // Check for ignoreInvalidTransport parameter
-        final boolean ignoreInvalidTransport;
+        boolean ignoreInvalidTransport;
         {
-            final String tmp = requestData.getParameter("ignoreInvalidTransport");
+            String tmp = requestData.getParameter("ignoreInvalidTransport");
             ignoreInvalidTransport = AJAXRequestDataTools.parseBoolParameter(tmp);
         }
         if (tree) {
             return new AJAXRequestResult(actionValidateTree(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
         }
         return new AJAXRequestResult(actionValidateBoolean(accountDescription, session, ignoreInvalidTransport, warnings)).addWarnings(warnings);
+    }
+
+    private static boolean hasValidationReason(MailAccountDescription accountDescription, MailAccount storageMailAccount, boolean checkPassword, ServerSession session) throws OXException {
+        String s1 = storageMailAccount.generateMailServerURL();
+        String s2 = accountDescription.generateMailServerURL();
+        if (null == s1) {
+            if (null != s2) {
+                return true;
+            }
+        } else if (!s1.equals(s2)) {
+            return true;
+        }
+
+        s1 = storageMailAccount.generateTransportServerURL();
+        s2 = accountDescription.generateTransportServerURL();
+        if (null == s1) {
+            if (null != s2) {
+                return true;
+            }
+        } else if (!s1.equals(s2)) {
+            return true;
+        }
+
+        s1 = storageMailAccount.getLogin();
+        s2 = accountDescription.getLogin();
+        if (null == s1) {
+            if (null != s2) {
+                return true;
+            }
+        } else if (!s1.equals(s2)) {
+            return true;
+        }
+
+        if (checkPassword) {
+            s1 = MailPasswordUtil.decrypt(storageMailAccount.getPassword(), session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+            s2 = accountDescription.getPassword();
+            if (null == s1) {
+                if (null != s2) {
+                    return true;
+                }
+            } else if (!s1.equals(s2)) {
+                return true;
+            }
+        }
+
+        s2 = accountDescription.getTransportLogin();
+        if (null != s2) {
+            s1 = storageMailAccount.getTransportLogin();
+            if (!s2.equals(s1)) {
+                return true;
+            }
+        }
+
+        s2 = accountDescription.getTransportPassword();
+        if (null != s2) {
+            s1 = storageMailAccount.getTransportPassword();
+            if (null != s1) {
+                s1 = MailPasswordUtil.decrypt(s1, session, accountDescription.getId(), accountDescription.getLogin(), accountDescription.getMailServer());
+                if (!s2.equals(s1)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private static Object actionValidateTree(final MailAccountDescription accountDescription, final ServerSession session, final boolean ignoreInvalidTransport, final List<OXException> warnings) throws JSONException, OXException {

@@ -151,10 +151,11 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
+     * @param properties The properties to decorate
+     * @param loginMethod The actual login method that performs authentication
      * @return The login providing login information
      * @throws OXException If login fails
      */
-    @SuppressWarnings("static-method")
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
         final LoginResultImpl retval = new LoginResultImpl();
@@ -198,7 +199,7 @@ public final class LoginPerformer {
             authService.authorizeUser(ctx, user);
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
-            // Create session
+            // Check needed service
             SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             if (null == sessiondService) {
                 sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
@@ -219,7 +220,6 @@ public final class LoginPerformer {
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
-
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
@@ -263,16 +263,19 @@ public final class LoginPerformer {
      * @return The context
      * @throws OXException
      */
-    public static Context findContext(final String contextInfo) throws OXException {
-        final ContextStorage contextStor = ContextStorage.getInstance();
-        final int contextId = contextStor.getContextId(contextInfo);
+    public static Context findContext(String contextInfo) throws OXException {
+        ContextStorage contextStor = ContextStorage.getInstance();
+
+        int contextId = contextStor.getContextId(contextInfo);
         if (ContextStorage.NOT_FOUND == contextId) {
             throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
         }
-        final Context context = contextStor.getContext(contextId);
+
+        Context context = contextStor.getContext(contextId);
         if (null == context) {
             throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
         }
+
         return context;
     }
 
@@ -284,15 +287,17 @@ public final class LoginPerformer {
      * @return The context
      * @throws OXException
      */
-    public static User findUser(final Context ctx, final String userInfo) throws OXException {
-        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
-        final UserStorage us = UserStorage.getInstance();
-        int userId = 0;
+    public static User findUser(Context ctx, String userInfo) throws OXException {
+        String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+        UserStorage us = UserStorage.getInstance();
+
+        int userId;
         if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
             userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
         } else {
             userId = us.getUserId(userInfo, ctx);
         }
+
         return us.getUser(userId, ctx);
     }
 
@@ -302,8 +307,7 @@ public final class LoginPerformer {
      * @param sessionId The session ID
      * @throws OXException If logout fails
      */
-    @SuppressWarnings("static-method")
-    public Session doLogout(final String sessionId) throws OXException {
+    public Session doLogout(String sessionId) throws OXException {
         // Drop the session
         SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
         if (null == sessiondService) {
@@ -466,7 +470,7 @@ public final class LoginPerformer {
         } catch (final OXException e) {
             e.log(LOG);
         } catch (final RuntimeException e) {
-            LOG.error("", e);
+            LOG.error(e.getMessage(), e);
         }
     }
 

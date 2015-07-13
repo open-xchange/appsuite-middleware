@@ -333,10 +333,7 @@ public class DriveServiceImpl implements DriveService {
                 e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength);
             if (DriveUtils.indicatesQuotaExceeded(e)) {
                 syncResult.addActionsForClient(DriveUtils.handleQuotaExceeded(syncSession, e, path, originalVersion, newVersion));
-            } else if ("IFO-0100".equals(e.getErrorCode())) {
-                /*
-                 * database fields (filename/title/comment?) too long - put into quarantine to prevent repeated errors
-                 */
+            } else if (DriveUtils.indicatesFailedSave(e)) {
                 syncResult.addActionForClient(new ErrorFileAction(null, newVersion, null, path, e, true));
             } else {
                 throw e;

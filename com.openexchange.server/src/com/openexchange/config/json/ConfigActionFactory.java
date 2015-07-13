@@ -78,6 +78,8 @@ public class ConfigActionFactory implements AJAXActionServiceFactory {
         actions = new ConcurrentHashMap<String, AJAXActionService>(2);
         actions.put("GET", new com.openexchange.config.json.actions.GETAction(services));
         actions.put("PUT", new com.openexchange.config.json.actions.PUTAction(services));
+        actions.put("get_property", new com.openexchange.config.json.actions.GetPropertyAction(services));
+        actions.put("set_property", new com.openexchange.config.json.actions.SetPropertyAction(services));
     }
 
     @Override

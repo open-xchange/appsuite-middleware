@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime.utils;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -66,6 +67,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -83,6 +85,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.activation.DataHandler;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -110,6 +113,8 @@ import org.apache.james.mime4j.stream.FieldBuilder;
 import org.apache.james.mime4j.stream.RawField;
 import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
+import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -131,11 +136,14 @@ import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.HeaderName;
 import com.openexchange.mail.mime.MessageHeaders;
+import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.DataHandlerWrapper;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
@@ -358,6 +366,9 @@ public final class MimeMessageUtility {
 
     /**
      * Gathers all occurring content IDs in HTML content and returns them as a list
+     * <pre>
+     * &lt;img src=&quot;cid:s345asd845@12drg&quot;&gt;
+     * </pre>
      *
      * @param htmlContent The HTML content
      * @return an instance of <code>{@link List}</code> containing all occurring content IDs
@@ -447,6 +458,18 @@ public final class MimeMessageUtility {
         return true;
     }
 
+    /**
+     * Gets the trimmed Content-ID value
+     * <p>
+     * <tt>"&lt;1234abcd&gt;"</tt> --&gt; <tt>"1234abcd"</tt>
+     *
+     * @param contentId The Content-ID value
+     * @return The trimmed Content-ID value
+     */
+    public static String trimContentId(String contentId) {
+        return trimContentId(contentId, null);
+    }
+
     private static String trimContentId(final String contentId, final String ignorableSuffix) {
         if (null == contentId) {
             return null;
@@ -462,6 +485,58 @@ public final class MimeMessageUtility {
             ret = ret.substring(0, ret.lastIndexOf(ignorableSuffix));
         }
         return ret;
+    }
+
+    /**
+     * URL-decodes given string
+     *
+     * @param s The string
+     * @return The URL-decoded string
+     */
+    public static String urlDecode(String s) {
+        try {
+            return AJAXUtility.decodeUrl(replaceURLCodePoints(s), "ISO-8859-1");
+        } catch (final RuntimeException e) {
+            return s;
+        }
+    }
+
+    private static final Pattern PATTERN_CODE_POINT = Pattern.compile("%u00([a-fA-F0-9]{2})");
+
+    private static String replaceURLCodePoints(String s) {
+        Matcher m = PATTERN_CODE_POINT.matcher(s);
+        StringBuffer buffer = new StringBuffer(s.length());
+        while (m.find()) {
+            char[] chars = Character.toChars(Integer.parseInt(m.group(1), 16));
+            m.appendReplacement(buffer, com.openexchange.java.Strings.quoteReplacement(new String(chars)));
+        }
+        m.appendTail(buffer);
+        return buffer.toString();
+    }
+
+    /** The pattern for matching the <code>src</code> attribute within an &lt;img&gt; tag */
+    public static final Pattern PATTERN_SRC = Pattern.compile("<img[^>]*?src=\"([^\"]+)\"[^>]*/?>", Pattern.CASE_INSENSITIVE);
+
+    /**
+     * Yields a blank <code>src</code> attribute for passed &lt;img&gt; tag.
+     *
+     * @param imageTag The &lt;img&gt; tag
+     * @return The &lt;img&gt; tag with a blank <code>src</code> attribute
+     */
+    public static String blankSrc(final String imageTag) {
+        if (isEmpty(imageTag)) {
+            return imageTag;
+        }
+        final Matcher srcMatcher = PATTERN_SRC.matcher(imageTag);
+        if (!srcMatcher.find()) {
+            return imageTag;
+        }
+        final StringBuffer sb = new StringBuffer(imageTag.length());
+        int st = srcMatcher.start(1);
+        int end = srcMatcher.end(1);
+        srcMatcher.appendReplacement(sb, Matcher.quoteReplacement(imageTag.substring(0, st) + imageTag.substring(end)));
+        srcMatcher.appendTail(sb);
+        return sb.toString();
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;
@@ -711,9 +786,14 @@ public final class MimeMessageUtility {
 
     private static boolean hasAttachments0(final BODYSTRUCTURE bodystructure) {
         boolean found = false;
-        for (int i = 0; !found && (i < bodystructure.bodies.length); i++) {
-            found |= hasAttachments(bodystructure.bodies[i]);
+
+        BODYSTRUCTURE[] bodies = bodystructure.bodies;
+        if (null != bodies) {
+            for (int i = 0; !found && (i < bodies.length); i++) {
+                found |= hasAttachments(bodies[i]);
+            }
         }
+
         return found;
     }
 
@@ -877,7 +957,7 @@ public final class MimeMessageUtility {
             return sb.toString();
         }
 
-        // Try to recover from malformed Content-Type value like ''=?windows-1252?q?application/pdf; name="blatt8.pdf"''
+        // Try to recover from malformed Content-Type value like ``=?windows-1252?q?application/pdf; name="blatt8.pdf"\u00b4\u00b4
         if (!hdrVal.startsWith("=?")) {
             // Encoded word does not start with "=?"
             return hdrVal;
@@ -2139,6 +2219,56 @@ public final class MimeMessageUtility {
         }
     }
 
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage parseMimeMessageFrom(InputStream is, Date optReceivedDate) throws OXException {
+        return newMimeMessage(is, optReceivedDate);
+    }
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage newMimeMessage(InputStream is, Date optReceivedDate) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
     /** ASCII-wise to lower-case */
     private static String toLowerCase(final CharSequence chars) {
         if (null == chars) {
@@ -2370,5 +2500,185 @@ public final class MimeMessageUtility {
             return (this == address);
         }
     };
+
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong Content-Type header.
+     * <p>
+     * Aligns <i>Message-Id</i> header to given host name.
+     *
+     * @param mimeMessage The MIME message
+     * @param hostName The host name
+     * @param keepMessageIdIfPresent Whether to keep a possibly available <i>Message-ID</i> header or to generate a new (unique) one
+     * @throws OXException If operation fails
+     */
+    public static void saveChanges(MimeMessage mimeMessage, String hostName, boolean keepMessageIdIfPresent) throws OXException {
+        try {
+            String name = "Message-ID";
+            String prevMessageId = keepMessageIdIfPresent ? mimeMessage.getHeader(name, null) : null;
+            saveChanges(mimeMessage);
+            if (null != prevMessageId) {
+                mimeMessage.setHeader(name, prevMessageId);
+            } else if (null != hostName) {
+                // Change Message-Id header appropriately
+                String messageId = mimeMessage.getHeader(name, null);
+                if (null != messageId) {
+                    /*
+                     * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
+                     */
+                    int pos = messageId.indexOf('@');
+                    if (pos > 0) {
+                        StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
+                        if (messageId.charAt(0) == '<') {
+                            mid.append('>');
+                        }
+                        mimeMessage.setHeader(name, mid.toString());
+                    } else {
+                        mimeMessage.setHeader(name, messageId + hostName);
+                    }
+                }
+            }
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+    }
+
+    /**
+     * Performs {@link MimeMessage#saveChanges() saveChanges()} on specified message with sanitizing for a possibly corrupt/wrong
+     * Content-Type header.
+     *
+     * @param mimeMessage The message
+     * @throws OXException If an error occurs
+     */
+    public static void saveChanges(MimeMessage mimeMessage) throws OXException {
+        saveChanges(mimeMessage, true);
+    }
+
+    private static void saveChanges(MimeMessage mimeMessage, final boolean trySanitizeMultipart) throws OXException {
+        if (null == mimeMessage) {
+            return;
+        }
+        try {
+            try {
+                mimeMessage.saveChanges();
+            } catch (javax.mail.internet.ParseException e) {
+                /*-
+                 * Probably parsing of a Content-Type header failed.
+                 *
+                 * Try to sanitize parameter list headers
+                 */
+                sanitizeContentTypeHeaders(mimeMessage, new ContentType());
+                /*
+                 * ... and retry
+                 */
+                mimeMessage.saveChanges();
+            } catch (javax.mail.MessagingException e) {
+                if (!trySanitizeMultipart) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+                // Check for DCH error
+                final String msg = asciiLowerCase(e.getMessage());
+                if (null != msg && msg.startsWith("mime part of type \"multipart/")) {
+                    sanitizeMultipartContent(mimeMessage);
+                    saveChanges(mimeMessage, false);
+                } else {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            }
+        } catch (MessagingException e) {
+            throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static boolean sanitizeMultipartContent(MimePart part) throws OXException {
+        try {
+            final String sContentType = asciiLowerCase(part.getHeader("Content-Type", null));
+            if (null != sContentType && sContentType.startsWith("multipart/")) {
+                final Object o = part.getContent();
+                if (o instanceof MimeMultipart) {
+                    final MimeMultipart multipart = (MimeMultipart) o;
+                    final int count = multipart.getCount();
+                    for (int i = 0; i < count; i++) {
+                        if (!sanitizeMultipartContent((MimePart) multipart.getBodyPart(i))) {
+                            return false;
+                        }
+                    }
+                    return true;
+                }
+                // Not an instance of MimeMultipart.
+                // Try to sanitize
+                if (o instanceof InputStream) {
+                    final MimeMultipart multipart = new MimeMultipart(new MessageDataSource((InputStream) o, sContentType));
+                    part.setContent(multipart);
+                    return true;
+                }
+                return false;
+            }
+            return true;
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
+        final DataHandler dh;
+        try {
+            dh = part.getDataHandler();
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        }
+        if (dh == null) {
+            return;
+        }
+        try {
+            final String type = dh.getContentType();
+            sanitizer.setContentType(type);
+            try {
+                /*
+                 * Try to parse with JavaMail Content-Type implementation
+                 */
+                new javax.mail.internet.ContentType(type);
+            } catch (final javax.mail.internet.ParseException e) {
+                /*
+                 * Sanitize Content-Type header
+                 */
+                final String cts = sanitizer.toString(true);
+                try {
+                    new javax.mail.internet.ContentType(cts);
+                } catch (final javax.mail.internet.ParseException pe) {
+                    /*
+                     * Still not parseable
+                     */
+                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, type);
+                }
+                part.setDataHandler(new DataHandlerWrapper(dh, cts));
+                part.setHeader("Content-Type", cts);
+            }
+            /*
+             * Check for recursive invocation
+             */
+            if (sanitizer.startsWith("multipart/")) {
+                final Object o = dh.getContent();
+                if (o instanceof MimeMultipart) {
+                    final MimeMultipart mm = (MimeMultipart) o;
+                    final int count = mm.getCount();
+                    for (int i = 0; i < count; i++) {
+                        sanitizeContentTypeHeaders(mm.getBodyPart(i), sanitizer);
+                    }
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
 
 }

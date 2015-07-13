@@ -362,13 +362,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     private IMAPDefaultFolderChecker getChecker() {
         if (null == checker) {
             Map<String, String> caps = imapConfig.asMap();
+            boolean hasMetadata = caps.containsKey("METADATA"); // http://tools.ietf.org/html/rfc5464#section-1
             if (caps.containsKey("SPECIAL-USE")) {
                 // Supports SPECIAL-USE capability
                 boolean hasCreateSpecialUse = caps.containsKey("CREATE-SPECIAL-USE"); // http://tools.ietf.org/html/rfc6154#section-3
-                boolean hasMetadata = caps.containsKey("METADATA"); // http://tools.ietf.org/html/rfc5464#section-1
                 checker = new SpecialUseDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess, hasCreateSpecialUse, hasMetadata);
             } else {
-                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess);
+                checker = new IMAPDefaultFolderChecker(accountId, session, ctx, imapStore, imapAccess, hasMetadata);
             }
         }
         return checker;
@@ -403,14 +403,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             } else {
                 f = (IMAPFolder) imapStore.getFolder(fullName);
             }
+
             // ... and check existence
-            if (!f.exists()) {
-                f = checkForNamespaceFolder(fn);
-                if (null == f) {
-                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+            boolean exists = f.exists();
+            if (!exists) {
+
+                try {
+                    f.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        f.close(false);
+                    }
+                }
+
+                if (!exists) {
+                    f = checkForNamespaceFolder(fn);
+                    if (null == f) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                    }
                 }
             }
-
 
             ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(fullName, accountId, f, session);
             return null == listEntry ? IMAPFolderConverter.convertFolder(f, session, imapAccess, ctx).asMailFolderInfo(accountId) : toFolderInfo(listEntry);
@@ -703,8 +718,24 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (checkForNamespaceFolder(fullName) != null) {
                 return true;
             }
+
             // The hard way...
-            final boolean exists = imapStore.getFolder(fullName).exists();
+            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName);
+            boolean exists = imapFolder.exists();
+
+            if (!exists) {
+                try {
+                    imapFolder.open(IMAPFolder.READ_ONLY);
+                    exists = true;
+                } catch (javax.mail.FolderNotFoundException e) {
+                    exists = false;
+                } finally {
+                    if (exists) {
+                        imapFolder.close(false);
+                    }
+                }
+            }
+
             if (exists) {
                 // IMAP does signal folder existence, but not reflected in caches
                 FolderCache.removeCachedFolders(session, accountId);
@@ -1035,9 +1066,28 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      *
      * @param fullName The folder's full name
      * @return The corresponding namespace folder or <code>null</code>
-     * @throws MessagingException
+     * @throws MessagingException If operation fails
      */
     public IMAPFolder checkForNamespaceFolder(final String fullName) throws MessagingException {
+        return checkForNamespaceFolder0(fullName, null);
+    }
+
+    /**
+     * Checks if given full name matches a namespace folder or one of its subfolders.
+     *
+     * @param fullName The folder's full name
+     * @param folder The folder associated with the full name
+     * @return The corresponding namespace folder or <code>null</code>
+     * @throws MessagingException If operation fails
+     */
+    public IMAPFolder checkForNamespaceFolder(final String fullName, IMAPFolder folder) throws MessagingException {
+        if (null == folder) {
+            throw new MessagingException("IMAP folder must not be null");
+        }
+        return checkForNamespaceFolder0(fullName, folder);
+    }
+
+    private IMAPFolder checkForNamespaceFolder0(final String fullName, IMAPFolder folder) throws MessagingException {
         if (NamespaceFoldersCache.containedInPersonalNamespaces(fullName, imapStore, true, session, accountId)) {
             return new NamespaceFolder(imapStore, fullName, getSeparator());
         }
@@ -1047,7 +1097,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         if (NamespaceFoldersCache.containedInSharedNamespaces(fullName, imapStore, true, session, accountId)) {
             return new NamespaceFolder(imapStore, fullName, getSeparator());
         }
-        return null;
+        return null == folder ? null : startsWithNamespaceFolder(fullName, getSeparator()) ? folder : null;
     }
 
     @Override
@@ -1114,7 +1164,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
             synchronized (parent) {
-                if (!parent.exists()) {
+                if (!doesExist(parent, false)) {
                     parent = checkForNamespaceFolder(parentFullname);
                     if (null == parent) {
                         throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, parentFullname);
@@ -1914,7 +1964,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         }
                     }
                 }
-                if (/* !MailProperties.getInstance().isIgnoreSubscription() && */performSubscription) {
+                if (performSubscription) {
                     /*
                      * Check read permission
                      */
@@ -1931,9 +1981,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, fullName);
                         }
                     }
-                    final boolean subscribe = toUpdate.isSubscribed();
-                    updateMe.setSubscribed(subscribe);
-                    IMAPCommandsCollection.forceSetSubscribed(imapStore, updateMe.getFullName(), subscribe);
+                    boolean subscribe = toUpdate.isSubscribed();
+                    setSubscribed(subscribe, updateMe);
                     FolderCache.removeCachedFolders(session, accountId);
                     changed = true;
                 }
@@ -1948,6 +1997,23 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } finally {
             if (changed) {
                 ListLsubCache.clearCache(accountId, session);
+            }
+        }
+    }
+
+    private void setSubscribed(boolean subscribe, IMAPFolder imapFolder) throws MessagingException {
+        imapFolder.setSubscribed(subscribe);
+        IMAPCommandsCollection.forceSetSubscribed(imapStore, imapFolder.getFullName(), subscribe);
+
+        if (subscribe) {
+            // Ensure parent gets subscribed, too
+            try {
+                IMAPFolder parent = (IMAPFolder) imapFolder.getParent();
+                if ((null != parent) && (parent.getFullName().length() > 0)) {
+                    setSubscribed(subscribe, parent);
+                }
+            } catch (Exception e) {
+                // Ignore
             }
         }
     }
@@ -2704,7 +2770,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 getSubscriptionStatus(m, (IMAPFolder) folders[i], oldFullName, newFullName);
             }
         }
-        m.put(f.getFullName().replaceFirst(quoteReplacement(oldFullName), quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
+        m.put(f.getFullName().replaceFirst(Pattern.quote(oldFullName), quoteReplacement(newFullName)), Boolean.valueOf(f.isSubscribed()));
     }
 
     private void setFolderSubscription(final IMAPFolder f, final boolean subscribed) throws MessagingException {
@@ -3208,22 +3274,34 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private IMAPFolder getIMAPFolder(final String fullName) throws MessagingException {
+    private IMAPFolder getIMAPFolder(String fullName) throws MessagingException {
         return DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
     }
 
-    private IMAPFolder getIMAPFolderWithRecentListener(final String fullName) throws MessagingException {
-        final IMAPFolder ret =
-            DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
+    private IMAPFolder getIMAPFolderWithRecentListener(String fullName) throws MessagingException {
+        IMAPFolder ret = DEFAULT_FOLDER_ID.equals(fullName) ? (IMAPFolder) imapStore.getDefaultFolder() : (IMAPFolder) imapStore.getFolder(fullName);
         if (MailAccount.DEFAULT_ID == accountId && imapConfig.getIMAPProperties().notifyRecent()) {
             IMAPNotifierMessageRecentListener.addNotifierFor(ret, fullName, accountId, session, true);
         }
         return ret;
     }
 
-    private boolean doesExist(final IMAPFolder imapFolder, final boolean readOnly) throws OXException, MessagingException {
+    private boolean doesExist(IMAPFolder imapFolder, boolean readOnly) throws OXException, MessagingException {
         final String fullName = imapFolder.getFullName();
-        return STR_INBOX.equals(fullName) || (readOnly ? getLISTEntry(fullName, imapFolder).exists() : imapFolder.exists());
+        boolean exists = STR_INBOX.equals(fullName) || (readOnly ? getLISTEntry(fullName, imapFolder).exists() : imapFolder.exists());
+        if (!exists) {
+            try {
+                imapFolder.open(IMAPFolder.READ_ONLY);
+                exists = true;
+            } catch (javax.mail.FolderNotFoundException e) {
+                exists = false;
+            } finally {
+                if (exists) {
+                    imapFolder.close(false);
+                }
+            }
+        }
+        return exists;
     }
 
     private static boolean doesExist(final ListLsubEntry entry) {
@@ -3304,7 +3382,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return fullName.charAt(length) == separator;
     }
 
-    private boolean startsWithNamespaceFolder(final String fullName, final char separator) throws MessagingException {
+    /**
+     * Checks if specified full name starts with either a user or a shared namespace path prefix.
+     *
+     * @param fullName The full name to check
+     * @return <code>true</code> if denoted full name is a namespace subfolder; otherwise <code>false</code>
+     * @throws MessagingException If operation fails
+     */
+    public boolean startsWithNamespaceFolder(String fullName) throws MessagingException {
+        return startsWithNamespaceFolder(fullName, getSeparator());
+    }
+
+    private boolean startsWithNamespaceFolder(String fullName, char separator) throws MessagingException {
         for (final String nsFullName : NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId)) {
             if (isSubfolderOf(fullName, nsFullName, separator)) {
                 return true;

@@ -57,9 +57,10 @@ import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
+/**
+ * Activator for <code>com.openexchange.authentication.imap</code> bundle.
+ */
 public class ActivatorNew extends HousekeepingActivator {
-
-    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ActivatorNew.class);
 
     /**
      * Initializes a new {@link ActivatorNew}.
@@ -75,13 +76,7 @@ public class ActivatorNew extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        try {
-            registerService(AuthenticationService.class, new IMAPAuthentication(this), null);
-        } catch (final Throwable t) {
-            LOG.error("", t);
-            throw t instanceof Exception ? (Exception) t : new Exception(t);
-        }
-
+        registerService(AuthenticationService.class, new IMAPAuthentication(this));
     }
 
 }

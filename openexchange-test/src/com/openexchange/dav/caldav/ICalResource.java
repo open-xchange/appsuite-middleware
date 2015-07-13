@@ -90,6 +90,11 @@ public class ICalResource {
         return 0 < components.size() ? components.get(0) : null;
     }
 
+    public Component getVTodo() {
+        List<Component> components = vCalendar.getComponents(VTODO);
+        return 0 < components.size() ? components.get(0) : null;
+    }
+
 	public Component getVFreeBusy() {
 	    List<Component> components = vCalendar.getComponents(VFREEBUSY);
 	    return 0 < components.size() ? components.get(0) : null;

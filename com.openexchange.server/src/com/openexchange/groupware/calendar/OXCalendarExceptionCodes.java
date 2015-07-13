@@ -49,11 +49,13 @@
 
 package com.openexchange.groupware.calendar;
 
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.tools.exceptions.SimpleIncorrectStringAttribute;
 
 /**
  * The calendar error code enumeration.
@@ -78,7 +80,18 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Unexpected SQL Error!
      */
-    CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 5, Category.CATEGORY_ERROR),
+    CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 5, Category.CATEGORY_ERROR) {
+        public OXException create(final Throwable cause, final Object... args) {
+            if (IncorrectStringSQLException.class.isInstance(cause)) {
+                IncorrectStringSQLException isse = (IncorrectStringSQLException) cause;
+                CalendarField field = CalendarField.getByDbField(isse.getColumn());
+                OXException e = OXCalendarExceptionCodes.INVALID_CHARACTER.create(cause, field.getLocalizable(), isse.getIncorrectString());
+                e.addProblematic(new SimpleIncorrectStringAttribute(field.getAppointmentObjectID(), isse.getIncorrectString()));
+                return e;
+            }
+            return OXExceptionFactory.getInstance().create(this, cause, args);
+        }
+    },
     /**
      * TODO remove this exception. The AJAX interface should already check for a missing last modified.
      */

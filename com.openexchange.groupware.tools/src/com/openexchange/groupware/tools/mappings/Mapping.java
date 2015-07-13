@@ -97,16 +97,27 @@ public interface Mapping<T, O> extends Comparator<O> {
 	 */
 	void remove(O object);
 
-	/**
-	 * Truncates the current property value to the supplied length if it is
-	 * longer.
-	 *
-	 * @param object the object to truncate the property's value for
-	 * @param length the maximum length the property's value should be
-	 * @return <code>true</code>, if the value was actually truncated,
-	 * <code>false</code>, otherwise
-	 */
-	boolean truncate(O object, int length) throws OXException;
+    /**
+     * Truncates the current property value to the supplied length if it is
+     * longer.
+     *
+     * @param object the object to truncate the property's value for
+     * @param length the maximum length the property's value should be
+     * @return <code>true</code>, if the value was actually truncated,
+     * <code>false</code>, otherwise
+     */
+    boolean truncate(O object, int length) throws OXException;
+
+    /**
+     * If this mapping denotes a textual property, replaces each substring of this property's value that matches the given regular
+     * expression with the given replacement.
+     *
+     * @param object The object to replace substrings in the property's value for
+     * @param regex The regular expression to which this property's value is to be matched
+     * @param replacement The string to be substituted for each match
+     * @return <code>true</code>, if the replacements were actually performed, <code>false</code>, otherwise
+     */
+    boolean replaceAll(O object, String regex, String replacement) throws OXException;
 
 	/**
 	 * Gets a value indicating whether a property's value is equal in two

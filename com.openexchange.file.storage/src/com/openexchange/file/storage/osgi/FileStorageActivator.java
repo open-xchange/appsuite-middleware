@@ -54,6 +54,7 @@ import com.openexchange.file.storage.internal.FileStorageQuotaProvider;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
+import com.openexchange.secret.SecretService;
 
 /**
  * {@link FileStorageActivator}
@@ -83,6 +84,7 @@ public final class FileStorageActivator extends HousekeepingActivator {
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
         try {
             log.info("starting bundle: com.openexchange.file.storage");
+            Services.setServices(this);
             /*
              * Start registry tracking
              */
@@ -95,6 +97,11 @@ public final class FileStorageActivator extends HousekeepingActivator {
             final OSGIFileStorageAccountManagerLookupService lookupService = new OSGIFileStorageAccountManagerLookupService();
             lookupService.start(context);
             this.lookupService = lookupService;
+            /*
+             * Track SecretService
+             */
+            trackService(SecretService.class);
+            openTrackers();
             /*
              * Register services
              */
@@ -129,7 +136,8 @@ public final class FileStorageActivator extends HousekeepingActivator {
                 registry.stop();
                 this.registry = null;
             }
-            cleanUp();
+            Services.setServices(null);
+            super.stopBundle();
         } catch (final Exception e) {
             log.error("Stopping bundle \"com.openexchange.file.storage\" failed.", e);
             throw e;

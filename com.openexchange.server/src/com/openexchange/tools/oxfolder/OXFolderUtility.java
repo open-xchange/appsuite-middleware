@@ -67,6 +67,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.data.Check;
+import com.openexchange.groupware.i18n.FolderStrings;
 import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -342,26 +343,26 @@ public final class OXFolderUtility {
     /**
      * Ensures that an user who does not hold full shared folder access cannot share one of his private folders
      *
-     * @param folderObj The folder object
-     * @param sessionUserPerms The session user's permissions
-     * @param ctx The context
+     * @param folder The folder object
+     * @param permissionBits The session user's permissions
+     * @param context The context
      * @throws OXException If an user tries to share a folder although he is not allowed to
      */
-    public static void checkPermissionsAgainstSessionUserConfig(final FolderObject folderObj, final UserPermissionBits sessionUserPerms, final Context ctx) throws OXException {
-        final List<OCLPermission> perms = folderObj.getPermissions();
-        final int size = perms.size();
-        final Iterator<OCLPermission> iter = perms.iterator();
-        final boolean isPrivate = (folderObj.getType() == FolderObject.PRIVATE);
-        final boolean hasFullSharedFolderAccess = sessionUserPerms.hasFullSharedFolderAccess();
-        for (int i = 0; i < size; i++) {
-            final OCLPermission oclPerm = iter.next();
-            if (!hasFullSharedFolderAccess && isPrivate && i > 0 && !isEmptyPermission(oclPerm)) {
-                /*
-                 * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
-                 */
-                throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(getUserName(sessionUserPerms.getUserId(), ctx),
-                    getFolderName(folderObj),
-                    Integer.valueOf(ctx.getContextId()));
+    public static void checkPermissionsAgainstSessionUserConfig(FolderObject folder, UserPermissionBits permissionBits, Context context) throws OXException {
+        List<OCLPermission> permissions = folder.getPermissions();
+        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() &&
+            (FolderObject.PRIVATE == folder.getType() || FolderObject.PUBLIC == folder.getType() && FolderObject.INFOSTORE == folder.getModule())) {
+            /*
+             * forbid any non-empty additional permission
+             */
+            for (int i = 1; i < permissions.size(); i++) {
+                if (false == isEmptyPermission(permissions.get(i))) {
+                    /*
+                     * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
+                     */
+                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(
+                        getUserName(permissionBits.getUserId(), context), getFolderName(folder, context), Integer.valueOf(context.getContextId()));
+                }
             }
         }
     }
@@ -864,6 +865,21 @@ public final class OXFolderUtility {
     /**
      * Gets the folder name for logging/messaging purpose
      *
+     * @param folder The folder
+     * @param context The context
+     * @return The folder name for logging/messaging purpose
+     */
+    public static String getFolderName(FolderObject folder, Context context) {
+        final String folderName = folder.getFolderName();
+        if (null == folderName) {
+            return getFolderName(folder.getObjectID(), context);
+        }
+        return new StringBuilder().append(folderName).append(" (").append(folder.getObjectID()).append(')').toString();
+    }
+
+    /**
+     * Gets the folder name for logging/messaging purpose
+     *
      * @param fo The folder
      * @return The folder name for logging/messaging purpose
      */
@@ -1027,6 +1043,24 @@ public final class OXFolderUtility {
         default:
             return STR_UNKNOWN;
         }
+    }
+
+    private static final String COLUMN_FNAME = "fname";
+
+    /**
+     * Gets the appropriate localizable field name for specified column
+     *
+     * @param column The column
+     * @return The field name or <code>null</code>
+     */
+    public static String column2Field(String column) {
+        if (null == column) {
+            return null;
+        }
+        if (COLUMN_FNAME.equalsIgnoreCase(column)) {
+            return FolderStrings.FIELD_FOLDER_NAME;
+        }
+        return null;
     }
 
 }

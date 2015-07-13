@@ -52,8 +52,6 @@ package com.openexchange.messaging.facebook.session;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.messaging.facebook.services.Services;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link FacebookOAuthAccessRegistry}
@@ -140,18 +138,14 @@ public final class FacebookOAuthAccessRegistry {
      * @return <code>true</code> if a Facebook OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeSessionIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = Services.getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            /*
-             * No sessions left for user
-             */
-            final ConcurrentMap<Integer, FacebookOAuthAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
-            if (null == inner || inner.isEmpty()) {
-                return false;
-            }
-            return !inner.isEmpty();
+        /*
+         * No sessions left for user
+         */
+        final ConcurrentMap<Integer, FacebookOAuthAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null == inner || inner.isEmpty()) {
+            return false;
         }
-        return false;
+        return !inner.isEmpty();
     }
 
     /**

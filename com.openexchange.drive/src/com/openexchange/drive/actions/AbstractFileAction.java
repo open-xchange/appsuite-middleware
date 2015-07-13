@@ -50,11 +50,13 @@
 package com.openexchange.drive.actions;
 
 import java.util.List;
+import java.util.Map.Entry;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.comparison.ThreeWayComparison;
 import com.openexchange.drive.internal.SyncSession;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 
 /**
@@ -147,7 +149,17 @@ public abstract class AbstractFileAction extends AbstractAction<FileVersion> {
             result = prime * result + newVersion.getChecksum().hashCode();
             result = prime * result + newVersion.getName().hashCode();
         }
-        result = prime * result + ((null == parameters) ? 0 : parameters.hashCode());
+        if (null != parameters) {
+            for (Entry<String, Object> parameter : parameters.entrySet()) {
+                String key = parameter.getKey();
+                Object value = parameter.getValue();
+                if (PARAMETER_ERROR.equals(key) && null != value && OXException.class.isInstance(value)) {
+                    result = prime * result + (null == key ? 0 : key.hashCode()) ^ (((OXException) value).getErrorCode().hashCode());
+                } else {
+                    result = prime * result + (null == key ? 0 : key.hashCode()) ^ (null == value ? 0 : value.hashCode());
+                }
+            }
+        }
         return result;
     }
 

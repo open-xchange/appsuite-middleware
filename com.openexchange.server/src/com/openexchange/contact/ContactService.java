@@ -75,7 +75,7 @@ public interface ContactService {
      * permissions for that folder.
      */
 	public static final ContactField[] LIMITED_USER_FIELDS = new ContactField[] { ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
-			ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED };
+			ContactField.SUR_NAME, ContactField.MIDDLE_NAME, ContactField.SUFFIX, ContactField.LAST_MODIFIED, ContactField.EMAIL1 };
 
     /**
      * Gets a contact with all fields.
@@ -451,7 +451,7 @@ public interface ContactService {
      * @param sortOptions The options to sort the results
      * @return The contacts found with the search
      * @throws OXException
-     * 
+     *
      * @see {@link AutocompleteParameters#newInstance()}
      */
     SearchIterator<Contact> autocompleteContacts(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;

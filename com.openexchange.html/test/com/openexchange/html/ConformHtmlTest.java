@@ -105,4 +105,15 @@ public class ConformHtmlTest {
         Assert.assertTrue("Missing <meta> tag.", test.indexOf("<meta") >= 0);
         Assert.assertTrue("Missing <meta> tag.", test.indexOf("?") < 0);
     }
+
+    @Test
+    public void testConformHtml2() {
+        String content = "<p>Text before one empty line</p><p><br></p><p>Text after empty line.</p>";
+
+        String test = service.getConformHTML(content, "us-ascii");
+
+        Assert.assertTrue("Unexpected HTML content", test.indexOf("<br>") > 0);
+        Assert.assertTrue("Unexpected HTML content", test.indexOf("</br>") < 0);
+    }
+
 }

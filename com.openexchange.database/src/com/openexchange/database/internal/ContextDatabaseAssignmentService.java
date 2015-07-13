@@ -71,12 +71,12 @@ interface ContextDatabaseAssignmentService {
     AssignmentImpl getAssignment(int contextId) throws OXException;
 
     /**
-     * Invalidates an assignment for a context in the cache.
+     * Invalidates the assignments for one or more contexts in the cache.
      * @param con writable connection to the config database in a transaction.
-     * @param contextId The unique identifier of the context.
+     * @param contextIds The unique identifiers of the contexts
      * @throws OXException If getting the server identifier fails.
      */
-    void invalidateAssignment(int contextId) throws OXException;
+    void invalidateAssignment(int... contextIds) throws OXException;
 
     /**
      * Writes a database assignment for a context into the database. Normally this is done within a transaction on the config database.

@@ -295,11 +295,11 @@ public abstract class AbstractUserAction implements AJAXActionService {
     }
 
     protected static UserCensorship getUserCensorship(final ServerSession session) throws OXException {
-         if( canSeeGlobalAddressBook(session) ) {
-             return DO_NOTHING_USER_CENSORSHIP;
-         }
+        if (canSeeGlobalAddressBook(session)) {
+            return DO_NOTHING_USER_CENSORSHIP;
+        }
 
-         return NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP;
+        return NO_GLOBAL_ADDRESSBOOK_USER_CENSORSHIP;
     }
 
     private static boolean canSeeGlobalAddressBook(final ServerSession session) throws OXException {

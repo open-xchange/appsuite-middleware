@@ -6,7 +6,7 @@ import com.openexchange.tx.UndoableAction;
 
 public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 
-	CreateDocumentAction create = new CreateDocumentAction();
+	CreateDocumentAction create = new CreateDocumentAction(null);
 
 	@Override
 	public void setUp() throws Exception {
@@ -26,7 +26,7 @@ public class DeleteDocumentActionTest extends AbstractInfostoreActionTest {
 
 	@Override
 	protected UndoableAction getAction() throws Exception {
-		final DeleteDocumentAction deleteAction = new DeleteDocumentAction();
+		final DeleteDocumentAction deleteAction = new DeleteDocumentAction(null);
 		deleteAction.setProvider(getProvider());
 		deleteAction.setContext(getContext());
 		deleteAction.setDocuments(getDocuments());

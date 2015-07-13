@@ -52,8 +52,6 @@ package com.openexchange.file.storage.boxcom.access;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.file.storage.boxcom.Services;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link BoxAccessRegistry}
@@ -139,21 +137,17 @@ public final class BoxAccessRegistry {
      * @return <code>true</code> if a Box access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = Services.getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            /*
-             * No sessions left for user
-             */
-            final ConcurrentMap<String, BoxAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
-            if (null == inner || inner.isEmpty()) {
-                return false;
-            }
-            for (final BoxAccess boxAccess : inner.values()) {
-                boxAccess.dispose();
-            }
-            return !inner.isEmpty();
+        /*
+         * No sessions left for user
+         */
+        final ConcurrentMap<String, BoxAccess> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null == inner || inner.isEmpty()) {
+            return false;
         }
-        return false;
+        for (final BoxAccess boxAccess : inner.values()) {
+            boxAccess.dispose();
+        }
+        return !inner.isEmpty();
     }
 
     /**

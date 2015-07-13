@@ -51,6 +51,8 @@ package com.openexchange.tools.images;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 
 
 /**
@@ -68,6 +70,32 @@ public class ImageTransformationUtility {
     private ImageTransformationUtility() {
         super();
     }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final String COVER = com.openexchange.tools.images.ScaleType.COVER.getKeyword();
+
+    /**
+     * Check if given AJAX request data seems to be a thumbnail request.
+     *
+     * @param requestData The AJAX request data
+     * @return <code>true</code> if AJAX request data seems to be a thumbnail request; otherwise <code>false</code>
+     */
+    public static boolean seemsLikeThumbnailRequest(AJAXRequestData requestData) {
+        return COVER.equals(requestData.getParameter("scaleType")) || "thumbnail_image".equals(requestData.getFormat());
+    }
+
+    /**
+     * Check if given HTTP request seems to be a thumbnail request.
+     *
+     * @param request The HTTP request
+     * @return <code>true</code> if HTTP request seems to be a thumbnail request; otherwise <code>false</code>
+     */
+    public static boolean seemsLikeThumbnailRequest(HttpServletRequest request) {
+        return COVER.equals(request.getParameter("scaleType")) || "thumbnail_image".equals(request.getParameter("format"));
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Strips a leading "image/" as well as trailing additional properties after the first ";" from the supplied value if necessary from

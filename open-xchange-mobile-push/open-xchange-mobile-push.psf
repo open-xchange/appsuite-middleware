@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.apn"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.gcm"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.mobilepush.events.storage"/>
+</provider>
+</psf>

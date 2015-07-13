@@ -49,6 +49,7 @@
 
 package com.openexchange.mail;
 
+import static com.openexchange.java.Charsets.US_ASCII;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
@@ -554,7 +555,7 @@ public class MailConverterTest extends AbstractMailTest {
 
 	public void testMIMEConverter2() {
 		try {
-			final MailMessage mail = MimeMessageConverter.convertMessage(SRC2.getBytes(com.openexchange.java.Charsets.US_ASCII));
+			final MailMessage mail = MimeMessageConverter.convertMessage(SRC2.getBytes(US_ASCII));
 
 			final int expectedCount = 2;
 			assertEquals("Unexpected number of enclosed parts", expectedCount, mail.getEnclosedCount());
@@ -585,4 +586,13 @@ public class MailConverterTest extends AbstractMailTest {
 			fail(e.getMessage());
 		}
 	}
+
+	public void testBug37537() throws Exception {
+        String uid = "123";
+        String fullName = "INBOX/testBug37537";
+        MailMessage mail = MimeMessageConverter.convertMessage(SRC.getBytes(US_ASCII), uid, fullName, '/', MailField.FIELDS_WO_BODY);
+        assertNotNull(mail);
+        assertEquals(uid, mail.getMailId());
+        assertEquals(fullName, mail.getFolder());
+    }
 }

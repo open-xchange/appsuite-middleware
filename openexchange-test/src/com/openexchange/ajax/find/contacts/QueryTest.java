@@ -137,6 +137,17 @@ public class QueryTest extends ContactsFindTest {
         testStringFilter(EMAIL, "email", randomUID() + "@example.com", EMAIL_COLUMNS);
     }
 
+    public void testSearchEmailInDistributionList() throws Exception {
+        // Test case for bug 38260
+        Contact distributionList = randomContact();
+        distributionList.setDistributionList(new DistributionListEntryObject[] {
+            new DistributionListEntryObject(randomUID(), randomUID() + "someuniquestring@example.com", DistributionListEntryObject.INDEPENDENT)
+        });
+        manager.newAction(distributionList);
+        List<PropDocument> response = query(Collections.singletonList(createQuery("someuniquestring")));
+        assertTrue("Distribution list not found", 0 < response.size());
+    }
+
     public void testFilterContactType() throws Exception {
         Contact contact = randomContact();
         Contact distributionList = randomContact();

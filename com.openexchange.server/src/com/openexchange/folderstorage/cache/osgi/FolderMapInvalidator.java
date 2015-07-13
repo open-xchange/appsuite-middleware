@@ -63,7 +63,6 @@ import com.openexchange.caching.events.CacheListener;
 import com.openexchange.folderstorage.cache.memory.FolderMapManagement;
 import com.openexchange.folderstorage.internal.Tools;
 
-
 /**
  * {@link FolderMapInvalidator} - Invalidates folder map.
  *
@@ -88,7 +87,7 @@ public class FolderMapInvalidator implements CacheListener, ServiceTrackerCustom
     }
 
     @Override
-    public void onEvent(final Object sender, final CacheEvent cacheEvent, final boolean fromRemote) {
+    public void onEvent(Object sender, CacheEvent cacheEvent, boolean fromRemote) {
         if (fromRemote) {
             // Remotely received
             LOGGER.debug("Handling incoming remote cache event: {}", cacheEvent);

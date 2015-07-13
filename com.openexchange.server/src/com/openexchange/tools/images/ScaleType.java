@@ -58,13 +58,23 @@ package com.openexchange.tools.images;
 public enum ScaleType {
 
     /**
-     * The "cover" scale type
+     * The "cover" scale type, specifying the minimum target dimensions. The source image will be resized in a way that the resulting
+     * image covers the target resolution entirely, with the original aspect ratio being preserved.
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "cover", will result in the
+     * picture being resized to 267x200 pixels.
      */
     COVER("cover"),
+
     /**
-     * The "contain" scale type
+     * The "contain" scale type, specifying the maximum target dimensions. The source image will be resized in a way that the resulting
+     * image fits into the target resolution entirely, with the original aspect ratio being preserved.
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the
+     * picture being resized to 200x150 pixels.
      */
     CONTAIN("contain"),
+
     /**
      * The "auto" scale type
      */

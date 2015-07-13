@@ -62,7 +62,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.publish.Publication;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
-import com.openexchange.tools.servlet.RateLimitedException;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.userconf.UserPermissionService;
 
 /**

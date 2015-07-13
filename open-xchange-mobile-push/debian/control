@@ -1,0 +1,16 @@
+Source: open-xchange-mobile-push
+Section: web
+Priority: optional
+Maintainer: Lars Hoogestraat <lars.hoogestraat@open-xchange.com>
+Build-Depends: cdbs (>= 0.4.53), debhelper (>= 7.0.1), ant-optional (>= 1.7.0), sun-java6-jdk|java6-sdk, open-xchange-core (>= @OXVERSION@)
+Standards-Version: 3.8.4
+Homepage: http://www.open-xchange.com
+
+Package: open-xchange-mobile-push
+Architecture: all
+Pre-Depends: open-xchange-core (>= @OXVERSION@)
+Depends: ${misc:Depends}
+Description: Server module for Open-Xchange Mobile Push functionality
+ This package installes the server module for the mobile push functionality.
+ The service used for receiving push messages is Google Cloud Messaging for Android (GCM).
+ Furthermore a watchdog is installed, which looks for valid push listener every five minutes.

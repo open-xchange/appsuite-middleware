@@ -272,12 +272,16 @@ public final class JerichoParser {
                 if (m.find()) {
                     // Re-parse start tag
 
+                    String startTag = m.group(1);
+                    if (startTag.startsWith("<!--")) {
+                        handler.handleComment(m.group());
+                        return;
+                    }
+
                     int start = m.start();
                     if (start > 0) {
                         handler.handleSegment(segment.subSequence(0, start));
                     }
-
-                    String startTag = m.group(1);
                     String remainder = null;
 
                     int end = m.end();
@@ -290,6 +294,7 @@ public final class JerichoParser {
                         }
                     }
 
+                    @SuppressWarnings("resource")
                     StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag));
                     Thread thread = Thread.currentThread();
                     for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {

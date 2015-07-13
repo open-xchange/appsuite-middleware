@@ -201,8 +201,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void invalidate(int contextId) {
-        configDatabaseService.invalidate(contextId);
+    public void invalidate( int... contextIds) {
+        configDatabaseService.invalidate(contextIds);
     }
 
     @Override

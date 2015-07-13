@@ -65,10 +65,15 @@ import com.openexchange.exception.OXException;
 public class ServerProperty implements BasicProperty {
 
     private String value;
-
     private boolean defined;
-
     private final Map<String, String> metadata = new HashMap<String, String>();
+
+    /**
+     * Initializes a new {@link ServerProperty}.
+     */
+    public ServerProperty() {
+        super();
+    }
 
     @Override
     public String get() {
@@ -102,6 +107,21 @@ public class ServerProperty implements BasicProperty {
     @Override
     public List<String> getMetadataNames() throws OXException {
         return new ArrayList<String>(metadata.keySet());
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder(64);
+        builder.append("ServerProperty [");
+        if (value != null) {
+            builder.append("value=").append(value).append(", ");
+        }
+        builder.append("defined=").append(defined).append(", ");
+        if (metadata != null) {
+            builder.append("metadata=").append(metadata);
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

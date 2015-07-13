@@ -56,6 +56,8 @@ package com.openexchange.java;
  */
 public final class StringBufferStringer implements Stringer {
 
+    private static final long serialVersionUID = -4423710388296255532L;
+
     private final StringBuffer sb;
 
     /**
@@ -64,6 +66,16 @@ public final class StringBufferStringer implements Stringer {
     public StringBufferStringer(final StringBuffer sb) {
         super();
         this.sb = sb;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        int length = sb.length();
+        boolean empty = true;
+        for (int i = 0; i < length; i++) {
+            empty = Strings.isWhitespace(sb.charAt(i));
+        }
+        return empty;
     }
 
     @Override

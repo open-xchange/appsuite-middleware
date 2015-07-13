@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange SMTP
 Bundle-SymbolicName: com.openexchange.smtp
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.api2,
@@ -36,6 +36,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.mail.text,
  com.openexchange.mail.transport,
  com.openexchange.mail.transport.config,
+ com.openexchange.mail.transport.listener,
  com.openexchange.mail.usersetting,
  com.openexchange.mail.utils,
  com.openexchange.mailaccount,

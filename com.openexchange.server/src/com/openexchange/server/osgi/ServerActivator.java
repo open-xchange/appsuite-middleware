@@ -52,6 +52,7 @@ package com.openexchange.server.osgi;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.nio.charset.spi.CharsetProvider;
+import java.rmi.Remote;
 import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -85,6 +86,8 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.auth.Authenticator;
 import com.openexchange.auth.mbean.AuthenticatorMBean;
 import com.openexchange.auth.mbean.impl.AuthenticatorMBeanImpl;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.auth.rmi.impl.RemoteAuthenticatorImpl;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.caching.CacheService;
 import com.openexchange.capabilities.CapabilityService;
@@ -163,6 +166,7 @@ import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
 import com.openexchange.mail.api.MailProvider;
 import com.openexchange.mail.api.unified.UnifiedViewService;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.cache.MailAccessCacheEventListener;
 import com.openexchange.mail.cache.MailSessionEventHandler;
 import com.openexchange.mail.conversion.ICalMailPartDataSource;
@@ -421,6 +425,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(MailProvider.class, new MailProviderServiceTracker(context));
         track(MailcapCommandMap.class, new MailcapServiceTracker(context));
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
+        track(AttachmentTokenService.class, new RegistryCustomizer<AttachmentTokenService>(context, AttachmentTokenService.class));
 
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));
@@ -457,7 +462,7 @@ public final class ServerActivator extends HousekeepingActivator {
         track(DistributedFileManagement.class, new DistributedFilesListener());
 
         // CapabilityService
-        track(CapabilityService.class, new CapabilityRegistrationListener());
+        track(CapabilityService.class, new CapabilityRegistrationListener(context));
 
         // Authenticator
         track(Authenticator.class, new RegistryCustomizer<Authenticator>(context, Authenticator.class));
@@ -482,6 +487,11 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             }
         });
+        {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("RMIName", RemoteAuthenticator.RMI_NAME);
+            registerService(Remote.class, new RemoteAuthenticatorImpl(), props);
+        }
 
         // MetaContributors
         {

@@ -79,6 +79,38 @@ public final class AuthenticatorMBeanImpl extends StandardMBean implements Authe
     }
 
     @Override
+    public boolean isMasterAuthenticationDisabled() throws MBeanException {
+        final Logger logger = LoggerFactory.getLogger(AuthenticatorMBeanImpl.class);
+        try {
+            final Authenticator authenticator = ServerServiceRegistry.getInstance().getService(Authenticator.class);
+            if (null == authenticator) {
+                throw ServiceExceptionCode.absentService(Authenticator.class);
+            }
+            return authenticator.isMasterAuthenticationDisabled();
+        } catch (final Exception e) {
+            logger.error("", e);
+            final String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
+    public boolean isContextAuthenticationDisabled() throws MBeanException {
+        final Logger logger = LoggerFactory.getLogger(AuthenticatorMBeanImpl.class);
+        try {
+            final Authenticator authenticator = ServerServiceRegistry.getInstance().getService(Authenticator.class);
+            if (null == authenticator) {
+                throw ServiceExceptionCode.absentService(Authenticator.class);
+            }
+            return authenticator.isContextAuthenticationDisabled();
+        } catch (final Exception e) {
+            logger.error("", e);
+            final String message = e.getMessage();
+            throw new MBeanException(new Exception(message), message);
+        }
+    }
+
+    @Override
     public void doAuthentication(String login, String password) throws MBeanException {
         final Logger logger = LoggerFactory.getLogger(AuthenticatorMBeanImpl.class);
         try {

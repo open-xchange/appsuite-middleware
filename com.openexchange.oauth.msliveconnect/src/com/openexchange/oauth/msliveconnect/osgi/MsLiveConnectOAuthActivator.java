@@ -91,9 +91,9 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
         org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(MsLiveConnectOAuthActivator.class);
         Services.setServiceLookup(this);
         try {
-            final MsLiveConnectOAuthServiceMetaData boxcomService = new MsLiveConnectOAuthServiceMetaData(this);
-            registerService(OAuthServiceMetaData.class, boxcomService);
-            registerService(Reloadable.class, boxcomService);
+            final MsLiveConnectOAuthServiceMetaData msLiveConnectService = new MsLiveConnectOAuthServiceMetaData(this);
+            registerService(OAuthServiceMetaData.class, msLiveConnectService);
+            registerService(Reloadable.class, msLiveConnectService);
 
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, "msliveconnect");
@@ -106,7 +106,7 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
                             return false;
                         }
 
-                        return boxcomService.isEnabled(session.getUserId(), session.getContextId());
+                        return msLiveConnectService.isEnabled(session.getUserId(), session.getContextId());
                     }
 
                     return true;
@@ -114,7 +114,7 @@ public final class MsLiveConnectOAuthActivator extends HousekeepingActivator {
             }, properties);
 
             getService(CapabilityService.class).declareCapability("msliveconnect");
-            
+
             // Register the update task
             final DefaultUpdateTaskProviderService providerService = new DefaultUpdateTaskProviderService(new RemoveOAuthAccountsTask());
             registerService(UpdateTaskProviderService.class.getName(), providerService);

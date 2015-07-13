@@ -134,7 +134,7 @@ public class UploadEvent {
      *
      * @param affiliationId The affiliation ID.
      */
-    public final void setAffiliationId(final int affiliationId) {
+    public final void setAffiliationId(int affiliationId) {
         this.affiliationId = affiliationId;
     }
 
@@ -143,9 +143,9 @@ public class UploadEvent {
      *
      * @param uploadFile The upload file to add.
      */
-    public final void addUploadFile(final UploadFile uploadFile) {
+    public final void addUploadFile(UploadFile uploadFile) {
         if (null != uploadFile) {
-            final String fieldName = uploadFile.getFieldName();
+            String fieldName = uploadFile.getFieldName();
             List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
             if (null == list) {
                 list = new LinkedList<UploadFile>();
@@ -161,8 +161,8 @@ public class UploadEvent {
      * @param fieldName The field name.
      * @return The upload file associated with specified field name or <code>null</code>
      */
-    public final UploadFile getUploadFileByFieldName(final String fieldName) {
-        final List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
+    public final UploadFile getUploadFileByFieldName(String fieldName) {
+        List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
         return null == list || list.isEmpty() ? null : list.get(0);
     }
 
@@ -172,8 +172,8 @@ public class UploadEvent {
      * @param fieldName The field name.
      * @return The upload files associated with specified field name or <code>null</code>
      */
-    public final List<UploadFile> getUploadFilesByFieldName(final String fieldName) {
-        final List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
+    public final List<UploadFile> getUploadFilesByFieldName(String fieldName) {
+        List<UploadFile> list = uploadFilesByFieldName.get(fieldName);
         return null == list ? null : Collections.unmodifiableList(list);
     }
 
@@ -183,13 +183,13 @@ public class UploadEvent {
      * @param fileName The file name.
      * @return The upload files associated with specified file name.
      */
-    public final List<UploadFile> getUploadFileByFileName(final String fileName) {
+    public final List<UploadFile> getUploadFileByFileName(String fileName) {
         if (null == fileName) {
             return Collections.emptyList();
         }
-        final List<UploadFile> ret = new LinkedList<UploadFile>();
-        for (final List<UploadFile> ufs : uploadFilesByFieldName.values()) {
-            for (final UploadFile uf : ufs) {
+        List<UploadFile> ret = new LinkedList<UploadFile>();
+        for (List<UploadFile> ufs : uploadFilesByFieldName.values()) {
+            for (UploadFile uf : ufs) {
                 if (fileName.equals(uf.getFileName())) {
                     ret.add(uf);
                 }
@@ -236,8 +236,8 @@ public class UploadEvent {
         if (uploadFilesByFieldName.isEmpty()) {
             return Collections.emptyList();
         }
-        final List<UploadFile> ret = new LinkedList<UploadFile>();
-        for (final List<UploadFile> ufs : uploadFilesByFieldName.values()) {
+        List<UploadFile> ret = new LinkedList<UploadFile>();
+        for (List<UploadFile> ufs : uploadFilesByFieldName.values()) {
             ret.addAll(ufs);
         }
         return ret;
@@ -249,7 +249,7 @@ public class UploadEvent {
      * @param fieldName The field's name.
      * @param fieldValue The field's value.
      */
-    public final void addFormField(final String fieldName, final String fieldValue) {
+    public final void addFormField(String fieldName, String fieldValue) {
         formFields.put(fieldName, fieldValue);
     }
 
@@ -268,7 +268,7 @@ public class UploadEvent {
      * @param fieldName The field name.
      * @return The removed form field's value or <code>null</code>.
      */
-    public final String removeFormField(final String fieldName) {
+    public final String removeFormField(String fieldName) {
         return formFields.remove(fieldName);
     }
 
@@ -278,7 +278,7 @@ public class UploadEvent {
      * @param fieldName The field name.
      * @return The value of associated form field or <code>null</code>.
      */
-    public final String getFormField(final String fieldName) {
+    public final String getFormField(String fieldName) {
         return formFields.get(fieldName);
     }
 
@@ -312,7 +312,7 @@ public class UploadEvent {
      *
      * @param action The action string.
      */
-    public final void setAction(final String action) {
+    public final void setAction(String action) {
         this.action = action;
     }
 
@@ -322,7 +322,7 @@ public class UploadEvent {
      * @param name The parameter's name.
      * @return The parameter associated with specified name or <code>null</code> .
      */
-    public final Object getParameter(final String name) {
+    public final Object getParameter(String name) {
         return name == null ? null : parameters.get(name);
     }
 
@@ -332,7 +332,7 @@ public class UploadEvent {
      * @param name The parameter name.
      * @param value The parameter value.
      */
-    public final void setParameter(final String name, final Object value) {
+    public final void setParameter(String name, Object value) {
         if (name != null && value != null) {
             parameters.put(name, value);
         }
@@ -343,7 +343,7 @@ public class UploadEvent {
      *
      * @param name The parameter's name.
      */
-    public final void removeParameter(final String name) {
+    public final void removeParameter(String name) {
         if (name != null) {
             parameters.remove(name);
         }
@@ -353,15 +353,15 @@ public class UploadEvent {
      * Deletes all created temporary files created through this <code>UploadEvent</code> instance and clears upload files.
      */
     public final void cleanUp() {
-        for (final List<UploadFile> uploadFiles : uploadFilesByFieldName.values()) {
-            for (final UploadFile uploadFile : uploadFiles) {
-                final File tmpFile = uploadFile.getTmpFile();
+        for (List<UploadFile> uploadFiles : uploadFilesByFieldName.values()) {
+            for (UploadFile uploadFile : uploadFiles) {
+                File tmpFile = uploadFile.getTmpFile();
                 if (null != tmpFile && tmpFile.exists()) {
                     try {
                         if (!tmpFile.delete()) {
                             LOG.error("Temporary upload file could not be deleted: {}", tmpFile.getName());
                         }
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         LOG.error("Temporary upload file could not be deleted: {}", tmpFile.getName(), e);
                     }
                 }
@@ -378,7 +378,7 @@ public class UploadEvent {
      * @param filePath The file path
      * @return The sole file name.
      */
-    public static final String getFileName(final String filePath) {
+    public static final String getFileName(String filePath) {
         String retval = filePath;
         int pos;
         if ((pos = retval.lastIndexOf('\\')) > -1) {

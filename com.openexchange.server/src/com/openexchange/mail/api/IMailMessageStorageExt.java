@@ -50,8 +50,12 @@
 package com.openexchange.mail.api;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailSortField;
+import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.SearchTerm;
 
 /**
  * {@link IMailMessageStorageExt} - Extends {@link IMailMessageStorage} for mail systems which support to request single header names.
@@ -96,6 +100,18 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
     public MailMessage[] getMessagesByMessageID(String... messageIDs) throws OXException;
 
     /**
+     * Gets the identifiers if the mails whose <i>"Message-ID"</i> header is contained in specified list.
+     * <p>
+     * If any <i>"Message-ID"</i> header cannot be found, <code>null</code> is located at associated index position in returned array.
+     *
+     * @param fullName The folder full name
+     * @param messageIDs The <i>"Message-ID"</i> header list
+     * @return An array providing the looked-up mails with ID and folder set
+     * @throws OXException If mail identifiers could not be returned
+     */
+    public MailMessage[] getMessagesByMessageIDByFolder(String fullName, String... messageIDs) throws OXException;
+
+    /**
      * Searches mails located in given folder. If the search yields no results, the constant {@link #EMPTY_RETVAL} may be returned. This
      * method's purpose is to return filtered mails' headers for a <b>fast</b> list view. Therefore this method's <code>fields</code>
      * parameter should only contain instances of {@link MailField} which are marked as <b>[low cost]</b>. Otherwise pre-filling of returned
@@ -116,6 +132,6 @@ public interface IMailMessageStorageExt extends IMailMessageStorage {
      * @return The desired, pre-filled instances of {@link MailMessage}
      * @throws OXException If mails cannot be returned
      */
-    //public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
+    public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields, String[] headerNames) throws OXException;
 
 }

@@ -66,6 +66,7 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
+import com.openexchange.mail.parser.ContentProvider;
 import com.openexchange.mail.parser.MailMessageHandler;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.utils.MessageUtility;
@@ -242,14 +243,14 @@ public class DumperMessageHandler implements MailMessageHandler {
      * java.lang.String)
      */
     @Override
-    public boolean handleInlineHtml(final String htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+    public boolean handleInlineHtml(final ContentProvider htmlContent, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
         strBuilder.append('\n').append("handleInlineHtml:\n");
         strBuilder.append("ContentType=").append(contentType).append('\n');
         strBuilder.append("Size=").append(size).append('\n');
         strBuilder.append("Filename=").append(fileName).append('\n');
         strBuilder.append("sequenceId=").append(id).append('\n');
 
-        strBuilder.append("Content:\n").append(htmlContent);
+        strBuilder.append("Content:\n").append(htmlContent.getContent());
 
         return true;
     }

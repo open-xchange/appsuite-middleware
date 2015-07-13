@@ -50,10 +50,14 @@
 package com.openexchange.importexport.importers;
 
 import static com.openexchange.importexport.formats.csv.CSVLibrary.getFolderObject;
+import static com.openexchange.importexport.formats.csv.CSVLibrary.readLines;
 import static com.openexchange.importexport.formats.csv.CSVLibrary.transformInputStreamToString;
 import static com.openexchange.java.Autoboxing.I;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,7 +67,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
+import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.Generic;
@@ -87,7 +94,10 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.formats.csv.ContactFieldMapper;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.CharsetDetector;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.Collections;
@@ -163,6 +173,7 @@ public class CSVContactImporter extends AbstractImporter {
         if (!canImport(sessObj, format, folders, optionalParams)) {
             throw ImportExportExceptionCodes.CANNOT_IMPORT.create(folder, format);
         }
+        int limit = getLimit(sessObj);
         List<List<String>> csv = null;
         // get header fields
         List<String> fields;
@@ -171,7 +182,9 @@ public class CSVContactImporter extends AbstractImporter {
             try {
                 input = is.markSupported() ? is : Streams.asInputStream(is);
                 input.mark(Integer.MAX_VALUE);
-                csv = checkFields(input);
+                Charset charset = getCharsetFromParameters(optionalParams);
+                int maxLines = 0 < limit ? limit + 2 : -1;
+                csv = null != charset ? parse(input, charset, maxLines) : parse(input, maxLines);
                 if (csv == null) {
                     throw ImportExportExceptionCodes.NO_VALID_CSV_COLUMNS.create();
                 }
@@ -204,7 +217,6 @@ public class CSVContactImporter extends AbstractImporter {
             }
         }
 
-        int limit = getLimit(sessObj);
         int count = 0;
         // Build a list of contacts to insert
         final List<Contact> contacts = new ArrayList<Contact>(intentions.size());
@@ -410,6 +422,100 @@ public class CSVContactImporter extends AbstractImporter {
         }
     }
 
+    /**
+     * Parses comma separated values from the supplied input stream and selects the best matching contact mapper based on the input.
+     *
+     * @param input The input stream to parse
+     * @param charset A fixed (client-defined) charset to use
+     * @param maxLines The maximum number of lines to parse, or -1 to read all available lines
+     * @return The line-wise parsed input, or <code>null</code> if no appropriate mapper was detected
+     */
+    private List<List<String>> parse(InputStream input, Charset charset, int maxLines) throws OXException, IOException {
+        ThresholdFileHolder fileHolder = null;
+        try {
+            fileHolder = new ThresholdFileHolder(new FileHolder(input, -1, null, null));
+            /*
+             * parse the first line using a fixed (client-defined) charset
+             */
+            String firstLine = readLines(fileHolder.getStream(), charset, false, 1);
+            CSVParser csvParser = getCSVParser(determineDelimiter(firstLine));
+            List<List<String>> parsedFirstLine = csvParser.parse(firstLine);
+            if (null == parsedFirstLine || 0 == parsedFirstLine.size() || null == parsedFirstLine.get(0)) {
+                throw ImportExportExceptionCodes.NO_CONTENT.create();
+            }
+            /*
+             * remember the best matching mapper & parse the whole file
+             */
+            currentMapper = chooseMapper(getMappers(), parsedFirstLine.get(0));
+            if (null == currentMapper) {
+                return null;
+            }
+            return csvParser.parse(readLines(fileHolder.getStream(), charset, false, maxLines));
+        } finally {
+            Streams.close(fileHolder);
+        }
+    }
+
+    /**
+     * Parses comma separated values from the supplied input stream and selects the best matching contact mapper based on the input.
+     *
+     * @param input The input stream to parse
+     * @param maxLines The maximum number of lines to parse, or -1 to read all available lines
+     * @return The line-wise parsed input, or <code>null</code> if no appropriate mapper was detected
+     */
+    private List<List<String>> parse(InputStream input, int maxLines) throws OXException, IOException {
+        ThresholdFileHolder fileHolder = null;
+        try {
+            fileHolder = new ThresholdFileHolder(new FileHolder(input, -1, null, null));
+            /*
+             * try to parse using the mapper's native charset as well as the auto-detected one
+             */
+            Charset detectedCharset = null;
+            String detectedCharsetName = CharsetDetector.detectCharset(fileHolder.getStream(), null, true);
+            if (null != detectedCharsetName) {
+                detectedCharset = Charsets.forName(detectedCharsetName);
+            }
+            /*
+             * determine the overall best matching mapper
+             */
+            int maxMappedFields = 0;
+            CSVParser bestParser = null;
+            ContactFieldMapper bestMapper = null;
+            Charset bestCharset = null;
+            Map<Charset, List<ContactFieldMapper>> mappersByCharset = getMappersByCharset(getMappers(), detectedCharset);
+            for (Entry<Charset, List<ContactFieldMapper>> entry : mappersByCharset.entrySet()) {
+                /*
+                 * parse the first line & choose an appropriate mapper
+                 */
+                String firstLine = readLines(fileHolder.getStream(), entry.getKey(), false, 1);
+                CSVParser csvParser = getCSVParser(determineDelimiter(firstLine));
+                List<List<String>> parsedFirstLine = csvParser.parse(firstLine);
+                if (null == parsedFirstLine || 0 == parsedFirstLine.size() || null == parsedFirstLine.get(0)) {
+                    continue;
+                }
+                for (ContactFieldMapper mapper : entry.getValue()) {
+                    int mappedFields = getMappedFields(mapper, parsedFirstLine.get(0));
+                    if (mappedFields > maxMappedFields) {
+                        maxMappedFields = mappedFields;
+                        bestMapper = mapper;
+                        bestParser = csvParser;
+                        bestCharset = entry.getKey();
+                    }
+                }
+            }
+            /*
+             * remember the best matching mapper & parse the whole file
+             */
+            currentMapper = bestMapper;
+            if (null == currentMapper) {
+                return null;
+            }
+            return bestParser.parse(readLines(fileHolder.getStream(), bestCharset, false, maxLines));
+        } finally {
+            Streams.close(fileHolder);
+        }
+    }
+
     public List<List<String>> checkFields(final InputStream input) throws OXException, IOException {
         currentMapper = null;
         int highestAmountOfMappedFields = 0;
@@ -497,10 +603,16 @@ public class CSVContactImporter extends AbstractImporter {
         return currentMapper;
     }
 
-    protected CSVParser getCSVParser() {
+    protected static CSVParser getCSVParser() {
         final CSVParser result = new CSVParser();
         result.setTolerant(true);
         return result;
+    }
+
+    protected static CSVParser getCSVParser(char delimiter) {
+        CSVParser csvParser = getCSVParser();
+        csvParser.setCellDelimiter(delimiter);
+        return csvParser;
     }
 
     protected boolean isResponsibleFor(Format f) {
@@ -509,6 +621,134 @@ public class CSVContactImporter extends AbstractImporter {
 
     public String getEncoding() {
         return getCurrentMapper().getEncoding();
+    }
+
+    /**
+     * Gets a map holding contact field mappers per charset they should operate on.
+     *
+     * @param mappers The mappers
+     * @param detectedCharset A static detected charset to include in the mapping, or <code>null</code> if not used
+     * @return A map holding the contact field mappers per charset they should operate on.
+     */
+    private static Map<Charset, List<ContactFieldMapper>> getMappersByCharset(List<ContactFieldMapper> mappers, Charset detectedCharset) {
+        Map<Charset, List<ContactFieldMapper>> mappersByCharset = new HashMap<Charset, List<ContactFieldMapper>>();
+        if (null != detectedCharset) {
+            mappersByCharset.put(detectedCharset, new ArrayList<ContactFieldMapper>(mappers));
+        }
+        for (ContactFieldMapper mapper : mappers) {
+            Charset key = Charsets.forName(mapper.getEncoding());
+            if (null != key) {
+                List<ContactFieldMapper> value = mappersByCharset.get(key);
+                if (null == value) {
+                    value = new ArrayList<ContactFieldMapper>();
+                    mappersByCharset.put(key, value);
+                }
+                value.add(mapper);
+            }
+        }
+        return mappersByCharset;
+    }
+
+    /**
+     * Selects the contact field mapper that supports most of the fields present in the supplied header list from the .csv file.
+     *
+     * @param mappers The possible mappers
+     * @param csvHeaders The header names from the .csv file
+     * @return The best matching mapper, or <code>null</code> if not a single mapped field is supported by any mapper
+     */
+    private static ContactFieldMapper chooseMapper(List<ContactFieldMapper> mappers, List<String> csvHeaders) {
+        ContactFieldMapper bestMapper = null;
+        int maxMappedFields = 0;
+        for (ContactFieldMapper mapper : mappers) {
+            int mappedFields = getMappedFields(mapper, csvHeaders);
+            if (maxMappedFields < mappedFields) {
+                bestMapper = mapper;
+                maxMappedFields = mappedFields;
+            }
+        }
+        return bestMapper;
+    }
+
+    /**
+     * Gets the number of mapped fields the supplied mapper supports from the supplied header list from the .csv file.
+     *
+     * @param mapper The mapper
+     * @param csvHeaders The header names from the .csv file
+     * @return The number of fields supported by the mapper
+     */
+    private static int getMappedFields(ContactFieldMapper mapper, List<String> csvHeaders) {
+        int mappedFields = 0;
+        for (String header : csvHeaders) {
+            if (null != mapper.getFieldByName(header)) {
+                mappedFields++;
+            }
+        }
+        return mappedFields;
+    }
+
+    /**
+     * Checks which delimiter is most likely used to separate the fields in the supplied csv string.
+     *
+     * @param csv The csv string to determine the delimiter for; only the first line is taken into account
+     * @return The delimiter character, default to <code>,</code>
+     */
+    private static char determineDelimiter(String csv) {
+        int firstNewlineIndex = csv.indexOf('\n');
+        String probe = -1 == firstNewlineIndex ? csv : csv.substring(0, firstNewlineIndex);
+        char delimiter = ',';
+        int maxOccurrences = 0;
+        for (char c : new char[] { ',', ';', '\t' }) {
+            int occurrences = countOccurrences(probe, c);
+            if (occurrences > maxOccurrences) {
+                maxOccurrences = occurrences;
+                delimiter = c;
+            }
+        }
+        return delimiter;
+    }
+
+    /**
+     * Counts the number of occurrences of a specific character in the supplied input string.
+     *
+     * @param input The string to count the occurrences in
+     * @param c The character to count
+     * @return The number of occorrences
+     */
+    private static int countOccurrences(String input, char c) {
+        int count = 0;
+        if (null != input) {
+            for (int i = 0; i < input.length(); i++) {
+                if (c == input.charAt(i)) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Extracts a client-defined charset if one is set in the supplied optional parameters.
+     *
+     * @param optionalParams The optional parameters from the request
+     * @return The charset, or <code>null</code> if none is defined
+     */
+    private static Charset getCharsetFromParameters(Map<String, String[]> optionalParams) throws OXException {
+        if (null != optionalParams && 0 < optionalParams.size()) {
+            String[] value = optionalParams.get("charset");
+            if (null != value && 1 == value.length) {
+                String charsetName = value[0];
+                if (false == Strings.isEmpty(charsetName) && false == "auto".equalsIgnoreCase(charsetName)) {
+                    try {
+                        return Charsets.forName(value[0]);
+                    } catch (IllegalCharsetNameException e) {
+                        throw ImportExportExceptionCodes.UNSUPPORTED_CHARACTER_ENCODING.create(charsetName);
+                    } catch (UnsupportedCharsetException e) {
+                        throw ImportExportExceptionCodes.UNSUPPORTED_CHARACTER_ENCODING.create(charsetName);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

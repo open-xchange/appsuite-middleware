@@ -57,6 +57,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.itip.ITipAnalysisWriter;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.calendar.itip.ITipAnalysis;
+import com.openexchange.calendar.itip.ITipAnalyzerService;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -67,8 +69,8 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class AnalyzeAction extends AbstractITipAction {
 
-    public AnalyzeAction(ServiceLookup services) {
-        super(services);
+    public AnalyzeAction(ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing) {
+        super(services, analyzerListing);
     }
 
     @Override

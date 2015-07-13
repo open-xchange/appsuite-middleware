@@ -109,7 +109,7 @@ public final class MailForwardTest extends AbstractMailTest {
             mailAccess.connect();
             try {
 
-                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(new MailMessage[] { sourceMail });
+                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(new MailMessage[] { sourceMail }, false);
 
                 {
                     /*
@@ -233,7 +233,7 @@ public final class MailForwardTest extends AbstractMailTest {
             mailAccess.connect();
             try {
 
-                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(new MailMessage[] { sourceMail });
+                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(new MailMessage[] { sourceMail }, false);
 
                 {
                     final UserSettingMail usm = UserSettingMailStorage.getInstance().getUserSettingMail(getUser(), ctx.getContextId());
@@ -308,7 +308,7 @@ public final class MailForwardTest extends AbstractMailTest {
                         }
                     }
                     forwardPrefix = forwardPrefix.replaceFirst("#SUBJECT#", sourceMail.getSubject());
-                    
+
                     final String text = content.toString().replaceAll("(\r?\n)> ", "$1");
                     assertTrue("Missing forward prefix:\n" + forwardPrefix, text.indexOf(forwardPrefix) > 0);
                 }
@@ -348,7 +348,7 @@ public final class MailForwardTest extends AbstractMailTest {
                     uids,
                     new MailField[] { MailField.FULL });
 
-                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(fetchedMails);
+                final MailMessage forwardMail = mailAccess.getLogicTools().getFowardMessage(fetchedMails, false);
 
                 assertTrue("Unexpected content type: " + forwardMail.getContentType().toString(), forwardMail.getContentType().isMimeType(
                     MimeTypes.MIME_MULTIPART_MIXED));

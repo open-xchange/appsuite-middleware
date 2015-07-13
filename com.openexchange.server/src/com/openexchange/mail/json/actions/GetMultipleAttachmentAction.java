@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Locale;
 import javax.mail.MessageRemovedException;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
@@ -68,9 +69,12 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.groupware.i18n.MailStrings;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -86,8 +90,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "folder", description = "The folder identifier."),
     @Parameter(name = "id", description = "Object ID of the mail which contains the attachments."),
-    @Parameter(name = "attachment", description = "A comma-separated list of IDs of the requested attachments")
-}, responseDescription = "The raw byte data of the ZIP file.")
+    @Parameter(name = "attachment", description = "A comma-separated list of IDs of the requested attachments") }, responseDescription = "The raw byte data of the ZIP file.")
 public final class GetMultipleAttachmentAction extends AbstractMailAction {
 
     /**
@@ -118,11 +121,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                 /*
                  * Set Content-Type and Content-Disposition header
                  */
-                final String fileName;
-                {
-                    final String subject = mailInterface.getMessage(folderPath, uid).getSubject();
-                    fileName = new StringBuilder(subject).append(".zip").toString();
-                }
+                final String fullFileName = getFileName(req.getSession().getUser().getLocale(), mailInterface.getMessage(folderPath, uid));
                 /*
                  * We are supposed to offer attachment for download. Therefore enforce application/octet-stream and attachment disposition.
                  */
@@ -133,7 +132,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                             try {
                                 final StringBuilder sb = new StringBuilder(512);
                                 sb.append("attachment");
-                                DownloadUtility.appendFilenameParameter(fileName, "application/zip", ajaxRequestData.getUserAgent(), sb);
+                                DownloadUtility.appendFilenameParameter(fullFileName, "application/zip", ajaxRequestData.getUserAgent(), sb);
                                 ajaxRequestData.setResponseHeader("Content-Disposition", sb.toString());
                                 createZipArchive(folderPath, uid, sequenceIds, mailInterface, ajaxRequestData.optOutputStream());
                                 // Streamed
@@ -162,7 +161,7 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
                  * Parameterize file holder
                  */
                 req.getRequest().setFormat("file");
-                fileHolder.setName(fileName);
+                fileHolder.setName(fullFileName);
                 // fileHolder.setContentType("application/octet-stream");
                 fileHolder.setContentType("application/zip");
                 return new AJAXRequestResult(fileHolder, "file");
@@ -183,6 +182,22 @@ public final class GetMultipleAttachmentAction extends AbstractMailAction {
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Returns the filename for the attachment
+     *
+     * @param req - Mailrequest to g
+     * @param userLocale - Locale of the user to get correct subject translation in case subject is not set
+     * @return String - file name
+     */
+    protected String getFileName(final Locale userLocale, final MailMessage message) {
+        String fileName = message.getSubject();
+        if (fileName == null) { // in case no subject was set
+            fileName = StringHelper.valueOf(userLocale).getString(MailStrings.DEFAULT_SUBJECT);
+        }
+
+        return new StringBuilder(fileName).append(".zip").toString();
     }
 
     private void createZipArchive(final String folderPath, final String uid, final String[] sequenceIds, final MailServletInterface mailInterface, OutputStream out) throws OXException {

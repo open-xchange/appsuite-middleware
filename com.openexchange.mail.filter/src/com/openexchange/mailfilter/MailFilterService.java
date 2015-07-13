@@ -64,7 +64,7 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface MailFilterService {
 
     public enum FilterType {
-        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), custom("");
+        antispam("antispam"), autoforward("autoforward"), vacation("vacation"), all(""), custom("custom");
 
         private final String flag;
 
@@ -75,11 +75,11 @@ public interface MailFilterService {
         public String getFlag() {
             return flag;
         }
-    };
-    
+    }
+
     public enum DayOfWeek {
         sunday, monday, tuesday, wednesday, thursday, friday, saturday
-    };
+    }
 
     /**
      * Create a new mail filter rule and return it's UID.

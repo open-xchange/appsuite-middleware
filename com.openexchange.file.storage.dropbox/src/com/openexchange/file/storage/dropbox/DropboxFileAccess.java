@@ -69,17 +69,13 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageUtility;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
-import com.openexchange.file.storage.search.AndTerm;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.OrTerm;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Streams;
@@ -93,7 +89,7 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider {
+public class DropboxFileAccess extends AbstractDropboxAccess implements ThumbnailAware, FileStorageSequenceNumberProvider, FileStorageVersionedFileAccess {
 
     private final DropboxAccountAccess accountAccess;
     private final int userId;
@@ -168,19 +164,26 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             if (entry.isDeleted) {
                 throw DropboxExceptionCodes.NOT_FOUND.create(path);
             }
-            return new DropboxFile(entry, userId);
+            DropboxFile file = new DropboxFile(entry, userId);
+            //TODO fetching all revisions just to get the number of versions is quite expensive;
+            //     maybe we can introduce sth like "-1" for "unknown number of versions"
+            List<Entry> revisions = dropboxAPI.revisions(path, 0);
+            if (null != revisions) {
+                file.setNumberOfVersions(revisions.size());
+            }
+            return file;
         } catch (Exception e) {
             throw handle(e, path);
         }
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (FileStorageFileAccess.NEW == file.getId()) {
             /*
              * create new, empty file ("touch")
@@ -190,15 +193,16 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 Entry entry = dropboxAPI.putFile(path, Streams.EMPTY_INPUT_STREAM, 0, null, null);
                 file.setId(entry.fileName());
                 file.setVersion(entry.rev);
+                return new IDTuple(toId(entry.path), entry.fileName());
             } catch (Exception e) {
                 throw handle(e, path);
             }
         } else {
+            String path = toPath(file.getFolderId(), file.getId());
             /*
-             * only rename possible
+             * rename?
              */
             if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
-                String path = toPath(file.getFolderId(), file.getId());
                 String toPath = toPath(file.getFolderId(), file.getFileName());
                 if (false == path.equals(toPath)) {
                     try {
@@ -210,11 +214,28 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                         Entry entry = dropboxAPI.move(path, toPath);
                         file.setId(entry.fileName());
                         file.setVersion(entry.rev);
+                        return new IDTuple(toId(entry.parentPath()), entry.fileName());
                     } catch (Exception e) {
                         throw handle(e, path);
                     }
                 }
             }
+            /*
+             * restore version?
+             */
+            if (null == modifiedFields || modifiedFields.contains(Field.VERSION)) {
+                if (null != file.getVersion()) {
+                    try {
+                        Entry entry = dropboxAPI.restore(path, file.getVersion());
+                        file.setId(entry.fileName());
+                        file.setVersion(entry.rev);
+                        return new IDTuple(toId(entry.parentPath()), entry.fileName());
+                    } catch (Exception e) {
+                        throw handle(e, path);
+                    }
+                }
+            }
+            return new IDTuple(file.getFolderId(), file.getId());
         }
     }
 
@@ -281,12 +302,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         String path = FileStorageFileAccess.NEW == file.getId() ? null : toPath(file.getFolderId(), file.getId());
         try {
             final long fileSize = file.getFileSize();
@@ -302,12 +323,13 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                     null);
                 file.setId(entry.fileName());
                 file.setVersion(entry.rev);
+                return new IDTuple(toId(entry.path), entry.fileName());
             } else {
                 // Update, adjust metadata as needed
                 entry = dropboxAPI.putFileOverwrite(path, data, length, null);
                 file.setId(entry.fileName());
                 file.setVersion(entry.rev);
-                saveFileMetadata(file, sequenceNumber);
+                return saveFileMetadata(file, sequenceNumber);
             }
         } catch (Exception e) {
             throw handle(e, path);
@@ -384,16 +406,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     }
 
     @Override
-    public void unlock(final String folderId, final String id) throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void lock(final String folderId, final String id, final long diff) throws OXException {
-        // Nope
-    }
-
-    @Override
     public void touch(final String folderId, final String id) throws OXException {
         exists(folderId, id, CURRENT_VERSION);
     }
@@ -449,22 +461,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id) throws OXException {
-        String path = toPath(folderId, id);
-        try {
-            final List<Entry> revisions = dropboxAPI.revisions(path, 0);
-            final List<File> files = new ArrayList<File>(revisions.size());
-            for (final Entry revisionEntry : revisions) {
-                files.add(new DropboxFile(revisionEntry, userId));
-            }
-            return new FileTimedResult(files);
-        } catch (Exception e) {
-            throw handle(e, path);
-        }
+        return getVersions(folderId, id, null);
     }
 
     @Override
     public TimedResult<File> getVersions(final String folderId, final String id, final List<Field> fields) throws OXException {
-        return getVersions(folderId, id);
+        return getVersions(folderId, id, fields, null, SortDirection.DEFAULT);
     }
 
     @Override
@@ -473,8 +475,11 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
         try {
             final List<Entry> revisions = dropboxAPI.revisions(path, 0);
             final List<File> files = new ArrayList<File>(revisions.size());
-            for (final Entry revisionEntry : revisions) {
-                files.add(new DropboxFile(revisionEntry, userId));
+            for (int i = 0; i < revisions.size(); i++) {
+                DropboxFile file = new DropboxFile(revisions.get(i), userId);
+                file.setNumberOfVersions(revisions.size());
+                file.setIsCurrentVersion(0 == i);
+                files.add(file);
             }
             // Sort collection
             sort(files, sort, order);
@@ -487,12 +492,45 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public TimedResult<File> getDocuments(final List<IDTuple> ids, final List<Field> fields) throws OXException {
         try {
-            final List<File> files = new ArrayList<File>(ids.size());
-            for (final IDTuple id : ids) {
-                String path = toPath(id.getFolder(), id.getId());
-                final Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
-                if (!entry.isDeleted && !entry.isDir) {
-                    files.add(new DropboxFile(entry, userId));
+            List<File> files = new ArrayList<File>(ids.size());
+            Map<String, List<String>> filesPerFolder = getFilesPerFolder(ids);
+            if (1 == filesPerFolder.size() && 2 < filesPerFolder.values().iterator().next().size()) {
+                /*
+                 * seems like a "list" request for multiple items from one folder, get metadata via common folder
+                 */
+                String folderID  = filesPerFolder.keySet().iterator().next();
+                String path = toPath(folderID);
+                Entry directoryEntry = dropboxAPI.metadata(path, 0, null, true, null);
+                if (false == directoryEntry.isDir) {
+                    throw DropboxExceptionCodes.NOT_A_FOLDER.create(folderID);
+                }
+                for (IDTuple id : ids) {
+                    for (Entry entry : directoryEntry.contents) {
+                        if (id.getId().equals(entry.fileName()) && false == entry.isDeleted && false == entry.isDir) {
+                            files.add(new DropboxFile(entry, userId));
+                            break;
+                        }
+                    }
+                }
+                return new FileTimedResult(files);
+            } else {
+                /*
+                 * load metadata one-by-one
+                 */
+                for (IDTuple id : ids) {
+                    String path = toPath(id.getFolder(), id.getId());
+                    try {
+                        Entry entry = dropboxAPI.metadata(path, 1, null, false, null);
+                        if (!entry.isDeleted && !entry.isDir) {
+                            files.add(new DropboxFile(entry, userId));
+                        }
+                    } catch (Exception e) {
+                        // skip non-existing file in result
+                        OXException x = handle(e, path);
+                        if (false == DropboxExceptionCodes.NOT_FOUND.equals(x)) {
+                            throw x;
+                        }
+                    }
                 }
             }
             return new FileTimedResult(files);
@@ -511,64 +549,6 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     @Override
     public Delta<File> getDelta(final String folderId, final long updateSince, final List<Field> fields, final Field sort, final SortDirection order, final boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
-    }
-
-    @Override
-    public SearchIterator<File> search(final List<String> folderIds, final SearchTerm<?> searchTerm, List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        /*
-         * search in one or all folders only
-         */
-        if (null != folderIds && 1 != folderIds.size()) {
-            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Can only search in one or all folders");
-        }
-        String folderID = null == folderIds ? null : folderIds.get(0);
-        /*
-         * search by one or more filename patterns
-         */
-        List<String> patterns = extractPatterns(searchTerm);
-        List<File> files = new LinkedList<File>();
-        for (String pattern : patterns) {
-            files.addAll(searchInFolder(folderID, pattern));
-        }
-        return getSearchIterator(files, sort, order, start, end);
-    }
-
-    private static List<String> extractPatterns(SearchTerm<?> searchTerm) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm)) {
-            /*
-             * single filename pattern
-             */
-            return Collections.singletonList(((FileNameTerm) searchTerm).getPattern());
-        } else if (OrTerm.class.isInstance(searchTerm)) {
-            /*
-             * try multiple filename patterns
-             */
-            List<SearchTerm<?>> nestedTerms = ((OrTerm) searchTerm).getPattern();
-            List<String> patterns = new ArrayList<String>(nestedTerms.size());
-            for (SearchTerm<?> nestedTerm : nestedTerms) {
-                if (FileNameTerm.class.isInstance(nestedTerm)) {
-                    patterns.add(((FileNameTerm) nestedTerm).getPattern());
-                } else {
-                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
-                }
-            }
-            return patterns;
-        } else if (AndTerm.class.isInstance(searchTerm)) {
-            /*
-             * construct single filename pattern
-             */
-            List<SearchTerm<?>> nestedTerms = ((AndTerm) searchTerm).getPattern();
-            StringBuilder patternBuilder = new StringBuilder();
-            for (SearchTerm<?> nestedTerm : nestedTerms) {
-                if (FileNameTerm.class.isInstance(nestedTerm)) {
-                    patternBuilder.append(((FileNameTerm) nestedTerm).getPattern()).append(' ');
-                } else {
-                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
-                }
-            }
-            return Collections.singletonList(patternBuilder.toString().trim());
-        }
-        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override
@@ -735,6 +715,25 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
             hash = 31 * hash + entry.hash.charAt(i);
         }
         return hash;
+    }
+
+    /**
+     * Maps the file identifiers of the supplied ID tuples to their parent folder identifiers.
+     *
+     * @param ids The ID tuples to map
+     * @return The mapped identifiers
+     */
+    private static Map<String, List<String>> getFilesPerFolder(List<IDTuple> ids) {
+        Map<String, List<String>> filesPerFolder = new HashMap<String, List<String>>();
+        for (IDTuple id : ids) {
+            List<String> files = filesPerFolder.get(id.getFolder());
+            if (null == files) {
+                files = new ArrayList<String>();
+                filesPerFolder.put(id.getFolder(), files);
+            }
+            files.add(id.getId());
+        }
+        return filesPerFolder;
     }
 
 }

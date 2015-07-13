@@ -72,15 +72,10 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileDelta;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileTimedResult;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
-import com.openexchange.file.storage.search.AndTerm;
-import com.openexchange.file.storage.search.FileNameTerm;
-import com.openexchange.file.storage.search.OrTerm;
-import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.session.Session;
@@ -189,12 +184,12 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
-        saveFileMetadata(file, sequenceNumber, null);
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, null);
     }
 
     @Override
-    public void saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME)) {
             try {
                 Drive drive = googleDriveAccess.getDrive(session);
@@ -203,7 +198,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 modFile.setId(file.getId());
                 modFile.setTitle(file.getFileName());
 
-                drive.files().patch(file.getId(), modFile).execute();
+                modFile = drive.files().patch(file.getId(), modFile).execute();
+                return new IDTuple(file.getFolderId(), modFile.getId());
             } catch (final HttpResponseException e) {
                 throw handleHttpResponseError(file.getId(), e);
             } catch (final IOException e) {
@@ -212,6 +208,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
+        return new IDTuple(file.getFolderId(), file.getId());
     }
 
     @Override
@@ -371,12 +368,12 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
-        saveDocument(file, data, sequenceNumber, null);
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber) throws OXException {
+        return saveDocument(file, data, sequenceNumber, null);
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
         String id = file.getId();
         try {
             Drive drive = googleDriveAccess.getDrive(session);
@@ -394,6 +391,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 uploader.setDirectUploadEnabled(true);
                 String newId = insert.execute().getId();
                 file.setId(newId);
+                return new IDTuple(folderId, newId);
             } else {
                 // Update
                 com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
@@ -406,7 +404,8 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 Drive.Files.Update update = drive.files().update(id, fileMetadata, new InputStreamContent(file.getFileMIMEType(), data));
                 MediaHttpUploader uploader = update.getMediaHttpUploader();
                 uploader.setDirectUploadEnabled(true);
-                update.execute();
+                fileMetadata = update.execute();
+                return new IDTuple(folderId, fileMetadata.getId());
             }
         } catch (final HttpResponseException e) {
             throw handleHttpResponseError(id, e);
@@ -503,44 +502,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (final RuntimeException e) {
             throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-    }
-
-    @Override
-    public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
-        /*
-         * No versioning support
-         */
-        for (final String version : versions) {
-            if (version != CURRENT_VERSION) {
-                throw GoogleDriveExceptionCodes.VERSIONING_NOT_SUPPORTED.create();
-            }
-        }
-        try {
-            Drive drive = googleDriveAccess.getDrive(session);
-            // Determine folder identifier
-            String fid = toGoogleDriveFolderId(folderId);
-            drive.children().delete(fid, id).execute();
-            return new String[0];
-        } catch (final HttpResponseException e) {
-            if (404 == e.getStatusCode()) {
-                return new String[0];
-            }
-            throw handleHttpResponseError(null, e);
-        } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public void unlock(String folderId, String id) throws OXException {
-        // Nope
-    }
-
-    @Override
-    public void lock(String folderId, String id, long diff) throws OXException {
-        // Nope
     }
 
     @Override
@@ -664,41 +625,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     }
 
     @Override
-    public TimedResult<File> getVersions(String folderId, String id) throws OXException {
-        try {
-            Drive drive = googleDriveAccess.getDrive(session);
-            List<File> files = Collections.<File> singletonList(new GoogleDriveFile(folderId, id, userId, getRootFolderId()).parseGoogleDriveFile(drive.files().get(id).execute()));
-            return new FileTimedResult(files);
-        } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
-        } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields) throws OXException {
-        return getVersions(folderId, id);
-    }
-
-    @Override
-    public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
-        try {
-            Drive drive = googleDriveAccess.getDrive(session);
-            List<File> files = Collections.<File> singletonList(new GoogleDriveFile(folderId, id, userId, getRootFolderId()).parseGoogleDriveFile(drive.files().get(id).execute()));
-            return new FileTimedResult(files);
-        } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
-        } catch (final IOException e) {
-            throw GoogleDriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw GoogleDriveExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    @Override
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
@@ -736,89 +662,6 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
         return new FileDelta(EMPTY_ITER, EMPTY_ITER, EMPTY_ITER, 0L);
-    }
-
-    @Override
-    public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, final SortDirection order, int start, int end) throws OXException {
-        if (null != folderIds && 1 != folderIds.size()) {
-            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create("Can only search in one or all folders");
-        }
-
-        //
-        // https://developers.google.com/drive/web/search-parameters
-        //
-
-        String folderID = null == folderIds ? null : folderIds.get(0);
-        /*
-         * search by one or more filename patterns
-         */
-        List<String> patterns = extractPatterns(searchTerm);
-        List<File> files = new LinkedList<File>();
-        for (String pattern : patterns) {
-            files.addAll(searchByFileNamePattern(pattern, folderID));
-        }
-
-        // Sort collection
-        sort(files, sort, order);
-
-        // Start, end...
-        if ((start != NOT_SET) && (end != NOT_SET)) {
-            final int size = files.size();
-            if ((start) > size) {
-                /*
-                 * Return empty iterator if start is out of range
-                 */
-                return SearchIteratorAdapter.emptyIterator();
-            }
-            /*
-             * Reset end index if out of range
-             */
-            int toIndex = end;
-            if (toIndex >= size) {
-                toIndex = size;
-            }
-            files = files.subList(start, toIndex);
-        }
-
-        return new SearchIteratorAdapter<File>(files.iterator(), files.size());
-    }
-
-    private static List<String> extractPatterns(SearchTerm<?> searchTerm) throws OXException {
-        if (FileNameTerm.class.isInstance(searchTerm)) {
-            /*
-             * single filename pattern
-             */
-            return Collections.singletonList(((FileNameTerm) searchTerm).getPattern());
-        } else if (OrTerm.class.isInstance(searchTerm)) {
-            /*
-             * try multiple filename patterns
-             */
-            List<SearchTerm<?>> nestedTerms = ((OrTerm) searchTerm).getPattern();
-            List<String> patterns = new ArrayList<String>(nestedTerms.size());
-            for (SearchTerm<?> nestedTerm : nestedTerms) {
-                if (FileNameTerm.class.isInstance(nestedTerm)) {
-                    patterns.add(((FileNameTerm) nestedTerm).getPattern());
-                } else {
-                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
-                }
-            }
-            return patterns;
-        } else if (AndTerm.class.isInstance(searchTerm)) {
-            /*
-             * construct single filename pattern
-             */
-            List<SearchTerm<?>> nestedTerms = ((AndTerm) searchTerm).getPattern();
-            StringBuilder patternBuilder = new StringBuilder();
-            for (SearchTerm<?> nestedTerm : nestedTerms) {
-                if (FileNameTerm.class.isInstance(nestedTerm)) {
-                    patternBuilder.append(((FileNameTerm) nestedTerm).getPattern()).append(' ');
-                } else {
-                    throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
-                }
-            }
-            return Collections.singletonList(patternBuilder.toString().trim());
-        }
-        throw FileStorageExceptionCodes.SEARCH_TERM_NOT_SUPPORTED.create(searchTerm.getClass().getSimpleName());
     }
 
     @Override

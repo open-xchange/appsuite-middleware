@@ -50,7 +50,6 @@
 package com.openexchange.contact.storage.rdb.sql;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -66,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
@@ -496,10 +494,13 @@ public class Executor {
      */
     public DistListMember[] select(final Connection connection, final Table table, final int contextID, final int objectID,
     		final DistListMemberField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
-            .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=?;");
+            .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append("=? ")
+            .append("ORDER BY CONCAT_WS('',").append(Mappers.DISTLIST.get(DistListMemberField.DISPLAY_NAME).getColumnLabel()).append(',')
+            .append(Mappers.DISTLIST.get(DistListMemberField.MAIL).getColumnLabel()).append(") ASC;")
+        ;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         final List<DistListMember> members = new ArrayList<DistListMember>();
@@ -531,11 +532,14 @@ public class Executor {
      */
     public Map<Integer, List<DistListMember>> select(final Connection connection, final Table table, final int contextID,
     		final int[] objectIDs, final DistListMemberField[] fields) throws SQLException, OXException {
-        final StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT ").append(Mappers.DISTLIST.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
             .append(Mappers.DISTLIST.get(DistListMemberField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
             .append(Mappers.DISTLIST.get(DistListMemberField.PARENT_CONTACT_ID).getColumnLabel()).append(" IN (")
-            .append(Tools.toCSV(objectIDs)).append(");");
+            .append(Tools.toCSV(objectIDs)).append(") ORDER BY CONCAT_WS('',")
+            .append(Mappers.DISTLIST.get(DistListMemberField.DISPLAY_NAME).getColumnLabel()).append(',')
+            .append(Mappers.DISTLIST.get(DistListMemberField.MAIL).getColumnLabel()).append(") ASC;")
+        ;
         PreparedStatement stmt = null;
         ResultSet resultSet = null;
         final Map<Integer, List<DistListMember>> members = new HashMap<Integer, List<DistListMember>>();

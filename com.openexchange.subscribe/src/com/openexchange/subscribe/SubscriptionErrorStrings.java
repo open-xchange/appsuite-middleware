@@ -89,4 +89,7 @@ public class SubscriptionErrorStrings implements LocalizableStrings {
     // It is in the provider's responsibility. For this reason, the subscription cannot be completed.
     public static final String ABORT_IDENTITY_CONFIRMATION_DISPLAY = "The service provider asked for an identity confirmation. This happens for some accounts and cannot fixed by us. It is in the provider's responsibility. For this reason, the subscription cannot be completed.";
 
+    // You already have such a subscription.
+    public static final String DUPLICATE_SUBSCRIPTION_DISPLAY = "You already have such a subscription.";
+
 }

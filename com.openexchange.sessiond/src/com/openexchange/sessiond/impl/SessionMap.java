@@ -88,6 +88,8 @@ public final class SessionMap {
         alternativeIdMap = new HashMap<String, SessionControl>(initialCapacity);
     }
 
+    // -------------------------------------------------------------------------------
+
     /**
      * Gets the map's size.
      *

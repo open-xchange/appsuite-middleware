@@ -50,13 +50,11 @@
 package com.openexchange.config.cascade.context;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.BasicProperty;
-import com.openexchange.config.cascade.ConfigCascadeExceptionCodes;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -68,67 +66,35 @@ import com.openexchange.groupware.contexts.Context;
  */
 public class ContextConfigProvider extends AbstractContextBasedConfigProvider {
 
-    private static final String DYNAMIC_ATTR_PREFIX = "config/";
+    static final String DYNAMIC_ATTR_PREFIX = "config/";
 
-    public ContextConfigProvider(final ContextService contexts) {
+    /**
+     * Initializes a new {@link ContextConfigProvider}.
+     *
+     * @param contexts The context service
+     */
+    public ContextConfigProvider(ContextService contexts) {
         super(contexts);
     }
 
     @Override
-    public BasicProperty get(final String property, final Context ctx, final int user) throws OXException {
-
-        return new BasicProperty() {
-
-            @Override
-            public String get() {
-                final Map<String, List<String>> attributes = ctx.getAttributes();
-
-                final List<String> values = attributes.get(new StringBuilder(DYNAMIC_ATTR_PREFIX).append(property).toString());
-                if (values == null || values.isEmpty()) {
-                    return null;
-                }
-                return values.get(0);
-            }
-
-            @Override
-            public String get(final String metadataName) throws OXException {
-                return null;
-            }
-
-            @Override
-            public boolean isDefined() throws OXException {
-                return get() != null;
-            }
-
-            @Override
-            public void set(final String value) throws OXException {
-                throw ConfigCascadeExceptionCodes.CAN_NOT_SET_PROPERTY.create(property, "user");
-            }
-
-            @Override
-            public void set(final String metadataName, final String value) throws OXException {
-                throw ConfigCascadeExceptionCodes.CAN_NOT_DEFINE_METADATA.create(metadataName, "user");
-            }
-
-            @Override
-            public List<String> getMetadataNames() throws OXException {
-                return Collections.emptyList();
-            }
-
-        };
-
+    public BasicProperty get(String property, Context ctx, int user) throws OXException {
+        return new BasicPropertyImpl(property, ctx);
     }
 
     @Override
-    public Collection<String> getAllPropertyNames(final Context ctx) {
-        final Map<String, List<String>> attributes = ctx.getAttributes();
-        final Set<String> allNames = new HashSet<String>();
-        final int snip = DYNAMIC_ATTR_PREFIX.length();
-        for (final String name : attributes.keySet()) {
-            if (name.startsWith(DYNAMIC_ATTR_PREFIX)) {
-                allNames.add(name.substring(snip));
+    public Collection<String> getAllPropertyNames(Context ctx) {
+        Map<String, List<String>> attributes = ctx.getAttributes();
+        Set<String> allNames = new HashSet<String>();
+
+        String prefix = DYNAMIC_ATTR_PREFIX;
+        int snip1 = prefix.length();
+        for (String name : attributes.keySet()) {
+            if (name.startsWith(prefix)) {
+                allNames.add(name.substring(snip1));
             }
         }
+
         return allNames;
     }
 

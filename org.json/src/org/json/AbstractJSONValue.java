@@ -49,8 +49,12 @@
 
 package org.json;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -239,6 +243,51 @@ abstract class AbstractJSONValue implements JSONValue {
      */
     protected AbstractJSONValue() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void writeTo(File file) throws JSONException {
+        if (null == file) {
+            return;
+        }
+        Writer writer = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+            write(writer);
+            writer.flush();
+        } catch (final IOException e) {
+            throw new JSONException(e);
+        } finally {
+            close(writer);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void prettyPrintTo(File file) throws JSONException {
+        if (null == file) {
+            return;
+        }
+
+        Writer writer = null;
+        JsonGenerator jGenerator = null;
+        try {
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "UTF-8"));
+            jGenerator = createGenerator(writer, false);
+            jGenerator.setPrettyPrinter(STANDARD_DEFAULT_PRETTY_PRINTER);
+            write(this, jGenerator);
+            writer.flush();
+        } catch (final IOException e) {
+            throw new JSONException(e);
+        } finally {
+            close(jGenerator);
+            close(writer);
+        }
     }
 
     /**

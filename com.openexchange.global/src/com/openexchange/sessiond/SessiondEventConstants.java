@@ -132,7 +132,7 @@ public final class SessiondEventConstants {
      * <p>
      * Needed on event handler registration to a bundle context.
      */
-    private static final String[] TOPICS = { TOPIC_LAST_SESSION, TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA,
+    private static final String[] TOPICS = { TOPIC_LAST_SESSION_CONTEXT, TOPIC_LAST_SESSION, TOPIC_REMOVE_SESSION, TOPIC_REMOVE_CONTAINER, TOPIC_REMOVE_DATA,
         TOPIC_ADD_SESSION, TOPIC_REACTIVATE_SESSION, TOPIC_STORED_SESSION, TOPIC_TOUCH_SESSION, TOPIC_RESTORED_SESSION };
 
     /**

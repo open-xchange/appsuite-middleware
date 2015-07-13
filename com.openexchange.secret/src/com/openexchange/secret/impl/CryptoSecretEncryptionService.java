@@ -57,6 +57,7 @@ import com.openexchange.secret.Decrypter;
 import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretEncryptionService;
 import com.openexchange.secret.SecretEncryptionStrategy;
+import com.openexchange.secret.SecretExceptionCodes;
 import com.openexchange.secret.SecretService;
 import com.openexchange.secret.osgi.tools.WhiteboardSecretService;
 import com.openexchange.session.Session;
@@ -108,53 +109,46 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
 
     @Override
     public String encrypt(final Session session, final String toEncrypt) throws OXException {
-        /*
+        /*-
          * Check currently applicable SecretService
+         *
+         * Is it greater than or equal to default ranking of zero?
+         * If not use token-based entry
          */
-        final int ranking = secretService.getRanking();
-        if (ranking >= 0) { // Greater than or equal to default ranking of zero
-            return crypto.encrypt(toEncrypt, secretService.getSecret(session));
+        String secret = (secretService.getRanking() >= 0) ? secretService.getSecret(session) : tokenList.peekLast().getSecret(session);
+        if (Strings.isEmpty(secret)) {
+            throw SecretExceptionCodes.EMPTY_SECRET.create();
         }
-        /*
-         * Use token-based entry
-         */
-        return crypto.encrypt(toEncrypt, tokenList.peekLast().getSecret(session));
+        return crypto.encrypt(toEncrypt, secret);
     }
 
     @Override
     public String decrypt(final Session session, final String toDecrypt) throws OXException {
-        if (isEmpty(toDecrypt)) {
+        if (Strings.isEmpty(toDecrypt)) {
             return toDecrypt;
         }
         return decrypt(session, toDecrypt, null);
     }
 
-    private static boolean isEmpty(final String str) {
-        if (null == str || 0 == str.length()) {
-            return true;
-        }
-        final int len = str.length();
-        boolean ret = true;
-        for (int i = 0; ret && i < len; i++) {
-            ret = Strings.isWhitespace(str.charAt(i));
-        }
-        return ret;
-    }
-
     @Override
     public String decrypt(final Session session, final String toDecrypt, final T customizationNote) throws OXException {
-        /*
-         * Check currently applicable SecretService
-         */
-        final int ranking = secretService.getRanking();
+        // Ranking and secret from currently highest-ranked SecretService implementation
+        int ranking = secretService.getRanking();
+        String secretFromSecretService = secretService.getSecret(session);
+
+        // Check currently applicable SecretService
+        boolean checkedWithApplicableSecretService = false;
         if (ranking >= 0) { // Greater than or equal to default ranking of zero
-            final String secret = secretService.getSecret(session);
+            String secret = secretFromSecretService;
+            if (Strings.isEmpty(secret)) {
+                throw SecretExceptionCodes.EMPTY_SECRET.create();
+            }
             try {
                 return crypto.decrypt(toDecrypt, secret);
-            } catch (final OXException x) {
+            } catch (OXException x) {
                 try {
                     final String decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
-                    final String recrypted = crypto.encrypt(decrypted, secret);
+                    final String recrypted = recrypt(decrypted, secret);
                     strategy.update(recrypted, customizationNote);
                     return decrypted;
                 } catch (final GeneralSecurityException e) {
@@ -162,46 +156,56 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 }
                 // Ignore and try other
             }
+            checkedWithApplicableSecretService = true;
         }
+
         /*-
          * Use token-based entries.
          *
          * Try with last list entry first
          */
         String secret = tokenList.peekLast().getSecret(session);
-        try {
-            return crypto.decrypt(toDecrypt, secret);
-        } catch (final OXException x) {
-            try {
-                final String decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
-                final String recrypted = crypto.encrypt(decrypted, ranking >= 0 ? secretService.getSecret(session) : tokenList.peekLast().getSecret(session));
-                strategy.update(recrypted, customizationNote);
-                return decrypted;
-            } catch (final GeneralSecurityException e) {
-                // Ignore
+        {
+            boolean emptySecret = Strings.isEmpty(secret);
+            if (!checkedWithApplicableSecretService && emptySecret) {
+                throw SecretExceptionCodes.EMPTY_SECRET.create();
             }
-            // Ignore and try other
+            if (!emptySecret) {
+                try {
+                    return crypto.decrypt(toDecrypt, secret);
+                } catch (final OXException x) {
+                    try {
+                        final String decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
+                        final String recrypted = recrypt(decrypted, ranking >= 0 ? secretFromSecretService : tokenList.peekLast().getSecret(session));
+                        strategy.update(recrypted, customizationNote);
+                        return decrypted;
+                    } catch (final GeneralSecurityException e) {
+                        // Ignore
+                    }
+                    // Ignore and try other
+                }
+            }
         }
-        /*
-         * Try other secrets in list
-         */
+
+        // Try other secrets in list
         String decrypted = null;
         for (int i = off; null == decrypted && i >= 0; i--) {
             secret = tokenList.get(i).getSecret(session);
-            try {
-                decrypted = crypto.decrypt(toDecrypt, secret);
-            } catch (final OXException x) {
+            if (!Strings.isEmpty(secret)) {
                 try {
-                    decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
-                } catch (final GeneralSecurityException e) {
-                    // Ignore
+                    decrypted = crypto.decrypt(toDecrypt, secret);
+                } catch (final OXException x) {
+                    try {
+                        decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
+                    } catch (final GeneralSecurityException e) {
+                        // Ignore
+                    }
+                    // Ignore and try other
                 }
-                // Ignore and try other
             }
         }
-        /*
-         * Try to decrypt "the old way"
-         */
+
+        // Try to decrypt "the old way"
         if (decrypted == null) {
             LOG.debug("Failed to decrypt password with 'secrets' token list. Retrying with former crypt mechanism");
             if (customizationNote instanceof Decrypter) {
@@ -226,11 +230,16 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 }
             }
             if (decrypted == null) {
+                // Get secret from SecretService
+                secret = secretFromSecretService;
+                if (Strings.isEmpty(secret)) {
+                    throw SecretExceptionCodes.EMPTY_SECRET.create();
+                }
                 try {
-                    decrypted = decrypthWithSecretService(toDecrypt, session);
+                    decrypted = decrypthWithCryptoService(toDecrypt, secret);
                 } catch (final OXException e) {
                     try {
-                        decrypted = OldStyleDecrypt.decrypt(toDecrypt, secretService.getSecret(session));
+                        decrypted = OldStyleDecrypt.decrypt(toDecrypt, secret);
                     } catch (final GeneralSecurityException ignore) {
                         // Ignore
                     }
@@ -241,32 +250,36 @@ public class CryptoSecretEncryptionService<T> implements SecretEncryptionService
                 }
             }
         }
-        /*
-         * At last, re-crypt password using current secret service & store it
-         */
+
+        // At last, re-crypt password using current secret service & store it
         {
-            final String recrypted = crypto.encrypt(decrypted, ranking >= 0 ? secretService.getSecret(session) : tokenList.peekLast().getSecret(session));
+            String recrypted = recrypt(decrypted, ranking >= 0 ? secretFromSecretService : tokenList.peekLast().getSecret(session));
             strategy.update(recrypted, customizationNote);
         }
-        /*
-         * Return plain-text password
-         */
+
+        // Return decrypted string
         return decrypted;
     }
 
-    private String decrypthWithPasswordSecretService(final String toDecrypt, final Session session) throws OXException {
-        final String secret = passwordSecretService.getSecret(session);
-        if (isEmpty(secret)) {
+    private String recrypt(String decrypted, String secret) throws OXException {
+        if (Strings.isEmpty(secret)) {
+            throw SecretExceptionCodes.EMPTY_SECRET.create();
+        }
+        return crypto.encrypt(decrypted, secret);
+    }
+
+    private String decrypthWithPasswordSecretService(String toDecrypt, Session session) throws OXException {
+        String secret = passwordSecretService.getSecret(session);
+        if (Strings.isEmpty(secret)) {
             return null;
         }
-        final String decrypted = crypto.decrypt(toDecrypt, secret);
+        String decrypted = crypto.decrypt(toDecrypt, secret);
         LOG.debug("Decrypted password with former crypt mechanism");
         return decrypted;
     }
 
-    private String decrypthWithSecretService(final String toDecrypt, final Session session) throws OXException {
-        final String secret = secretService.getSecret(session);
-        final String decrypted = crypto.decrypt(toDecrypt, secret);
+    private String decrypthWithCryptoService(final String toDecrypt, final String secret) throws OXException {
+        String decrypted = crypto.decrypt(toDecrypt, secret);
         LOG.debug("Decrypted password with former crypt mechanism");
         return decrypted;
     }

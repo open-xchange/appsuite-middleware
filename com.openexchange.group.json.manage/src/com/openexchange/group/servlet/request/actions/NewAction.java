@@ -92,7 +92,7 @@ public final class NewAction extends AbstractGroupAction {
         groupParser.parse(group, jsonobject);
         final GroupService groupService = getService(GroupService.class);
         final ServerSession session = req.getSession();
-        groupService.create(session.getContext(), session.getUser(), group);
+        groupService.create(session.getContext(), session.getUser(), group, true);
         final JSONObject response = new JSONObject();
         response.put(GroupFields.IDENTIFIER, group.getIdentifier());
         return new AJAXRequestResult(response, group.getLastModified(), "json");

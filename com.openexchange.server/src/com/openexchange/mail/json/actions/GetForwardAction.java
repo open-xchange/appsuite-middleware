@@ -130,11 +130,12 @@ public final class GetForwardAction extends AbstractMailAction {
             if (AJAXRequestDataTools.parseBoolParameter(req.getParameter("attachOriginalMessage"))) {
                 usmNoSave.setAttachOriginalMessage(true);
             }
+            boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
             /*
              * Get mail interface
              */
             MailServletInterface mailInterface = getMailInterface(req);
-            MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave);
+            MailMessage mailMessage = mailInterface.getForwardMessageForDisplay(new String[] { folderPath }, new String[] { uid }, usmNoSave, setFrom);
             if (!mailMessage.containsAccountId()) {
                 mailMessage.setAccountId(mailInterface.getAccountID());
             }
@@ -194,9 +195,9 @@ public final class GetForwardAction extends AbstractMailAction {
                     LOG.warn("Unknown value in parameter {}: {}. Using user's mail settings as fallback.", Mail.PARAMETER_VIEW, view);
                 }
             }
-
+            boolean setFrom = AJAXRequestDataTools.parseBoolParameter(req.getParameter("setFrom"));
             MailServletInterface mailInterface = getMailInterface(req);
-            MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave);
+            MailMessage mail = mailInterface.getForwardMessageForDisplay(folders, ids, usmNoSave, setFrom);
             if (!mail.containsAccountId()) {
                 mail.setAccountId(mailInterface.getAccountID());
             }

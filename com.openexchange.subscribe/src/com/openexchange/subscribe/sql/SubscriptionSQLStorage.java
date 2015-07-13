@@ -57,11 +57,13 @@ import static com.openexchange.subscribe.SubscriptionErrorMessage.IDGiven;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SQLException;
 import static com.openexchange.subscribe.SubscriptionErrorMessage.SubscriptionNotFound;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.database.Databases;
@@ -86,6 +88,7 @@ import com.openexchange.subscribe.EncryptedField;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
 import com.openexchange.subscribe.SubscriptionStorage;
+import com.openexchange.tools.sql.DBUtils;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -218,11 +221,38 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
         return retval;
     }
 
+    @Override
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId) throws OXException {
+        Connection con = dbProvider.getReadConnection(ctx);
+        try {
+            return getSubscriptionsOfUser(ctx, userId, sourceId, con);
+        } finally {
+            dbProvider.releaseReadConnection(ctx, con);
+        }
+    }
+
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId, String sourceId, Connection con) throws OXException {
+        if (null == con) {
+            return getSubscriptionsOfUser(ctx, userId, sourceId);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT id, folder_id, last_update, created, user_id, enabled, configuration_id, source_id FROM subscriptions WHERE cid=? AND user_id=? AND source_id = ?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, userId);
+            stmt.setString(3, sourceId);
+            rs = stmt.executeQuery();
+            return parseResultSet(rs, ctx, con);
+        } catch (SQLException e) {
+            throw SQLException.create(e);
+        } finally {
+            DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
 
     @Override
-    public List<Subscription> getSubscriptionsOfUser(final Context ctx, final int userId)  throws OXException {
-        List<Subscription> retval = null;
-
+    public List<Subscription> getSubscriptionsOfUser(Context ctx, int userId)  throws OXException {
         Connection readConnection = null;
         ResultSet resultSet = null;
         StatementBuilder builder = null;
@@ -232,28 +262,26 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
             .FROM(subscriptions)
             .WHERE(new EQUALS("cid", PLACEHOLDER).AND(new EQUALS("user_id", PLACEHOLDER)));
 
-            final List<Object> values = new ArrayList<Object>();
+            final List<Object> values = new LinkedList<Object>();
             values.add(I(ctx.getContextId()));
             values.add(I(userId));
 
             builder = new StatementBuilder();
             resultSet = builder.executeQuery(readConnection, select, values);
-            retval = parseResultSet(resultSet, ctx, readConnection);
-        } catch (final SQLException e) {
+            return parseResultSet(resultSet, ctx, readConnection);
+        } catch (SQLException e) {
             throw SQLException.create(e);
         } finally {
             try {
                 if (builder != null) {
                     builder.closePreparedStatement(null, resultSet);
                 }
-            } catch (final SQLException e) {
+            } catch (SQLException e) {
                 throw SQLException.create(e);
             } finally {
                 dbProvider.releaseReadConnection(ctx, readConnection);
             }
         }
-
-        return retval;
     }
 
     @Override
@@ -460,7 +488,7 @@ public class SubscriptionSQLStorage implements SubscriptionStorage {
     }
 
     private List<Subscription> parseResultSet(final ResultSet resultSet, final Context ctx, final Connection readConnection) throws OXException, SQLException {
-        final List<Subscription> retval = new ArrayList<Subscription>();
+        final List<Subscription> retval = new LinkedList<Subscription>();
         while (resultSet.next()) {
             final Subscription subscription = new Subscription();
             subscription.setContext(ctx);

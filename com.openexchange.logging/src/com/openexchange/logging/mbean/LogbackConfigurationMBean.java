@@ -186,4 +186,10 @@ public interface LogbackConfigurationMBean {
     @MBeanMethodAnnotation (description="Sets whether to include stack traces in HTTP-API JSON responses for userID contextID combo", parameters={"userID", "contextID", "enable"}, parameterDescriptions={"The userID for which to apply the setting", "The contextID for which to apply the setting", "Whether to enable or disable to include stack traces in HTTP-API JSON responses"})
     public void includeStackTraceForUser(int userID, int contextID, boolean enable);
 
+    /**
+     * Get root appender statistics
+     */
+    @MBeanMethodAnnotation (description="Gets an info string about all root appenders", parameterDescriptions={}, parameters={})
+    public String getRootAppenderStats();
+
 }

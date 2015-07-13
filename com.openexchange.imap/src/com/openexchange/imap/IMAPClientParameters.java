@@ -49,6 +49,9 @@
 
 package com.openexchange.imap;
 
+import com.openexchange.session.Session;
+import com.sun.mail.imap.IMAPStore;
+
 
 /**
  * {@link IMAPClientParameters} - An enumeration for IMAP client parameters passed to IMAP store using <code>"ID"</code> command (if supported)
@@ -88,6 +91,30 @@ public enum IMAPClientParameters {
      */
     public String getParamName() {
         return paramName;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Generates the session information.
+     * <pre>
+     *  &lt;session-id&gt; + "-" &lt;user-id&gt; + "-" + &lt;context-id&gt; + "-" + &lt;store-hash&gt;
+     *
+     *  Example:
+     *  6ceec6585485458eb27456ad6ec97b62-17-1337-1356782
+     * </pre>
+     *
+     * @param session The user-associated session
+     * @param imapStore The IMAP store
+     * @return The session information
+     */
+    public static String generateSessionInformation(Session session, IMAPStore imapStore) {
+        StringBuilder buf = new StringBuilder(64);
+        buf.append(session.getSessionID());
+        buf.append('-').append(session.getUserId());
+        buf.append('-').append(session.getContextId());
+        buf.append('-').append(imapStore.hashCode());
+        return buf.toString();
     }
 
 }

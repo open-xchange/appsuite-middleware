@@ -61,8 +61,10 @@ public class StringToLowerCaseTransformer implements Transformer {
 
     @Override
     public Object transform(Object input) {
-        String s = (String) input;
-        return s.toLowerCase();
+        if (input instanceof String) {
+            String s = (String) input;
+            return s.toLowerCase();
+        }
+        return input;
     }
-
 }

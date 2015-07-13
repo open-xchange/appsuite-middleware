@@ -128,4 +128,6 @@ public class TaskExceptionMessage implements LocalizableStrings {
     public static final String CONTAINS_NON_DIGITS_MSG = "Value \"%1$s\" of attribute \"%2$s\" contains non digit characters.";
 
     public static final String INVALID_PRIORITY_MSG = "Priority is %d but must be between 1 and 3.";
+
+    public final static String INCORRECT_STRING_DISPLAY = "The character \"%1$s\" in field \"%2$s\" can't be saved. Please remove the problematic character and try again.";
 }

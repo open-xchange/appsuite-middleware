@@ -51,9 +51,6 @@ package com.openexchange.imap.search;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import javax.mail.FetchProfile;
 import javax.mail.FolderClosedException;
@@ -65,7 +62,6 @@ import javax.mail.search.SearchTerm;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderWorker;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
@@ -78,7 +74,6 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.MessageSet;
 
 /**
  * {@link IMAPSearch}
@@ -151,7 +146,7 @@ public final class IMAPSearch {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If an Open-Xchange error occurs
      */
-    private static int[] searchByTerm(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, int chunkSize, int msgCount) throws MessagingException, OXException {
+    public static int[] searchByTerm(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, int chunkSize, int msgCount) throws MessagingException, OXException {
         TIntList list = new TIntArrayList(msgCount);
         FetchProfile fp = new FetchProfile();
         searchTerm.contributeTo(fp);
@@ -191,7 +186,7 @@ public final class IMAPSearch {
     }
 
     private static volatile Integer umlautFilterThreshold;
-    private static int umlautFilterThreshold() {
+    public static int umlautFilterThreshold() {
         Integer i = umlautFilterThreshold;
         if (null == i) {
             synchronized (IMAPSearch.class) {
@@ -210,33 +205,11 @@ public final class IMAPSearch {
         return i.intValue();
     }
 
-    private static volatile Boolean chunkWiseImapSearch;
-    private static boolean chunkWiseImapSearch() {
-        Boolean tmp = chunkWiseImapSearch;
-        if (null == tmp) {
-            synchronized (IMAPSearch.class) {
-                tmp = chunkWiseImapSearch;
-                if (null == tmp) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    final boolean defaultVal = false;
-                    if (null == service) {
-                        return defaultVal;
-                    }
-                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.imap.chunkWiseImapSearch", defaultVal));
-                    chunkWiseImapSearch = tmp;
-                }
-            }
-        }
-        return tmp.booleanValue();
-    }
-
     static {
         IMAPReloadable.getInstance().addReloadable(new Reloadable() {
-
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
                 umlautFilterThreshold = null;
-                chunkWiseImapSearch = null;
             }
 
             @Override
@@ -246,7 +219,7 @@ public final class IMAPSearch {
         });
     }
 
-    private static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, FolderClosedException, StoreClosedException {
+    public static int[] issueIMAPSearch(final IMAPFolder imapFolder, final com.openexchange.mail.search.SearchTerm<?> searchTerm) throws OXException, MessagingException {
         try {
             if (searchTerm.containsWildcard()) {
                 /*
@@ -297,8 +270,8 @@ public final class IMAPSearch {
                     throw ((FolderClosedException) cause);
                 }
             }
-            LOG.warn("", IMAPException.Code.IMAP_SEARCH_FAILED.create(e, e.getMessage()));
-            return null;
+
+            throw e;
         }
     }
 
@@ -324,7 +297,7 @@ public final class IMAPSearch {
     /**
      * Searches with respect to umlauts
      */
-    private static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
+    public static int[] searchWithUmlautSupport(final com.openexchange.mail.search.SearchTerm<?> searchTerm, final int[] seqNums, final IMAPFolder imapFolder) throws OXException {
         try {
             IMAPFolderWorker.clearCache(imapFolder);
 
@@ -364,51 +337,17 @@ public final class IMAPSearch {
             return new int[0];
         }
 
-        final boolean chunkWise = chunkWiseImapSearch();
         final Object oSeqNums = imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
-
             @Override
             public Object doCommand(final IMAPProtocol protocol) throws ProtocolException {
                 try {
-                    if (!chunkWise) {
-                        return protocol.search(term);
-                    }
-
-                    // Perform chunk-wise search
-                    final List<MessageSet> sets = new LinkedList<MessageSet>();
-                    {
-                        int chunkSize = MailProperties.getInstance().getMailFetchLimit();
-                        int start = 1;
-                        while (start <= messageCount) {
-                            if ((start + chunkSize) > messageCount) {
-                                chunkSize = (messageCount - start + 1);
-                            }
-                            sets.add(new MessageSet(start, start + chunkSize - 1));
-                            start += chunkSize;
-                        }
-                        if (start <= messageCount) {
-                            sets.add(new MessageSet(start, messageCount));
-                        }
-                    }
-                    final TIntList ret = new TIntLinkedList();
-                    final MessageSet[] arr = new MessageSet[1];
-                    for (final MessageSet messageSet : sets) {
-                        arr[0] = messageSet;
-                        int[] results = protocol.search(arr, term);
-                        for (int seqNum : results) {
-                            if (seqNum >= 1 && seqNum <= messageCount) {
-                                ret.add(seqNum);
-                            }
-                        }
-                    }
-                    return ret;
+                    return protocol.search(term);
                 } catch (final SearchException e) {
-                    throw new ProtocolException(e.getMessage(), e);
-                } catch (final MessagingException e) {
                     throw new ProtocolException(e.getMessage(), e);
                 }
             }
         });
+
         return oSeqNums instanceof TIntList ? ((TIntList) oSeqNums).toArray() : (int[]) oSeqNums;
     }
 

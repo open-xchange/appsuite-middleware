@@ -105,14 +105,18 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
 
     @Override
-    public void change(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public void change(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(res);
         } catch (final InvalidDataException e3) {
             final InvalidDataException invalidDataException = new InvalidDataException("One of the given arguments for change is null");
             LOGGER.error("", invalidDataException);
             throw invalidDataException;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -202,14 +206,18 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
 
     @Override
-    public Resource create(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
-       auth = auth == null ? new Credentials("","") : auth;
+    public Resource create(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+       Credentials auth = credentials == null ? new Credentials("","") : credentials;
        try {
            doNullCheck(res);
            doNullCheck(res.getName());
        } catch (final InvalidDataException e3) {
            LOGGER.error("One of the given arguments for create is null", e3);
            throw e3;
+       }
+
+       if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+           auth.setLogin(auth.getLogin().toLowerCase());
        }
 
        try {
@@ -299,13 +307,17 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
 
     @Override
-    public void delete(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public void delete(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(res);
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for delete is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -364,13 +376,17 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
 
     @Override
-    public Resource getData(final Context ctx, final Resource res, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public Resource getData(final Context ctx, final Resource res, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchResourceException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(res);
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for get is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -414,13 +430,17 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
 
     @Override
-    public Resource[] getData(final Context ctx, final Resource[] resources, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public Resource[] getData(final Context ctx, final Resource[] resources, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchResourceException, DatabaseUpdateException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck((Object[])resources);
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for getData is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -481,13 +501,17 @@ public class OXResource extends OXCommonImpl implements OXResourceInterface{
     }
 
     @Override
-    public Resource[] list(final Context ctx, final String pattern, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
-        auth = auth == null ? new Credentials("","") : auth;
+    public Resource[] list(final Context ctx, final String pattern, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException {
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(pattern);
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for list is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {

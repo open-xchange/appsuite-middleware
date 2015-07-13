@@ -69,36 +69,34 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
     }
 
     @Override
-    public List<Integer> getAllContextIds() throws OXException {
-        try {
-            return getService().getAllContextIds();
-        } catch (final OXException e) {
-            throw e;
-        }
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        getService().setAttribute(name, value, contextId);
     }
 
     @Override
-    public Context getContext(final int contextId) throws OXException {
-        try {
-            return getService().getContext(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+    public List<Integer> getAllContextIds() throws OXException {
+        return getService().getAllContextIds();
+    }
+
+    @Override
+    public Context getContext(int contextId) throws OXException {
+        return getService().getContext(contextId);
     }
 
     @Override
     public int getContextId(final String loginContextInfo) throws OXException {
-        try {
-            return getService().getContextId(loginContextInfo);
-        } catch (final OXException e) {
-            throw e;
-        }
+        return getService().getContextId(loginContextInfo);
     }
 
     @Override
     public void invalidateContext(final int contextId) throws OXException {
+        getService().invalidateContext(contextId);
+    }
+
+    @Override
+    public void invalidateContexts(int[] contextIDs) throws OXException {
         try {
-            getService().invalidateContext(contextId);
+            getService().invalidateContexts(contextIDs);
         } catch (final OXException e) {
             throw e;
         }
@@ -106,20 +104,12 @@ public final class OSGiContextService extends AbstractOSGiDelegateService<Contex
 
     @Override
     public void invalidateLoginInfo(final String loginContextInfo) throws OXException {
-        try {
-            getService().invalidateLoginInfo(loginContextInfo);
-        } catch (final OXException e) {
-            throw e;
-        }
+        getService().invalidateLoginInfo(loginContextInfo);
     }
 
     @Override
     public Context loadContext(final int contextId) throws OXException {
-        try {
-            return getService().loadContext(contextId);
-        } catch (final OXException e) {
-            throw e;
-        }
+        return getService().loadContext(contextId);
     }
 
 }

@@ -178,7 +178,7 @@ public final class IMAPNotifierRegistry implements IMAPNotifierRegistryService {
      * ------------------------- Key class -----------------------
      */
 
-    private static Key keyFor(final Session session) {
+    private static Key keyFor(Session session) {
         return new Key(session.getUserId(), session.getContextId());
     }
 

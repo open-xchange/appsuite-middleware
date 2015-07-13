@@ -116,7 +116,7 @@ public class RefreshSubscriptionAction extends AbstractSubscribeAction {
                 subscribeRequest.getServerSession(),
                 parameters.optString("source"),
                 services.getService(SecretService.class).getSecret(subscribeRequest.getServerSession()));
-            if (ids.add(id)) {
+            if ((subscription != null) && (ids.add(id))) {
                 subscriptionsToRefresh.add(subscription);
             }
         }

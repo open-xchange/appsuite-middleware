@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.annotation.Nullable;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.CommonObject;
@@ -90,10 +91,9 @@ public final class SQL {
         new EnumMap<StorageType, String>(StorageType.class);
 
     /**
-     * Tables for external participants.
+     * Tables for external participants. No table anymore for deleted external participants because of bug 29809, US #53461243.
      */
-    static final Map<StorageType, String> EPARTS_TABLES =
-        new EnumMap<StorageType, String>(StorageType.class);
+    static final Map<StorageType, String> EPARTS_TABLES = new EnumMap<StorageType, String>(StorageType.class);
 
     /**
      * Tables for task folder mapping.
@@ -229,7 +229,7 @@ public final class SQL {
     static String getFields(final int[] columns, final boolean folder) throws OXException {
         return getFields(columns, folder, null);
     }
-    
+
     /**
      * @param columns attributes of a task that should be selected.
      * @param folder <code>true</code> if the folder must be selected in
@@ -244,7 +244,7 @@ public final class SQL {
             prefix = "";
         else
             prefix += ".";
-        
+
         final StringBuilder builder = new StringBuilder();
         for (final int i : columns) {
             final Mapper<?> mapper = Mapping.getMapping(i);
@@ -410,22 +410,35 @@ public final class SQL {
     }
 
     /**
-     * Maps the index of the truncated value to the according identifier of the
-     * truncated attribute.
-     * @param fields string array with all truncated field names.
-     * @return the identifier of the truncated attribute.
+     * Maps a list of column names to the according database column mapper implementations.
+     * @param fields string array with database column names.
+     * @return the database column mapper implementation.
      */
-    public static Mapper<?>[] findTruncated(final String[] fields) {
+    public static Mapper<?>[] mapColumns(final String[] fields) {
         final List<Mapper<?>> tmp = new ArrayList<Mapper<?>>();
         for (final String field : fields) {
-            for (final Mapper<?> mapper : Mapping.MAPPERS) {
-                if (mapper.getDBColumnName().equals(field)) {
-                    tmp.add(mapper);
-                    break;
-                }
+            Mapper<?> mapper = mapColumn(field);
+            if (null != mapper) {
+                tmp.add(mapper);
+                break;
             }
         }
         return tmp.toArray(new Mapper[tmp.size()]);
+    }
+
+    /**
+     * Maps the column name to the according database column mapper implementation.
+     * @param columnName name of a database column.
+     * @return the database column mapper implementation or <code>null</code> if the column can not be mapped.
+     */
+    @Nullable
+    public static Mapper<?> mapColumn(String columnName) {
+        for (final Mapper<?> mapper : Mapping.MAPPERS) {
+            if (mapper.getDBColumnName().equals(columnName)) {
+                return mapper;
+            }
+        }
+        return null;
     }
 
     static {
@@ -437,6 +450,7 @@ public final class SQL {
         selectAll.setLength(selectAll.length() - 1);
         ALL_FIELDS = selectAll.toString();
 
+        final StorageType[] active = new StorageType[] { StorageType.ACTIVE };
         final StorageType[] activeDelete = new StorageType[] { StorageType.ACTIVE, StorageType.DELETED };
         final String tableName = "@tableName@";
 
@@ -446,7 +460,7 @@ public final class SQL {
         PARTS_TABLES.put(StorageType.REMOVED, "task_removedparticipant");
         PARTS_TABLES.put(StorageType.DELETED, "del_task_participant");
         EPARTS_TABLES.put(StorageType.ACTIVE, "task_eparticipant");
-        EPARTS_TABLES.put(StorageType.DELETED, "del_task_eparticipant");
+        // Table del_task_eparticipant was removed with fix for bug 35992 because of US #53461243 and bug 29809.
         FOLDER_TABLES.put(StorageType.ACTIVE, "task_folder");
         FOLDER_TABLES.put(StorageType.DELETED, "del_task_folder");
 
@@ -499,21 +513,18 @@ public final class SQL {
         }
         sql = "INSERT INTO " + tableName
             + " (cid,task,mail,display_name) VALUES (?,?,?,?)";
-        for (final StorageType type : activeDelete) {
-            INSERT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
-                .get(type)));
+        for (final StorageType type : active) {
+            INSERT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES.get(type)));
         }
         sql = "DELETE FROM " + tableName
             + " WHERE cid=? AND task=? AND mail IN (";
-        for (final StorageType type : activeDelete) {
-            DELETE_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
-                .get(type)));
+        for (final StorageType type : active) {
+            DELETE_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES.get(type)));
         }
         sql = "SELECT task,mail,display_name FROM " + tableName
             + " WHERE cid=? AND task IN (";
-        for (final StorageType type : activeDelete) {
-            SELECT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES
-                .get(type)));
+        for (final StorageType type : active) {
+            SELECT_EXTERNAL.put(type, sql.replace(tableName, EPARTS_TABLES.get(type)));
         }
 
         sql = "INSERT INTO " + tableName + " (cid, id, folder, user) "

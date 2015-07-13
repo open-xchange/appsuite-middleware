@@ -58,7 +58,7 @@ package com.openexchange.java;
 public final class StringAppender {
 
     private final StringBuilder sb;
-    private final char delim;
+    private final String delim;
     private boolean first = true;
 
     /**
@@ -79,7 +79,28 @@ public final class StringAppender {
     public StringAppender(char delim, int initialCapacity) {
         super();
         sb = new StringBuilder(initialCapacity);
-        this.delim = delim;
+        this.delim = String.valueOf(delim);
+    }
+
+    /**
+     * Initializes a new {@link StringAppender}.
+     *
+     * @param delim The delimiter sequence
+     */
+    public StringAppender(String delim) {
+        this(delim, 256);
+    }
+
+    /**
+     * Initializes a new {@link StringAppender}.
+     *
+     * @param delim The delimiter sequence
+     * @param initialCapacity The initial capacity
+     */
+    public StringAppender(String delim, int initialCapacity) {
+        super();
+        sb = new StringBuilder(initialCapacity);
+        this.delim = null == delim ? "null" : delim;
     }
 
     @Override

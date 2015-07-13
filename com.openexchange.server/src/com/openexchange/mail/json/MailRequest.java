@@ -49,17 +49,21 @@
 
 package com.openexchange.mail.json;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.json.actions.AbstractMailAction;
+import com.openexchange.mailaccount.Tools;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -69,6 +73,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailRequest {
+
+    private static final String PARAMETER_HEADERS = Mail.PARAMETER_HEADERS;
+    private static final String PARAMETER_COLUMNS = AJAXServlet.PARAMETER_COLUMNS;
 
     /**
      * Constant for not-found number.
@@ -182,6 +189,53 @@ public final class MailRequest {
     }
 
     /**
+     * Checks for columns.
+     *
+     * @return The column collection
+     * @throws OXException If parameter is missing
+     */
+    public static ColumnCollection requireColumnsAndHeaders(AJAXRequestData requestData) throws OXException {
+        String parameter = requestData.getParameter(PARAMETER_COLUMNS);
+        if (null == parameter) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_COLUMNS);
+        }
+
+        List<Column> l;
+        if (parameter.equals("all")) {
+            l = new ArrayList<Column>(Arrays.asList(AbstractMailAction.COLUMNS_ALL_ALIAS));
+        } else if (parameter.equals("list")) {
+            l = new ArrayList<Column>(Arrays.asList(AbstractMailAction.COLUMNS_LIST_ALIAS));
+        } else {
+            String[] sa = SPLIT.split(parameter, 0);
+            l = new ArrayList<Column>(sa.length);
+            for (String s : sa) {
+                int field = Tools.getUnsignedInteger(s);
+                l.add(field > 0 ? Column.field(field) : Column.header(s));
+            }
+        }
+
+        parameter = requestData.getParameter(PARAMETER_HEADERS);
+        if (null != parameter) {
+            String[] sa = SPLIT.split(parameter, 0);
+            for (String s : sa) {
+                l.add(Column.header(s));
+            }
+        }
+
+        return new ColumnCollection(l);
+    }
+
+    /**
+     * Checks for columns.
+     *
+     * @return The column collection
+     * @throws OXException If parameter is missing
+     */
+    public ColumnCollection checkColumnsAndHeaders() throws OXException {
+        return requireColumnsAndHeaders(requestData);
+    }
+
+    /**
      * Split pattern for CSV.
      */
     private static final Pattern SPLIT = Pattern.compile(" *, *");
@@ -198,12 +252,12 @@ public final class MailRequest {
         if (null == parameter) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(name);
         }
-        if (name.equals(AJAXServlet.PARAMETER_COLUMNS)) {
+        if (name.equals(PARAMETER_COLUMNS)) {
             if (parameter.equals("all")) {
-                return AbstractMailAction.COLUMNS_ALL_ALIAS;
+                return AbstractMailAction.FIELDS_ALL_ALIAS;
             }
             if (parameter.equals("list")) {
-                return AbstractMailAction.COLUMNS_LIST_ALIAS;
+                return AbstractMailAction.FIELDS_LIST_ALIAS;
             }
         }
         final String[] sa = SPLIT.split(parameter, 0);

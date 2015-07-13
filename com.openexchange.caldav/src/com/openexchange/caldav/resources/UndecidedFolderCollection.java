@@ -61,6 +61,8 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.IncorrectString;
+import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
@@ -135,6 +137,23 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
             newFolder.addPermission(getDefaultPermissions());
             newFolder = OXFolderManager.getInstance(factory.getSession()).createFolder(newFolder, true, System.currentTimeMillis());
         } catch (OXException e) {
+            if ("FLD-0092".equals(e.getErrorCode())) {
+                /*
+                 * 'Unsupported character "..." in field "Folder name".
+                 */
+                ProblematicAttribute[] problematics = e.getProblematics();
+                if (null != problematics && 0 < problematics.length && null != problematics[0] && IncorrectString.class.isInstance(problematics[0])) {
+                    IncorrectString incorrectString = ((IncorrectString) problematics[0]);
+                    if (FolderObject.FOLDER_NAME == incorrectString.getId()) {
+                        String correctedDisplayName = displayName.replace(incorrectString.getIncorrectString(), "");
+                        if (false == correctedDisplayName.equals(displayName)) {
+                            displayName = correctedDisplayName;
+                            create();
+                            return;
+                        }
+                    }
+                }
+            }
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         }
     }

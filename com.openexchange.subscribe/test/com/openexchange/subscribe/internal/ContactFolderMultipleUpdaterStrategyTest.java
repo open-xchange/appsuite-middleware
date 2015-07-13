@@ -49,10 +49,13 @@
 
 package com.openexchange.subscribe.internal;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -63,18 +66,19 @@ import com.openexchange.groupware.container.FolderObject;
  *
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
-public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
+public class ContactFolderMultipleUpdaterStrategyTest {
 
     private FolderUpdaterStrategy<Contact> strategy;
 
     private HashMap <Integer, Object> session;
 
-    @Override
+    @Before
     public void setUp() {
         this.strategy = new ContactFolderMultipleUpdaterStrategy();
         this.session = new HashMap<Integer,Object>();
     }
 
+    @Test
     public void testHandles() {
         FolderObject contactFolder = new FolderObject();
         contactFolder.setModule(FolderObject.CONTACT);
@@ -86,6 +90,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
         assertFalse("Should not handle infostore folders", strategy.handles(infostoreFolder));
     }
 
+    @Test
     public void testScoring() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
@@ -117,6 +122,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
 
     }
 
+    @Test
     public void testTwoCompaniesDiffer() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("");
@@ -136,6 +142,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
         assertTrue("Empty names shouldn't be considered equal.", score < strategy.getThreshold(session));
     }
 
+    @Test
     public void testNameChangedButMailAdressStayedTheSame() throws OXException {
         // First name is not enough
         Contact contact = new Contact();
@@ -155,6 +162,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
         assertTrue("First name and email address should suffice", score >= strategy.getThreshold(session));
     }
 
+    @Test
     public void testWithoutUUIDNoMagicWillHappen() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -172,6 +180,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
         assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));
     }
 
+    @Test
     public void testSecondContactHasUUIDButIsNotOnThisSystem() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -190,6 +199,7 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
         assertTrue("These two contacts should not score higher than the treshhold", score < strategy.getThreshold(contact2));
     }
 
+    @Test
     public void testTwoContactsAreSimilarButWillNotBeAssociatedBecauseOneIsNotOnTheSystem() throws OXException {
         Contact contact = new Contact();
         contact.setGivenName("Hans");
@@ -206,5 +216,39 @@ public class ContactFolderMultipleUpdaterStrategyTest extends TestCase {
         int score = strategy.calculateSimilarityScore(contact, contact2, session);
 
         assertTrue("These two contacts are similar and should be merged", score >= strategy.getThreshold(contact2));
+    }
+
+    @Test
+    public void testCalculateSimilarityScore_mobileEqual_increaseSimilarityScore() throws OXException {
+        // First name is not enough
+        Contact contact = new Contact();
+        contact.setGivenName("Hans");
+        contact.setCellularTelephone1("0000-0000000");
+
+        Contact candidate = new Contact();
+        candidate.setGivenName("Hans");
+        candidate.setEmail1("hans@example.com");
+        candidate.setCellularTelephone1("0000-0000000");
+
+        int score = strategy.calculateSimilarityScore(contact, candidate, session);
+
+        assertTrue("Score to low. CellularTelephone is equal.", score >= strategy.getThreshold(session));
+    }
+
+    @Test
+    public void testCalculateSimilarityScore_mobileDifferent_smallScore() throws OXException {
+        // First name is not enough
+        Contact contact = new Contact();
+        contact.setGivenName("Hans");
+        contact.setCellularTelephone1("0000-0000000");
+
+        Contact candidate = new Contact();
+        candidate.setGivenName("Hans");
+        candidate.setEmail1("hans@example.com");
+        candidate.setCellularTelephone1("1111-1111111");
+
+        int score = strategy.calculateSimilarityScore(contact, candidate, session);
+
+        assertTrue("Score to high. Only GivenName is equal.", score < strategy.getThreshold(session));
     }
 }

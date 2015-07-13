@@ -77,21 +77,46 @@ public class OXUserCopyServicePortTypeImpl implements OXUserCopyServicePortType 
         try {
             return user2Soap(userCopyInterface.copyUser(soap2User(user), soap2Context(src), soap2Context(dest), soap2Credentials(auth)));
         } catch (final RemoteException e) {
-            throw new RemoteException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.RemoteException fd = new com.openexchange.admin.soap.usercopy.soap.RemoteException();
+            com.openexchange.admin.soap.usercopy.rmi.RemoteException value = new com.openexchange.admin.soap.usercopy.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            fd.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), fd, e);
         } catch (final InvalidCredentialsException e) {
-            throw new InvalidCredentialsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.InvalidCredentialsException fd = new com.openexchange.admin.soap.usercopy.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.usercopy.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.usercopy.exceptions.InvalidCredentialsException();
+            fd.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), fd, e);
         } catch (final NoSuchContextException e) {
-            throw new NoSuchContextException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.NoSuchContextException fd = new com.openexchange.admin.soap.usercopy.soap.NoSuchContextException();
+            com.openexchange.admin.soap.usercopy.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.usercopy.exceptions.NoSuchContextException();
+            fd.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), fd, e);
         } catch (final StorageException e) {
-            throw new StorageException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.StorageException fd = new com.openexchange.admin.soap.usercopy.soap.StorageException();
+            com.openexchange.admin.soap.usercopy.exceptions.StorageException value = new com.openexchange.admin.soap.usercopy.exceptions.StorageException();
+            fd.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), fd, e);
         } catch (final InvalidDataException e) {
-            throw new InvalidDataException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.InvalidDataException fd = new com.openexchange.admin.soap.usercopy.soap.InvalidDataException();
+            com.openexchange.admin.soap.usercopy.exceptions.InvalidDataException value = new com.openexchange.admin.soap.usercopy.exceptions.InvalidDataException();
+            fd.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), fd, e);
         } catch (final DatabaseUpdateException e) {
-            throw new DatabaseUpdateException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.DatabaseUpdateException fd = new com.openexchange.admin.soap.usercopy.soap.DatabaseUpdateException();
+            com.openexchange.admin.soap.usercopy.exceptions.DatabaseUpdateException value = new com.openexchange.admin.soap.usercopy.exceptions.DatabaseUpdateException();
+            fd.setDatabaseUpdateException(value);
+            throw new DatabaseUpdateException_Exception(e.getMessage(), fd, e);
         } catch (final NoSuchUserException e) {
-            throw new NoSuchUserException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.NoSuchUserException fd = new com.openexchange.admin.soap.usercopy.soap.NoSuchUserException();
+            com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException value = new com.openexchange.admin.soap.usercopy.exceptions.NoSuchUserException();
+            fd.setNoSuchUserException(value);
+            throw new NoSuchUserException_Exception(e.getMessage(), fd, e);
         } catch (final UserExistsException e) {
-            throw new UserExistsException_Exception(e.getMessage(), e);
+            com.openexchange.admin.soap.usercopy.soap.UserExistsException fd = new com.openexchange.admin.soap.usercopy.soap.UserExistsException();
+            com.openexchange.admin.soap.usercopy.exceptions.UserExistsException value = new com.openexchange.admin.soap.usercopy.exceptions.UserExistsException();
+            fd.setUserExistsException(value);
+            throw new UserExistsException_Exception(e.getMessage(), fd, e);
         }
     }
 

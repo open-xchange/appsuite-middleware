@@ -58,11 +58,10 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.MDC;
-import static  org.powermock.api.mockito.PowerMockito.*;
+import static org.powermock.api.mockito.PowerMockito.*;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.core.spi.FilterReply;
-
 
 /**
  * {@link ExtendedMDCFilterTest}
@@ -132,7 +131,7 @@ public class ExtendedMDCFilterTest {
             MDC.clear();
         }
     }
-    
+
     @Test
     public void testUserFilterWithLoggingLevel() {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
@@ -141,10 +140,10 @@ public class ExtendedMDCFilterTest {
         filter.addLogger("com.openexchange.a", Level.DEBUG);
         Logger loggerA = mock(Logger.class);
         when(loggerA.getName()).thenReturn("com.openexchange.a.some.logger");
-        
+
         Logger loggerB = mock(Logger.class);
         when(loggerB.getName()).thenReturn("com.openexchange.b.some.logger");
-        
+
         Assert.assertEquals(FilterReply.NEUTRAL, filter.decide(null, loggerA, Level.TRACE, "Some message", null, null));
 
         try {

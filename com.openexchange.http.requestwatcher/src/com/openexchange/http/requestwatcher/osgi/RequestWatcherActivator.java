@@ -66,6 +66,7 @@ public class RequestWatcherActivator extends HousekeepingActivator {
         super();
     }
 
+    /** The request watcher instance */
     private volatile RequestWatcherServiceImpl requestWatcher;
 
     @Override
@@ -75,27 +76,26 @@ public class RequestWatcherActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws OXException {
-        final Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
-        log.info("Starting RequestWatcher.");
+        Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
+        log.info("Starting request watcher.");
 
-        Services.setServiceLookup(this);
-
-        final RequestWatcherServiceImpl requestWatcher = new RequestWatcherServiceImpl();
+        RequestWatcherServiceImpl requestWatcher = new RequestWatcherServiceImpl(getService(ConfigurationService.class), getService(TimerService.class));
         this.requestWatcher = requestWatcher;
         registerService(RequestWatcherService.class, requestWatcher);
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        final Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
-        log.info("Stopping RequestWatcher.");
+        Logger log = org.slf4j.LoggerFactory.getLogger(RequestWatcherActivator.class);
+        log.info("Stopping request watcher.");
+
         // Stop the Watcher
-        final RequestWatcherServiceImpl requestWatcher = this.requestWatcher;
+        RequestWatcherServiceImpl requestWatcher = this.requestWatcher;
         if (null != requestWatcher) {
             requestWatcher.stopWatching();
             this.requestWatcher = null;
         }
-        Services.setServiceLookup(null);
+
         super.stopBundle();
     }
 

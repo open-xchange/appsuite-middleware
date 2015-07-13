@@ -57,6 +57,13 @@ package com.openexchange.java;
 public interface Stringer extends CharSequence, Appendable, java.io.Serializable {
 
     /**
+     * Checks if this Stringer's content is empty, that is length is lower than 1 or does only contain white-space characters.
+     *
+     * @return <code>true</code> if empty; otherwise <code>false</code>
+     */
+    public boolean isEmpty();
+
+    /**
      * Returns the length (character count).
      *
      * @return the length of the sequence of characters currently represented by this object

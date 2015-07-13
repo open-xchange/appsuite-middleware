@@ -1,14 +1,14 @@
-# Anneli Axelsson <anneli@bureau-cornavin.com>, 2008,2009.
-# Samantha Whitsitt <atanicama@gmail.com>, 2008.
-# Arve Eriksson <031299870@telia.com>, 2013, 2014.
+# Anneli Axelsson <anneli@bureau-cornavin.com>, 2008, 2009.
+# Samantha Whitsitt <samantha@bureau-cornavin.com>, 2008.
+# Arve Eriksson <arve@bureau-cornavin.com>, 2013, 2014, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-10-08 18:21+0200\n"
-"Last-Translator: Arve Eriksson <031299870@telia.com>\n"
-"Language-Team: Swedish <kde-i18n-doc@kde.org>\n"
+"PO-Revision-Date: 2015-02-03 18:38+0100\n"
+"Last-Translator: Arve Eriksson\n"
+"Language-Team: Swedish <ox@bureau-cornavin.com>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1608,8 +1608,7 @@ msgid ""
 "The file name \"%1$s\" is conflicting with an equally named directory at "
 "\"%2$s\"."
 msgstr ""
-"Filnamnet \"%1$s\" står i konflikt med en mapp med samma namn i "
-"\"%2$s\"."
+"Filnamnet \"%1$s\" står i konflikt med en mapp med samma namn i \"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:90
 msgid ""
@@ -2367,6 +2366,21 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:85
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "ZIP-arkivet överstiger den största tillåtna storleken %1$s"
+
+#. The file storage account is currently not accessible.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+msgid "The file storage account is currently not accessible."
+msgstr "Fillagringskontot är inte tillgängligt just nu."
+
+#. The folder \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "Mappen \"%1$s\" kan inte flyttas till \"%2$s\"."
+
+#. The file \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "Filen \"%1$s\" kan inte flyttas till \"%2$s\"."
 
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
@@ -3868,6 +3882,37 @@ msgstr ""
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "Ett problem uppstod när en anslutning upprättades mot fjärrservern."
 
+#. You need to grant additional %1$s permissions to access the resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+msgid "You need to grant additional %1$s permissions to access the resource."
+msgstr "Du behöver ge ytterligare %1$s-rättigheter för att komma åt resursen."
+
+#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+msgid ""
+"Your '%1$s' access was rejected. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Du nekades åtkomst till '%1$s'. Du måste kontrollera serverns behörighet "
+"igen innan du kan använda ditt konto med det nya lösenordet. För att göra "
+"det, gå "
+"till Inställningar -> Mina sociala inställningar -> Konton. Försök sedan på "
+"nytt."
+
+#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+msgid ""
+"Your '%1$s' access was revoked. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Din åtkomst till '%1$s' drogs in. Du måste kontrollera serverns behörighet "
+"igen innan du kan använda ditt konto med det nya lösenordet. För att göra "
+"det, gå "
+"till Inställningar -> Mina sociala inställningar -> Konton. Försök sedan på "
+"nytt."
+
 #. *
 #. * New password too short.
 #.
@@ -5306,6 +5351,13 @@ msgstr "Servern tillfälligt nere för underhåll. Försök igen senare."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
 msgstr "Kunde inte ansluta till kontextlagringen."
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+msgid "Denied concurrent update of user attributes."
+msgstr "Avslog samtidig uppdatering av användarattribut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
@@ -7479,6 +7531,24 @@ msgstr ""
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Anslutningen stängdes oväntat. Försök igen."
 
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr ""
+"Förfrågan nekades eftersom filstorleken (%1$s) överstiger den maximala "
+"konfigurerade storleken %2$s."
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr ""
+"Förfrågan nekad eftersom filstorleken överstiger den maximala konfigurerade "
+"storleken %1$s."
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -7793,6 +7863,18 @@ msgstr "Servern %1$s har inte stöd för åtkomst över en säker anslutning."
 msgid "Mail access is disabled for context administrator."
 msgstr "E-poståtkomst är avaktiverad för kontextens administratör."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr ""
+"Maximalt antal filer som kan bifogas i e-post överskreds. Maximum är %1$s."
+
+#. The client request is not permitted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+msgid "The client request is not permitted."
+msgstr "Klientbegäran tillåts inte."
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -7929,23 +8011,43 @@ msgid "Message could not be sent to the following recipients: %1$s (%2$s)"
 msgstr "Meddelandet kunde inte skickas till följande mottagare: %1$s (%2$s)"
 
 #. *
-#. * Lost connection to mail server.
+#. * Message could not be sent. Error message from mail transport server: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s"
+msgstr ""
+"Meddelandet kunde inte skickas. Felmeddelande från e-posttransportserver: %1$s"
+
+#. *
+#. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s "
+"(%2$s)"
+msgstr ""
+"Meddelandet kunde inte skickas. Felmeddelande från e-posttransportserver: %"
+"1$s (%2$s)"
+
+#. *
+#. * Lost connection to mail server.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server."
 msgstr "Förlorade anslutningen till e-postservern."
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s."
 msgstr "Förlorade anslutningen till e-postservern %1$s."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect."
@@ -7956,34 +8058,34 @@ msgstr ""
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The allowed quota on mail server exceeded."
 msgstr "Kvoten på e-postservern har överskridits."
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "Kvoten på e-postservern \"%1$s\" har överskridits."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The mailbox is already in use. Please try again later."
 msgstr "Den brevlådan används just nu. Försök igen senare."
 
 #. *
 #. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr "Brevlådan på e-postservern %1$s används just nu. Försök igen senare."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8503,6 +8605,14 @@ msgstr ""
 msgid "Missing the following field in JSON data: %1$s"
 msgstr "Följande fält saknas i JSON-data: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
+msgstr ""
+"HTML-innehållet är för stort, och kan därför inte visas säkert. Om du vill se "
+"det ändå, ladda ner dess innehåll."
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
@@ -8679,6 +8789,11 @@ msgstr ""
 "Tjänsteleverantören bad om en identitetskontroll. Detta händer med vissa "
 "konton, och är inget vi kan göra något åt. Det ligger helt hos leverantören. "
 "Av den anledningen kan inte prenumerationen genomföras."
+
+#. You already have such a subscription.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+msgid "You already have such a subscription."
+msgstr "Du har redan en prenumeration här."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."

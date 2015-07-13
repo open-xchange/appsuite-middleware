@@ -162,10 +162,6 @@ public class ReplicationMonitor {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
-                    if (DBPoolingExceptionCodes.TRANSACTION_MISSING.equals(e)) {
-                        // No such context exists
-                        throw e;
-                    }
                     LOG.warn("", e);
                     if (10 == tries) {
                         // Do a fall back to the master.
@@ -378,7 +374,7 @@ public class ReplicationMonitor {
 
     void increaseTransactionCounter(AssignmentImpl assign, Connection con) {
         try {
-            if (!active || con.isClosed()) {
+            if (!active || assign.getWritePoolId() == assign.getReadPoolId() || con.isClosed()) {
                 return;
             }
         } catch (SQLException e) {
@@ -390,7 +386,7 @@ public class ReplicationMonitor {
     }
 
     public void increaseInCurrentTransaction(AssignmentImpl assign, Connection delegate, ConnectionState state) {
-        if (!active) {
+        if (!active || assign.getWritePoolId() == assign.getReadPoolId()) {
             return;
         }
         try {

@@ -75,6 +75,18 @@ public class StateManager extends AbstractRealtimeJanitor {
 
     private final ConcurrentHashMap<ID, StanzaTransmitter> transmitters = new ConcurrentHashMap<ID, StanzaTransmitter>();
 
+    private boolean isShutDown = false;
+
+    
+    /**
+     * Inform the {@link StateManager} about a shutdown
+     *
+     * @param isShutDown true if the StateManager should be should down
+     */
+    public void shutDown() {
+        this.isShutDown= true;
+    }
+
     /**
      * Retrieves stored {@link RTClientState} or creates a new entry for the given id.
      * @param id The id
@@ -122,32 +134,34 @@ public class StateManager extends AbstractRealtimeJanitor {
      * @param timestamp - The timestamp to compare the lastSeen value to
      */
     public void timeOutStaleStates(long timestamp) {
-        GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
-        DistributedGroupManager groupManager = JSONServiceRegistry.getInstance().getService(DistributedGroupManager.class);
-        for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
-            ID client = state.getId();
-            Duration inactivity = state.getInactivityDuration();
-            LOG.debug("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
-            if(groupManager != null) {
-                try {
-                    groupManager.setInactivity(client, inactivity);
-                } catch(OXException oxe) {
-                    LOG.error("Error while trying to set inactivity of client {}", client, oxe);
-                }
-            } else {
-                LOG.error("Unable to inform GroupManager about inactivity duration. GroupManagerService is missing!");
-            }
-            if (state.isTimedOut(timestamp)) {
-                /*
-                 * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
-                 * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
-                 * it cluster-wide.
-                 */
-                LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
-                if(globalRealtimeCleanup != null) {
-                    globalRealtimeCleanup.cleanForId(state.getId());
+        if (!isShutDown) {
+            GlobalRealtimeCleanup globalRealtimeCleanup = JSONServiceRegistry.getInstance().getService(GlobalRealtimeCleanup.class);
+            DistributedGroupManager groupManager = JSONServiceRegistry.getInstance().getService(DistributedGroupManager.class);
+            for (RTClientState state : new ArrayList<RTClientState>(states.values())) {
+                ID client = state.getId();
+                Duration inactivity = state.getInactivityDuration();
+                LOG.debug("Client {} is inactive since {} seconds", client, inactivity.getValueInS());
+                if (groupManager != null) {
+                    try {
+                        groupManager.setInactivity(client, inactivity);
+                    } catch (OXException oxe) {
+                        LOG.error("Error while trying to set inactivity of client {}", client, oxe);
+                    }
                 } else {
-                    LOG.error("Unable to cleanup for id {}. GLobalRealtimeCleanupService is missing!", client);
+                    LOG.error("Unable to inform GroupManager about inactivity duration. GroupManagerService is missing!");
+                }
+                if (state.isTimedOut(timestamp)) {
+                    /*
+                     * The client timed out: if he'd be still active and was just rerouted to another backend the cleanup would have already
+                     * happened during enrol on the other node. As we reached this code there was no cleanup yet and we still have to do
+                     * it cluster-wide.
+                     */
+                    LOG.debug("State for id {} is timed out. Last seen: {}", state.getId(), state.getLastSeen());
+                    if (globalRealtimeCleanup != null) {
+                        globalRealtimeCleanup.cleanForId(state.getId());
+                    } else {
+                        LOG.error("Unable to cleanup for id {}. GLobalRealtimeCleanupService is missing!", client);
+                    }
                 }
             }
         }

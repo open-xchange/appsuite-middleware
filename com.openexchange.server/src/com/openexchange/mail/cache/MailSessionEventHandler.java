@@ -55,10 +55,8 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.event.EventPool;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -81,7 +79,7 @@ public final class MailSessionEventHandler implements EventHandler {
      * @return The topics
      */
     public static String[] getTopics() {
-        return new String[] { SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER };
+        return new String[] { SessiondEventConstants.TOPIC_REMOVE_SESSION, SessiondEventConstants.TOPIC_REMOVE_DATA, SessiondEventConstants.TOPIC_REMOVE_CONTAINER, SessiondEventConstants.TOPIC_LAST_SESSION };
     }
 
     /**
@@ -126,6 +124,18 @@ public final class MailSessionEventHandler implements EventHandler {
                     for (final Session session : sessionContainer.values()) {
                         dropSessionCaches(session);
                     }
+                } else if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                    Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                    if (null != contextId) {
+                        Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                        if (null != userId) {
+                            final EventPool eventPool = EventPool.getInstance();
+                            if (null != eventPool) {
+                                eventPool.removeByUser(userId.intValue(), contextId.intValue());
+                                LOG.debug("Removed all pooled mail events for user {} in context {}", userId, contextId);
+                            }
+                        }
+                    }
                 }
             } catch (final Exception e) {
                 LOG.error("Error while handling session event \"{}\"", topic, e);
@@ -151,17 +161,6 @@ public final class MailSessionEventHandler implements EventHandler {
                 LOG.error("", e);
             }
             LOG.debug("All session-related caches cleared for removed session {}", session.getSessionID());
-            /*
-             * Pooled events: Last session removed?
-             */
-            final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-            if (null != sessiondService && null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-                final EventPool eventPool = EventPool.getInstance();
-                if (null != eventPool) {
-                    eventPool.removeByUser(userId, contextId);
-                    LOG.debug("Removed all pooled mail events for user {} in context {}", userId, contextId);
-                }
-            }
         }
 
     } // End of CustomRunnable

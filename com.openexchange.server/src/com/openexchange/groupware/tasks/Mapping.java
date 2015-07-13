@@ -470,7 +470,7 @@ public final class Mapping {
             }
             @Override
             public String getDisplayName() {
-                throw new UnsupportedOperationException();
+                return AttributeNames.TITLE;
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -517,7 +517,7 @@ public final class Mapping {
             }
             @Override
             public String getDisplayName() {
-                throw new UnsupportedOperationException();
+                return AttributeNames.DESCRIPTION;
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -704,7 +704,7 @@ public final class Mapping {
             }
             @Override
             public String getDisplayName() {
-                throw new UnsupportedOperationException();
+                return AttributeNames.CURRENCY;
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -752,7 +752,7 @@ public final class Mapping {
             }
             @Override
             public String getDisplayName() {
-                throw new UnsupportedOperationException();
+                return AttributeNames.TRIP_METER;
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -800,7 +800,7 @@ public final class Mapping {
             }
             @Override
             public String getDisplayName() {
-                throw new UnsupportedOperationException();
+                return AttributeNames.BILLING_INFORMATION;
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,
@@ -848,7 +848,7 @@ public final class Mapping {
             }
             @Override
             public String getDisplayName() {
-                throw new UnsupportedOperationException();
+                return AttributeNames.COMPANIES;
             }
             @Override
             public void toDB(final PreparedStatement stmt, final int pos,

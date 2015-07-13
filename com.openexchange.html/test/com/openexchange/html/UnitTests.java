@@ -78,9 +78,9 @@ import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
     Bug36412Test.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,
-    FilterJerichoHandlerTest.class
+    FilterJerichoHandlerTest.class,
+    com.openexchange.html.internal.SaneScriptTagsTest.class
 })
-
 public class UnitTests {
 
     private UnitTests() {

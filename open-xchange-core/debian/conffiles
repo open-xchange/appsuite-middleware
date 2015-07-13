@@ -1,3 +1,5 @@
+opt/open-xchange/etc/hazelcast/serverTokenHz.properties
+opt/open-xchange/etc/hazelcast/credentials.properties
 opt/open-xchange/etc/attachment.properties
 opt/open-xchange/etc/autoconfig.properties
 opt/open-xchange/etc/cache.ccf
@@ -31,6 +33,8 @@ opt/open-xchange/etc/logback.xml
 opt/open-xchange/etc/mailcache.ccf
 opt/open-xchange/etc/mail.properties
 opt/open-xchange/etc/mail-push.properties
+opt/open-xchange/etc/mailresolver.properties
+opt/open-xchange/etc/external-domains.properties
 opt/open-xchange/etc/management.properties
 opt/open-xchange/etc/messaging.properties
 opt/open-xchange/etc/mime.types
@@ -60,6 +64,7 @@ opt/open-xchange/etc/transport.properties
 opt/open-xchange/etc/tokens.properties
 opt/open-xchange/etc/user.properties
 opt/open-xchange/etc/whitelist.properties
+opt/open-xchange/etc/meta/infostore.yml
 opt/open-xchange/etc/meta/ui.yml
 opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties

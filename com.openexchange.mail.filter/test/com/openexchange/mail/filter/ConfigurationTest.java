@@ -6,10 +6,10 @@ import org.junit.Before;
 import org.junit.Test;
 import com.openexchange.exception.OXException;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.osgi.Activator;
+import com.openexchange.mailfilter.osgi.MailFilterActivator;
 
 
-public class ConfigurationTest extends Activator {
+public class ConfigurationTest extends MailFilterActivator {
 
     @Before
     public void setUp() throws Exception {

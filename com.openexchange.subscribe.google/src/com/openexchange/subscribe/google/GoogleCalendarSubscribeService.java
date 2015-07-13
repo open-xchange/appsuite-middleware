@@ -191,10 +191,11 @@ public class GoogleCalendarSubscribeService extends AbstractGoogleSubscribeServi
         return new LinkedList<CalendarDataObject>();
     }
 
-    private void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException {
+    private void parseAndAdd(final Events events, final CalendarEventParser parser, final List<CalendarDataObject> singleAppointments, final List<CalendarDataObject> series, final List<CalendarDataObject> changeExceptions, final List<CalendarDataObject> deleteExceptions) throws OXException, IOException {
         for (Event event : events.getItems()) {
             // Consider only events with an organizer; the rest are only updates on status, e.g. delete exceptions (handle below)
             final CalendarDataObject calendarObject = new CalendarDataObject();
+            LOG.debug("Parsing event: {}", event.toPrettyString());
             if (event.getOrganizer() != null) {
                 parser.parseCalendarEvent(event, calendarObject);
                 if (event.getRecurrence() != null) {

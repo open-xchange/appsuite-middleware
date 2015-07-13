@@ -118,11 +118,7 @@ public class LastLoginRecorder implements LoginHandlerService {
             return;
         }
         // Set attribute and add current time stamp
-        try {
-            userService.setAttribute("client:" + client, Long.toString(System.currentTimeMillis()), origUser.getId(), context);
-        } catch (final OXException e) {
-            throw e;
-        }
+        userService.setAttribute("client:" + client, Long.toString(System.currentTimeMillis()), origUser.getId(), context);
     }
 
     private static boolean isWhitelistedClient(String client) {

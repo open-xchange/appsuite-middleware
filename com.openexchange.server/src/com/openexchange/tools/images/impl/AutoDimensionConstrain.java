@@ -50,7 +50,6 @@
 package com.openexchange.tools.images.impl;
 
 import java.awt.Dimension;
-import com.mortennobel.imagescaling.DimensionConstrain;
 
 
 /**
@@ -58,7 +57,7 @@ import com.mortennobel.imagescaling.DimensionConstrain;
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class AutoDimensionConstrain extends DimensionConstrain {
+public class AutoDimensionConstrain implements DimensionConstrain {
 
     private final int width;
 

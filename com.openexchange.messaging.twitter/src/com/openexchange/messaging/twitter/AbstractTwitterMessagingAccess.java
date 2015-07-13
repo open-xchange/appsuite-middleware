@@ -55,7 +55,7 @@ import java.util.concurrent.locks.Lock;
 import com.openexchange.exception.OXException;
 import com.openexchange.messaging.MessagingAccount;
 import com.openexchange.messaging.MessagingAccountManager;
-import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
+import com.openexchange.messaging.twitter.osgi.Services;
 import com.openexchange.messaging.twitter.session.TwitterAccessRegistry;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
@@ -75,15 +75,10 @@ import com.openexchange.twitter.TwitterService;
 public abstract class AbstractTwitterMessagingAccess {
 
     protected final MessagingAccount account;
-
     protected final TwitterService twitterService;
-
     protected final TwitterAccess twitterAccess;
-
     protected final Session session;
-
     protected final String secret;
-
     protected boolean connected;
 
     /**
@@ -95,13 +90,8 @@ public abstract class AbstractTwitterMessagingAccess {
         super();
         this.session = session;
         this.account = account;
-        try {
-            twitterService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(TwitterService.class, true);
-            secret = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SecretService.class, true).getSecret(session);
-
-        } catch (final OXException e) {
-            throw e;
-        }
+        twitterService = Services.getService(TwitterService.class);
+        secret = Services.getService(SecretService.class).getSecret(session);
         final int contextId = session.getContextId();
         final int userId = session.getUserId();
         final int accountId = account.getId();
@@ -118,7 +108,7 @@ public abstract class AbstractTwitterMessagingAccess {
                  */
                 final OAuthAccount oAuthAccount;
                 {
-                    final OAuthService oAuthService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(OAuthService.class, true);
+                    final OAuthService oAuthService = Services.getService(OAuthService.class);
                     /*
                      * Check presence of TwitterConstants.TWITTER_OAUTH_ACCOUNT
                      */

@@ -59,6 +59,7 @@ import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.container.CommonObject;
@@ -131,6 +132,14 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
                 LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
                 retry = true;
             }
+        } else if (Tools.isIncorrectString(e)) {
+            /*
+             * handle by removing problematic characters
+             */
+            if (replaceIncorrectStrings(e, "")) {
+                LOG.warn("{}: {} - removing problematic characters and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
         } else if ("APP-0093".equals(e.getErrorCode())) {
             /*
              * 'Moving a recurring appointment to another folder is not supported.'
@@ -175,6 +184,20 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
             }
         }
         return hasTrimmed;
+    }
+
+    protected abstract boolean replaceIncorrectStrings(IncorrectString incorrectString, String replacement);
+
+    private boolean replaceIncorrectStrings(OXException e, String replacement) {
+        boolean hasReplaced = false;
+        if (null != e.getProblematics()) {
+            for (ProblematicAttribute problematic : e.getProblematics()) {
+                if (IncorrectString.class.isInstance(problematic)) {
+                    hasReplaced |= this.replaceIncorrectStrings((IncorrectString) problematic, replacement);
+                }
+            }
+        }
+        return hasReplaced;
     }
 
     protected abstract String getFileExtension();

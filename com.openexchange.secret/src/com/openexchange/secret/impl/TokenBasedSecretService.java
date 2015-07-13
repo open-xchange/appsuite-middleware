@@ -49,9 +49,6 @@
 
 package com.openexchange.secret.impl;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.secret.RankingAwareSecretService;
 import com.openexchange.secret.SecretService;
@@ -65,32 +62,27 @@ import com.openexchange.session.Session;
  */
 public class TokenBasedSecretService implements RankingAwareSecretService {
 
-    /**
-     * The random.
-     */
+    /** The random. */
     public static final AtomicReference<String> RANDOM = new AtomicReference<String>();
 
-    private static final List<Token> DEFAULT_TOKEN_LIST = new CopyOnWriteArrayList<Token>(Arrays.<Token> asList(
-        ReservedToken.USER_ID,
-        new LiteralToken("@"),
-        ReservedToken.CONTEXT_ID));
+    // --------------------------------------------------------------------------------------------------------------------------------
 
     private volatile SecretService impl;
-
     private final int ranking;
+
     /**
      * Initializes a new {@link TokenBasedSecretService}.
      */
-    public TokenBasedSecretService(final List<Token> tokenList) {
+    public TokenBasedSecretService(TokenRow tokenRow) {
         super();
         ranking = Integer.MIN_VALUE;
-        applyTokenList(tokenList);
+        applyTokenRow(tokenRow);
     }
 
     /**
      * Initializes a new {@link TokenBasedSecretService}.
      */
-    public TokenBasedSecretService(final TokenList tokenList) {
+    public TokenBasedSecretService(TokenList tokenList) {
         super();
         ranking = Integer.MIN_VALUE;
         this.impl = tokenList.peekLast();
@@ -102,22 +94,20 @@ public class TokenBasedSecretService implements RankingAwareSecretService {
     }
 
     /**
-     * Sets the token list
+     * Sets the token row
      *
-     * @param tokenList The token list to set
+     * @param tokenRow The token row to set
      */
-    public void setTokenList(final List<Token> tokenList) {
-        applyTokenList(tokenList);
+    public void setTokenList(TokenRow tokenRow) {
+        applyTokenRow(tokenRow);
     }
 
-    private void applyTokenList(final List<Token> tokenList) {
-        final List<Token> tl =
-            ((null == tokenList) || tokenList.isEmpty()) ? DEFAULT_TOKEN_LIST : new CopyOnWriteArrayList<Token>(tokenList);
-        final int size = tl.size();
+    private void applyTokenRow(TokenRow tokenRow) {
+        final TokenRow tr = (null == tokenRow || tokenRow.isEmpty()) ? TokenRow.DEFAULT_TOKEN_ROW : tokenRow;
+        final int size = tr.size();
         if (1 == size) {
+            final Token token = tr.get(0);
             impl = new SecretService() {
-
-                private final Token token = tl.get(0);
 
                 @Override
                 public String getSecret(final Session session) {
@@ -133,9 +123,9 @@ public class TokenBasedSecretService implements RankingAwareSecretService {
             impl = new SecretService() {
 
                 @Override
-                public String getSecret(final Session session) {
-                    final StringBuilder sb = new StringBuilder(16);
-                    for (final Token token : tl) {
+                public String getSecret(Session session) {
+                    StringBuilder sb = new StringBuilder(16);
+                    for (Token token : tr) {
                         sb.append(token.getFrom(session));
                     }
                     return sb.toString();
@@ -143,13 +133,13 @@ public class TokenBasedSecretService implements RankingAwareSecretService {
 
                 @Override
                 public String toString() {
-                    if (tl.isEmpty()) {
+                    if (tr.isEmpty()) {
                         return "<empty>";
                     }
-                    final StringBuilder sb = new StringBuilder(32);
-                    sb.append(tl.get(0));
+                    StringBuilder sb = new StringBuilder(32);
+                    sb.append(tr.get(0));
                     for (int i = 1; i < size; i++) {
-                        sb.append(" + ").append(tl.get(i));
+                        sb.append(" + ").append(tr.get(i));
                     }
                     return sb.toString();
                 }
@@ -158,12 +148,14 @@ public class TokenBasedSecretService implements RankingAwareSecretService {
     }
 
     @Override
-    public String getSecret(final Session session) {
-        return impl.getSecret(session);
+    public String getSecret(Session session) {
+        SecretService impl = this.impl;
+        return null == impl ? null : impl.getSecret(session);
     }
 
     @Override
     public String toString() {
+        SecretService impl = this.impl;
         return null == impl ? "<not-initialized>" : impl.toString();
     }
 

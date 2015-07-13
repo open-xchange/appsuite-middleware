@@ -51,9 +51,11 @@ package com.openexchange.ajax.requesthandler;
 
 import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -69,6 +71,37 @@ public class Dispatchers {
      */
     private Dispatchers() {
         super();
+    }
+
+    /**
+     * Triggers the given dispatcher to perform specified AJAX request data using given session.
+     *
+     * @param requestData The AJAX request data
+     * @param dispatcher The dispatcher to use
+     * @param session The associated session
+     * @return The result
+     * @throws OXException If operation fails
+     * @see #sendResponse(DispatcherResult, HttpServletRequest, HttpServletResponse)
+     */
+    public static DispatcherResult perform(AJAXRequestData requestData, Dispatcher dispatcher, ServerSession session) throws OXException {
+        AJAXState ajaxState = dispatcher.begin();
+        return new DispatcherResult(requestData, dispatcher.perform(requestData, ajaxState, session), ajaxState, dispatcher);
+    }
+
+    /**
+     * Sends a proper response to requesting client after request has been orderly dispatched.
+     *
+     * @param result The dispatcher result
+     * @param httpRequest The associated HTTP Servlet request
+     * @param httpResponse The associated HTTP Servlet response
+     * @see #perform(AJAXRequestData, Dispatcher, ServerSession)
+     */
+    public static void sendResponse(DispatcherResult result, HttpServletRequest httpRequest, HttpServletResponse httpResponse) {
+        try {
+            DispatcherServlet.sendResponse(result.getRequestData(), result.getRequestResult(), httpRequest, httpResponse);
+        } finally {
+            result.close();
+        }
     }
 
     /**

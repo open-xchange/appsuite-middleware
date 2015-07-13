@@ -68,28 +68,25 @@ public final class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public void create(final Context ctx, final User user, final Group group)
-        throws OXException {
-        final Create create = new Create(ctx, user, group);
+    public void create(Context ctx, User user, Group group, boolean checkI18nNames) throws OXException {
+        Create create = new Create(ctx, user, group, checkI18nNames);
         create.perform();
     }
 
     @Override
-    public void update(final Context ctx, final User user, final Group group,
-        final Date lastRead) throws OXException {
-        final Update update = new Update(ctx, user, group, lastRead);
+    public void update(Context ctx, User user, Group group, Date lastRead, boolean checkI18nNames) throws OXException {
+        Update update = new Update(ctx, user, group, lastRead, checkI18nNames);
         update.perform();
     }
 
     @Override
-    public void delete(final Context ctx, final User user, final int groupId,
-        final Date lastRead) throws OXException {
-        final Delete delete = new Delete(ctx, user, groupId, lastRead);
+    public void delete(Context ctx, User user, int groupId, Date lastRead) throws OXException {
+        Delete delete = new Delete(ctx, user, groupId, lastRead);
         delete.perform();
     }
 
     @Override
-    public Group getGroup(final Context ctx, final int groupId) throws OXException {
+    public Group getGroup(Context ctx, int groupId) throws OXException {
         return GroupStorage.getInstance().getGroup(groupId, ctx);
     }
 }

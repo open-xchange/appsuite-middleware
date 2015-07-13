@@ -46,6 +46,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.rss.actions;
 
 import java.io.IOException;
@@ -97,18 +98,18 @@ public class RssAction implements AJAXActionService {
     private static final int NOT_FOUND = 404;
     private static final int FORBIDDEN = 403;
 
-	private final TimoutHttpURLFeedFetcher fetcher;
-	private final HashMapFeedInfoCache feedCache;
+    private final TimoutHttpURLFeedFetcher fetcher;
+    private final HashMapFeedInfoCache feedCache;
 
-	/**
-	 * Initializes a new {@link RssAction}.
-	 */
-	public RssAction () {
-		feedCache = new HashMapFeedInfoCache();
-		fetcher = new TimoutHttpURLFeedFetcher(10000, 30000, feedCache);
-	}
+    /**
+     * Initializes a new {@link RssAction}.
+     */
+    public RssAction() {
+        feedCache = new HashMapFeedInfoCache();
+        fetcher = new TimoutHttpURLFeedFetcher(10000, 30000, feedCache);
+    }
 
-	@Override
+    @Override
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String sort = request.getParameter("sort"); // DATE or SOURCE
         if (sort == null) {
@@ -120,88 +121,87 @@ public class RssAction implements AJAXActionService {
         }
 
         List<OXException> warnings = new LinkedList<OXException>();
-
         List<SyndFeed> feeds = new LinkedList<SyndFeed>();
-        {
-            String urlString = "";
-            try {
-                final JSONObject data = (JSONObject) request.requireData();
-                final JSONArray test = data.optJSONArray("feedUrl");
 
-                final List<URL> urls;
-                if (test == null) {
-                    urlString = request.checkParameter("feedUrl");
-                    urlString = urlDecodeSafe(urlString);
-                    urls = Collections.singletonList(new URL(prepareUrlString(urlString)));
-                } else {
-                    final int length = test.length();
-                    urls = new ArrayList<URL>(length);
-                    for (int i = 0; i < length; i++) {
-                        urlString = test.getString(i);
-                        urls.add(new URL(prepareUrlString(urlString)));
-                    }
+        String urlString = "";
+        try {
+            JSONObject data = (JSONObject) request.requireData();
+            JSONArray test = data.optJSONArray("feedUrl");
+
+            List<URL> urls;
+            if (test == null) {
+                urlString = request.checkParameter("feedUrl");
+                urlString = urlDecodeSafe(urlString);
+                urls = Collections.singletonList(new URL(prepareUrlString(urlString)));
+            } else {
+                final int length = test.length();
+                urls = new ArrayList<URL>(length);
+                for (int i = 0; i < length; i++) {
+                    urlString = test.getString(i);
+                    urls.add(new URL(prepareUrlString(urlString)));
                 }
-                for (final URL url : urls) {
-                    try {
-                        feeds.add(fetcher.retrieveFeed(url));
-                    } catch (final java.net.SocketTimeoutException e) {
-                        throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
-                    } catch (final ParsingFeedException parsingException) {
-                        final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
+            }
+            for (URL url : urls) {
+                try {
+                    feeds.add(fetcher.retrieveFeed(url));
+                } catch (java.net.SocketTimeoutException e) {
+                    throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
+                } catch (ParsingFeedException parsingException) {
+                    final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
+                    if (1 == urls.size()) {
+                        throw oxe;
+                    }
+                    oxe.setCategory(Category.CATEGORY_WARNING);
+                    warnings.add(oxe);
+                } catch (FeedException e) {
+                    LOG.warn("Could not load RSS feed from: {}", url, e);
+                } catch (FetcherException e) {
+                    int responseCode = e.getResponseCode();
+                    if (responseCode <= 0) {
+                        // No response code available
+                        LOG.warn("Could not load RSS feed from: {}", url, e);
+                    }
+                    if (NOT_FOUND == responseCode) {
+                        LOG.debug("Resource could not be found: {}", url, e);
+                    } else if (FORBIDDEN == responseCode) {
+                        LOG.debug("Authentication required for resource: {}", url, e);
+                    } else if (responseCode >= 500 && responseCode < 600) {
+                        OXException oxe = RssExceptionCodes.RSS_HTTP_ERROR.create(e, Integer.valueOf(responseCode), url);
                         if (1 == urls.size()) {
                             throw oxe;
                         }
                         oxe.setCategory(Category.CATEGORY_WARNING);
                         warnings.add(oxe);
-                    } catch (final FeedException e) {
+                    } else {
                         LOG.warn("Could not load RSS feed from: {}", url, e);
-                    } catch (final FetcherException e) {
-                        final int responseCode = e.getResponseCode();
-                        if (responseCode <= 0) {
-                            // No response code available
-                            LOG.warn("Could not load RSS feed from: {}", url, e);
-                        }
-                        if (NOT_FOUND == responseCode) {
-                            LOG.debug("Resource could not be found: {}", url, e);
-                        } else if (FORBIDDEN == responseCode) {
-                            LOG.debug("Authentication required for resource: {}", url, e);
-                        } else if (responseCode >= 500 && responseCode < 600) {
-                            final OXException oxe = RssExceptionCodes.RSS_HTTP_ERROR.create(e, Integer.valueOf(responseCode), url);
-                            if (1 == urls.size()) {
-                                throw oxe;
-                            }
-                            oxe.setCategory(Category.CATEGORY_WARNING);
-                            warnings.add(oxe);
-                        } else {
-                            LOG.warn("Could not load RSS feed from: {}", url, e);
-                        }
                     }
+                } catch (IllegalArgumentException e) {
+                    if (!"Invalid document".equals(e.getMessage())) {
+                        throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
+                    }
+                    // There is no parser for current document
+                    LOG.warn("Could not load RSS feed from: {}", url);
                 }
-
-            } catch (final UnsupportedEncodingException e) {
-                /* yeah, right... not happening for UTF-8 */
-            } catch (final MalformedURLException e) {
-                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
-            } catch (final IllegalArgumentException e) {
-                throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
-            } catch (final IOException e) {
-                throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
-            } catch (final JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
+
+        } catch (UnsupportedEncodingException e) {
+            /* yeah, right... not happening for UTF-8 */
+        } catch (MalformedURLException e) {
+            throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
+        } catch (IllegalArgumentException e) {
+            throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
         List<RssResult> results = new ArrayList<RssResult>(feeds.size());
         for (SyndFeed feed : feeds) {
             for (Object obj : feed.getEntries()) {
                 SyndEntry entry = (SyndEntry) obj;
-                RssResult result = new RssResult()
-                	.setAuthor(entry.getAuthor())
-                	.setSubject(getTitle(entry))
-                	.setUrl(entry.getLink())
-                	.setFeedUrl(feed.getLink())
-                	.setFeedTitle(feed.getTitle())
-                	.setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
+                RssResult result = new RssResult().setAuthor(entry.getAuthor()).setSubject(getTitle(entry)).setUrl(entry.getLink()).setFeedUrl(
+                    feed.getLink()).setFeedTitle(feed.getTitle()).setDate(entry.getUpdatedDate(), entry.getPublishedDate(), new Date());
 
                 if (feed.getImage() != null) {
                     result.setImageUrl(feed.getImage().getLink());
@@ -284,11 +284,11 @@ public class RssAction implements AJAXActionService {
         return sb.toString();
     }
 
-	private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
-	    if (isEmpty(urlString)) {
+    private static String urlDecodeSafe(final String urlString) throws MalformedURLException {
+        if (isEmpty(urlString)) {
             return urlString;
         }
-	    try {
+        try {
             final String ret = URLDecoder.decode(urlString, "ISO-8859-1");
             if (isAscii(ret)) {
                 return checkUrl(ret);
@@ -297,13 +297,13 @@ public class RssAction implements AJAXActionService {
         } catch (UnsupportedEncodingException e) {
             return urlString;
         }
-	}
+    }
 
-	/**
+    /**
      * Checks given URL string for syntactical correctness.
      *
      * @param sUrl The URL string
-	 * @throws MalformedURLException If URL string is invalid
+     * @throws MalformedURLException If URL string is invalid
      */
     private static String checkUrl(final String sUrl) throws MalformedURLException {
         if (isEmpty(sUrl)) {
@@ -318,7 +318,7 @@ public class RssAction implements AJAXActionService {
         return sUrl;
     }
 
-	/**
+    /**
      * Checks whether the specified string's characters are ASCII 7 bit
      *
      * @param s The string to check
@@ -333,19 +333,19 @@ public class RssAction implements AJAXActionService {
         return isAscci;
     }
 
-	private static String prepareUrlString(final String urlString) {
-	    if (isEmpty(urlString)) {
+    private static String prepareUrlString(final String urlString) {
+        if (isEmpty(urlString)) {
             return urlString;
         }
-	    final String tmp = urlString.toLowerCase(Locale.US);
+        final String tmp = urlString.toLowerCase(Locale.US);
         int pos = tmp.indexOf("http://");
         if (pos < 0) {
             pos = tmp.indexOf("https://");
         }
         return pos > 0 ? urlString.substring(pos) : urlString;
-	}
+    }
 
-	/** Checks for an empty string */
+    /** Checks for an empty string */
     private static boolean isEmpty(final String string) {
         if (null == string) {
             return true;

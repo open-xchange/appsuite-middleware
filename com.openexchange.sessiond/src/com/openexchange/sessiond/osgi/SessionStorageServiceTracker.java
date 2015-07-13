@@ -49,7 +49,6 @@
 
 package com.openexchange.sessiond.osgi;
 
-import static com.openexchange.sessiond.services.SessiondServiceRegistry.getServiceRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
@@ -68,19 +67,21 @@ import com.openexchange.sessionstorage.SessionStorageService;
 public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<SessionStorageService, SessionStorageService> {
 
     private final BundleContext context;
+    private final SessiondActivator activator;
 
     /**
      * Initializes a new {@link SessionStorageServiceTracker}.
      */
-    public SessionStorageServiceTracker(final BundleContext context) {
+    public SessionStorageServiceTracker(SessiondActivator activator, BundleContext context) {
         super();
+        this.activator = activator;
         this.context = context;
     }
 
     @Override
     public SessionStorageService addingService(final ServiceReference<SessionStorageService> reference) {
         final SessionStorageService service = context.getService(reference);
-        getServiceRegistry().addService(SessionStorageService.class, service);
+        activator.addService(SessionStorageService.class, service);
         final List<SessionControl> sessionControls = SessionHandler.getSessions();
         if (!sessionControls.isEmpty()) {
             final List<SessionImpl> sessions = new ArrayList<SessionImpl>(sessionControls.size());
@@ -99,7 +100,7 @@ public class SessionStorageServiceTracker implements ServiceTrackerCustomizer<Se
 
     @Override
     public void removedService(final ServiceReference<SessionStorageService> reference, final SessionStorageService service) {
-        getServiceRegistry().removeService(SessionStorageService.class);
+        activator.removeService(SessionStorageService.class);
         context.ungetService(reference);
     }
 

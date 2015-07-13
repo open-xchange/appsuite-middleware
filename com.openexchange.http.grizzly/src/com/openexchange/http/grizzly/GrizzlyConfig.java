@@ -118,6 +118,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Do we want to enable the AJP Filter for incoming requests */
     private boolean isAJPEnabled = false;
 
+
     // server properties
 
     /** Maximal age of a cookie in seconds. A negative value destroys the cookie when the browser exits. A value of 0 deletes the cookie. */
@@ -501,10 +502,10 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     public int getMaxNumberOfHttpSessions() {
         return maxNumberOfHttpSessions;
     }
-    
+
     /**
      * Get the maximum header size for an HTTP request in bytes.
-     * 
+     *
      * @return the maximum header size for an HTTP request in bytes.
      */
     public int getMaxHttpHeaderSize() {

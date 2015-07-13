@@ -52,8 +52,6 @@ package com.openexchange.messaging.twitter.session;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import com.openexchange.messaging.twitter.services.TwitterMessagingServiceRegistry;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.twitter.TwitterAccess;
 
 /**
@@ -142,11 +140,7 @@ public final class TwitterAccessRegistry {
      * @return <code>true</code> if a twitter access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessIfLast(final int contextId, final int userId) {
-        final SessiondService sessiondService = TwitterMessagingServiceRegistry.getServiceRegistry().getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            return (null != map.remove(SimpleKey.valueOf(contextId, userId)));
-        }
-        return false;
+        return (null != map.remove(SimpleKey.valueOf(contextId, userId)));
     }
 
     /**

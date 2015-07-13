@@ -166,11 +166,12 @@ public class MailLogicTools {
      * is needed.
      *
      * @param originalMails The original mails
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing the forward message
      * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails) throws OXException {
-        return MimeForward.getFowardMail(originalMails, session, accountId);
+    public MailMessage getFowardMessage(final MailMessage[] originalMails, final boolean setFrom) throws OXException {
+        return MimeForward.getFowardMail(originalMails, session, accountId, setFrom);
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------- //
@@ -185,11 +186,12 @@ public class MailLogicTools {
      *
      * @param originalMails The original mails
      * @param usm The user mail settings to use; leave to <code>null</code> to obtain from specified session
+     * @param setFrom <code>true</code> to set 'From' header; otherwise <code>false</code> to leave it
      * @return An instance of {@link MailMessage} representing the forward message
      * @throws OXException If forward message cannot be generated
      */
-    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm) throws OXException {
-        return MimeForward.getFowardMail(originalMails, session, accountId, usm);
+    public MailMessage getFowardMessage(final MailMessage[] originalMails, final UserSettingMail usm, boolean setFrom) throws OXException {
+        return MimeForward.getFowardMail(originalMails, session, accountId, usm, setFrom);
     }
 
 }

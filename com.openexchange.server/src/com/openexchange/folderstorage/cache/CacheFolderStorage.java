@@ -80,6 +80,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -125,7 +126,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements FolderStorage, FolderCacheInvalidationService {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -261,6 +262,30 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         if (service != null) {
             cacheService = null;
         }
+    }
+
+    @Override
+    public boolean reinitialize(String treeId, StorageParameters storageParameters) throws OXException {
+        boolean reinitialized = false;
+        for (FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
+            if (folderStorage instanceof ReinitializableFolderStorage) {
+                boolean started = folderStorage.startTransaction(storageParameters, false);
+                try {
+                    reinitialized |= ((ReinitializableFolderStorage) folderStorage).reinitialize(treeId, storageParameters);
+                    if (started) {
+                        folderStorage.commitTransaction(storageParameters);
+                        started = false;
+                    }
+                } catch (RuntimeException e) {
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } finally {
+                    if (started) {
+                        folderStorage.rollback(storageParameters);
+                    }
+                }
+            }
+        }
+        return reinitialized;
     }
 
     protected static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;

@@ -63,32 +63,44 @@ public interface SecretEncryptionService<T> {
 
     /**
      * Encrypts specified string using given session data.
+     * <p>
+     * The caller is required to have a special treatment for the {@link SecretExceptionCodes#EMPTY_SECRET} error code, which hints either
+     * to a setup error or to a session providing insufficient data; e.g. missing password in single-sign on scenarios.
      *
      * @param session The session providing data
      * @param toEncrypt The string to encrypt
      * @return The encrypted string
      * @throws OXException If encryption fails
+     * @see SecretExceptionCodes#EMPTY_SECRET
      */
     String encrypt(Session session, String toEncrypt) throws OXException;
 
     /**
      * Decrypts specified string using given session data.
+     * <p>
+     * The caller is required to have a special treatment for the {@link SecretExceptionCodes#EMPTY_SECRET} error code, which hints either
+     * to a setup error or to a session providing insufficient data; e.g. missing password in single-sign on scenarios.
      *
      * @param session The session providing data
      * @param toDecrypt The string to decrypt
      * @return The decrypted string
      * @throws OXException If decryption fails
+     * @see SecretExceptionCodes#EMPTY_SECRET
      */
     String decrypt(Session session, String toDecrypt) throws OXException;
 
     /**
      * Decrypts specified string using given session data.
+     * <p>
+     * The caller is required to have a special treatment for the {@link SecretExceptionCodes#EMPTY_SECRET} error code, which hints either
+     * to a setup error or to a session providing insufficient data; e.g. missing password in single-sign on scenarios.
      *
      * @param session The session providing data
      * @param toDecrypt The string to decrypt
      * @param customizationNote The optional customization note
      * @return The decrypted string
      * @throws OXException If decryption fails
+     * @see SecretExceptionCodes#EMPTY_SECRET
      */
     String decrypt(Session session, String toDecrypt, T customizationNote) throws OXException;
 

@@ -127,17 +127,26 @@ public final class MailAccessWatcher {
     }
 
     /**
-     * Adds specified mail access to this watcher's tracing if not already added before. If already present its timestamp is updated.
+     * Adds specified mail access to this watcher's tracing if not already added before. If already present its time stamp is updated.
      * <p>
      * Watcher is established if not running, yet
      *
      * @param mailAccess The mail access to add
      */
-    public static void addMailAccess(final MailAccess<?, ?> mailAccess) {
+    public static void addMailAccess(MailAccess<?, ?> mailAccess) {
         /*
          * Insert or update time stamp
          */
-        MAIL_ACCESSES.put(new MailAccessDelayElement(mailAccess, System.currentTimeMillis()));
+        MAIL_ACCESSES.offer(new MailAccessDelayElement(mailAccess, System.currentTimeMillis()));
+    }
+
+    /**
+     * Touches specified mail access.
+     *
+     * @param mailAccess The mail access to touch
+     */
+    public static boolean touchMailAccess(MailAccess<?, ?> mailAccess) {
+        return MAIL_ACCESSES.touch(new MailAccessDelayElement(mailAccess, System.currentTimeMillis()));
     }
 
     /**
@@ -145,7 +154,7 @@ public final class MailAccessWatcher {
      *
      * @param mailAccess The mail access to remove
      */
-    public static void removeMailAccess(final MailAccess<?, ?> mailAccess) {
+    public static void removeMailAccess(MailAccess<?, ?> mailAccess) {
         MAIL_ACCESSES.remove(new MailAccessDelayElement(mailAccess, 0L));
     }
 

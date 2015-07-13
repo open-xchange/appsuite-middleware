@@ -74,7 +74,12 @@ public enum CryptoErrorMessage implements DisplayableOXExceptionCode {
     /**
      * Arbitrary byte sequence is missing to generate a secure key.
      */
-    NoSalt(CATEGORY_USER_INPUT, 4, "Arbitrary byte sequence is missing to generate a secure key.");
+    NoSalt(CATEGORY_USER_INPUT, 4, "Arbitrary byte sequence is missing to generate a secure key."),
+    /**
+     * Empty password.
+     */
+    EmptyPassword(CATEGORY_CONFIGURATION, 5, "The passed password is empty."),
+    ;
 
     private static final String PREFIX = "CRP";
 
@@ -90,7 +95,7 @@ public enum CryptoErrorMessage implements DisplayableOXExceptionCode {
     private final Category category;
     private final int errorCode;
     private final String message;
-    private String displayMessage;
+    private final String displayMessage;
 
     private CryptoErrorMessage(Category category, int errorCode, String message) {
         this(category, errorCode, message, OXExceptionStrings.MESSAGE);
@@ -100,7 +105,7 @@ public enum CryptoErrorMessage implements DisplayableOXExceptionCode {
         this.category = category;
         this.errorCode = errorCode;
         this.message = message;
-        this.displayMessage = displayMessage != null ? displayMessage : OXExceptionStrings.MESSAGE;
+        this.displayMessage = displayMessage == null ? OXExceptionStrings.MESSAGE : displayMessage;
     }
 
     @Override

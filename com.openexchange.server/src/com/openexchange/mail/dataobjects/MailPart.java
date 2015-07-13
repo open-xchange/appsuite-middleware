@@ -575,9 +575,19 @@ public abstract class MailPart implements Serializable, Cloneable {
     }
 
     /**
-     * Gets the size
+     * Gets the size.
+     * <p>
+     * <div style="background-color:#FFDDDD; padding:6px; margin:0px;">
+     * <b>Note</b>: The size returned reflects the value as given by associated mail storage, which might not be
+     * the exact size, but only a "size estimation" as possible transfer-encodings (e.g. base64) are not considered.
+     * </div>
+     * <p>
+     * For obtaining the exact you might want to use:
+     * <pre>
+     *   com.openexchange.java.Streams.countInputStream(mailPart.getInputStream());
+     * <pre>
      *
-     * @return the size
+     * @return The size or <code>-1</code> if unknown
      */
     public long getSize() {
         return size;
@@ -834,9 +844,9 @@ public abstract class MailPart implements Serializable, Cloneable {
             throw MailExceptionCode.NO_CONTENT.create();
         }
         try {
-            final byte[] buf = new byte[8192];
-            int count = -1;
-            while ((count = in.read(buf, 0, buf.length)) > 0) {
+            int buflen = 8192;
+            byte[] buf = new byte[buflen];
+            for (int count; (count = in.read(buf, 0, buflen)) > 0;) {
                 out.write(buf, 0, count);
             }
         } catch (final IOException e) {

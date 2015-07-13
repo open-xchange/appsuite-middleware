@@ -261,7 +261,7 @@ public abstract class ICalDataHandler implements DataHandler {
 
         private static final int DEFAULT_BUF_SIZE = 0x2000;
 
-        private static final String FILE_PREFIX = "openexchange";
+        private static final String FILE_PREFIX = "openexchange-ical-";
 
         private byte[] bytes;
 

@@ -60,7 +60,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -69,9 +68,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link ListAction}
@@ -86,9 +86,6 @@ import com.openexchange.tools.session.ServerSession;
 responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter followed by requested headers.")
 public final class ListAction extends AbstractMailAction {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(ListAction.class);
-
     /**
      * Initializes a new {@link ListAction}.
      *
@@ -101,12 +98,10 @@ public final class ListAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final int[] columns = req.checkIntArray(AJAXServlet.PARAMETER_COLUMNS);
-            final String[] headers = req.optStringArray(Mail.PARAMETER_HEADERS);
+            // Read in parameters
+            ColumnCollection columnCollection = req.checkColumnsAndHeaders();
+            int[] columns = columnCollection.getFields();
+            String[] headers = columnCollection.getHeaders();
             /*
              * Get map
              */
@@ -147,6 +142,10 @@ public final class ListAction extends AbstractMailAction {
     }
 
     private static final Map<String, List<String>> fillMapByArray(final JSONArray idArray) throws JSONException, OXException {
+        if (null == idArray) {
+            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+        }
+
         final int length = idArray.length();
         if (length <= 0) {
             return Collections.emptyMap();

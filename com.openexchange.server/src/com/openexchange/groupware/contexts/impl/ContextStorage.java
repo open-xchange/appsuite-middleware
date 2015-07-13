@@ -59,7 +59,7 @@ import com.openexchange.tools.session.ServerSession;
  * This class defines the methods for accessing the storage of contexts. TODO We should introduce a logic layer above this context storage
  * layer. That layer should then trigger the update tasks. Nearly all accesses to the ContextStorage need then to be replaced with an access
  * to the ContextService.
- * 
+ *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -185,12 +185,26 @@ public abstract class ContextStorage {
 
     /**
      * Get a list of all context ids that are bound to the specified filestore id
-     * 
+     *
      * @param filestoreId the filestoreId
      * @return the list of context ids
      * @throws OXException if reading the contexts fails.
      */
     public abstract List<Integer> getAllContextIdsForFilestore(final int filestoreId) throws OXException;
+
+    /**
+     * Stores an internal context attribute. Internal context attributes must not be exposed to clients through the HTTP/JSON API.
+     * <p>
+     * This method might throw a {@link ContextExceptionCodes#CONCURRENT_ATTRIBUTES_UPDATE_DISPLAY} error in case a concurrent modification occurred. The
+     * caller can decide to treat as an error or to simply ignore it.
+     *
+     * @param name Name of the attribute.
+     * @param value Value of the attribute. If the value is <code>null</code>, the attribute is removed.
+     * @param contextId Identifier of the context that attribute should be set.
+     * @throws OXException if writing the attribute fails.
+     * @see ContextExceptionCodes#CONCURRENT_ATTRIBUTES_UPDATE
+     */
+    public abstract void setAttribute(String name, String value, int contextId) throws OXException;
 
     /**
      * Internal start-up routine invoked in {@link #start()}

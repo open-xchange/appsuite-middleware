@@ -89,14 +89,14 @@ public abstract class BoxClosure<R> {
     /**
      * Performs this closure's operation.
      *
-     * @param resourceAccess The associated resource access
+     * @param resourceAccess The associated resource access or <code>null</code>
      * @param boxAccess The Box.com access to use
      * @param session The associated session
      * @return The return value
      * @throws OXException If operation fails
      */
     public R perform(AbstractBoxResourceAccess resourceAccess, BoxAccess boxAccess, Session session) throws OXException {
-        return innerPerform(true, resourceAccess, boxAccess, session);
+        return null == resourceAccess ? innerPerform(false, null, boxAccess, session) : innerPerform(true, resourceAccess, boxAccess, session);
     }
 
     /** Status code (401) indicating that the request requires HTTP authentication. */
@@ -106,13 +106,13 @@ public abstract class BoxClosure<R> {
         try {
             return doPerform(boxAccess);
         } catch (BoxRestException e) {
-            throw resourceAccess.handleRestError(e);
+            throw AbstractBoxResourceAccess.handleRestError(e);
         } catch (BoxServerException e) {
             if (handleAuthError && SC_UNAUTHORIZED == e.getStatusCode()) {
                 BoxAccess newBoxAccess = resourceAccess.handleAuthError(e, session);
                 return innerPerform(false, resourceAccess, newBoxAccess, session);
             }
-            throw resourceAccess.handleHttpResponseError(null, e);
+            throw AbstractBoxResourceAccess.handleHttpResponseError(null, e);
         } catch (AuthFatalFailureException e) {
             if (!handleAuthError) {
                 throw BoxExceptionCodes.AUTH_ERROR.create(e, e.getMessage());

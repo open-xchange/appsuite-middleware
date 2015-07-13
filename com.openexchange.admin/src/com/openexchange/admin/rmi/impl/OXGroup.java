@@ -127,6 +127,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e3;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
@@ -187,12 +191,16 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
 
     @Override
     public void change(final Context ctx, final Group grp, final Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchGroupException, NoSuchUserException {
-        final Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(grp);
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for change is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -322,6 +330,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for create is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -457,6 +469,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e3;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         try {
             basicauth.doAuthentication(auth, ctx);
 
@@ -567,6 +583,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e3;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
@@ -617,6 +637,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for getData is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -686,6 +710,9 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             InvalidCredentialsException, NoSuchContextException,
             InvalidDataException, DatabaseUpdateException {
         final Credentials auth = credentials == null ? new Credentials("","") : credentials;
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
         basicauth.doAuthentication(auth, ctx);
         LOGGER.debug("{} - {}", ctx, auth);
         checkContextAndSchema(ctx);
@@ -710,6 +737,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for getMembers is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -751,6 +782,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
             throw e3;
         }
 
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
         try {
             basicauth.doAuthentication(auth, ctx);
         } catch (final InvalidDataException e) {
@@ -785,6 +820,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for getMembers is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {
@@ -822,6 +861,10 @@ public class OXGroup extends OXCommonImpl implements OXGroupInterface {
         } catch (final InvalidDataException e3) {
             LOGGER.error("One of the given arguments for removeMember is null", e3);
             throw e3;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
         }
 
         try {

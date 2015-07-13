@@ -49,7 +49,9 @@
 
 package com.openexchange.oauth.json.oauthaccount.actions;
 
+import java.io.IOException;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -61,6 +63,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthInteractionType;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
@@ -70,6 +73,7 @@ import com.openexchange.oauth.json.oauthaccount.AccountField;
 import com.openexchange.oauth.json.oauthaccount.AccountWriter;
 import com.openexchange.oauth.json.osgi.UtilizerRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -113,7 +117,23 @@ public final class CreateAction extends AbstractOAuthTokenAction {
             final Map<String, Object> arguments = processOAuthArguments(request, session, service);
 
             // By now it doesn't matter which interaction type is passed
-            final OAuthAccount newAccount = oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
+            OAuthAccount newAccount;
+            try {
+                newAccount = oAuthService.createAccount(serviceId, OAuthInteractionType.CALLBACK, arguments, session.getUserId(), session.getContextId());
+            } catch (OXException e) {
+                // Create attempt failed
+                HttpServletResponse response = request.optHttpServletResponse();
+                if (null == response) {
+                    throw e;
+                }
+
+                try {
+                    Tools.sendErrorPage(response, HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+                    return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+                } catch (IOException ioe) {
+                    throw OAuthExceptionCodes.IO_ERROR.create(ioe, ioe.getMessage());
+                }
+            }
 
             // Shall we create an account utilizer?
             // TODO: Change default to false once appropriate file storage account managing is supported by clients

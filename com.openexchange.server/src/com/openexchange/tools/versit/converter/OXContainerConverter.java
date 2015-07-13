@@ -157,6 +157,18 @@ public class OXContainerConverter {
 
     private static final String PARAM_VOICE = "voice";
 
+    private static final String PARAM_TEXT = "text";
+
+    private static final String PARAM_FAX = "fax";
+
+    private static final String PARAM_CELL = "cell";
+
+    private static final String PARAM_VIDEO = "video";
+
+    private static final String PARAM_PAGER = "pager";
+
+    private static final String PARAM_TEXTPHON = "textphon";
+
     private static final String P_TEL = "TEL";
 
     private static final String PARAM_WORK = "work";
@@ -584,31 +596,31 @@ public class OXContainerConverter {
                      * Apply image data as it is since ValueDefinition#parse(Scanner s, Property property) already decodes value dependent
                      * on "ENCODING" parameter
                      */
-                	byte[] imageData = (byte[])propertyValue;
-                	Rectangle clipRect = extractClipRect(property.getParameter("X-ABCROP-RECTANGLE"));
-                	if (null != clipRect) {
-                		/*
-                		 * determine image format
-                		 */
-        				String formatName = "JPEG";
-        				Parameter typeParameter = property.getParameter("TYPE");
-        				if (null != typeParameter && 1 == typeParameter.getValueCount()) {
-        					String type = typeParameter.getValue(0).getText();
-        					if (null != type && 0 < type.length()) {
-        						formatName = type;
-        					}
-        				}
-        				/*
-                		 * try to crop the image
-                		 */
-                		try {
-                			imageData = doABCrop(imageData, clipRect, formatName);
-                		} catch (IOException e) {
-                			LOG.error("error cropping image, falling back to uncropped image.", e);
-                		} catch (OXException e) {
-                			LOG.error("error cropping image, falling back to uncropped image.", e);
-						}
-                	}
+                    byte[] imageData = (byte[]) propertyValue;
+                    Rectangle clipRect = extractClipRect(property.getParameter("X-ABCROP-RECTANGLE"));
+                    if (null != clipRect) {
+                        /*
+                         * determine image format
+                         */
+                        String formatName = "JPEG";
+                        Parameter typeParameter = property.getParameter("TYPE");
+                        if (null != typeParameter && 1 == typeParameter.getValueCount()) {
+                            String type = typeParameter.getValue(0).getText();
+                            if (null != type && 0 < type.length()) {
+                                formatName = type;
+                            }
+                        }
+                        /*
+                         * try to crop the image
+                         */
+                        try {
+                            imageData = doABCrop(imageData, clipRect, formatName);
+                        } catch (IOException e) {
+                            LOG.error("error cropping image, falling back to uncropped image.", e);
+                        } catch (OXException e) {
+                            LOG.error("error cropping image, falling back to uncropped image.", e);
+                        }
+                    }
                     contactContainer.setImage1(imageData);
                     value = null;
                 } else if (propertyValue instanceof URI) {
@@ -719,8 +731,8 @@ public class OXContainerConverter {
                     isOther = false;
                     for (int j = 0; j < type.getValueCount(); j++) {
                         final String value = type.getValue(j).getText();
-                        isHome  |= PARAM_HOME.equalsIgnoreCase(value);
-                        isWork  |= PARAM_WORK.equalsIgnoreCase(value);
+                        isHome |= PARAM_HOME.equalsIgnoreCase(value);
+                        isWork |= PARAM_WORK.equalsIgnoreCase(value);
                         isOther |= PARAM_OTHER.equalsIgnoreCase(value);
                     }
                 }
@@ -802,7 +814,7 @@ public class OXContainerConverter {
                 boolean isProperEmailAddress = value != null && value.length() > 0;
                 if (isProperEmailAddress) {
                     try {
-                    	final QuotedInternetAddress address = new QuotedInternetAddress(value);
+                        final QuotedInternetAddress address = new QuotedInternetAddress(value);
                         address.validate();
                         value = address.getIDNAddress();
                         personal = address.getPersonal();
@@ -923,7 +935,7 @@ public class OXContainerConverter {
                                 }
                             }
                         }
-//                        ComplexProperty(contactContainer, emails, emailIndex, value);
+                        //                        ComplexProperty(contactContainer, emails, emailIndex, value);
                     }
                 } else {
                     // fix for: 7719
@@ -987,25 +999,25 @@ public class OXContainerConverter {
      * @return the clipping rectangle, or <code>null</code>, if not defined
      */
     private static Rectangle extractClipRect(Parameter cropParameter) {
-    	if (null != cropParameter && 0 < cropParameter.getValueCount()) {
-    		Pattern clipRectPattern = Pattern.compile("ABClipRect_1&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&");
-    		for (int i = 0; i < cropParameter.getValueCount(); i++) {
-    			String text = cropParameter.getValue(i).getText();
-    			Matcher matcher = clipRectPattern.matcher(text);
-    			if (matcher.find()) {
-    				try {
-        				int offsetLeft = Integer.parseInt(matcher.group(1));
-        				int offsetBottom = Integer.parseInt(matcher.group(2));
-        				int targetWidth = Integer.parseInt(matcher.group(3));
-        				int targetHeight = Integer.parseInt(matcher.group(4));
-        				return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
-    				} catch (NumberFormatException e) {
-    					LOG.warn("unable to parse clipping rectangle from {}", text, e);
-    				}
-    			}
-    		}
-    	}
-		return null;
+        if (null != cropParameter && 0 < cropParameter.getValueCount()) {
+            Pattern clipRectPattern = Pattern.compile("ABClipRect_1&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&([-+]?\\d+?)&");
+            for (int i = 0; i < cropParameter.getValueCount(); i++) {
+                String text = cropParameter.getValue(i).getText();
+                Matcher matcher = clipRectPattern.matcher(text);
+                if (matcher.find()) {
+                    try {
+                        int offsetLeft = Integer.parseInt(matcher.group(1));
+                        int offsetBottom = Integer.parseInt(matcher.group(2));
+                        int targetWidth = Integer.parseInt(matcher.group(3));
+                        int targetHeight = Integer.parseInt(matcher.group(4));
+                        return new Rectangle(offsetLeft, offsetBottom, targetWidth, targetHeight);
+                    } catch (NumberFormatException e) {
+                        LOG.warn("unable to parse clipping rectangle from {}", text, e);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     /**
@@ -1046,23 +1058,23 @@ public class OXContainerConverter {
      * @throws OXException
      */
     private byte[] doABCrop(byte[] imageBytes, Rectangle clipRect, String formatName) throws IOException, OXException {
-    	InputStream inputStream = null;
-    	try {
-    		/*
-    		 * read source image
-    		 */
-    		inputStream = new ByteArrayInputStream(imageBytes);
-        	BufferedImage sourceImage = ImageIO.read(inputStream);
-        	/*
-        	 * crop the image
-        	 */
-        	ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
-        	Object source = null == optSession ? null : optSession.getSessionID();
-        	return imageService.transfom(sourceImage, source).crop(clipRect.x * -1,
-        			clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getBytes(formatName);
-    	} finally {
-    		Streams.close(inputStream);
-    	}
+        InputStream inputStream = null;
+        try {
+            /*
+             * read source image
+             */
+            inputStream = new ByteArrayInputStream(imageBytes);
+            BufferedImage sourceImage = ImageIO.read(inputStream);
+            /*
+             * crop the image
+             */
+            ImageTransformationService imageService = ServerServiceRegistry.getInstance().getService(ImageTransformationService.class, true);
+            Object source = null == optSession ? null : optSession.getSessionID();
+            return imageService.transfom(sourceImage, source).crop(clipRect.x * -1,
+                clipRect.height + clipRect.y - sourceImage.getHeight(), clipRect.width, clipRect.height).getBytes(formatName);
+        } finally {
+            Streams.close(inputStream);
+        }
     }
 
     /**
@@ -1239,13 +1251,17 @@ public class OXContainerConverter {
                     ContactField.TELEPHONE_OTHER)) {
                 continue;
             }
+
             boolean home = containsValue(PARAM_HOME, typeParameter);
             boolean business = containsValue(PARAM_WORK, typeParameter);
             boolean other = containsValue(PARAM_OTHER, typeParameter);
+
             /*
              * voice
+             *
+             * (Fix for bug 37172: Assume voice if parameter is missing and tag types 'home', 'work' or 'other' are set)
              */
-            if (containsValue("voice", typeParameter)) {
+            if (containsValue("voice", typeParameter) || false == containsAnyTypeParameter(typeParameter)) {
                 if (business && setProperty(target, value, preferred, ContactField.TELEPHONE_BUSINESS1,
                     ContactField.TELEPHONE_BUSINESS2, ContactField.TELEPHONE_COMPANY, ContactField.TELEPHONE_OTHER)) {
                     continue;
@@ -1263,6 +1279,7 @@ public class OXContainerConverter {
                     continue;
                 }
             }
+
             /*
              * fax
              */
@@ -1292,12 +1309,12 @@ public class OXContainerConverter {
      * @param possibleFields The possible contact fields
      * @return <code>true</code> if a value was set, <code>false</code>, otherwise
      */
-    private static boolean setProperty(Contact target, String value, boolean preferred, ContactField...possibleFields) {
+    private static boolean setProperty(Contact target, String value, boolean preferred, ContactField... possibleFields) {
         for (int i = 0; i < possibleFields.length; i++) {
             try {
                 ContactMapping<? extends Object> genericMapping = ContactMapper.getInstance().get(possibleFields[i]);
                 if (null != genericMapping && StringMapping.class.isInstance(genericMapping)) {
-                    StringMapping mapping = ((StringMapping)genericMapping);
+                    StringMapping mapping = ((StringMapping) genericMapping);
                     if (false == mapping.isSet(target)) {
                         mapping.set(target, value);
                         return true;
@@ -1329,6 +1346,14 @@ public class OXContainerConverter {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    private static boolean containsAnyTypeParameter(Parameter parameter) {
+        if (containsValue(PARAM_TEXT, parameter) || containsValue(PARAM_FAX, parameter) || containsValue(PARAM_CELL, parameter) || containsValue(PARAM_VIDEO, parameter) ||
+            containsValue(PARAM_PAGER, parameter) || containsValue(PARAM_TEXTPHON, parameter) && containsValue(PARAM_VOICE, parameter)) {
+            return true;
         }
         return false;
     }
@@ -1509,72 +1534,72 @@ public class OXContainerConverter {
         }
         calContainerObj.setInterval(recur.Interval);
         switch (recur.Freq) {
-        case RecurrenceValue.YEARLY:
-            int month;
-            if (recur.ByMonth.length > 0) {
-                if (recur.ByMonth.length > 1) {
-                    throw new ConverterException("Multiple months of the year are not supported.");
+            case RecurrenceValue.YEARLY:
+                int month;
+                if (recur.ByMonth.length > 0) {
+                    if (recur.ByMonth.length > 1) {
+                        throw new ConverterException("Multiple months of the year are not supported.");
+                    }
+                    month = recur.ByMonth[0] - 1 + Calendar.JANUARY;
+                } else {
+                    month = cal.get(Calendar.MONTH);
                 }
-                month = recur.ByMonth[0] - 1 + Calendar.JANUARY;
-            } else {
-                month = cal.get(Calendar.MONTH);
-            }
-            calContainerObj.setMonth(month);
-            //$FALL-THROUGH$
-        case RecurrenceValue.MONTHLY:
-            if (recur.ByMonthDay.length > 0) {
-                if (recur.ByDay.size() != 0) {
-                    throw new ConverterException("Simultaneous day in month and weekday in month are not supported.");
+                calContainerObj.setMonth(month);
+                //$FALL-THROUGH$
+            case RecurrenceValue.MONTHLY:
+                if (recur.ByMonthDay.length > 0) {
+                    if (recur.ByDay.size() != 0) {
+                        throw new ConverterException("Simultaneous day in month and weekday in month are not supported.");
+                    }
+                    if (recur.ByMonthDay.length > 1) {
+                        throw new ConverterException("Multiple days of the month are not supported.");
+                    }
+                    final int dayOfMonth = recur.ByMonthDay[0];
+                    if (dayOfMonth <= 0) {
+                        throw new ConverterException("Counting days from end of the month is not supported.");
+                    }
+                    calContainerObj.setDayInMonth(dayOfMonth);
+                } else if (recur.ByDay.size() > 0) {
+                    int days = 0, week = 0;
+                    final int size = recur.ByDay.size();
+                    final Iterator<?> j = recur.ByDay.iterator();
+                    for (int k = 0; k < size; k++) {
+                        final RecurrenceValue.Weekday wd = (RecurrenceValue.Weekday) j.next();
+                        days |= 1 << (wd.day - Calendar.SUNDAY);
+                        if (week != 0 && week != wd.week) {
+                            throw new ConverterException("Multiple weeks of month are not supported.");
+                        }
+                        week = wd.week;
+                        if (week < 0) {
+                            if (week == -1) {
+                                week = 5;
+                            } else {
+                                throw new ConverterException(
+                                    "Only the last week of a month is supported. Counting from the end of the month above the first is not supported.");
+                            }
+                        }
+                    }
+                    calContainerObj.setDays(days);
+                    calContainerObj.setDayInMonth(week);
+                } else {
+                    calContainerObj.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
                 }
-                if (recur.ByMonthDay.length > 1) {
-                    throw new ConverterException("Multiple days of the month are not supported.");
-                }
-                final int dayOfMonth = recur.ByMonthDay[0];
-                if (dayOfMonth <= 0) {
-                    throw new ConverterException("Counting days from end of the month is not supported.");
-                }
-                calContainerObj.setDayInMonth(dayOfMonth);
-            } else if (recur.ByDay.size() > 0) {
-                int days = 0, week = 0;
+                break;
+            case RecurrenceValue.WEEKLY:
+            case RecurrenceValue.DAILY: // fix: 7703
+                int days = 0;
                 final int size = recur.ByDay.size();
                 final Iterator<?> j = recur.ByDay.iterator();
                 for (int k = 0; k < size; k++) {
-                    final RecurrenceValue.Weekday wd = (RecurrenceValue.Weekday) j.next();
-                    days |= 1 << (wd.day - Calendar.SUNDAY);
-                    if (week != 0 && week != wd.week) {
-                        throw new ConverterException("Multiple weeks of month are not supported.");
-                    }
-                    week = wd.week;
-                    if (week < 0) {
-                        if (week == -1) {
-                            week = 5;
-                        } else {
-                            throw new ConverterException(
-                                "Only the last week of a month is supported. Counting from the end of the month above the first is not supported.");
-                        }
-                    }
+                    days |= 1 << ((RecurrenceValue.Weekday) j.next()).day - Calendar.SUNDAY;
+                }
+                if (days == 0) {
+                    days = 1 << cal.get(Calendar.DAY_OF_WEEK);
                 }
                 calContainerObj.setDays(days);
-                calContainerObj.setDayInMonth(week);
-            } else {
-                calContainerObj.setDayInMonth(cal.get(Calendar.DAY_OF_MONTH));
-            }
-            break;
-        case RecurrenceValue.WEEKLY:
-        case RecurrenceValue.DAILY: // fix: 7703
-            int days = 0;
-            final int size = recur.ByDay.size();
-            final Iterator<?> j = recur.ByDay.iterator();
-            for (int k = 0; k < size; k++) {
-                days |= 1 << ((RecurrenceValue.Weekday) j.next()).day - Calendar.SUNDAY;
-            }
-            if (days == 0) {
-                days = 1 << cal.get(Calendar.DAY_OF_WEEK);
-            }
-            calContainerObj.setDays(days);
-            break;
-        default:
-            throw new ConverterException("Unknown Recurrence Property: " + recur.Freq);
+                break;
+            default:
+                throw new ConverterException("Unknown Recurrence Property: " + recur.Freq);
         }
     }
 
@@ -1990,7 +2015,7 @@ public class OXContainerConverter {
                 Contact.POSTAL_CODE_HOME,
                 Contact.COUNTRY_HOME);
             // ADR OTHER (as "dom" since there is no equivalent)
-        	addADR(
+            addADR(
                 object,
                 contact,
                 new String[] { PARAM_OTHER },
@@ -2112,12 +2137,12 @@ public class OXContainerConverter {
 
     private void addADR(final VersitObject object, final Contact contactContainer, final String[] type, final int street, final int city, final int state, final int postalCode, final int country) throws ConverterException {
         try {
-        	String streetValue = getStreet(street, contactContainer);
-        	String cityValue = getCity(city, contactContainer);
-        	String stateValue = getState(state, contactContainer);
-        	String postalCodeValue = getPostalCode(postalCode, contactContainer);
-        	String countryValue = getCountry(country, contactContainer);
-        	if (null != streetValue || null != cityValue || null != stateValue || null != postalCodeValue || null != countryValue) {
+            String streetValue = getStreet(street, contactContainer);
+            String cityValue = getCity(city, contactContainer);
+            String stateValue = getState(state, contactContainer);
+            String postalCodeValue = getPostalCode(postalCode, contactContainer);
+            String countryValue = getCountry(country, contactContainer);
+            if (null != streetValue || null != cityValue || null != stateValue || null != postalCodeValue || null != countryValue) {
                 final ArrayList<ArrayList<Object>> adr = new ArrayList<ArrayList<Object>>(7);
                 adr.add(null);
                 adr.add(null);
@@ -2127,7 +2152,7 @@ public class OXContainerConverter {
                 adr.add(makeList(postalCodeValue));
                 adr.add(makeList(countryValue));
                 addProperty(object, "ADR", P_TYPE, type, adr);
-        	}
+            }
         } catch (final Exception e) {
             throw new ConverterException(e);
         }
@@ -2136,70 +2161,70 @@ public class OXContainerConverter {
     private String getStreet(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case Contact.STREET_BUSINESS:
-            return contactContainer.getStreetBusiness();
-        case Contact.STREET_HOME:
-            return contactContainer.getStreetHome();
-        case Contact.STREET_OTHER:
-            return contactContainer.getStreetOther();
-        default:
-            throw new Exception("Unknown street constant " + id);
+            case Contact.STREET_BUSINESS:
+                return contactContainer.getStreetBusiness();
+            case Contact.STREET_HOME:
+                return contactContainer.getStreetHome();
+            case Contact.STREET_OTHER:
+                return contactContainer.getStreetOther();
+            default:
+                throw new Exception("Unknown street constant " + id);
         }
     }
 
     private String getCity(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case Contact.CITY_BUSINESS:
-            return contactContainer.getCityBusiness();
-        case Contact.CITY_HOME:
-            return contactContainer.getCityHome();
-        case Contact.CITY_OTHER:
-            return contactContainer.getCityOther();
-        default:
-            throw new Exception("Unknown city constant " + id);
+            case Contact.CITY_BUSINESS:
+                return contactContainer.getCityBusiness();
+            case Contact.CITY_HOME:
+                return contactContainer.getCityHome();
+            case Contact.CITY_OTHER:
+                return contactContainer.getCityOther();
+            default:
+                throw new Exception("Unknown city constant " + id);
         }
     }
 
     private String getState(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case Contact.STATE_BUSINESS:
-            return contactContainer.getStateBusiness();
-        case Contact.STATE_HOME:
-            return contactContainer.getStateHome();
-        case Contact.STATE_OTHER:
-            return contactContainer.getStateOther();
-        default:
-            throw new Exception("Unknown state constant " + id);
+            case Contact.STATE_BUSINESS:
+                return contactContainer.getStateBusiness();
+            case Contact.STATE_HOME:
+                return contactContainer.getStateHome();
+            case Contact.STATE_OTHER:
+                return contactContainer.getStateOther();
+            default:
+                throw new Exception("Unknown state constant " + id);
         }
     }
 
     private String getCountry(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case Contact.COUNTRY_BUSINESS:
-            return contactContainer.getCountryBusiness();
-        case Contact.COUNTRY_HOME:
-            return contactContainer.getCountryHome();
-        case Contact.COUNTRY_OTHER:
-            return contactContainer.getCountryOther();
-        default:
-            throw new Exception("Unknown country constant " + id);
+            case Contact.COUNTRY_BUSINESS:
+                return contactContainer.getCountryBusiness();
+            case Contact.COUNTRY_HOME:
+                return contactContainer.getCountryHome();
+            case Contact.COUNTRY_OTHER:
+                return contactContainer.getCountryOther();
+            default:
+                throw new Exception("Unknown country constant " + id);
         }
     }
 
     private String getPostalCode(final int id, final Contact contactContainer) throws Exception {
 
         switch (id) {
-        case Contact.POSTAL_CODE_BUSINESS:
-            return contactContainer.getPostalCodeBusiness();
-        case Contact.POSTAL_CODE_HOME:
-            return contactContainer.getPostalCodeHome();
-        case Contact.POSTAL_CODE_OTHER:
-            return contactContainer.getPostalCodeOther();
-        default:
-            throw new Exception("Unknown postal code constant " + id);
+            case Contact.POSTAL_CODE_BUSINESS:
+                return contactContainer.getPostalCodeBusiness();
+            case Contact.POSTAL_CODE_HOME:
+                return contactContainer.getPostalCodeHome();
+            case Contact.POSTAL_CODE_OTHER:
+                return contactContainer.getPostalCodeOther();
+            default:
+                throw new Exception("Unknown postal code constant " + id);
         }
     }
 
@@ -2385,31 +2410,31 @@ public class OXContainerConverter {
             }
             final int type = oxobject.getRecurrenceType();
             switch (oxobject.getRecurrenceType()) {
-            case CalendarObject.YEARLY:
-                final int[] byMonth = { oxobject.getMonth() - Calendar.JANUARY + 1 };
-                recur.ByMonth = byMonth;
-                // no break
-            case CalendarObject.MONTHLY:
-                final int monthDay = oxobject.getDayInMonth();
-                final int mdays = oxobject.getDays();
-                if (mdays == 0) {
-                    final int[] byMonthDay = { monthDay };
-                    recur.ByMonthDay = byMonthDay;
-                } else {
-                    for (int i = 0; i < 7; i++) {
-                        if ((mdays & (1 << i)) != 0) {
-                            recur.ByDay.add(new Weekday(monthDay, Calendar.SUNDAY + i));
+                case CalendarObject.YEARLY:
+                    final int[] byMonth = { oxobject.getMonth() - Calendar.JANUARY + 1 };
+                    recur.ByMonth = byMonth;
+                    // no break
+                case CalendarObject.MONTHLY:
+                    final int monthDay = oxobject.getDayInMonth();
+                    final int mdays = oxobject.getDays();
+                    if (mdays == 0) {
+                        final int[] byMonthDay = { monthDay };
+                        recur.ByMonthDay = byMonthDay;
+                    } else {
+                        for (int i = 0; i < 7; i++) {
+                            if ((mdays & (1 << i)) != 0) {
+                                recur.ByDay.add(new Weekday(monthDay, Calendar.SUNDAY + i));
+                            }
                         }
                     }
-                }
-                break;
-            case CalendarObject.WEEKLY:
-                final int days = oxobject.getDays();
-                for (int i = 0; i < 7; i++) {
-                    if ((days & (1 << i)) != 0) {
-                        recur.ByDay.add(new Weekday(0, Calendar.SUNDAY + i));
+                    break;
+                case CalendarObject.WEEKLY:
+                    final int days = oxobject.getDays();
+                    for (int i = 0; i < 7; i++) {
+                        if ((days & (1 << i)) != 0) {
+                            recur.ByDay.add(new Weekday(0, Calendar.SUNDAY + i));
+                        }
                     }
-                }
             }
             final int[] freqs = { RecurrenceValue.DAILY, RecurrenceValue.WEEKLY, RecurrenceValue.MONTHLY, RecurrenceValue.YEARLY };
             recur.Freq = freqs[type - CalendarObject.DAILY];

@@ -64,6 +64,11 @@ public final class Constants {
     public static final String MODULE = "user";
 
     /**
+     * The module (appendix to servlet path).
+     */
+    public static final String MODULE_ME = "user/me";
+
+    /**
      * The servlet path.
      */
     public static final String SERVLET_PATH_APPENDIX = MODULE;

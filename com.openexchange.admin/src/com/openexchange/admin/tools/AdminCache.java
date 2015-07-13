@@ -88,6 +88,7 @@ import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolDBPool;
 import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.sql.DBUtils;
 
 public class AdminCache {
@@ -230,8 +231,18 @@ public class AdminCache {
         return getNamedAccessCombination(name, true);
     }
 
+    /**
+     * Gets the access combination by given name
+     *
+     * @param name The name
+     * @param contextAdmin Whether this call is performed by context administrator
+     * @return The access combination or <code>null</code>
+     */
     public synchronized UserModuleAccess getNamedAccessCombination(String name, boolean contextAdmin) {
         UserModuleAccess retval = named_access_combinations.get(name);
+        if (null == retval) {
+            return null;
+        }
         if (!contextAdmin) {
             // publicFolderEditable can only be applied to the context administrator.
             retval.setPublicFolderEditable(false);
@@ -281,11 +292,11 @@ public class AdminCache {
         while (predefined_access_combinations.hasMoreElements()) {
             String predefined_combination_name = (String) predefined_access_combinations.nextElement();
             String predefined_modules = (String) access_props.get(predefined_combination_name);
-            if (predefined_modules != null && predefined_modules.trim().length() > 0) {
+            if (predefined_modules != null) {
                 UserModuleAccess us = new UserModuleAccess();
                 us.disableAll();
                 us.setGlobalAddressBookDisabled(false); // by default this is enabled.
-                String[] modules = predefined_modules.split(" *, *");
+                String[] modules = Strings.isEmpty(predefined_modules) ? new String[0] : predefined_modules.split(" *, *");
                 for (String module : modules) {
                     module = module.trim();
                     Method meth = module_method_mapping.get(module);

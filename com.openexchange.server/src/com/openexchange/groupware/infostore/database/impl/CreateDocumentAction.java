@@ -57,14 +57,15 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 public class CreateDocumentAction extends AbstractDocumentListAction {
 
     /**
      * Initializes a new {@link CreateDocumentAction}.
      */
-    public CreateDocumentAction() {
-        super();
+    public CreateDocumentAction(Session session) {
+        super(session);
     }
 
     /**
@@ -75,9 +76,8 @@ public class CreateDocumentAction extends AbstractDocumentListAction {
      * @param context The context
      * @param documents The documents to create
      */
-    public CreateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> documents) {
-        super(provider, queryCatalog, context, documents);
+    public CreateDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, Session session) {
+        super(provider, queryCatalog, context, documents, session);
     }
 
     @Override

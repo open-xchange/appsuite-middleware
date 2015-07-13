@@ -67,6 +67,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
     private static final String delTaskTableName = "del_task";
     private static final String delTaskFolderTableName = "del_task_folder";
     private static final String delTaskParticipantTableName = "del_task_participant";
+    // TODO drop this table with the upcoming major release after 7.8.0.
     private static final String delTaskEParticipantTableName = "del_task_eparticipant";
 
     private static final String createTaskTable = "CREATE TABLE task ("
@@ -220,6 +221,7 @@ public class CreateTaskTables extends AbstractCreateTableImpl {
        + "FOREIGN KEY (cid, task) REFERENCES del_task (cid, id)"
        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
+    // TODO drop this table with the upcoming major release after 7.8.0.
     private static final String createDelTaskEParticipantTable = "CREATE TABLE del_task_eparticipant ("
        + "cid INT4 UNSIGNED NOT NULL,"
        + "task INT4 UNSIGNED NOT NULL,"

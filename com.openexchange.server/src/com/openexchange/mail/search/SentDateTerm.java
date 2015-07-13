@@ -116,17 +116,17 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         final ComparisonType comparisonType = pattern.getComparisonType();
         switch (comparisonType) {
             case EQUALS:
-                return pattern.getPattern().getTime() == sentDate.getTime();
+                return toSeconds(pattern.getPattern()) == toSeconds(sentDate);
             case LESS_THAN:
-                return pattern.getPattern().getTime() > sentDate.getTime();
+                return toSeconds(pattern.getPattern()) > toSeconds(sentDate);
             case LESS_EQUALS:
-                return pattern.getPattern().getTime() >= sentDate.getTime();
+                return toSeconds(pattern.getPattern()) >= toSeconds(sentDate);
             case GREATER_THAN:
-                return pattern.getPattern().getTime() < sentDate.getTime();
+                return toSeconds(pattern.getPattern()) < toSeconds(sentDate);
             case GREATER_EQUALS:
-                return pattern.getPattern().getTime() <= sentDate.getTime();
+                return toSeconds(pattern.getPattern()) <= toSeconds(sentDate);
             default:
-                return pattern.getPattern().getTime() == sentDate.getTime();
+                return toSeconds(pattern.getPattern()) == toSeconds(sentDate);
         }
     }
 
@@ -146,17 +146,17 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         final ComparisonType comparisonType = pattern.getComparisonType();
         switch (comparisonType) {
             case EQUALS:
-                return pattern.getPattern().getTime() == sentDate.getTime();
+                return toSeconds(pattern.getPattern()) == toSeconds(sentDate);
             case LESS_THAN:
-                return pattern.getPattern().getTime() > sentDate.getTime();
+                return toSeconds(pattern.getPattern()) > toSeconds(sentDate);
             case LESS_EQUALS:
-                return pattern.getPattern().getTime() >= sentDate.getTime();
+                return toSeconds(pattern.getPattern()) >= toSeconds(sentDate);
             case GREATER_THAN:
-                return pattern.getPattern().getTime() < sentDate.getTime();
+                return toSeconds(pattern.getPattern()) < toSeconds(sentDate);
             case GREATER_EQUALS:
-                return pattern.getPattern().getTime() <= sentDate.getTime();
+                return toSeconds(pattern.getPattern()) <= toSeconds(sentDate);
             default:
-                return pattern.getPattern().getTime() == sentDate.getTime();
+                return toSeconds(pattern.getPattern()) == toSeconds(sentDate);
         }
     }
 
@@ -176,6 +176,10 @@ public final class SentDateTerm extends SearchTerm<ComparablePattern<java.util.D
         if (!fetchProfile.contains(FetchProfile.Item.ENVELOPE)) {
             fetchProfile.add(FetchProfile.Item.ENVELOPE);
         }
+    }
+
+    private static final long toSeconds(Date date) {
+        return date.getTime() / 1000;
     }
 
 }

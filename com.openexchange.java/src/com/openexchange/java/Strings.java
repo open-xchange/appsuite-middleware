@@ -192,22 +192,22 @@ public class Strings {
      */
     public static boolean isWhitespace(final char c) {
         switch (c) {
-        case 9: // 'unicode: 0009
-        case 10: // 'unicode: 000A'
-        case 11: // 'unicode: 000B'
-        case 12: // 'unicode: 000C'
-        case 13: // 'unicode: 000D'
-        case 28: // 'unicode: 001C'
-        case 29: // 'unicode: 001D'
-        case 30: // 'unicode: 001E'
-        case 31: // 'unicode: 001F'
-        case ' ': // Space
-            // case Character.SPACE_SEPARATOR:
-            // case Character.LINE_SEPARATOR:
-        case Character.PARAGRAPH_SEPARATOR:
-            return true;
-        default:
-            return false;
+            case 9: // 'unicode: 0009
+            case 10: // 'unicode: 000A'
+            case 11: // 'unicode: 000B'
+            case 12: // 'unicode: 000C'
+            case 13: // 'unicode: 000D'
+            case 28: // 'unicode: 001C'
+            case 29: // 'unicode: 001D'
+            case 30: // 'unicode: 001E'
+            case 31: // 'unicode: 001F'
+            case ' ': // Space
+                // case Character.SPACE_SEPARATOR:
+                // case Character.LINE_SEPARATOR:
+            case Character.PARAGRAPH_SEPARATOR:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -218,19 +218,19 @@ public class Strings {
      */
     public static boolean isDigit(final char c) {
         switch (c) {
-        case '0':
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-        case '5':
-        case '6':
-        case '7':
-        case '8':
-        case '9':
-            return true;
-        default:
-            return false;
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -266,12 +266,61 @@ public class Strings {
     }
 
     /**
-     * Splits given string by comma separator.
+     * Splits given string by tokens/quoted-strings.
      *
-     * @param s The string to split
+     * @param str The string to split
+     * @return The tokens/quoted-strings
+     */
+    public static String[] splitByTokensOrQuotedStrings(String str) {
+        if (null == str) {
+            return null;
+        }
+        List<String> splitted = new LinkedList<String>();
+        int inQuotes = 0;
+        boolean escaped = false;
+        StringBuilder s = new StringBuilder(16);
+
+        int length = str.length();
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(i);
+            if (Strings.isWhitespace(c)) {
+                if (inQuotes > 0) {
+                    if (inQuotes == c && !escaped) {
+                        inQuotes = 0;
+                    }
+                    s.append(c);
+                    escaped = false;
+                } else {
+                    if (s.length() > 0) {
+                        splitted.add(s.toString().trim());
+                        s.setLength(0);
+                    }
+                }
+            } else if ('\\' == c) {
+                escaped = !escaped;
+                s.append(c);
+            } else {
+                if (('"' == c || '\'' == c) && !escaped) {
+                    inQuotes = inQuotes > 0 ? 0 : c;
+                }
+                s.append(c);
+                escaped = false;
+            }
+        }
+        if (s.length() > 0) {
+            splitted.add(s.toString().trim());
+        }
+        return splitted.toArray(new String[splitted.size()]);
+    }
+
+    /**
+     * Splits given string by specifies delimiter.
+     *
+     * @param str The string to split
+     * @param delim The delimiting character
      * @return The split string
      */
-    public static String[] splitByCommaNotInQuotes(String str) {
+    public static String[] splitByDelimNotInQuotes(String str, char delim) {
         if (null == str) {
             return null;
         }
@@ -283,7 +332,7 @@ public class Strings {
         int length = str.length();
         for (int i = 0; i < length; i++) {
             char c = str.charAt(i);
-            if (c == ',') {
+            if (c == delim) {
                 if (inQuotes) {
                     if ('"' == c && !escaped) {
                         inQuotes = !inQuotes;
@@ -309,6 +358,16 @@ public class Strings {
         return splitted.toArray(new String[splitted.size()]);
     }
 
+    /**
+     * Splits given string by comma separator.
+     *
+     * @param str The string to split
+     * @return The split string
+     */
+    public static String[] splitByCommaNotInQuotes(String str) {
+        return splitByDelimNotInQuotes(str, ',');
+    }
+
     private static final Pattern P_SPLIT_COMMA = Pattern.compile("\\s*,\\s*");
 
     /**
@@ -330,13 +389,28 @@ public class Strings {
      * Splits given string by dots.
      *
      * @param s The string to split
-     * @return The splitted string
+     * @return The split string
      */
     public static String[] splitByDots(final String s) {
         if (null == s) {
             return null;
         }
         return P_SPLIT_DOT.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_AMP = Pattern.compile("&");
+
+    /**
+     * Splits given string by ampersands <code>'&'</code>.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByAmps(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_AMP.split(s, 0);
     }
 
     private static final Pattern P_SPLIT_CRLF = Pattern.compile("\r?\n");
@@ -417,6 +491,11 @@ public class Strings {
 
     /**
      * Replaces control characters with space characters.
+     * <p>
+     * A subsequent range of control characters gets replaced with a whitespace; e.g.
+     * <pre>
+     * <code>"\r\n\t"</code> -&gt; <code>" "</code>
+     * </pre>
      *
      * @param str The string to sanitize
      * @return The sanitized string
@@ -587,8 +666,8 @@ public class Strings {
      * </p>
      *
      * <pre>
-     * StringUtils.abbreviate(null, *)      = null
-     * StringUtils.abbreviate("", 4)        = ""
+     * StringUtils.abbreviate(null, *) = null
+     * StringUtils.abbreviate("", 4) = ""
      * StringUtils.abbreviate("abcdefg", 6) = "abc..."
      * StringUtils.abbreviate("abcdefg", 7) = "abcdefg"
      * StringUtils.abbreviate("abcdefg", 8) = "abcdefg"
@@ -615,19 +694,19 @@ public class Strings {
      * In no case will it return a String of length greater than <code>maxWidth</code>.
      *
      * <pre>
-     * StringUtils.abbreviate(null, *, *)                = null
-     * StringUtils.abbreviate("", 0, 4)                  = ""
+     * StringUtils.abbreviate(null, *, *) = null
+     * StringUtils.abbreviate("", 0, 4) = ""
      * StringUtils.abbreviate("abcdefghijklmno", -1, 10) = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 0, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 1, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 4, 10)  = "abcdefg..."
-     * StringUtils.abbreviate("abcdefghijklmno", 5, 10)  = "...fghi..."
-     * StringUtils.abbreviate("abcdefghijklmno", 6, 10)  = "...ghij..."
-     * StringUtils.abbreviate("abcdefghijklmno", 8, 10)  = "...ijklmno"
+     * StringUtils.abbreviate("abcdefghijklmno", 0, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 1, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 4, 10) = "abcdefg..."
+     * StringUtils.abbreviate("abcdefghijklmno", 5, 10) = "...fghi..."
+     * StringUtils.abbreviate("abcdefghijklmno", 6, 10) = "...ghij..."
+     * StringUtils.abbreviate("abcdefghijklmno", 8, 10) = "...ijklmno"
      * StringUtils.abbreviate("abcdefghijklmno", 10, 10) = "...ijklmno"
      * StringUtils.abbreviate("abcdefghijklmno", 12, 10) = "...ijklmno"
-     * StringUtils.abbreviate("abcdefghij", 0, 3)        = IllegalArgumentException
-     * StringUtils.abbreviate("abcdefghij", 5, 6)        = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefghij", 0, 3) = IllegalArgumentException
+     * StringUtils.abbreviate("abcdefghij", 5, 6) = IllegalArgumentException
      * </pre>
      *
      * @param str The String to check, may be null
@@ -1059,7 +1138,7 @@ public class Strings {
      * @param trimChars The characters to remove
      * @return The trimmed string
      */
-    public static String trimStart(String string, char...trimChars) {
+    public static String trimStart(String string, char... trimChars) {
         if (null != string && null != trimChars && 0 < trimChars.length) {
             while (0 < string.length() && contains(string.charAt(0), trimChars)) {
                 string = string.substring(1, string.length() - 1);
@@ -1075,13 +1154,40 @@ public class Strings {
      * @param trimChars The characters to remove
      * @return The trimmed string
      */
-    public static String trimEnd(String string, char...trimChars) {
+    public static String trimEnd(String string, char... trimChars) {
         if (null != string && null != trimChars && 0 < trimChars.length) {
             while (0 < string.length() && contains(string.charAt(string.length() - 1), trimChars)) {
                 string = string.substring(0, string.length() - 1);
             }
         }
         return string;
+    }
+
+    /**
+     * Converts specified wildcard string to a regular expression
+     *
+     * @param wildcard The wildcard string to convert
+     * @return An appropriate regular expression ready for being used in a {@link Pattern pattern}
+     */
+    public static String wildcardToRegex(String wildcard) {
+        final StringBuilder s = new StringBuilder(wildcard.length());
+        s.append('^');
+        final int len = wildcard.length();
+        for (int i = 0; i < len; i++) {
+            final char c = wildcard.charAt(i);
+            if (c == '*') {
+                s.append(".*");
+            } else if (c == '?') {
+                s.append('.');
+            } else if (c == '(' || c == ')' || c == '[' || c == ']' || c == '$' || c == '^' || c == '.' || c == '{' || c == '}' || c == '|' || c == '\\') {
+                s.append('\\');
+                s.append(c);
+            } else {
+                s.append(c);
+            }
+        }
+        s.append('$');
+        return (s.toString());
     }
 
     private static boolean contains(char c, char[] charArray) {
@@ -1092,6 +1198,39 @@ public class Strings {
         }
         return false;
 
+    }
+
+    /**
+     * Omits leading and trailing whitespaces in given <code>StringBuilder</code> instance.
+     *
+     * @param sb The <code>StringBuilder</code> instance
+     * @return The <code>StringBuilder</code> instance with leading and trailing whitespaces omitted
+     */
+    public static StringBuilder trim(StringBuilder sb) {
+        if (null == sb) {
+            return null;
+        }
+
+        int len = sb.length();
+        int st = 0;
+
+        while ((st < len) && (sb.charAt(st) <= ' ')) {
+            st++;
+        }
+        while ((st < len) && (sb.charAt(len - 1) <= ' ')) {
+            len--;
+        }
+
+        if ((st > 0) || (len < sb.length())) {
+            for (int i = sb.length(); i > len; i--) {
+                sb.deleteCharAt(i - 1);
+            }
+            for (int i = st; i-- > 0;) {
+                sb.deleteCharAt(0);
+            }
+        }
+
+        return sb;
     }
 
 }

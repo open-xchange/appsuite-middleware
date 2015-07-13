@@ -59,12 +59,14 @@ import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageUtility;
@@ -94,6 +96,8 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     private static final long serialVersionUID = -7725853828283398968L;
 
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(InfostoreFileServlet.class);
+
     private static final String CONTEXTID = "contextId";
     private static final String SITE = "site";
     private static final String INFOSTORE_ID = "infoId";
@@ -117,6 +121,15 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
 
     public static void setFileResponseRenderer(final FileResponseRenderer renderer) {
         fileResponseRenderer = renderer;
+    }
+
+    // -------------------------------------------------------------------------------------------------------
+
+    /**
+     * Initializes a new {@link InfostoreFileServlet}.
+     */
+    public InfostoreFileServlet() {
+        super();
     }
 
     @Override
@@ -151,6 +164,21 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
             startedWriting = true;
             writeFile(new PublicationSession(publication), metadata, fileData, req, resp);
 
+        } catch (OXException e) {
+            if (PublicationErrorMessage.NOT_FOUND_EXCEPTION.equals(e)) {
+                // Signal 404 - Not found
+                String queryString = req.getQueryString();
+                LOGGER.debug("No such file for request: {}{}", req.getRequestURI(), null == queryString ? "" : "?" + queryString);
+                resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            // Signal internal server error
+            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            if(!startedWriting) {
+                e.printStackTrace(resp.getWriter());
+            }
+            LOG.error("", e);
         } catch (Exception e) {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             if(!startedWriting) {
@@ -171,9 +199,13 @@ public class InfostoreFileServlet extends OnlinePublicationServlet {
                 throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create();
             }
             Session session = new PublicationSession(publication);
-            IDBasedFileAccess fileAccess = factory.createAccess(session);
+            IDBasedFileAccess fileAccess = fileFactory.createAccess(session);
             String id = publication.getEntityId() + '/' + infoId;
-            return FileMetadata.getMetadata(fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION));
+            File metadata = fileAccess.getFileMetadata(id, FileStorageFileAccess.CURRENT_VERSION);
+            if (null == metadata || null != publication.getEntityId() && false == publication.getEntityId().equals(metadata.getFolderId())) {
+                throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create();
+            }
+            return FileMetadata.getMetadata(metadata);
         } catch (final OXException e) {
             if (InfostoreExceptionCodes.NOT_EXIST.equals(e) || FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e)) {
                 throw PublicationErrorMessage.NOT_FOUND_EXCEPTION.create(e, new Object[0]);

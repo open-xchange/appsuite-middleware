@@ -57,6 +57,7 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 public class DeleteDocumentAction extends AbstractDocumentListAction {
 
@@ -65,8 +66,8 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
     /**
      * Initializes a new {@link DeleteDocumentAction}.
      */
-    public DeleteDocumentAction() {
-        super();
+    public DeleteDocumentAction(Session session) {
+        super(session);
     }
 
     /**
@@ -77,8 +78,8 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
      * @param context The context
      * @param document The document to delete
      */
-    public DeleteDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata document) {
-        this(provider, queryCatalog, context, Collections.singletonList(document));
+    public DeleteDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, DocumentMetadata document, Session session) {
+        this(provider, queryCatalog, context, Collections.singletonList(document), session);
     }
 
     /**
@@ -89,9 +90,8 @@ public class DeleteDocumentAction extends AbstractDocumentListAction {
      * @param context The context
      * @param documents The documents to delete
      */
-    public DeleteDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context,
-        List<DocumentMetadata> documents) {
-        super(provider, queryCatalog, context, documents);
+    public DeleteDocumentAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> documents, Session session) {
+        super(provider, queryCatalog, context, documents, session);
     }
 
     @Override

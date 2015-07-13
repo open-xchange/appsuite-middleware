@@ -75,6 +75,7 @@ import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -93,26 +94,23 @@ public abstract class AbstractITipAction implements AJAXActionService{
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractITipAction.class);
 
     protected ServiceLookup services;
+    
+    protected RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing;
 
-    public AbstractITipAction(final ServiceLookup services) {
+    public AbstractITipAction(final ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing) {
         super();
         this.services = services;
+        this.analyzerListing = analyzerListing;
     }
 
 
     @Override
     public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
-        final List<ConversionError> errors = new ArrayList<ConversionError>();
-        final List<ConversionWarning> warnings = new ArrayList<ConversionWarning>();
-
         final ITipParser itipParser = services.getService(ITipParser.class);
         if (null == itipParser) {
             throw ServiceExceptionCode.serviceUnavailable(ITipParser.class);
         }
-        final ITipAnalyzerService analyzer = services.getService(ITipAnalyzerService.class);
-        if (null == analyzer) {
-            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
-        }
+        ITipAnalyzerService analyzer = getAnalyzerService();
 
         final TimeZone tz = TimeZone.getTimeZone(session.getUser().getTimeZone());
         final String timezoneParameter = request.getParameter("timezone");
@@ -120,13 +118,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
 
         final Map<String, String> mailHeader = new HashMap<String, String>();
         final InputStream stream = getInputStreamAndFillMailHeader(request, session, mailHeader);
-        int owner = 0;
-        if (mailHeader.containsKey(OWNER)) {
-            owner = Integer.parseInt(mailHeader.get(OWNER));
-        }
-        final List<ITipMessage> messages = itipParser.parseMessage(stream, tz, session.getContext(), owner, errors, warnings);
-
-        final List<ITipAnalysis> analysis = analyzer.analyze(messages, request.getParameter("descriptionFormat"), session, mailHeader);
+        final List<ITipAnalysis> analysis = analyzer.analyze(stream, request.getParameter("descriptionFormat"), session, mailHeader);
         Object result;
         try {
             result = process(analysis, request, session, outputTimeZone);
@@ -135,6 +127,19 @@ public abstract class AbstractITipAction implements AJAXActionService{
         }
 
         return new AJAXRequestResult(result, new Date());
+    }
+
+
+    private ITipAnalyzerService getAnalyzerService() throws OXException {
+        List<ITipAnalyzerService> serviceList = analyzerListing.getServiceList();
+        if (serviceList == null || serviceList.isEmpty()) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
+        }
+        ITipAnalyzerService analyzer = serviceList.get(0);
+        if (analyzer == null) {
+            throw ServiceExceptionCode.serviceUnavailable(ITipAnalyzerService.class);
+        }
+        return analyzer;
     }
 
 

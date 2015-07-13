@@ -182,6 +182,8 @@ public final class MailProperties implements IMailProperties {
 
     private int maxToCcBcc;
 
+    private int maxDriveAttachments;
+
     private String authProxyDelimiter;
 
     /** Indicates whether MSISDN addresses should be supported or not. */
@@ -282,6 +284,7 @@ public final class MailProperties implements IMailProperties {
         rateLimitPrimaryOnly = true;
         rateLimit = 0;
         maxToCcBcc = 0;
+        maxDriveAttachments = 20;
         authProxyDelimiter = null;
         supportMsisdnAddresses = false;
         accountBlacklistRanges = null;
@@ -632,6 +635,19 @@ public final class MailProperties implements IMailProperties {
         }
 
         {
+            final String maxDriveAttachmentsStr = configuration.getProperty("com.openexchange.mail.maxDriveAttachments", "20").trim();
+            try {
+                maxDriveAttachments = Integer.parseInt(maxDriveAttachmentsStr);
+                logBuilder.append("\tmaxDriveAttachments: ").append(maxDriveAttachments).append('\n');
+            } catch (final NumberFormatException e) {
+                maxDriveAttachments = 20;
+                logBuilder.append("\tmaxDriveAttachments: Invalid value \"").append(maxDriveAttachmentsStr).append("\". Setting to fallback ").append(
+                    maxDriveAttachments).append('\n');
+
+            }
+        }
+
+        {
             String javaMailPropertiesStr = configuration.getProperty("com.openexchange.mail.JavaMailProperties");
             if (null != javaMailPropertiesStr) {
                 javaMailPropertiesStr = javaMailPropertiesStr.trim();
@@ -885,12 +901,21 @@ public final class MailProperties implements IMailProperties {
     }
 
     /**
-     * Gets the sent mail rate limit (how many mails can be sent in
+     * Gets the max. number of recipient addresses that can be specified
      *
-     * @return
+     * @return The max. number of recipient addresses
      */
     public int getMaxToCcBcc() {
         return maxToCcBcc;
+    }
+
+    /**
+     * Gets the max. number of Drive attachments that can be attached to a mail
+     *
+     * @return The max. number of Drive attachments
+     */
+    public int getMaxDriveAttachments() {
+        return maxDriveAttachments;
     }
 
     /**

@@ -50,7 +50,7 @@
 package com.openexchange.cli;
 
 /**
- * {@link ExecutionFault} - A wrapper for exceptions causes by MBean invocation.
+ * {@link ExecutionFault} - A wrapper for exceptions causes by MBean/RMI invocation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

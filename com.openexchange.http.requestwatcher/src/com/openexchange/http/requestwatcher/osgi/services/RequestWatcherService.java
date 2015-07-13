@@ -59,30 +59,31 @@ import com.openexchange.osgi.annotation.SingletonService;
  * processing and a warning is logged if the duration exceeds a configurable amount of time.
  *
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 @SingletonService
 public interface RequestWatcherService {
 
     /**
-     * Register a request in the request registry.
+     * Registers a request in the request registry.
      *
-     * @param request the request to register
-     * @param thread the thread associated with the request
+     * @param request The request to register
+     * @param thread The thread associated with the request
      * @param propertyMap The log properties associated with the thread
-     * @return A RequestRegistryEntry wrapping the registered request
+     * @return A registry entry wrapping the registered request
      */
     RequestRegistryEntry registerRequest(HttpServletRequest request, HttpServletResponse response, Thread thread, Map<String, String> propertyMap);
 
     /**
-     * Unregister a request from the request registry
+     * Unregisters a request from the request registry
      *
      * @param The RequestRegistryEntry that was received when initially registering the request
-     * @return false if the entry couldn't be found
+     * @return <code>false</code> if the entry could not be found; otherwise <code>true</code>
      */
     boolean unregisterRequest(RequestRegistryEntry registryEntry);
 
     /**
-     * Stop periodically inspecting the requests in the requestRegistry.
+     * Stops periodically inspecting the requests in the requestRegistry.
      *
      * @return <code>false</code> if the task could not be canceled, typically because it has already completed normally; <code>true</code>
      *         otherwise

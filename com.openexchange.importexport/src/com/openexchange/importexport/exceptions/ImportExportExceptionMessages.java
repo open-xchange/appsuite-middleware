@@ -99,7 +99,7 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
     public static final String NO_FIELD_FOR_NAMING_IN_LINE_MSG = "No field was set that might give the contact in line %s a display name: no name, company or E-Mail.";
 
     public static final String ONLY_ONE_FILE_MSG = "Can only handle one file, not %s";
-    
+
     public static final String UNKNOWN_FORMAT_MSG = "Unknown format: %s";
 
     public static final String EMPTY_FILE_MSG = "Empty file uploaded.";
@@ -131,6 +131,9 @@ public class ImportExportExceptionMessages implements LocalizableStrings {
 
     // Could not create: %s
     public static final String LIMIT_EXCEEDED_MSG = "Import limit exceeded. Only imported the first %1$s contacts";
+
+    // The character encoding \"%1$s\" is not supported. Please choose another one.
+    public static final String UNSUPPORTED_CHARACTER_ENCODING_MSG = "The character encoding \"%1$s\" is not supported. Please choose another one.";
 
     private ImportExportExceptionMessages() {
         super();

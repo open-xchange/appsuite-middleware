@@ -102,6 +102,57 @@ public class Streams {
         }
     };
 
+    /** An output stream that just discards passed bytes. */
+    public static final OutputStream EMPTY_OUTPUT_STREAM = new OutputStream() {
+
+        @Override
+        public void write(int b) throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void write(byte[] b) throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void write(byte[] b, int off, int len) throws IOException {
+            // Nothing
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // Nothing
+        }
+    };
+
+    /**
+     * Checks if specified stream is empty.
+     * <p>
+     * If <code>null</code> is returned, the given stream is ensured to be closed.
+     *
+     * @param is The stream to check
+     * @return The stream if not empty; otherwise <code>null</code> if empty
+     * @throws IOException If an I/O error occurs
+     */
+    public static InputStream getNonEmpty(InputStream is) throws IOException {
+        if (null == is) {
+            return null;
+        }
+
+        // Try to read first byte
+        PushbackInputStream pis = new PushbackInputStream(is);
+        int check = pis.read();
+        if (check < 0) {
+            Streams.close(pis);
+            return null;
+        }
+
+        // ... then push back to non-empty stream
+        pis.unread(check);
+        return pis;
+    }
+
     /**
      * Returns a buffered {@link InputStream} for specified stream.
      *
@@ -135,20 +186,46 @@ public class Streams {
     }
 
     /**
+     * Gets the specified stream's string representation using given character encoding.
+     *
+     * @param is The stream to read from
+     * @param charset The character encoding
+     * @return The string
+     * @throws IOException If an I/O error occurs
+     */
+    public static String stream2string(InputStream is, String charset) throws IOException {
+        if (null == is) {
+            return null;
+        }
+        try {
+            @SuppressWarnings("resource")
+            UnsynchronizedByteArrayOutputStream bos = new UnsynchronizedByteArrayOutputStream(4096);
+            int buflen = 2048;
+            byte[] buf = new byte[buflen];
+            for (int read; (read = is.read(buf, 0, buflen)) > 0;) {
+                bos.write(buf, 0, read);
+            }
+            return bos.toString(Charsets.forName(charset));
+        } finally {
+            close(is);
+        }
+    }
+
+    /**
      * Reads the content from given reader.
      *
      * @param reader The reader
      * @return The reader's content
      * @throws IOException If an I/O error occurs
      */
-    public static String reader2string(final Reader reader) throws IOException {
+    public static String reader2string(Reader reader) throws IOException {
         if (null == reader) {
             return null;
         }
-        final int buflen = 2048;
-        final char[] cbuf = new char[buflen];
-        final StringBuilder builder = new StringBuilder(8192);
-        for (int read = reader.read(cbuf, 0, buflen); read > 0; read = reader.read(cbuf, 0, buflen)) {
+        int buflen = 2048;
+        char[] cbuf = new char[buflen];
+        StringBuilder builder = new StringBuilder(8192);
+        for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
             builder.append(cbuf, 0, read);
         }
         if (0 == builder.length()) {

@@ -193,9 +193,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
     public static final String PIVATE_FLAG_ONLY_IN_PRIVATE_FOLDER_MSG = "You can not use the private flag in a non private folder.";
 
     /**
-     * Invalid characters in field %1$s.
+     * Invalid characters (%2$s) in field %1$s.
      */
-    public static final String INVALID_CHARACTER_DISPLAY = "Invalid characters in field %1$s.";
+    public static final String INVALID_CHARACTER_DISPLAY = "Invalid characters (%2$s) in field %1$s.";
 
     /**
      * Series end is before start date.

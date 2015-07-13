@@ -80,6 +80,7 @@ import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.Assignment;
 import com.openexchange.exception.OXException;
+import com.openexchange.tools.file.external.QuotaFileStorages;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
 import com.openexchange.tools.pipesnfilters.PipesAndFiltersException;
@@ -180,7 +181,9 @@ public class OXContextMySQLStorageCommon {
 
             oxdb_read = cache.getConnectionForContext(context_id);
 
-            prep = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
+            boolean hasUserColumn = QuotaFileStorages.hasUserColumn(oxdb_read, context_id);
+
+            prep = oxdb_read.prepareStatement(hasUserColumn ? "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0" : "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
             prep.setInt(1, context_id);
             rs = prep.executeQuery();
 
@@ -200,6 +203,8 @@ public class OXContextMySQLStorageCommon {
             cs.setId(context_id);
             loadDynamicAttributes(oxdb_read, cs);
             return cs;
+        } catch (OXException e) {
+            throw new StorageException(e.getMessage(), e);
         } finally {
             closePreparedStatement(prep);
             if (oxdb_read != null) {

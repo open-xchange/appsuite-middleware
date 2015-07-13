@@ -93,6 +93,15 @@ public final class OAuthExceptionMessages implements LocalizableStrings {
     // There was a problem while creating a connection to the remote service.
     public static final String CONNECT_ERROR_MSG = "There was a problem while creating a connection to the remote service.";
 
+    // You need to grant additional %1$s permissions to access the resource.
+    public static final String OAUTH_PROBLEM_ADDITIONAL_AUTHORIZATION_REQUIRED_MSG = "You need to grant additional %1$s permissions to access the resource.";
+
+    // Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+    public static final String OAUTH_PROBLEM_TOKEN_REJECTED_MSG = "Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
+
+    // Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+    public static String OAUTH_PROBLEM_TOKEN_REVOKED_MSG = "Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.";
+
     /**
      * Initializes a new {@link OAuthExceptionMessages}.
      */

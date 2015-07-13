@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange JSON interface to pass an identity token from one system to another
 Bundle-SymbolicName: com.openexchange.jump.json
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,

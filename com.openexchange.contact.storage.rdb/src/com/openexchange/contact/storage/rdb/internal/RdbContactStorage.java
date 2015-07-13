@@ -57,7 +57,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.DefaultContactStorage;
@@ -67,6 +66,7 @@ import com.openexchange.contact.storage.rdb.fields.QueryFields;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Executor;
 import com.openexchange.contact.storage.rdb.sql.Table;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -228,6 +228,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              * commit
              */
             connectionHelper.commit();
+        } catch (IncorrectStringSQLException e) {
+            DBUtils.rollback(connection);
+            throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
@@ -480,6 +483,9 @@ public class RdbContactStorage extends DefaultContactStorage {
              * commit
              */
             connectionHelper.commit();
+        } catch (IncorrectStringSQLException e) {
+            DBUtils.rollback(connection);
+            throw Tools.getIncorrectStringException(serverSession, connection, e, contact, Table.CONTACTS);
         } catch (DataTruncation e) {
             DBUtils.rollback(connection);
             throw Tools.getTruncationException(session, connection, e, contact, Table.CONTACTS);
@@ -548,6 +554,8 @@ public class RdbContactStorage extends DefaultContactStorage {
              * commit
              */
             connectionHelper.commit();
+        } catch (IncorrectStringSQLException e) {
+            throw Tools.getIncorrectStringException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);
         } catch (DataTruncation e) {
             DBUtils.rollback(connectionHelper.getWritable());
             throw Tools.getTruncationException(session, connectionHelper.getReadOnly(), e, updatedContact, Table.CONTACTS);

@@ -72,11 +72,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractConfigAction implements AJAXActionService {
 
-    private static final org.slf4j.Logger LOG =
-        org.slf4j.LoggerFactory.getLogger(AbstractConfigAction.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractConfigAction.class);
 
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
+    // ------------------------------------------------------------------------------------------------------------------
+
+    /** The service look-up for tracked OSGi services */
     protected final ServiceLookup services;
 
     /**
@@ -93,8 +95,8 @@ public abstract class AbstractConfigAction implements AJAXActionService {
      * @param clazz The service's class
      * @return The service or <code>null</code> if absent
      */
-    protected <S> S getService(final Class<? extends S> clazz) {
-        return services.getService(clazz);
+    protected <S> S getService(Class<? extends S> clazz) {
+        return services.getOptionalService(clazz);
     }
 
     @Override

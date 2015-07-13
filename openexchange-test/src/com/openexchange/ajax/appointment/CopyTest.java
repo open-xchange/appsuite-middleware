@@ -2,7 +2,6 @@ package com.openexchange.ajax.appointment;
 
 import java.io.ByteArrayInputStream;
 import java.util.Date;
-import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
 import com.meterware.httpunit.PutMethodWebRequest;
 import com.meterware.httpunit.WebRequest;
@@ -21,6 +20,10 @@ import com.openexchange.tools.URLParameter;
 public class CopyTest extends AppointmentTest {
 
 	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CopyTest.class);
+    private int targetFolderId;
+    private String login;
+    private String context;
+    private String password;
 
 	public CopyTest(final String name) {
 		super(name);
@@ -28,8 +31,20 @@ public class CopyTest extends AppointmentTest {
 
 	@Override
 	protected void setUp() throws Exception {
-		super.setUp();
+	    super.setUp();
+	    targetFolderId = 0;
+	    login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
+	    context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultContext");
+	    password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
 	}
+
+    @Override
+    protected void tearDown() throws Exception {
+        if (0 != targetFolderId) {
+            com.openexchange.webdav.xml.FolderTest.deleteFolder(getWebConversation(), new int[] { targetFolderId }, PROTOCOL + getHostName(), login, password, context);
+        }
+        super.tearDown();
+    }
 
 	public void testCopy() throws Exception {
 		final Appointment appointmentObj = new Appointment();
@@ -42,12 +57,10 @@ public class CopyTest extends AppointmentTest {
 		appointmentObj.setIgnoreConflicts(true);
 		final int objectId1 = insertAppointment(getWebConversation(), appointmentObj, timeZone, PROTOCOL + getHostName(), getSessionId());
 
-		final String login = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "login", "");
-		final String context = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "contextName", "defaultContext");
-		final String password = AbstractConfigWrapper.parseProperty(getAJAXProperties(), "password", "");
+
 
 		final FolderObject folderObj = com.openexchange.webdav.xml.FolderTest.createFolderObject(userId, "testCopy" + System.currentTimeMillis(), FolderObject.CALENDAR, false);
-		final int targetFolder = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
+		targetFolderId = com.openexchange.webdav.xml.FolderTest.insertFolder(getWebConversation(), folderObj, PROTOCOL + getHostName(), login, password, context);
 
 		final URLParameter parameter = new URLParameter();
 		parameter.setParameter(AJAXServlet.PARAMETER_SESSION, getSessionId());
@@ -57,7 +70,7 @@ public class CopyTest extends AppointmentTest {
 		parameter.setParameter(AppointmentFields.IGNORE_CONFLICTS, true);
 
 		final JSONObject jsonObj = new JSONObject();
-		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolder);
+		jsonObj.put(FolderChildFields.FOLDER_ID, targetFolderId);
 		final ByteArrayInputStream bais = new ByteArrayInputStream(jsonObj.toString().getBytes(com.openexchange.java.Charsets.UTF_8));
 		final WebRequest req = new PutMethodWebRequest(PROTOCOL + getHostName() + APPOINTMENT_URL + parameter.getURLParameters(), bais, "text/javascript");
 		final WebResponse resp = getWebConversation().getResponse(req);
@@ -83,7 +96,7 @@ public class CopyTest extends AppointmentTest {
 
 		deleteAppointment(getWebConversation(), objectId1, appointmentFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 		if (objectId2 > 0) {
-			deleteAppointment(getWebConversation(), objectId2, targetFolder, PROTOCOL + getHostName(), getSessionId(), false);
+			deleteAppointment(getWebConversation(), objectId2, targetFolderId, PROTOCOL + getHostName(), getSessionId(), false);
 		}
 	}
 }

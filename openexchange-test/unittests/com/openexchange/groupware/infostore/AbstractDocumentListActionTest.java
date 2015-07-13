@@ -124,6 +124,10 @@ public class AbstractDocumentListActionTest extends AbstractInfostoreTest {
 
     static final class TestDocumentListAction extends AbstractDocumentListAction {
 
+        TestDocumentListAction() {
+            super(null);
+        }
+
         @Override
         public void perform() throws OXException {
             assureExistence();

@@ -1,0 +1,54 @@
+#!/usr/bin/perl -w
+#%# family=auto
+#%# capabilities=autoconf
+
+$logconf="/opt/open-xchange/sbin/logconf";
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf") {
+    if (-x $logconf) {
+        print "yes\n";
+        exit 0;
+    } else {
+        print "no\n";
+        exit 0;
+    }
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+    print "graph_title AsyncAppender Queue Sizes\n";
+    print "graph_category Open Xchange\n";
+    print "graph_vlabel total\n";
+
+    open(APPENDERS,"$logconf -la |") || die "can not read monitoring output";
+    $i = 0;
+    while (<APPENDERS>) {
+        if ($_ =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
+            print "a$i.label $1 (capacity: $2)\n";
+            my $w = int($2 / 2);
+            print "a$i.warning :$w\n";
+            print "a$i.critical :$2\n";
+            $i++;
+        } elsif ($_ =~ /LogstashSocketAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
+            print "a$i.label $1 (capacity: $2)\n";
+            my $w = int($2 / 2);
+            print "a$i.warning :$w\n";
+            print "a$i.critical :$2\n";
+            $i++;
+        }
+    }
+    close(APPENDERS);
+    exit 0
+}
+
+open(APPENDERS,"$logconf -la |") || die "can not read monitoring output";
+$i = 0;
+while (<APPENDERS>) {
+    if ( $_ =~ /AsyncAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
+        print "a$i.value $3\n";
+        $i++;
+    } elsif ($_ =~ /LogstashSocketAppender:\s([^\[]+)\s\[capacity=([\d]+),size=([\d]+)/) {
+        print "a$i.value $3\n";
+        $i++;
+    }
+}
+close(APPENDERS);

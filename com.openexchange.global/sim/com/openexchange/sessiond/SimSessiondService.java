@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -119,6 +120,13 @@ public class SimSessiondService implements SessiondService {
     public void removeContextSessions(int contextId) {
         SessionFilter filter = SessionFilter.create("(" + SessionFilter.CONTEXT_ID + "=" + contextId + ")");
         filterSessionIds(filter, true);
+    }
+
+    @Override
+    public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException {
+        for (Integer contextId : contextIds) {
+            removeContextSessions(contextId);
+        }
     }
 
     @Override
@@ -212,6 +220,11 @@ public class SimSessiondService implements SessiondService {
     }
 
     @Override
+    public Session getSessionByAlternativeId(String altId, boolean lookupSessionStorage) {
+        return getSessionByAlternativeId(altId);
+    }
+
+    @Override
     public Session getSessionByRandomToken(String randomToken, String localIp) {
         // TODO Auto-generated method stub
         return null;
@@ -274,4 +287,9 @@ public class SimSessiondService implements SessiondService {
         }
     }
 
+    @Override
+    public boolean storeSession(String sessionId) throws OXException {
+        // Nothing to do.
+        return true;
+    }
 }

@@ -97,12 +97,16 @@ public class MsgFormat implements PreferencesItemService {
                     String format = "html";
                     {
                         int msgFormat = settings.getMsgFormat();
-                        if (UserSettingMail.MSG_FORMAT_TEXT_ONLY == msgFormat) {
-                            format = "text";
-                        } else if (UserSettingMail.MSG_FORMAT_HTML_ONLY == msgFormat) {
-                            format = "html";
-                        } else if (UserSettingMail.MSG_FORMAT_BOTH == msgFormat) {
-                            format = "alternative";
+                        switch (msgFormat) {
+                            case UserSettingMail.MSG_FORMAT_TEXT_ONLY:
+                                format = "text";
+                                break;
+                            case UserSettingMail.MSG_FORMAT_HTML_ONLY:
+                                format = "html";
+                                break;
+                            case UserSettingMail.MSG_FORMAT_BOTH:
+                                format = "alternative";
+                                break;
                         }
                     }
                     setting.setSingleValue(format);

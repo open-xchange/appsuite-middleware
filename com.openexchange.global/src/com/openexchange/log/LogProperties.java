@@ -183,6 +183,10 @@ public final class LogProperties {
          */
         GRIZZLY_REQUEST_URI("com.openexchange.grizzly.requestURI"),
         /**
+         * com.openexchange.grizzly.queryString
+         */
+        GRIZZLY_QUERY_STRING("com.openexchange.grizzly.queryString"),
+        /**
          * com.openexchange.grizzly.servletPath
          */
         GRIZZLY_SERVLET_PATH("com.openexchange.grizzly.servletPath"),
@@ -190,10 +194,6 @@ public final class LogProperties {
          * com.openexchange.grizzly.pathInfo
          */
         GRIZZLY_PATH_INFO("com.openexchange.grizzly.pathInfo"),
-        /**
-         * com.openexchange.grizzly.requestIp
-         */
-        GRIZZLY_REQUEST_IP("com.openexchange.grizzly.requestIp"),
         /**
          * com.openexchange.grizzly.serverName
          */
@@ -211,11 +211,11 @@ public final class LogProperties {
          */
         GRIZZLY_REMOTE_ADDRESS("com.openexchange.grizzly.remoteAddress"),
         /**
-         * com.openexchange.http.grizzly.session
+         * com.openexchange.grizzly.session
          */
         GRIZZLY_HTTP_SESSION("com.openexchange.grizzly.session"),
         /**
-         * com.openexchange.http.grizzly.userAgent
+         * com.openexchange.grizzly.userAgent
          */
         GRIZZLY_USER_AGENT("com.openexchange.grizzly.userAgent"),
         /**
@@ -362,15 +362,17 @@ public final class LogProperties {
                 if (null == field) {
                     throw new NoSuchFieldException("InheritableThreadLocal");
                 }
+                field.setAccessible(true);
+                FIELD_CACHE.put(clazz, field);
             }
             return (InheritableThreadLocal<Map<String, String>>) field.get(mdcAdapter);
-        } catch (final SecurityException e) {
+        } catch (SecurityException e) {
             throw OXException.general(e.getMessage(), e);
-        } catch (final IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             throw OXException.general(e.getMessage(), e);
-        } catch (final NoSuchFieldException e) {
+        } catch (NoSuchFieldException e) {
             throw OXException.general(e.getMessage(), e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             throw OXException.general(e.getMessage(), e);
         }
     }
@@ -723,6 +725,56 @@ public final class LogProperties {
     @Deprecated
     public static Props getLogProperties() {
         return new Props();
+    }
+
+    private static final Set<String> SANITIZE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("password")));
+    private static final String REPLACEMENT = "xxx";
+
+    /**
+     * Gets the sanitized (URL) parameter value.
+     *
+     * @param name The name
+     * @param value The value
+     * @return The sanitized value
+     */
+    public static String getSanitizedValue(String name, String value) {
+        return SANITIZE.contains(Strings.asciiLowerCase(name)) ? REPLACEMENT : value;
+    }
+
+    /**
+     * Gets the sanitized query-string
+     *
+     * @param queryString The query-string to sanitize
+     * @return The sanitized query-string
+     */
+    public static String getSanitizedQueryString(String queryString) {
+        if (Strings.isEmpty(queryString)) {
+            return queryString;
+        }
+        String[] pairs = Strings.splitByAmps(queryString);
+        StringBuilder sb = new StringBuilder(queryString.length());
+        boolean first = true;
+        for (String pair : pairs) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append('&');
+            }
+
+            int idx = pair.indexOf('=');
+            if (idx <= 0) {
+                sb.append(pair);
+            } else {
+                String key = pair.substring(0, idx);
+                sb.append(key);
+                if (SANITIZE.contains(Strings.asciiLowerCase(key))) {
+                    sb.append('=').append(REPLACEMENT);
+                } else {
+                    sb.append(pair.substring(idx));
+                }
+            }
+        }
+        return sb.toString();
     }
 
 }

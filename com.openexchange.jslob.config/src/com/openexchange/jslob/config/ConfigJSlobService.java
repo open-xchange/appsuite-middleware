@@ -66,7 +66,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.json.JSONArray;
@@ -86,6 +85,7 @@ import com.openexchange.groupware.settings.SettingExceptionCodes;
 import com.openexchange.groupware.settings.impl.ConfigTree;
 import com.openexchange.groupware.settings.impl.SettingStorage;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.SequentialCompletionService;
 import com.openexchange.java.Streams;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSONPathElement;
@@ -101,7 +101,6 @@ import com.openexchange.preferences.ServerUserSettingLoader;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
-import com.openexchange.threadpool.ThreadPoolCompletionService;
 import com.openexchange.threadpool.ThreadPools;
 
 /**
@@ -303,7 +302,8 @@ public final class ConfigJSlobService implements JSlobService {
                         preferenceItems.put(key, attributes);
                     }
                     try {
-                        attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property));
+                        boolean isProtected = Boolean.parseBoolean(property.get("protected"));
+                        attributes.put(preferencePath, new AttributedProperty(preferencePath, entry.getKey(), property, isProtected));
                     } catch (final Exception e) {
                         logger.warn("Couldn't initialize preference path: {}", preferencePath, e);
                     }
@@ -430,7 +430,7 @@ public final class ConfigJSlobService implements JSlobService {
             if (sharedId.startsWith(id)) {
                 try {
                     JSlob sharedJSlob = entry.getValue().getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                    String newId = id.length() < sharedId.length() ? sharedId.substring(id.length() + 1, sharedId.length()) : sharedId;
                     jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
                 } catch (JSONException e) {
                     // should not happen
@@ -537,7 +537,7 @@ public final class ConfigJSlobService implements JSlobService {
             final ConfigTree configTree = ConfigTree.getInstance();
 
             final Set<Entry<String, String>> entrySet = equiv.config2lob.entrySet();
-            final JSONObject jObject = new JSONObject(entrySet.size());
+            final JSONObject jObject = new JSONObject(jsLob.getJsonObject());
             for (final Map.Entry<String, String> mapping : entrySet) {
                 final String configTreePath = mapping.getKey();
                 final String lobPath = mapping.getValue();
@@ -551,7 +551,7 @@ public final class ConfigJSlobService implements JSlobService {
                 }
             }
 
-            jsLob.setJsonObject(JSONUtil.rightMerge(jsLob.getJsonObject(), jObject));
+            jsLob.setJsonObject(jObject);
         } catch (final JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException rte) {
@@ -645,50 +645,60 @@ public final class ConfigJSlobService implements JSlobService {
             }
             // Remember the paths to purge
             final List<List<JSONPathElement>> pathsToPurge = new LinkedList<List<JSONPathElement>>();
-            // Config Tree Values first
 
-            final CompletionServiceReference cr = new CompletionServiceReference();
+            // Config Tree Values first
             {
-                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
-                if (equiv != null) {
-                    session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
-                    try {
-                        final SettingStorage stor = SettingStorage.getInstance(session);
-                        final ConfigTree configTree = ConfigTree.getInstance();
-                        final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
-                        // Update setting
-                        updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
-                    } finally {
-                        session.setParameter("__serverUserSetting", null);
+                final CompletionServiceReference cr = new CompletionServiceReference();
+                try {
+                    final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                    if (equiv != null) {
+                        session.setParameter("__serverUserSetting", ServerUserSettingLoader.getInstance().loadFor(session.getUserId(), session.getContextId()));
+                        try {
+                            final SettingStorage stor = SettingStorage.getInstance(session);
+                            final ConfigTree configTree = ConfigTree.getInstance();
+                            final Map<String, String> attribute2ConfigTreeMap = equiv.lob2config;
+                            // Update setting
+                            updateConfigTreeSetting("", jObject, configTree, attribute2ConfigTreeMap, stor, pathsToPurge, cr);
+                        } finally {
+                            session.setParameter("__serverUserSetting", null);
+                        }
+                    }
+
+                    // Check completion service
+                    if (cr.num > 0) {
+                        ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
+                    }
+                } finally {
+                    SequentialCompletionService<Void> completionService = cr.completionService;
+                    if (null != completionService) {
+                        completionService.close();
                     }
                 }
             }
 
-            // Check completion service
-            if (cr.num > 0) {
-                ThreadPools.<Void, OXException> awaitCompletionService(cr.completionService, cr.num, ThreadPools.DEFAULT_EXCEPTION_FACTORY);
-            }
-
             // Set (or replace) JSlob
-            final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
+            Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null != attributes) {
                 // A config cascade change because identifier refers to a preference item
-                final ConfigView view = getConfigViewFactory().getView(userId, contextId);
-                for (final AttributedProperty attributedProperty : attributes.values()) {
-                    final Object value = JSONPathElement.getPathFrom(attributedProperty.path, jObject);
+                ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                for (AttributedProperty attributedProperty : attributes.values()) {
+                    Object value = JSONPathElement.getPathFrom(attributedProperty.path, jObject);
                     if (null != value) {
                         if (view.property(attributedProperty.propertyName, String.class).isDefined()) {
                             pathsToPurge.add(attributedProperty.path);
-                            final Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
-                            // Clients have a habit of dumping the config back at us, so we only save differing values.
-                            if (!value.equals(oldValue)) {
-                                view.set("user", attributedProperty.propertyName, value);
+                            // Update if not protected
+                            if (false == attributedProperty.isProtected) {
+                                Object oldValue = asJSObject(view.get(attributedProperty.propertyName, String.class));
+                                // Clients have a habit of dumping the config back at us, so we only save differing values.
+                                if (!value.equals(oldValue)) {
+                                    view.set("user", attributedProperty.propertyName, value);
+                                }
                             }
                         }
                     }
                 }
             }
-            for (final List<JSONPathElement> path : pathsToPurge) {
+            for (List<JSONPathElement> path : pathsToPurge) {
                 JSONPathElement.remove(path, jObject);
             }
             jsonJSlob.setJsonObject(jObject);
@@ -698,13 +708,13 @@ public final class ConfigJSlobService implements JSlobService {
         }
     }
 
-    private void updateConfigTreeSetting(final String prefix, final JSONObject jObject, final ConfigTree configTree, final Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, final List<List<JSONPathElement>> pathsToPurge, final CompletionServiceReference cr) {
+    private void updateConfigTreeSetting(String prefix, JSONObject jObject, final ConfigTree configTree, Map<String, String> attribute2ConfigTreeMap, final SettingStorage stor, List<List<JSONPathElement>> pathsToPurge, CompletionServiceReference cr) throws OXException {
         for (final Entry<String, Object> entry : jObject.entrySet()) {
-            final String key = prefix + entry.getKey();
+            String key = prefix + entry.getKey();
             final Object value = entry.getValue();
             String path = attribute2ConfigTreeMap.get(key);
             if (path != null) {
-                pathsToPurge.add(Arrays.asList(new JSONPathElement(key)));
+                pathsToPurge.add(JSONPathElement.parsePath(key));
                 if (path.length() > 0 && path.charAt(0) == '/') {
                     path = path.substring(1);
                 }
@@ -712,12 +722,12 @@ public final class ConfigJSlobService implements JSlobService {
                     path = path.substring(0, path.length() - 1);
                 }
                 final String _path = path;
-                final Callable<Void> task = new Callable<Void>() {
+                Callable<Void> task = new Callable<Void>() {
 
                     @Override
                     public Void call() throws Exception {
                         try {
-                            final Setting setting = configTree.optSettingByPath(_path);
+                            Setting setting = configTree.optSettingByPath(_path);
                             if (null != setting) {
                                 setting.setSingleValue(value);
                                 saveSettingWithSubs(stor, setting);
@@ -733,7 +743,7 @@ public final class ConfigJSlobService implements JSlobService {
                 };
 
                 if (null == cr.completionService) {
-                    cr.completionService = new ThreadPoolCompletionService<Void>(ThreadPools.getThreadPool());
+                    cr.completionService = new SequentialCompletionService<Void>(ThreadPools.getThreadPool().getExecutor());
                 }
                 cr.completionService.submit(task);
                 cr.num++;
@@ -818,17 +828,17 @@ public final class ConfigJSlobService implements JSlobService {
             /*
              * Look-up appropriate storage
              */
-            final int userId = session.getUserId();
-            final int contextId = session.getContextId();
-            final JSlobStorage storage = getStorage();
-            final JSlobId jslobId = new JSlobId(SERVICE_ID, id, userId, contextId);
+            int userId = session.getUserId();
+            int contextId = session.getContextId();
+            JSlobStorage storage = getStorage();
+            JSlobId jslobId = new JSlobId(SERVICE_ID, id, userId, contextId);
             /*
              * Get JSlob
              */
-            final JSONObject storageObject;
-            final DefaultJSlob jsonJSlob;
+            JSONObject storageObject;
+            DefaultJSlob jsonJSlob;
             {
-                final JSlob opt = storage.opt(jslobId);
+                JSlob opt = storage.opt(jslobId);
                 if (null == opt) {
                     jsonJSlob = new DefaultJSlob();
                     storageObject = new JSONObject();
@@ -840,12 +850,12 @@ public final class ConfigJSlobService implements JSlobService {
             /*
              * Examine path
              */
-            final List<JSONPathElement> path = jsonUpdate.getPath();
+            List<JSONPathElement> path = jsonUpdate.getPath();
             if (path.isEmpty()) {
                 /*
                  * Merge whole object
                  */
-                final JSONObject merged = JSONUtil.merge(storageObject, (JSONObject) jsonUpdate.getValue());
+                JSONObject merged = JSONUtil.merge(storageObject, (JSONObject) jsonUpdate.getValue());
                 set(id, jsonJSlob.setJsonObject(merged), session);
                 return;
             }
@@ -856,45 +866,43 @@ public final class ConfigJSlobService implements JSlobService {
 
             if (path.size() == 1) {
                 // Only first level elements can be config tree equivalents
-                final ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
+                ConfigTreeEquivalent equiv = configTreeEquivalents.get(id);
                 if (equiv != null) {
-
-                    final String configTreePath = equiv.lob2config.get(path.get(0).getName());
-                    final Object value = jsonUpdate.getValue();
+                    String configTreePath = equiv.lob2config.get(path.get(0).getName());
+                    Object value = jsonUpdate.getValue();
                     if (null != value) {
-                        final SettingStorage stor = SettingStorage.getInstance(session);
-                        final ConfigTree configTree = ConfigTree.getInstance();
-                        final Setting setting = configTree.getSettingByPath(configTreePath);
+                        SettingStorage stor = SettingStorage.getInstance(session);
+                        ConfigTree configTree = ConfigTree.getInstance();
+                        Setting setting = configTree.getSettingByPath(configTreePath);
                         setting.setSingleValue(value);
                         saveSettingWithSubs(stor, setting);
                     }
-
                 }
             }
 
             /*
              * Update in config cascade or basic storage
              */
-            final int size = path.size();
-            final Map<String, AttributedProperty> attributes = preferenceItems.get(id);
+            int size = path.size();
+            Map<String, AttributedProperty> attributes = preferenceItems.get(id);
             if (null == attributes) {
                 /*-
                  * Update in store
                  *
                  * Iterate path except last element
                  */
-                final int msize = size - 1;
+                int msize = size - 1;
                 JSONObject current = storageObject;
                 for (int i = 0; i < msize; i++) {
-                    final JSONPathElement jsonPathElem = path.get(i);
-                    final int index = jsonPathElem.getIndex();
-                    final String name = jsonPathElem.getName();
+                    JSONPathElement jsonPathElem = path.get(i);
+                    int index = jsonPathElem.getIndex();
+                    String name = jsonPathElem.getName();
                     if (index >= 0) {
                         /*
                          * Denotes an index within a JSON array
                          */
                         if (isInstance(name, JSONArray.class, current)) {
-                            final JSONArray jsonArray = current.getJSONArray(name);
+                            JSONArray jsonArray = current.getJSONArray(name);
                             if (index >= jsonArray.length()) {
                                 current = putNewJSONObject(jsonArray);
                             } else {
@@ -905,7 +913,7 @@ public final class ConfigJSlobService implements JSlobService {
                                 }
                             }
                         } else {
-                            final JSONArray newArray = new JSONArray();
+                            JSONArray newArray = new JSONArray();
                             current.put(name, newArray);
                             current = putNewJSONObject(newArray);
                         }
@@ -916,7 +924,7 @@ public final class ConfigJSlobService implements JSlobService {
                         if (isInstance(name, JSONObject.class, current)) {
                             current = current.getJSONObject(name);
                         } else {
-                            final JSONObject newObject = new JSONObject();
+                            JSONObject newObject = new JSONObject();
                             current.put(name, newObject);
                             current = newObject;
                         }
@@ -925,14 +933,14 @@ public final class ConfigJSlobService implements JSlobService {
                 /*
                  * Handle last path element
                  */
-                final JSONPathElement lastPathElem = path.get(msize);
-                final int index = lastPathElem.getIndex();
-                final String name = lastPathElem.getName();
+                JSONPathElement lastPathElem = path.get(msize);
+                int index = lastPathElem.getIndex();
+                String name = lastPathElem.getName();
                 if (index >= 0) {
                     if (isInstance(name, JSONArray.class, current)) {
                         current.getJSONArray(name).put(index, jsonUpdate.getValue());
                     } else {
-                        final JSONArray newArray = new JSONArray();
+                        JSONArray newArray = new JSONArray();
                         current.put(name, newArray);
                         newArray.put(jsonUpdate.getValue());
                     }
@@ -947,31 +955,41 @@ public final class ConfigJSlobService implements JSlobService {
                 /*
                  * A config cascade change because identifier refers to a preference item
                  */
-                final StringBuilder pathBuilder = new StringBuilder(16);
-                pathBuilder.append(path.get(0).toString());
-                for (int i = 1; i < size; i++) {
-                    pathBuilder.append('/').append(path.get(i).toString());
+                String sPath;
+                {
+                    StringBuilder pathBuilder = new StringBuilder(16);
+                    pathBuilder.append(path.get(0).toString());
+                    for (int i = 1; i < size; i++) {
+                        pathBuilder.append('/').append(path.get(i).toString());
+                    }
+                    sPath = pathBuilder.toString();
                 }
-                final AttributedProperty attributedProperty = attributes.get(pathBuilder.toString());
+                AttributedProperty attributedProperty = attributes.get(sPath);
                 if (null == attributedProperty) {
                     /*
                      * No such property
                      */
-                    throw JSlobExceptionCodes.PATH_NOT_FOUND.create(pathBuilder.toString());
+                    throw JSlobExceptionCodes.PATH_NOT_FOUND.create(sPath);
                 }
-                final Object value = jsonUpdate.getValue();
-                if (null != value) {
-                    final ConfigView view = getConfigViewFactory().getView(userId, contextId);
-                    final String oldValue = view.get(attributedProperty.propertyName, String.class);
+                Object newValue = jsonUpdate.getValue();
+                if (null != newValue) {
+                    ConfigView view = getConfigViewFactory().getView(userId, contextId);
+                    String oldValue = view.get(attributedProperty.propertyName, String.class);
                     // Clients have a habit of dumping the config back at us, so we only save differing values.
-                    if (!value.equals(oldValue)) {
-                        view.set("user", attributedProperty.propertyName, value);
+                    if (!newValue.equals(oldValue)) {
+                        if (attributedProperty.isProtected) {
+                            /*
+                             * Protected property
+                             */
+                            throw JSlobExceptionCodes.PROTECTED.create(sPath);
+                        }
+                        view.set("user", attributedProperty.propertyName, newValue);
                     }
                 }
             }
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw JSlobExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException rte) {
+        } catch (RuntimeException rte) {
             throw JSlobExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         }
     }
@@ -1160,31 +1178,27 @@ public final class ConfigJSlobService implements JSlobService {
      */
     private static final class AttributedProperty {
 
-        /**
-         * The property name of the preference item property.
-         */
+        /** The property name of the preference item property. */
         protected final String propertyName;
 
-        /**
-         * The preference path; ending with <code>"/value"</code>.
-         */
+        /** The preference path; ending with <code>"/value"</code>. */
         protected final String preferencePath;
 
-        /**
-         * The property representing a preference item.
-         */
+        /** The property representing a preference item. */
         protected final ComposedConfigProperty<String> property;
 
-        /**
-         * The parsed preference path.
-         */
+        /** The parsed preference path. */
         protected final List<JSONPathElement> path;
 
-        protected AttributedProperty(final String preferencePath, final String propertyName, final ComposedConfigProperty<String> property) throws OXException {
+        /** Whether the associated property is protected */
+        protected final boolean isProtected;
+
+        protected AttributedProperty(String preferencePath, String propertyName, ComposedConfigProperty<String> property, boolean isProtected) throws OXException {
             super();
             this.propertyName = propertyName;
             this.property = property;
             this.preferencePath = preferencePath;
+            this.isProtected = isProtected;
             path = JSONPathElement.parsePath(preferencePath);
         }
     } // End of class AttributedProperty
@@ -1203,7 +1217,7 @@ public final class ConfigJSlobService implements JSlobService {
 
     private static final class CompletionServiceReference {
 
-        CompletionService<Void> completionService = null;
+        SequentialCompletionService<Void> completionService = null;
         int num = 0;
 
         /**

@@ -65,8 +65,8 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
- * An ID describes a valid sender or recipient of a {@link Stanza}. 
- * 
+ * An ID describes a valid sender or recipient of a {@link Stanza}.
+ *
  * An ID has the following form: [protocol].[component]://[user]@[context]/[resource]:
  * <ol>
  *   <li><b>protocol</b>: specifies the protocol that the entity behind this ID uses to connect to the OX.</li>
@@ -75,7 +75,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *   <li><b>context</b>: specifies the context of the entity we want to address</li>
  *   <li><b>resource</b>: is an unique identifier used to distinguish between multiple instances/connections of the same entitiy</li>
  * </ol>
- * 
+ *
  * <h4>Examples:</h4>
  * <ol>
  *   <li><b>ox://francisco.laguna@premium/20d39asd9da93249f009d</b>: we want to address the user francisco.laguna in the context premium.
@@ -91,6 +91,12 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  */
+/**
+ * {@link ID}
+ *
+ * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
+ * @since 7.x.y
+ */
 public class ID implements Serializable {
 
     private static final long serialVersionUID = -5237507998711320109L;
@@ -98,12 +104,14 @@ public class ID implements Serializable {
     public static final AtomicReference<IDManager> ID_MANAGER_REF = new AtomicReference<IDManager>();
 
     public static final String INTERNAL_CONTEXT = "internal";
-    
+
     protected String protocol;
     protected String component;
     protected String user;
     protected String context;
     protected String resource;
+    protected String cachedStringRepresentation;
+    private boolean stringRepresentationInSync = false;
 
     /**
      * Initializes a new {@link ID}.
@@ -114,10 +122,10 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID}.
-     * 
+     *
      * @param id the given String representation of an ID
      * @param defaultContext the default context to use if the string representation doesn't contain one
-     * @throws IllegalArgumentException if no ID could be created from the given String 
+     * @throws IllegalArgumentException if no ID could be created from the given String
      */
     public ID(final String id, String defaultContext) {
         IDComponents idComponents = IDComponentsParser.parse(id);
@@ -138,7 +146,7 @@ public class ID implements Serializable {
 
     /**
      * Initializes a new {@link ID}.
-     * 
+     *
      * @param id the given String representation of an ID
      * @throws IllegalArgumentException if no ID could be created from the given String
      */
@@ -189,6 +197,33 @@ public class ID implements Serializable {
     }
 
     /**
+     * Initializes a new {@link ID}.
+     *
+     * @param protocol The protocol of the ID, ox, xmpp ...
+     * @param component The component of the id (to address Files and so on)
+     * @param user The user represented by this ID
+     * @param context The context of the user represented by this ID
+     * @param resource The resource of the connected user eg. "desktop" or ontoher string identifying the connected client. Must be unique
+     *            to enable multiple logins.
+     * @param cachedStringRepresentation the cached {@link String} representation of the id. Unless this parameter is empty/null we assume the
+     *            cachedStringRepresentation is in sync with the other provided components.
+     */
+    public ID(final String protocol, final String component, final String user, final String context, final String resource, final String cachedStringRepresentation) {
+        super();
+        this.protocol = protocol;
+        this.user = user;
+        this.context = context;
+        this.resource = resource;
+        this.component = component;
+        this.cachedStringRepresentation = cachedStringRepresentation;
+        if(!Strings.isEmpty(cachedStringRepresentation)) {
+            stringRepresentationInSync = true;
+        }
+        sanitize();
+        validate();
+    }
+
+    /**
      * Check optional id components for emtpy strings and sanitize by setting to null or default values.
      */
     protected void sanitize() {
@@ -201,7 +236,7 @@ public class ID implements Serializable {
         }
 
         if (Strings.isEmpty(component)) {
-                component = null;
+            component = null;
         }
 
     }
@@ -223,45 +258,53 @@ public class ID implements Serializable {
         return protocol;
     }
 
-    public void setProtocol(final String protocol) {
+    public synchronized void setProtocol(final String protocol) {
         this.protocol = protocol;
         validate();
+        stringRepresentationInSync = false;
     }
 
     public String getUser() {
         return user;
     }
 
-    public void setUser(final String user) {
+    public synchronized void setUser(final String user) {
         this.user = user;
         validate();
-
+        stringRepresentationInSync = false;
     }
 
     public String getContext() {
         return context;
     }
 
-    public void setContext(final String context) {
+    public synchronized void setContext(final String context) {
         this.context = context;
         validate();
+        stringRepresentationInSync = false;
     }
 
     public String getResource() {
         return resource;
     }
 
-    public void setResource(final String resource) {
+    public synchronized void setResource(final String resource) {
         this.resource = resource;
         validate();
+        stringRepresentationInSync = false;
     }
 
     public String getComponent() {
         return component;
     }
 
-    public void setComponent(String component) {
+    public synchronized void setComponent(String component) {
         this.component = component;
+        stringRepresentationInSync = false;
+    }
+
+    public String getCachedStringRepresentation() {
+        return cachedStringRepresentation;
     }
 
     @Override
@@ -325,43 +368,58 @@ public class ID implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder b = new StringBuilder(32);
-        boolean needSep = false;
-        if (protocol != null) {
-            b.append(protocol);
-            needSep = true;
-        }
-        if (component != null) {
-            if(protocol != null) {
-                b.append(".");
+        if (cachedStringRepresentation == null || !stringRepresentationInSync) {
+            synchronized (this) {
+                final StringBuilder b = new StringBuilder(32);
+                boolean needSep = false;
+                if (protocol != null) {
+                    b.append(protocol);
+                    needSep = true;
+                }
+                if (component != null) {
+                    if (protocol != null) {
+                        b.append(".");
+                    }
+                    b.append(component);
+                    needSep = true;
+                }
+                if (needSep) {
+                    b.append("://");
+                }
+                b.append(escape(user, '@')).append('@').append(escape(context, '@', '/'));
+                if (resource != null) {
+                    b.append('/').append(resource);
+                }
+                cachedStringRepresentation = b.toString();
+                stringRepresentationInSync = true;
             }
-            b.append(component);
-            needSep = true;
         }
-        if (needSep) {
-            b.append("://");
+        return cachedStringRepresentation;
+    }
+
+    private Object getStackTraceString() {
+        StringBuilder sb = new StringBuilder(1024);
+        for (StackTraceElement ste : new Throwable().getStackTrace()) {
+            sb.append(ste).append("\n");
         }
-        b.append(escape(user, '@')).append('@').append(escape(context, '@','/'));
-        if (resource != null) {
-            b.append('/').append(resource);
-        }
-        return b.toString();
+        return sb.toString();
     }
 
     /**
      * If the given input string contains any of the candidate characters those will be escaped via '\'
+     *
      * @param str The input string
-     * @param chars The characters to escape in the input string 
+     * @param chars The characters to escape in the input string
      * @return The given input string with the candidate characters escaped via '\'
      */
-    private String escape(String str, char...chars) {
+    private String escape(String str, char... chars) {
         StringBuilder b = new StringBuilder();
-        for(char c: str.toCharArray()) {
+        for (char c : str.toCharArray()) {
             boolean escape = false;
             if (c == '\\') {
                 escape = true;
             } else {
-                for(char candidate: chars) {
+                for (char candidate : chars) {
                     if (candidate == c) {
                         escape = true;
                     }
@@ -395,9 +453,8 @@ public class ID implements Serializable {
     }
 
     /**
-     * Create a ServerSession from a dummy SessionObject based on the user infos contained in this {@link ID}. This will fail for synthetic
-     * {@link ID}s that don't have real userId and userContextId values.
-     * 
+     * Create a ServerSession from a dummy SessionObject based on the user infos contained in this {@link ID}. This will fail for synthetic {@link ID}s that don't have real userId and userContextId values.
+     *
      * @return a ServerSession from a dummy SessionObject based on the user infos contained in this {@link ID}.
      * @throws OXException if no ServerSession can be ceated based upon this {@link ID}.
      */
@@ -412,9 +469,9 @@ public class ID implements Serializable {
 
     /**
      * Get the static {@link IDManager} instance that does the Housekeeping for all {@link ID}s.
-     * 
+     *
      * @return The IDManager instance
-     * @throws RealtimeException if the IDManager reference is unset 
+     * @throws RealtimeException if the IDManager reference is unset
      */
     private IDManager getManager() throws RealtimeException {
         IDManager manager = ID_MANAGER_REF.get();
@@ -426,7 +483,7 @@ public class ID implements Serializable {
 
     /**
      * Get a "scope"-wide lock for a given {@link ID}.
-     * 
+     *
      * @param scope The scope to be used for the {@link Lock}
      * @return The "scope"-wide lock for this {@link ID}.
      */
@@ -436,7 +493,7 @@ public class ID implements Serializable {
 
     /**
      * Get a {@link Lock} for the given scope from this {@link ID} and lock it.
-     * 
+     *
      * @param scope The scope for the {@link Lock}
      * @throws RealtimeException If getting the {@link Lock}/locking fails
      */
@@ -446,7 +503,7 @@ public class ID implements Serializable {
 
     /**
      * Get a {@link Lock} for the given scope from this {@link ID} and unlock it.
-     * 
+     *
      * @param scope The scope for the {@link Lock}
      * @throws RealtimeException If getting the {@link Lock}/unlocking fails
      */
@@ -456,6 +513,7 @@ public class ID implements Serializable {
 
     /**
      * Check whether this {@link ID} represents an internal client.
+     *
      * @return false if this {@link ID} doesn't represent an internal client, true otherwise.
      */
     public boolean isInternal() {

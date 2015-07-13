@@ -208,11 +208,28 @@ public final class UnsynchronizedByteArrayInputStream extends ByteArrayInputStre
     }
 
     /**
+     * Reinitializes this instance having <code>buf</code> as its buffer array. The initial value of
+     * <code>pos</code> is <code>offset</code> and the initial value of <code>count</code> is the minimum of <code>offset+length</code> and
+     * <code>buf.length</code>. The buffer array is not copied. The buffer's mark is set to the specified offset.
+     *
+     * @param buf The input buffer.
+     * @param offset The offset in the buffer of the first byte to read.
+     * @param length The maximum number of bytes to read from the buffer.
+     */
+    public void reinit(byte buf[], int offset, int length) {
+        this.buf = buf;
+        this.pos = offset;
+        this.count = Math.min(offset + length, buf.length);
+        this.mark = offset;
+    }
+
+    /**
      * Closing a <tt>ByteArrayInputStream</tt> has no effect. The methods in this class can be called after the stream has been closed
      * without generating an <tt>IOException</tt>.
      */
     @Override
     public void close() throws IOException {
+        // Nothing
     }
 
     /**

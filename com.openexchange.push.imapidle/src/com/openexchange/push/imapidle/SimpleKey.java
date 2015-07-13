@@ -49,7 +49,7 @@
 
 package com.openexchange.push.imapidle;
 
-
+import com.openexchange.session.Session;
 
 /**
  * {@link SimpleKey}
@@ -61,9 +61,19 @@ public class SimpleKey {
 
     /**
      * Gets a simple key instance for given user.
+     *
+     * @param session The session
+     * @return The simple key
+     */
+    public static SimpleKey valueOf(Session session) {
+        return null == session ? null : new SimpleKey(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets a simple key instance for given user.
+     *
      * @param userId The user identifier
      * @param contextId The context identifier
-     *
      * @return The simple key
      */
     public static SimpleKey valueOf(final int userId, final int contextId) {

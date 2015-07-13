@@ -67,7 +67,12 @@ public enum DisplayMode {
     /**
      * Generate a version for being displayed in front-end
      */
-    DISPLAY;
+    DISPLAY,
+    /**
+     * Generates the document view for associated message's body
+     */
+    DOCUMENT,
+    ;
 
     /**
      * Gets the mode's integer value

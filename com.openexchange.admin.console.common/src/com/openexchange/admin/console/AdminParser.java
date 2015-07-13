@@ -86,6 +86,8 @@ public class AdminParser extends CLIParser {
     private final ArrayList<OptionInfo> optinfolist = new ArrayList<OptionInfo>();
 
     private String appname = null;
+    
+    private String usage = "";
 
     private CLIOption csvImportOption = null;
 
@@ -353,6 +355,12 @@ public class AdminParser extends CLIParser {
             return retval;
         }
     }
+    
+    public final CLIOption addOption(final char shortForm, final String longForm, final String description, final NeededQuadState needed) {
+        final CLIOption retval = this.addBooleanOption(shortForm, longForm);
+        this.optinfolist.add(new OptionInfo(needed, retval, shortForm, longForm, description));
+        return retval;
+    }
 
     public final boolean checkNoNewLine() {
         if (null != this.getOptionValue(this.noNewlineOption)) {
@@ -501,7 +509,8 @@ public class AdminParser extends CLIParser {
     }
 
     public final void printUsage() {
-        System.out.println("Usage: " + this.appname);
+        System.out.print("Usage: " + this.appname);
+        System.out.println(" " + usage);
 
         for (final OptionInfo optInfo : this.optinfolist) {
             if (!optInfo.extended && !optInfo.hidden) {
@@ -521,6 +530,7 @@ public class AdminParser extends CLIParser {
 
     public final void printUsageExtended() {
         System.out.println("Usage: " + this.appname);
+        System.out.println(" " + usage);
 
         for (final OptionInfo optInfo : this.optinfolist) {
             basicOutput(optInfo);
@@ -627,5 +637,13 @@ public class AdminParser extends CLIParser {
 
     public Map<String, Map<String, String>> getDynamicArguments() {
         return dynamicMaps;
+    }
+    
+    public void setUsage(String usage) {
+        this.usage = usage;
+    }
+    
+    public String getUsage() {
+        return usage;
     }
 }

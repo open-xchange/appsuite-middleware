@@ -77,11 +77,15 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.datatypes.genericonf.storage.GenericConfigurationStorageService;
 import com.openexchange.exception.OXException;
+import com.openexchange.filemanagement.ManagedFile;
+import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -92,6 +96,7 @@ import com.openexchange.snippet.ReferenceType;
 import com.openexchange.snippet.Snippet;
 import com.openexchange.snippet.SnippetExceptionCodes;
 import com.openexchange.snippet.SnippetManagement;
+import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
@@ -127,6 +132,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
             if (fn == null) {
                 final String sContentType = attachment.getContentType();
                 fn = null == sContentType ? null : new ContentType(sContentType).getNameParameter();
+            }
+            if (fn == null) {
+                DefaultAttachment da = (DefaultAttachment) attachment;
+                fn = da.getFilename();
             }
             return fn;
         } catch (final Exception e) {
@@ -164,7 +173,7 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 final ComposedConfigProperty<Boolean> property = factory.getView(userId, contextId).property(
                     "com.openexchange.snippet.rdb.supportsAttachments",
                     boolean.class);
-                supportsAttachments = property.isDefined() ? property.get().booleanValue() : false;
+                supportsAttachments = property.isDefined() ? property.get().booleanValue() : true;
             } catch (final Exception e) {
                 LOG.error("", e);
                 supportsAttachments = false;
@@ -440,12 +449,22 @@ public final class RdbSnippetManagement implements SnippetManagement {
                     do {
                         final String referenceId = rs.getString(1);
                         if (!rs.wasNull()) {
+                            String filename = rs.getString(2);
                             final DefaultAttachment attachment = new DefaultAttachment();
                             attachment.setId(referenceId);
-                            attachment.setContentType(fileStorage.getMimeType(referenceId));
-                            attachment.setContentDisposition("attachment; filename=\"" + rs.getString(2) + "\"");
+                            attachment.setContentType(MimeType2ExtMap.getContentType(filename));
+                            attachment.setContentDisposition("attachment; filename=\"" + filename + "\"");
                             attachment.setStreamProvider(new QuotaFileStorageStreamProvider(referenceId, fileStorage));
                             attachments.add(attachment);
+                            
+                            Object misc = snippet.getMisc();
+                            final String imageId = SnippetUtils.getImageId(misc);
+                            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+                            if (!Strings.isEmpty(imageId) && !mfm.contains(imageId)) {
+                                ManagedFile mf = mfm.createManagedFile(imageId, attachment.getInputStream());
+                                mf.setContentDisposition(attachment.getContentDisposition());
+                                mf.setContentType(attachment.getContentType());
+                            }
                         }
                     } while (rs.next());
                     closeSQLStuff(rs, stmt);
@@ -460,6 +479,8 @@ public final class RdbSnippetManagement implements SnippetManagement {
             return snippet;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
         }

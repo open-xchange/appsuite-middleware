@@ -129,19 +129,15 @@ public final class XingOAuthAccessRegistry {
      * @return <code>true</code> if a XING OAuth access for given user-context-pair was found and removed; otherwise <code>false</code>
      */
     public boolean removeAccessWhenNoActiveSession(final int userId, final int contextId) {
-        final SessiondService sessiondService = Services.getService(SessiondService.class);
-        if (null == sessiondService || null == sessiondService.getAnyActiveSessionForUser(userId, contextId)) {
-            // No active session available for user
-            final ConcurrentMap<Integer, XingOAuthAccessImpl> inner = map.remove(SimpleKey.valueOf(contextId, userId));
-            if (null == inner || inner.isEmpty()) {
-                return false;
-            }
-            for (final XingOAuthAccessImpl xingOAuthAccess : inner.values()) {
-                xingOAuthAccess.dispose();
-            }
-            return !inner.isEmpty();
+        // No active session available for user
+        final ConcurrentMap<Integer, XingOAuthAccessImpl> inner = map.remove(SimpleKey.valueOf(contextId, userId));
+        if (null == inner || inner.isEmpty()) {
+            return false;
         }
-        return false;
+        for (final XingOAuthAccessImpl xingOAuthAccess : inner.values()) {
+            xingOAuthAccess.dispose();
+        }
+        return !inner.isEmpty();
     }
 
     /**

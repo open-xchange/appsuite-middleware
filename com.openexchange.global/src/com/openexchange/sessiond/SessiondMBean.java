@@ -49,6 +49,7 @@
 
 package com.openexchange.sessiond;
 
+import java.util.Set;
 import javax.management.MBeanException;
 
 /**
@@ -75,6 +76,13 @@ public interface SessiondMBean {
      * @param contextId The context ID
      */
     public void clearContextSessions(int contextId);
+
+    /**
+     * Clears all sessions belonging to given contexts.
+     *
+     * @param contextId The context identifiers to remove sessions for
+     */
+    public void clearContextSessionsGlobal(Set<Integer> contextIds) throws MBeanException;
 
     /**
      * Gets the number of short-term sessions.

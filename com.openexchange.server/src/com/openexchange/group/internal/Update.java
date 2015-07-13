@@ -69,6 +69,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.i18n.LocalizableArgument;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
@@ -86,54 +87,34 @@ final class Update {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Update.class);
 
     /**
-     * Context.
-     */
-    private final Context ctx;
-
-    /**
-     * User.
-     */
-    private final User user;
-
-    /**
-     * Group object with changed information.
-     */
-    private final Group changed;
-
-    private final Date lastRead;
-
-    /**
      * Storage API for groups.
      */
-    private static final GroupStorage storage = GroupStorage.getInstance();
+    private static final GroupStorage STORAGE = GroupStorage.getInstance();
 
+    private final Context ctx;
+    private final User user;
+    private final Group changed;
+    private final boolean checkI18nNames;
+    private final Date lastRead;
     private Group orig;
-
-    /**
-     * Added members.
-     */
     private final TIntSet addedMembers = new TIntHashSet();
-
-    /**
-     * Removed members.
-     */
     private final TIntSet removedMembers = new TIntHashSet();
 
     /**
      * Default constructor.
      */
-    Update(final Context ctx, final User user, final Group group,
-        final Date lastRead) {
+    Update(Context ctx, User user, Group group, Date lastRead, boolean checkI18nNames) {
         super();
         this.ctx = ctx;
         this.user = user;
         this.changed = group;
         this.lastRead = lastRead;
+        this.checkI18nNames = checkI18nNames;
     }
 
     Group getOrig() throws OXException {
         if (null == orig) {
-            orig = storage.getGroup(changed.getIdentifier(), ctx);
+            orig = STORAGE.getGroup(changed.getIdentifier(), ctx);
         }
         return orig;
     }
@@ -166,16 +147,24 @@ final class Update {
             throw GroupExceptionCodes.NULL.create();
         }
         if (GroupStorage.GROUP_ZERO_IDENTIFIER == changed.getIdentifier()) {
-            throw GroupExceptionCodes.NO_GROUP_UPDATE.create(getOrig().getDisplayName());
+            throw GroupExceptionCodes.NO_GROUP_UPDATE.create(new LocalizableArgument(getOrig().getDisplayName()));
         }
         // Does the group exist? Are timestamps okay?
         if (getOrig().getLastModified().after(lastRead)) {
             throw GroupExceptionCodes.MODIFIED.create();
         }
+        if (GroupStorage.GROUP_STANDARD_SIMPLE_NAME.equals(getOrig().getSimpleName())) {
+            if (changed.isSimpleNameSet() && !changed.getSimpleName().equals(getOrig().getSimpleName())) {
+                throw GroupExceptionCodes.NO_GROUP_UPDATE.create(new LocalizableArgument(getOrig().getDisplayName()));
+            }
+            if (changed.isDisplayNameSet() && !changed.getDisplayName().equals(getOrig().getDisplayName())) {
+                throw GroupExceptionCodes.NO_GROUP_UPDATE.create(new LocalizableArgument(getOrig().getDisplayName()));
+            }
+        }
         Logic.checkMandatoryForUpdate(changed);
         Logic.validateSimpleName(changed);
         Logic.checkData(changed);
-        Logic.checkForDuplicate(storage, ctx, changed);
+        Logic.checkForDuplicate(STORAGE, ctx, changed, checkI18nNames);
         Logic.doMembersExist(ctx, changed);
     }
 
@@ -251,19 +240,19 @@ final class Update {
      * @throws OXException if some problem occurs.
      */
     public void update(final Connection con) throws OXException {
-        storage.updateGroup(ctx, con, changed, lastRead);
+        STORAGE.updateGroup(ctx, con, changed, lastRead);
         int[] tmp = new int[addedMembers.size()];
         TIntIterator iter = addedMembers.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             tmp[i] = iter.next();
         }
-        storage.insertMember(ctx, con, changed, tmp);
+        STORAGE.insertMember(ctx, con, changed, tmp);
         tmp = new int[removedMembers.size()];
         iter = removedMembers.iterator();
         for (int i = 0; iter.hasNext(); i++) {
             tmp[i] = iter.next();
         }
-        storage.deleteMember(ctx, con, changed, tmp);
+        STORAGE.deleteMember(ctx, con, changed, tmp);
     }
 
     /**

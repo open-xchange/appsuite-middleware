@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.servlet;
 
-import static com.openexchange.tools.servlet.RateLimiter.checkRequest;
+import static com.openexchange.tools.servlet.ratelimit.RateLimiter.checkRequest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -68,6 +68,7 @@ import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.server.reloadable.GenericReloadable;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.stream.CountingInputStream;
 
 /**
@@ -77,10 +78,6 @@ import com.openexchange.tools.stream.CountingInputStream;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class CountingHttpServletRequest implements HttpServletRequest, Parameterizable {
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CountingHttpServletRequest.class);
-
-    private static final String LINE_SEP = System.getProperty("line.separator");
 
     private static volatile Long lMax;
     private static long max() {
@@ -131,7 +128,7 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
      *
      * @throws RateLimitedException If associated request is rate limited
      */
-    public CountingHttpServletRequest(final HttpServletRequest servletRequest) {
+    public CountingHttpServletRequest(HttpServletRequest servletRequest) {
         this(servletRequest, max());
     }
 
@@ -140,12 +137,9 @@ public final class CountingHttpServletRequest implements HttpServletRequest, Par
      *
      * @throws RateLimitedException If associated request is rate limited
      */
-    public CountingHttpServletRequest(final HttpServletRequest servletRequest, final long max) {
+    public CountingHttpServletRequest(HttpServletRequest servletRequest, long max) {
         super();
-        if (!checkRequest(servletRequest)) {
-            LOG.info("Request with IP '{}' to path '{}' has been rate limited.{}", servletRequest.getRemoteAddr(), servletRequest.getServletPath(), LINE_SEP);
-            throw new RateLimitedException("429 Too Many Requests", RateLimiter.maxRateTimeWindow()/1000);
-        }
+        checkRequest(servletRequest);
         this.max = max;
         this.servletRequest = servletRequest;
         parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;

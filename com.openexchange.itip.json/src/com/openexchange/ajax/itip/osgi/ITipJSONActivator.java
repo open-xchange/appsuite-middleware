@@ -50,18 +50,21 @@
 package com.openexchange.ajax.itip.osgi;
 
 import org.osgi.service.http.HttpService;
+import org.osgi.util.tracker.ServiceTracker;
 
 import com.openexchange.ajax.itip.ITipActionFactory;
 import com.openexchange.ajax.itip.servlet.ITipJSONServlet;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
 import com.openexchange.calendar.itip.ITipDingeMacherFactoryService;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.conversion.ConversionService;
 import com.openexchange.data.conversion.ical.itip.ITipParser;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.multiple.AJAXActionServiceAdapterHandler;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 
 /**
  * {@link ITipJSONActivator}
@@ -72,22 +75,24 @@ public class ITipJSONActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            ITipAnalyzerService.class, ITipParser.class, ConversionService.class, ITipDingeMacherFactoryService.class,
-            ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class };
+        return new Class[] { ITipParser.class, ConversionService.class, ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class, ITipDingeMacherFactoryService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        ITipActionFactory.INSTANCE = new ITipActionFactory(this);
-
-        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(
-            ITipActionFactory.INSTANCE,
-            "calendar/itip"));
-
-        getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "calendar/itip", new ITipJSONServlet(), null, null);
-
+        RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> rankingTracker = new RankingAwareNearRegistryServiceTracker<ITipAnalyzerService>(context, ITipAnalyzerService.class, 0);
+        RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService> factoryTracker = new RankingAwareNearRegistryServiceTracker<ITipDingeMacherFactoryService>(context, ITipDingeMacherFactoryService.class, 0);
+        ServiceTracker<CapabilityService, CapabilityService> capabilityTracker = track(CapabilityService.class);
+        rememberTracker(rankingTracker);
+        rememberTracker(factoryTracker);
+        rememberTracker(capabilityTracker);
         openTrackers();
+    
+        ITipActionFactory.INSTANCE = new ITipActionFactory(this, rankingTracker, factoryTracker);
+
+        registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(ITipActionFactory.INSTANCE, "calendar/itip"));
+
+        getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "calendar/itip", new ITipJSONServlet(this), null, null);
     }
 
 }

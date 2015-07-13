@@ -1266,7 +1266,7 @@ public class IMAPStore extends Store
      *         p = getStoreProtocol();
      *         // perform the command
      *     } catch (ConnectionException cex) {
-     *         throw new StoreClosedException(this, cex.getMessage());
+     *         throw new StoreClosedException(this, cex.getMessage(), cex);
      *     } catch (WhateverException ex) {
      *         // handle it
      *     } finally {
@@ -2112,7 +2112,7 @@ public class IMAPStore extends Store
 	    } catch (BadCommandException bex) {
 		// NAMESPACE not supported, ignore it
 	    } catch (ConnectionException cex) {
-		throw new StoreClosedException(this, cex.getMessage());
+		throw new StoreClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
 	    } finally {
@@ -2172,7 +2172,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("QUOTA not supported", bex);
 	} catch (ConnectionException cex) {
-	    throw new StoreClosedException(this, cex.getMessage());
+	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
@@ -2200,7 +2200,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("QUOTA not supported", bex);
 	} catch (ConnectionException cex) {
-	    throw new StoreClosedException(this, cex.getMessage());
+	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
@@ -2346,7 +2346,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("IDLE not supported", bex);
 	} catch (ConnectionException cex) {
-	    throw new StoreClosedException(this, cex.getMessage());
+	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {
@@ -2405,7 +2405,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("ID not supported", bex);
 	} catch (ConnectionException cex) {
-	    throw new StoreClosedException(this, cex.getMessage());
+	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
 	} finally {

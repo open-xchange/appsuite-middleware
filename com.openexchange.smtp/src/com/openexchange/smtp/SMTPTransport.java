@@ -129,6 +129,8 @@ import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.transport.config.TransportProperties;
+import com.openexchange.mail.transport.listener.Reply;
+import com.openexchange.mail.transport.listener.Result;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
@@ -383,6 +385,12 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         smtpProps.put("mail.smtp.connectiontimeout", Integer.toString(smtpProperties.getSmtpConnectionTimeout()));
                     }
                     /*
+                     * Send partial or abort?
+                     */
+                    if (smtpProperties.isSendPartial()) {
+                        smtpProps.put("mail.smtp.sendpartial", "true");
+                    }
+                    /*
                      * Check if a secure SMTP connection should be established
                      */
                     final String sPort = String.valueOf(smtpConfig.getPort());
@@ -520,7 +528,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
     private static final String MULTI_SUBTYPE_REPORT = "report; report-type=disposition-notification";
 
     @Override
-    public void sendReceiptAck(final MailMessage srcMail, final String fromAddr) throws OXException {
+    public void sendReceiptAck(MailMessage srcMail, String fromAddr) throws OXException {
         if (null == srcMail) {
             return;
         }
@@ -534,16 +542,19 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             // Set the ClassLoader to the javax.mail bundle loader.
             // Thread.currentThread().setContextClassLoader(MailMessage.class.getClassLoader());
             // Go ahead...
-            final InternetAddress dispNotification = srcMail.getDispositionNotification();
+            InternetAddress dispNotification = srcMail.getDispositionNotification();
             if (dispNotification == null) {
-                throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
+                dispNotification = srcMail.getFrom()[0];
+                if (null == dispNotification) {
+                    throw SMTPExceptionCode.MISSING_NOTIFICATION_HEADER.create(MessageHeaders.HDR_DISP_TO, Long.valueOf(srcMail.getMailId()));
+                }
             }
-            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
-            final String userMail = UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail();
+            SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession());
+            String userMail = UserStorage.getInstance().getUser(session.getUserId(), ctx).getMail();
             /*
              * Set from
              */
-            final String from;
+            String from;
             if (fromAddr == null) {
                 if ((usm.getSendAddr() == null) && (userMail == null)) {
                     throw SMTPExceptionCode.NO_SEND_ADDRESS_FOUND.create();
@@ -556,7 +567,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Set to
              */
-            final Address[] recipients = new Address[] { dispNotification };
+            Address[] recipients = new Address[] { dispNotification };
             processAddressHeader(smtpMessage);
             checkRecipients(recipients);
             smtpMessage.addRecipients(RecipientType.TO, recipients);
@@ -568,14 +579,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Subject
              */
-            final Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
-            final StringHelper strHelper = StringHelper.valueOf(locale);
+            Locale locale = UserStorage.getInstance().getUser(session.getUserId(), ctx).getLocale();
+            StringHelper strHelper = StringHelper.valueOf(locale);
             smtpMessage.setSubject(strHelper.getString(MailStrings.ACK_SUBJECT));
             /*
              * Sent date in UTC time
              */
             {
-                final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
+                MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(session);
                 synchronized (mdf) {
                     smtpMessage.setHeader("Date", mdf.format(new Date()));
                 }
@@ -588,19 +599,23 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Compose body
              */
-            final String defaultMimeCS = MailProperties.getInstance().getDefaultMimeCharset();
-            final ContentType ct = new ContentType(CT_TEXT_PLAIN.replaceFirst("#CS#", defaultMimeCS));
-            final Multipart mixedMultipart = new MimeMultipart(MULTI_SUBTYPE_REPORT);
+            String defaultMimeCS = MailProperties.getInstance().getDefaultMimeCharset();
+            ContentType ct = new ContentType(CT_TEXT_PLAIN.replaceFirst("#CS#", defaultMimeCS));
+            Multipart mixedMultipart = new MimeMultipart(MULTI_SUBTYPE_REPORT);
             /*
              * Define text content
              */
-            final Date sentDate = srcMail.getSentDate();
+            Date sentDate = srcMail.getSentDate();
             {
-                final MimeBodyPart text = new MimeBodyPart();
-                final String txt = performLineFolding(
-                    strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT)
-                    .replaceFirst("#DATE#", sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate)))
-                    .replaceFirst("#RECIPIENT#", quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())), usm.getAutoLinebreak());
+                MimeBodyPart text = new MimeBodyPart();
+                String txt =
+                    performLineFolding(
+                        strHelper.getString(MailStrings.ACK_NOTIFICATION_TEXT).replaceFirst(
+                            "#DATE#",
+                            sentDate == null ? "" : quoteReplacement(DateFormat.getDateInstance(DateFormat.LONG, locale).format(sentDate))).replaceFirst(
+                            "#RECIPIENT#",
+                            quoteReplacement(from)).replaceFirst("#SUBJECT#", quoteReplacement(srcMail.getSubject())),
+                        usm.getAutoLinebreak());
                 MessageUtility.setText(txt, defaultMimeCS, text);
                 // text.setText(txt,defaultMimeCS);
                 text.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -612,11 +627,9 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
              */
             ct.setContentType(CT_READ_ACK);
             {
-                final MimeBodyPart ack = new MimeBodyPart();
-                final String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
-                final String txt = strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst(
-                    "#MSG ID#",
-                    quoteReplacement(msgId));
+                MimeBodyPart ack = new MimeBodyPart();
+                String msgId = srcMail.getFirstHeader(MessageHeaders.HDR_MESSAGE_ID);
+                String txt = strHelper.getString(ACK_TEXT).replaceFirst("#FROM#", quoteReplacement(from)).replaceFirst("#MSG ID#", quoteReplacement(msgId));
                 MessageUtility.setText(txt, defaultMimeCS, ack);
                 // ack.setText(txt,defaultMimeCS);
                 ack.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
@@ -632,19 +645,19 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             /*
              * Transport message
              */
-            final long start = System.currentTimeMillis();
-            final Transport transport = getSMTPSession().getTransport(SMTP);
+            long start = System.currentTimeMillis();
+            Transport transport = getSMTPSession().getTransport(SMTP);
             try {
                 connectTransport(transport, smtpConfig);
-                saveChangesSafe(smtpMessage);
+                saveChangesSafe(smtpMessage, true);
                 transport(smtpMessage, smtpMessage.getAllRecipients(), transport, smtpConfig);
                 mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-            } catch (final javax.mail.AuthenticationFailedException e) {
+            } catch (javax.mail.AuthenticationFailedException e) {
                 throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
             } finally {
                 transport.close();
             }
-        } catch (final MessagingException e) {
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, smtpConfig, session);
         } finally {
             // Restore the ClassLoader
@@ -673,14 +686,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             processAddressHeader(smtpMessage);
             final boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
-                saveChangesSafe(smtpMessage);
+                saveChangesSafe(smtpMessage, true);
             } else {
                 try {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
                     try {
                         connectTransport(transport, smtpConfig);
-                        saveChangesSafe(smtpMessage);
+                        saveChangesSafe(smtpMessage, true);
                         transport(smtpMessage, recipients, transport, smtpConfig);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
@@ -712,14 +725,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             processAddressHeader(mimeMessage);
             final boolean poisoned = checkRecipients(recipients);
             if (poisoned) {
-                saveChangesSafe(mimeMessage);
+                saveChangesSafe(mimeMessage, true);
             } else {
                 try {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
                     try {
                         connectTransport(transport, smtpConfig);
-                        saveChangesSafe(mimeMessage);
+                        saveChangesSafe(mimeMessage, true);
                         transport(mimeMessage, recipients, transport, smtpConfig);
                         mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                     } catch (final javax.mail.AuthenticationFailedException e) {
@@ -816,14 +829,14 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                 processAddressHeader(mimeMessage);
                 final boolean poisoned = checkRecipients(recipients);
                 if (poisoned) {
-                    saveChangesSafe(mimeMessage);
+                    saveChangesSafe(mimeMessage, true);
                 } else {
                     try {
                         final long start = System.currentTimeMillis();
                         final Transport transport = getSMTPSession().getTransport(SMTP);
                         try {
                             connectTransport(transport, smtpConfig);
-                            saveChangesSafe(mimeMessage);
+                            saveChangesSafe(mimeMessage, true);
                             transport(mimeMessage, recipients, transport, smtpConfig, mtaStatusInfo);
                             mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
                         } catch (final javax.mail.AuthenticationFailedException e) {
@@ -870,7 +883,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                  */
                 smtpMessage.removeHeader("x-original-headers");
                 if (poisoned) {
-                    saveChangesSafe(smtpMessage);
+                    saveChangesSafe(smtpMessage, true);
                 } else {
                     final long start = System.currentTimeMillis();
                     final Transport transport = getSMTPSession().getTransport(SMTP);
@@ -879,7 +892,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                         /*
                          * Save changes
                          */
-                        saveChangesSafe(smtpMessage);
+                        saveChangesSafe(smtpMessage, true);
                         /*
                          * TODO: Do encryption here
                          */
@@ -953,26 +966,47 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             transport.addTransportListener(new AddressAddingTransportListener(mtaInfo));
         }
 
+        // Grab listener chain instance
+        ListenerChain listenerChain = ListenerChain.getInstance();
+
         // Try to send the message
+        MimeMessage messageToSend = smtpMessage;
+        Exception exception = null;
         try {
-            transport.sendMessage(smtpMessage, recipients);
-            logMessageTransport(smtpMessage, smtpConfig);
+            // Check listener chain
+            Result result = listenerChain.onBeforeMessageTransport(messageToSend, session);
+            if (Reply.DENY == result.getReply()) {
+                throw MailExceptionCode.SEND_DENIED.create();
+            }
+            MimeMessage resultingMimeMessage = result.getMimeMessage();
+            if (null != resultingMimeMessage) {
+                messageToSend = resultingMimeMessage;
+            }
+
+            // Transport
+            transport.sendMessage(messageToSend, recipients);
+            logMessageTransport(messageToSend, smtpConfig);
+        } catch (OXException e) {
+            exception = e;
+            throw e;
         } catch (SMTPSendFailedException sendFailed) {
-            OXException oxe = MimeMailException.handleMessagingException(sendFailed, smtpConfig, session);
+            exception = sendFailed;
+            OXException oxe = MimeMailException.handleMessagingException(sendFailed, smtpConfig);
             if (null != mtaInfo) {
                 mtaInfo.setReturnCode(sendFailed.getReturnCode());
                 oxe.setArgument("mta_info", mtaInfo);
             }
             throw oxe;
         } catch (final MessagingException e) {
+            exception = e;
             if (e.getNextException() instanceof javax.activation.UnsupportedDataTypeException) {
                 // Check for "no object DCH for MIME type xxxxx/yyyy"
                 final String message = e.getNextException().getMessage();
-                if (toLowerCase(message).indexOf("no object dch") >= 0) {
+                if (message.toLowerCase().indexOf("no object dch") >= 0) {
                     // Not able to recover from JAF's "no object DCH for MIME type xxxxx/yyyy" error
                     // Perform the alternative transport with custom JAF DataHandler
                     LOG.warn(message.replaceFirst("[dD][cC][hH]", Matcher.quoteReplacement("javax.activation.DataContentHandler")));
-                    transportAlt(smtpMessage, recipients, transport, smtpConfig);
+                    transportAlt(messageToSend, recipients, transport, smtpConfig);
                     return;
                 }
             } else if (e.getNextException() instanceof IOException) {
@@ -980,7 +1014,12 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
                     throw MailExceptionCode.MAX_MESSAGE_SIZE_EXCEEDED.create(getSize(getMaxMailSize(), 2, false, true));
                 }
             }
-            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+            throw MimeMailException.handleMessagingException(e, smtpConfig);
+        } catch (RuntimeException e) {
+            exception = e;
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            listenerChain.onAfterMessageTransport(messageToSend, exception, session);
         }
     }
 
@@ -1222,7 +1261,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         }
     }
 
-    private void saveChangesSafe(final MimeMessage mimeMessage) throws OXException {
+    private void saveChangesSafe(final MimeMessage mimeMessage, boolean keepMessageIdIfPresent) throws OXException {
         final HostnameService hostnameService = Services.getService(HostnameService.class);
         String hostName;
         if (null == hostnameService) {
@@ -1233,7 +1272,7 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
         if (null == hostName) {
             hostName = getHostName();
         }
-        MimeMessageConverter.saveChanges(mimeMessage, hostName);
+        MimeMessageUtility.saveChanges(mimeMessage, hostName, keepMessageIdIfPresent);
         // Check whether to remove MIME-Version headers from sub-parts
         if (TransportProperties.getInstance().isRemoveMimeVersionInSubParts()) {
             /*-

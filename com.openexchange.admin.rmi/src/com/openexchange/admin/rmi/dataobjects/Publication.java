@@ -49,19 +49,18 @@
 
 package com.openexchange.admin.rmi.dataobjects;
 
-
 /**
  * {@link Publication}
  *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
  */
-public class Publication extends ExtendableDataObject implements NameAndIdObject, java.io.Serializable {
+public class Publication extends ExtendableDataObject implements NameAndIdObject, Comparable<Publication>, java.io.Serializable {
 
     /**
      * For serialization
      */
     private static final long serialVersionUID = -1272376727507395566L;
-    
+
     private Integer userId;
     private boolean userIdSet = false;
 
@@ -88,7 +87,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     public String getEntityId() {
         return entityId;
     }
-    
+
     /**
      * Gets the url
      *
@@ -97,7 +96,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     public String getUrl() {
         return url;
     }
-    
+
     /**
      * Sets the url
      *
@@ -108,7 +107,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     }
 
     public void setEntityId(final String entityId) {
-        if (null == entityId){
+        if (null == entityId) {
             this.entityIdSet = true;
         }
         this.entityId = entityId;
@@ -119,7 +118,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     }
 
     public void setModule(final String module) {
-        if (null == module){
+        if (null == module) {
             this.moduleSet = true;
         }
         this.module = module;
@@ -136,7 +135,6 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         this.context = context;
     }
 
-    
     /**
      * Sets the numeric publication id
      *
@@ -159,7 +157,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     final public Integer getId() {
         return id;
     }
-    
+
     /**
      * Sets the numeric user id
      *
@@ -180,7 +178,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
     final public Integer getUserId() {
         return userId;
     }
-    
+
     @Override
     final public String getName() {
         return name;
@@ -243,7 +241,7 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         }
         this.description = description;
     }
-    
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -336,7 +334,8 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         }
         if (nameSet != other.nameSet) {
             return false;
-        }if (userId == null) {
+        }
+        if (userId == null) {
             if (other.userId != null) {
                 return false;
             }
@@ -381,6 +380,20 @@ public class Publication extends ExtendableDataObject implements NameAndIdObject
         return builder.toString();
     }
 
-    
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Comparable#compareTo(java.lang.Object)
+     */
+    @Override
+    public int compareTo(Publication o) {
+        if (o.getUserId() > getUserId()) {
+            return -1;
+        } else if (o.getUserId() < getUserId()) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
 
 }

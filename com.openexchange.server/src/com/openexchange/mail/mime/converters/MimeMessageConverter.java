@@ -73,7 +73,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.activation.DataHandler;
 import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.Header;
@@ -89,11 +88,12 @@ import javax.mail.internet.MailDateFormat;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimePart;
+import javax.mail.util.SharedFileInputStream;
 import org.apache.james.mime4j.MimeException;
 import org.apache.james.mime4j.parser.ContentHandler;
 import org.apache.james.mime4j.parser.MimeStreamParser;
 import org.apache.james.mime4j.stream.MimeConfig;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -111,7 +111,6 @@ import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
-import com.openexchange.mail.mime.FullnameFolder;
 import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.ManagedMimeMessage;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -219,17 +218,6 @@ public final class MimeMessageConverter {
 
     }
 
-    private static abstract class ExtendedMailMessageFieldFiller implements MailMessageFieldFiller {
-
-        final Folder folder;
-
-        public ExtendedMailMessageFieldFiller(final Folder folder) {
-            super();
-            this.folder = folder;
-        }
-
-    }
-
     private static final String STR_EMPTY = "";
 
     /**
@@ -250,12 +238,20 @@ public final class MimeMessageConverter {
             if (mailPart instanceof MailMessage) {
                 return convertMailMessage((MailMessage) mailPart);
             }
-            final int size = (int) mailPart.getSize();
-            final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-            mailPart.writeTo(out);
-            return new MimeBodyPart(new UnsynchronizedByteArrayInputStream(out.toByteArray()));
+            @SuppressWarnings("resource") ThresholdFileHolder sink = new ThresholdFileHolder();
+            mailPart.writeTo(sink.asOutputStream());
+            File tempFile = sink.getTempFile();
+            if (null == tempFile) {
+                return new MimeBodyPart(Streams.newByteArrayInputStream(sink.toByteArray()));
+            }
+            return new MimeBodyPart(new SharedFileInputStream(tempFile));
         } catch (final MessagingException e) {
-            throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
+            throw MimeMailException.handleMessagingException(e);
+        } catch (final IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -368,64 +364,55 @@ public final class MimeMessageConverter {
      * @see #BEHAVIOR_CLONE
      * @see #BEHAVIOR_STREAM2FILE
      */
-    public static Message convertMailMessage(final MailMessage mail, final int behavior) throws OXException {
+    public static Message convertMailMessage(MailMessage mail, int behavior) throws OXException {
         if (mail instanceof ComposedMailMessage) {
             return convertComposedMailMessage((ComposedMailMessage) mail);
         }
         try {
-            final Date receivedDate = mail.getReceivedDateDirect();
-            final int size = (int) mail.getSize();
-            final boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
-            final boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
-            final MimeMessage mimeMessage;
+            boolean clone = ((behavior & BEHAVIOR_CLONE) > 0);
+            boolean stream2file = ((behavior & BEHAVIOR_STREAM2FILE) > 0);
+
+            MimeMessage mimeMessage;
             if (!clone && (mail instanceof MimeMailMessage)) {
                 mimeMessage = ((MimeMailMessage) mail).getMimeMessage();
             } else {
-                final ManagedFileManagement fileManagement;
+                ManagedFileManagement fileManagement;
                 if (!stream2file || (null == (fileManagement = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class)))) {
-                    final ByteArrayOutputStream out = new UnsynchronizedByteArrayOutputStream(size <= 0 ? DEFAULT_MESSAGE_SIZE : size);
-                    mail.writeTo(out);
-                    if (receivedDate == null) {
-                        mimeMessage =
-                            new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray()));
-                    } else {
-                        mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new UnsynchronizedByteArrayInputStream(out.toByteArray())) {
-                            @Override
-                            public Date getReceivedDate() throws MessagingException {
-                                return receivedDate;
-                            }
-                        };
+                    ThresholdFileHolder sink = null;
+                    boolean closeSink = true;
+                    try {
+                        sink = new ThresholdFileHolder();
+                        mail.writeTo(sink.asOutputStream());
+                        File tempFile = sink.getTempFile();
+                        if (null == tempFile) {
+                            mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                        } else {
+                            mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile);
+                        }
+                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
+                        closeSink = false;
+                    } finally {
+                        if (closeSink && null != sink) {
+                            sink.close();
+                        }
                     }
-                    mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
                 } else {
                     File file = checkForFile(mail);
-                    if (null == file) {
-                        FileOutputStream fos = null;
-                        try {
-                            final File newTempFile = fileManagement.newTempFile();
-                            fos = new FileOutputStream(newTempFile);
-                            mail.writeTo(fos);
-                            fos.flush();
-                            fos.close();
-                            fos = null;
-                            file = newTempFile;
-                        } catch (final IOException e) {
-                            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-                            }
-                            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-                        } finally {
-                            Streams.close(fos);
-                        }
-                    }
+                    boolean deleteOnError = false;
                     try {
-                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, receivedDate);
-                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
-                    } catch (final IOException e) {
-                        if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+                        if (null == file) {
+                            deleteOnError = true;
+                            File newTempFile = fileManagement.newTempFile();
+                            writeToFile(mail, newTempFile);
+                            file = newTempFile;
                         }
-                        throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                        mimeMessage = new ManagedMimeMessage(MimeDefaultSession.getDefaultSession(), file, mail.getReceivedDateDirect());
+                        mimeMessage.removeHeader(X_ORIGINAL_HEADERS);
+                        deleteOnError = false;
+                    } finally {
+                        if (deleteOnError && null != file) {
+                            file.delete();
+                        }
                     }
                 }
             }
@@ -450,9 +437,26 @@ public final class MimeMessageConverter {
                 mimeMessage.setFlags(flags, true);
             }
             return mimeMessage;
-        } catch (final MessagingException e) {
+        } catch (IOException e) {
+            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
+                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+            }
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (MessagingException e) {
             throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private static void writeToFile(MailMessage mail, File tempFile) throws IOException, OXException {
+        FileOutputStream out = null;
+        try {
+            out = new FileOutputStream(tempFile);
+            mail.writeTo(out);
+            out.flush();
+        } finally {
+            Streams.close(out);
+        }
+
     }
 
     private static File checkForFile(final MailMessage mail) {
@@ -661,37 +665,11 @@ public final class MimeMessageConverter {
      *
      * @param mimeMessage The MIME message
      * @param hostName The host name
+     * @param keepMessageIdIfPresent Whether to keep a possibly available <i>Message-ID</i> header or to generate a new (unique) one
      * @throws OXException If operation fails
      */
-    public static void saveChanges(final MimeMessage mimeMessage, final String hostName) throws OXException {
-        try {
-            String name = "Message-ID";
-            String prevMessageId = mimeMessage.getHeader(name, null);
-            saveChanges(mimeMessage);
-            if (null != prevMessageId) {
-                mimeMessage.setHeader(name, prevMessageId);
-            } else if (null != hostName) {
-                // Change Message-Id header appropriately
-                final String messageId = mimeMessage.getHeader(name, null);
-                if (null != messageId) {
-                    /*
-                     * Somewhat of: <744810669.1.1314981157714.JavaMail.username@host.com>
-                     */
-                    final int pos = messageId.indexOf('@');
-                    if (pos > 0) {
-                        final StringBuilder mid = new StringBuilder(messageId.substring(0, pos + 1)).append(hostName);
-                        if (messageId.charAt(0) == '<') {
-                            mid.append('>');
-                        }
-                        mimeMessage.setHeader(name, mid.toString());
-                    } else {
-                        mimeMessage.setHeader(name, messageId + hostName);
-                    }
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
+    public static void saveChanges(MimeMessage mimeMessage, String hostName, boolean keepMessageIdIfPresent) throws OXException {
+        MimeMessageUtility.saveChanges(mimeMessage, hostName, keepMessageIdIfPresent);
     }
 
     /**
@@ -701,136 +679,8 @@ public final class MimeMessageConverter {
      * @param mimeMessage The message
      * @throws OXException If an error occurs
      */
-    public static void saveChanges(final MimeMessage mimeMessage) throws OXException {
-        saveChanges(mimeMessage, true);
-    }
-
-    private static void saveChanges(final MimeMessage mimeMessage, final boolean trySanitizeMultipart) throws OXException {
-        if (null == mimeMessage) {
-            return;
-        }
-        try {
-            try {
-                mimeMessage.saveChanges();
-            } catch (final javax.mail.internet.ParseException e) {
-                /*-
-                 * Probably parsing of a Content-Type header failed.
-                 *
-                 * Try to sanitize parameter list headers
-                 */
-                sanitizeContentTypeHeaders(mimeMessage, new ContentType());
-                /*
-                 * ... and retry
-                 */
-                mimeMessage.saveChanges();
-            } catch (final javax.mail.MessagingException e) {
-                if (!trySanitizeMultipart) {
-                    throw MimeMailException.handleMessagingException(e);
-                }
-                // Check for DCH error
-                final String msg = toLowerCase(e.getMessage());
-                if (null != msg && msg.startsWith("mime part of type \"multipart/")) {
-                    sanitizeMultipartContent(mimeMessage);
-                    saveChanges(mimeMessage, false);
-                } else {
-                    throw MimeMailException.handleMessagingException(e);
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MailExceptionCode.MESSAGING_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static boolean sanitizeMultipartContent(final MimePart part) throws OXException {
-        try {
-            final String sContentType = toLowerCase(part.getHeader("Content-Type", null));
-            if (null != sContentType && sContentType.startsWith("multipart/")) {
-                final Object o = part.getContent();
-                if (o instanceof MimeMultipart) {
-                    final MimeMultipart multipart = (MimeMultipart) o;
-                    final int count = multipart.getCount();
-                    for (int i = 0; i < count; i++) {
-                        if (!sanitizeMultipartContent((MimePart) multipart.getBodyPart(i))) {
-                            return false;
-                        }
-                    }
-                    return true;
-                }
-                // Not an instance of MimeMultipart.
-                // Try to sanitize
-                if (o instanceof InputStream) {
-                    final MimeMultipart multipart = new MimeMultipart(new MessageDataSource((InputStream) o, sContentType));
-                    part.setContent(multipart);
-                    return true;
-                }
-                return false;
-            }
-            return true;
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
-    }
-
-    private static void sanitizeContentTypeHeaders(final Part part, final ContentType sanitizer) throws OXException {
-        final DataHandler dh;
-        try {
-            dh = part.getDataHandler();
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
-        if (dh == null) {
-            return;
-        }
-        try {
-            final String type = dh.getContentType();
-            sanitizer.setContentType(type);
-            try {
-                /*
-                 * Try to parse with JavaMail Content-Type implementation
-                 */
-                new javax.mail.internet.ContentType(type);
-            } catch (final javax.mail.internet.ParseException e) {
-                /*
-                 * Sanitize Content-Type header
-                 */
-                final String cts = sanitizer.toString(true);
-                try {
-                    new javax.mail.internet.ContentType(cts);
-                } catch (final javax.mail.internet.ParseException pe) {
-                    /*
-                     * Still not parseable
-                     */
-                    throw MailExceptionCode.INVALID_CONTENT_TYPE.create(e, type);
-                }
-                part.setDataHandler(new DataHandlerWrapper(dh, cts));
-                part.setHeader("Content-Type", cts);
-            }
-            /*
-             * Check for recursive invocation
-             */
-            if (sanitizer.startsWith("multipart/")) {
-                final Object o = dh.getContent();
-                if (o instanceof MimeMultipart) {
-                    final MimeMultipart mm = (MimeMultipart) o;
-                    final int count = mm.getCount();
-                    for (int i = 0; i < count; i++) {
-                        sanitizeContentTypeHeaders(mm.getBodyPart(i), sanitizer);
-                    }
-                }
-            }
-        } catch (final MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        }
+    public static void saveChanges(MimeMessage mimeMessage) throws OXException {
+        MimeMessageUtility.saveChanges(mimeMessage);
     }
 
     /**
@@ -944,7 +794,7 @@ public final class MimeMessageConverter {
      */
     public static MailMessage[] convertMessages(final Message[] msgs, final Folder folder, final MailField[] fields, final boolean includeBody) throws OXException {
         try {
-            final MailMessageFieldFiller[] fillers = createFieldFillers(folder, fields);
+            final MailMessageFieldFiller[] fillers = createFieldFillers(new DefaultFolderInfo(folder), fields);
             final MailMessage[] mails = new MimeMailMessage[msgs.length];
             for (int i = 0; i < mails.length; i++) {
                 if (null != msgs[i]) {
@@ -1708,15 +1558,18 @@ public final class MimeMessageConverter {
 
             @Override
             public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                String[] val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_IMPORTANCE);
-                if (val != null && (val.length > 0)) {
-                    parseImportance(val[0], mailMessage);
-                } else {
-                    val = ((ExtendedMimeMessage) msg).getHeader(MessageHeaders.HDR_X_PRIORITY);
-                    if ((val != null) && (val.length > 0)) {
-                        parsePriority(val[0], mailMessage);
+                if (msg instanceof ExtendedMimeMessage) {
+                    ExtendedMimeMessage extended = (ExtendedMimeMessage) msg;
+                    String[] val = extended.getHeader(MessageHeaders.HDR_IMPORTANCE);
+                    if (val != null && (val.length > 0)) {
+                        parseImportance(val[0], mailMessage);
                     } else {
-                        mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                        val = extended.getHeader(MessageHeaders.HDR_X_PRIORITY);
+                        if ((val != null) && (val.length > 0)) {
+                            parsePriority(val[0], mailMessage);
+                        } else {
+                            mailMessage.setPriority(MailMessage.PRIORITY_NORMAL);
+                        }
                     }
                 }
             }
@@ -1751,15 +1604,90 @@ public final class MimeMessageConverter {
         }
     }
 
+    private static interface FolderInfo {
+
+        /**
+         * Gets the full name of the mail folder.
+         * @return The full name
+         */
+        String getFullName();
+
+        /**
+         * Gets the UID of the given message within the
+         * according folder.
+         *
+         * @param msg The message
+         * @return The UID
+         * @throws MessagingException
+         */
+        String getUid(Message msg) throws MessagingException;
+
+    }
+
+    private static final class DefaultFolderInfo implements FolderInfo {
+
+        private final Folder folder;
+
+        public DefaultFolderInfo(Folder folder) {
+            super();
+            this.folder = folder;
+        }
+
+        @Override
+        public String getFullName() {
+            return folder.getFullName();
+        }
+
+        @Override
+        public String getUid(Message msg) throws MessagingException {
+            if (folder instanceof UIDFolder) {
+                return Long.toString(((UIDFolder) folder).getUID(msg));
+            } else if (folder instanceof POP3Folder) {
+              return ((POP3Folder) folder).getUID(msg);
+            }
+
+            return null;
+        }
+
+    }
+
+    private static final class StaticFolderInfo implements FolderInfo {
+
+        private final String fullName;
+
+        private final String uid;
+
+        /**
+         * @param fullName Full name of the mails folder
+         * @param uid UID of the mail within the given folder
+         */
+        public StaticFolderInfo(String fullName, String uid) {
+            super();
+            this.fullName = fullName;
+            this.uid = uid;
+        }
+
+        @Override
+        public String getFullName() {
+            return fullName;
+        }
+
+        @Override
+        public String getUid(Message msg) {
+            return uid;
+        }
+
+    }
+
     /**
      * Creates the field fillers and expects the messages to be common instances of {@link Message}.
      *
-     * @param folder The folder containing the messages
+     * @param folderInfo The folder info
      * @param fields The fields to fill
      * @return An array of appropriate {@link MailMessageFieldFiller} implementations
      * @throws OXException If field fillers cannot be created
      */
-    private static MailMessageFieldFiller[] createFieldFillers(final Folder folder, final MailField[] fields) throws OXException {
+    private static MailMessageFieldFiller[] createFieldFillers(final FolderInfo folderInfo, final MailField[] fields) throws OXException {
         final MailField[] arr;
         {
             final List<MailField> list = Arrays.asList(fields);
@@ -1776,25 +1704,17 @@ public final class MimeMessageConverter {
             final MailMessageFieldFiller filler = FILLER_MAP.get(field);
             if (filler == null) {
                 if (MailField.ID.equals(field)) {
-                    fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
-
+                    fillers[i] = new MailMessageFieldFiller() {
                         @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                            if (folder instanceof UIDFolder) {
-                                mailMessage.setMailId(Long.toString(((UIDFolder) folder).getUID(msg)));
-                            } else if (folder instanceof FullnameFolder) {
-                                mailMessage.setMailId(((FullnameFolder) folder).getUID(msg));
-                            } else if (folder instanceof POP3Folder) {
-                                mailMessage.setMailId(((POP3Folder) folder).getUID(msg));
-                            }
+                            mailMessage.setMailId(folderInfo.getUid(msg));
                         }
                     };
                 } else if (MailField.FOLDER_ID.equals(field)) {
-                    fillers[i] = new ExtendedMailMessageFieldFiller(folder) {
-
+                    fillers[i] = new MailMessageFieldFiller() {
                         @Override
                         public void fillField(final MailMessage mailMessage, final Message msg) throws MessagingException {
-                            mailMessage.setFolder(folder.getFullName());
+                            mailMessage.setFolder(folderInfo.getFullName());
                         }
                     };
                 } else if (MailField.BODY.equals(field) || MailField.FULL.equals(field) || MailField.ACCOUNT_NAME.equals(field)) {
@@ -1907,8 +1827,6 @@ public final class MimeMessageConverter {
                     try {
                         if (f instanceof UIDFolder) {
                             mail.setMailId(Long.toString(((UIDFolder) f).getUID(msg)));
-                        } else if (f instanceof FullnameFolder) {
-                            mail.setMailId(((FullnameFolder) f).getUID(msg));
                         } else if (f instanceof POP3Folder) {
                             mail.setMailId(((POP3Folder) f).getUID(msg));
                         }
@@ -2125,8 +2043,6 @@ public final class MimeMessageConverter {
                 try {
                     if (f instanceof UIDFolder) {
                         ret[1] = Long.toString(((UIDFolder) f).getUID(msg));
-                    } else if (f instanceof FullnameFolder) {
-                        ret[1] = ((FullnameFolder) f).getUID(msg);
                     } else if (f instanceof POP3Folder) {
                         ret[1] = ((POP3Folder) f).getUID(msg);
                     }
@@ -2183,7 +2099,7 @@ public final class MimeMessageConverter {
             return mail;
         }
         try {
-            final MailMessageFieldFiller[] fillers = createFieldFillers(new FullnameFolder(fullname, separator, uid), fields);
+            final MailMessageFieldFiller[] fillers = createFieldFillers(new StaticFolderInfo(fullname, uid), fields);
             final MailMessage mail = (set.contains(MailField.BODY)) ? new MimeMailMessage(msg) : new MimeMailMessage();
             fillMessage(fillers, mail, msg);
             return mail;
@@ -2888,6 +2804,30 @@ public final class MimeMessageConverter {
                     return mailDateFormat.parse(s);
                 }
             } catch (final ParseException pex) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Returns the value of the RFC 822 "Date" field. This is the date on which this message was sent. Returns <code>null</code> if this
+     * field is unavailable or its value is absent.
+     *
+     * @param mimeMessage The MIME message
+     * @return The sent Date
+     * @throws MessagingException If sent date cannot be returned
+     */
+    public static Date getSentDate(MimeMessage mimeMessage) throws MessagingException {
+        String s = mimeMessage.getHeader("Date", null);
+        if (s != null) {
+            try {
+                MailDateFormat mailDateFormat = MimeMessageUtility.getDefaultMailDateFormat();
+                synchronized (mailDateFormat) {
+                    return mailDateFormat.parse(s);
+                }
+            } catch (ParseException pex) {
                 return null;
             }
         }

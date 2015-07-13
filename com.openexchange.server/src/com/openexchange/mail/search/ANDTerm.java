@@ -94,12 +94,32 @@ public final class ANDTerm extends CatenatingTerm {
 
     @Override
     public javax.mail.search.SearchTerm getJavaMailSearchTerm() {
-        return new AndTerm(terms[0].getJavaMailSearchTerm(), terms[1].getJavaMailSearchTerm());
+        SearchTerm<?> t1 = terms[0];
+        SearchTerm<?> t2 = terms[1];
+        if (t1 instanceof BooleanTerm) {
+            // Neutral
+            return t2.getJavaMailSearchTerm();
+        }
+        if (t2 instanceof BooleanTerm) {
+            // Neutral
+            return t1.getJavaMailSearchTerm();
+        }
+        return new AndTerm(t1.getJavaMailSearchTerm(), t2.getJavaMailSearchTerm());
     }
 
     @Override
     public javax.mail.search.SearchTerm getNonWildcardJavaMailSearchTerm() {
-        return new AndTerm(terms[0].getNonWildcardJavaMailSearchTerm(), terms[1].getNonWildcardJavaMailSearchTerm());
+        SearchTerm<?> t1 = terms[0];
+        SearchTerm<?> t2 = terms[1];
+        if (t1 instanceof BooleanTerm) {
+            // Neutral
+            return t2.getNonWildcardJavaMailSearchTerm();
+        }
+        if (t2 instanceof BooleanTerm) {
+            // Neutral
+            return t1.getNonWildcardJavaMailSearchTerm();
+        }
+        return new AndTerm(t1.getNonWildcardJavaMailSearchTerm(), t2.getNonWildcardJavaMailSearchTerm());
     }
 
     @Override

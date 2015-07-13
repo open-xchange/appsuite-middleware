@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.actions.files;
 
 import static com.google.common.net.HttpHeaders.ETAG;
 import static com.google.common.net.HttpHeaders.LAST_MODIFIED;
+import static com.openexchange.tools.images.ImageTransformationUtility.seemsLikeThumbnailRequest;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -187,12 +188,6 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
         }
 
         return result;
-    }
-
-    private static final String COVER = com.openexchange.tools.images.ScaleType.COVER.getKeyword();
-
-    private boolean seemsLikeThumbnailRequest(AJAXRequestData requestData) {
-        return "thumbnail_image".equals(requestData.getFormat()) || COVER.equals(requestData.getParameter("scaleType"));
     }
 
     private void createAndSetETag(File fileMetadata, InfostoreRequest request, AJAXRequestResult result) throws OXException {

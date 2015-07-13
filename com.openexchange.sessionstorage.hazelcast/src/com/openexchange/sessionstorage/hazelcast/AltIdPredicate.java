@@ -52,7 +52,7 @@ package com.openexchange.sessionstorage.hazelcast;
 import java.util.Map.Entry;
 import com.hazelcast.query.Predicate;
 import com.openexchange.session.Session;
-import com.openexchange.sessionstorage.hazelcast.portable.PortableSession;
+import com.openexchange.sessionstorage.hazelcast.serialization.PortableSession;
 
 /**
  * {@link AltIdPredicate}

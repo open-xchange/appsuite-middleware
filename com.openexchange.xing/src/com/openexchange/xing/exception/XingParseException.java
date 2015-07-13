@@ -52,6 +52,7 @@ package com.openexchange.xing.exception;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import com.openexchange.java.Streams;
 
 /**
  * Indicates there was trouble parsing a response from Xing.
@@ -68,23 +69,23 @@ public class XingParseException extends XingException {
     }
 
     public static String stringifyBody(BufferedReader reader) {
-        String inputLine = null;
+        if (null == reader) {
+            return "";
+        }
 
         try {
-            if (reader != null) {
-                reader.reset();
-            }
+            reader.reset();
         } catch (IOException ioe) {
-        }
-        StringBuffer result = new StringBuffer();
-        try {
-            while ((inputLine = reader.readLine()) != null) {
-                result.append(inputLine);
-            }
-        } catch (IOException e) {
+            // Ignore
         }
 
-        return result.toString();
+        try {
+            String str = Streams.reader2string(reader);
+            return null == str ? "" : str;
+        } catch (IOException e) {
+            // Ignore
+        }
+        return "";
     }
 
     public XingParseException(String message) {

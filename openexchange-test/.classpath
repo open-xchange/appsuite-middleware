@@ -82,7 +82,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contacts.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.tasks.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.contact.storage.rdb"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.facebook"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.subscribe.linkedin"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.unifiedinbox"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.jcharset"/>
@@ -124,5 +123,6 @@
 	<classpathentry kind="src" path="/com.openexchange.oauth"/>
 	<classpathentry kind="src" path="/com.openexchange.google.api.client"/>
 	<classpathentry kind="src" path="/com.openexchange.test"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sessionstorage"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>

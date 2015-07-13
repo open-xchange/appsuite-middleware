@@ -51,7 +51,9 @@ package com.openexchange.calendar.itip;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import com.openexchange.data.conversion.ical.itip.ITipMessage;
 
@@ -67,6 +69,7 @@ public class ITipAnalysis {
     private final Set<ITipAction> actions = EnumSet.noneOf(ITipAction.class);
     private ITipMessage message = null;
 	private String uid;
+	private Map<String, Object> attributes = new HashMap<String, Object>();
 
     public ITipMessage getMessage() {
         return message;
@@ -113,5 +116,13 @@ public class ITipAnalysis {
 	public String getUid() {
 		return uid;
 	}
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Map<String, Object> attributes) {
+        this.attributes = attributes;
+    }
 
 }

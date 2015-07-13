@@ -71,6 +71,11 @@ public final class ContextServiceImpl implements ContextService {
     }
 
     @Override
+    public void setAttribute(String name, String value, int contextId) throws OXException {
+        ContextStorage.getInstance().setAttribute(name, value, contextId);
+    }
+
+    @Override
     public List<Integer> getAllContextIds() throws OXException {
         return ContextStorage.getInstance().getAllContextIds();
     }
@@ -93,6 +98,11 @@ public final class ContextServiceImpl implements ContextService {
     @Override
     public void invalidateContext(final int contextId) throws OXException {
         ContextStorage.getInstance().invalidateContext(contextId);
+    }
+
+    @Override
+    public void invalidateContexts(int[] contextIDs) throws OXException {
+        ContextStorage.getInstance().invalidateContexts(contextIDs);
     }
 
     @Override

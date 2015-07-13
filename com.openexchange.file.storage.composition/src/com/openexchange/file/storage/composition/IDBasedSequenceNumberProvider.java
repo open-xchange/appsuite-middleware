@@ -57,7 +57,11 @@ import com.openexchange.exception.OXException;
  * {@link IDBasedSequenceNumberProvider}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ *
+ * @deprecated Use {@link IDBasedFileAccess#supports(String, String, FileStorageCapability...)} with
+ *             {@link FileStorageCapability#SEQUENCE_NUMBERS} instead.
  */
+@Deprecated
 public interface IDBasedSequenceNumberProvider {
 
     /**

@@ -49,15 +49,18 @@
 
 package com.openexchange.database.migration.mbean;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.concurrent.ExecutionException;
+
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
+
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
+
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.migration.internal.DBMigrationExecutorServiceImpl;
 import com.openexchange.exception.OXException;
@@ -137,7 +140,13 @@ public class ConfigDBMigrationMBeanImpl extends StandardMBean implements ConfigD
             final String message = e.getMessage();
             throw new MBeanException(new Exception(message), message);
         } finally {
-            closeSQLStuff(stmt);
+            if (null != stmt) {
+                try {
+                    stmt.close();
+                } catch (final SQLException e) {
+                    LOG.error("", e);
+                }
+            }
             if (writable != null) {
                 databaseService.backForUpdateTask(writable);
             }

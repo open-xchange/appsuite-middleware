@@ -60,12 +60,14 @@ import com.openexchange.contact.SortOrder;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
+import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.Charsets;
@@ -126,6 +128,34 @@ public final class Tools {
             LOG.error("", x);
             return 0;
         }
+    }
+
+    /**
+     * Extracts the relevant information from a {@link IncorrectStringSQLException} exception and puts it into a corresponding {@link OXException}.
+     *
+     * @param session The user session
+     * @param connection A (readable) db connection
+     * @param e The incorrect string exception
+     * @param contact The affected contact
+     * @param table The database table
+     * @return The exception
+     */
+    public static OXException getIncorrectStringException(Session session, Connection connection, IncorrectStringSQLException e, Contact contact, Table table) throws OXException {
+        /*
+         * create problematic attributes
+         */
+        String columnLabel = e.getColumn();
+        String incorrectString = e.getIncorrectString();
+        ContactField field = Mappers.CONTACT.getMappedField(columnLabel);
+        DbMapping<? extends Object, Contact> mapping = Mappers.CONTACT.get(field);
+        String readableName = Translator.getInstance().translate(ServerSessionAdapter.valueOf(session).getUser().getLocale(), mapping.getReadableName(contact));
+        MappedIncorrectString<Contact> mappedIncorrectString = new MappedIncorrectString<Contact>(mapping, incorrectString, readableName);
+        /*
+         * create incorrect string exception
+         */
+        OXException incorrectStringException = ContactExceptionCodes.INCORRECT_STRING.create(e, incorrectString, readableName);
+        incorrectStringException.addProblematic(mappedIncorrectString);
+        return incorrectStringException;
     }
 
     /**

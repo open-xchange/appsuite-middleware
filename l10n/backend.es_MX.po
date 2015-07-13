@@ -1,15 +1,11 @@
-# #-#-#-#-#  server.es_ES.po (server)  #-#-#-#-#
-# translation of server.po to Spanish
-# #-#-#-#-#  errors.es_ES.po (errors)  #-#-#-#-#
-# translation of errors.po to Spanish
 # Antje Faber <antje.faber@open-xchange.com>, 2009, 2010, 2012.
-# Andres Herrera <andres@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2014.
+# Andres Herrera <andres@bureau-cornavin.com>, 2010, 2011, 2012, 2013, 2014, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-10-08 00:43+0200\n"
+"PO-Revision-Date: 2015-02-13 01:04+0100\n"
 "Last-Translator: Andres Herrera <andres@bureau-cornavin.com>\n"
 "Language-Team: Spanish <es@bureau-cornavin.com>\n"
 "Language: es\n"
@@ -327,7 +323,7 @@ msgstr "Hasta %1$s"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:137
 msgid "No end"
-msgstr "Sin fecha de fin"
+msgstr "Sin fecha de finalización"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:61
 msgid "An attendee would like to be brought up to date about this appointment."
@@ -2429,6 +2425,21 @@ msgstr ""
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "El archivo ZIP excede el tamaño máximo permitido de %1$s"
 
+#. The file storage account is currently not accessible.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+msgid "The file storage account is currently not accessible."
+msgstr "La cuenta de almacenamiento de archivos no es accesible actualmente."
+
+#. The folder \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "La carpeta \"%1$s\" no se puede mover a \"%2$s\"."
+
+#. The file \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "El archivo \"%1$s\" no se puede mover a \"%2$s\"."
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3961,6 +3972,36 @@ msgstr "No se pudo obtener una respuesta válida del proveedor OAuth asociado."
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "Hubo un problema al intentar crear una conexión al servicio remoto."
 
+#. You need to grant additional %1$s permissions to access the resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+msgid "You need to grant additional %1$s permissions to access the resource."
+msgstr ""
+"Es necesario conceder el permiso adicional de %1$s para acceder al recurso."
+
+#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+msgid ""
+"Your '%1$s' access was rejected. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Su acceso a '%1$s' fue rechazado. Debe volver a autorizar al servidor para "
+"utilizar su cuenta con una contraseña nueva. Para ello, vaya a Configuración "
+"-> Mi configuración de redes sociales -> Cuentas. A continuación, inténtelo "
+"de nuevo."
+
+#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+msgid ""
+"Your '%1$s' access was revoked. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Su acceso a '%1$s' fue revocado. Debe volver a autorizar al servidor para "
+"utilizar su cuenta con una contraseña nueva. Para ello, vaya a Configuración "
+"-> Mi configuración de redes sociales -> Cuentas. A continuación, inténtelo "
+"de nuevo."
+
 #. *
 #. * New password too short.
 #.
@@ -4545,7 +4586,7 @@ msgstr "el proveedor de alojamiento"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish.online.infostore/src/com/openexchange/publish/online/infostore/FormStrings.java:63
 msgid "Publish Infostore document"
-msgstr "Publicar documento del Portadocumentos"
+msgstr "Publicar documento del portadocumentos"
 
 #. Cannot find the requested publication site.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.publish/src/com/openexchange/publish/PublicationExceptionMessages.java:63
@@ -4807,7 +4848,7 @@ msgstr ""
 #. Not supported recurrence pattern: BYMONTH
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:91
 msgid "Not supported recurrence pattern: BYMONTH"
-msgstr "No se admite el patrón de frecuencia: BYMONTH"
+msgstr "No se admite el patrón de periodicidad: BYMONTH"
 
 #. This does not look like an iCal file. Please check the file.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/data/conversion/ical/ConversionWarningMessage.java:94
@@ -4938,7 +4979,7 @@ msgid ""
 msgstr ""
 "Conflicto de Edición. Su cambio no puede completarse porque alguien ha hecho "
 "un cambio al mismo elemento que entra en conflicto con el suyo. Por favor, "
-"actualice o resincronice, e inténtelo de nuevo."
+"recargue o resincronice, e inténtelo de nuevo."
 
 #. You are not allowed to change groups.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/group/GroupExceptionMessage.java:95
@@ -5029,7 +5070,7 @@ msgstr "No tiene los permisos necesarios para leer citas de la carpeta %1$d."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:82
 msgid "End date must not be before start date."
-msgstr "La fecha de fin no debe ser anterior a la fecha de inicio."
+msgstr "La fecha de finalización no debe ser anterior a la fecha de inicio."
 
 #. *
 #. * This label (%d) is not supported.
@@ -5078,7 +5119,7 @@ msgstr "No se ha proporcionado el valor requerido \"Fecha de inicio\"."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:113
 msgid "Required value \"End Date\" was not supplied."
-msgstr "No se ha proporcionado el valor requerido \"Fecha de fin\""
+msgstr "No se ha proporcionado el valor requerido \"Fecha de finalización\""
 
 #. *
 #. * Required value \"Title\" was not supplied.
@@ -5182,7 +5223,7 @@ msgid ""
 "Moving an instance of a recurring appointment into another folder is not "
 "allowed."
 msgstr ""
-"No se permite mover una instancia de una cita frecuente a otra carpeta."
+"No se permite mover una instancia de una cita recurrente a otra carpeta."
 
 #. *
 #. * Moving an appointment with private flag to a shared folder is not allowed.
@@ -5203,7 +5244,8 @@ msgid ""
 "appointment."
 msgstr ""
 "No pueden utilizar distintas etiquetas de privado para un sólo elemento de "
-"una cita frecuente."
+"una "
+"cita recurrente."
 
 #. *
 #. * You can not use the private flag in a non private folder.
@@ -5224,7 +5266,7 @@ msgstr "Caracteres incorrectos en el campo %1$s."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:203
 msgid "Series end is before start date."
-msgstr "La fecha de fin es anterior a la fecha de inicio."
+msgstr "La fecha de finalización es anterior a la fecha de inicio."
 
 #. *
 #. * An external participant with email address %1$s is already contained. Please remove duplicate participant and retry.
@@ -5242,7 +5284,7 @@ msgstr ""
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:213
 msgid "Moving a recurring appointment to another folder is not supported."
-msgstr "No está permitido mover una cita frecuente a otra carpeta."
+msgstr "No está permitido mover una cita recurrente a otra carpeta."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
@@ -5447,6 +5489,15 @@ msgstr ""
 msgid "Could not connect to the context storage."
 msgstr "No se pudo conectar con el almacenamiento del contexto."
 
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+msgid "Denied concurrent update of user attributes."
+msgstr ""
+"Petición rechazada porque el tamaño del archivo (%1$s) excede el tamaño de "
+"archivo máximo configurado de %2$s."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
 msgstr "Sistema"
@@ -5469,7 +5520,7 @@ msgstr "Portadocumentos"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:78
 msgid "Userstore"
-msgstr "Portadocumentos de usuarios"
+msgstr "Almacén de usuarios"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:80
 msgid "Public infostore"
@@ -6603,7 +6654,7 @@ msgstr "No se ha planificado ningún recurso."
 #. No series
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:642
 msgid "No series"
-msgstr "No frecuente"
+msgstr "No recurrente"
 
 #. No start date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:645
@@ -6613,7 +6664,7 @@ msgstr "Sin fecha de comienzo"
 #. No end date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:648
 msgid "No end date"
-msgstr "Sin fecha de fin"
+msgstr "Sin fecha de finalización"
 
 #. No due date
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:651
@@ -6699,7 +6750,7 @@ msgstr "Fecha de comienzo: %1$s"
 #. End date: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:727
 msgid "End date: %1$s"
-msgstr "Fecha de fin: %1$s"
+msgstr "Fecha de finalización: %1$s"
 
 #. Due date: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:730
@@ -6889,7 +6940,7 @@ msgstr ""
 #. The folder %1$s you requested is not an Infostore folder.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:68
 msgid "The folder %1$s you requested is not an Infostore folder."
-msgstr "La carpeta requerida %1$s no es una carpeta del Portadocumentos."
+msgstr "La carpeta requerida %1$s no es una carpeta del portadocumentos."
 
 #. You do not have the appropriate permissions to read the document.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:71
@@ -7429,11 +7480,11 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:101
 msgid "Unknown recurrence type %d."
-msgstr "Tipo de frecuencia %d desconocido."
+msgstr "Tipo de recurrencia %d desconocido."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:103
 msgid "Value for the recurrence is missing: %d."
-msgstr "Falta el valor para la frecuencia: %d."
+msgstr "Falta el valor para la recurrencia: %d."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:105
 msgid "Finished tasks need to have a percentage of 100 and not %d."
@@ -7442,7 +7493,8 @@ msgstr "Las tareas finalizadas deben tener un porcentaje de 100 y no de %d."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:107
 msgid "Start date \"%1$s\" must be before end date \"%2$s\"."
 msgstr ""
-"La fecha de inicio \"%1$s\" debe ser anterior a la fecha de fin \"%2$s\"."
+"La fecha de inicio \"%1$s\" debe ser anterior a la fecha de finalización "
+"\"%2$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:109
 msgid ""
@@ -7456,8 +7508,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:112
 msgid "Tasks with private flag cannot be moved to a public folder \"%1$s\"."
 msgstr ""
-"No se pueden mover tareas con etiqueta privada a una carpeta pública \"%1$s"
-"\"."
+"No se pueden mover tareas con etiqueta privada a una carpeta pública "
+"\"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/tasks/TaskExceptionMessage.java:114
 msgid "Only the task creator is allowed to set the private flag."
@@ -7526,9 +7578,9 @@ msgid ""
 "The version can not be set back if the update tasks handling has been "
 "migrated to the Remember Executed Update Tasks concept on schema \"%1$s\"."
 msgstr ""
-"La versión no puede modificarse si la administración de las tareas de "
-"actualización ha sido migrada a un concepto de recordatorio de tareas de "
-"actualización ejecutadas en el esquema \"%1$s\"."
+"La versión no puede modificarse si la gestión de las tareas de actualización "
+"ha sido migrada a un concepto de recordatorio de tareas de actualización "
+"ejecutadas en el esquema \"%1$s\"."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/update/UpdateExceptionMessages.java:72
 msgid ""
@@ -7652,6 +7704,24 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:107
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "La conexión se cerró inesperadamente. Por favor, inténtelo de nuevo."
+
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr ""
+"Petición rechazada porque el tamaño del archivo excede el tamaño de archivo "
+"máximo configurado de %1$s."
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr ""
+"Se ha superado el número máximo de archivos que se pueden adjuntar a un "
+"correo. El máximo es %1$s."
 
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
@@ -7984,6 +8054,19 @@ msgstr ""
 "El acceso al correo electrónica está deshabilitado para el administrador de "
 "contexto."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr ""
+"No se pudo enviar el mensaje. Mensaje de error del servidor de transporte de "
+"correo: %1$s"
+
+#. The client request is not permitted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+msgid "The client request is not permitted."
+msgstr "No se permite la petición del cliente."
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -8128,16 +8211,37 @@ msgstr ""
 "No se ha podido enviar el mensaje a los siguientes destinatarios: %1$s (%2$s)"
 
 #. *
-#. * Lost connection to mail server.
+#. * Message could not be sent. Error message from mail transport server: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s"
+msgstr ""
+"No se pudo enviar el mensaje. Mensaje de error del servidor de transporte de "
+"correo: %1$s"
+
+#. *
+#. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s "
+"(%2$s)"
+msgstr ""
+"No se pudo enviar el mensaje. Mensaje de error del servidor de transporte de "
+"correo: %1$s (%2$s)"
+
+#. *
+#. * Lost connection to mail server.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server."
 msgstr "Conexión perdida con el servidor de correo."
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s."
 msgstr "Conexión perdida con el servidor de correo %1$s."
 
@@ -8145,7 +8249,7 @@ msgstr "Conexión perdida con el servidor de correo %1$s."
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect."
@@ -8156,21 +8260,21 @@ msgstr ""
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The allowed quota on mail server exceeded."
 msgstr "Se ha excedido la cuota permitida en el servidor de correo."
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "Se ha excedido la cuota permitida en el servidor de correo \"%1$s\"."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The mailbox is already in use. Please try again later."
 msgstr ""
 "Ese buzón de correo ya está en uso. Por favor, inténtelo de nuevo más tarde."
@@ -8178,7 +8282,7 @@ msgstr ""
 #. *
 #. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
@@ -8186,7 +8290,7 @@ msgstr ""
 "más adelante."
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8729,6 +8833,15 @@ msgstr ""
 msgid "Missing the following field in JSON data: %1$s"
 msgstr "Falta el campo siguiente en los datos JSON: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
+msgstr ""
+"El contenido HTML es demasiado grande y por lo tanto no se puede visualizar "
+"de forma segura. Por favor, seleccione para descargar su contenido si desea "
+"verlo."
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
@@ -8908,6 +9021,11 @@ msgstr ""
 "El proveedor de servicios le pidió una confirmación de identidad. Esto "
 "sucede en algunas cuentas y no podemos corregirlo. Es responsabilidad del "
 "proveedor. Por esta razón, la suscripción no se puede completar."
+
+#. You already have such a subscription.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+msgid "You already have such a subscription."
+msgstr "Ya tiene esa suscripción."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."

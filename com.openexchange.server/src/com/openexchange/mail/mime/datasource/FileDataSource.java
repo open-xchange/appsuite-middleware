@@ -83,7 +83,7 @@ public final class FileDataSource implements DataSource {
         FileOutputStream fos = null;
         final File tmpFile;
         try {
-            tmpFile = File.createTempFile("openexchange", null, new File(ServerConfig.getProperty(Property.UploadDirectory)));
+            tmpFile = File.createTempFile("openexchange-fds-", null, new File(ServerConfig.getProperty(Property.UploadDirectory)));
             tmpFile.deleteOnExit();
             final int bufLen = 8192;
             final byte[] buf = new byte[bufLen];

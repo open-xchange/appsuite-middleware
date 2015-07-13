@@ -46,10 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.rmi;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Publication;
@@ -63,12 +65,11 @@ import com.openexchange.admin.rmi.exceptions.NoSuchPublicationException;
  * <b>Example:</b>
  * <pre>
  * final OXPublicationInterface iface = (OXPublicationInterface)Naming.lookup("rmi:///oxhost/"+OXPublicationInterface.RMI_NAME);
- *
- * </pre
+ * </pre>
  *
  *
  * @author <a href="mailto:felix.marx@open-xchange.com">Felix Marx</a>
- *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public interface OXPublicationInterface extends Remote {
 
@@ -76,25 +77,150 @@ public interface OXPublicationInterface extends Remote {
      * RMI name to be used in the naming lookup.
      */
     public static final String RMI_NAME = "OXPublication";
-    
+
     /**
-     * This method returns a Publication for a given Url
+     * Gets a Publication for a given URL
      *
      * @return Publication if Publication is found
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
+     * @throws OXException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
      */
-    public Publication getPublication(Context ctx, String url, Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    public Publication getPublication(Context ctx, String url, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
     /**
-     * This method will delete a Publication
-     *
-     * @return true if the publication is deleted, false if not
-     * @throws OXException 
-     * @throws NoSuchPublicationException 
-     * @throws MissingServiceException 
+     * Lists all publications in the specified context
+     * 
+     * @param ctx The context
+     * @param credentials The context administrative credentials
+     * @return A Collection with all publications in the specified context
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
      */
-    public boolean deletePublication(Context ctx, String url, Credentials auth) throws RemoteException, NoSuchPublicationException, MissingServiceException;
-    
+    public List<Publication> listPublications(Context ctx, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * List all publications in the specified context with the specified entity identifier
+     * 
+     * @param ctx The context
+     * @param credentials The credentials
+     * @param entityId The entity identifier
+     * @return A Collection with all publications in the specified context with the specified entity identifier
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> listPublications(Context ctx, Credentials credentials, String entityId) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Lists all publications for the specified user in the specified context for the specified module
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @param user The user identifier
+     * @param module The module name
+     * @return A Collection with all user publications in the specified context for the specified module
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> listPublications(Context ctx, Credentials credentials, int user, String module) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Lists all publications for the specified user in the specified context
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @param user The user identifier
+     * @return A Collection with all user publications in the specified context for the specified module
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> listPublications(Context ctx, Credentials credentials, int user) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Deletes a Publication
+     *
+     * @return true if the publication is deleted; false otherwise
+     * @throws OXException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     * @deprecated Use {@link OXPublicationInterface.deletePublication(Context ctx, Credentials credentials, String url)} instead
+     */
+    public boolean deletePublication(Context ctx, String url, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Deletes all Publications for the specified user
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @param user The user identifier
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> deletePublications(Context ctx, Credentials credentials, int user) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Deletes the publication with the specified identifier
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @param publicationId The publication identifier
+     * @return the publication that was deleted
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public Publication deletePublication(Context ctx, Credentials credentials, int publicationId) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Delete all publications in the specified context with the specified entity identifier
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @param entityId The entity identifier
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> deletePublications(Context ctx, Credentials credentials, String entityId) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Delete all publications for the specified user in the specified context for the specified module
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @param user The user identifier
+     * @param module The module name
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> deletePublications(Context ctx, Credentials credentials, int user, String module) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Deletes all publications in the specified context
+     * 
+     * @param ctx The context
+     * @param credentials The context's administrative credentials
+     * @return A list with all publication ids that were deleted
+     * @throws RemoteException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public List<Publication> deletePublications(Context ctx, Credentials credentials) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
+    /**
+     * Deletes a Publication
+     *
+     * @return the publication that was deleted
+     * @throws OXException
+     * @throws NoSuchPublicationException
+     * @throws MissingServiceException
+     */
+    public Publication deletePublication(Context ctx, Credentials credentials, String url) throws RemoteException, NoSuchPublicationException, MissingServiceException;
+
 }

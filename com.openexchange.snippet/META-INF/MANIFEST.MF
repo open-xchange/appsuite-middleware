@@ -2,18 +2,36 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet Bundle
 Bundle-SymbolicName: com.openexchange.snippet
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.exception,
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.capabilities,
+ com.openexchange.config.cascade,
+ com.openexchange.conversion,
+ com.openexchange.exception,
+ com.openexchange.filemanagement,
  com.openexchange.html,
  com.openexchange.i18n,
+ com.openexchange.image,
  com.openexchange.java,
  com.openexchange.log,
+ com.openexchange.mail.config,
+ com.openexchange.mail.mime,
+ com.openexchange.mail.mime.utils,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.servlet,
+ com.openexchange.tools.stream,
+ com.openexchange.version,
+ javax.activation;version="1.1.0",
+ javax.mail,
+ javax.mail.internet,
+ javax.mail.internet.idn,
+ javax.mail.search,
+ javax.mail.util,
+ org.apache.commons.io,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

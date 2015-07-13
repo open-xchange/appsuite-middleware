@@ -49,14 +49,10 @@
 
 package com.openexchange.message.timeline.osgi;
 
-import java.util.Map;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.message.timeline.MessageTimelineManagement;
-import com.openexchange.message.timeline.services.Services;
-import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
-import com.openexchange.sessiond.SessiondService;
 
 /**
  * {@link MessageTimelineEventHandler}
@@ -78,27 +74,18 @@ public final class MessageTimelineEventHandler implements EventHandler {
     public void handleEvent(final Event event) {
         final String topic = event.getTopic();
         try {
-            if (SessiondEventConstants.TOPIC_REMOVE_SESSION.equals(topic)) {
-                // A single session was removed
-                final Session session = (Session) event.getProperty(SessiondEventConstants.PROP_SESSION);
-                handleRemovedSession(session);
-            } else if (SessiondEventConstants.TOPIC_REMOVE_DATA.equals(topic) || SessiondEventConstants.TOPIC_REMOVE_CONTAINER.equals(topic)) {
-                // A session container was removed
-                @SuppressWarnings("unchecked") final Map<String, Session> sessionContainer = (Map<String, Session>) event.getProperty(SessiondEventConstants.PROP_CONTAINER);
-                // For each session
-                for (final Session session : sessionContainer.values()) {
-                    handleRemovedSession(session);
+            if (SessiondEventConstants.TOPIC_LAST_SESSION.equals(topic)) {
+                Integer contextId = (Integer) event.getProperty(SessiondEventConstants.PROP_CONTEXT_ID);
+                if (null != contextId) {
+                    Integer userId = (Integer) event.getProperty(SessiondEventConstants.PROP_USER_ID);
+                    if (null != userId) {
+                        // No active session left
+                        MessageTimelineManagement.getInstance().dropFor(userId, contextId);
+                    }
                 }
             }
         } catch (final Exception e) {
             LOG.error("Error while handling SessionD event \"{}\"", topic, e);
-        }
-    }
-
-    private void handleRemovedSession(final Session session) {
-        if (!session.isTransient() && (null == Services.getService(SessiondService.class).getAnyActiveSessionForUser(session.getUserId(), session.getContextId()))) {
-            // No active session left
-            MessageTimelineManagement.getInstance().dropFor(session);
         }
     }
 

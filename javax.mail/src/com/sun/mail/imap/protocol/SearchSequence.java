@@ -123,7 +123,7 @@ public class SearchSequence {
 	else if (term instanceof ModifiedSinceTerm)	// RFC 4551 MODSEQ
 	    return modifiedSince((ModifiedSinceTerm)term);
 	else
-	    throw new SearchException("Search too complex");
+	    throw new SearchException("Search too complex. Cannot handle term: " + term.getClass().getName());
     }
 
     /**

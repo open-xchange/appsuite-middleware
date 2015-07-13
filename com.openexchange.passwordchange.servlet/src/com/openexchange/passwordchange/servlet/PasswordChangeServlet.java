@@ -50,8 +50,11 @@
 package com.openexchange.passwordchange.servlet;
 
 import static com.openexchange.passwordchange.servlet.services.PasswordChangeServletServiceRegistry.getServiceRegistry;
+import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -174,7 +177,7 @@ public final class PasswordChangeServlet extends SessionServlet {
         throw PasswordChangeServletExceptionCode.UNSUPPORTED_ACTION.create(actionStr, "GET");
     }
 
-    private void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
+    protected void actionPutUpdate(final HttpServletRequest req, final HttpServletResponse resp) throws JSONException, IOException {
         /*
          * Some variables
          */
@@ -199,17 +202,16 @@ public final class PasswordChangeServlet extends SessionServlet {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
                     PasswordChangeService.class.getName());
             }
+
             final ContextService contextService = getServiceRegistry().getService(ContextService.class);
             if (contextService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(
-                    ContextService.class.getName());
-            }
-            passwordChangeService.perform(new PasswordChangeEvent(
-                session,
-                contextService.getContext(session.getContextId()),
-                requestObject.getString(PARAM_NEW_PASSWORD),
-                requestObject.getString(PARAM_OLD_PASSWORD)));
+                throw ServiceExceptionCode.absentService(ContextService.class);
+			}
 
+			Map<String, List<String>> headers = copyHeaders(req);
+            com.openexchange.authentication.Cookie[] cookies = Tools.getCookieFromHeader(req);
+
+            passwordChangeService.perform(new PasswordChangeEvent(session, contextService.getContext(session.getContextId()), requestObject.getString(PARAM_NEW_PASSWORD), requestObject.getString(PARAM_OLD_PASSWORD), headers, cookies));
         } catch (final OXException e) {
             LOG.error("", e);
             response.setException(e);

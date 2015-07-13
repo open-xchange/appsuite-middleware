@@ -78,11 +78,11 @@ public class RequestRegistryEntry implements Comparable<RequestRegistryEntry> {
      * @param thread the thread associated with the request
      * @param propertyMap
      */
-    public RequestRegistryEntry(final long number, final HttpServletRequest request, final HttpServletResponse response, final Thread thread, Map<String, String> propertyMap) {
+    public RequestRegistryEntry(long number, HttpServletRequest request, HttpServletResponse response, Thread thread,  Map<String, String> propertyMap) {
         super();
         this.number = number;
         this.thread = thread;
-        this.propertyMap = null == propertyMap ? Collections.<String, String> emptyMap() : propertyMap;
+        this.propertyMap = null == propertyMap ? Collections.<String, String> emptyMap() : propertyMap;;
         this.request = request;
         this.response = response;
         this.birthTime = System.currentTimeMillis();

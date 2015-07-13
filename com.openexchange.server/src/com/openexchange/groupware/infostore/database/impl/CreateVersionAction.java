@@ -56,14 +56,15 @@ import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.session.Session;
 
 public class CreateVersionAction extends AbstractDocumentListAction {
 
     /**
      * Initializes a new {@link CreateVersionAction}.
      */
-    public CreateVersionAction() {
-        super();
+    public CreateVersionAction(Session session) {
+        super(session);
     }
 
     /**
@@ -74,8 +75,8 @@ public class CreateVersionAction extends AbstractDocumentListAction {
      * @param context The context
      * @param versions The versions to create
      */
-    public CreateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions) {
-        super(provider, queryCatalog, context, versions);
+    public CreateVersionAction(DBProvider provider, InfostoreQueryCatalog queryCatalog, Context context, List<DocumentMetadata> versions, Session session) {
+        super(provider, queryCatalog, context, versions, session);
     }
 
     @Override

@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import com.openexchange.exception.Category.EnumType;
 import com.openexchange.exception.internal.I18n;
+import com.openexchange.i18n.Localizable;
 import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.session.Session;
 
@@ -961,18 +962,32 @@ public class OXException extends Exception implements OXExceptionConstants {
 
     private String getDisplayMessage0(Locale locale) {
         Locale lcl = null == locale ? Locale.US : locale;
-        String msg = I18n.getInstance().translate(lcl, displayMessage);
+        I18n i18n = I18n.getInstance();
+
+        // Translate format string
+        String msg = i18n.translate(lcl, displayMessage);
+
+        // Generate formatted string using the specified locale, format string, and arguments.
         if (msg != null && displayArgs != null) {
-            try {
-                msg = String.format(lcl, msg, displayArgs);
-            } catch (NullPointerException e) {
-                msg = null;
-            } catch (MissingFormatArgumentException e) {
-                LOG.debug("Missing format argument: >>{}<<", msg, e);
-            } catch (IllegalFormatException e) {
-                LOG.error("Illegal message format: >>{}<<", msg, e);
+            int length = displayArgs.length;
+            if (length > 0) {
+                try {
+                    Object[] args = new Object[length];
+                    for (int i = length; i-- > 0;) {
+                        Object arg = displayArgs[i];
+                        args[i] = (arg instanceof Localizable) ? i18n.translate(lcl, ((Localizable) arg).getArgument()) : arg;
+                    }
+                    msg = String.format(lcl, msg, args);
+                } catch (NullPointerException e) {
+                    msg = null;
+                } catch (MissingFormatArgumentException e) {
+                    LOG.debug("Missing format argument: >>{}<<", msg, e);
+                } catch (IllegalFormatException e) {
+                    LOG.error("Illegal message format: >>{}<<", msg, e);
+                }
             }
         }
+
         return dropSubsequentWhitespaces(msg);
     }
 
@@ -1045,6 +1060,27 @@ public class OXException extends Exception implements OXExceptionConstants {
          * @return the actual length of the value of the truncated attribute.
          */
         int getLength();
+    }
+
+    /**
+     * Interface for an incorrect string in an attribute.
+     */
+    public static interface IncorrectString extends ProblematicAttribute {
+
+        /**
+         * Gets the column identifier of the attribute containing the incorrect string.
+         *
+         * @return The column identifier of the truncated attribute
+         */
+        int getId();
+
+        /**
+         * Gets the incorrect (sub-)string.
+         *
+         * @return The incorrect string
+         */
+        String getIncorrectString();
+
     }
 
     /**

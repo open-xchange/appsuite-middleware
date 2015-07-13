@@ -49,8 +49,6 @@
 
 package com.openexchange.i18n;
 
-import java.util.Locale;
-
 /**
  * Implementation of a {@link Translator} backed with an {@link I18nService}.
  *
@@ -75,22 +73,9 @@ public class I18nTranslator implements Translator {
     @Override
     public String translate(final String toTranslate) {
         if (!service.hasKey(toTranslate)) {
-            final Locale locale = service.getLocale();
-            if (isEnUs(locale)) {
-                LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate, new Throwable());
-            } else {
-                LOG.warn("I18n service for locale {} has no translation for \"{}\".", locale, toTranslate);
-            }
+            LOG.debug("I18n service for locale {} has no translation for \"{}\".", service.getLocale(), toTranslate);
             return toTranslate;
         }
         return service.getLocalized(toTranslate);
     }
-
-    private static boolean isEnUs(final Locale locale) {
-        if (null == locale) {
-            return false;
-        }
-        return "en".equals(locale.getLanguage()) && "US".equals(locale.getCountry());
-    }
-
 }

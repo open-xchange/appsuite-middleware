@@ -65,6 +65,7 @@ import com.openexchange.crypto.CryptoService;
 import com.openexchange.crypto.EncryptedData;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import de.rtner.security.auth.spi.PBKDF2Engine;
 import de.rtner.security.auth.spi.PBKDF2Parameters;
 
@@ -254,6 +255,9 @@ public class CryptoServiceImpl implements CryptoService {
      * @throws OXException
      */
     private SecretKey generateSecretKey(final String password, final byte[] salt) throws OXException {
+        if (Strings.isEmpty(password)) {
+            throw CryptoErrorMessage.EmptyPassword.create();
+        }
         try {
             final PBKDF2Parameters params = new PBKDF2Parameters(KEY_ALGORITHM, CHARSET, salt, 1000);
             final PBKDF2Engine engine = new PBKDF2Engine(params);

@@ -208,7 +208,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
     }
 
     @Test(expected = OXException.class)
@@ -223,7 +223,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
     }
 
     @Test(expected = OXException.class)
@@ -239,7 +239,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
     }
 
     @Test(expected = OXException.class)
@@ -255,7 +255,7 @@ public class TokenLoginServiceImplTest {
             }
         };
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
     }
 
     @Test(expected = OXException.class)
@@ -272,7 +272,7 @@ public class TokenLoginServiceImplTest {
 
         MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
 
-        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash");
+        this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
     }
 
     @Test
@@ -291,7 +291,7 @@ public class TokenLoginServiceImplTest {
 
         MockUtils.injectValueIntoPrivateField(this.tokenLoginServiceImpl, "token2sessionId", createToken2SessionId());
 
-        Session returnedSession = this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash");
+        Session returnedSession = this.tokenLoginServiceImpl.redeemToken(this.token, "appSecret", "optClientId", "optAuthId", "optHash", "optClientIp");
 
         Assert.assertNotNull(returnedSession);
         Mockito.verify(sessiondService, Mockito.times(1)).addSession((AddSessionParameter) Mockito.anyObject());

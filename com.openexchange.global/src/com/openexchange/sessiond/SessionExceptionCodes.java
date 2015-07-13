@@ -166,9 +166,9 @@ public enum SessionExceptionCodes implements DisplayableOXExceptionCode {
      */
     KERBEROS_TICKET_MISSING("Kerberos ticket is missing in session %1$s.", KERBEROS_TICKET_MISSING_MSG, Category.CATEGORY_TRY_AGAIN, 212),
     /**
-     * Failed to issue remote session removal for user %1$s in contexts %2$s on remote node %3$s.
+     * Removing session with session identifier %1$s failed.
      */
-    REMOTE_SESSION_REMOVAL_FAILED("Failed to issue remote session removal for user %1$s in contexts %2$s on remote node %3$s.", MESSAGE, Category.CATEGORY_ERROR, 214);
+    REMOTE_SESSION_REMOVAL_FAILED("Failed to issue remote session removal for contexts %1$s on remote node %2$s.", MESSAGE, Category.CATEGORY_ERROR, 213);
 
     private static final String PREFIX = "SES";
 

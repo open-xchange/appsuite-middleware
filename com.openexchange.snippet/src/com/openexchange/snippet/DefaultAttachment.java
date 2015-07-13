@@ -90,6 +90,9 @@ public class DefaultAttachment implements Attachment {
 
     /** The <code>Content-Id</code> value */
     protected String contentId;
+    
+    /** The attachment's filename */
+    private String filename;
 
     /**
      * Initializes a new {@link DefaultAttachment}.
@@ -187,6 +190,24 @@ public class DefaultAttachment implements Attachment {
         this.streamProvider = streamProvider;
     }
 
+    /**
+     * Gets the filename
+     *
+     * @return The filename
+     */
+    public String getFilename() {
+        return filename;
+    }
+
+    /**
+     * Sets the filename
+     *
+     * @param filename The filename to set
+     */
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     @Override
     public String toString() {
         final StringBuilder builder = new StringBuilder();
@@ -206,6 +227,9 @@ public class DefaultAttachment implements Attachment {
         }
         if (streamProvider != null) {
             builder.append("streamProvider=").append(streamProvider);
+        }
+        if (filename != null) {
+            builder.append("filename=").append(filename);
         }
         builder.append(']');
         return builder.toString();

@@ -113,18 +113,18 @@ public class CacheEvent implements Serializable {
 
     private static final long serialVersionUID = 7172029773641345572L;
 
-    private CacheOperation operation;
-    private List<Serializable> keys;
-    private String groupName;
-    private String region;
+    private final CacheOperation operation;
+    private final List<Serializable> keys;
+    private final String groupName;
+    private final String region;
 
     /**
      * Initializes a new {@link CacheEvent}.
      *
      * @param operation The cache operation
      * @param region The cache region
-     * @param groupName The cache group name
      * @param keys The keys of the affected cache entries
+     * @param groupName The cache group name
      */
     public CacheEvent(CacheOperation operation, String region, List<Serializable> keys, String groupName) {
         super();
@@ -212,30 +212,12 @@ public class CacheEvent implements Serializable {
     }
 
     /**
-     * Sets the operation
-     *
-     * @param operation The operation to set
-     */
-    public void setOperation(CacheOperation operation) {
-        this.operation = operation;
-    }
-
-    /**
      * Gets the keys
      *
      * @return The keys
      */
     public List<Serializable> getKeys() {
         return keys;
-    }
-
-    /**
-     * Sets the keys
-     *
-     * @param keys The keys to set
-     */
-    public void setKey(List<Serializable> keys) {
-        this.keys = keys;
     }
 
     /**
@@ -248,30 +230,12 @@ public class CacheEvent implements Serializable {
     }
 
     /**
-     * Sets the groupName
-     *
-     * @param groupName The groupName to set
-     */
-    public void setGroupName(String groupName) {
-        this.groupName = groupName;
-    }
-
-    /**
      * Gets the region
      *
      * @return The region
      */
     public String getRegion() {
         return region;
-    }
-
-    /**
-     * Sets the region
-     *
-     * @param region The region to set
-     */
-    public void setRegion(String region) {
-        this.region = region;
     }
 
     @Override

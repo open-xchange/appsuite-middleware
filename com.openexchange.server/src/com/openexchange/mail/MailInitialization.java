@@ -54,7 +54,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.cache.registry.CacheAvailabilityListener;
 import com.openexchange.cache.registry.CacheAvailabilityRegistry;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
 import com.openexchange.mail.cache.EnqueueingMailAccessCache;
 import com.openexchange.mail.cache.MailCacheConfiguration;
 import com.openexchange.mail.cache.MailMessageCache;
@@ -202,7 +201,6 @@ public final class MailInitialization implements Initialization, CacheAvailabili
         /*
          * Stop global mail system
          */
-        AttachmentTokenRegistry.releaseInstance();
         EventPool.releaseInstance();
         MimeType2ExtMap.reset();
         EnqueueingMailAccessCache.releaseInstance();

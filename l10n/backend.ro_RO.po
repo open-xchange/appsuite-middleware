@@ -1,12 +1,12 @@
-# Daiana Heinrich <xdaiana@yahoo.com>, 2013.
+# Daiana Heinrich <daiana@bureau-cornavin.com>, 2013.
 msgid ""
 msgstr ""
 "Project-Id-Version: errors\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2014-10-08 21:20+0100\n"
-"Last-Translator: \n"
-"Language-Team: Romanian <kde-i18n-doc@kde.org>\n"
+"PO-Revision-Date: 2015-02-11 21:46+0100\n"
+"Last-Translator: daiana <xdaiana@yahoo.com>\n"
+"Language-Team: Romanian <ro@bureau-cornavin.com>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -2403,6 +2403,21 @@ msgstr ""
 msgid "ZIP archive exceeds max. allowed size of %1$s"
 msgstr "Arhiva ZIP depășește dimensiunea maximă permisă de %1$s"
 
+#. The file storage account is currently not accessible.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:88
+msgid "The file storage account is currently not accessible."
+msgstr "Contul pentru stocarea fișierelor nu este accesibil pentru moment."
+
+#. The folder \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:91
+msgid "The folder \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "Dosarul \"%1$s\" nu poate fi mutat în \"%2$s\"."
+
+#. The file \"%1$s\" cannot be moved to \"%2$s\".
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:94
+msgid "The file \"%1$s\" cannot be moved to \"%2$s\"."
+msgstr "Fișierul \"%1$s\" nu poate fi mutat în \"%2$s\"."
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -3924,6 +3939,36 @@ msgstr "Imposibil de obținut un răspuns corect de la furnizorul OAuth asociat.
 msgid "There was a problem while creating a connection to the remote service."
 msgstr "A apărut o eroare la crearea conexiunii cu serviciul la distanță."
 
+#. You need to grant additional %1$s permissions to access the resource.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:97
+msgid "You need to grant additional %1$s permissions to access the resource."
+msgstr ""
+"Trebuie să acordați permisiuni %1$s suplimentare pentru a accesa resursa."
+
+#. Your '%1$s' access was rejected. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:100
+msgid ""
+"Your '%1$s' access was rejected. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Accesul dumneavoastră '%1$s' a fost respins. Trebuie să autorizați din nou "
+"serverul să utilizeze contul dumneavoastră cu parola nouă. Selectați "
+"Configurație -> Configurație socială personală -> Conturi și modificați, "
+"apoi încercați din nou."
+
+#. Your '%1$s' access was revoked. You have to reauthorize the server to use your account with a new password. To do so, go to Configuration -> My Social Configuration -> Accounts. Then try again.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:103
+msgid ""
+"Your '%1$s' access was revoked. You have to reauthorize the server to use "
+"your account with a new password. To do so, go to Configuration -> My Social "
+"Configuration -> Accounts. Then try again."
+msgstr ""
+"Accesul dumneavoastră '%1$s' a fost revocat. Trebuie să autorizați din nou "
+"serverul să utilizeze contul dumneavoastră cu parola nouă. Selectați "
+"Configurație -> Configurație socială personală -> Conturi și modificați, "
+"apoi încercați din nou."
+
 #. *
 #. * New password too short.
 #.
@@ -5388,6 +5433,13 @@ msgstr "Serverul este oprit momentan pentru întreținere. Încercați din nou."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:64
 msgid "Could not connect to the context storage."
 msgstr "Nu s-a putut realiza conexiunea la zona de stocare a contextului."
+
+#. This exception is triggered by concurrent requests of clients trying to modify the same user attributes in the same moment.
+#. This should happen in very rare conditions and is not visible to the client.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contexts/impl/ContextExceptionMessage.java:69
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/ldap/UserExceptionMessage.java:180
+msgid "Denied concurrent update of user attributes."
+msgstr "Actualizare simultană a atributelor de utilizator refuzată"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:68
 msgid "System"
@@ -7571,6 +7623,24 @@ msgstr ""
 msgid "Connection has been closed unexpectedly. Please try again."
 msgstr "Conexiunea a fost închisă în mod neașteptat. Încercați din nou."
 
+#. Request rejected because file size (%1$s) exceeds the maximum configured file size of %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:110
+msgid ""
+"Request rejected because file size (%1$s) exceeds the maximum configured "
+"file size of %2$s."
+msgstr ""
+"Cererea a fost respinsă deoarece dimensiunea fișierului (%1$s) depășește "
+"dimensiunea maximă configurată de %2$s."
+
+#. Request rejected because file size exceeds the maximum configured file size of %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:113
+msgid ""
+"Request rejected because file size exceeds the maximum configured file size "
+"of %1$s."
+msgstr ""
+"Cererea a fost respinsă deoarece dimensiunea fișierului depășește "
+"dimensiunea maximă configurată de %1$s."
+
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
 #.
@@ -7896,6 +7966,19 @@ msgstr "Serverul %1$s nu suportă accesul prin conexiune securizată."
 msgid "Mail access is disabled for context administrator."
 msgstr "Accesul la e-mail este dezactivat pentru contextul administrator."
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:182
+msgid ""
+"The maximum number of files that may be attached to an E-Mail is exceeded. "
+"Max. is %1$s."
+msgstr ""
+"Numărul maxim de fișiere care pot fi atașate unui mesaj a fost depășit. "
+"Numărul maxim este de %1$s."
+
+#. The client request is not permitted.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:185
+msgid "The client request is not permitted."
+msgstr "Cererea clientului nu este permisă."
+
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
 #. * your most current password.
@@ -8035,23 +8118,44 @@ msgid "Message could not be sent to the following recipients: %1$s (%2$s)"
 msgstr "Mesajul nu a putut fi trimis către următorii destinatari: %1$s (%2$s)"
 
 #. *
-#. * Lost connection to mail server.
+#. * Message could not be sent. Error message from mail transport server: %1$s
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:145
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s"
+msgstr ""
+"Mesajul nu a putut fi trimis. Mesaj de eroare de la serverul de transport de "
+"mail: %1$s"
+
+#. *
+#. * Message could not be sent. Error message from mail transport server: %1$s (%2$s)
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+msgid ""
+"Message could not be sent. Error message from mail transport server: %1$s "
+"(%2$s)"
+msgstr ""
+"Mesajul nu a putut fi trimis. Mesaj de eroare de la serverul de transport de "
+"mail: %1$s (%2$s)"
+
+#. *
+#. * Lost connection to mail server.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
 msgid "Lost connection to mail server."
 msgstr "S-a pierdut conexiunea cu serverul de mail."
 
 #. *
 #. * Connection closed to mail server %1$s.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:150
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
 msgid "Connection closed to mail server %1$s."
 msgstr "Conexiunea cu serverul de mail %1$s s-a închis."
 
 #. *
 #. * The connection to remote server %1$s was refused or timed out while attempting to connect.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:155
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
 msgid ""
 "The connection to remote server %1$s was refused or timed out while "
 "attempting to connect."
@@ -8062,28 +8166,28 @@ msgstr ""
 #. *
 #. * The allowed quota on mail server exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
 msgid "The allowed quota on mail server exceeded."
 msgstr "S-a depășit limita permisă pe serverul de mail. "
 
 #. *
 #. * The allowed quota on mail server "%1$s" exceeded.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:165
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
 msgid "The allowed quota on mail server \"%1$s\" exceeded."
 msgstr "S-a depășit limita permisă pe serverul de mail \"%1$s\"."
 
 #. *
 #. * The mailbox is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:170
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:180
 msgid "The mailbox is already in use. Please try again later."
 msgstr "Căsuța poștală este deja utilizată. Încercați din nou. "
 
 #. *
 #. * The mailbox on mail server %1$s is already in use. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:175
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:185
 msgid ""
 "The mailbox on mail server %1$s is already in use. Please try again later."
 msgstr ""
@@ -8091,7 +8195,7 @@ msgstr ""
 "din nou. "
 
 #. Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:178
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:188
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
@@ -8621,6 +8725,14 @@ msgstr ""
 msgid "Missing the following field in JSON data: %1$s"
 msgstr "Lipsește următorul câmp din datele JSON: %1$s"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:69
+msgid ""
+"The HTML content is too big and therefore cannot be safely displayed. Please "
+"select to download its content if you want to see it."
+msgstr ""
+"Conținutul HTML este prea mare și nu poate fi afișat în siguranță. "
+"Descărcați conținutul dacă doriți să îl vizualizați. "
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
@@ -8795,6 +8907,11 @@ msgstr ""
 "produce pentru anumite conturi, iar noi nu putem să îl remediem. Este "
 "responsabilitatea furnizorului. Prin urmare, nu se poate finaliza "
 "abonamentul."
+
+#. You already have such a subscription.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe/src/com/openexchange/subscribe/SubscriptionErrorStrings.java:93
+msgid "You already have such a subscription."
+msgstr "Aveți deja un astfel de abonament."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.templating/src/com/openexchange/templating/TemplateExceptionMessage.java:68
 msgid "File access denied."

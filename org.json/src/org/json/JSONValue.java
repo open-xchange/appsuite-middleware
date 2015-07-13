@@ -49,6 +49,7 @@
 
 package org.json;
 
+import java.io.File;
 import java.io.Serializable;
 import java.io.Writer;
 
@@ -60,6 +61,22 @@ import java.io.Writer;
 public interface JSONValue extends Serializable {
 
     /**
+     * Writes this JSON value to specified file
+     *
+     * @param file The file to write to
+     * @throws JSONException If writing the JSON object fails (e.g. I/O error)
+     */
+    void writeTo(File file) throws JSONException;
+
+    /**
+     * Pretty-prints this JSON value to specified file
+     *
+     * @param file The file to write to
+     * @throws JSONException If writing the JSON object fails (e.g. I/O error)
+     */
+    void prettyPrintTo(File file) throws JSONException;
+
+    /**
      * Write the contents of this JSON value as JSON text to a writer. For compactness, no whitespace is added.<br>
      * Invokes {@link #write(Writer, boolean)} with latter parameter set to <code>false</code>.
      * <p>
@@ -69,7 +86,7 @@ public interface JSONValue extends Serializable {
      * @return The specified writer for chained invocations
      * @throws JSONException If writing the JSON object fails (e.g. I/O error)
      */
-    public Writer write(Writer writer) throws JSONException;
+    Writer write(Writer writer) throws JSONException;
 
     /**
      * Write the contents of this JSON value as JSON text to a writer. For compactness, no whitespace is added.
@@ -81,19 +98,19 @@ public interface JSONValue extends Serializable {
      * @return The specified writer for chained invocations
      * @throws JSONException If writing the JSON object fails (e.g. I/O error)
      */
-    public Writer write(Writer writer, boolean asciiOnly) throws JSONException;
+    Writer write(Writer writer, boolean asciiOnly) throws JSONException;
 
     /**
      * Resets this JSON value for re-use.
      */
-    public void reset();
+    void reset();
 
     /**
      * Get the number of elements stored in this JSON value.
      *
      * @return The number of elements stored in this JSON value.
      */
-    public int length();
+    int length();
 
     /**
      * Checks if this JSON value contains no elements.
@@ -120,33 +137,34 @@ public interface JSONValue extends Serializable {
      * @return A printable, displayable, and transmittable representation of the JSON value.
      * @throws JSONException If JSON value cannot be pretty-printed
      */
-    public String toString(final int indentFactor, final int indent) throws JSONException;
+    String toString(final int indentFactor, final int indent) throws JSONException;
 
     /**
      * Check if this value represents a JSON array.
      *
      * @return <code>true</code> if this value represents a JSON array; otherwise <code>false</code>
      */
-    public boolean isArray();
+    boolean isArray();
 
     /**
      * Check if this value represents a JSON object.
      *
      * @return <code>true</code> if this value represents a JSON object; otherwise <code>false</code>
      */
-    public boolean isObject();
+    boolean isObject();
 
     /**
      * Gets the {@link JSONValue}'s {@link JSONObject} representation (if appropriate).
      *
      * @return The associated {@link JSONObject} or <code>null</code>
      */
-    public JSONObject toObject();
+    JSONObject toObject();
 
     /**
      * Gets the {@link JSONValue}'s {@link JSONArray} representation (if appropriate).
      *
      * @return The associated {@link JSONArray} or <code>null</code>
      */
-    public JSONArray toArray();
+    JSONArray toArray();
+
 }

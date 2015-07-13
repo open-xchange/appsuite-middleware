@@ -51,6 +51,7 @@ package com.openexchange.tools.servlet;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.server.Initialization;
+import com.openexchange.tools.servlet.ratelimit.RateLimiter;
 
 
 /**

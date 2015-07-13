@@ -93,7 +93,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
             final MailField mailField = MailField.FIELDS_LOW_COST[i];
             listFields[i] = mailField.getListField();
         }
-        DEFAULT_MAIL_WRITERS = MessageWriter.getMailFieldWriter(listFields);
+        DEFAULT_MAIL_WRITERS = MessageWriter.getMailFieldWriters(listFields);
     }
 
     // ------------------------------------------------------------------------------------------------- //
@@ -134,7 +134,7 @@ public class JSONResponseVisitor implements DocumentVisitor {
             if (columns == null) {
                 mailFieldWriters = DEFAULT_MAIL_WRITERS;
             } else {
-                mailFieldWriters = MessageWriter.getMailFieldWriter(MailListField.getFields(columns));
+                mailFieldWriters = MessageWriter.getMailFieldWriters(MailListField.getFields(columns));
             }
         }
 

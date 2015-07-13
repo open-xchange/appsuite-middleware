@@ -2,11 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Mailmapping Service
 Bundle-SymbolicName: com.openexchange.mailmapping
-Bundle-Version: 7.6.1
+Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.mailmapping.osgi.MailMappingActivator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Import-Package: com.openexchange.context,
+Import-Package: com.openexchange.config,
+ com.openexchange.context,
+ com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.ldap,

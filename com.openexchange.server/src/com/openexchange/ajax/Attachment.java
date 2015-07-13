@@ -65,6 +65,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.fields.ResponseFields;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -368,7 +370,7 @@ public class Attachment extends PermissionServlet {
     }
 
     private void document(Session session, final HttpServletResponse res, final String userAgent, final boolean ie, final int folderId, final int attachedId, final int moduleId, final int id, final String contentType, final Context ctx, final User user, final UserConfiguration userConfig) {
-        InputStream documentData = null;
+        Readable documentData = null;
         OutputStream os = null;
 
         try {
@@ -377,7 +379,7 @@ public class Attachment extends PermissionServlet {
 
             res.setContentLength((int) attachment.getFilesize());
 
-            documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
+            documentData = new InputStreamReadable(ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig));
 
             if (SAVE_AS_TYPE.equals(contentType)) {
                 res.setContentType(contentType);
@@ -405,10 +407,9 @@ public class Attachment extends PermissionServlet {
 
             os = res.getOutputStream();
 
-            final byte[] buffer = new byte[0xFFFF];
-            int bytesRead = 0;
-
-            while ((bytesRead = documentData.read(buffer)) > 0) {
+            int buflen = 0xFFFF;
+            byte[] buffer = new byte[buflen];
+            for (int bytesRead; (bytesRead = documentData.read(buffer, 0, buflen)) > 0;) {
                 os.write(buffer, 0, bytesRead);
             }
             os.flush();

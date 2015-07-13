@@ -49,16 +49,9 @@
 
 package com.openexchange.mail.attachment;
 
-import java.io.Closeable;
-import java.util.UUID;
+import static com.openexchange.java.util.UUIDs.getUnformattedString;
+import static java.util.UUID.randomUUID;
 import java.util.concurrent.atomic.AtomicLong;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailPart;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -66,7 +59,7 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AttachmentToken implements AttachmentTokenConstants, Closeable {
+public final class AttachmentToken implements AttachmentTokenConstants {
 
     private final String id;
     private final long ttlMillis;
@@ -77,8 +70,7 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
     private int accountId;
     private String mailId;
     private String attachmentId;
-    private String fullName;
-    private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess;
+    private String folderPath;
     private String sessionId;
     private String clientIp;
     private String client;
@@ -90,14 +82,12 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
     /**
      * Initializes a new {@link AttachmentToken}.
      */
-    public AttachmentToken(final long ttlMillis) {
+    public AttachmentToken(long ttlMillis) {
         super();
         if (ttlMillis <= 0) {
             throw new IllegalArgumentException("ttlMillis must be positive.");
         }
-        this.id =
-            new StringBuilder(75).append(UUIDs.getUnformattedString(UUID.randomUUID())).append('.').append(
-                UUIDs.getUnformattedString(UUID.randomUUID())).toString();
+        this.id = new StringBuilder(75).append(getUnformattedString(randomUUID())).append('.').append(getUnformattedString(randomUUID())).toString();
         this.ttlMillis = ttlMillis;
         timeoutStamp = new AtomicLong(System.currentTimeMillis() + ttlMillis);
     }
@@ -108,7 +98,7 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
      * @param oneTime <code>true</code> for one-time token; otherwise <code>false</code>
      * @return This attachment token with new behavior applied
      */
-    public AttachmentToken setOneTime(final boolean oneTime) {
+    public AttachmentToken setOneTime(boolean oneTime) {
         this.oneTime = oneTime;
         return this;
     }
@@ -137,7 +127,7 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
      * @param checkIp The checkIp to set
      * @return This attachment token with new behavior applied
      */
-    public AttachmentToken setCheckIp(final boolean checkIp) {
+    public AttachmentToken setCheckIp(boolean checkIp) {
         this.checkIp = checkIp;
         return this;
     }
@@ -158,7 +148,7 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
      * @param session The session
      * @return This token with access information applied
      */
-    public AttachmentToken setAccessInfo(final int accountId, final Session session) {
+    public AttachmentToken setAccessInfo(int accountId, Session session) {
         this.accountId = accountId;
         this.jsessionId = (String) session.getParameter("JSESSIONID");
         this.contextId = session.getContextId();
@@ -173,12 +163,13 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
     /**
      * Sets the attachment information.
      *
+     * @param folderPath The folder path; e.g. <code>"default0/INBOX"</code>
      * @param mailId The mail identifier
      * @param attachmentId The attachment identifier
-     * @return This token with access attachment applied
+     * @return This token with arguments applied
      */
-    public AttachmentToken setAttachmentInfo(final String fullName, final String mailId, final String attachmentId) {
-        this.fullName = fullName;
+    public AttachmentToken setAttachmentInfo(String folderPath, String mailId, String attachmentId) {
+        this.folderPath = folderPath;
         this.mailId = mailId;
         this.attachmentId = attachmentId;
         return this;
@@ -213,37 +204,6 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
      */
     public boolean isExpired() {
         return System.currentTimeMillis() >= timeoutStamp.get();
-    }
-
-    /**
-     * Gets the associated attachment.
-     * <p>
-     * <b>Note</b>: After calling this method {@link #close()} needs to be called!
-     *
-     * @return The associated attachment
-     * @throws MailException
-     * @see {@link #close()}
-     */
-    public MailPart getAttachment() throws OXException {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = MailAccess.getInstance(userId, contextId, accountId);
-        this.mailAccess = mailAccess;
-        mailAccess.connect();
-        return mailAccess.getMessageStorage().getAttachment(
-            MailFolderUtility.prepareMailFolderParam(fullName).getFullname(),
-            mailId,
-            attachmentId);
-    }
-
-    /**
-     * Closes associated mail access (if opened)
-     */
-    @Override
-    public void close() {
-        final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = this.mailAccess;
-        if (null != mailAccess) {
-            mailAccess.close(true);
-            this.mailAccess = null;
-        }
     }
 
     /**
@@ -298,6 +258,141 @@ public final class AttachmentToken implements AttachmentTokenConstants, Closeabl
      */
     public int getUserId() {
         return userId;
+    }
+
+    /**
+     * Gets the accountId
+     *
+     * @return The accountId
+     */
+    public int getAccountId() {
+        return accountId;
+    }
+
+    /**
+     * Gets the folder path
+     *
+     * @return The folder path
+     */
+    public String getFolderPath() {
+        return folderPath;
+    }
+
+    /**
+     * Gets the mailId
+     *
+     * @return The mailId
+     */
+    public String getMailId() {
+        return mailId;
+    }
+
+    /**
+     * Gets the attachmentId
+     *
+     * @return The attachmentId
+     */
+    public String getAttachmentId() {
+        return attachmentId;
+    }
+
+    /**
+     * Sets the contextId
+     *
+     * @param contextId The contextId to set
+     */
+    public void setContextId(int contextId) {
+        this.contextId = contextId;
+    }
+
+    /**
+     * Sets the userId
+     *
+     * @param userId The userId to set
+     */
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    /**
+     * Sets the accountId
+     *
+     * @param accountId The accountId to set
+     */
+    public void setAccountId(int accountId) {
+        this.accountId = accountId;
+    }
+
+    /**
+     * Sets the mailId
+     *
+     * @param mailId The mailId to set
+     */
+    public void setMailId(String mailId) {
+        this.mailId = mailId;
+    }
+
+    /**
+     * Sets the attachmentId
+     *
+     * @param attachmentId The attachmentId to set
+     */
+    public void setAttachmentId(String attachmentId) {
+        this.attachmentId = attachmentId;
+    }
+
+    /**
+     * Sets the folderPath
+     *
+     * @param folderPath The folderPath to set
+     */
+    public void setFolderPath(String folderPath) {
+        this.folderPath = folderPath;
+    }
+
+    /**
+     * Sets the sessionId
+     *
+     * @param sessionId The sessionId to set
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    /**
+     * Sets the clientIp
+     *
+     * @param clientIp The clientIp to set
+     */
+    public void setClientIp(String clientIp) {
+        this.clientIp = clientIp;
+    }
+
+    /**
+     * Sets the client
+     *
+     * @param client The client to set
+     */
+    public void setClient(String client) {
+        this.client = client;
+    }
+
+    /**
+     * Sets the userAgent
+     *
+     * @param userAgent The userAgent to set
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    /**
+     * Sets the jsessionId
+     *
+     * @param jsessionId The jsessionId to set
+     */
+    public void setJsessionId(String jsessionId) {
+        this.jsessionId = jsessionId;
     }
 
 }

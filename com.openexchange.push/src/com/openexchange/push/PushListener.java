@@ -60,9 +60,11 @@ public interface PushListener {
 
     /**
      * Notifies about new mails in <code>INBOX</code> folder.
+     * <p>
+     * See {@link PushUtility} utility class.
      *
      * @throws OXException If notification fails
      */
-    public void notifyNewMail() throws OXException;
+    void notifyNewMail() throws OXException;
 
 }

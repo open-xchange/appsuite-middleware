@@ -81,7 +81,6 @@ public class InsertRequest extends AbstractMailFilterRequest {
 	 *
 	 * @param rule
 	 *            Rule to insert.
-	 * @param failOnError
 	 *            <code>true</code> to check the response for error messages.
 	 */
 	public InsertRequest(final Rule rule, final String forUser) {

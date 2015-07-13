@@ -76,9 +76,8 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
-import com.openexchange.file.storage.composition.IDBasedIgnorableVersionFileAccess;
-import com.openexchange.file.storage.composition.IDBasedRandomFileAccess;
 import com.openexchange.file.storage.search.FileNameTerm;
 import com.openexchange.file.storage.search.OrTerm;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -331,12 +330,11 @@ public class UploadHelper {
              * write initial file data, setting the first version number
              */
             checksum = saveDocumentAndChecksum(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, false);
-        } else if (session.getStorage().isRandomFileAccess()) {
+        } else if (session.getStorage().supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
             /*
              * append file data via random file access (not incrementing the version number)
              */
-            ((IDBasedRandomFileAccess)fileAccess).saveDocument(
-                uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, offset);
+            fileAccess.saveDocument(uploadFile, uploadStream, uploadFile.getSequenceNumber(), modifiedFields, offset);
         } else {
             /*
              * work around filestore limitation and append file data via temporary managed file
@@ -372,8 +370,8 @@ public class UploadHelper {
         try {
             digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
             IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
-            if (ignoreVersion && session.getStorage().isIgnorableVersionFileAccess()) {
-                ((IDBasedIgnorableVersionFileAccess)fileAccess).saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
+            if (ignoreVersion && session.getStorage().supports(FileStorageCapability.IGNORABLE_VERSION)) {
+                fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
             } else {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields);
             }
@@ -466,24 +464,37 @@ public class UploadHelper {
      * @return The found files
      * @throws OXException
      */
-    private List<File> findUploadFiles(final String folderID, List<FileVersion> fileVersions) throws OXException {
+    private List<File> findUploadFiles(final String folderID, final List<FileVersion> fileVersions) throws OXException {
         List<File> files = new ArrayList<File>();
         final List<Field> fields = Arrays.asList(Field.FILENAME, Field.FILE_SIZE);
-        final SearchTerm<?> searchTerm = getSearchTermForUploadFiles(fileVersions);
         SearchIterator<File> searchIterator = null;
         try {
             searchIterator = session.getStorage().wrapInTransaction(new StorageOperation<SearchIterator<File>>() {
 
                 @Override
                 public SearchIterator<File> call() throws OXException {
-                    return session.getStorage().getFileAccess().search(Collections.singletonList(folderID), searchTerm, fields, null,
-                        SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    if (session.getStorage().supports(FileStorageCapability.SEARCH_BY_TERM)) {
+                        return session.getStorage().getFileAccess().search(Collections.singletonList(folderID),
+                            getSearchTermForUploadFiles(fileVersions), fields, null,
+                            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    } else {
+                        String pattern = 1 == fileVersions.size() ?
+                            getUploadFilename(fileVersions.get(0).getChecksum()) : "*" + DriveConstants.FILEPART_EXTENSION;
+                        return session.getStorage().getFileAccess().search(pattern, fields, folderID, null,
+                            SortDirection.DEFAULT, FileStorageFileAccess.NOT_SET, FileStorageFileAccess.NOT_SET);
+                    }
                 }
             });
             while (searchIterator.hasNext()) {
                 File file = searchIterator.next();
                 if (null != file && null != file.getFileName()) {
-                    files.add(file);
+                    for (FileVersion fileVersion : fileVersions) {
+                        String uploadFilename = getUploadFilename(fileVersion.getChecksum());
+                        if (uploadFilename.equals(file.getFileName())) {
+                            files.add(file);
+                            break;
+                        }
+                    }
                 }
             }
         } finally {

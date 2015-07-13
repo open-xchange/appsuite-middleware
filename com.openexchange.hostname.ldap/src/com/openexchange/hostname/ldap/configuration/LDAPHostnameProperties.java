@@ -153,21 +153,21 @@ public class LDAPHostnameProperties {
 
     /**
      * Checks if all required properties are set and throws an exception if not. Also prints out the settings values
-     * @param configuration the {@link ConfigurationService} from which the properties are read
-     * @param props an array of props which should be checked
-     * @param bundlename the bundlename (needed for output of the properties)
      *
+     * @param configService The {@link ConfigurationService} from which the properties are read
+     * @param props An array of props which should be checked
+     * @param bundlename The bundle name (needed for output of the properties)
      * @throws OXException
      */
-    public static void check(final ServiceRegistry registry, final PropertyInterface[] props, final String bundlename) throws OXException {
-        final ConfigurationService configuration = registry.getService(ConfigurationService.class);
-        if (null == configuration) {
+    public static void check(ConfigurationService configService, PropertyInterface[] props, String bundlename) throws OXException {
+        if (null == configService) {
             throw new OXException().setLogMessage("No configuration service found");
         }
-        final StringBuilder sb = new StringBuilder();
+
+        StringBuilder sb = new StringBuilder(256);
         sb.append("\nLoading global " + bundlename + " properties...\n");
-        for (final PropertyInterface prop : props) {
-            final Object property = getProperty(configuration, prop);
+        for (PropertyInterface prop : props) {
+            Object property = getProperty(configService, prop);
             sb.append('\t');
             sb.append(prop.getName());
             sb.append(": ");
@@ -183,7 +183,7 @@ public class LDAPHostnameProperties {
                 }
                 for (final Condition cond : condition) {
                     final PropertyInterface property3 = cond.getProperty();
-                    final Object property2 = getProperty(configuration, property3);
+                    final Object property2 = getProperty(configService, property3);
                     final Object value = cond.getValue();
                     if (value.equals(property2) && null == property) {
                         throw new OXException().setLogMessage("Property " + prop.getName() + " must be set if " + property3.getName() + " is set to " + value);

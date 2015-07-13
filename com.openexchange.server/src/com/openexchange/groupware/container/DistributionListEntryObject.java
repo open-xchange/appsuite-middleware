@@ -51,7 +51,6 @@ package com.openexchange.groupware.container;
 
 import java.io.Serializable;
 import javax.mail.internet.AddressException;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -367,6 +366,11 @@ public class DistributionListEntryObject implements Serializable {
         b_emailaddress = false;
         b_emailfield = false;
         b_folderid = false;
+    }
+
+    @Override
+    public String toString() {
+        return "DistributionListEntryObject [emailaddress=" + emailaddress + ", displayname=" + displayname + "]";
     }
 
 }

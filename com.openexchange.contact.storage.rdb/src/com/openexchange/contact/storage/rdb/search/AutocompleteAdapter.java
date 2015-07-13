@@ -49,16 +49,20 @@
 
 package com.openexchange.contact.storage.rdb.search;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.database.DbMapping;
 import com.openexchange.java.SimpleTokenizer;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.StringCollection;
 
 /**
@@ -70,23 +74,32 @@ import com.openexchange.tools.StringCollection;
  */
 public class AutocompleteAdapter extends DefaultSearchAdapter {
 
+    private static final int MAX_PATTERNS = 5;
 	private final StringBuilder stringBuilder;
 
-	/**
-	 * Initializes a new {@link AutocompleteAdapter}.
-	 *
+    /**
+     * Initializes a new {@link AutocompleteAdapter}.
+     *
      * @param query The query, as supplied by the client
      * @param parameters The {@link AutocompleteParameters}
-     * @param folderIDs The folder IDs, or <code>null</code> if there's no restriction on folders
-     * @param contextID The context ID
-	 * @param charset The used charset
-	 * @throws OXException
-	 */
-	public AutocompleteAdapter(String query, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields, String charset) throws OXException {
-		super(charset);
-		this.stringBuilder = new StringBuilder(256);
-		appendAutocomplete(extractPatterns(query), parameters, folderIDs, contextID, fields);
-	}
+     * @param folderIDs The folder identifiers, or <code>null</code> if there's no restriction on folders
+     * @param contextID The context identifier
+     * @param charset The used charset
+     * @throws OXException
+     */
+    public AutocompleteAdapter(String query, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields, String charset) throws OXException {
+        this(query, parameters, folderIDs, contextID, fields, charset, true);
+    }
+
+    AutocompleteAdapter(String query, AutocompleteParameters parameters, int[] folderIDs, int contextID, ContactField[] fields, String charset, boolean checkPatternLength) throws OXException {
+        super(charset);
+        this.stringBuilder = new StringBuilder(2048);
+        List<String> patterns = extractPatterns(query, checkPatternLength);
+        if (MAX_PATTERNS < patterns.size()) {
+            throw ContactExceptionCodes.TOO_MANY_PATTERNS.create(query, Integer.valueOf(MAX_PATTERNS));
+        }
+        appendAutocomplete(patterns, parameters, folderIDs, contextID, fields);
+    }
 
 	@Override
 	public String getClause() {
@@ -187,20 +200,83 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 
     /**
      * Extracts the search patterns from the supplied query, appending wildcards as needed, as well as checking the individual pattern
-     * length restrictions.
+     * length restrictions. Some optimizations regarding sole wildcards or redundant patterns are excluded implicitly.
      *
      * @param query The query as supplied by the client
      * @return The patterns
      * @throws OXException
      */
     private static List<String> extractPatterns(String query) throws OXException {
-        List<String> patterns = SimpleTokenizer.tokenize(query);
-        for (int i = 0; i < patterns.size(); i++) {
-            String pattern = StringCollection.prepareForSearch(patterns.get(i), false, true, true);
-            Search.checkPatternLength(pattern);
-            patterns.set(i, pattern);
+        return extractPatterns(query, true);
+    }
+
+    /**
+     * Extracts the search patterns from the supplied query, appending wildcards as needed, as well as checking the individual pattern
+     * length restrictions. Some optimizations regarding sole wildcards or redundant patterns are excluded implicitly.
+     *
+     * @param query The query as supplied by the client
+     * @param checkPatternLength <code>true</code> to check each pattern length against the configured restrictions, <code>false</code>, otherwise
+     * @return The patterns
+     * @throws OXException
+     */
+    static List<String> extractPatterns(String query, boolean checkPatternLength) throws OXException {
+        List<String> resultingPatterns = new ArrayList<String>();
+        for (String pattern : SimpleTokenizer.tokenize(query)) {
+            pattern = StringCollection.prepareForSearch(pattern, false, true, true);
+            if (checkPatternLength) {
+                Search.checkPatternLength(pattern);
+            }
+            if (Strings.isEmpty(pattern)) {
+                /*
+                 * ignore empty patterns
+                 */
+                continue;
+            }
+            /*
+             * condense multiple not escaped wildcard characters
+             * TODO: consider to also add this to Collection.prepareForSearch
+             */
+            pattern = pattern.replaceAll("(?<!\\\\)%+", "%");
+            if ("%".equals(pattern)) {
+                /*
+                 * sole wildcard, match everything
+                 */
+                return Collections.singletonList(pattern);
+            }
+            if (resultingPatterns.contains(pattern)) {
+                /*
+                 * skip an equal pattern
+                 */
+                continue;
+            }
+            boolean addPattern = true;
+            for (int i = 0; i < resultingPatterns.size(); i++) {
+                /*
+                 * prefer a more general pattern
+                 */
+                String patternPrefix = Strings.trimEnd(pattern, '%');
+                String existingPatternPrefix = Strings.trimEnd(resultingPatterns.get(i), '%');
+                if (patternPrefix.startsWith(existingPatternPrefix)) {
+                    /*
+                     * existing: ot% , new: otto% -> new can be ignored
+                     */
+                    addPattern = false;
+                    break;
+                }
+                if (existingPatternPrefix.startsWith(patternPrefix)) {
+                    /*
+                     * existing: otto% , new: ot% -> existing can be replaced
+                     */
+                    resultingPatterns.set(i, pattern);
+                    addPattern = false;
+                    break;
+                }
+            }
+            if (addPattern) {
+                resultingPatterns.add(pattern);
+            }
         }
-        return patterns;
+        return resultingPatterns;
     }
 
 }

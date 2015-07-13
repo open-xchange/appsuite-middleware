@@ -75,11 +75,14 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      * Generate an appropriate value for given time stamp and session identifier pair
      *
      * @param nanos The time stamp
-     * @param sessionId The session identifier
+     * @param sessionInfo The session info
      * @return The value
      */
-    protected String generateValue(long nanos, String sessionId) {
-        return new StringBuilder(32).append(nanos).append('?').append(sessionId).toString();
+    protected String generateValue(long nanos, SessionInfo sessionInfo) {
+        if (sessionInfo.isPermanent()) {
+            return Long.toString(nanos);
+        }
+        return new StringBuilder(32).append(nanos).append('?').append(sessionInfo.getSessionId()).toString();
     }
 
     /**
@@ -89,7 +92,8 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      * @return The nano seconds
      */
     protected long parseNanosFromValue(String value) {
-        return Long.parseLong(value.substring(0, value.indexOf('?')));
+        int pos = value.indexOf('?');
+        return Long.parseLong(pos > 0 ? value.substring(0, pos) : value);
     }
 
     /**
@@ -99,9 +103,14 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      * @return <code>true</code> if session still exists; otherwise <code>false</code>
      */
     protected boolean existsSessionFromValue(String value) {
+        int pos = value.indexOf('?');
+        if (pos < 0) {
+            // Value from a permanent listener - Always true
+            return true;
+        }
         SessiondService sessiondService = services.getService(SessiondService.class);
         if (null != sessiondService) {
-            return sessiondService.getSession(value.substring(value.indexOf('?') + 1)) != null;
+            return sessiondService.getSession(value.substring(pos + 1)) != null;
         }
         return false;
     }

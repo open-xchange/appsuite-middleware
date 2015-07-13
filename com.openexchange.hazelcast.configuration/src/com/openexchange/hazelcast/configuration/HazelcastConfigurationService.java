@@ -87,6 +87,6 @@ public interface HazelcastConfigurationService  {
      * @return The full name of the map, e.g. <code>mymap-5</code>
      * @throws OXException If no matching map configuration was found
      */
-    String dicoverMapName(String namePrefix) throws OXException;
+    String discoverMapName(String namePrefix) throws OXException;
 
 }

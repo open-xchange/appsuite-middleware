@@ -50,14 +50,18 @@
 package com.openexchange.cluster.lock.internal;
 
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
 import com.openexchange.cluster.lock.ClusterLockService;
+import com.openexchange.cluster.lock.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link ClusterLockServiceImpl}
@@ -67,6 +71,7 @@ import com.openexchange.server.ServiceExceptionCode;
 public class ClusterLockServiceImpl implements ClusterLockService {
 
     private final HazelcastInstance hazelcastInstance;
+
     private final Unregisterer unregisterer;
 
     /**
@@ -80,7 +85,10 @@ public class ClusterLockServiceImpl implements ClusterLockService {
 
     private OXException handleNotActiveException(HazelcastInstanceNotActiveException e) {
         final Logger logger = org.slf4j.LoggerFactory.getLogger(ClusterLockServiceImpl.class);
-        logger.warn("Encountered a {} error. {} will be shut-down!", HazelcastInstanceNotActiveException.class.getSimpleName(), ClusterLockServiceImpl.class);
+        logger.warn(
+            "Encountered a {} error. {} will be shut-down!",
+            HazelcastInstanceNotActiveException.class.getSimpleName(),
+            ClusterLockServiceImpl.class);
         unregisterer.propagateNotActive(e);
         unregisterer.unregister();
         return ServiceExceptionCode.absentService(HazelcastInstance.class);
@@ -136,7 +144,42 @@ public class ClusterLockServiceImpl implements ClusterLockService {
         if (futureTS != null) {
             throw ClusterLockExceptionCodes.CLUSTER_PERIODIC_LOCKED.create(period, action, period - (now - futureTS));
         }
+
+        final TimerService timerService = Services.getService(TimerService.class);
+        timerService.schedule(new ReleasePeriodicClusterLock(action), period, TimeUnit.MILLISECONDS);
+
         return lock;
     }
 
+    @Override
+    public void releasePeriodicClusterLock(String action) throws OXException {
+        final ConcurrentMap<String, Long> map = getPeriodicHzMap();
+        map.remove(action);
+    }
+
+    private class ReleasePeriodicClusterLock implements Runnable {
+
+        private final String action;
+
+        /**
+         * Initializes a new {@link ReleasePeriodicClusterLock}.
+         * 
+         * @param action
+         * @param period
+         */
+        public ReleasePeriodicClusterLock(String action) {
+            super();
+            this.action = action;
+        }
+
+        @Override
+        public void run() {
+            try {
+                releasePeriodicClusterLock(action);
+            } catch (OXException e) {
+                final Logger log = LoggerFactory.getLogger(ClusterLockServiceImpl.class);
+                log.warn("Unable to release periodic lock for action {}", action, e);
+            }
+        }
+    }
 }

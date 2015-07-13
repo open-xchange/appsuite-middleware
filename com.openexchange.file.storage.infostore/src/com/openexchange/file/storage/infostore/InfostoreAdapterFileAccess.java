@@ -64,11 +64,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
+import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStoragePersistentIDs;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
+import com.openexchange.file.storage.FileStorageVersionedFileAccess;
 import com.openexchange.file.storage.infostore.internal.VirtualFolderInfostoreFacade;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.groupware.container.FolderObject;
@@ -88,7 +92,8 @@ import com.openexchange.tools.session.ServerSession;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider {
+public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, FileStorageSequenceNumberProvider,
+FileStorageAdvancedSearchFileAccess, FileStoragePersistentIDs, FileStorageVersionedFileAccess, FileStorageLockedFileAccess {
 
     private static final InfostoreFacade VIRTUAL_INFOSTORE = new VirtualFolderInfostoreFacade();
     private static final Set<Long> VIRTUAL_FOLDERS;
@@ -356,68 +361,74 @@ public class InfostoreAdapterFileAccess implements FileStorageRandomFileAccess, 
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber) throws OXException {
         checkUrl(file);
-        getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
+        int result = getInfostore(file.getFolderId()).saveDocument(new FileMetadata(file), data, sequenceNumber, sessionObj);
+        return new IDTuple(String.valueOf(file.getFolderId()), String.valueOf(result));
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocument(
+        int result = getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,
             sequenceNumber,
             FieldMapping.getMatching(modifiedFields),
             sessionObj);
+        return new IDTuple(String.valueOf(file.getFolderId()), String.valueOf(result));
     }
 
     @Override
-    public void saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
+    public IDTuple saveDocument(final File file, final InputStream data, final long sequenceNumber, final List<Field> modifiedFields, final boolean ignoreVersion) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocument(
+        int result = getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,
             sequenceNumber,
             FieldMapping.getMatching(modifiedFields),
             ignoreVersion,
             sessionObj);
+        return new IDTuple(String.valueOf(file.getFolderId()), String.valueOf(result));
     }
 
     @Override
-    public void saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
+    public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, long offset) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocument(
+        int result = getInfostore(file.getFolderId()).saveDocument(
             new FileMetadata(file),
             data,
             sequenceNumber,
             FieldMapping.getMatching(modifiedFields),
             offset,
             sessionObj);
+        return new IDTuple(String.valueOf(file.getFolderId()), String.valueOf(result));
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber) throws OXException {
         checkUrl(file);
-        getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
+        int result = getInfostore(file.getFolderId()).saveDocumentMetadata(new FileMetadata(file), sequenceNumber, sessionObj);
+        return new IDTuple(String.valueOf(file.getFolderId()), String.valueOf(result));
     }
 
     @Override
-    public void saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
+    public IDTuple saveFileMetadata(final File file, final long sequenceNumber, final List<Field> modifiedFields) throws OXException {
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocumentMetadata(
+        int result = getInfostore(file.getFolderId()).saveDocumentMetadata(
             new FileMetadata(file),
             sequenceNumber,
             FieldMapping.getMatching(modifiedFields),
             sessionObj);
+        return new IDTuple(String.valueOf(file.getFolderId()), String.valueOf(result));
     }
 
     @Override

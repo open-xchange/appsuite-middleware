@@ -321,6 +321,26 @@ public abstract class OXToolStorageInterface {
     public abstract int getDatabaseIDByDatabasename(String dbName) throws StorageException, NoSuchObjectException;
 
     /**
+     * Gets the database for specified database schema name
+     *
+     * @param schemaName The database schema name
+     * @return The database
+     * @throws StorageException If database cannot be loaded
+     * @throws NoSuchObjectException If there is no such database schema
+     */
+    public abstract int getDatabaseIDByDatabaseSchema(String schemaName) throws StorageException, NoSuchObjectException;
+
+    /**
+     * Checks whether all contexts of the given db share the same write pool ID or not.
+     *
+     * @param schema the schema name
+     * @return <code>true</code> if a distinct pool ID is used for all contexts.
+     * @throws StorageException If database cannot be loaded
+     * @throws NoSuchObjectException If there is no such database schema
+     */
+    public abstract boolean isDistinctWritePoolIDForSchema(String schema) throws StorageException, NoSuchObjectException;
+
+    /**
      * Load database information with the given identifier.
      * @param id the identifier of the database. It must be the identifier of the master.
      * @return the database information with the given identifier.

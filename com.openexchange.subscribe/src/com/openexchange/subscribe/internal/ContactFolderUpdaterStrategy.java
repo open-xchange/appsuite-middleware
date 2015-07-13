@@ -65,6 +65,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.generic.TargetFolderDefinition;
+import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.subscribe.TargetFolderSession;
 import com.openexchange.subscribe.osgi.SubscriptionServiceRegistry;
@@ -89,7 +90,7 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
 
     private static final ContactField[] COMPARISON_FIELDS = {
         ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.GIVEN_NAME, ContactField.SUR_NAME, ContactField.BIRTHDAY,
-        ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.USERFIELD20 };
+        ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, ContactField.USERFIELD20, ContactField.CELLULAR_TELEPHONE1 };
 
     private static final int[] MATCH_COLUMNS = I2i(Arrays.remove(i2I(Contact.CONTENT_COLUMNS), I(Contact.USERFIELD20)));
 
@@ -121,6 +122,9 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
             score += 10;
         }
         if (eq(original.getEmail3(), candidate.getEmail3())) {
+            score += 10;
+        }
+        if (eq(original.getCellularTelephone1(), candidate.getCellularTelephone1())) {
             score += 10;
         }
         if (original.containsBirthday() && candidate.containsBirthday() && eq(original.getBirthday(), candidate.getBirthday())) {
@@ -204,22 +208,17 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         if (sqlInterface instanceof ContactService && targetFolderSession instanceof TargetFolderSession) {
             TargetFolderDefinition target = (TargetFolderDefinition) getFromSession(TARGET, session);
             newElement.setParentFolderID(target.getFolderIdAsInt());
-            try {
-                ((ContactService)sqlInterface).createContact((TargetFolderSession)targetFolderSession, target.getFolderId(), newElement);
-            } catch (OXException e) {
-                if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
-                    boolean hasTrimmed = false;
-                    try {
-                        hasTrimmed = MappedTruncation.truncate(e.getProblematics(), newElement);
-                    } catch (OXException x) {
-                        LOG.warn("error trying to handle truncated attributes", x);
+            int MAX_RETRIES = 5;
+            for (int i = 0; i < MAX_RETRIES; i++) {
+                try {
+                    ((ContactService)sqlInterface).createContact((TargetFolderSession)targetFolderSession, target.getFolderId(), newElement);
+                    return;
+                } catch (OXException e) {
+                    if (handle(e, newElement)) {
+                        continue;
                     }
-                    if (hasTrimmed) {
-                        save(newElement, session);
-                        return;
-                    }
+                    throw e;
                 }
-                throw e;
             }
         }
     }
@@ -254,4 +253,29 @@ public class ContactFolderUpdaterStrategy implements FolderUpdaterStrategy<Conta
         }
     }
 
+    /**
+     * Tries to handle an exception that occurred when saving a contact, i.e. corrects problematic data in the contact automatically based
+     * on the exception if possible.
+     *
+     * @param e The exception
+     * @param contact The contact
+     * @return <code>true</code> if problematic data was corrected and the operation may be tried again, <code>false</code>, otherwise
+     */
+    private boolean handle(OXException e, Contact contact) {
+        if (ContactExceptionCodes.DATA_TRUNCATION.equals(e)) {
+            try {
+                return MappedTruncation.truncate(e.getProblematics(), contact);
+            } catch (OXException x) {
+                LOG.warn("error trying to handle truncated attributes", x);
+            }
+        }
+        if (ContactExceptionCodes.INCORRECT_STRING.equals(e)) {
+            try {
+                return MappedIncorrectString.replace(e.getProblematics(), contact, "");
+            } catch (OXException x) {
+                LOG.warn("error trying to handle incorrect strings", x);
+            }
+        }
+        return false;
+    }
 }

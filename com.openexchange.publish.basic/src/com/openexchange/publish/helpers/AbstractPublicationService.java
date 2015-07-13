@@ -178,7 +178,10 @@ public abstract class AbstractPublicationService implements PublicationService {
             /* as some publications are not working anymore, we should at least filter out the not working ones and write them to LOG */
             try {
                 modifyOutgoing(publication);
-                returnPublications.add(publication);
+                String url = (String) publication.getConfiguration().get("url");
+                //if (url.contains(publication.getModule())) {
+                    returnPublications.add(publication);
+                //}
             } catch (OXException e) {
                 if (InfostoreExceptionCodes.NOT_EXIST.equals(e)){
                     LOG.debug("", e);

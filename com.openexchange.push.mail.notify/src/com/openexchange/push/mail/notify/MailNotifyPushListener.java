@@ -79,34 +79,49 @@ public final class MailNotifyPushListener implements PushListener {
      * Initializes a new {@link MailNotifyPushListener}.
      *
      * @param session The needed session to obtain and connect mail access instance
+     * @param permanent <code>true</code> for permanent listener; otherwise <code>false</code>
      * @return A new {@link MailNotifyPushListener}.
      */
-    public static MailNotifyPushListener newInstance(final Session session) {
-        return new MailNotifyPushListener(session);
+    public static MailNotifyPushListener newInstance(Session session, boolean permanent) {
+        return new MailNotifyPushListener(session, permanent);
     }
 
-    /*
-     * Member section
+    /*-
+     * ------------------------------------------------- Member section -------------------------------------------------
      */
 
     private final Session session;
-
     private final int userId;
-
     private final int contextId;
-
-    private volatile boolean started;
+    private final boolean permanent;
 
     /**
      * Initializes a new {@link MailNotifyPushListener}.
-     *
-     * @param session The needed session to obtain and connect mail access instance
      */
-    private MailNotifyPushListener(final Session session) {
+    private MailNotifyPushListener(Session session, boolean permanent) {
         super();
+        this.permanent = permanent;
         this.session = session;
         this.userId = session.getUserId();
         this.contextId = session.getContextId();
+    }
+
+    /**
+     * Gets the permanent flag
+     *
+     * @return The permanent flag
+     */
+    public boolean isPermanent() {
+        return permanent;
+    }
+
+    /**
+     * Gets the associated session
+     *
+     * @return The associated session
+     */
+    public Session getSession() {
+        return session;
     }
 
     @Override
@@ -116,34 +131,9 @@ public final class MailNotifyPushListener implements PushListener {
         return sb.toString();
     }
 
-    /**
-     * Opens this listener (if {@link #isIgnoreOnGlobal()} returns <code>false</code>).
-     *
-     * @throws OXException If listener cannot be opened
-     */
-    public void open() throws OXException {
-        // Nothing to do
-    }
-
-    /**
-     * Closes this listener.
-     */
-    public void close() {
-        // NOthing to do
-    }
-
     @Override
     public void notifyNewMail() throws OXException {
-        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX"), session, /* Distribute remotely! */ true);
-    }
-
-    /**
-     * Checks if this listener has been started.
-     *
-     * @return <code>true</code> if this listener has been started; otherwise <code>false</code>
-     */
-    public boolean isStarted() {
-        return started;
+        PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(ACCOUNT_ID, "INBOX"), session, null, /* Distribute remotely! */ true, false);
     }
 
 }

@@ -66,9 +66,7 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryFolderImpl;
 import com.openexchange.folderstorage.outlook.memory.impl.MemoryTreeImpl;
 import com.openexchange.folderstorage.outlook.sql.Utility;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
-import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -141,13 +139,11 @@ public final class MemoryTable {
     /**
      * Drops the memory table from specified session
      *
-     * @param session The session
+     * @param userId The user identifier
+     * @param contextId The context identifier
      */
-    public static void dropMemoryTableFrom(final Session session) {
-        final SessiondService service = ServerServiceRegistry.getInstance().getService(SessiondService.class);
-        if (service.getAnyActiveSessionForUser(session.getUserId(), session.getContextId()) == null) {
-            MAP.remove(keyFor(session));
-        }
+    public static void dropMemoryTableFrom(int userId, int contextId) {
+        MAP.remove(keyFor(userId, contextId));
     }
 
     /*-

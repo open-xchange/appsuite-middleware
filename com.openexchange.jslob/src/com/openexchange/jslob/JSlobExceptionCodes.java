@@ -103,7 +103,11 @@ public enum JSlobExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The JSlob %1$s is too big in context %2$d for user %3$d.
      */
-    JSLOB_TOO_BIG("The JSlob %1$s is too big in context %2$d for user %3$d.", EnumCategory.CATEGORY_USER_INPUT, 10, null)
+    JSLOB_TOO_BIG("The JSlob %1$s is too big in context %2$d for user %3$d.", EnumCategory.CATEGORY_USER_INPUT, 10, null),
+    /**
+     * Path is protected and must not be changed: %1$s
+     */
+    PROTECTED("Path is protected and must not be changed: %1$s", CATEGORY_USER_INPUT, 11, null),
 
     ;
 

@@ -173,8 +173,7 @@ public final class AJAXState {
      * Closes this state orderly.
      */
     public void close() {
-        while (!handlers.isEmpty()) {
-            final AJAXStateHandler handler = handlers.poll();
+        for (AJAXStateHandler handler; (handler = handlers.poll()) != null;) {
             try {
                 handler.cleanUp(this);
             } catch (final Exception e) {

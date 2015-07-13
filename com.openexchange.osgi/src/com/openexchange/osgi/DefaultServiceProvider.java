@@ -51,6 +51,7 @@ package com.openexchange.osgi;
 
 import java.util.Set;
 import java.util.TreeSet;
+import com.openexchange.osgi.util.RankedService;
 
 /**
  * {@link DefaultServiceProvider}
@@ -58,27 +59,6 @@ import java.util.TreeSet;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class DefaultServiceProvider<S> implements ServiceProvider<S> {
-
-    private static final class RankedService<S> implements Comparable<RankedService<S>> {
-
-        protected final int ranking;
-
-        protected final S service;
-
-        protected RankedService(S service, int ranking) {
-            super();
-            this.service = service;
-            this.ranking = ranking;
-        }
-
-        @Override
-        public int compareTo(RankedService<S> o) {
-            int thisVal = this.ranking;
-            int anotherVal = o.ranking;
-            return (thisVal < anotherVal ? -1 : (thisVal == anotherVal ? 0 : 1));
-        }
-
-    }
 
     private final Set<RankedService<S>> set;
 
