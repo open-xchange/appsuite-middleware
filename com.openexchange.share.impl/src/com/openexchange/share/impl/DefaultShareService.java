@@ -64,6 +64,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -251,6 +253,19 @@ public class DefaultShareService implements ShareService {
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        boolean shareLinks = false;
+        boolean inviteGuests = false;
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null != capabilities && capabilities.contains("share_links")) {
+            shareLinks = true;
+        }
+        if (null != capabilities && capabilities.contains("invite_guests")) {
+            inviteGuests = true;
+        }
         try {
             connectionHelper.start();
             /*
@@ -268,6 +283,16 @@ public class DefaultShareService implements ShareService {
                     InternalRecipient internal = recipient.toInternal();
                     if (!internal.isGroup() && internal.getEntity() == session.getUserId()) {
                         throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                    }
+                }
+                if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                    if (!shareLinks) {
+                        throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                    }
+                }
+                if (RecipientType.GUEST.equals(recipient.getType())) {
+                    if (!inviteGuests) {
+                        throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
                     }
                 }
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);

@@ -50,6 +50,7 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,9 +58,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.performer.UpdatePerformer;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -89,37 +97,48 @@ public class UpdateLinkAction extends AbstractShareAction {
              */
             Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
             JSONObject json = (JSONObject) requestData.requireData();
-            String token = json.getString("token");
-            UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session, services);
-            /*
-             * apply changes based on present data in update request
-             */
-            if (json.has("expiry_date")) {
-                String expiry = json.getString("expiry_date");
-                try {
-                    updatePerformer.setExpiry(null == expiry ? null :
-                        new Date(ShareJSONParser.removeTimeZoneOffset(Long.valueOf(expiry), getTimeZone(requestData, session))));
-                } catch (NumberFormatException e) {
-                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
+            ShareTarget target = ShareJSONParser.parseTarget(json.getJSONObject("target"), getTimeZone(requestData, session),
+                services.getService(ModuleSupport.class));
+            ShareService shareService = services.getService(ShareService.class);
+            List<ShareInfo> shares = shareService.getShares(session, Module.getModuleString(target.getModule(), Integer.parseInt(target.getFolder())), target.getFolder(), target.getItem());
+            if (!shares.isEmpty()) {
+                for (ShareInfo info : shares) {
+                    if (RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
+                        UpdatePerformer updatePerformer = new UpdatePerformer(info.getToken(), clientTimestamp, session, services);
+                        /*
+                         * apply changes based on present data in update request
+                         */
+                        if (json.has("expiry_date")) {
+                            String expiry = json.optString("expiry_date");
+                            try {
+                                updatePerformer.setExpiry(null == expiry ? null :
+                                    new Date(ShareJSONParser.removeTimeZoneOffset(Long.valueOf(expiry), getTimeZone(requestData, session))));
+                            } catch (NumberFormatException e) {
+                                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
+                            }
+                        }
+                        if (json.has("meta")) {
+                            if (json.isNull("meta")) {
+                                updatePerformer.setMeta(null);
+                            } else {
+                                updatePerformer.setMeta((Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
+                            }
+                        }
+                        if (json.has("password")) {
+                            AnonymousRecipient recipient = new AnonymousRecipient();
+                            recipient.setPassword(json.optString("password", null));
+                            updatePerformer.setRecipient(recipient);
+                        }
+                        /*
+                         * perform the update, return empty result in case of success
+                         */
+                        updatePerformer.perform();
+                    }
                 }
+            } else {
+                throw ShareExceptionCodes.UNKNOWN_SHARE.create();
             }
-            if (json.has("meta")) {
-                if (json.isNull("meta")) {
-                    updatePerformer.setMeta(null);
-                } else {
-                    updatePerformer.setMeta((Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
-                }
-            }
-            if (json.has("password") || json.has("bits")) {
-                AnonymousRecipient recipient = new AnonymousRecipient();
-                recipient.setPassword(json.optString("password", null));
-                recipient.setBits(json.optInt("bits", -1));
-                updatePerformer.setRecipient(recipient);
-            }
-            /*
-             * perform the update, return empty result in case of success
-             */
-            updatePerformer.perform();
+
             /*
              * return empty result in case of success
              */

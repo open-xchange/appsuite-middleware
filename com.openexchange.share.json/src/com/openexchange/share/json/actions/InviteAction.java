@@ -60,12 +60,14 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -99,6 +101,13 @@ public class InviteAction extends AbstractShareAction {
             /*
              * create the shares, notify recipients
              */
+
+            for (ShareRecipient recipient : recipients) {
+                if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                    throw ShareExceptionCodes.NO_INVITE_ANONYMOUS.create();
+                }
+            }
+
             CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
             CreatedShares createdShares = createPerformer.perform();
             /*
