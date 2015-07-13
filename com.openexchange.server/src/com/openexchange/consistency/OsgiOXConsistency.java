@@ -59,12 +59,13 @@ import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.filestore.FileStorage;
-import com.openexchange.filestore.FileStorage2ContextsResolver;
+import com.openexchange.tools.file.FileStorage;
+import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.
@@ -98,9 +99,8 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected List<FileStorage> getFileStorages(final Context ctx) throws OXException {
-        FileStorage2ContextsResolver resolver = FileStorages.getFileStorage2ContextsResolver();
-        return resolver.getFileStoragesUsedBy(ctx.getContextId(), true);
+    protected FileStorage getFileStorage(final Context ctx) throws OXException {
+        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
     }
 
     @Override

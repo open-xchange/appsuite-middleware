@@ -51,9 +51,8 @@ package com.openexchange.consistency.solver;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage;
+import com.openexchange.tools.file.FileStorage;
 
 /**
  * {@link CreateDummyFileSolver}
@@ -61,14 +60,12 @@ import com.openexchange.filestore.FileStorage;
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.8.0
  */
-public abstract class CreateDummyFileSolver {
+public class CreateDummyFileSolver {
 
-    /** The associated file storages */
-    protected final List<FileStorage> storages;
+    private final FileStorage storage;
 
-    protected CreateDummyFileSolver(final List<FileStorage> storages) {
-        super();
-        this.storages = storages;
+    public CreateDummyFileSolver(final FileStorage storage) {
+        this.storage = storage;
     }
 
     /**
@@ -77,7 +74,7 @@ public abstract class CreateDummyFileSolver {
      * @return The name of the dummy file
      * @throws OXException
      */
-    protected String createDummyFile(FileStorage storage) throws OXException {
+    protected String createDummyFile() throws OXException {
         final String filetext = "This is just a dummy file";
         final InputStream input = new ByteArrayInputStream(filetext.getBytes());
 
