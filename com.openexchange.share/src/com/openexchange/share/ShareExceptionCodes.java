@@ -132,13 +132,20 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     /** You can't share with yourself. */
     NO_SHARING_WITH_YOURSELF(ShareExceptionMessages.NO_SHARING_WITH_YOURSELF, ShareExceptionMessages.NO_SHARING_WITH_YOURSELF, Category.CATEGORY_USER_INPUT, 17),
 
+    /** You don't have sufficient permissions to share a link. **/
     NO_SHARE_LINK_PERMISSION(ShareExceptionMessages.NO_SHARE_LINK_PERMISSION_MSG, ShareExceptionMessages.NO_SHARE_LINK_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 18),
 
+    /** You don't have sufficient permissions to invite guests. **/
     NO_INVITE_GUEST_PERMISSION(ShareExceptionMessages.NO_INVITE_GUEST_PERMISSION_MSG, ShareExceptionMessages.NO_INVITE_GUEST_PERMISSION_MSG, Category.CATEGORY_PERMISSION_DENIED, 19),
 
-    NO_INVITE_ANONYMOUS(ShareExceptionMessages.NO_INVITE_ANONYMOUS_MSG, ShareExceptionMessages.NO_INVITE_ANONYMOUS_MSG, Category.CATEGORY_USER_INPUT, 20),
+    /** Anonymous guests cannot be created via invite! **/
+    NO_INVITE_ANONYMOUS("Anonymous guests cannot be created via invite!", null, Category.CATEGORY_ERROR, 20),
 
-    NO_MULTIPLE_TARGETS_LINK(ShareExceptionMessages.NO_MULTIPLE_TARGETS_LINK_MSG, ShareExceptionMessages.NO_MULTIPLE_TARGETS_LINK_MSG, Category.CATEGORY_USER_INPUT, 21)
+    /** You can't create links for multiple targets. **/
+    NO_MULTIPLE_TARGETS_LINK(ShareExceptionMessages.NO_MULTIPLE_TARGETS_LINK_MSG, ShareExceptionMessages.NO_MULTIPLE_TARGETS_LINK_MSG, Category.CATEGORY_PERMISSION_DENIED, 21),
+
+    /** You cannot create more than one link per folder or item. **/
+    LINK_ALREADY_EXISTS(ShareExceptionMessages.LINK_ALREADY_EXISTS_MSG, ShareExceptionMessages.LINK_ALREADY_EXISTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 22)
 
     ;
 

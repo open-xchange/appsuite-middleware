@@ -255,19 +255,6 @@ public class DefaultShareService implements ShareService {
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        boolean shareLinks = false;
-        boolean inviteGuests = false;
-        CapabilityService capabilityService = services.getService(CapabilityService.class);
-        if (null == capabilityService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
-        }
-        CapabilitySet capabilities = capabilityService.getCapabilities(session);
-        if (null != capabilities && capabilities.contains("share_links")) {
-            shareLinks = true;
-        }
-        if (null != capabilities && capabilities.contains("invite_guests")) {
-            inviteGuests = true;
-        }
         try {
             connectionHelper.start();
             /*
@@ -278,25 +265,16 @@ public class DefaultShareService implements ShareService {
              * prepare guest users and resulting shares
              */
             Connection connection = connectionHelper.getConnection();
-            User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
+            UserService userService = services.getService(UserService.class);
+            User sharingUser = userService.getUser(connection, session.getUserId(), context);
+            /*
+             * Initial checks
+             */
+            checkRecipients(recipients, session);
+            checkForDuplicateLinks(recipients, targets, context, shareStorage, userService, connectionHelper);
+
             List<Share> sharesToStore = new ArrayList<Share>(expectedShares);
             for (ShareRecipient recipient : recipients) {
-                if (recipient.isInternal()) {
-                    InternalRecipient internal = recipient.toInternal();
-                    if (!internal.isGroup() && internal.getEntity() == session.getUserId()) {
-                        throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
-                    }
-                }
-                if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
-                    if (!shareLinks) {
-                        throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
-                    }
-                }
-                if (RecipientType.GUEST.equals(recipient.getType())) {
-                    if (!inviteGuests) {
-                        throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
-                    }
-                }
                 int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
                 User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient);
                 List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
@@ -330,6 +308,83 @@ public class DefaultShareService implements ShareService {
             return new CreatedSharesImpl(sharesPerRecipient);
         } finally {
             connectionHelper.finish();
+        }
+    }
+
+
+    /**
+     * Checks that the sharing user doesn't try to share targets to himself and has sufficient permissions
+     * to create links or invite guests.
+     *
+     * @param recipients The recipients
+     * @param userId the sharing users ID
+     * @throws OXException {@link ShareExceptionCodes#NO_SHARING_WITH_YOURSELF)
+     */
+    private void checkRecipients(List<ShareRecipient> recipients, Session session) throws OXException {
+        boolean shareLinks = false;
+        boolean inviteGuests = false;
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null != capabilities && capabilities.contains("share_links")) {
+            shareLinks = true;
+        }
+        if (null != capabilities && capabilities.contains("invite_guests")) {
+            inviteGuests = true;
+        }
+
+        int userId = session.getUserId();
+        for (ShareRecipient recipient : recipients) {
+            if (recipient.isInternal()) {
+                InternalRecipient internal = recipient.toInternal();
+                if (!internal.isGroup() && internal.getEntity() == userId) {
+                    throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                }
+            }
+            if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                if (!shareLinks) {
+                    throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                }
+            }
+            if (RecipientType.GUEST.equals(recipient.getType())) {
+                if (!inviteGuests) {
+                    throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks that for every target at most one link exists
+     * @param recipients
+     * @param targets
+     * @param context
+     * @param shareStorage
+     * @param userService
+     * @param connectionHelper
+     * @throws OXException
+     */
+    private static void checkForDuplicateLinks(List<ShareRecipient> recipients, List<ShareTarget> targets, Context context, ShareStorage shareStorage, UserService userService, ConnectionHelper connectionHelper) throws OXException {
+        int numLinks = 0;
+        for (ShareRecipient recipient : recipients) {
+            if (recipient.getType() == RecipientType.ANONYMOUS) {
+                if (numLinks > 0) {
+                    throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
+                }
+                numLinks++;
+
+                for (ShareTarget target : targets) {
+                    List<Share> existingShares = shareStorage.loadSharesForTarget(context.getContextId(), target.getModule(), target.getFolder(), target.getItem(), connectionHelper.getParameters());
+                    for (Share share : existingShares) {
+                        User guestUser = userService.getUser(connectionHelper.getConnection(), share.getGuest(), context);
+                        if (ShareTool.isAnonymousGuest(guestUser)) {
+                            throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
+                        }
+                    }
+                }
+            }
         }
     }
 
