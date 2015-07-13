@@ -2440,7 +2440,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public void setSessionHolder(final SessionHolder sessionHolder) {
         expiredLocksListener.setSessionHolder(sessionHolder);
-        db.setSessionHolder(sessionHolder);
     }
 
     /**
