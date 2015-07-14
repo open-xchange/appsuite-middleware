@@ -1,3 +1,7 @@
+* 2015-07-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 37472: Do not update message flags when saving message as draft
+
 * 2015-07-03 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service

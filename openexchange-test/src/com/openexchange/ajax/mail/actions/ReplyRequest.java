@@ -55,6 +55,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.java.Strings;
 
 /**
  * {@link ReplyRequest}
@@ -95,6 +96,8 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
 
     protected String mailID;
 
+    protected String csid;
+
     public ReplyRequest(){
 
     }
@@ -127,6 +130,14 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         this.folderID = folderID;
     }
 
+    public String getCsid() {
+        return csid;
+    }
+
+
+    public void setCsid(String csid) {
+        this.csid = csid;
+    }
 
     public String getMailID() {
         return mailID;
@@ -169,6 +180,10 @@ public class ReplyRequest extends AbstractMailRequest<ReplyResponse> {
         list.add( new Parameter(Mail.PARAMETER_ID, mailID) );
         if (getView() != null) {
             list.add( new Parameter(Mail.PARAMETER_VIEW, getView().toString()) );
+        }
+
+        if(!Strings.isEmpty(csid)) {
+            list.add(new Parameter(Mail.PARAMETER_CSID, csid));
         }
 
         return list.toArray(new Parameter[list.size()]);
