@@ -136,8 +136,17 @@ public class Activator implements BundleActivator {
 
     @Override
     public void stop(BundleContext context) throws Exception {
-        cmTracker.close();
-        csTracker.close();
+        ServiceTracker<ConfigurationAdmin, ConfigurationAdmin> cmTracker = this.cmTracker;
+        if (null != cmTracker) {
+            cmTracker.close();
+            this.cmTracker = null;
+        }
+
+        ServiceTracker<ConfigurationService, ConfigurationService> csTracker = this.csTracker;
+        if (null != csTracker) {
+            csTracker.close();
+            this.csTracker = null;
+        }
     }
 
 }
