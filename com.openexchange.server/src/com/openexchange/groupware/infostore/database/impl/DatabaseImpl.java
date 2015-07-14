@@ -473,6 +473,7 @@ public class DatabaseImpl extends DBService {
         } finally {
             close(stmt, result);
             finishDBTransaction();
+            releaseWriteConnection(ctx, writecon);
         }
         return retval;
     }
@@ -550,6 +551,7 @@ public class DatabaseImpl extends DBService {
         } finally {
             close(stmt, result);
             finishDBTransaction();
+            releaseWriteConnection(ctx, writecon);
         }
         return retval;
     }
@@ -638,6 +640,9 @@ public class DatabaseImpl extends DBService {
         } finally {
             close(stmt, null);
             finishDBTransaction();
+            if (null != writeCon) {
+                releaseWriteConnection(ctx, writeCon);
+            }
         }
         return retval;
     }
@@ -1311,7 +1316,9 @@ public class DatabaseImpl extends DBService {
                     LOG.debug("", e);
                 }
             }
-            releaseWriteConnection(ctx, writeCon);
+            if (null != writeCon) {
+                releaseWriteConnection(ctx, writeCon);
+            }
         }
     }
 
