@@ -51,6 +51,7 @@ package com.openexchange.share.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.share.impl.DefaultShareInfo.create;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -178,7 +179,7 @@ public class DefaultShareService implements ShareService {
             /*
              * implicitly adjust share targets if the session's user is the guest himself
              */
-            return toShareInfos(services, contextID, shares, true);
+            return create(services, contextID, shares, true);
 
         }
         /*
@@ -188,7 +189,7 @@ public class DefaultShareService implements ShareService {
         if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
             shares = removeInaccessible(session, shares);
         }
-        return toShareInfos(services, contextID, shares, false);
+        return create(services, contextID, shares, false);
     }
 
     @Override
@@ -197,7 +198,7 @@ public class DefaultShareService implements ShareService {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         shares = removeInaccessible(session, shares);
-        return toShareInfos(services, session.getContextId(), shares);
+        return create(services, session.getContextId(), shares);
     }
 
     @Override
@@ -222,7 +223,7 @@ public class DefaultShareService implements ShareService {
         int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
-        return toShareInfos(services, session.getContextId(), shares);
+        return create(services, session.getContextId(), shares);
     }
 
     @Override
@@ -517,7 +518,7 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID) throws OXException {
-        return toShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
+        return create(services, contextID, services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
     }
 
     /**
@@ -528,7 +529,7 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
-        return toShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, -1, StorageParameters.NO_PARAMETERS));
+        return create(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, -1, StorageParameters.NO_PARAMETERS));
     }
 
     /**
@@ -1044,58 +1045,6 @@ public class DefaultShareService implements ShareService {
             }
         }
         return addrs;
-    }
-
-
-    /**
-     * Creates a list of extended share info objects for the supplied shares. The underlying share targets are used in their original from
-     * (i.e. not personalized for the guest user).
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param shares The shares
-     * @return The share infos
-     * @throws OXException
-     */
-    public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
-        return toShareInfos(services, contextID, shares, false);
-    }
-
-    /**
-     * Creates a list of extended share info objects for the supplied shares.
-     *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param shares The shares
-     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
-     * @return The share infos
-     * @throws OXException
-     */
-    public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
-        if (null == shares || 0 == shares.size()) {
-            return Collections.emptyList();
-        }
-        /*
-         * retrieve referenced guest users
-         */
-        Context context = services.getService(ContextService.class).getContext(contextID);
-        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
-        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
-        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
-        for (User user : users) {
-            if (false == user.isGuest()) {
-                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
-            }
-            guestUsers.put(Integer.valueOf(user.getId()), user);
-        }
-        /*
-         * build & return share infos
-         */
-        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
-        for (Share share : shares) {
-            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share, adjustTargets));
-        }
-        return shareInfos;
     }
 
 }
