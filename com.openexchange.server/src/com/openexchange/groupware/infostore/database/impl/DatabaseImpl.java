@@ -420,20 +420,11 @@ public class DatabaseImpl extends DBService {
         int current_version = 0;
         int infostore_id = 0;
 
-        final StringBuilder version_select = new StringBuilder(
-            "SELECT version_number, infostore_id, version FROM " + documentstable + " JOIN " + basetablename + " ON " + basetablename + ".id = " + documentstable + ".infostore_id " + " AND file_store_location=? AND " + documentstable + ".cid=?");
-        final StringBuilder query_all_versions = new StringBuilder(
-            "SELECT version_number FROM " + documentstable + " WHERE infostore_id=? AND cid=?");
-        final StringBuilder deletefromdocumentstable = new StringBuilder(
-            "DELETE FROM " + documentstable + " WHERE cid=? AND file_store_location=?");
-        final StringBuilder changeversioninbasetable = new StringBuilder(
-            "UPDATE " + basetablename + " SET version=? " + " WHERE id=? AND  " + basetablename + ".cid=?");
-
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             startDBTransaction();
-            stmt = writecon.prepareStatement(version_select.toString());
+            stmt = writecon.prepareStatement("SELECT version_number, infostore_id, version FROM " + documentstable + " JOIN " + basetablename + " ON " + basetablename + ".id = " + documentstable + ".infostore_id " + " AND file_store_location=? AND " + documentstable + ".cid=?");
             stmt.setString(1, identifier);
             stmt.setInt(2, ctx.getContextId());
             result = stmt.executeQuery();
@@ -446,7 +437,7 @@ public class DatabaseImpl extends DBService {
             stmt.close();
 
             // Now we have to check if the version number is the active one
-            stmt = writecon.prepareStatement(query_all_versions.toString());
+            stmt = writecon.prepareStatement("SELECT version_number FROM " + documentstable + " WHERE infostore_id=? AND cid=?");
             stmt.setInt(1, infostore_id);
             stmt.setInt(2, ctx.getContextId());
             result = stmt.executeQuery();
@@ -458,7 +449,7 @@ public class DatabaseImpl extends DBService {
             stmt.close();
 
             if (version_nr == current_version) {
-                stmt = writecon.prepareStatement(changeversioninbasetable.toString());
+                stmt = writecon.prepareStatement("UPDATE " + basetablename + " SET version=? " + " WHERE id=? AND  " + basetablename + ".cid=?");
                 stmt.setInt(1, set.last().intValue());
                 stmt.setInt(2, infostore_id);
                 stmt.setInt(3, ctx.getContextId());
@@ -466,7 +457,7 @@ public class DatabaseImpl extends DBService {
                 stmt.close();
             }
 
-            stmt = writecon.prepareStatement(deletefromdocumentstable.toString());
+            stmt = writecon.prepareStatement("DELETE FROM " + documentstable + " WHERE cid=? AND file_store_location=?");
             stmt.setInt(1, ctx.getContextId());
             stmt.setString(2, identifier);
             retval[1] = stmt.executeUpdate();
@@ -521,18 +512,12 @@ public class DatabaseImpl extends DBService {
         int retval = -1;
         final Connection writecon = getWriteConnection(ctx);
 
-        final StringBuilder select_description = new StringBuilder(
-            "SELECT description FROM " + documentstable + " WHERE file_store_location=? AND cid=?");
-
-        final StringBuilder updatedatabase = new StringBuilder(
-            "UPDATE " + documentstable + " SET file_store_location=?,  description=?, file_mimetype=? " + "WHERE file_store_location=? AND cid=?");
-
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             startDBTransaction();
             String olddescription = null;
-            stmt = writecon.prepareStatement(select_description.toString());
+            stmt = writecon.prepareStatement("SELECT description FROM " + documentstable + " WHERE file_store_location=? AND cid=?");
             stmt.setString(1, oldidentifier);
             stmt.setInt(2, ctx.getContextId());
             result = stmt.executeQuery();
@@ -546,7 +531,7 @@ public class DatabaseImpl extends DBService {
                 olddescription = olddescription.concat(description);
             }
 
-            stmt = writecon.prepareStatement(updatedatabase.toString());
+            stmt = writecon.prepareStatement("UPDATE " + documentstable + " SET file_store_location=?,  description=?, file_mimetype=? " + "WHERE file_store_location=? AND cid=?");
             stmt.setString(1, newidentifier);
             stmt.setString(2, olddescription);
             stmt.setString(3, mimetype);
