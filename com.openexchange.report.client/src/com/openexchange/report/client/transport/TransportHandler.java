@@ -182,6 +182,7 @@ public class TransportHandler {
             total.put("contexts", tmp.getContexts());
             total.put("users", tmp.getUsers());
             total.put("guests", tmp.getGuests());
+            total.put("links", tmp.getLinks());
         }
 
         for (final MacDetail tmp : macDetails) {
