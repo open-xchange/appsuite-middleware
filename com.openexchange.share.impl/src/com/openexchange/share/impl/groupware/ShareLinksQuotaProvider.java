@@ -113,9 +113,14 @@ public class ShareLinksQuotaProvider implements QuotaProvider {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
             }
 
-            Quota quota = getAmountQuota(session, databaseService.getReadOnly(session.getContextId()), StorageParameters.NO_PARAMETERS, viewFactory);
-
-            return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(quota);
+            int contextId = session.getContextId();
+            Connection con = databaseService.getReadOnly(contextId);
+            try {
+                Quota quota = getAmountQuota(session, con, StorageParameters.NO_PARAMETERS, viewFactory);
+                return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(quota);
+            } finally {
+                databaseService.backReadOnly(contextId, con);
+            }
         }
         throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
     }

@@ -188,13 +188,21 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
      * @param contextReport
      */
     private void handleGuests(UserReport userReport, ContextReport contextReport) {
-        HashMap<String, Long> guestCounts = contextReport.get("macdetail", "guests", HashMap.class);
-
-        if (guestCounts == null) {
-            guestCounts = new HashMap<String, Long>();
+        if (userReport.getUser().getMail().isEmpty()) {
+            HashMap<String, Long> linkCounts = contextReport.get("macdetail", "links", HashMap.class);
+            if (linkCounts == null) {
+                linkCounts = new HashMap<String, Long>();
+            }
+            incCount(linkCounts, "links");
+            contextReport.set("macdetail", "links", linkCounts);
+        } else {
+            HashMap<String, Long> guestCounts = contextReport.get("macdetail", "guests", HashMap.class);
+            if (guestCounts == null) {
+                guestCounts = new HashMap<String, Long>();
+            }
+            incCount(guestCounts, "guests");
+            contextReport.set("macdetail", "guests", guestCounts);
         }
-        incCount(guestCounts, "guests");
-        contextReport.set("macdetail", "guests", guestCounts);
     }
 
     private void incCount(HashMap<String, Long> counts, String count) {
@@ -218,7 +226,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         String quotaSpec = "fileQuota[" + quota + "]";
 
         for (Map.Entry<String, Object> entry : macdetail.entrySet()) {
-            if (entry.getKey().equalsIgnoreCase("guests")) { // at this moment, do ignore guest entries
+            if (entry.getKey().equalsIgnoreCase("guests") || entry.getKey().equalsIgnoreCase("links")) {// at this moment, do ignore guest entries
                 continue;
             }
             // The report contains a count of unique capablities + quotas, so our identifier is the

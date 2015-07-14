@@ -234,7 +234,7 @@ public class ReportClientBaseTest {
         PowerMockito.when(ObjectHandler.createDetailList(contextDetails)).thenReturn(ObjectHandlerForTest.createDetailList(contextDetails));
 
         totals = new ArrayList<>();
-        totals.add(new Total("4", "16", "22"));
+        totals.add(new Total("4", "16", "22", "10"));
         PowerMockito.when(ObjectHandler.getTotalObjects(serverConnection)).thenReturn(totals);
         PowerMockito.when(ObjectHandler.createTotalList(totals)).thenReturn(ObjectHandlerForTest.createTotalList(totals));
 
@@ -801,10 +801,10 @@ public class ReportClientBaseTest {
 
         protected static List<List<Object>> createTotalList(final List<Total> totals) {
             final List<List<Object>> retval = new ArrayList<List<Object>>();
-            retval.add(Arrays.asList((Object) "contexts", "users", "guests"));
+            retval.add(Arrays.asList((Object) "contexts", "users", "guests", "links"));
 
             for (final Total tmp : totals) {
-                retval.add(Arrays.asList((Object) tmp.getContexts(), tmp.getUsers(), tmp.getGuests()));
+                retval.add(Arrays.asList((Object) tmp.getContexts(), tmp.getUsers(), tmp.getGuests(), tmp.getLinks()));
             }
 
             return retval;

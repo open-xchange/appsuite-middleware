@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.core.tools;
 
 import java.util.Collections;
 import java.util.HashMap;

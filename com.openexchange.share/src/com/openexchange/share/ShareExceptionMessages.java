@@ -89,6 +89,10 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String NO_INVITE_GUEST_PERMISSION_MSG = "You don't have sufficient permissions to invite guests.";
 
+    public static final String NO_MULTIPLE_TARGETS_LINK_MSG = "You can't create links for multiple targets.";
+
+    public static final String LINK_ALREADY_EXISTS_MSG = "You cannot create more than one link per folder or item.";
+
     /**
      * Prevent instantiation.
      */

@@ -179,8 +179,10 @@ public class PermissionResolver {
         GuestInfo guest = knownGuests.get(key);
         if (null == guest) {
             try {
-                guest = services.getService(ShareService.class).getGuest(session.getContextId(), guestID);
-                knownGuests.put(key, guest);
+                guest = services.getService(ShareService.class).getGuestInfo(session.getContextId(), guestID);
+                if (guest != null) {
+                    knownGuests.put(key, guest);
+                }
             } catch (OXException e) {
                 getLogger(PermissionResolver.class).error("Error getting guest {}", key, e);
             }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,16 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
-
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
+package com.openexchange.share.core.tools;
 
 /**
- * {@link PasswordResetConfirmServletResponse}
+ * {@link ShareCoreTool}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public final class PasswordResetConfirmServletResponse extends AbstractAJAXResponse {
+public class ShareCoreTool {
 
-    private final String location;
 
-    PasswordResetConfirmServletResponse(final String location) {
-        super(null);
-        this.location = location;
-    }
-
-    public String getLocation() {
-        return location;
-    }
 
 }

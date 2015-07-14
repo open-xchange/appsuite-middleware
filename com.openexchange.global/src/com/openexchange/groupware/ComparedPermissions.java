@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,10 +47,12 @@
  *
  */
 
-package com.openexchange.folderstorage.internal.performers;
+package com.openexchange.groupware;
 
-import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -59,110 +61,117 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Folder;
-import com.openexchange.folderstorage.GuestPermission;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.user.UserService;
 
 /**
- * Helper class to calculate a diff of the folder permissions on an update request.
+ * {@link ComparedPermissions}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ComparedPermissions {
+public abstract class ComparedPermissions<P, GP extends P> {
 
-    private final Context context;
-    private final UserService userService;
-    private final List<GuestPermission> newGuests;
-    private final Map<User, Permission> addedGuests;
-    private final Map<User, Permission> addedUsers;
-    private final List<Permission> addedGroups;
-    private final List<Permission> removedGuests;
-    private final Map<User, Permission> modifiedGuests;
-    private final boolean hasChanges;
-    private final Permission[] newPermissions;
-    private final Permission[] originalPermissions;
-    private final Connection connection;
+    private Collection<P> newPermissions;
+    private Collection<P> originalPermissions;
+    private List<GP> newGuests;
+    private Map<Integer, P> addedGuests;
+    private Map<Integer, P> addedUsers;
+    private List<P> addedGroups;
+    private List<P> removedGuests;
+    private Map<Integer, P> modifiedGuests;
+    private boolean hasChanges;
 
     /**
-     * Initializes a new {@link ComparedPermissions}.
+     * Initializes a new {@link ComparedPermissions}. You must call {@link #calc()} to initialize the instance completely!
      *
-     * @param context The context
-     * @param newPermissions The new permissions
-     * @param originalPermissions The original permissions
-     * @param userService The user service
-     * @param connection The database connection used to load users, or <code>null</code>
+     * @param newPermissions The new permissions or <code>null</code>
+     * @param originalPermissions The original permissions or <code>null</code>
      * @throws OXException
      */
-    public ComparedPermissions(Context context, Permission[] newPermissions, Permission[] originalPermissions, UserService userService, Connection connection) throws OXException {
-        super();
-        this.context = context;
-        this.newPermissions = newPermissions;
-        this.originalPermissions = originalPermissions;
-        this.userService = userService;
-        this.connection = connection;
-        newGuests = new LinkedList<GuestPermission>();
-        addedGuests = new LinkedHashMap<User, Permission>();
-        addedUsers = new LinkedHashMap<User, Permission>();
-        addedGroups = new LinkedList<Permission>();
-        removedGuests = new LinkedList<Permission>();
-        modifiedGuests = new LinkedHashMap<User, Permission>();
-        hasChanges = calc();
+    protected ComparedPermissions(P[] newPermissions, P[] originalPermissions) throws OXException {
+        this(newPermissions == null ? null : Arrays.asList(newPermissions), originalPermissions == null ? null : Arrays.asList(originalPermissions));
     }
 
     /**
-     * Initializes a new {@link ComparedPermissions}.
+     * Initializes a new {@link ComparedPermissions}. You must call {@link #calc()} to initialize the instance completely!
      *
-     * @param context The context
-     * @param newFolder The modified object sent by the client; not <code>null</code>
-     * @param origFolder The original object loaded from the storage; not <code>null</code>
-     * @param userService The user service; not <code>null</code>
-     * @param connection The database connection used to load users, or <code>null</code>
-     * @throws OXException If errors occur when loading additional data for the comparison
+     * @param newPermissions The new permissions or <code>null</code>
+     * @param originalPermissions The original permissions or <code>null</code>
+     * @throws OXException
      */
-    public ComparedPermissions(Context context, Folder newFolder, Folder origFolder, UserService userService, Connection connection) throws OXException {
-        this(context, newFolder.getPermissions(), origFolder.getPermissions(), userService, connection);
+    protected ComparedPermissions(Collection<P> newPermissions, Collection<P> originalPermissions) throws OXException {
+        super();
+        this.newPermissions = newPermissions;
+        this.originalPermissions = originalPermissions;
     }
 
-    private boolean calc() throws OXException {
+    protected abstract boolean isSystemPermission(P p);
+
+    protected abstract boolean isUnresolvedGuestPermission(P p);
+
+    protected abstract boolean isGuestUser(int userId) throws OXException;
+
+    protected abstract boolean isGroupPermission(P p);
+
+    protected abstract int getEntityId(P p);
+
+    protected abstract boolean areEqual(P p1, P p2);
+
+    protected void calc() throws OXException {
         if (newPermissions == null) {
-            return false;
+            newGuests = Collections.emptyList();
+            addedGuests = Collections.emptyMap();
+            addedUsers = Collections.emptyMap();
+            addedGroups = Collections.emptyList();
+            removedGuests = Collections.emptyList();
+            modifiedGuests = Collections.emptyMap();
+            hasChanges = false;
+            return;
+        } else {
+            newGuests = new LinkedList<GP>();
+            addedGuests = new LinkedHashMap<Integer, P>();
+            addedUsers = new LinkedHashMap<Integer, P>();
+            addedGroups = new LinkedList<P>();
+            removedGuests = new LinkedList<P>();
+            modifiedGuests = new LinkedHashMap<Integer, P>();
         }
 
         /*
          * Calculate added permissions
          */
-        final Map<Integer, Permission> newUsers = new HashMap<Integer, Permission>();
-        final Map<Integer, Permission> newGroups = new HashMap<Integer, Permission>();
-        for (Permission permission : newPermissions) {
-            if (permission.getSystem() == 0 && permission.getEntity() >= 0) {
-                if (permission.isGroup()) {
-                    newGroups.put(permission.getEntity(), permission);
-                } else {
-                    newUsers.put(permission.getEntity(), permission);
-                }
-            } else if (GuestPermission.class.isAssignableFrom(permission.getClass())) {
+        final Map<Integer, P> newUsers = new HashMap<Integer, P>();
+        final Map<Integer, P> newGroups = new HashMap<Integer, P>();
+        for (P permission : newPermissions) {
+            if (isSystemPermission(permission)) {
+                continue;
+            }
+
+            if (isUnresolvedGuestPermission(permission)) {
                 // Check for guests among the new permissions
-                newGuests.add((GuestPermission) permission);
+                newGuests.add((GP) permission);
+            } else {
+                if (isGroupPermission(permission)) {
+                    newGroups.put(getEntityId(permission), permission);
+                } else {
+                    newUsers.put(getEntityId(permission), permission);
+                }
             }
         }
 
         /*
          * Calculate removed permissions
          */
-        final Map<Integer, Permission> oldUsers = new HashMap<Integer, Permission>();
-        final Map<Integer, Permission> oldGroups = new HashMap<Integer, Permission>();
+        final Map<Integer, P> oldUsers = new HashMap<Integer, P>();
+        final Map<Integer, P> oldGroups = new HashMap<Integer, P>();
         if (null != originalPermissions) {
-            for (Permission permission : originalPermissions) {
-                if (permission.getSystem() == 0) {
-                    if (permission.isGroup()) {
-                        oldGroups.put(permission.getEntity(), permission);
-                    } else {
-                        oldUsers.put(permission.getEntity(), permission);
-                    }
+            for (P permission : originalPermissions) {
+                if (isSystemPermission(permission)) {
+                    continue;
+                }
+
+                if (isGroupPermission(permission)) {
+                    oldGroups.put(getEntityId(permission), permission);
+                } else {
+                    oldUsers.put(getEntityId(permission), permission);
                 }
             }
         }
@@ -187,34 +196,27 @@ public class ComparedPermissions {
         /*
          * Calculate new user and modified guest permissions
          */
-        for (Permission newPermission : newUsers.values()) {
-            User user;
-            if (connection == null) {
-                user = userService.getUser(newPermission.getEntity(), context.getContextId());
-            } else {
-                user = userService.getUser(connection, newPermission.getEntity(), context);
-            }
-
-            Permission oldPermission = oldUsers.get(newPermission.getEntity());
-            if (!newPermission.equals(oldPermission)) {
+        for (P newPermission : newUsers.values()) {
+            int entityId = getEntityId(newPermission);
+            P oldPermission = oldUsers.get(entityId);
+            if (!areEqual(newPermission, oldPermission)) {
                 permissionsChanged = true;
+                boolean isGuest = isGuestUser(entityId);
                 if (oldPermission == null) {
-                    if (user.isGuest()) {
-                        addedGuests.put(user, newPermission);
+                    if (isGuest) {
+                        addedGuests.put(entityId, newPermission);
                     } else {
-                        addedUsers.put(user, newPermission);
+                        addedUsers.put(entityId, newPermission);
                     }
-                } else {
-                    if (user.isGuest()) {
-                        modifiedGuests.put(user, newPermission);
-                    }
+                } else if (isGuest) {
+                    modifiedGuests.put(entityId, newPermission);
                 }
             }
         }
 
-        for (Permission newPermission : newGroups.values()) {
-            Permission oldPermission = oldGroups.get(newPermission.getEntity());
-            if (!newPermission.equals(oldPermission)) {
+        for (P newPermission : newGroups.values()) {
+            P oldPermission = oldGroups.get(getEntityId(newPermission));
+            if (!areEqual(newPermission, oldPermission)) {
                 permissionsChanged = true;
                 addedGroups.add(newPermission);
             }
@@ -224,19 +226,12 @@ public class ComparedPermissions {
          * Calculate removed guest permissions
          */
         for (Integer removed : removedUserIds) {
-            User user;
-            if (connection == null) {
-                user = userService.getUser(removed, context.getContextId());
-            } else {
-                user = userService.getUser(connection, removed, context);
-            }
-
-            if (user.isGuest()) {
+            if (isGuestUser(removed)) {
                 removedGuests.add(oldUsers.get(removed));
             }
         }
 
-        return permissionsChanged;
+        hasChanges = permissionsChanged;
     }
 
     /**
@@ -291,50 +286,36 @@ public class ComparedPermissions {
     /**
      * @return A list of new {@link GuestPermission}s; never <code>null</code>
      */
-    public List<GuestPermission> getNewGuestPermissions() {
+    public List<GP> getNewGuestPermissions() {
         return newGuests;
     }
 
     /**
      * @return A list of added guest permissions for already existing guest users; never <code>null</code>
      */
-    public List<Permission> getAddedGuestPermissions() {
+    public List<P> getAddedGuestPermissions() {
         return new ArrayList<>(addedGuests.values());
     }
 
     /**
      * @return A list of added permissions for non-guest guest users; never <code>null</code>
      */
-    public List<Permission> getAddedUserPermissions() {
+    public List<P> getAddedUserPermissions() {
         return new ArrayList<>(addedUsers.values());
     }
 
     /**
      * @return A list of added permissions for groups; never <code>null</code>
      */
-    public List<Permission> getAddedGroupPermissions() {
+    public List<P> getAddedGroupPermissions() {
         return addedGroups;
-    }
-
-    /**
-     * @return A list of already existing guest users for whom permissions have been added
-     */
-    public List<User> getAddedGuests() {
-        return new ArrayList<>(addedGuests.keySet());
-    }
-
-    /**
-     * @return A list of non-guest users for whom permissions have been added
-     */
-    public List<User> getAddedUsers() {
-        return new ArrayList<>(addedUsers.keySet());
     }
 
     /**
      * @return A list of added permissions for all entities except new guests, i.e. no {@link GuestPermission}s
      */
-    public List<Permission> getAddedPermissions() {
-        List<Permission> permissions = new ArrayList<>(addedGuests.size() + addedUsers.size() + addedGroups.size());
+    public List<P> getAddedPermissions() {
+        List<P> permissions = new ArrayList<>(addedGuests.size() + addedUsers.size() + addedGroups.size());
         permissions.addAll(addedGuests.values());
         permissions.addAll(addedUsers.values());
         permissions.addAll(addedGroups);
@@ -344,38 +325,52 @@ public class ComparedPermissions {
     /**
      * @return A list of removed guest permissions; never <code>null</code>
      */
-    public List<Permission> getRemovedGuestPermissions() {
+    public List<P> getRemovedGuestPermissions() {
         return removedGuests;
     }
 
     /**
      * @return A list of modified guest permissions; never <code>null</code>
      */
-    public List<Permission> getModifiedGuestPermissions() {
+    public List<P> getModifiedGuestPermissions() {
         return new ArrayList<>(modifiedGuests.values());
     }
 
     /**
-     * @return A list of already existing guest users for whom permissions have been modified
+     * @return A list of already existing guest user IDs for whom permissions have been added
      */
-    public List<User> getModifiedGuests() {
+    public List<Integer> getAddedGuests() {
+        return new ArrayList<>(addedGuests.keySet());
+    }
+
+    /**
+     * @return A list of non-guest user IDs for whom permissions have been added
+     */
+    public List<Integer> getAddedUsers() {
+        return new ArrayList<>(addedUsers.keySet());
+    }
+
+    /**
+     * @return A list of already existing guest user IDs for whom permissions have been modified
+     */
+    public List<Integer> getModifiedGuests() {
         return new ArrayList<>(modifiedGuests.keySet());
     }
 
     /**
-     * @param guest The added guest
+     * @param guest The added guests ID
      * @return Gets the permission of the according added and already existing guest user
      */
-    public Permission getAddedGuestPermission(User guest) {
-        return addedGuests.get(guest);
+    public P getAddedGuestPermission(Integer guestId) {
+        return addedGuests.get(guestId);
     }
 
     /**
-     * @param guest The modified guest
+     * @param guest The modified guests ID
      * @return Gets the permission of the according modified guest user
      */
-    public Permission getModifiedGuestPermission(User guest) {
-        return modifiedGuests.get(guest);
+    public P getModifiedGuestPermission(Integer guestId) {
+        return modifiedGuests.get(guestId);
     }
 
 }

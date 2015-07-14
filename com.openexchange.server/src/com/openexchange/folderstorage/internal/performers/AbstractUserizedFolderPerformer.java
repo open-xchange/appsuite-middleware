@@ -76,6 +76,7 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StorageParametersUtility;
@@ -98,16 +99,16 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Strings;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
-import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
@@ -121,6 +122,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer {
+
+    protected static final String RECURSION_MARKER = AbstractUserizedFolderPerformer.class.getName() + ".RECURSION_MARKER";
 
     private static final String DUMMY_ID = "dummyId";
     private static final Pattern IS_NUMBERED_PARENTHESIS = Pattern.compile("\\(\\d+\\)$");
@@ -618,7 +621,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
         ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-        ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
 
         CreatedShares shares = null;
         try {
@@ -641,31 +643,42 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         } finally {
             session.setParameter(Connection.class.getName(), null);
         }
+    }
 
+    protected void sendCreatedShareNotifications(ComparedFolderPermissions comparedPermissions, Folder folder) throws OXException {
+        Permission[] permissions = folder.getPermissions();
+        if (permissions == null || permissions.length == 0) {
+            return;
+        }
+
+        Entities entities = new Entities();
+        List<Integer> modifiedGuests = comparedPermissions.getModifiedGuests();
+        for (Permission p : permissions) {
+            // gather all new user entities except the one executing this operation
+            if (!p.isGroup() && p.getEntity() != session.getUserId() && !modifiedGuests.contains(p.getEntity())) {
+                entities.addUser(p.getEntity(), Permissions.createPermissionBits(p));
+            }
+        }
+
+        for (Permission p : comparedPermissions.getAddedGroupPermissions()) {
+            entities.addGroupt(p.getEntity(), Permissions.createPermissionBits(p));
+        }
+
+        if (entities.size() == 0) {
+            return;
+        }
+
+        ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
         RequestContext requestContext = Tools.getRequestContext(session, decorator);
         if (requestContext == null) {
-            StringBuilder addresses = new StringBuilder();
-            boolean first = true;
-            for (ShareRecipient recipient : shares.getRecipients()) {
-                if (recipient instanceof GuestRecipient) {
-                    String address = ((GuestRecipient)recipient).getEmailAddress();
-                    if (first){
-                        addresses.append(address);
-                        first = false;
-                    } else {
-                        addresses.append(", ").append(address);
-                    }
-                }
-            }
-
-            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.", addresses.toString());
+            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.");
             Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
             logger.warn("Cannot send out notification mails for new guests because the necessary request context could not be constructed.", e);
             if (storageParameters != null) {
                 storageParameters.addWarning(e);
             }
         } else {
-            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, shares, null, session, requestContext);
+            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, requestContext);
             if (storageParameters != null) {
                 for (OXException warning : warnings) {
                     storageParameters.addWarning(warning);
@@ -709,19 +722,19 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param comparedPermissions The compared permissions
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkAnonymousPermissions(ComparedPermissions comparedPermissions) throws OXException {
+    protected void checkAnonymousPermissions(ComparedFolderPermissions comparedPermissions) throws OXException {
         if (comparedPermissions.hasAddedGuests()) {
-            List<User> addedGuests = comparedPermissions.getAddedGuests();
-            for (User addedGuest : addedGuests) {
-                if (isAnonymous(addedGuest)) {
+            List<Integer> addedGuests = comparedPermissions.getAddedGuests();
+            for (Integer addedGuest : addedGuests) {
+                if (isAnonymous(comparedPermissions.getGuestInfo(addedGuest))) {
                     checkReadOnly(comparedPermissions.getAddedGuestPermission(addedGuest));
                 }
             }
         }
 
         if (comparedPermissions.hasModifiedGuests()) {
-            for (User guest : comparedPermissions.getModifiedGuests()) {
-                if (isAnonymous(guest)) {
+            for (Integer guest : comparedPermissions.getModifiedGuests()) {
+                if (isAnonymous(comparedPermissions.getGuestInfo(guest))) {
                     checkReadOnly(comparedPermissions.getModifiedGuestPermission(guest));
                 }
             }
@@ -745,8 +758,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
     }
 
-    private static boolean isAnonymous(User guest) {
-        return Strings.isEmpty(guest.getMail());
+    private static boolean isAnonymous(GuestInfo guestInfo) {
+        return guestInfo.getRecipientType() == RecipientType.ANONYMOUS;
     }
 
     private void hasVisibleSubfolderIDs(final Folder folder, final String treeId, final boolean all, final UserizedFolder userizedFolder, final boolean nullIsPublicAccess, final StorageParameters storageParameters, final java.util.Collection<FolderStorage> openedStorages) throws OXException {

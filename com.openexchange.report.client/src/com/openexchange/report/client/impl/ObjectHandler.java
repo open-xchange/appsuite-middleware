@@ -90,7 +90,7 @@ public class ObjectHandler {
 
         final List<Total> retval = new ArrayList<Total>();
         for (final Object tmp : data.keySet()) {
-            retval.add(new Total(((List<Object>) tmp).get(0).toString(), ((List<Object>) tmp).get(1).toString(), ((List<Object>) tmp).get(2).toString()));
+            retval.add(new Total(((List<Object>) tmp).get(0).toString(), ((List<Object>) tmp).get(1).toString(), ((List<Object>) tmp).get(2).toString(), ((List<Object>) tmp).get(3).toString()));
         }
 
         return (retval);
@@ -212,10 +212,10 @@ public class ObjectHandler {
 
     protected static List<List<Object>> createTotalList(final List<Total> totals) {
         final List<List<Object>> retval = new ArrayList<List<Object>>();
-        retval.add(Arrays.asList((Object) "contexts", "users", "guests"));
+        retval.add(Arrays.asList((Object) "contexts", "users", "guests", "links"));
 
         for (final Total tmp : totals) {
-            retval.add(Arrays.asList((Object) tmp.getContexts(), tmp.getUsers(), tmp.getGuests()));
+            retval.add(Arrays.asList((Object) tmp.getContexts(), tmp.getUsers(), tmp.getGuests(), tmp.getLinks()));
         }
 
         return retval;

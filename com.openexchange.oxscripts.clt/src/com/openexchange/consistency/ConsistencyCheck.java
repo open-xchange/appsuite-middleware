@@ -109,6 +109,8 @@ public class ConsistencyCheck {
 
     private static final String POLICY_MISSING_FILE_FOR_INFOITEM = "missing_file_for_infoitem";
 
+    private static final String POLICY_MISSING_FILE_FOR_SNIPPET = "missing_file_for_snippet";
+
     private static final String POLICY_MISSING_FILE_FOR_VCARD = "missing_file_for_vcard";
 
     private static final String POLICY_ACTION_DELETE = "delete";
@@ -214,6 +216,15 @@ public class ConsistencyCheck {
                         config.addPolicy(POLICY_MISSING_FILE_FOR_ATTACHMENT, POLICY_ACTION_DELETE);
                     } else {
                         System.exit(unknownAction(POLICY_MISSING_FILE_FOR_ATTACHMENT, lexer.getCurrent(), POLICY_ACTION_CREATE_DUMMY, POLICY_ACTION_DELETE));
+                    }
+                } else if (lexer.consume(POLICY_MISSING_FILE_FOR_SNIPPET)) {
+                    lexer.noise(":");
+                    if (lexer.consume(POLICY_ACTION_CREATE_DUMMY)) {
+                        config.addPolicy(POLICY_MISSING_FILE_FOR_SNIPPET, POLICY_ACTION_CREATE_DUMMY);
+                    } else if (lexer.consume(POLICY_ACTION_DELETE)) {
+                        config.addPolicy(POLICY_MISSING_FILE_FOR_SNIPPET, POLICY_ACTION_DELETE);
+                    } else {
+                        System.exit(unknownAction(POLICY_MISSING_FILE_FOR_SNIPPET, lexer.getCurrent(), POLICY_ACTION_CREATE_DUMMY, POLICY_ACTION_DELETE));
                     }
                 } else if (lexer.consume(POLICY_MISSING_ENTRY_FOR_FILE)) {
                     lexer.noise(":");

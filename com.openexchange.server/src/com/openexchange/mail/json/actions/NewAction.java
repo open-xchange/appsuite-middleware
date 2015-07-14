@@ -256,7 +256,8 @@ public final class NewAction extends AbstractMailAction {
                         CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
                         space.addCleanUp(msgref);
                     }
-                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+
+                    CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
                     CompositionSpaces.destroy(csid, session);
                 }
 
@@ -286,7 +287,7 @@ public final class NewAction extends AbstractMailAction {
                     // Apply composition space state(s)
                     mailInterface.openFor(folder);
                     if (null != csid) {
-                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess());
+                        CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
                         CompositionSpaces.destroy(csid, session);
                     }
 
@@ -383,7 +384,7 @@ public final class NewAction extends AbstractMailAction {
 
                 // Apply composition space state(s)
                 if (null != csid) {
-                    CompositionSpaces.applyCompositionSpace(csid, session, null);
+                    CompositionSpaces.applyCompositionSpace(csid, session, null, isDraftAction(sendType));
                     CompositionSpaces.destroy(csid, session);
                 }
 
@@ -420,6 +421,10 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
         result.addWarnings(warnings);
         return result;
+    }
+
+    private boolean isDraftAction(ComposeType sendType) {
+        return ComposeType.DRAFT_EDIT.equals(sendType);
     }
 
     private AJAXRequestResult performWithoutUploads(final MailRequest req, final List<OXException> warnings) throws OXException, MessagingException, JSONException {

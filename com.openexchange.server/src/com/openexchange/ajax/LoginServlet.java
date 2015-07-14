@@ -172,6 +172,11 @@ public class LoginServlet extends AJAXServlet {
     public static final String SECRET_PREFIX = "open-xchange-secret-".intern();
 
     /**
+     * <code>"open-xchange-share-"</code>
+     */
+    public static final String SHARE_PREFIX = "open-xchange-share-".intern();
+
+    /**
      * <code>"open-xchange-public-session-"</code>
      */
     public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
@@ -792,22 +797,6 @@ public class LoginServlet extends AJAXServlet {
         doGet(req, resp);
     }
 
-    /**
-     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
-     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
-     *
-     * @param resp The HTTP servlet response
-     * @param session The session providing the secret cookie identifier
-     * @param hash The hash string used for composing cookie name
-     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
-     * @param serverName The HTTP request's server name
-     */
-    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
-        final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
-        configureCookie(cookie, secure, serverName, confReference.get());
-        resp.addCookie(cookie);
-    }
-
     public static void addHeadersAndCookies(final LoginResult result, final HttpServletResponse resp) {
         final com.openexchange.authentication.Cookie[] cookies = result.getCookies();
         if (null != cookies) {
@@ -861,6 +850,20 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /**
+     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
+        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, confReference.get()));
+    }
+
+    /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
      *
@@ -872,10 +875,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
-        Cookie cookie = new Cookie(LoginServlet.SECRET_PREFIX + hash, session.getSecret());
-        configureCookie(cookie, secure, serverName, conf);
-        resp.addCookie(cookie);
-
+        resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
     }
 
@@ -892,15 +892,23 @@ public class LoginServlet extends AJAXServlet {
     public static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            final Cookie cookie = new Cookie(getPublicSessionCookieName(req), altId);
-            configureCookie(cookie, secure, serverName, conf);
-            resp.addCookie(cookie);
+            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req), altId), secure, serverName, conf));
             return true;
         }
         return false;
     }
 
-    public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    /**
+     * Configures specific cookie properties, which includes setting the cookie path to <code>/</code>, applying the <code>secure</code>
+     * flag and domain setting the max-age and cookie domain.
+     *
+     * @param cookie The cookie to configure
+     * @param secure <code>true</code> to enforce the cookie's <code>secure</code>-flag, <code>false</code> to set the flag based on configuration
+     * @param serverName The server name as extracted from the request
+     * @param conf the login configuration
+     * @return The cookie
+     */
+    public static Cookie configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
         cookie.setPath("/");
         if (secure || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
@@ -916,6 +924,20 @@ public class LoginServlet extends AJAXServlet {
         if (null != domain) {
             cookie.setDomain(domain);
         }
+        return cookie;
+    }
+
+    /**
+     * Configures specific cookie properties based on configuration and the incoming request, which includes setting the cookie path
+     * to <code>/</code>, applying the <code>secure</code> flag and domain setting the max-age and cookie domain.
+     *
+     * @param cookie The cookie to configure
+     * @param request The underlying servlet request
+     * @param loginConfig the login configuration
+     * @return The cookie
+     */
+    public static Cookie configureCookie(Cookie cookie, HttpServletRequest request, LoginConfiguration loginConfig) {
+        return configureCookie(cookie, request.isSecure(), request.getServerName(), loginConfig);
     }
 
     private static String determineServerNameByLogProperty() {

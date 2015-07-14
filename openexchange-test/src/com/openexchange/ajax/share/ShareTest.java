@@ -113,7 +113,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
         createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
         createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousAuthorPermission("secret"),
+//        createAnonymousAuthorPermission("secret"),
+        createAnonymousGuestPermission("secret"),
         createAnonymousGuestPermission()
     };
 
@@ -796,21 +797,21 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return guestPermission;
     }
 
-    protected static OCLGuestPermission createAnonymousAuthorPermission(String password) {
-        OCLGuestPermission guestPermission = createAnonymousPermission(password);
-        guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
-        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
-        return guestPermission;
-    }
+//    protected static OCLGuestPermission createAnonymousAuthorPermission(String password) {
+//        OCLGuestPermission guestPermission = createAnonymousPermission(password);
+//        guestPermission.setAllPermission(
+//            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+//        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
+//        return guestPermission;
+//    }
 
     protected static OCLGuestPermission createAnonymousGuestPermission() {
         return createAnonymousGuestPermission(null);
     }
 
-    protected static OCLGuestPermission createAnonymousAuthorPermission() {
-        return createAnonymousAuthorPermission(null);
-    }
+//    protected static OCLGuestPermission createAnonymousAuthorPermission() {
+//        return createAnonymousAuthorPermission(null);
+//    }
 
     protected static OCLGuestPermission createAnonymousPermission(String password) {
         AnonymousRecipient recipient = new AnonymousRecipient();

@@ -101,7 +101,7 @@ public class ReportingMBean implements DynamicMBean {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReportingMBean.class);
 
-    private final String[] totalNames = { "contexts", "users", "guests" };
+    private final String[] totalNames = { "contexts", "users", "guests", "links" };
 
     private CompositeType totalRow;
 
@@ -280,22 +280,32 @@ public class ReportingMBean implements DynamicMBean {
             int nrctx = 0;
             int nruser = 0;
             int nrguests = 0;
+            int nrlinks = 0;
             List<Integer> allContextIds = contextService.getAllContextIds();
 
             int userCount = 0;
             int guestCount = 0;
+            int linkCount = 0;
             for (Integer contextId : allContextIds) {
                 Context context = contextService.getContext(contextId);
-                User[] guest = userService.getUser(context, true, true);
-                guestCount += guest.length;
                 User[] user = userService.getUser(context);
                 userCount += user.length;
+
+                User[] guest = userService.getUser(context, true, true);
+                for (User guestUser : guest) {
+                    if (guestUser.getMail().isEmpty()) {
+                        linkCount++;
+                    } else {
+                        guestCount++;
+                    }
+                }
             }
             nrctx = allContextIds.size();
             nruser = userCount;
             nrguests = guestCount;
+            nrlinks = linkCount;
 
-            final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(nrctx), I(nruser), I(nrguests) });
+            final CompositeDataSupport value = new CompositeDataSupport(totalRow, totalNames, new Object[] { I(nrctx), I(nruser), I(nrguests), I(nrlinks) });
             total.put(value);
             return total;
         } catch (OpenDataException e) {
@@ -469,8 +479,8 @@ public class ReportingMBean implements DynamicMBean {
 
     private final MBeanInfo buildMBeanInfo() {
         try {
-            final String[] totalDescriptions = { "Number of contexts", "Number of users", "Number of guests" };
-            final OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
+            final String[] totalDescriptions = { "Number of contexts", "Number of users", "Number of guests", "Number of links" };
+            final OpenType[] totalTypes = { SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER, SimpleType.INTEGER };
             totalRow = new CompositeType("Total row", "A total row", totalNames, totalDescriptions, totalTypes);
             totalType = new TabularType("Total", "Total view", totalRow, totalNames);
 

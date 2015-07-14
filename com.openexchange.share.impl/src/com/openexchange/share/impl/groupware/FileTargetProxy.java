@@ -54,6 +54,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -147,7 +148,7 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
         @Override
         public FileStorageObjectPermission convert(TargetPermission permission) {
-            return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), getObjectPermissionBits(permission.getBits()));
+            return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), ObjectPermission.convertFolderPermissionBits(permission.getBits()));
         }
     };
 

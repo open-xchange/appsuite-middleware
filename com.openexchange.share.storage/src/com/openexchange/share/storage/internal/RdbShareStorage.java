@@ -278,6 +278,7 @@ public class RdbShareStorage implements ShareStorage {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+            provider.close();
         }
         return 0;
     }
@@ -302,6 +303,7 @@ public class RdbShareStorage implements ShareStorage {
             throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+            provider.close();
         }
         return 0;
     }

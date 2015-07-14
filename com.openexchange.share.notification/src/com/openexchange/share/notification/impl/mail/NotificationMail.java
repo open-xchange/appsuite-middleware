@@ -158,7 +158,7 @@ abstract class NotificationMail {
                 mimeMessage.saveChanges();
                 mail = new ContentAwareComposedMailMessage(mimeMessage, data.context.getContextId());
             } catch (MessagingException e) {
-                throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage(), data.recipient.getAddress());
+                throw ShareNotifyExceptionCodes.UNEXPECTED_ERROR_FOR_RECIPIENT.create(e, e.getMessage(), data.recipient.getAddress());
             }
         }
 

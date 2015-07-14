@@ -336,7 +336,7 @@ public class ReportClientBase extends AbstractJMXTools {
         if (null != parser.getOptionValue(this.csv)) {
             new CSVWriter(System.out, ObjectHandler.createTotalList(totals)).write();
         } else {
-            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createTotalList(totals)).write();
+            new TableWriter(System.out, new ColumnFormat[] { new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT), new ColumnFormat(Align.LEFT) }, ObjectHandler.createTotalList(totals)).write();
         }
 
         System.out.println("");
