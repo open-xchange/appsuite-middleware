@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,79 +47,35 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.share.actions;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.LoginFields;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 
-
 /**
- * {@link AutologinRequest}
+ * {@link FileSharesParser}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AutologinRequest extends AbstractRequest<AutologinResponse> {
+public class FileSharesParser extends AbstractAJAXParser<FileSharesResponse> {
 
-    private final boolean failOnError;
+    private final int[] columns;
 
     /**
-     * Initializes a new {@link AutologinRequest}.
-     * @param parameters
+     * Initializes a new {@link FileSharesParser}.
+     *
+     * @param columns The requested column identifiers
+     * @param failOnError <code>true</code> to fail on error, <code>false</code>, otherwise
      */
-    public AutologinRequest(Parameter[] parameters, boolean failOnError) {
-        super(parameters);
-        this.failOnError = failOnError;
-    }
-
-    public AutologinRequest(AutologinParameters parameters, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_AUTOLOGIN),
-            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient())
-        }, failOnError);
+    public FileSharesParser(int[] columns, boolean failOnError) {
+        super(failOnError);
+        this.columns = columns;
     }
 
     @Override
-    public AbstractAJAXParser<? extends AutologinResponse> getParser() {
-        return new AutologinResponseParser(failOnError);
-    }
-
-    public static class AutologinParameters {
-
-        String authId, client, version;
-
-        public AutologinParameters(String authId, String client, String version) {
-            super();
-            this.authId = authId;
-            this.client = client;
-            this.version = version;
-        }
-
-        public String getAuthId() {
-            return authId;
-        }
-
-        public void setAuthId(String authId) {
-            this.authId = authId;
-        }
-
-        public String getClient() {
-            return client;
-        }
-
-        public void setClient(String client) {
-            this.client = client;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
+    protected FileSharesResponse createResponse(Response response) throws JSONException {
+        return new FileSharesResponse(response, columns);
     }
 
 }

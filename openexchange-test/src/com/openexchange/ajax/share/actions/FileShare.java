@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,79 +47,65 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.share.actions;
 
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.json.FileMetadataFieldParser;
+import com.openexchange.file.storage.meta.FileFieldSet;
 
 /**
- * {@link AutologinRequest}
+ * {@link FileShare}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AutologinRequest extends AbstractRequest<AutologinResponse> {
+public class FileShare extends DefaultFile {
 
-    private final boolean failOnError;
+    private List<ExtendedPermissionEntity> extendedFolderPermissions;
 
     /**
-     * Initializes a new {@link AutologinRequest}.
-     * @param parameters
+     * Initializes a new {@link FileShare}.
+     *
+     * @param json The json array from a <code>shares</code> response
+     * @param columns The requested columns
      */
-    public AutologinRequest(Parameter[] parameters, boolean failOnError) {
-        super(parameters);
-        this.failOnError = failOnError;
+    public FileShare(JSONArray json, int[] columns) throws JSONException {
+        super();
+        try {
+            parse(json, columns);
+        } catch (OXException e) {
+            throw new JSONException(e);
+        }
     }
 
-    public AutologinRequest(AutologinParameters parameters, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_AUTOLOGIN),
-            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient())
-        }, failOnError);
+    /**
+     * Gets the extended permission entities.
+     *
+     * @return The extended permissions
+     */
+    public List<ExtendedPermissionEntity> getExtendedPermissions() {
+        return extendedFolderPermissions;
     }
 
-    @Override
-    public AbstractAJAXParser<? extends AutologinResponse> getParser() {
-        return new AutologinResponseParser(failOnError);
-    }
-
-    public static class AutologinParameters {
-
-        String authId, client, version;
-
-        public AutologinParameters(String authId, String client, String version) {
-            super();
-            this.authId = authId;
-            this.client = client;
-            this.version = version;
+    private void parse(JSONArray jsonFile, int[] columns) throws JSONException, OXException {
+        FileFieldSet fileFieldSet = new FileFieldSet();
+        for (int i = 0; i < columns.length; i++) {
+            switch (columns[i]) {
+                case 7010:
+                    this.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonFile.optJSONArray(i));
+                    break;
+                default:
+                    Field field = File.Field.get(columns[i]);
+                    Object orig = jsonFile.get(i);
+                    Object converted = FileMetadataFieldParser.convert(field, orig);
+                    field.doSwitch(fileFieldSet, this, converted);
+                    break;
+            }
         }
-
-        public String getAuthId() {
-            return authId;
-        }
-
-        public void setAuthId(String authId) {
-            this.authId = authId;
-        }
-
-        public String getClient() {
-            return client;
-        }
-
-        public void setClient(String client) {
-            this.client = client;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
     }
 
 }

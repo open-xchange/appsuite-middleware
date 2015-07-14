@@ -58,7 +58,7 @@ import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.CommonDeleteResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -140,14 +140,14 @@ public class CreateSubfolderTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -221,14 +221,14 @@ public class CreateSubfolderTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*

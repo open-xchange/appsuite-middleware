@@ -88,8 +88,8 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @param shares The shares
      * @return The share infos
      */
-    public static List<ShareInfo> create(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
-        return create(services, contextID, shares, false);
+    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
+        return createShareInfos(services, contextID, shares, false);
     }
 
     /**
@@ -101,7 +101,7 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
      * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
      * @return The share infos
      */
-    public static List<ShareInfo> create(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
+    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
         if (null == shares || 0 == shares.size()) {
             return Collections.emptyList();
         }

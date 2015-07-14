@@ -49,17 +49,20 @@
 
 package com.openexchange.ajax.share.tests;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
-import com.openexchange.ajax.share.actions.UpdateRecipientRequest;
-import com.openexchange.folderstorage.Permissions;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
+import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link AnonymousGuestPasswordTest}
@@ -83,7 +86,8 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * create folder shared to guest user
          */
         int module = randomModule();
-        FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), guestPermission);
+        EnumAPI api = randomFolderAPI();
+        FolderObject folder = insertSharedFolder(api, module, getDefaultFolder(module), guestPermission);
         /*
          * check permissions
          */
@@ -97,54 +101,61 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        assertEquals(RecipientType.ANONYMOUS, guest.getType());
+        assertNull("Password is set", guest.getPassword());
         /*
          * update recipient, set a password for the anonymous guest
          */
-        AnonymousRecipient recipient = new AnonymousRecipient();
-        recipient.setPassword("secret");
-        recipient.setBits(Permissions.createPermissionBits(guestPermission.getFolderPermission(), guestPermission.getReadPermission(),
-            guestPermission.getWritePermission(), guestPermission.getDeletePermission(), guestPermission.isFolderAdmin()));
-        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
-        guestPermission.setRecipient(recipient);
+        String token = null;
+        {
+            //TODO: update link via target?
+            Pattern pattern = Pattern.compile("[a-f0-9]{48}", Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(guest.getShareURL());
+            if (matcher.find()) {
+                token = matcher.group();
+            }
+        }
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(token, System.currentTimeMillis());
+        updateLinkRequest.setBits(guestPermission.getPermissionBits());
+        updateLinkRequest.setPassword("secret");
+        client.execute(updateLinkRequest);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
-        assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
+        guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        assertEquals(RecipientType.ANONYMOUS, guest.getType());
+        assertNotNull("Password not set", guest.getPassword());
+        assertEquals("Password wrong", "secret", guest.getPassword());
         /*
          * update recipient, change password for the anonymous guest
          */
-        recipient.setPassword("geheim");
-        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        updateLinkRequest.setPassword("geheim");
+        client.execute(updateLinkRequest);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNotNull("Password not set", ((AnonymousRecipient) share.getRecipient()).getPassword());
-        assertEquals("Password wrong", recipient.getPassword(), ((AnonymousRecipient) share.getRecipient()).getPassword());
+        guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        assertEquals(RecipientType.ANONYMOUS, guest.getType());
+        assertNotNull("Password not set", guest.getPassword());
+        assertEquals("Password wrong", "geheim", guest.getPassword());
         /*
          * update recipient remove password for the anonymous guest
          */
-        recipient.setPassword(null);
-        getClient().execute(new UpdateRecipientRequest(share.getGuest(), recipient));
+        updateLinkRequest.setPassword(null);
+        client.execute(updateLinkRequest);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
-        assertTrue(AnonymousRecipient.class.isInstance(share.getRecipient()));
-        assertNull("Password is set", ((AnonymousRecipient) share.getRecipient()).getPassword());
+        guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        assertEquals(RecipientType.ANONYMOUS, guest.getType());
+        assertNull("Password is set", guest.getPassword());
     }
 
     public void testDontAllowAnonymousGuestPasswordUpdate() throws Exception {
@@ -153,7 +164,8 @@ public class AnonymousGuestPasswordTest extends ShareTest {
          * create folder shared to guest user
          */
         int module = randomModule();
-        FolderObject folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), guestPermission);
+        EnumAPI api = randomFolderAPI();
+        FolderObject folder = insertSharedFolder(api, module, getDefaultFolder(module), guestPermission);
         /*
          * check permissions
          */
@@ -167,14 +179,14 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*
          * try to update password
@@ -187,12 +199,12 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * check if share link still accessible with old password
          */
-        guestClient = resolveShare(share, guestPermission.getRecipient());
+        guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         /*
          * check access to share with new password
          */
-        GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), null, newPassword, false);
+        GuestClient revokedGuestClient = new GuestClient(guest.getShareURL(), null, newPassword, false);
         assertTrue("No errors during login with new password", revokedGuestClient.getLoginResponse().hasError());
         assertNull("Got session ID from login with new password", revokedGuestClient.getLoginResponse().getSessionId());
     }

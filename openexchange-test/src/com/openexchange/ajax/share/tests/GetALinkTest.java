@@ -62,9 +62,9 @@ import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.DeleteLinkRequest;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.GetLinkRequest;
 import com.openexchange.ajax.share.actions.GetLinkResponse;
-import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
@@ -165,15 +165,14 @@ public class GetALinkTest extends ShareTest {
         GuestClient newClient = resolveShare(url, null, newPassword);
         int guestId = newClient.getValues().getUserId();
         newClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), allPermission);
-        ParsedShare share = discoverShare(guestId, infostore.getObjectID());
-        assertNotNull(share);
-        assertEquals(newExpiry, share.getTarget().getExpiryDate());
-
+        ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, infostore.getObjectID(), guestId);
+        assertNotNull(guest);
+        assertEquals(newExpiry, guest.getExpiry());
         /*
          * Delete link and verify that share and folder permission are gone
          */
         client.execute(new DeleteLinkRequest(token));
-        assertNull("Share was not deleted", discoverShare(guestId, infostore.getObjectID()));
+        assertNull("Share was not deleted", discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, infostore.getObjectID(), guestId));
         List<OCLPermission> reloadedFolderPermissions = getFolder(EnumAPI.OX_NEW, infostore.getObjectID()).getPermissions();
         assertEquals("Permission was not deleted", 1, reloadedFolderPermissions.size());
         assertEquals("Permission was not deleted", client.getValues().getUserId(), reloadedFolderPermissions.get(0).getEntity());
@@ -220,15 +219,14 @@ public class GetALinkTest extends ShareTest {
         GuestClient newClient = resolveShare(url, null, newPassword);
         int guestId = newClient.getValues().getUserId();
         newClient.checkFileAccessible(file.getId(), allPermission);
-        ParsedShare share = discoverShare(guestId, infostore.getObjectID(), file.getId());
-        assertNotNull(share);
-        assertEquals(newExpiry, share.getTarget().getExpiryDate());
-
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), guestId);
+        assertNotNull(guest);
+        assertEquals(newExpiry, guest.getExpiry());
         /*
          * Delete link and verify that share and object permission are gone
          */
         client.execute(new DeleteLinkRequest(token));
-        assertNull("Share was not deleted", discoverShare(guestId, infostore.getObjectID(), file.getId()));
+        assertNull("Share was not deleted", discoverGuestEntity(file.getFolderId(), file.getId(), guestId));
         List<FileStorageObjectPermission> objectPermissions = client.execute(new GetInfostoreRequest(file.getId())).getDocumentMetadata().getObjectPermissions();
         assertNull("Permission was not deleted", objectPermissions);
     }

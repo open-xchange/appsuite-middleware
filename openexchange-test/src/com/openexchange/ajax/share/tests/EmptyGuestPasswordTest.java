@@ -55,7 +55,7 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -102,14 +102,14 @@ public class EmptyGuestPasswordTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(perm, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(perm, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(perm, guest);
         /*
          * check access to share and skip setting password
          */
-        GuestClient guestClient = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
+        GuestClient guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
         LoginResponse response = guestClient.getLoginResponse();
         assertNotNull(response);
         assertFalse(response.hasError());
@@ -118,7 +118,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * another login with password skip should fail with LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED
          */
-        GuestClient guestClient2 = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
+        GuestClient guestClient2 = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
         LoginResponse response2 = guestClient2.getLoginResponse();
         assertNotNull(response2);
         assertTrue(response2.hasError());
@@ -128,7 +128,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * Set password for guest user
          */
-        GuestClient guestClient3 = resolveShare(share, "testGuestPasswordInit" + now + "@example.org", "secret");
+        GuestClient guestClient3 = resolveShare(guest, "testGuestPasswordInit" + now + "@example.org", "secret");
         LoginResponse response3 = guestClient3.getLoginResponse();
         assertNotNull(response3);
         assertFalse(response3.hasError());
@@ -137,7 +137,7 @@ public class EmptyGuestPasswordTest extends ShareTest {
         /*
          * Empty password should now fail with LoginExceptionCodes.INVALID_CREDENTIALS
          */
-        GuestClient guestClient4 = resolveShare(share, perm.getRecipient());
+        GuestClient guestClient4 = resolveShare(guest, perm.getRecipient());
         LoginResponse response4 = guestClient4.getLoginResponse();
         assertNotNull(response4);
         assertTrue(response4.hasError());

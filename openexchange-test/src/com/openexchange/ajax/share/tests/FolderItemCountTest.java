@@ -58,10 +58,9 @@ import com.openexchange.ajax.folder.actions.GetRequestNew;
 import com.openexchange.ajax.folder.actions.GetResponseNew;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
-import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
 import com.openexchange.folderstorage.Folder;
@@ -82,7 +81,7 @@ public class FolderItemCountTest extends ShareTest {
     private List<File> files;
     private int folderCount;
     private OCLGuestPermission perm;
-    private ParsedShare share;
+    private ExtendedPermissionEntity guest;
 
     public FolderItemCountTest(String name) {
         super(name);
@@ -119,8 +118,8 @@ public class FolderItemCountTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingFolderPermission);
         checkPermissions(perm, matchingFolderPermission);
 
-        share = discoverShare(matchingFolderPermission.getEntity(), folder.getObjectID());
-        checkShare(perm, folder, share);
+        guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingFolderPermission.getEntity());
+        checkGuestPermission(perm, guest);
     }
 
     @Override
@@ -131,12 +130,7 @@ public class FolderItemCountTest extends ShareTest {
     }
 
     public void testFolderItemCount() throws Exception {
-        GuestClient guestClient = resolveShare(share, perm.getRecipient());
-        LoginResponse response = guestClient.getLoginResponse();
-        assertNotNull(response);
-        assertFalse(response.hasError());
-        assertNotNull(response.getSessionId());
-
+        GuestClient guestClient = resolveShare(guest, perm.getRecipient());
         String folderId = guestClient.getFolder();
         GetRequestNew req = new GetRequestNew(EnumAPI.OX_NEW, folderId, new int[] { 1, 2, 3, 4, 5, 6, 20, 300, 301, 302, 309 });
         GetResponseNew res = guestClient.execute(req);

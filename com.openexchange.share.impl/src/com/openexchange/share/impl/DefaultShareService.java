@@ -51,7 +51,7 @@ package com.openexchange.share.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.I2i;
-import static com.openexchange.share.impl.DefaultShareInfo.create;
+import static com.openexchange.share.impl.DefaultShareInfo.createShareInfos;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -179,7 +179,7 @@ public class DefaultShareService implements ShareService {
             /*
              * implicitly adjust share targets if the session's user is the guest himself
              */
-            return create(services, contextID, shares, true);
+            return createShareInfos(services, contextID, shares, true);
 
         }
         /*
@@ -189,7 +189,7 @@ public class DefaultShareService implements ShareService {
         if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
             shares = removeInaccessible(session, shares);
         }
-        return create(services, contextID, shares, false);
+        return createShareInfos(services, contextID, shares, false);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class DefaultShareService implements ShareService {
         List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
         shares = removeInaccessible(session, shares);
-        return create(services, session.getContextId(), shares);
+        return createShareInfos(services, session.getContextId(), shares);
     }
 
     @Override
@@ -223,7 +223,7 @@ public class DefaultShareService implements ShareService {
         int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
         List<Share> shares = services.getService(ShareStorage.class).loadSharesCreatedBy(session.getContextId(), session.getUserId(), moduleId, StorageParameters.NO_PARAMETERS);
         shares = removeExpired(session.getContextId(), shares);
-        return create(services, session.getContextId(), shares);
+        return createShareInfos(services, session.getContextId(), shares);
     }
 
     @Override
@@ -518,7 +518,7 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID) throws OXException {
-        return create(services, contextID, services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
+        return createShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesForContext(contextID, StorageParameters.NO_PARAMETERS));
     }
 
     /**
@@ -529,7 +529,7 @@ public class DefaultShareService implements ShareService {
      * @return The shares, or an empty list if there are none
      */
     public List<ShareInfo> getAllShares(int contextID, int userID) throws OXException {
-        return create(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, -1, StorageParameters.NO_PARAMETERS));
+        return createShareInfos(services, contextID, services.getService(ShareStorage.class).loadSharesCreatedBy(contextID, userID, -1, StorageParameters.NO_PARAMETERS));
     }
 
     /**
