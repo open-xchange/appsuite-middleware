@@ -54,7 +54,7 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
@@ -126,14 +126,14 @@ public class RemoveGuestPermissionTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -156,21 +156,21 @@ public class RemoveGuestPermissionTest extends ShareTest {
             /*
              * check if share link still accessible
              */
-            GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
+            GuestClient revokedGuestClient = new GuestClient(guest.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
             assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         } else {
             /*
              * check share target no longer accessible for non-anonymous guest user
              */
-            guestClient.checkFolderNotAccessible(share.getTarget().getFolder());
+            guestClient.checkFolderNotAccessible(String.valueOf(folder.getObjectID()));
             guestClient.logout();
         }
         /*
-         * check shares list
+         * check guest entities
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        assertTrue("share still found", null == share);
+        guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        assertNull("guest entity still found", guest);
     }
 
     private void testUpdateSharedFile(EnumAPI api, FileStorageGuestObjectPermission guestPermission) throws Exception {
@@ -196,14 +196,14 @@ public class RemoveGuestPermissionTest extends ShareTest {
         assertNotNull("No matching permission in created file found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, file, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -224,7 +224,7 @@ public class RemoveGuestPermissionTest extends ShareTest {
             /*
              * check if share link still accessible
              */
-            GuestClient revokedGuestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient(), false);
+            GuestClient revokedGuestClient = new GuestClient(guest.getShareURL(), guestPermission.getRecipient(), false);
             ResolveShareResponse shareResolveResponse = revokedGuestClient.getShareResolveResponse();
             assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
         } else {
@@ -235,10 +235,10 @@ public class RemoveGuestPermissionTest extends ShareTest {
             guestClient.logout();
         }
         /*
-         * check shares list
+         * check guest entities
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        assertTrue("share still found", null == share);
+        guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        assertNull("guest entity still found", guest);
     }
 
 }

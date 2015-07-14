@@ -53,6 +53,8 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.http.Header;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -63,10 +65,11 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
 import com.openexchange.ajax.share.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
@@ -85,9 +88,7 @@ import com.openexchange.share.recipient.GuestRecipient;
 public final class PasswordResetServletTest extends ShareTest {
 
     private OCLGuestPermission guestPermission;
-
-    private ParsedShare share;
-
+    private ExtendedPermissionEntity guest;
     private FolderObject folder;
 
     /**
@@ -108,6 +109,7 @@ public final class PasswordResetServletTest extends ShareTest {
          * \u00b0 create folder shared to guest user
          */
         int module = randomModule();
+        EnumAPI api = randomFolderAPI();
         folder = insertSharedFolder(randomFolderAPI(), module, getDefaultFolder(module), lGuestPermission);
         /*
          * check permissions
@@ -124,14 +126,14 @@ public final class PasswordResetServletTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare lShare = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(lGuestPermission, folder, lShare);
+        ExtendedPermissionEntity lGuest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(lGuestPermission, lGuest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(lShare, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
+        GuestClient guestClient = resolveShare(lGuest, ((GuestRecipient) lGuestPermission.getRecipient()).getEmailAddress(), ((GuestRecipient) lGuestPermission.getRecipient()).getPassword());
         guestClient.checkShareModuleAvailable();
-        this.share = lShare;
+        this.guest = lGuest;
         this.guestPermission = lGuestPermission;
 
         /*
@@ -154,13 +156,21 @@ public final class PasswordResetServletTest extends ShareTest {
     }
 
     public void testResetPassword_passwordReset() throws Exception {
+        //TODO: receive share token from the share redirect location as the UI does
+        String token = null;
+        Matcher matcher = Pattern.compile("[a-f0-9]{48}", Pattern.CASE_INSENSITIVE).matcher(guest.getShareURL());
+        if (matcher.matches()) {
+            token = matcher.group();
+        } else {
+            fail("got no token from share link");
+        }
         DefaultHttpClient httpClient = getSession().getHttpClient();
         // http://localhost/ajax/share/reset/password?share=1100ba1e0f0652b8849d7f3f066049e390589313a77026ef&confirm=FIMvTtnmQ7Dv_N97CRENJy6rTYw
         HttpGet getConfirmationMail = new HttpGet(new URIBuilder()
             .setScheme(client.getProtocol())
             .setHost(client.getHostname())
             .setPath("/ajax/share/reset/password")
-            .setParameter("share", share.getToken())
+            .setParameter("share", token)
             .build());
         HttpResponse getConfirmationMailResponse = httpClient.execute(getConfirmationMail);
         EntityUtils.consume(getConfirmationMailResponse.getEntity());
@@ -197,7 +207,7 @@ public final class PasswordResetServletTest extends ShareTest {
         assertNotNull("Missing session ID in redirect location", sessionId);
 
         // Login again to verify
-        GuestClient guestClient = resolveShare(share, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
+        GuestClient guestClient = resolveShare(guest, ((GuestRecipient) guestPermission.getRecipient()).getEmailAddress(), newPW);
         guestClient.checkShareAccessible(guestPermission);
         guestClient.logout();
     }

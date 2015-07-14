@@ -63,12 +63,11 @@ import org.junit.Assert;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.share.AuthenticationMode;
 
 /**
  * {@link DownloadHandlerTest}
@@ -122,14 +121,14 @@ public class DownloadHandlerTest extends ShareTest {
         assertNotNull("No matching permission in created file found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, file, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share (via guest client)
          */
-        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
         /*
@@ -137,7 +136,8 @@ public class DownloadHandlerTest extends ShareTest {
          */
         DefaultHttpClient httpClient = new DefaultHttpClient();
         httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
-        if (AuthenticationMode.ANONYMOUS != share.getAuthentication()) {
+        String password = getPassword(guestPermission.getRecipient());
+        if (null != password) {
             BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
             UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(
                 getUsername(guestPermission.getRecipient()), getPassword(guestPermission.getRecipient()));
@@ -148,7 +148,7 @@ public class DownloadHandlerTest extends ShareTest {
          * check direct download
          */
         for (String queryParameter : new String[] { "delivery=download", "dl=1", "dl=true" }) {
-            HttpGet httpGet = new HttpGet(share.getShareURL() + '?' + queryParameter);
+            HttpGet httpGet = new HttpGet(guest.getShareURL() + '?' + queryParameter);
             HttpResponse httpResponse = httpClient.execute(httpGet);
             assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
             Header disposition = httpResponse.getFirstHeader("Content-Disposition");
@@ -163,7 +163,7 @@ public class DownloadHandlerTest extends ShareTest {
          * check inline delivery
          */
         for (String queryParameter : new String[] { "delivery=view", "raw=1", "raw=true" }) {
-            HttpGet httpGet = new HttpGet(share.getShareURL() + '?' + queryParameter);
+            HttpGet httpGet = new HttpGet(guest.getShareURL() + '?' + queryParameter);
             HttpResponse httpResponse = httpClient.execute(httpGet);
             assertEquals("Wrong HTTP status", 200, httpResponse.getStatusLine().getStatusCode());
             Header disposition = httpResponse.getFirstHeader("Content-Disposition");

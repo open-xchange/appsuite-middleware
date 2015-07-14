@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,79 +47,82 @@
  *
  */
 
-package com.openexchange.ajax.session.actions;
+package com.openexchange.ajax.share.actions;
 
+import java.io.IOException;
+import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.LoginFields;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-
+import com.openexchange.ajax.infostore.actions.AbstractInfostoreRequest;
+import com.openexchange.file.storage.File.Field;
 
 /**
- * {@link AutologinRequest}
+ * {@link FileSharesRequest}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.6.2
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AutologinRequest extends AbstractRequest<AutologinResponse> {
+public class FileSharesRequest extends AbstractInfostoreRequest<FileSharesResponse> {
 
+    /**
+     * The default columns for the <code>shares</code> action
+     */
+    public static final int[] DEFAULT_COLUMNS = {
+        Field.FOLDER_ID.getNumber(), Field.ID.getNumber(), Field.FILENAME.getNumber(), Field.TITLE.getNumber(),
+        Field.VERSION.getNumber(), Field.CREATED_BY.getNumber(), Field.MODIFIED_BY.getNumber(),
+        Field.OBJECT_PERMISSIONS.getNumber(), 7010
+    };
+
+    private final int[] columns;
     private final boolean failOnError;
 
     /**
-     * Initializes a new {@link AutologinRequest}.
-     * @param parameters
+     * Initializes a new {@link FileSharesRequest}.
+     *
+     * @param columns The columns which shall be available in returned folder objects
+     * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      */
-    public AutologinRequest(Parameter[] parameters, boolean failOnError) {
-        super(parameters);
+    public FileSharesRequest(int[] columns, boolean failOnError) {
+        super();
+        this.columns = columns;
         this.failOnError = failOnError;
     }
 
-    public AutologinRequest(AutologinParameters parameters, boolean failOnError) {
-        this(new Parameter[] {
-            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_AUTOLOGIN),
-            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient())
-        }, failOnError);
+    /**
+     * Initializes a new {@link FileSharesRequest}.
+     *
+     * @param columns The columns which shall be available in returned folder objects
+     */
+    public FileSharesRequest(int[] columns) {
+        this(columns, true);
+    }
+
+    /**
+     * Initializes a new {@link FileSharesRequest} with default columns.
+     */
+    public FileSharesRequest() {
+        this(DEFAULT_COLUMNS);
     }
 
     @Override
-    public AbstractAJAXParser<? extends AutologinResponse> getParser() {
-        return new AutologinResponseParser(failOnError);
+    public Object getBody() {
+        return null;
     }
 
-    public static class AutologinParameters {
+    @Override
+    public Method getMethod() {
+        return Method.GET;
+    }
 
-        String authId, client, version;
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_COLUMNS, columns),
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, "shares")
+        };
+    }
 
-        public AutologinParameters(String authId, String client, String version) {
-            super();
-            this.authId = authId;
-            this.client = client;
-            this.version = version;
-        }
-
-        public String getAuthId() {
-            return authId;
-        }
-
-        public void setAuthId(String authId) {
-            this.authId = authId;
-        }
-
-        public String getClient() {
-            return client;
-        }
-
-        public void setClient(String client) {
-            this.client = client;
-        }
-
-        public String getVersion() {
-            return version;
-        }
-
-        public void setVersion(String version) {
-            this.version = version;
-        }
-
+    @Override
+    public FileSharesParser getParser() {
+        return new FileSharesParser(columns, failOnError);
     }
 
 }

@@ -56,8 +56,8 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.AllRequest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
+import com.openexchange.ajax.share.actions.FolderShare;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
@@ -89,8 +89,7 @@ public class FolderTransactionTest extends ShareTest {
     public void testDontCreateShareOnFailingFolderCreate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject folder = insertPrivateFolder(api, module, parent.getObjectID());
-        List<ParsedShare> oldShares = client.execute(new AllRequest()).getParsedShares();
-
+        List<FolderShare> oldShares = getFolderShares(api, module);
         /*
          * Should fail due to name conflict
          */
@@ -107,7 +106,7 @@ public class FolderTransactionTest extends ShareTest {
         }
         assertTrue("API: " + api + ", Module: " + module, insertionFailed);
 
-        List<ParsedShare> newShares = client.execute(new AllRequest()).getParsedShares();
+        List<FolderShare> newShares = getFolderShares(api, module);
         assertEquals("The number of shares differs but should not. " + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
@@ -122,7 +121,7 @@ public class FolderTransactionTest extends ShareTest {
     public void testDontCreateShareOnFailingFolderUpdate(EnumAPI api, int module) throws Exception {
         FolderObject parent = getFolder(api, getDefaultFolder(module));
         FolderObject sharedFolder = insertPrivateFolder(api, module, parent.getObjectID());
-        List<ParsedShare> oldShares = client.execute(new AllRequest()).getParsedShares();
+        List<FolderShare> oldShares = getFolderShares(api, module);
 
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         ArrayList<OCLPermission> permissions = new ArrayList<OCLPermission>(sharedFolder.getPermissions());
@@ -141,7 +140,7 @@ public class FolderTransactionTest extends ShareTest {
         }
         assertTrue("API: " + api + ", Module: " + module, updateFailed);
 
-        List<ParsedShare> newShares = client.execute(new AllRequest()).getParsedShares();
+        List<FolderShare> newShares = getFolderShares(api, module);
         assertEquals("The number of shares differs but should not." + "API: " + api + ", Module: " + module, oldShares.size(), newShares.size());
     }
 
@@ -174,8 +173,8 @@ public class FolderTransactionTest extends ShareTest {
         assertNotNull("No matching permission in created folder found." + "API: " + api + ", Module: " + module, matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
 
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), sharedFolder.getObjectID());
-        assertNotNull("API: " + api + ", Module: " + module, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, sharedFolder.getObjectID(), matchingPermission.getEntity());
+        assertNotNull("API: " + api + ", Module: " + module, guest);
 
         /*
          * Update should fail because of invalid permissions
@@ -189,7 +188,7 @@ public class FolderTransactionTest extends ShareTest {
         }
         assertTrue("API: " + api + ", Module: " + module, updateFailed);
 
-        GuestClient guestClient = new GuestClient(share.getShareURL(), guestPermission.getRecipient());
+        GuestClient guestClient = new GuestClient(guest.getShareURL(), guestPermission.getRecipient());
         ResolveShareResponse resolveResponse = guestClient.getShareResolveResponse();
         assertEquals("API: " + api + ", Module: " + module, Integer.toString(sharedFolder.getObjectID()), resolveResponse.getFolder());
     }

@@ -55,7 +55,7 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.session.actions.LoginResponse;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.ResolveShareResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
@@ -102,11 +102,11 @@ public class SystemMessagesTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(perm, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(perm, guest);
 
         {
-            GuestClient guestClient = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
+            GuestClient guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
             ResolveShareResponse response = guestClient.getShareResolveResponse();
 
             assertNotNull(response);
@@ -120,7 +120,7 @@ public class SystemMessagesTest extends ShareTest {
         }
 
         {
-            GuestClient guestClient = resolveShare(share.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
+            GuestClient guestClient = resolveShare(guest.getShareURL(), ShareTest.getUsername(perm.getRecipient()));
             ResolveShareResponse response = guestClient.getShareResolveResponse();
 
             assertNotNull(response);
@@ -134,7 +134,7 @@ public class SystemMessagesTest extends ShareTest {
         }
 
         {
-            GuestClient guestClient = resolveShare(share, "testGuestPasswordInit" + now + "@example.org", "secret");
+            GuestClient guestClient = resolveShare(guest, "testGuestPasswordInit" + now + "@example.org", "secret");
             LoginResponse response = guestClient.getLoginResponse();
             assertNotNull(response);
             assertFalse(response.hasError());
@@ -143,7 +143,7 @@ public class SystemMessagesTest extends ShareTest {
         }
 
         {
-            GuestClient guestClient = resolveShare(share, perm.getRecipient());
+            GuestClient guestClient = resolveShare(guest, perm.getRecipient());
             ResolveShareResponse response = guestClient.getShareResolveResponse();
 
             assertNotNull(response);

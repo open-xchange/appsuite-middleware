@@ -53,12 +53,14 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.share.ShareTest;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.RecipientType;
 
 /**
  * {@link ConvertToInternalPermissionTest}
@@ -124,7 +126,8 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         /*
          * check that no share was created for internal user
          */
-        assertNull("Share created for internal user", discoverShare(matchingPermission.getEntity(), folder.getObjectID()));
+        ExtendedPermissionEntity entity = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        assertEquals(RecipientType.USER, entity.getType());
     }
 
     private void testConvertToInternalObjectPermission(EnumAPI api, AJAXClient.User user) throws Exception {
@@ -163,7 +166,8 @@ public class ConvertToInternalPermissionTest extends ShareTest {
         /*
          * check that no share was created for internal user
          */
-        assertNull("Share created for internal user", discoverShare(matchingPermission.getEntity(), folder.getObjectID()));
+        ExtendedPermissionEntity entity = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        assertEquals(RecipientType.USER, entity.getType());
     }
-    
+
 }
