@@ -147,24 +147,28 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         this.clusterLock = clusterLock;
         listeners = new ConcurrentHashMap<SimpleKey, DovecotPushListener>(512);
 
-        ConfigurationService service = services.getService(ConfigurationService.class);
-
         // Parse auth data
-        String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
-        String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
-        if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
-            LOGGER.error("Denied initialization due to unset Basic-Auth configuration. Please set properties 'com.openexchange.rest.services.basic-auth.login' and 'com.openexchange.rest.services.basic-auth.password' appropriately.");
-            throw ServiceExceptionCode.absentService(ConfigurationService.class);
+        {
+            ConfigurationService service = services.getService(ConfigurationService.class);
+            String authLogin = service.getProperty("com.openexchange.rest.services.basic-auth.login");
+            String authPassword = service.getProperty("com.openexchange.rest.services.basic-auth.password");
+            if (Strings.isEmpty(authLogin) || Strings.isEmpty(authPassword)) {
+                LOGGER.error("Denied initialization due to unset Basic-Auth configuration. Please set properties 'com.openexchange.rest.services.basic-auth.login' and 'com.openexchange.rest.services.basic-auth.password' appropriately.");
+                throw ServiceExceptionCode.absentService(ConfigurationService.class);
+            }
+            this.authLogin = authLogin.trim();
+            this.authPassword = authPassword.trim();
         }
-        this.authLogin = authLogin.trim();
-        this.authPassword = authPassword.trim();
 
         // Parse URL
-        String sUrl = endPoint;
-        try {
-            uri = new URI(sUrl);
-        } catch (URISyntaxException e) {
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(null == sUrl ? "<empty>" : sUrl);
+        if (Strings.isEmpty(endPoint)) {
+            uri = null;
+        } else {
+            try {
+                uri = new URI(endPoint);
+            } catch (URISyntaxException e) {
+                throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, null == endPoint ? "<empty>" : endPoint);
+            }
         }
     }
 
