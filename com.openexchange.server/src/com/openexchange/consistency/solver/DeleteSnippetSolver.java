@@ -49,14 +49,10 @@
 
 package com.openexchange.consistency.solver;
 
-import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -76,8 +72,9 @@ public class DeleteSnippetSolver implements ProblemSolver {
     @Override
     public void solve(final Context ctx, final Set<String> problems) {
         // Now we go through the set an delete each superfluous entry:
-        final Iterator<String> it = problems.iterator();
-        while (it.hasNext()) {
+        for (Iterator<String> it = problems.iterator(); it.hasNext();) {
+            String old_identifier = it.next();
+
             Connection con = null;
             PreparedStatement stmt = null;
             boolean rollback = false;
@@ -86,8 +83,7 @@ public class DeleteSnippetSolver implements ProblemSolver {
                 con.setAutoCommit(false);
                 rollback = true;
 
-                final int contextId = ctx.getContextId();
-                final String old_identifier = it.next();
+                int contextId = ctx.getContextId();
                 // Not recoverable
                 if (DBUtils.tableExists(con, "snippet")) {
                     stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND refId=? AND refType=1");
@@ -98,30 +94,7 @@ public class DeleteSnippetSolver implements ProblemSolver {
                     DBUtils.closeSQLStuff(stmt);
                     stmt = null;
                 }
-                // Partly recoverable
-                if (DBUtils.tableExists(con, "snippetAttachment")) {
-                    final List<int[]> pairs = new LinkedList<int[]>();
-                    {
-                        ResultSet rs = null;
-                        try {
-                            stmt = con.prepareStatement("SELECT user, id FROM snippetAttachment WHERE cid=? AND referenceId=?");
-                            int pos = 0;
-                            stmt.setInt(++pos, contextId);
-                            stmt.setString(++pos, old_identifier);
-                            rs = stmt.executeQuery();
-                            while (rs.next()) {
-                                pairs.add(new int[] { rs.getInt(1), rs.getInt(2) });
-                            }
-                        } finally {
-                            DBUtils.closeSQLStuff(rs, stmt);
-                        }
-                    }
-                    for (final int[] pair : pairs) {
-                        final int userId = pair[0];
-                        final int id = pair[1];
-                        deleteSnippet(id, userId, contextId, con);
-                    }
-                }
+
                 con.commit();
                 rollback = false;
             } catch (final SQLException e) {
@@ -140,84 +113,6 @@ public class DeleteSnippetSolver implements ProblemSolver {
                     Database.back(ctx, true, con);
                 }
             }
-        }
-    }
-
-    private void deleteSnippet(final int id, final int userId, final int contextId, final Connection con) {
-        PreparedStatement stmt = null;
-        try {
-            // Delete attachments
-            stmt = con.prepareStatement("DELETE FROM snippetAttachment WHERE cid=? AND user=? AND id=?");
-            int pos = 0;
-            stmt.setLong(++pos, contextId);
-            stmt.setLong(++pos, userId);
-            stmt.setLong(++pos, id);
-            stmt.executeUpdate();
-            closeSQLStuff(stmt);
-            stmt = null;
-            // Delete content
-            stmt = con.prepareStatement("DELETE FROM snippetContent WHERE cid=? AND user=? AND id=?");
-            pos = 0;
-            stmt.setLong(++pos, contextId);
-            stmt.setLong(++pos, userId);
-            stmt.setLong(++pos, id);
-            stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
-            stmt = null;
-            // Delete JSON object
-            stmt = con.prepareStatement("DELETE FROM snippetMisc WHERE cid=? AND user=? AND id=?");
-            pos = 0;
-            stmt.setLong(++pos, contextId);
-            stmt.setLong(++pos, userId);
-            stmt.setLong(++pos, id);
-            stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
-            stmt = null;
-            // Delete unnamed properties
-            final int confId;
-            {
-                ResultSet rs = null;
-                try {
-                    stmt = con.prepareStatement("SELECT refId FROM snippet WHERE cid=? AND user=? AND id=? AND refType=0");
-                    pos = 0;
-                    stmt.setLong(++pos, contextId);
-                    stmt.setLong(++pos, userId);
-                    stmt.setString(++pos, Integer.toString(id));
-                    rs = stmt.executeQuery();
-                    confId = rs.next() ? Integer.parseInt(rs.getString(1)) : -1;
-                } finally {
-                    closeSQLStuff(rs, stmt);
-                    stmt = null;
-                    rs = null;
-                }
-            }
-            if (confId > 0) {
-                stmt = con.prepareStatement("DELETE FROM genconf_attributes_strings WHERE cid = ? AND id = ?");
-                pos = 0;
-                stmt.setLong(++pos, contextId);
-                stmt.setLong(++pos, confId);
-                stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
-                stmt = con.prepareStatement("DELETE FROM genconf_attributes_bools WHERE cid = ? AND id = ?");
-                pos = 0;
-                stmt.setLong(++pos, contextId);
-                stmt.setLong(++pos, confId);
-                stmt.executeUpdate();
-                DBUtils.closeSQLStuff(stmt);
-            }
-            // Delete snippet
-            stmt = con.prepareStatement("DELETE FROM snippet WHERE cid=? AND user=? AND id=? AND refType=0");
-            pos = 0;
-            stmt.setLong(++pos, contextId);
-            stmt.setLong(++pos, userId);
-            stmt.setString(++pos, Integer.toString(id));
-            stmt.executeUpdate();
-            DBUtils.closeSQLStuff(stmt);
-            stmt = null;
-        } catch (final SQLException e) {
-            LOG.error("", e);
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
         }
     }
 
