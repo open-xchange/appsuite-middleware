@@ -55,6 +55,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.RequestContext;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -83,6 +84,8 @@ public interface ShareNotificationService {
      * @return Any exceptions occurred during notification, or an empty list if all was fine
      */
     List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, RequestContext requestContext);
+
+    List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, ShareTarget target, Session session, RequestContext requestContext);
 
     /**
      * Send a notification mail that requests a confirmation for a requested password reset from the user.

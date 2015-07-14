@@ -260,12 +260,13 @@ public interface ShareService {
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
     /**
-     * Gets detailed guest information for specific a guest user.
+     * Gets the guest info for the given user. If the user is no guest, <code>null</code> is returned.
      *
      * @param contextId The context identifier
-     * @param guestId The guest identifier
-     * @return The guest information
+     * @param userId The user identifier
+     * @return The guest info or <code>null</code>
+     * @throws OXException If loading the according user object fails
      */
-    GuestInfo getGuest(int contextId, int guestId) throws OXException;
+    GuestInfo getGuestInfo(int contextId, int userId) throws OXException;
 
 }

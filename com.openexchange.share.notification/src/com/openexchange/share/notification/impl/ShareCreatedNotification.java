@@ -91,13 +91,6 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
     int getTargetUserID();
 
     /**
-     * Returns whether this notification is about the first share targeting a new guest user.
-     *
-     * @return <code>true</code> if a new guest was created and the notification is about the initial share, else <code>false</code>
-     */
-    boolean isInitialShare();
-
-    /**
      * Gets the URL to the according share.
      *
      * @return The URL

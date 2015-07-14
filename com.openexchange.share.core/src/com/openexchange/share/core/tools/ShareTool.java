@@ -47,10 +47,10 @@
  *
  */
 
-package com.openexchange.share.impl;
+package com.openexchange.share.core.tools;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,7 +63,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
@@ -82,12 +81,10 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
-import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 import com.openexchange.userconf.UserPermissionService;
 
@@ -118,49 +115,6 @@ public class ShareTool {
         }
 
         return match.iterator().next();
-    }
-
-    /**
-     * Gets the authentication mode applicable for the supplied guest user.
-     *
-     * @param guest The guest user
-     * @return The authentication mode
-     */
-    public static AuthenticationMode getAuthenticationMode(User guest) {
-        if (Strings.isEmpty(guest.getMail())) {
-            if (guest.getUserPassword() == null) {
-                return AuthenticationMode.ANONYMOUS;
-            } else {
-                return AuthenticationMode.ANONYMOUS_PASSWORD;
-            }
-        } else {
-            if (guest.getUserPassword() == null) {
-                return AuthenticationMode.GUEST;
-            } else {
-                return AuthenticationMode.GUEST_PASSWORD;
-            }
-        }
-    }
-
-    /**
-     * Gets the authentication mode applicable for the supplied share recipient.
-     *
-     * @param guest The guest user
-     * @return The authentication mode, or <code>null</code> if the recipient does not denote guest authentication
-     */
-    public static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
-        switch (recipient.getType()) {
-            case ANONYMOUS:
-                return Strings.isEmpty(((AnonymousRecipient) recipient).getPassword()) ?
-                    AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
-            case GUEST:
-                if (((GuestRecipient) recipient).getPassword() == null) {
-                    return AuthenticationMode.GUEST;
-                }
-                return AuthenticationMode.GUEST_PASSWORD;
-            default:
-                return null;
-        }
     }
 
     /**
@@ -303,7 +257,13 @@ public class ShareTool {
         guestUser.setMail(recipient.getEmailAddress());
         guestUser.setLoginInfo(recipient.getEmailAddress());
         guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-        recipient.setWasCreated(true);
+        if (Strings.isNotEmpty(recipient.getPassword())) {
+            try {
+                guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
+            }
+        }
         return guestUser;
     }
 
@@ -525,54 +485,61 @@ public class ShareTool {
     }
 
     /**
-     * Creates a list of extended share info objects for the supplied shares. The underlying share targets are used in their original from
-     * (i.e. not personalized for the guest user).
+     * Gets the authentication mode applicable for the supplied guest user.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param shares The shares
-     * @return The share infos
-     * @throws OXException
+     * @param guest The guest user
+     * @return The authentication mode
      */
-    public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
-        return toShareInfos(services, contextID, shares, false);
+    public static AuthenticationMode getAuthenticationMode(User guest) {
+        if (Strings.isEmpty(guest.getMail())) {
+            if (guest.getUserPassword() == null) {
+                return AuthenticationMode.ANONYMOUS;
+            } else {
+                return AuthenticationMode.ANONYMOUS_PASSWORD;
+            }
+        } else {
+            if (guest.getUserPassword() == null) {
+                return AuthenticationMode.GUEST;
+            } else {
+                return AuthenticationMode.GUEST_PASSWORD;
+            }
+        }
     }
 
     /**
-     * Creates a list of extended share info objects for the supplied shares.
+     * Gets the authentication mode applicable for the supplied share recipient.
      *
-     * @param services A service lookup reference
-     * @param contextID The context ID
-     * @param shares The shares
-     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
-     * @return The share infos
-     * @throws OXException
+     * @param guest The guest user
+     * @return The authentication mode, or <code>null</code> if the recipient does not denote guest authentication
      */
-    public static List<ShareInfo> toShareInfos(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
-        if (null == shares || 0 == shares.size()) {
-            return Collections.emptyList();
+    public static AuthenticationMode getAuthenticationMode(ShareRecipient recipient) {
+        switch (recipient.getType()) {
+            case ANONYMOUS:
+                return Strings.isEmpty(((AnonymousRecipient) recipient).getPassword()) ?
+                    AuthenticationMode.ANONYMOUS : AuthenticationMode.ANONYMOUS_PASSWORD;
+            case GUEST:
+                if (((GuestRecipient) recipient).getPassword() == null) {
+                    return AuthenticationMode.GUEST;
+                }
+                return AuthenticationMode.GUEST_PASSWORD;
+            default:
+                return null;
         }
-        /*
-         * retrieve referenced guest users
-         */
-        Context context = services.getService(ContextService.class).getContext(contextID);
-        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
-        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
-        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
-        for (User user : users) {
-            if (false == user.isGuest()) {
-                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
-            }
-            guestUsers.put(Integer.valueOf(user.getId()), user);
+    }
+
+    /**
+     * Checks whether the passed user is a guest user and its authentication mode is  either
+     * {@link AuthenticationMode#ANONYMOUS} or {@link AuthenticationMode#ANONYMOUS_PASSWORD}.
+     *
+     * @param user The user to check
+     * @return <code>true</code> if the user is an anonymous guest
+     */
+    public static boolean isAnonymousGuest(User user) {
+        if (user.isGuest() && Strings.isEmpty(user.getMail())) {
+            return true;
         }
-        /*
-         * build & return share infos
-         */
-        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
-        for (Share share : shares) {
-            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share, adjustTargets));
-        }
-        return shareInfos;
+
+        return false;
     }
 
 }

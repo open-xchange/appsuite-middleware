@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,91 +47,86 @@
  *
  */
 
-package com.openexchange.file.storage.composition.internal;
+package com.openexchange.folderstorage.internal.performers;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageGuestObjectPermission;
-import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.folderstorage.Folder;
+import com.openexchange.folderstorage.GuestPermission;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.groupware.ComparedPermissions;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
- * {@link ComparedObjectPermissions}
+ * Helper class to calculate a diff of the folder permissions on an update request.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ComparedObjectPermissions extends ComparedPermissions<FileStorageObjectPermission, FileStorageGuestObjectPermission> {
+public class ComparedFolderPermissions extends ComparedPermissions<Permission, GuestPermission> {
 
+    private final Context context;
     private final ShareService shareService;
-
-    private final int contextId;
-
     private final Map<Integer, GuestInfo> guestInfos;
 
     /**
-     * Initializes a new {@link ComparedObjectPermissions}.
+     * Initializes a new {@link ComparedFolderPermissions}.
      *
-     * @param contextId The context ID
-     * @param oldMetadata The old metadata, or <code>null</code> for new documents
-     * @param newMetadata The new metadata
+     * @param context The context
+     * @param newPermissions The new permissions
+     * @param originalPermissions The original permissions
+     * @param shareService The share service
      * @throws OXException
      */
-    public ComparedObjectPermissions(int contextId, File oldMetadata, File newMetadata) throws OXException {
-        this(contextId, null == oldMetadata ? null: oldMetadata.getObjectPermissions(), null == newMetadata ? null : newMetadata.getObjectPermissions());
-    }
-
-    /**
-     * Initializes a new {@link ComparedObjectPermissions}.
-     *
-     * @param contextId The context ID
-     * @param oldPermissions The old object permissions, or <code>null</code> for new documents
-     * @param newPermissions The new object permissions
-     * @throws OXException
-     */
-    public ComparedObjectPermissions(int contextId, List<FileStorageObjectPermission> oldPermissions, List<FileStorageObjectPermission> newPermissions) throws OXException {
-        super(newPermissions, oldPermissions);
-        this.contextId = contextId;
-        shareService = Services.getService(ShareService.class);
-        if (shareService == null) {
-            throw ServiceExceptionCode.absentService(ShareService.class);
-        }
+    public ComparedFolderPermissions(Context context, Permission[] newPermissions, Permission[] originalPermissions, ShareService shareService) throws OXException {
+        super(newPermissions, originalPermissions);
+        this.context = context;
+        this.shareService = shareService;
         guestInfos = new HashMap<>();
         calc();
     }
 
-    @Override
-    protected boolean isSystemPermission(FileStorageObjectPermission p) {
-        return false;
+    /**
+     * Initializes a new {@link ComparedFolderPermissions}.
+     *
+     * @param context The context
+     * @param newFolder The modified object sent by the client; not <code>null</code>
+     * @param origFolder The original object loaded from the storage; not <code>null</code>
+     * @param shareService The share service
+     * @throws OXException If errors occur when loading additional data for the comparison
+     */
+    public ComparedFolderPermissions(Context context, Folder newFolder, Folder origFolder, ShareService shareService) throws OXException {
+        this(context, newFolder.getPermissions(), origFolder.getPermissions(), shareService);
     }
 
     @Override
-    protected boolean isUnresolvedGuestPermission(FileStorageObjectPermission p) {
-        return p instanceof FileStorageGuestObjectPermission;
+    protected boolean isSystemPermission(Permission p) {
+        return p.getSystem() != 0;
     }
 
     @Override
-    protected boolean isGroupPermission(FileStorageObjectPermission p) {
+    protected boolean isUnresolvedGuestPermission(Permission p) {
+        return p instanceof GuestPermission;
+    }
+
+    @Override
+    protected boolean isGroupPermission(Permission p) {
         return p.isGroup();
     }
 
     @Override
-    protected int getEntityId(FileStorageObjectPermission p) {
+    protected int getEntityId(Permission p) {
         return p.getEntity();
     }
 
     @Override
-    protected boolean areEqual(FileStorageObjectPermission p1, FileStorageObjectPermission p2) {
+    protected boolean areEqual(Permission p1, Permission p2) {
         if (p1 == null) {
             if (p2 == null) {
                 return true;
@@ -155,7 +150,7 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
     public GuestInfo getGuestInfo(int guestId) throws OXException {
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {
-            guestInfo = shareService.getGuestInfo(contextId, guestId);
+            guestInfo = shareService.getGuestInfo(context.getContextId(), guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }

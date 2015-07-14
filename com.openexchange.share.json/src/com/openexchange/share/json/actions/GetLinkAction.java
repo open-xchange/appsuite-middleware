@@ -59,13 +59,17 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
+import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -80,7 +84,7 @@ import com.openexchange.tools.session.ServerSession;
 public class GetLinkAction extends AbstractShareAction {
 
     /** The default permission bits to use if not supplied by the client */
-    private static final int DEFAULT_PERMISSION_BITS = Permissions.createPermissionBits(
+    private static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
         Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
 
     /**
@@ -96,27 +100,46 @@ public class GetLinkAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(json.getJSONArray("targets"), getTimeZone(requestData, session),
+            ShareTarget target = ShareJSONParser.parseTarget(json.getJSONObject("target"), getTimeZone(requestData, session),
                 services.getService(ModuleSupport.class));
-            int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
+
+            ShareService shareService = services.getService(ShareService.class);
+            List<ShareInfo> shares = shareService.getShares(session, Module.getModuleString(target.getModule(), Integer.parseInt(target.getFolder())), target.getFolder(), target.getItem());
+            if (!shares.isEmpty()) {
+                for (ShareInfo info : shares) {
+                    if (RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
+                        JSONObject jResult = new JSONObject();
+                        jResult.put("url", info.getShareURL(DefaultRequestContext.newInstance(requestData)));
+                        if (null != info.getShare().getTarget().getExpiryDate()) {
+                            jResult.put("expiry_date", info.getShare().getTarget().getExpiryDate().getTime());
+                        }
+                        jResult.put("has_password", null != info.getGuest().getPassword());
+                        return new AJAXRequestResult(jResult, new Date(), "json");
+                    }
+                }
+            }
+
             String password = json.hasAndNotNull("password") ? json.getString("password") : null;
             /*
              * prepare anonymous recipient
              */
             AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setBits(permissionBits);
+            recipient.setBits(DEFAULT_READONLY_PERMISSION_BITS);
             recipient.setPassword(password);
             /*
              * create share
              */
-            CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient>singletonList(recipient), targets, session, services);
+            CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient> singletonList(recipient), Collections.<ShareTarget> singletonList(target), session, services);
             CreatedShare share = createPerformer.perform().getShare(recipient);
             /*
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
             jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
-            jResult.put("token", share.getToken());
+            if (null != target.getExpiryDate()) {
+                jResult.put("expiry_date", target.getExpiryDate().getTime());
+            }
+            jResult.put("has_password", null != share.getGuestInfo().getPassword());
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

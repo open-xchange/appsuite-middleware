@@ -131,7 +131,6 @@ public class MailNotifications {
 
         private Session session;
         private String message;
-        private boolean initialShare;
         private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
         private String shareUrl;
 
@@ -181,16 +180,6 @@ public class MailNotifications {
         }
 
         /**
-         * Set whether this notification is about the first share targeting a new guest user.
-         *
-         * @param initialShare the flag
-         */
-        public ShareCreatedBuilder setIntitialShare(boolean initialShare) {
-            this.initialShare = initialShare;
-            return this;
-        }
-
-        /**
          * Sets the share URL.
          *
          * @param shareUrl The URL
@@ -212,7 +201,6 @@ public class MailNotifications {
             notification.setTargetUserID(guestID);
             notification.setTargets(targets);
             notification.setMessage(message);
-            notification.setInitialShare(initialShare);
             notification.setShareUrl(shareUrl);
             return notification;
         }

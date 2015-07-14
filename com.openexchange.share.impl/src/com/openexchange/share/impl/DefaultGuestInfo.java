@@ -57,6 +57,8 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.core.tools.ShareToken;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
 
 /**

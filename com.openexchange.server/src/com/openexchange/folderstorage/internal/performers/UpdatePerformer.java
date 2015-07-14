@@ -79,7 +79,6 @@ import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link UpdatePerformer} - Serves the <code>UPDATE</code> request.
@@ -135,8 +134,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     public UpdatePerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(storageParameters, folderStorageDiscoverer);
     }
-
-    private static final String RECURSION_MARKER = UpdatePerformer.class.getName() + ".RECURSION_MARKER";
 
     /**
      * Performs the <code>UPDATE</code> request.
@@ -231,13 +228,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final ComparedPermissions comparedPermissions = new ComparedPermissions(
-                getContext(),
-                folder,
-                storageFolder,
-                FolderStorageServices.requireService(UserService.class),
-                transactionManager.getConnection());
 
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(getContext(), folder, storageFolder, shareService);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {

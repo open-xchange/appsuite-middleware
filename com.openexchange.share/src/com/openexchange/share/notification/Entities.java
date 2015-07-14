@@ -47,26 +47,80 @@
  *
  */
 
-package com.openexchange.ajax.share.actions;
+package com.openexchange.share.notification;
 
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * {@link PasswordResetServletResponse}
+ * Encapsulates the IDs of different entities to notify about shares.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public class PasswordResetServletResponse extends AbstractAJAXResponse {
+public class Entities {
+
+    private final Map<Integer, Integer> users;
+
+    private final Map<Integer, Integer> groups;
+
+    public Entities() {
+        super();
+        users = new LinkedHashMap<>();
+        groups = new LinkedHashMap<>();
+    }
 
     /**
-     * Initializes a new {@link PasswordResetServletResponse}.
-     * @param response
+     * Adds a user entity.
+     *
+     * @param userId The user ID
+     * @param permissionBits The permission bits as folder permission bit mask
      */
-    public PasswordResetServletResponse(Response response) {
-        super(response);
+    public void addUser(int userId, int permissionBits) {
+        users.put(userId, permissionBits);
+    }
+
+    /**
+     * Adds a group entity.
+     *
+     * @param groupId The group ID
+     * @param permissionBits The permission bits as folder permission bit mask
+     */
+    public void addGroupt(int groupId, int permissionBits) {
+        groups.put(groupId, permissionBits);
+    }
+
+    public Set<Integer> getUsers() {
+        return users.keySet();
+    }
+
+    public Set<Integer> getGroups() {
+        return groups.keySet();
+    }
+
+    /**
+     * Gets the permission bits of a contained user entity.
+     *
+     * @param userId The user ID
+     * @return The permission bits as folder permission bit mask
+     */
+    public int getUserPermissionBits(int userId) {
+        return users.get(userId);
+    }
+
+    /**
+     * Gets the permission bits of a contained group entity.
+     *
+     * @param groupId The group ID
+     * @return The permission bits as folder permission bit mask
+     */
+    public int getGroupPermissionBits(int groupId) {
+        return groups.get(groupId);
+    }
+
+    public int size() {
+        return users.size() + groups.size();
     }
 
 }
