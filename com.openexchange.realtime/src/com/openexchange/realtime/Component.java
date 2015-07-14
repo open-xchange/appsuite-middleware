@@ -135,4 +135,11 @@ public interface Component {
      */
     EvictionPolicy getEvictionPolicy();
 
+    /**
+     * Set the {@link LoadFactorCalculator}
+     *
+     * @param loadFactorCalculator the {@link LoadFactorCalculator}
+     */
+    void setLoadFactorCalculator(LoadFactorCalculator loadFactorCalculator);
+
 }

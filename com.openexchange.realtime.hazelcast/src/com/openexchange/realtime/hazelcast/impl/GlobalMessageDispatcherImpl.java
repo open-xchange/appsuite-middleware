@@ -73,6 +73,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.Utils;
@@ -116,6 +117,10 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
 
     @Override
     public void send(Stanza stanza) throws OXException {
+        IDMap<Resource> idMap = directory.get(stanza.getTo());
+        if(idMap == null || idMap.isEmpty()) {
+            throw DispatchExceptionCode.RESOURCE_OFFLINE.create(stanza.getTo());
+        }
         Map<ID, OXException> exceptions = send(stanza, directory.get(stanza.getTo()));
         if(!exceptions.isEmpty()) {
             throw exceptions.values().iterator().next();

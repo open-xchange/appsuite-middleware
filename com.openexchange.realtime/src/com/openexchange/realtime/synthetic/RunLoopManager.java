@@ -68,6 +68,7 @@ import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.LoadFactorCalculator;
 import com.openexchange.realtime.management.RunLoopManagerMBean;
 import com.openexchange.realtime.management.RunLoopManagerManagement;
 import com.openexchange.realtime.packet.ID;
@@ -80,13 +81,13 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
+public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, LoadFactorCalculator {
 
     /**
      * Middle naming part of the managed RunLoops
      */
     public static final String LOOP_NAMING_INFIX = "-handler-";
-    
+
     /**
      * Keep associations from component ids to distinct clusters of runloops for given ids.
      *
@@ -281,21 +282,21 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
         }
         return handlesInCluster;
     }
-    
+
     /**
-     * Get a view of the loop clusters. 
-     * 
-     * @return a view of the loop clusters 
+     * Get a view of the loop clusters.
+     *
+     * @return a view of the loop clusters
      */
     public Collection<SyntheticChannelRunLoop> getRunLoopView() {
         return loopClusters.values();
-        
+
     }
-    
+
     /**
-     * Get a view of the loop clusters per component. 
-     * 
-     * @return a readonly view of the loop clusters 
+     * Get a view of the loop clusters per component.
+     *
+     * @return a readonly view of the loop clusters
      */
     public Map<String, Collection<SyntheticChannelRunLoop>> getRunLoopsPerComponent() {
         return loopClusters.asMap();
@@ -306,4 +307,20 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
         return runLoopManagerManagement;
     }
 
+    @Override
+    public float getCurrentLoad(Component component) {
+        Collection<SyntheticChannelRunLoop> runLoops = getRunLoopsPerComponent().get(component.getId());
+        int runLoopCount = runLoops.size();
+        long sum = 0;
+        for (SyntheticChannelRunLoop syntheticChannelRunLoop : runLoops) {
+            sum += syntheticChannelRunLoop.getQueueSize();
+        }
+        return ((float)sum/(float)runLoopCount);
+    }
+
+    @Override
+    public int getRunLoopCount(Component component) {
+        Collection<SyntheticChannelRunLoop> runLoops = getRunLoopsPerComponent().get(component.getId());
+        return runLoops.size();
+    }
 }
