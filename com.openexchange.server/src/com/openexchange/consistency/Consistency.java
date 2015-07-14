@@ -549,24 +549,28 @@ public abstract class Consistency implements ConsistencyMBean {
         return retval;
     }
 
-    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> storages) throws OXException {
+    private void checkOneContext(final Context ctx, final ProblemSolver dbSolver, final ProblemSolver attachmentSolver, final ProblemSolver snippetSolver, final ProblemSolver previewSolver, final ProblemSolver fileSolver, final ProblemSolver vCardSolver, final DatabaseImpl database, final AttachmentBase attach, final List<FileStorage> fileStorages) throws OXException {
 
         // We believe in the worst case, so lets check the storage first, so
         // that the state file is recreated
         LOG.info("Checking context {}. Using solvers db: {} attachments: {} snippets: {} files: {} vcards: {}", ctx.getContextId(), dbSolver.description(), attachmentSolver.description(), snippetSolver.description(), fileSolver.description(), vCardSolver.description());
-        for (FileStorage stor : storages) {
+
+        List<FileStorage> storages = new ArrayList<FileStorage>(fileStorages.size());
+        for (FileStorage stor : fileStorages) {
             try {
                 stor.recreateStateFile();
+                storages.add(stor);
             } catch (OXException e) {
-                if (FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
-                    // Does not (yet) exist
-                    Object[] logArgs = e.getLogArgs();
-                    LOG.info("Cannot check files in filestore{} for context {} since associated filestore does not (yet) exist: {}", ((stor instanceof QuotaFileStorage) ? " "+((QuotaFileStorage) stor).getUri() : ""), ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
-                    return;
+                if (!FileStorageCodes.NO_SUCH_FILE_STORAGE.equals(e)) {
+                    throw e;
                 }
-
-                throw e;
+                // Does not (yet) exist
+                Object[] logArgs = e.getLogArgs();
+                LOG.info("Cannot check files in filestore for context {} since associated filestore does not (yet) exist: {}", ctx.getContextId(), null == logArgs || 0 == logArgs.length ? e.getMessage() : logArgs[0].toString());
             }
+        }
+        if (storages.isEmpty()) {
+            return;
         }
 
         // Get files residing in file storages
@@ -694,7 +698,7 @@ public abstract class Consistency implements ConsistencyMBean {
             try {
                 if (storage instanceof QuotaFileStorage) {
                     output("Recalculating usage...");
-                    ((QuotaFileStorage) storages).recalculateUsage(filesToIgnore);
+                    ((QuotaFileStorage) storage).recalculateUsage(filesToIgnore);
                 }
             } catch (final OXException e) {
                 erroroutput(e);

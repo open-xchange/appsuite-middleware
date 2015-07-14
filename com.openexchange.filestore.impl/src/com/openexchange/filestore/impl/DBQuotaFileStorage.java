@@ -387,7 +387,13 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         long entireFileSize = 0;
         for (String filename : filenames) {
             if (!filesToIgnore.contains(filename)) {
-                entireFileSize += fileStorage.getFileSize(filename);
+                try {
+                    entireFileSize += fileStorage.getFileSize(filename);
+                } catch (OXException e) {
+                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
+                }
             }
         }
 
