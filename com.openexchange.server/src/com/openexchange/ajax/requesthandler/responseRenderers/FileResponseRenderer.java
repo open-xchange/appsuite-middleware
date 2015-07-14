@@ -634,7 +634,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 outputStream.flush();
             } catch (final java.net.SocketException e) {
-                final String lmsg = toLowerCase(e.getMessage());
+                final String lmsg = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                 if ("broken pipe".equals(lmsg) || "connection reset".equals(lmsg)) {
                     // Assume client-initiated connection closure
                     LOG.debug("Underlying (TCP) protocol communication aborted while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
@@ -644,7 +644,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             } catch (final com.sun.mail.util.MessageRemovedIOException e) {
                 sendErrorSafe(HttpServletResponse.SC_NOT_FOUND, "Message not found.", resp);
             } catch (final IOException e) {
-                final String lcm = toLowerCase(e.getMessage());
+                final String lcm = com.openexchange.java.Strings.toLowerCase(e.getMessage());
                 if ("connection reset by peer".equals(lcm) || "broken pipe".equals(lcm)) {
                     /*-
                      * The client side has abruptly aborted the connection.
@@ -757,7 +757,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             // Rotation/compression only required for JPEG
             if (!transform) {
-                final String formatName = toLowerCase(ImageTransformationUtility.getImageFormat(fileHolder.getContentType()));
+                final String formatName = com.openexchange.java.Strings.toLowerCase(ImageTransformationUtility.getImageFormat(fileHolder.getContentType()));
                 if (("jpeg".equals(formatName) || "jpg".equals(formatName)) && !DOWNLOAD.equalsIgnoreCase(delivery)) {
                     // Check for possible compression
                     transform = true;
@@ -992,7 +992,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @return The checked <i>Content-Disposition</i> value
      */
     private String checkedContentDisposition(final String contentDisposition, final IFileHolder file) {
-        final String ct = toLowerCase(file.getContentType()); // null-safe
+        final String ct = com.openexchange.java.Strings.toLowerCase(file.getContentType()); // null-safe
         if (null == ct || ct.startsWith("text/htm")) {
             final int pos = contentDisposition.indexOf(';');
             return pos > 0 ? "attachment" + contentDisposition.substring(pos) : "attachment";
@@ -1013,19 +1013,6 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
         return true;
-    }
-
-    private String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
     /**
@@ -1053,7 +1040,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (null == contentType1 || null == contentType2) {
             return false;
         }
-        return toLowerCase(getPrimaryType(contentType1)).startsWith(toLowerCase(getPrimaryType(contentType2)));
+        return com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType1)).startsWith(com.openexchange.java.Strings.toLowerCase(getPrimaryType(contentType2)));
     }
 
     private String detectMimeType(final InputStream in) throws IOException {

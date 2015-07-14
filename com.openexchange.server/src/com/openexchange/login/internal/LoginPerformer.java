@@ -73,9 +73,11 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Blocking;
 import com.openexchange.login.LoginHandlerService;
@@ -159,17 +161,18 @@ public final class LoginPerformer {
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
-        final LoginResultImpl retval = new LoginResultImpl();
+        LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
-            final Map<String, List<String>> headers = request.getHeaders();
+            Map<String, List<String>> headers = request.getHeaders();
             if (headers != null) {
                 properties.put("headers", headers);
             }
-            final Cookie[] cookies = request.getCookies();
+            Cookie[] cookies = request.getCookies();
             if (null != cookies) {
                 properties.put("cookies", cookies);
             }
+            String userLoginLanguage = request.getLanguage();
             final Authenticated authed = loginMethod.doAuthentication(retval);
             if (null == authed) {
                 return null;
@@ -186,41 +189,43 @@ public final class LoginPerformer {
                 }
             }
 
-            /*
-             * get user & context
-             */
-            final Context ctx;
-            final User user;
+            // Get user & context
+            Context ctx;
+            User user;
             if (GuestAuthenticated.class.isInstance(authed)) {
-                /*
-                 * use already resolved user / context
-                 */
+                // use already resolved user / context
                 GuestAuthenticated guestAuthenticated = (GuestAuthenticated) authed;
                 ctx = getContext(guestAuthenticated.getContextID());
                 user = getUser(ctx, guestAuthenticated.getUserID());
             } else {
-                /*
-                 * perform user / context lookup
-                 */
+                // Perform user / context lookup
                 ctx = findContext(authed.getContextInfo());
                 user = findUser(ctx, authed.getUserInfo());
+
                 // Checks if something is deactivated.
-                final AuthorizationService authService = Authorization.getService();
+                AuthorizationService authService = Authorization.getService();
                 if (null == authService) {
                     final OXException e = ServiceExceptionCode.SERVICE_UNAVAILABLE.create(AuthorizationService.class.getName());
                     LOG.error("unable to find AuthorizationService", e);
                     throw e;
                 }
-                /*
-                 * authorize
-                 */
+
+                // Authorize
                 authService.authorizeUser(ctx, user);
+            }
+            if (!Strings.isEmpty(userLoginLanguage) && !userLoginLanguage.equals(user.getPreferredLanguage())) {
+                UserStorage us = UserStorage.getInstance();
+                UserImpl impl = new UserImpl(user);
+                impl.setPreferredLanguage(userLoginLanguage);
+                us.updateUser(impl, ctx);
+                user = impl;
             }
             retval.setContext(ctx);
             retval.setUser(user);
 
             // Check if indicated client is allowed to perform a login
             checkClient(request, user, ctx);
+
             // Check needed service
             SessiondService sessiondService = SessiondService.SERVICE_REFERENCE.get();
             if (null == sessiondService) {
@@ -234,7 +239,7 @@ public final class LoginPerformer {
             if (SessionEnhancement.class.isInstance(authed)) {
                 addSession.setEnhancement((SessionEnhancement) authed);
             }
-            final Session session = sessiondService.addSession(addSession);
+            Session session = sessiondService.addSession(addSession);
             if (null == session) {
                 // Session could not be created
                 throw LoginExceptionCodes.UNKNOWN.create("Session could not be created.");
@@ -245,12 +250,12 @@ public final class LoginPerformer {
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
             return retval;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             if (DBPoolingExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 LOG.error(e.getLogMessage(), e);
             }
             throw e;
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
         } finally {
             logLoginRequest(request, retval);

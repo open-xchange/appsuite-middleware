@@ -49,9 +49,6 @@
 
 package com.openexchange.calendar;
 
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.groupware.calendar.Constants;
 import com.openexchange.groupware.calendar.RecurringResultInterface;
@@ -73,8 +70,6 @@ public final class RecurringResult implements RecurringResultInterface {
 
 	private final int position;
 
-    private String timezone;
-
 	/**
 	 * Initializes a new {@link RecurringResult}
 	 *
@@ -87,13 +82,12 @@ public final class RecurringResult implements RecurringResultInterface {
 	 * @param position
 	 *            The one-based position
 	 */
-	public RecurringResult(final long start, final long diff, final int lengthOffset, final int position, String timezone) {
+	public RecurringResult(final long start, final long diff, final int lengthOffset, final int position) {
 		this.start = start;
 		normalized = new CalendarCollection().normalizeLong(start);
 		this.diff = diff;
 		this.lengthOffset = lengthOffset;
 		this.position = position;
-		this.timezone = timezone;
 	}
 
 	/* (non-Javadoc)
@@ -117,10 +111,7 @@ public final class RecurringResult implements RecurringResultInterface {
      */
 	@Override
     public long getEnd() {
-	    Calendar end = new GregorianCalendar(TimeZone.getTimeZone(timezone));
-	    end.setTimeInMillis(start + diff);
-	    end.add(Calendar.DATE, lengthOffset);
-	    return end.getTimeInMillis();
+		return start + diff + (lengthOffset * Constants.MILLI_DAY);
 	}
 
 	/* (non-Javadoc)

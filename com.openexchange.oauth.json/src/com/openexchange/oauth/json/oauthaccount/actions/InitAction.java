@@ -56,11 +56,13 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.Client;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -69,7 +71,9 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.oauth.OAuthAccount;
 import com.openexchange.oauth.OAuthConstants;
 import com.openexchange.oauth.OAuthExceptionCodes;
@@ -105,9 +109,9 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
     }
 
     @Override
-    public AJAXRequestResult perform(final AJAXRequestData request, final ServerSession session) throws OXException {
+    public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         try {
-            final String accountId = request.getParameter("id");
+            String accountId = request.getParameter("id");
             if (null == accountId) {
                 /*
                  * Call-back with action=create
@@ -118,14 +122,15 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              * Call-back with action=reauthorize
              */
             return reauthorizeCallbackAction(accountId, request, session);
-        } catch (final JSONException e) {
+        } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create( e, e.getMessage());
         }
     }
 
     //FIXME: Refactor this. These methods are pretty similar. DRY
 
-    private AJAXRequestResult createCallbackAction(final AJAXRequestData request, final ServerSession session) throws OXException, JSONException {
+    private AJAXRequestResult createCallbackAction(AJAXRequestData request, ServerSession session) throws OXException {
+        Locale locale = session.getUser().getLocale();
         try {
             final OAuthService oAuthService = getOAuthService();
             /*
@@ -217,11 +222,20 @@ public final class InitAction extends AbstractOAuthAJAXActionService {
              */
             return new AJAXRequestResult(jsonInteraction);
         } catch (OXException e) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_OK, e.getMessage());
+            if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                throw e;
+            }
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_BAD_REQUEST), e.getDisplayMessage(locale));
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_OK, e.getMessage());
+            if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_OK), StringHelper.valueOf(locale).getString(OXExceptionStrings.MESSAGE));
         } catch (RuntimeException e) {
-            throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_OK, e.getMessage());
+            if (Client.OX6_UI.getClientId().equals(session.getClient())) {
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            }
+            throw AjaxExceptionCodes.HTTP_ERROR.create(e, Integer.valueOf(HttpServletResponse.SC_OK), StringHelper.valueOf(locale).getString(OXExceptionStrings.MESSAGE));
         }
     }
 

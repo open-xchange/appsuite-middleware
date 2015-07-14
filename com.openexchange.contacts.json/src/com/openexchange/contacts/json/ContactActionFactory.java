@@ -101,7 +101,7 @@ public class ContactActionFactory implements AJAXActionServiceFactory {
 
     public ContactActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, ContactAction>(15);
+        actions = new ConcurrentHashMap<String, ContactAction>(15, 0.9f, 1);
         actions.put("get", new GetAction(serviceLookup));
         actions.put("all", new AllAction(serviceLookup));
         actions.put("list", new ListAction(serviceLookup));

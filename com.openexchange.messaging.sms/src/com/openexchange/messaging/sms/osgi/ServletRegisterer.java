@@ -72,7 +72,9 @@ public class ServletRegisterer {
     // friend to be able to test
     final static String SERVLET_PATH_APPENDIX = "messaging/sms";
 
-    public ServletRegisterer (){
+    private volatile String alias;
+
+    public ServletRegisterer () {
         super();
     }
 
@@ -85,7 +87,9 @@ public class ServletRegisterer {
             return;
         }
         try {
-            http_service.registerServlet(PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX, new com.openexchange.messaging.sms.servlet.MessagingSMSServlet(), null, null);
+            String alias = PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX;
+            http_service.registerServlet(alias, new com.openexchange.messaging.sms.servlet.MessagingSMSServlet(), null, null);
+            this.alias = alias;
         } catch (final ServletException e) {
             LOG.error("Error registering messaging sms servlet!", e);
         } catch (final NamespaceException e) {
@@ -101,6 +105,10 @@ public class ServletRegisterer {
             LOG.error("Error unregistering messaging sms servlet!", e);
             return;
         }
-        http_service.unregister(PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX);
+        String alias = this.alias;
+        if (null != alias) {
+            http_service.unregister(PREFIX.get().getPrefix()+SERVLET_PATH_APPENDIX);
+            this.alias = null;
+        }
     }
 }

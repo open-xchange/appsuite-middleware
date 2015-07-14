@@ -172,6 +172,38 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     }
 
     /**
+     * Initializes a new {@link MailMessageFetchIMAPCommand} to fetch all messages.
+     *
+     * @param imapFolder The IMAP folder providing connected protocol
+     * @param separator The separator character
+     * @param isRev1 Whether IMAP server has <i>IMAP4rev1</i> capability or not
+     * @param fp The fetch profile to use
+     * @param serverInfo The IMAP server information deduced from configuration
+     * @throws MessagingException If initialization fails
+     */
+    public MailMessageFetchIMAPCommand(IMAPFolder imapFolder, char separator, boolean isRev1, FetchProfile fp, IMAPServerInfo serverInfo) throws MessagingException {
+        super(imapFolder);
+        determineAttachmentByHeader = false;
+        final int messageCount = imapFolder.getMessageCount();
+        if (messageCount <= 0) {
+            returnDefaultValue = true;
+        }
+        this.separator = separator;
+        lastHandlers = new HashSet<FetchItemHandler>();
+        command = getFetchCommand(isRev1, fp, false, serverInfo);
+        uid = false;
+        length = messageCount;
+        uid2index = null;
+        seqNum2index = null;
+        args = (1 == length ? new String[] { "1" } : ARGS_ALL);
+        if (0 == length) {
+            returnDefaultValue = true;
+        }
+        fullname = imapFolder.getFullName();
+        retval = new MailMessage[length];
+    }
+
+    /**
      * Initializes a new {@link MailMessageFetchIMAPCommand}.
      *
      * @param imapFolder The IMAP folder providing connected protocol
@@ -388,7 +420,12 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         final FetchResponse fetchResponse = (FetchResponse) currentReponse;
         final int seqNum = fetchResponse.getNumber();
         int pos;
-        if (null == seqNum2index) {
+        if (null != seqNum2index) {
+            pos = seqNum2index.remove(seqNum);
+            if (pos < 0) {
+                pos = index;
+            }
+        } else if (null != uid2index) {
             UID uidItem = getItemOf(UID.class, fetchResponse);
             if (null != uidItem) {
                 pos = uid2index.remove(uidItem.uid);
@@ -399,10 +436,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                 pos = index;
             }
         } else {
-            pos = seqNum2index.remove(seqNum);
-            if (pos < 0) {
-                pos = index;
-            }
+            pos = index;
         }
         index++;
         boolean error = false;
@@ -688,7 +722,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             for (final Enumeration<?> e = h.getAllHeaders(); e.hasMoreElements();) {
                 final Header hdr = (Header) e.nextElement();
                 final String name = hdr.getName();
-                headerFields.remove(toLowerCase(name));
+                headerFields.remove(Strings.toLowerCase(name));
                 {
                     final HeaderHandler headerHandler = hh.get(name);
                     if (null != headerHandler) {
@@ -981,7 +1015,7 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
                     for (Enumeration<?> names = cParams.getNames(); names.hasMoreElements();) {
                         String name = names.nextElement().toString();
                         String value = cParams.get(name);
-                        if (!isEmpty(value)) {
+                        if (!com.openexchange.java.Strings.isEmpty(value)) {
                             try {
                                 contentType.setParameterErrorAware(name, MimeMessageUtility.decodeEnvelopeHeader(value));
                             } catch (OXException e) {
@@ -1327,18 +1361,4 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
         }
         return null;
     }
-
-    /** Check for an empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

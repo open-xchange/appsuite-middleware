@@ -76,9 +76,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.ho.yaml.Yaml;
+import org.ho.yaml.exception.YamlException;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
+import com.openexchange.config.ForcedReloadable;
 import com.openexchange.config.PropertyFilter;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.config.Reloadable;
@@ -178,9 +180,9 @@ public final class ConfigurationImpl implements ConfigurationService {
     public ConfigurationImpl(String[] directories, Collection<ReinitializableConfigProviderService> reinitQueue) {
         super();
         this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
-        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128);
+        reloadableServices = new ConcurrentHashMap<String, Reloadable>(128, 0.9f, 1);
         propertiesByFile = new HashMap<String, Properties>(256);
-        texts = new ConcurrentHashMap<String, String>(1024);
+        texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<String, byte[]>(64);
@@ -713,7 +715,12 @@ public final class ConfigurationImpl implements ConfigurationService {
             return null;
         }
 
-        return Yaml.load(new String(yamlFiles.get(path)));
+        try {
+            return Yaml.load(Charsets.toString(yamlFiles.get(path), Charsets.UTF_8));
+        } catch (YamlException e) {
+            // Failed to load .yml file
+            throw new IllegalStateException("Failed to load YAML file '" + path + "'. Reason:" + e.getMessage(), e);
+        }
     }
 
     @Override
@@ -725,8 +732,14 @@ public final class ConfigurationImpl implements ConfigurationService {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
                 final Entry<String, byte[]> entry = iter.next();
-                if (entry.getKey().startsWith(fldName)) {
-                    retval.put(entry.getKey(), Yaml.load(new String(entry.getValue(), Charsets.UTF_8)));
+                String pathName = entry.getKey();
+                if (pathName.startsWith(fldName)) {
+                    try {
+                        retval.put(pathName, Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8)));
+                    } catch (YamlException e) {
+                        // Failed to load .yml file
+                        throw new IllegalStateException("Failed to load YAML file '" + pathName + "'. Reason:" + e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -759,10 +772,22 @@ public final class ConfigurationImpl implements ConfigurationService {
         // Re-initialize config-cascade
         reinitConfigCascade();
 
-        // Check if properties have been changed, abort if not
+        // Check if properties have been changed, execute only forced ones if not
         Set<String> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
         if (changes.isEmpty()) {
             LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
+
+            // Trigger only forced ones
+            for (Reloadable reloadable : reloadableServices.values()) {
+                try {
+                    if (ForcedReloadable.class.isInstance(reloadable)) {
+                        reloadable.reloadConfiguration(this);
+                    }
+                } catch (Exception e) {
+                    LOG.warn("Failed to let reloaded configuration be handled by: {}", reloadable.getClass().getName(), e);
+                }
+            }
+
             return;
         }
 

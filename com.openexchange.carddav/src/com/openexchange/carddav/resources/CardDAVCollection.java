@@ -61,6 +61,8 @@ import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
 import com.openexchange.carddav.mixins.CTag;
+import com.openexchange.carddav.mixins.MaxImageSize;
+import com.openexchange.carddav.mixins.MaxResourceSize;
 import com.openexchange.carddav.mixins.SupportedReportSet;
 import com.openexchange.carddav.mixins.SyncToken;
 import com.openexchange.carddav.reports.Syncstatus;
@@ -96,14 +98,15 @@ public abstract class CardDAVCollection extends AbstractCollection {
     /**
      * Initializes a new {@link CardDAVCollection}.
      *
-     * @param factory the factory
-     * @param url the WebDAV path
+     * @param factory A reference to the CardDAV factory
+     * @param url The collection's WebDAV path
      */
     public CardDAVCollection(GroupwareCarddavFactory factory, WebdavPath url) {
         super();
         this.factory = factory;
         this.url = url;
-        super.includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this));
+        includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this),
+            new MaxResourceSize(factory), new MaxImageSize(factory));
         LOG.debug("{}: initialized.", getUrl());
     }
 
@@ -366,10 +369,9 @@ public abstract class CardDAVCollection extends AbstractCollection {
     		if (null != contact) {
               	LOG.debug("{}: found child resource by name '{}'", this.getUrl(), name);
     			return new ContactResource(contact, this.factory, constructPathForChildResource(contact));
-    		} else {
-              	LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
-    			return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
     		}
+            LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
+            return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
     	} catch (OXException e) {
     		throw protocolException(e);
 		}

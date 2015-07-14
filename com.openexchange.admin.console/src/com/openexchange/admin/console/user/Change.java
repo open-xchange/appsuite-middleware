@@ -101,6 +101,11 @@ public class Change extends ChangeCore {
         if ((null != capabilitiesToAdd && !capabilitiesToAdd.isEmpty()) || (null != capabilitiesToRemove && !capabilitiesToRemove.isEmpty()) || (null != capabilitiesToDrop && !capabilitiesToDrop.isEmpty())) {
             oxusr.changeCapabilities(ctx, usr, capabilitiesToAdd, capabilitiesToRemove, capabilitiesToDrop, auth);
         }
+
+        String personal = parseAndSetPersonal(parser);
+        if (null != personal) {
+            oxusr.changeMailAddressPersonal(ctx, usr, "NULL".equals(personal) ? null : personal, auth);
+        }
     }
 
     @Override
@@ -109,6 +114,7 @@ public class Change extends ChangeCore {
         setCapsToAdd(parser);
         setCapsToRemove(parser);
         setCapsToDrop(parser);
+        setPersonal(parser);
         setUserQuotaOption(parser, false);
     }
 

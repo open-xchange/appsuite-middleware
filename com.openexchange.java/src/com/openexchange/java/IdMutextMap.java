@@ -82,7 +82,7 @@ public class IdMutextMap {
      */
     private IdMutextMap() {
         super();
-        map = new ConcurrentHashMap<String, IdMutextMap.MutexImpl>(1024);
+        map = new ConcurrentHashMap<String, IdMutextMap.MutexImpl>(1024, 0.9f, 1);
     }
 
     /**

@@ -73,7 +73,7 @@ public final class CompositeFileStorageAccountManagerProvider implements FileSto
      */
     public CompositeFileStorageAccountManagerProvider() {
         super();
-        set = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(4);
+        set = new ConcurrentHashMap<FileStorageAccountManagerProvider, Object>(4, 0.9f, 1);
     }
 
     /**

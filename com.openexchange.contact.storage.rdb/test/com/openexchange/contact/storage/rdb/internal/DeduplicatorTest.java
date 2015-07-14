@@ -54,7 +54,9 @@ import static com.openexchange.contact.storage.rdb.internal.Deduplicator.getCont
 import static com.openexchange.contact.storage.rdb.internal.Deduplicator.getDistListContentFields;
 import java.util.Random;
 import java.util.UUID;
-import junit.framework.TestCase;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.contact.storage.rdb.fields.DistListMemberField;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -68,7 +70,7 @@ import com.openexchange.java.util.UUIDs;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DeduplicatorTest extends TestCase {
+public class DeduplicatorTest {
 
     private static final ContactField[] TEXTUAL_FIELDS = {
         ContactField.DISPLAY_NAME,
@@ -182,18 +184,19 @@ public class DeduplicatorTest extends TestCase {
     private DistListMemberField[] distListContentFields;
     private Random random;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         random = new Random();
         contentFields = getContentFields();
         distListContentFields = getDistListContentFields();
     }
 
+    @Test
     public void testDetectEmptyDuplicates() throws Exception {
         assertSameHash(contact1(), contact2());
     }
 
+    @Test
     public void testDetectDuplicatesInTextualFields() throws Exception {
         for (ContactField field : TEXTUAL_FIELDS) {
             String value = randomString();
@@ -206,6 +209,7 @@ public class DeduplicatorTest extends TestCase {
         }
     }
 
+    @Test
     public void testDontDetectDifferencesInTextualFields() throws Exception {
         for (ContactField field : TEXTUAL_FIELDS) {
             VarCharMapping<Contact> mapping = (VarCharMapping<Contact>) Mappers.CONTACT.get(field);
@@ -217,6 +221,7 @@ public class DeduplicatorTest extends TestCase {
         }
     }
 
+    @Test
     public void testDetectDuplicatesInNumericalFields() throws Exception {
         for (ContactField field : NUMERICAL_FIELDS) {
             Integer value = Integer.valueOf(randomNumber());
@@ -229,6 +234,7 @@ public class DeduplicatorTest extends TestCase {
         }
     }
 
+    @Test
     public void testDontDetectDifferencesInNumericalFields() throws Exception {
         for (ContactField field : NUMERICAL_FIELDS) {
             IntegerMapping<Contact> mapping = (IntegerMapping<Contact>) Mappers.CONTACT.get(field);
@@ -240,6 +246,7 @@ public class DeduplicatorTest extends TestCase {
         }
     }
 
+    @Test
     public void testDontDetectSimilars() {
         Contact contact1 = contact1();
         contact1.setEmail1("otto@example.com");
@@ -248,6 +255,7 @@ public class DeduplicatorTest extends TestCase {
         assertDifferentHash(contact1, contact2);
     }
 
+    @Test
     public void testDontDetectDifferentImages() {
         Contact contact1 = contact1();
         contact1.setImage1(UUIDs.toByteArray(UUID.randomUUID()));
@@ -260,6 +268,7 @@ public class DeduplicatorTest extends TestCase {
         assertDifferentHash(contact1, contact2);
     }
 
+    @Test
     public void testDetectDuplicateImages() {
         UUID uuid = UUID.randomUUID();
         Contact contact1 = contact1();
@@ -282,13 +291,13 @@ public class DeduplicatorTest extends TestCase {
     private void assertSameHash(Contact contact1, Contact contact2, String msg) {
         int hash1 = calculateHash(contact1, contentFields, distListContentFields);
         int hash2 = calculateHash(contact2, contentFields, distListContentFields);
-        assertEquals(null != msg ? "Different hashes: " + msg : "Different hashes", hash1, hash2);
+        Assert.assertEquals(null != msg ? "Different hashes: " + msg : "Different hashes", hash1, hash2);
     }
 
     private void assertDifferentHash(Contact contact1, Contact contact2, String msg) {
         int hash1 = calculateHash(contact1, contentFields, distListContentFields);
         int hash2 = calculateHash(contact2, contentFields, distListContentFields);
-        assertFalse(null != msg ? "Same hashes: " + msg : "Same hashes", hash1 == hash2);
+        Assert.assertFalse(null != msg ? "Same hashes: " + msg : "Same hashes", hash1 == hash2);
     }
 
     private String randomString() {

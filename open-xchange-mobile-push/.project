@@ -3,7 +3,6 @@
 	<name>open-xchange-mobile-push</name>
 	<comment></comment>
 	<projects>
-		<project>com.openexchange.contact.storage.ldap</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

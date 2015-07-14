@@ -80,7 +80,13 @@ import com.openexchange.ajax.infostore.actions.NewInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.NewInfostoreResponse;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.UpdateInfostoreResponse;
+import com.openexchange.ajax.share.GuestClient.ClientConfig;
 import com.openexchange.ajax.share.actions.AllRequest;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
+import com.openexchange.ajax.share.actions.FileShare;
+import com.openexchange.ajax.share.actions.FileSharesRequest;
+import com.openexchange.ajax.share.actions.FolderShare;
+import com.openexchange.ajax.share.actions.FolderSharesRequest;
 import com.openexchange.ajax.share.actions.ParsedShare;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
@@ -96,6 +102,7 @@ import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -111,7 +118,8 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static final OCLGuestPermission[] TESTED_PERMISSIONS = new OCLGuestPermission[] {
         createNamedAuthorPermission("otto@example.com", "Otto Example", "secret"),
         createNamedGuestPermission("horst@example.com", "Horst Example", "secret"),
-        createAnonymousAuthorPermission("secret"),
+//        createAnonymousAuthorPermission("secret"),
+        createAnonymousGuestPermission("secret"),
         createAnonymousGuestPermission()
     };
 
@@ -152,6 +160,28 @@ public abstract class ShareTest extends AbstractAJAXSession {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         filesToDelete = new HashMap<String, File>();
+    }
+
+    /**
+     * Gets a request context based on the AJAX clients values.
+     */
+    protected RequestContext getRequestContext() {
+        return new RequestContext() {
+            @Override
+            public String getProtocol() {
+                return client.getProtocol();
+            }
+
+            @Override
+            public String getHostname() {
+                return client.getHostname();
+            }
+
+            @Override
+            public String getServletPrefix() {
+                return "/ajax/";
+            }
+        };
     }
 
     /**
@@ -198,6 +228,41 @@ public abstract class ShareTest extends AbstractAJAXSession {
         FolderObject privateFolder = Create.createPrivateFolder(randomUID(), module, client.getValues().getUserId());
         privateFolder.setParentFolderID(parent);
         return insertFolder(api, privateFolder);
+    }
+
+    /**
+     * Inserts a public folder below folder 2 or folder 15 if its a drive folder.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The inserted folder
+     * @throws Exception
+     */
+    protected FolderObject insertPublicFolder(EnumAPI api, int module) throws Exception {
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(randomUID());
+        folder.setModule(module);
+        folder.setType(FolderObject.PUBLIC);
+        OCLPermission perm1 = new OCLPermission();
+        perm1.setEntity(client.getValues().getUserId());
+        perm1.setGroupPermission(false);
+        perm1.setFolderAdmin(true);
+        perm1.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
+        if (module == FolderObject.INFOSTORE) {
+            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+        } else {
+            folder.setParentFolderID(FolderObject.SYSTEM_PUBLIC_FOLDER_ID);
+        }
+
+        InsertRequest request = new InsertRequest(EnumAPI.OX_OLD, folder, true);
+        InsertResponse response = client.execute(request);
+        response.fillObject(folder);
+        return folder;
     }
 
     /**
@@ -389,6 +454,110 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Gets all folder shares of a specific module.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The folder shares
+     */
+    protected List<FolderShare> getFolderShares(EnumAPI api, int module) throws OXException, IOException, JSONException {
+        return getFolderShares(client, api, module);
+    }
+
+    /**
+     * Gets all folder shares of a specific module.
+     *
+     * @param client The ajax client to use
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @return The folder shares
+     */
+    protected static List<FolderShare> getFolderShares(AJAXClient client, EnumAPI api, int module) throws OXException, IOException, JSONException {
+        return client.execute(new FolderSharesRequest(api, Module.getModuleString(module, -1))).getShares();
+    }
+
+    /**
+     * Discovers a specific guest permission entity amongst all available shares of the current user, based on the folder- and guest identifiers.
+     *
+     * @param api The folder tree to use
+     * @param module The module identifier
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The guest permission entity, or <code>null</code> if not found
+     */
+    protected ExtendedPermissionEntity discoverGuestEntity(EnumAPI api, int module, int folderID, int guest) throws OXException, IOException, JSONException {
+        return discoverGuestEntity(client, api, module, folderID, guest);
+    }
+
+    /**
+     * Discovers a specific guest permission entity amongst all available shares of the current user, based on the folder- and guest identifiers.
+     *
+     * @param client The ajax client to use
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, EnumAPI api, int module, int folderID, int guest) throws OXException, IOException, JSONException {
+        List<FolderShare> shares = getFolderShares(client, api, module);
+        for (FolderShare share : shares) {
+            if (share.getObjectID() == folderID) {
+                return discoverGuestEntity(share.getExtendedPermissions(), guest);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Discovers a specific guest permission entity amongst all available shares of the current user, based on the file- and guest identifiers.
+     *
+     * @param folder The folder ID to discover the share for
+     * @param item The item ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The guest permission entity, or <code>null</code> if not found
+     */
+    protected ExtendedPermissionEntity discoverGuestEntity(String folder, String item, int guest) throws OXException, IOException, JSONException {
+        return discoverGuestEntity(client, folder, item, guest);
+    }
+
+    /**
+     * Discovers a specific guest permission entity amongst all available shares of the current user, based on the file- and guest identifiers.
+     *
+     * @param client The ajax client to use
+     * @param folder The folder ID to discover the share for
+     * @param item The item ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, String folder, String item, int guest) throws OXException, IOException, JSONException {
+        List<FileShare> shares = client.execute(new FileSharesRequest()).getShares();
+        for (FileShare share : shares) {
+            if (share.getId().equals(item)) {
+                return discoverGuestEntity(share.getExtendedPermissions(), guest);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
+     *
+     * @param client The ajax client to use
+     * @param folderID The folder ID to discover the share for
+     * @param guest The ID of the guest associated to the share
+     * @return The share, or <code>null</code> if not found
+     */
+    protected static ExtendedPermissionEntity discoverGuestEntity(List<ExtendedPermissionEntity> entities, int guest) throws OXException, IOException, JSONException {
+        if (null != entities) {
+            for (ExtendedPermissionEntity entity : entities) {
+                if (entity.getEntity() == guest) {
+                    return entity;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * Discovers a specific share amongst all available shares of the current user, based on the folder- and guest identifiers.
      *
      * @param client The ajax client to use
@@ -511,6 +680,52 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Resolves the share behind a guest permission, i.e. accesses the share link and authenticates using the guest's credentials.
+     *
+     * @param guestPermission The guest permission entity
+     * @param recipient The recipient
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, ShareRecipient recipient) throws Exception {
+        return new GuestClient(guestPermission.getShareURL(), recipient);
+    }
+
+    /**
+     * Resolves the share, i.e. accesses the share link and authenticates using the guest's credentials.
+     *
+     * @param shareURL The share URL
+     * @param recipient The recipient
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(String shareURL, ShareRecipient recipient) throws Exception {
+        return new GuestClient(shareURL, recipient);
+    }
+
+    /**
+     * Resolves the share behind a guest permission, i.e. accesses the share link and authenticates using the supplied credentials.
+     *
+     * @param guestPermission The guest permission entity
+     * @param username The username, or <code>null</code> if not needed
+     * @param password The password, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(ExtendedPermissionEntity guestPermission, String username, String password) throws Exception {
+        return resolveShare(guestPermission.getShareURL(), username, password);
+    }
+
+    /**
+     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the supplied credentials.
+     *
+     * @param url The share URL
+     * @param username The username, or <code>null</code> if not needed
+     * @param password The password, or <code>null</code> if not needed
+     * @return An authenticated guest client being able to access the share
+     */
+    protected GuestClient resolveShare(String url, String username, String password) throws Exception {
+        return new GuestClient(url, username, password);
+    }
+
+    /**
      * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
      *
      * @param share The share
@@ -522,27 +737,18 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Resolves the supplied share, i.e. accesses the share link and authenticates using the share's credentials.
-     *
-     * @param share The share
-     * @param username The username, or <code>null</code> if not needed
-     * @param password The password, or <code>null</code> if not needed
-     * @return An authenticated guest client being able to access the share
-     */
-    protected GuestClient resolveShare(ParsedShare share, String username, String password) throws Exception {
-        return resolveShare(share.getShareURL(), username, password);
-    }
-
-    /**
-     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the share's credentials.
+     * Resolves the supplied share url, i.e. accesses the share link and authenticates using the given user name but
+     * sets no password and simulates the "skip password" behavior.
      *
      * @param url The share URL
      * @param username The username, or <code>null</code> if not needed
-     * @param password The password, or <code>null</code> if not needed
      * @return An authenticated guest client being able to access the share
      */
-    protected GuestClient resolveShare(String url, String username, String password) throws Exception {
-        return new GuestClient(url, username, password);
+    protected GuestClient resolveShare(String url, String username) throws Exception {
+        ClientConfig clientConfig = new GuestClient.ClientConfig(url)
+            .setUsername(username)
+            .setSkipPassword(true);
+        return new GuestClient(clientConfig);
     }
 
     protected boolean awaitGuestCleanup(int guestID, long timeout) throws Exception {
@@ -636,9 +842,65 @@ public abstract class ShareTest extends AbstractAJAXSession {
                 assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
             }
         } else if (RecipientType.GUEST.equals(expected.getType())) {
-            assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+            if (null == ((GuestRecipient) expected).getPassword()) {
+                assertEquals("Wrong authentication", AuthenticationMode.GUEST, actual.getAuthentication());
+            } else {
+                assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+            }
         }
     }
+
+    /**
+     * Checks the supplied extended guest permission against the expected guest permissions.
+     *
+     * @param expectedPermission The expected permissions
+     * @param actual The actual extended permission
+     */
+    protected static void checkGuestPermission(FileStorageGuestObjectPermission expectedPermission, ExtendedPermissionEntity actual) {
+        assertNotNull("No guest permission entitiy", actual);
+//        assertEquals("Expiry date wrong", expected.getExpiryDate(), actual.getTarget().getExpiryDate());
+//        checkAuthentication(expectedPermission.getRecipient(), actual);
+//        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
+//        assertNotNull("No share target", actual.getTarget());
+//        assertEquals("Target module wrong", FolderObject.INFOSTORE, actual.getTarget().getModule());
+//        assertEquals("Target folder wrong", expectedFile.getFolderId(), actual.getTarget().getFolder());
+//        assertEquals("Target item wrong", expectedFile.getId(), actual.getTarget().getItem());
+    }
+
+    /**
+     * Checks the supplied extended guest permission against the expected guest permissions.
+     *
+     * @param expectedPermission The expected permissions
+     * @param actual The actual extended permission
+     */
+    protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
+        assertNotNull("No guest permission entitiy", actual);
+        assertEquals(expectedPermission.getPermissionBits(), actual.getBits());
+
+
+
+//        checkAuthentication(expectedPermission.getRecipient(), actual);
+//        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
+//        assertNotNull("No share target", actual.getTarget());
+//        assertEquals("Target module wrong", expectedFolder.getModule(), actual.getTarget().getModule());
+//        assertEquals("Target folder wrong", String.valueOf(expectedFolder.getObjectID()), actual.getTarget().getFolder());
+    }
+
+//    private static void checkAuthentication(ShareRecipient expected, ExtendedPermissionEntity actual) {
+//        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
+//            if (null == ((AnonymousRecipient) expected).getPassword()) {
+//                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS, actual.getAuthentication());
+//            } else {
+//                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
+//            }
+//        } else if (RecipientType.GUEST.equals(expected.getType())) {
+//            if (null == ((GuestRecipient) expected).getPassword()) {
+//                assertEquals("Wrong authentication", AuthenticationMode.GUEST, actual.getAuthentication());
+//            } else {
+//                assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
+//            }
+//        }
+//    }
 
     private static void checkRecipient(ShareRecipient expected, ShareRecipient actual) {
         assertNotNull("No recipient", actual);
@@ -718,21 +980,21 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return guestPermission;
     }
 
-    protected static OCLGuestPermission createAnonymousAuthorPermission(String password) {
-        OCLGuestPermission guestPermission = createAnonymousPermission(password);
-        guestPermission.setAllPermission(
-            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
-        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
-        return guestPermission;
-    }
+//    protected static OCLGuestPermission createAnonymousAuthorPermission(String password) {
+//        OCLGuestPermission guestPermission = createAnonymousPermission(password);
+//        guestPermission.setAllPermission(
+//            OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
+//        guestPermission.getRecipient().setBits(guestPermission.getPermissionBits());
+//        return guestPermission;
+//    }
 
     protected static OCLGuestPermission createAnonymousGuestPermission() {
         return createAnonymousGuestPermission(null);
     }
 
-    protected static OCLGuestPermission createAnonymousAuthorPermission() {
-        return createAnonymousAuthorPermission(null);
-    }
+//    protected static OCLGuestPermission createAnonymousAuthorPermission() {
+//        return createAnonymousAuthorPermission(null);
+//    }
 
     protected static OCLGuestPermission createAnonymousPermission(String password) {
         AnonymousRecipient recipient = new AnonymousRecipient();

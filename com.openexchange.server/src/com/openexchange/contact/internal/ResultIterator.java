@@ -78,7 +78,8 @@ public class ResultIterator implements SearchIterator<Contact> {
 
     private static final ContactField[] DLISTMEMBER_FIELDS = {
     	ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.CREATED_BY, ContactField.PRIVATE_FLAG, ContactField.LAST_MODIFIED,
-    	ContactField.DISPLAY_NAME, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, };
+    	ContactField.DISPLAY_NAME, ContactField.SUR_NAME, ContactField.GIVEN_NAME,
+    	ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3, };
 
     private final SearchIterator<Contact> delegate;
     private final boolean needsAttachmentInfo;
@@ -188,7 +189,9 @@ public class ResultIterator implements SearchIterator<Contact> {
 	}
 
 	private void updateMemberInfo(DistributionListEntryObject member, Contact referencedContact) {
-		member.setDisplayname(referencedContact.getDisplayName());
+	    if (null != referencedContact.getDisplayName()) {
+	        member.setDisplayname(referencedContact.getDisplayName());
+	    }
 		member.setFolderID(referencedContact.getParentFolderID());
 		member.setEntryID(referencedContact.getObjectID());
 		member.setFirstname(referencedContact.getGivenName());

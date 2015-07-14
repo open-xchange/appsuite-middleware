@@ -333,11 +333,10 @@ public class NotificationMail {
             LOG.debug("NotificationMail.shouldBeSend (2), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
             return !isAboutStateChangesOnly();
         }
-
-        LOG.debug("NotificationMail.shouldBeSend (3), User: " + id() + "\nDiffering Fields: " + diffs());
+        LOG.debug("NotificationMail.shouldBeSend, User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
         return true;
     }
-    
+
     private String id() {
         try {
             return getRecipient().getUser().getId() + "";
@@ -345,19 +344,19 @@ public class NotificationMail {
             return "NPE";
         }
     }
-    
+
     private String getUserDiff() {
         try {
             if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
                 FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
-                
+
             }
         } catch (Exception e) {
             return "Error";
         }
         return "";
     }
-    
+
     private String diffs() {
         try {
             return getDiff().getDifferingFieldNames().toString();
@@ -365,7 +364,7 @@ public class NotificationMail {
             return "NPE";
         }
     }
-    
+
     private String changes() {
         try {
             return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
@@ -373,7 +372,7 @@ public class NotificationMail {
             return "NPE";
         }
     }
-    
+
     private String stateChanges() {
         try {
             return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());

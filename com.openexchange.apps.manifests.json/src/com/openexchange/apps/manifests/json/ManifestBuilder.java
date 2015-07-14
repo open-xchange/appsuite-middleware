@@ -49,15 +49,16 @@
 
 package com.openexchange.apps.manifests.json;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.apps.manifests.ManifestContributor;
 import com.openexchange.exception.OXException;
-import com.openexchange.osgi.NearRegistryServiceTracker;
+import com.openexchange.osgi.ServiceListing;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link ManifestBuilder} - Build manifests based on manifest files and registered {@link ManifestContributor}s.
@@ -68,47 +69,94 @@ import com.openexchange.tools.session.ServerSession;
 public class ManifestBuilder {
 
     final private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ManifestBuilder.class);
-    
-    private JSONArray manifests;
-    private NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker;
 
-    public ManifestBuilder(JSONArray manifests, NearRegistryServiceTracker<ManifestContributor> manifestContributorTracker) {
-        this.manifests = manifests;
-        this.manifestContributorTracker = manifestContributorTracker;
+    private final AtomicReference<JSONArray> initialManifestsReference;
+    private final ServiceListing<ManifestContributor> manifestContributors;
+    private volatile JSONArray cachedResult;
+
+    /**
+     * Initializes a new {@link ManifestBuilder}.
+     *
+     * @param manifests The JSON array providing the manifests
+     * @param manifestContributorTracker The contributor tracker
+     */
+    public ManifestBuilder(JSONArray manifests, ServiceListing<ManifestContributor> manifestContributors) {
+        super();
+        this.initialManifestsReference = new AtomicReference<JSONArray>(manifests);
+        this.manifestContributors = manifestContributors;
     }
-    
+
+    /**
+     * Reinitializes this builder with new initial manifests
+     *
+     * @param manifests The new initial manifests
+     */
+    public void reinitialize(JSONArray manifests) {
+        this.initialManifestsReference.set(manifests);
+        reset();
+    }
+
+    /**
+     * Resets this manifest builder.
+     */
+    public void reset() {
+        cachedResult = null;
+    }
+
     /**
      * Compute the manifests from files and {@link ManifestContributor}s.
-     * 
+     *
      * @param session The {@link ServerSession}
-     * @throws OXException 
+     * @throws OXException
      */
     public JSONArray buildManifests(ServerSession session) throws OXException {
-        manifests = new JSONArray(manifests);
+        // Any contributors?
+        List<ManifestContributor> contributors = manifestContributors.getServiceList();
+        boolean noContributors = contributors.isEmpty();
+        if (noContributors) {
+            // Check cached result
+            JSONArray cached = cachedResult;
+            if (null != cached) {
+                return cached;
+            }
+        }
 
-        JSONArray result = new JSONArray();
-        for(ManifestContributor contributor: manifestContributorTracker.getServiceList()) {
+        // Fill with initial manifests
+        JSONArray manifests = new JSONArray(initialManifestsReference.get());
+
+        // Add contributions (if any)
+        for (ManifestContributor contributor : contributors) {
             try {
                 JSONArray additionalManifests = contributor.getAdditionalManifests(session);
                 if (additionalManifests != null) {
-                    for(int i = 0, size = additionalManifests.length(); i < size; i++) {
+                    for (int i = 0, size = additionalManifests.length(); i < size; i++) {
                         manifests.put(additionalManifests.get(i));
                     }
                 }
-            } catch (OXException|JSONException ex) {
+            } catch (OXException | JSONException ex) {
                 LOG.error("Error while trying to get additional manifests from contributor {} ", contributor, ex);
             }
         }
 
+        // Build resulting manifests
         try {
-                for (int i = 0, size = manifests.length(); i < size; i++) {
-                    JSONObject definition = manifests.getJSONObject(i);
-                    result.put(new JSONObject(definition));
-                }
+            int size = manifests.length();
+            JSONArray result = new JSONArray(size);
+            for (int i = 0; i < size; i++) {
+                // Put a copy into result
+                JSONObject definition = manifests.getJSONObject(i);
+                result.put(new JSONObject(definition));
+            }
+
+            // Caching only possible if no ManifestContributor available
+            if (noContributors) {
+                cachedResult = result;
+            }
+
+            return result;
         } catch (JSONException x) {
             throw AjaxExceptionCodes.JSON_ERROR.create(x.getMessage(), x);
         }
-        return result;
     }
-    
+
 }

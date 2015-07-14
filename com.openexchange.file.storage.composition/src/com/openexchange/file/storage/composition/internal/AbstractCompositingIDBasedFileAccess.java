@@ -87,6 +87,7 @@ import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageETagProvider;
 import com.openexchange.file.storage.FileStorageEfficientRetrieval;
 import com.openexchange.file.storage.FileStorageEventConstants;
@@ -103,10 +104,10 @@ import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileStorageVersionedFileAccess;
+import com.openexchange.file.storage.ObjectPermissionAware;
 import com.openexchange.file.storage.Range;
 import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
 import com.openexchange.file.storage.composition.FolderID;
@@ -501,6 +502,20 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     @Override
+    public SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException {
+        List<SearchIterator<File>> searchIterators = new ArrayList<SearchIterator<File>>();
+        List<FileStorageFileAccess> fileStorageAccesses = getAllFileStorageAccesses();
+        for (FileStorageFileAccess fileAccess : fileStorageAccesses) {
+            if (ObjectPermissionAware.class.isInstance(fileAccess)) {
+                SearchIterator<File> searchIterator = ((ObjectPermissionAware) fileAccess).getUserSharedDocuments(fields, sort, order);
+                FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
+                searchIterators.add(fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId()));
+            }
+        }
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), searchIterators);
+    }
+
+    @Override
     public File getFileMetadata(final String id, final String version) throws OXException {
         final FileID fileID = new FileID(id);
         FileStorageFileAccess fileAccess = getFileAccess(fileID.getService(), fileID.getAccountId());
@@ -778,7 +793,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             document.setFolderId(targetFolderID.getFolderId());
             FileStorageFileAccess fileAccess = getFileAccess(serviceID, accountID);
             /*
-             * collect warnings prior saving & abort the operation if not ignored 
+             * collect warnings prior saving & abort the operation if not ignored
              */
             List<OXException> warnings = collectWarningsBeforeSave(document, fileAccess, modifiedColumns);
             if (0 < warnings.size()) {
@@ -997,7 +1012,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
             @Override
             protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
-                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, null);
+                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, null);
                 IDTuple result = access.saveDocument(document, data, sequenceNumber);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
@@ -1022,12 +1037,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
             @Override
             protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
-                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, modifiedColumns);
+                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
                 IDTuple result;
                 if (ignoreVersion && FileStorageFileAccess.NEW != document.getId() &&
                     FileStorageTools.supports(access, FileStorageCapability.IGNORABLE_VERSION)) {
                     /*
-                     * save and don't increment the version number 
+                     * save and don't increment the version number
                      */
                     result = ((FileStorageIgnorableVersionFileAccess) access).saveDocument(
                         document, data, sequenceNumber, modifiedColumns, ignoreVersion);
@@ -1053,7 +1068,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 if (false == FileStorageTools.supports(access, FileStorageCapability.RANDOM_FILE_ACCESS)) {
                     throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(access.getAccountAccess().getService());
                 }
-                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, modifiedColumns);
+                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
                 IDTuple result = ((FileStorageRandomFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
@@ -1068,7 +1083,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
             @Override
             protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
-                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, null);
+                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, null);
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
@@ -1088,7 +1103,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
             @Override
             protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
-                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(access, document, modifiedColumns);
+                ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
@@ -1600,12 +1615,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         }
         if (false == Strings.isEmpty(file.getCategories()) && (null == modifiedColumns || modifiedColumns.contains(Field.CATEGORIES)) &&
             false == FileStorageTools.supports(fileAccess, Field.CATEGORIES)) {
-            warnings.add(FileStorageExceptionCodes.NO_CATEGORIES_SUPPORT.create(file.getFileName(), 
+            warnings.add(FileStorageExceptionCodes.NO_CATEGORIES_SUPPORT.create(file.getFileName(),
                 getAccountName(this, fileAccess), file.getId(), file.getFolderId()));
         }
         if (null != file.getObjectPermissions() && 0 < file.getObjectPermissions().size() &&
             false == FileStorageTools.supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
-            warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create( 
+            warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(
                 getAccountName(this, fileAccess), file.getFolderId(), session.getContextId()));
         }
         return warnings;

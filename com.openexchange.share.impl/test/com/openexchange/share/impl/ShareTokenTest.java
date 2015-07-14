@@ -53,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.Random;
 import org.junit.Test;
 import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.share.core.tools.ShareToken;
 
 
 /**

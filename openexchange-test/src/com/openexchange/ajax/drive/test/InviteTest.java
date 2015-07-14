@@ -70,7 +70,6 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.test.FolderTestManager;
@@ -175,7 +174,7 @@ public class InviteTest extends AbstractDriveShareTest {
         }
         assertNotNull("Missing share.", share);
 
-        GuestClient guestClient = new GuestClient(share.getShareURL(null, null), null, recipient.getPassword());
+        GuestClient guestClient = new GuestClient(share.getShareURL(getRequestContext()), null, recipient.getPassword());
         InfostoreTestManager itmGuest = new InfostoreTestManager(guestClient);
         checkFilePermission(guestClient.getValues().getUserId(), ObjectPermission.READ, itmGuest.getAction(getId(file)));
     }
@@ -230,7 +229,7 @@ public class InviteTest extends AbstractDriveShareTest {
         }
         assertNotNull("Missing share.", share);
 
-        GuestClient guestClient = new GuestClient(share.getShareURL(null, null), null, recipient.getPassword());
+        GuestClient guestClient = new GuestClient(share.getShareURL(getRequestContext()), null, recipient.getPassword());
         FolderTestManager ftmGuest = new FolderTestManager(guestClient);
         checkFolderPermission(guestClient.getValues().getUserId(), FOLDER_READ_PERMISSION, ftmGuest.getFolderFromServer(folder.getObjectID()));
     }

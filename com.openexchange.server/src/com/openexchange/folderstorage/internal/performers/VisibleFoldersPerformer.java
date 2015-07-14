@@ -372,37 +372,4 @@ public final class VisibleFoldersPerformer extends AbstractUserizedFolderPerform
         }
     }
 
-    private static final ThreadPools.ExpectedExceptionFactory<OXException> FACTORY =
-        new ThreadPools.ExpectedExceptionFactory<OXException>() {
-
-            @Override
-            public Class<OXException> getType() {
-                return OXException.class;
-            }
-
-            @Override
-            public OXException newUnexpectedError(final Throwable t) {
-                return FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(t, t.getMessage());
-            }
-        };
-
-    /**
-     * Creates a newly allocated array containing all elements of specified array in the same order except <code>null</code> values.
-     *
-     * @param userizedFolders The array to trim
-     * @return A newly allocated copy-array with <code>null</code> elements removed
-     */
-    private static UserizedFolder[] trimArray(final UserizedFolder[] userizedFolders) {
-        if (null == userizedFolders) {
-            return new UserizedFolder[0];
-        }
-        final List<UserizedFolder> l = new ArrayList<UserizedFolder>(userizedFolders.length);
-        for (final UserizedFolder uf : userizedFolders) {
-            if (null != uf) {
-                l.add(uf);
-            }
-        }
-        return l.toArray(new UserizedFolder[l.size()]);
-    }
-
 }

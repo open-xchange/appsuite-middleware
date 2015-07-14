@@ -51,34 +51,39 @@ package com.openexchange.report.client.container;
 
 public class Total {
 
-	private String contexts;
+	private final String contexts;
 
-	private String users;
+    private final String users;
 
-	public Total(String contexts, String users) {
+    private final String guests;
+
+    private final String links;
+
+	public Total(String contexts, String users, String guests, String links) {
 		this.contexts = contexts;
 		this.users = users;
+		this.guests = guests;
+		this.links = links;
 	}
 
 	public String getContexts() {
 		return contexts;
 	}
 
-	public void setContexts(String contexts) {
-		this.contexts = contexts;
-	}
+    public String getUsers() {
+        return users;
+    }
 
-	public String getUsers() {
-		return users;
-	}
+    public String getGuests() {
+        return guests;
+    }
 
-	public void setUsers(String users) {
-		this.users = users;
-	}
+    public String getLinks() {
+        return links;
+    }
 
 	@Override
 	public String toString() {
-		return "TotalObject [contexts=" + contexts + ", users=" + users + "]";
+		return "TotalObject [contexts=" + contexts + ", users=" + users + ", guests=" + guests + ", links=" + links  + "]";
 	}
-
 }

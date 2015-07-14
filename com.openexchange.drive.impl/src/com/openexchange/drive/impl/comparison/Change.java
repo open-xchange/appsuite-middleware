@@ -49,8 +49,8 @@
 
 package com.openexchange.drive.impl.comparison;
 
-import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 

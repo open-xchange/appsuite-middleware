@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.mime;
 
+import static com.openexchange.java.Strings.asciiLowerCase;
 import static com.openexchange.java.Strings.toUpperCase;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEncodedHeader;
 import java.util.Iterator;
@@ -303,6 +304,8 @@ public class ContentType extends ParameterizedHeader {
     private static final String PARAM_CHARSET = "charset";
 
     private static final String PARAM_NAME = "name";
+
+    private static final String PARAM_BOUNDARY = "boundary";
 
     private String primaryType;
 
@@ -643,6 +646,19 @@ public class ContentType extends ParameterizedHeader {
     /**
      * Checks if this Content-Type has specified base type.
      *
+     * @param baseType The base type; e.g. <code>"text/plain"</code>
+     * @return <code>true</code> if equals given base type; otherwise <code>false</code>
+     */
+    public boolean isBaseType(final String baseType) {
+        if (null == baseType) {
+            throw new IllegalArgumentException("baseType is null");
+        }
+        return getLowerCaseBaseType().equals(toLowerCase(baseType));
+    }
+
+    /**
+     * Checks if this Content-Type has specified base type.
+     *
      * @param primaryType The primary type; e.g. <code>"text"</code>
      * @param subType The secondary type; e.g. <code>"plain"</code>
      * @return <code>true</code> if equals given base type; otherwise <code>false</code>
@@ -772,6 +788,20 @@ public class ContentType extends ParameterizedHeader {
      */
     public String removeNameParameter() {
         return removeParameter(PARAM_NAME);
+    }
+
+    /**
+     * @return the <code>"boundary"</code> value or <code>null</code> if not present
+     */
+    public String getBoundaryParameter() {
+        return getParameter(PARAM_BOUNDARY);
+    }
+
+    /**
+     * @return <code>true</code> if <code>"boundary"</code> parameter is present, <code>false</code> otherwise
+     */
+    public boolean containsBoundaryParameter() {
+        return containsParameter(PARAM_BOUNDARY);
     }
 
     /**
@@ -930,6 +960,30 @@ public class ContentType extends ParameterizedHeader {
         return (s.toString());
     }
 
+    /**
+     * Returns a RFC2045 style (ASCII-only) string representation of this content type.
+     *
+     * @return A RFC2045 style (ASCII-only) string representation of this content type
+     */
+    public String toLowerCaseString() {
+        return toLowerCaseString(false);
+    }
+
+    /**
+     * Returns a RFC2045 style (ASCII-only) string representation of this content type.
+     *
+     * @param skipEmptyParams <code>true</code> to skip empty parameters; otherwise <code>false</code>
+     * @return A RFC2045 style (ASCII-only) string representation of this content type
+     */
+    public String toLowerCaseString(boolean skipEmptyParams) {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(asciiLowerCase(primaryType)).append(DELIMITER).append(asciiLowerCase(subType));
+        if (null != parameterList) {
+            parameterList.appendRFC2045String(sb, skipEmptyParams);
+        }
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
         return toString(false);
@@ -953,8 +1007,14 @@ public class ContentType extends ParameterizedHeader {
      * @return A RFC2045 style (ASCII-only) string representation of this content type
      */
     public String toString(boolean skipEmptyParams, boolean upperCase) {
-        final StringBuilder sb = new StringBuilder(64);
-        sb.append(upperCase ? toUpperCase(primaryType) : primaryType).append(DELIMITER).append(upperCase ? toUpperCase(subType) : subType);
+        StringBuilder sb = new StringBuilder(64);
+
+        if (upperCase) {
+            sb.append(toUpperCase(primaryType)).append(DELIMITER).append(toUpperCase(subType));
+        } else {
+            sb.append(primaryType).append(DELIMITER).append(subType);
+        }
+
         if (null != parameterList) {
             parameterList.appendRFC2045String(sb, skipEmptyParams);
         }

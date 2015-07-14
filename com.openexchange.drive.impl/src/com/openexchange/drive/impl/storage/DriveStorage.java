@@ -78,6 +78,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
@@ -88,7 +89,6 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -129,8 +129,8 @@ public class DriveStorage {
     }
 
     /**
-     * Gets the user's permission for a specific folder. 
-     * 
+     * Gets the user's permission for a specific folder.
+     *
      * @param path The path to the folder to get the own permissions for
      * @return The permissions
      */
@@ -682,7 +682,7 @@ public class DriveStorage {
 
     /**
      * Gets the directory path for the supplied folder identifier, relative to the root synchronization folder.
-     * 
+     *
      * @param folderID The folder identifier to get the path for
      * @return The path
      */
@@ -699,7 +699,7 @@ public class DriveStorage {
 
     /**
      * Gets the identifier of the folder behind the supplied path.
-     * 
+     *
      * @param path The path to get the folder identifier for
      * @return The folder identifier
      */
@@ -709,7 +709,7 @@ public class DriveStorage {
 
     /**
      * Gets the identifier of the folder behind the supplied path.
-     * 
+     *
      * @param path The path to get the folder identifier for
      * @param createIfNeeded <code>true</code> to create new folders in case the path not exists, <code>false</code>, otherwise
      * @return The folder identifier
@@ -720,7 +720,7 @@ public class DriveStorage {
 
     /**
      * Gets the folder behind the supplied path.
-     * 
+     *
      * @param path The path to get the folder for
      * @return The folder
      */
@@ -730,7 +730,7 @@ public class DriveStorage {
 
     /**
      * Gets the folder behind the supplied path.
-     * 
+     *
      * @param path The path to get the folder for
      * @param createIfNeeded <code>true</code> to create new folders in case the path not exists, <code>false</code>, otherwise
      * @return The folder
@@ -745,7 +745,7 @@ public class DriveStorage {
 
     /**
      * Optionally gets the folder behind the supplied path, not throwing exceptions in case it not yet exists.
-     * 
+     *
      * @param path The path to get the folder for
      * @return The folder, or <code>null</code> if not found
      */

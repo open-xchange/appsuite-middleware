@@ -215,7 +215,7 @@ public class MimeFilter {
             if (com.openexchange.java.Strings.isEmpty(contentType)) {
                 newMultipart.addBodyPart(bodyPart);
             } else {
-                contentType = toLowerCase(contentType.trim());
+                contentType = com.openexchange.java.Strings.toLowerCase(contentType.trim());
                 if (contentType.startsWith("multipart/")) {
                     final MimeMultipart newSubMultipart = new MimeMultipart(getSubType(contentType, "mixed"));
                     {
@@ -259,18 +259,4 @@ public class MimeFilter {
             return defaultType;
         }
     }
-
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

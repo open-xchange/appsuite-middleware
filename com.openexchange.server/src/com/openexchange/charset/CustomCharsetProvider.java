@@ -92,8 +92,8 @@ public final class CustomCharsetProvider extends CharsetProvider {
         if (name2charset == null) {
             synchronized (CustomCharsetProvider.class) {
                 if (name2charset == null) {
-                    name2charset = new ConcurrentHashMap<String, Charset>(8);
-                    startsWith2charset = new ConcurrentHashMap<String, Charset>(8);
+                    name2charset = new ConcurrentHashMap<String, Charset>(8, 0.9f, 1);
+                    startsWith2charset = new ConcurrentHashMap<String, Charset>(8, 0.9f, 1);
                 }
             }
         }

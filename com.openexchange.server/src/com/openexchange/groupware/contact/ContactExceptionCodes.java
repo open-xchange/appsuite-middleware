@@ -268,6 +268,13 @@ public enum ContactExceptionCodes implements DisplayableOXExceptionCode {
     INCORRECT_STRING("Field \"%2$s\" contains invalid character: \"%1$s\"", ContactExceptionMessages.INCORRECT_STRING_DISPLAY, Category.CATEGORY_USER_INPUT, 262),
 
     /**
+     * Search aborted for query \"%1$s\" with more than %2$d patterns. <br />
+     * The query \"%1$s\" contains too many patterns. Please shorten the query and try again.
+     */
+    TOO_MANY_PATTERNS("Search aborted for query \"%1$s\" with more than %2$d patterns.",
+        ContactExceptionMessages.TOO_MANY_PATTERNS_DISPLAY, Category.CATEGORY_USER_INPUT, 263),
+
+    /**
      * Number of documents attached to this contact is below zero. You can not
      * remove any more attachments.
      */

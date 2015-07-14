@@ -1,0 +1,27 @@
+<#--
+    Include this somehere at the top of your template. You can then use
+    the <@styledButton> macro to render a button with inline styles.
+    This is intended to be used for email templates, not for general static
+    HTML.
+-->
+<#macro styledButton link color="#ffffff" background="#3c73aa" borderColor="#356697">
+  <a class="btn" href="${link}" style="
+
+color:${color};
+background:${background};
+border-color:${borderColor};
+
+padding:10px 15px;
+font-size:14px;
+line-height:1.5;
+border-radius:3px;
+
+text-align:center;
+text-decoration:none;
+vertical-align:middle;
+
+">
+    <span><#nested></span>
+  </a>
+</#macro>
+

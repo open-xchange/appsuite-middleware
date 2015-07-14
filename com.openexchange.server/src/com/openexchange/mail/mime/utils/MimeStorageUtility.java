@@ -511,8 +511,10 @@ public final class MimeStorageUtility {
         field2item.put(MailField.HEADERS, IMAPFolder.FetchProfileItem.HEADERS);
         field2item.put(MailField.ID, UIDFolder.FetchProfileItem.UID);
         field2item.put(MailField.CONTENT_TYPE, FetchProfile.Item.CONTENT_INFO);
+        field2item.put(MailField.MIME_TYPE, FetchProfile.Item.CONTENT_INFO);
         field2item.put(MailField.SIZE, FetchProfile.Item.SIZE);
         field2item.put(MailField.FLAGS, FetchProfile.Item.FLAGS);
+        field2item.put(MailField.COLOR_LABEL, FetchProfile.Item.FLAGS);
         field2item.put(MailField.ORIGINAL_ID, ORIGINAL_MAILBOX);
         field2item.put(MailField.ORIGINAL_FOLDER_ID, ORIGINAL_UID);
         FIELD2ITEM = field2item;
@@ -538,18 +540,13 @@ public final class MimeStorageUtility {
      * @param field The field to add
      */
     public static void addFetchItem(final FetchProfile fp, final MailField field) {
-        if (MailField.COLOR_LABEL.equals(field)) {
-            if (!fp.contains(FetchProfile.Item.FLAGS)) {
-                fp.add(FetchProfile.Item.FLAGS);
-            }
-            return;
-        }
-        final Item item = FIELD2ITEM.get(field);
+        Item item = FIELD2ITEM.get(field);
         if (null != item) {
             fp.add(item);
             return;
         }
-        final List<String> strings = FIELD2STRING.get(field);
+
+        List<String> strings = FIELD2STRING.get(field);
         if (null != strings) {
             for (final String string : strings) {
                 fp.add(string);

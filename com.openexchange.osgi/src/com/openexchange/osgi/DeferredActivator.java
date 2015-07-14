@@ -237,7 +237,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     protected DeferredActivator() {
         super();
         started = new AtomicBoolean();
-        additionalServices = new ConcurrentHashMap<Class<?>, ReferencedService<?>>(6);
+        additionalServices = new ConcurrentHashMap<Class<?>, ReferencedService<?>>(6, 0.9f, 1);
     }
 
     /**
@@ -290,7 +290,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         updateServiceState();
         final Class<?>[] classes = getNeededServices();
         if (null == classes || 0 == classes.length) {
-            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1);
+            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
             startUp(false);
@@ -306,7 +306,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     }
                 }
             }
-            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len);
+            services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[len];
             availability = 0;
             allAvailable = (1 << len) - 1;

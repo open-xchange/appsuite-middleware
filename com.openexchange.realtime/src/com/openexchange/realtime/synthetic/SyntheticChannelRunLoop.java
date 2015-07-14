@@ -75,7 +75,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
     */
     private final static MessageDispatch NOOP = new MessageDispatch(null, null) {
         @Override
-        public void tick() throws OXException {}
+        public void tick() {/*NOOP*/}
     };
 
     public SyntheticChannelRunLoop(String name) {
@@ -83,7 +83,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
     }
 
     @Override
-    protected void handle(MessageDispatch element) throws OXException {
+    protected void handle(MessageDispatch element) {
         element.tick();
     }
 

@@ -217,7 +217,7 @@ final class DoubleKeyMap<K1, K2, V extends Serializable> implements Serializable
         final Map<K1, Map<K2, V>> m = getMap();
         Map<K2, V> innerMap = m.get(k1);
         if (innerMap == null) {
-            innerMap = new ConcurrentHashMap<K2, V>(values.length);
+            innerMap = new ConcurrentHashMap<K2, V>(values.length, 0.9f, 1);
             m.put(k1, innerMap);
         }
         for (int i = 0; i < values.length; i++) {

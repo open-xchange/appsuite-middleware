@@ -70,7 +70,7 @@ public interface PushMBean {
      * @return The permanent push users running on this node
      * @throws MBeanException If push user cannot be returned
      */
-    String[] listPermanentPushUsers() throws MBeanException;
+    String[] listPushUsers() throws MBeanException;
 
     /**
      * Unregisters the permanent listener for specified push user

@@ -51,8 +51,6 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -67,11 +65,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginRampUpService;
-import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.share.AuthenticationMode;
@@ -109,7 +105,6 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
             if (null == configService) {
                 throw ServiceExceptionCode.absentService(ConfigurationService.class);
             }
-            int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
 
             String body = AJAXServlet.getBody(httpRequest);
             if (Strings.isEmpty(body)) {
@@ -120,7 +115,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
 
                 pass = httpRequest.getParameter(LoginFields.PASSWORD_PARAM);
-                if (Strings.isEmpty(pass) && emptyGuestPasswords == 0) {
+                if (Strings.isEmpty(pass)) {
                     throw AjaxExceptionCodes.MISSING_PARAMETER.create(LoginFields.PASSWORD_PARAM);
                 }
             } else {
@@ -130,6 +125,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 login = jBody.getString("login");
             }
 
+            final Map<String, Object> loginProperties = new HashMap<String, Object>(1);
             return new LoginInfo() {
                 @Override
                 public String getPassword() {
@@ -141,7 +137,7 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
                 }
                 @Override
                 public Map<String, Object> getProperties() {
-                    return new HashMap<String, Object>(1);
+                    return loginProperties;
                 }
             };
         } catch (JSONException e) {
@@ -154,47 +150,8 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
     @Override
     protected User authenticateUser(GuestShare share, LoginInfo loginInfo, Context context) throws OXException {
         // Resolve the user
-        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-        ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-        if (null == userService) {
-            throw ServiceExceptionCode.absentService(UserService.class);
-        }
-        if (null == configService) {
-            throw ServiceExceptionCode.absentService(ConfigurationService.class);
-        }
-        int emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
+        UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
         User user = userService.getUser(share.getGuest().getGuestID(), context);
-        int loginCount = 0;
-        if (emptyGuestPasswords > 0) {
-            Set<String> loginsWithoutPassword = user.getAttributes().get("guestLoginWithoutPassword");
-            if (null != loginsWithoutPassword && !loginsWithoutPassword.isEmpty()) {
-                try {
-                    loginCount = Integer.parseInt(loginsWithoutPassword.iterator().next());
-                } catch (RuntimeException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
-                }
-            }
-        }
-        if (!share.getGuest().isPasswordSet()) {
-            if (Strings.isEmpty(loginInfo.getPassword()) && emptyGuestPasswords > 0 && emptyGuestPasswords > loginCount) {
-                userService.setAttribute("guestLoginWithoutPassword", String.valueOf(++loginCount), share.getGuest().getGuestID(), context);
-                return user;
-            }
-            if (!Strings.isEmpty(loginInfo.getPassword())) {
-                try {
-                UserImpl userToUpdate = new UserImpl(user);
-                userToUpdate.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
-                userToUpdate.setUserPassword(PasswordMech.BCRYPT.encode(loginInfo.getPassword()));
-                userService.updateUser(userToUpdate, context);
-                return userToUpdate;
-                } catch (UnsupportedEncodingException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
-                } catch (NoSuchAlgorithmException e) {
-                    throw LoginExceptionCodes.UNKNOWN.create(e);
-                }
-            }
-            throw LoginExceptionCodes.LOGINS_WITHOUT_PASSWORD_EXCEEDED.create();
-        }
 
         // Authenticate the user
         if (!userService.authenticate(user, loginInfo.getPassword())) {
@@ -202,10 +159,10 @@ public class GuestLogin extends AbstractShareBasedLoginRequestHandler {
             if (guestService != null) {
                 boolean authenticate = guestService.authenticate(user, context.getContextId(), loginInfo.getPassword());
                 if (authenticate == false) {
-                    throw INVALID_CREDENTIALS.create();
+                    throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
                 }
             } else {
-                throw INVALID_CREDENTIALS.create();
+                throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
             }
         }
         if (!loginInfo.getUsername().equals(user.getMail())) {

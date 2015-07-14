@@ -50,6 +50,9 @@
 package com.openexchange.file.storage.dummy;
 
 import com.openexchange.file.storage.AbstractFileStorageAccountAccess;
+import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageServiceFactory;
 import com.openexchange.session.Session;
 
@@ -59,10 +62,15 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class DummyFileStorageAccountAccess extends AbstractFileStorageAccountAccess {
+public class DummyFileStorageAccountAccess extends AbstractFileStorageAccountAccess implements CapabilityAware {
 
     protected DummyFileStorageAccountAccess(FileStorageServiceFactory factory, Session session, String accountId) {
         super(factory, session, accountId);
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(DummyFileStorageFileAccess.class, capability);
     }
 
 }

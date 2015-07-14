@@ -49,11 +49,12 @@
 
 package com.openexchange.ajax;
 
+import static com.openexchange.ajax.LoginServlet.SESSION_PREFIX;
+import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
 import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Strings.toLowerCase;
 import static com.openexchange.tools.servlet.http.Cookies.extractDomainValue;
-import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -91,7 +92,10 @@ import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.services.SessionInspector;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -215,30 +219,42 @@ public final class SessionUtility {
      * @param resp The response
      * @throws OXException If initialization fails
      */
-    public static void defaultInitializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
-        if (null != getSessionObject(req, true)) {
-            return;
+    public static SessionResult<ServerSession> defaultInitializeSession(final HttpServletRequest req, final HttpServletResponse resp) throws OXException {
+        ServerSession session = getSessionObject(req, true);
+        if (null != session) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, session);
         }
-        // Remember session
-        final SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
+
+        // Require SessionD service
+        SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        final ServerSession session;
+
+        // Look-up & remember session
+        SessionResult<ServerSession> result;
         {
-            final String sSession = req.getParameter(PARAMETER_SESSION);
+            String sSession = req.getParameter(PARAMETER_SESSION);
             if (sSession != null && sSession.length() > 0) {
                 final String sessionId = getSessionId(req);
-                session = getSession(req, sessionId, sessiondService);
+                result = getSession(req, resp, sessionId, sessiondService);
+                if (Reply.STOP == result.getReply()) {
+                    return result;
+                }
+                session = result.getSession();
+                if (null == session) {
+                    // Should not occur
+                    throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+                }
                 verifySession(req, sessiondService, sessionId, session);
                 rememberSession(req, session);
                 checkPublicSessionCookie(req, resp, session, sessiondService);
-            } else {
-                session = null;
             }
         }
+
         // Try public session
         findPublicSessionId(req, session, sessiondService, false, false);
+        return new SessionResult<ServerSession>(Reply.CONTINUE, session);
     }
 
     private static final String PARAM_ALTERNATIVE_ID = Session.PARAM_ALTERNATIVE_ID;
@@ -257,31 +273,23 @@ public final class SessionUtility {
      * @throws OXException If public session cannot be created
      */
     public static boolean findPublicSessionId(final HttpServletRequest req, final ServerSession session, final SessiondService sessiondService, final boolean mayUseFallbackSession, final boolean mayPerformPublicSessionAuth) throws OXException {
-        final Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
-        if (cookies == null) {
-            // No cookies available - Try to look-up by parameter
-            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
-            if (null != publicSessionId) {
-                return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth || isChangeable(session, req));
-            }
-        } else {
-            Cookie cookie = cookies.get(getPublicSessionCookieName(req));
-            if (null != cookie) {
-                return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
-            }
+        Map<String, Cookie> cookies = Cookies.cookieMapFor(req);
+        Cookie cookie = cookies.get(getPublicSessionCookieName(req));
+        if (null != cookie) {
+            return handlePublicSessionIdentifier(cookie.getValue(), req, session, sessiondService, false);
+        }
 
-            // No such cookie
-            String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
-            if (null != publicSessionId) {
-                return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth || isChangeable(session, req));
-            }
+        // No such cookie
+        String publicSessionId = req.getParameter(PARAMETER_PUBLIC_SESSION);
+        if (null != publicSessionId) {
+            return handlePublicSessionIdentifier(publicSessionId, req, session, sessiondService, mayPerformPublicSessionAuth);
+        }
 
-            // No such "public_session" parameter
-            if (mayUseFallbackSession && isChangeable(session, req)) {
-                for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
-                    if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
-                        return handlePublicSessionIdentifier(entry.getValue().getValue(), req, session, sessiondService, false);
-                    }
+        // No such "public_session" parameter
+        if (mayUseFallbackSession && isChangeable(req)) {
+            for (Map.Entry<String, Cookie> entry : cookies.entrySet()) {
+                if (entry.getKey().startsWith(PUBLIC_SESSION_PREFIX)) {
+                    return handlePublicSessionIdentifier(entry.getValue().getValue(), req, session, sessiondService, false);
                 }
             }
         }
@@ -465,46 +473,95 @@ public final class SessionUtility {
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
-     * @return the session.
-     * @throws OXException if the session can not be found.
+     * @return The session result
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
-    public static ServerSession getSession(final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
-        return getSession(hashSource, req, sessionId, sessiondService);
+    public static SessionResult<ServerSession> getSession(HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
+        return getSession(hashSource, req, resp, sessionId, sessiondService);
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
      * @param source defines how the cookie should be found
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
-     * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @return The session result
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
-    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService) throws OXException {
-        return getSession(source, req, sessionId, sessiondService, null);
+    public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService) throws OXException {
+        return getSession(source, req, resp, sessionId, sessiondService, null);
     }
 
     /**
-     * Finds appropriate local session.
+     * Checks if a valid session exists in terms of the passed ID and servlet request.
+     * If the session ID is valid, the according sessions secret will be checked against
+     * the cookies of the servlet request.
      *
      * @param source defines how the cookie should be found
+     * @param req The associated HTTP request
+     * @param resp The associated HTTP response
      * @param sessionId identifier of the session.
      * @param sessiondService The SessionD service
-     * @return the session.
-     * @throws SessionException if the session can not be found.
+     * @param optChecker The {@link SessionSecretChecker} to verify the secret cookie.
+     *        May be <code>null</code> to use the default.
+     * @return The session result
+     * @throws OXException If the session can not be found. The following error codes indicate
+     *         a validation error:
+     *         <ul>
+     *          <li>{@link SessionExceptionCodes#SESSION_EXPIRED}: The session ID is invalid or
+     *              the according context or user have been deleted/disabled.</li>
+     *          <li>{@link SessionExceptionCodes#WRONG_SESSION_SECRET}: The session of the
+     *              passed ID does not match to the requests secret cookie.</li>
+     *         </ul>
      */
-    public static ServerSession getSession(final CookieHashSource source, final HttpServletRequest req, final String sessionId, final SessiondService sessiondService, final SessionSecretChecker optChecker) throws OXException {
-        final Session session = sessiondService.getSession(sessionId);
+    public static SessionResult<ServerSession> getSession(CookieHashSource source, HttpServletRequest req, HttpServletResponse resp, String sessionId, SessiondService sessiondService, SessionSecretChecker optChecker) throws OXException {
+        Session session = sessiondService.getSession(sessionId);
         if (null == session) {
             if (!"unset".equals(sessionId)) {
                 LOG.info("There is no session associated with session identifier: {}", sessionId);
             }
+            /*
+             * Session MISS -- Consult session inspector
+             */
+            if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionMiss(sessionId, req, resp)) {
+                return new SessionResult<ServerSession>(Reply.STOP, null);
+            }
+
+            // Otherwise throw appropriate error
             throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
+        /*
+         * Session HIT -- Consult session inspector
+         */
+        if (Reply.STOP == SessionInspector.getInstance().getChain().onSessionHit(session, req, resp)) {
+            return new SessionResult<ServerSession>(Reply.STOP, ServerSessionAdapter.valueOf(session));
         }
         /*
          * Get session secret
@@ -515,13 +572,13 @@ public final class SessionUtility {
             optChecker.checkSecret(session, req, source.name());
         }
         try {
-            final User user = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
+            User user = UserStorage.getInstance().getUser(session.getUserId(), ContextStorage.getInstance().getContext(session.getContextId()));
             if (!user.isMailEnabled()) {
                 LOG.info("User {} in context {} is not activated.", Integer.toString(user.getId()), Integer.toString(session.getContextId()));
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(session.getSessionID());
             }
-            return ServerSessionAdapter.valueOf(session);
-        } catch (final OXException e) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
+        } catch (OXException e) {
             if (ContextExceptionCodes.NOT_FOUND.equals(e)) {
                 // An outdated session; context absent
                 sessiondService.removeSession(sessionId);
@@ -529,7 +586,7 @@ public final class SessionUtility {
                 throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
             }
             if (UserExceptionCode.USER_NOT_FOUND.getPrefix().equals(e.getPrefix())) {
-                final int code = e.getCode();
+                int code = e.getCode();
                 if (UserExceptionCode.USER_NOT_FOUND.getNumber() == code || LdapExceptionCode.USER_NOT_FOUND.getNumber() == code) {
                     // An outdated session; user absent
                     sessiondService.removeSession(sessionId);
@@ -538,7 +595,7 @@ public final class SessionUtility {
                 }
             }
             throw e;
-        } catch (final UndeclaredThrowableException e) {
+        } catch (UndeclaredThrowableException e) {
             throw UserExceptionCode.USER_NOT_FOUND.create(e, I(session.getUserId()), I(session.getContextId()));
         }
     }
@@ -672,7 +729,7 @@ public final class SessionUtility {
                 }
 
                 // Check for special User-Agent to allow look-up by remembered cookie name
-                if (isChangeable(null, req)) {
+                if (isChangeable(req)) {
                     tmp.setLength(0);
                     cookie = cookies.get(tmp.append(secretPrefix).append(hash).toString());
                     if (null != cookie) {
@@ -703,22 +760,8 @@ public final class SessionUtility {
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
-    private static boolean isChangeable(Session session, HttpServletRequest req) {
-        return (isChangeableClient(detectClientId(session, req)) || isChangeableUserAgent(req.getHeader(USER_AGENT)));
-    }
-
-    private static String detectClientId(Session session, HttpServletRequest req) {
-        String clientByRequest = null == req ? null : req.getParameter("client");
-        if (null != clientByRequest) {
-            return clientByRequest;
-        }
-        return null == session ? null : session.getClient();
-    }
-
-    private static final Set<String> CHANGEABLE_CLIENTS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("open-xchange-mailapp")));
-
-    private static boolean isChangeableClient(String client) {
-        return (null != client) && CHANGEABLE_CLIENTS.contains(client);
+    private static boolean isChangeable(HttpServletRequest req) {
+        return isChangeableUserAgent(req.getHeader(USER_AGENT));
     }
 
     private static boolean isChangeableUserAgent(String userAgent) {
@@ -799,7 +842,7 @@ public final class SessionUtility {
      * @param resp The HTTP response
      */
     public static void removeOXCookies(final String hash, final HttpServletRequest req, final HttpServletResponse resp) {
-        removeOXCookies(req, resp, Arrays.asList(LoginServlet.SESSION_PREFIX + hash, SECRET_PREFIX + hash, getPublicSessionCookieName(req)));
+        removeOXCookies(req, resp, Arrays.asList(SESSION_PREFIX + hash, SECRET_PREFIX + hash, SHARE_PREFIX + hash, getPublicSessionCookieName(req)));
     }
 
     /**
@@ -817,20 +860,7 @@ public final class SessionUtility {
         for (final String cookieName : cookieNames) {
             final Cookie cookie = cookies.get(cookieName);
             if (null != cookie) {
-                final String value = cookie.getValue();
-                final Cookie respCookie = new Cookie(cookieName, value);
-                respCookie.setPath("/");
-                final String domain = getDomainValue(req.getServerName());
-                if (null != domain) {
-                    respCookie.setDomain(domain);
-                    // Once again without domain parameter
-                    final Cookie respCookie2 = new Cookie(cookieName, value);
-                    respCookie2.setPath("/");
-                    respCookie2.setMaxAge(0); // delete
-                    resp.addCookie(respCookie2);
-                }
-                respCookie.setMaxAge(0); // delete
-                resp.addCookie(respCookie);
+                removeCookie(cookie, resp);
             }
         }
     }
@@ -849,21 +879,32 @@ public final class SessionUtility {
         final String name = Tools.JSESSIONID_COOKIE;
         final Cookie cookie = cookies.get(name);
         if (null != cookie) {
-            final String value = cookie.getValue();
-            final Cookie respCookie = new Cookie(name, value);
-            respCookie.setPath("/");
-            final String domain = extractDomainValue(value);
-            if (null != domain) {
-                respCookie.setDomain(domain);
-                // Once again without domain parameter
-                final Cookie respCookie2 = new Cookie(name, value);
-                respCookie2.setPath("/");
-                respCookie2.setMaxAge(0); // delete
-                resp.addCookie(respCookie2);
-            }
-            respCookie.setMaxAge(0); // delete
-            resp.addCookie(respCookie);
+            removeCookie(cookie, resp);
         }
+    }
+
+    /**
+     * Removes a given cookie by setting its MaxAge parameter to 0.
+     *
+     * @param cookie The cookie
+     * @param resp The HTTP Servlet response
+     */
+    public static void removeCookie(final Cookie cookie, final HttpServletResponse resp) {
+        final String name = cookie.getName();
+        final String value = cookie.getValue();
+        final Cookie respCookie = new Cookie(name, value);
+        respCookie.setPath("/");
+        final String domain = extractDomainValue(value);
+        if (null != domain) {
+            respCookie.setDomain(domain);
+            // Once again without domain parameter
+            final Cookie respCookie2 = new Cookie(name, value);
+            respCookie2.setPath("/");
+            respCookie2.setMaxAge(0); // delete
+            resp.addCookie(respCookie2);
+        }
+        respCookie.setMaxAge(0); // delete
+        resp.addCookie(respCookie);
     }
 
     /**

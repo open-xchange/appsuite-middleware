@@ -50,12 +50,13 @@
 package com.openexchange.share.impl;
 
 import java.util.Locale;
-import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -65,14 +66,14 @@ import com.openexchange.share.recipient.RecipientType;
  * @since v7.8.0
  */
 public class InternalUserShareInfo implements ShareInfo {
-    
+
     private final int contextID;
     private final User user;
     private final Share share;
 
     /**
      * Initializes a new {@link InternalUserShareInfo}.
-     * 
+     *
      * @param contextID The context identifier
      * @param user The user
      * @param share The share
@@ -95,52 +96,52 @@ public class InternalUserShareInfo implements ShareInfo {
          * use special guest info for internal user
          */
         return new GuestInfo() {
-            
-            @Override
-            public boolean isPasswordSet() {
-                return true;
-            }
-            
+
             @Override
             public RecipientType getRecipientType() {
                 return RecipientType.USER;
             }
-            
+
             @Override
-            public String getPassword() throws OXException {
+            public String getPassword() {
                 return null;
             }
-            
+
             @Override
             public Locale getLocale() {
                 return null;
             }
-            
+
             @Override
             public int getGuestID() {
                 return user.getId();
             }
-            
+
             @Override
             public String getEmailAddress() {
                 return user.getMail();
             }
-            
+
+            @Override
+            public String getDisplayName() {
+                return user.getDisplayName();
+            }
+
             @Override
             public int getCreatedBy() {
                 return 0;
             }
-            
+
             @Override
             public int getContextID() {
                 return contextID;
             }
-            
+
             @Override
-            public String getBaseToken() throws OXException {
+            public String getBaseToken() {
                 return null;
             }
-            
+
             @Override
             public AuthenticationMode getAuthentication() {
                 return null;
@@ -149,13 +150,13 @@ public class InternalUserShareInfo implements ShareInfo {
     }
 
     @Override
-    public String getToken() throws OXException {
+    public String getToken() {
         return null;
     }
 
     @Override
-    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
-        return null;
+    public String getShareURL(RequestContext requestContext) {
+        return ShareLinks.generateInternal(requestContext, share.getTarget());
     }
 
 }

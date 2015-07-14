@@ -84,7 +84,7 @@ public class TaskActionFactory implements AJAXActionServiceFactory {
 
     public static final String OAUTH_WRITE_SCOPE = "write_tasks";
 
-    private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10);
+    private final Map<String, TaskAction> actions = new ConcurrentHashMap<String, TaskAction>(10, 0.9f, 1);
 
     /**
      * Initializes a new {@link TaskActionFactory}.

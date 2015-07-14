@@ -70,6 +70,28 @@ public final class FileStorages {
 
     // -------------------------------------------------------------------------------------------------------------------------
 
+    private static final AtomicReference<FileStorage2ContextsResolver> RESOLVER_REF = new AtomicReference<FileStorage2ContextsResolver>();
+
+    /**
+     * Sets the "file storage to context" resolver.
+     *
+     * @param resolver The "file storage to context" resolver
+     */
+    public static void setFileStorage2ContextsResolver(FileStorage2ContextsResolver resolver) {
+        RESOLVER_REF.set(resolver);
+    }
+
+    /**
+     * Gets the "file storage to context" resolver.
+     *
+     * @return The "file storage to context" resolver or <code>null</code> if absent
+     */
+    public static FileStorage2ContextsResolver getFileStorage2ContextsResolver() {
+        return RESOLVER_REF.get();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
 
     /**

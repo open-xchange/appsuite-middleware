@@ -344,4 +344,10 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return null;
     }
 
+    @Override
+    public TimedResult<DocumentMetadata> getUserSharedDocuments(Metadata[] columns, Metadata sort, int order, int start, int end, ServerSession session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

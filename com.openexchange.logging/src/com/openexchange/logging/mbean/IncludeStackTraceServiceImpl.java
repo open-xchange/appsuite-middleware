@@ -73,7 +73,7 @@ public final class IncludeStackTraceServiceImpl implements IncludeStackTraceServ
      */
     public IncludeStackTraceServiceImpl() {
         super();
-        map = new ConcurrentHashMap<IncludeStackTraceServiceImpl.Key, Boolean>(32);
+        map = new ConcurrentHashMap<IncludeStackTraceServiceImpl.Key, Boolean>(32, 0.9f, 1);
         nonEmpty = false;
     }
 

@@ -49,8 +49,6 @@
 
 package com.openexchange.share;
 
-import com.openexchange.exception.OXException;
-
 /**
  * {@link ShareInfo}
  *
@@ -78,16 +76,13 @@ public interface ShareInfo {
      *
      * @return The absolute token
      */
-    String getToken() throws OXException;
+    String getToken();
 
     /**
      * Gets the (base) share URL to access the share as guest user and jump to the underlying target directly.
      *
-     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code>, <code>https://</code> is used. You probably
-     *        want to pass <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
-     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
-     *        <code>HttpServletRequest.getServerName()</code> here.
+     * @param requestContext The context of the current HTTP request to determine protocol, hostname and servlet prefix
      * @return The share URL as used to access the share as guest
      */
-    String getShareURL(String protocol, String fallbackHostname) throws OXException;
+    String getShareURL(RequestContext requestContext);
 }

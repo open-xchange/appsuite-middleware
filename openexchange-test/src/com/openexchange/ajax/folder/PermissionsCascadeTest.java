@@ -168,14 +168,17 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
     /**
      * Test roll-back functionality.
      * 
-     * Create a random tree and find the a folder in the tree that has at least one sub-folder.
+     * Create a random tree and find a folder in the tree (say (A)) that has at least one sub-folder.
      * Select that sub-folder (A) and create a new folder (B) under that sub-folder (A) with a second client
-     * Remove the permissions from the new folder (B) for client 1 and make client 2 the admin for that folder.
+     * Remove the permissions from the new folder (B) for client 1 and make client 2 the administrator
+     * for that folder.
+     * 
      * Apply new permissions to folder (A) and assert that the permissions are not cascaded.
+     * Then apply the new permissions again and ignore the warnings. Assert that the permissions are cascaded.
      * 
      * @throws Exception
      */
-    public void testCascadePermissionsInTreeRollback() throws Exception {
+    public void testCascadePermissionsInTreeRollbackAndThenIgnore() throws Exception {
         rootFolder = createRandomTree("testCascadePermissionsInTreeRollback", 20);
 
         // Pick one folder that has at least one sub-folder
@@ -242,7 +245,7 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         leafOfLeaf.setLastModified(new Date(timestamp));
         client2.execute(new UpdateRequest(EnumAPI.OUTLOOK, leafOfLeaf));
 
-        // Try to apply permissions to the rootNodeOfSubTree and cascade (should fail)
+        // Try to apply permissions to the rootNodeOfSubTree and cascade (should fail and roll-back)
         response = client.execute(new GetRequest(EnumAPI.OUTLOOK, rootNodeIdOfSubTree, new int[] { 5, 306 }));
         FolderObject rootNode = response.getFolder();
         timestamp = ((JSONObject) response.getData()).getLong("last_modified");
@@ -257,7 +260,8 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
             OCLPermission.NO_PERMISSIONS,
             OCLPermission.NO_PERMISSIONS));
         rootNode.setLastModified(new Date(timestamp));
-        client.execute(new UpdateRequest(EnumAPI.OUTLOOK, rootNode, false).setCascadePermissions(true));
+        UpdateRequest setCascadePermissions = new UpdateRequest(EnumAPI.OUTLOOK, rootNode, false).setCascadePermissions(true);
+        client.execute(setCascadePermissions);
 
         int owner = client.getValues().getUserId();
         int guest = client2.getValues().getUserId();
@@ -266,6 +270,15 @@ public class PermissionsCascadeTest extends AbstractAJAXSession {
         // Assert permissions
         assertPermissions(rootNode, new int[] { owner }, new int[] { guest, doe }, client);
         assertPermissions(leaf, new int[] { owner, guest }, new int[] { doe }, client);
+        assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
+
+        // Ignore warnings and apply permissions to the rootNodeOfSubTree again (should succeed)
+        setCascadePermissions.setIgnoreWarnings(true);
+        client.execute(setCascadePermissions);
+
+        // Assert permissions
+        assertPermissions(rootNode, new int[] { owner, doe }, new int[] { guest }, client);
+        assertPermissions(leaf, new int[] { owner, doe }, new int[] { guest }, client);
         assertPermissions(leafOfLeaf, new int[] { guest }, new int[] { owner, doe }, client2);
     }
 

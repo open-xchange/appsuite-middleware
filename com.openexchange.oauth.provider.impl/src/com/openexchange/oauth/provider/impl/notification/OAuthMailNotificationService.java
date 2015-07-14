@@ -51,27 +51,21 @@ package com.openexchange.oauth.provider.impl.notification;
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import javax.activation.DataHandler;
-import javax.mail.Address;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.http.HttpServletRequest;
-import org.json.JSONException;
+import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
@@ -85,17 +79,20 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.utils.MessageUtility;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.notification.BasicNotificationTemplate;
+import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
+import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientManagementException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.osgi.Services;
+import com.openexchange.oauth.provider.impl.tools.URLHelper;
+import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.user.UserService;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link OAuthMailNotificationService}
@@ -106,152 +103,130 @@ import com.openexchange.user.UserService;
 public class OAuthMailNotificationService {
 
     private final TransportProvider transportProvider;
-    private final OAuthProviderService oAuthProviderService;
 
-    private static final String INTRO_FIELD = "intro";
-    private static final String MESSAGE_FIELD = "message";
-
-    private static final Set<String> NEW_EXTERNAL_APPLICATION_FIELDS = new HashSet<String>();
-    static {
-        NEW_EXTERNAL_APPLICATION_FIELDS.add(INTRO_FIELD);
-        NEW_EXTERNAL_APPLICATION_FIELDS.add(MESSAGE_FIELD);
-    }
-
-    public OAuthMailNotificationService(OAuthProviderService oAuthProviderService) {
+    public OAuthMailNotificationService() {
         super();
-        this.oAuthProviderService = oAuthProviderService;
         transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
     }
 
-    public void sendNotification(int userId, int contextId, String clientId, HttpServletRequest request) throws OXException {
+    public void sendNotification(ServerSession serverSession, Client client, HttpServletRequest request) throws OXException {
         try {
-            UserService userService = Services.requireService(UserService.class);
-            User user = userService.getUser(userId, contextId);
-            InternetAddress address = new InternetAddress(user.getMail());
-            ComposedMailMessage mail = buildNewExternalApplicationMail(user, contextId, clientId, address, request);
-            MailTransport transport = transportProvider.createNewNoReplyTransport(contextId);
-            transport.sendMailMessage(mail, ComposeType.NEW, new Address[] { address });
-        } catch (AddressException e) {
-            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
-        } catch (UnsupportedEncodingException e) {
-            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
-        } catch (MessagingException e) {
-            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
-        } catch (JSONException e) {
+            ComposedMailMessage mail = buildNewExternalApplicationMail(serverSession, client, request);
+            MailTransport transport = transportProvider.createNewNoReplyTransport(serverSession.getContextId());
+            transport.sendMailMessage(mail, ComposeType.NEW, mail.getTo());
+        } catch (UnsupportedEncodingException | MessagingException | URISyntaxException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);
         }
     }
 
-    private ComposedMailMessage buildNewExternalApplicationMail(User user, int contextId, String clientId, InternetAddress address, HttpServletRequest request) throws OXException, UnsupportedEncodingException, MessagingException, JSONException {
+    private ComposedMailMessage buildNewExternalApplicationMail(ServerSession session, Client client, HttpServletRequest request) throws OXException, UnsupportedEncodingException, MessagingException, URISyntaxException {
+        User user = session.getUser();
+        TemplateService templateService = Services.requireService(TemplateService.class);
         Translator translator = Services.requireService(TranslatorFactory.class).translatorFor(user.getLocale());
         ServerConfigService serverConfigService = Services.requireService(ServerConfigService.class);
-        String hostname;
-        HostnameService hostnameService = Services.optService(HostnameService.class);
-        if(hostnameService != null) {
-            hostname = hostnameService.getHostname(user.getId(), contextId);
-        } else {
-            hostname = request.getServerName();
-        }
+        String hostname = URLHelper.getHostname(request);
+        int contextId = session.getContextId();
         ServerConfig serverConfig = serverConfigService.getServerConfig(hostname, user.getId(), contextId);
-        Client client = getClient(clientId);
-        String title = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_TITLE);
-        title = String.format(title, serverConfig.getProductName());
-        String intro = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_INTRO);
-        intro = String.format(intro, user.getDisplayName());
-        String message = translator.translate(NotificationStrings.NEW_EXTERNAL_APPLICATION_MESSAGE);
-        String settingsUrl = getSettingsUrl(request);
-        message = String.format(message, client.getName(), serverConfig.getProductName(), settingsUrl);
+        String subject = translator.translate(NotificationStrings.SUBJECT);
+        subject = String.format(subject, client.getName());
+        String salutation = translator.translate(NotificationStrings.SALUTATION);
+        String userName = FullNameBuilder.buildFullName(user, translator);
+        salutation = String.format(salutation, userName);
+        String appConnected = translator.translate(NotificationStrings.APP_CONNECTED);
+        appConnected = String.format(appConnected, getLogin(session, user), client.getName());
+
+        // text substitutions
         Map<String, Object> vars = new HashMap<String, Object>();
-        vars.put(INTRO_FIELD, intro);
-        vars.put(MESSAGE_FIELD, message);
-        MimeMessage mail = prepareEnvelope(title, address);
-        mail.setHeader("Auto-Submitted", "auto-generated");
-        mail.setContent(prepareContent("oauth-new-external-application-mail.txt.tmpl", vars, "oauth-new-external-application-mail.html.tmpl", vars));
-        mail.saveChanges();
-        return new ContentAwareComposedMailMessage(mail, contextId);
-    }
+        vars.put("salutation", salutation);
+        vars.put("appConnected", appConnected);
+        vars.put("revokeAccess", translator.translate(NotificationStrings.REVOKE_ACCESS));
+        vars.put("gotoSettings", translator.translate(NotificationStrings.GO_TO_SETTINGS));
+        vars.put("settingsURL", getSettingsUrl(request));
 
-    private Client getClient(String clientId) throws OXException {
-        try {
-            Client client = oAuthProviderService.getClientManagement().getClientById(clientId);
-            if (client == null) {
-                throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
-            }
+        // style substitutions
+        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
+        BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
+        basicTemplate.applyStyle(vars);
+        FooterImage footerImage = basicTemplate.applyFooter(vars);
 
-            return client;
-        } catch (ClientManagementException e) {
-            if (e.getReason() == com.openexchange.oauth.provider.client.ClientManagementException.Reason.INVALID_CLIENT_ID) {
-                throw OAuthProviderExceptionCodes.CLIENT_NOT_FOUND.create(clientId);
-            }
+        OXTemplate template = templateService.loadTemplate("notify.oauthprovider.accessgranted.html.tmpl");
+        StringWriter writer = new StringWriter();
+        template.process(vars, writer);
 
-            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        ComposedMailMessage mail;
+        if (footerImage == null) {
+            // no image, no multipart
+            mail = transportProvider.getNewComposedMailMessage(session, session.getContext());
+            mail.setSubject(subject);
+            mail.setHeader("Auto-Submitted", "auto-generated");
+            mail.setBodyPart(transportProvider.getNewTextBodyPart(writer.toString()));
+        } else {
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            ContentType ct = new ContentType();
+            ct.setPrimaryType("text");
+            ct.setSubType("html");
+            ct.setCharsetParameter("UTF-8");
+            String contentType = ct.toString();
+            HtmlService htmlService = Services.requireService(HtmlService.class);
+            String conformContent = htmlService.getConformHTML(writer.toString(), "UTF-8");
+            htmlPart.setDataHandler(new DataHandler(new MessageDataSource(conformContent, ct)));
+            htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
+
+            MimeBodyPart imagePart = new MimeBodyPart();
+            imagePart.setDisposition("inline; filename=\"" + footerImage.getFileName() + "\"");
+            imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, footerImage.getContentType() + "; name=\"" + footerImage.getFileName() + "\"");
+            imagePart.setContentID("<" + footerImage.getContentId() + ">");
+            imagePart.setHeader("X-Attachment-Id", footerImage.getContentId());
+            imagePart.setDataHandler(new DataHandler(new MessageDataSource(footerImage.getData(), footerImage.getContentType())));
+
+            MimeMultipart multipart = new MimeMultipart("related");
+            multipart.addBodyPart(htmlPart);
+            multipart.addBodyPart(imagePart);
+
+            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            mimeMessage.setSubject(subject, "UTF-8");
+            mimeMessage.setHeader("Auto-Submitted", "auto-generated");
+            mimeMessage.setContent(multipart);
+            mimeMessage.saveChanges();
+            mail = new ContentAwareComposedMailMessage(mimeMessage, contextId);
         }
-    }
 
-    private MimeMessage prepareEnvelope(String subject, InternetAddress recipient) throws MessagingException {
-        MimeMessage mail = new MimeMessage(MimeDefaultSession.getDefaultSession());
-        mail.addRecipient(RecipientType.TO, recipient);
-        mail.setSubject(subject, "UTF-8");
+        InternetAddress recipient = new InternetAddress(user.getMail(), userName);
+        mail.addRecipient(recipient);
+        mail.addTo(recipient);
         return mail;
     }
 
-    private BodyPart prepareTextPart(Writer writer) throws MessagingException {
-        MimeBodyPart textPart = new MimeBodyPart();
-        MessageUtility.setText(writer.toString(), "UTF-8", textPart);
-        textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-        final ContentType ct = new ContentType();
-        ct.setPrimaryType("text");
-        ct.setSubType("plain");
-        ct.setCharsetParameter("UTF-8");
-        textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
-        return textPart;
+    private static String getLogin(Session session, User user) {
+        String login = session.getLogin();
+        if (login == null) {
+            login = session.getLoginName();
+        }
+
+        if (login == null) {
+            login = user.getLoginInfo();
+        }
+
+        if (login == null) {
+            login = user.getMail();
+        }
+
+        if (login == null) {
+            login = "";
+        }
+
+        return login;
     }
 
-    private BodyPart prepareHtmlPart(Writer writer) throws OXException, UnsupportedEncodingException, MessagingException {
-        MimeBodyPart htmlPart = new MimeBodyPart();
-        ContentType ct = new ContentType();
-        ct.setPrimaryType("text");
-        ct.setSubType("html");
-        ct.setCharsetParameter("UTF-8");
-        String contentType = ct.toString();
-        HtmlService htmlService = Services.requireService(HtmlService.class);
-        String conformContent = htmlService.getConformHTML(writer.toString(), "UTF-8");
-        htmlPart.setDataHandler(new DataHandler(new MessageDataSource(conformContent, ct)));
-        htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-        htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
-
-        return htmlPart;
-    }
-
-    private MimeMultipart prepareContent(String txtTemplate, Map<String, Object> txtVars, String htmlTemplate, Map<String, Object> htmlVars) throws MessagingException, OXException, UnsupportedEncodingException {
-        TemplateService templateService = Services.requireService(TemplateService.class);
-        OXTemplate template = templateService.loadTemplate(txtTemplate);
-        StringWriter writer = new StringWriter();
-        template.process(txtVars, writer);
-        BodyPart textPart = prepareTextPart(writer);
-
-        template = templateService.loadTemplate(htmlTemplate);
-        writer = new StringWriter();
-        template.process(htmlVars, writer);
-        BodyPart htmlPart = prepareHtmlPart(writer);
-
-        MimeMultipart multipart = new MimeMultipart("alternative");
-        multipart.addBodyPart(textPart);
-        multipart.addBodyPart(htmlPart);
-        return multipart;
-    }
-
-    private final String url = "[[protocol]]://[[host]][[uiWebPath]]/#&[[app]]";
-
-    private String getSettingsUrl(HttpServletRequest request) throws OXException {
-        String protocol = request.isSecure() ? "https" : "http";
-        String host = request.getLocalName();
+    private String getSettingsUrl(HttpServletRequest request) throws OXException, URISyntaxException {
         String uiWebPath = Services.requireService(ConfigurationService.class).getProperty("com.openexchange.UIWebPath", "/appsuite");
-        String settingsUrl = url.replace("[[protocol]]", protocol)
-            .replace("[[host]]", host)
-            .replace("[[uiWebPath]]", uiWebPath)
-            .replace("[[app]]", "app=io.ox/settings");
-        return settingsUrl;
+        URI settingsURI = new URIBuilder()
+            .setScheme("https")
+            .setHost(URLHelper.getHostname(request))
+            .setPath(uiWebPath)
+            .setFragment("&app=io.ox/settings&folder=virtual/settings/external/apps")
+            .build();
+        return settingsURI.toString();
     }
 
 }

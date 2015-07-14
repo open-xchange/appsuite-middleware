@@ -373,14 +373,12 @@ public final class MailNotifyPushListenerRegistry {
      * @return The stop result
      */
     private StopResult stopListener(boolean tryToReconnect, boolean stopIfPermanent, String mboxId, int userId, int contextId) {
-        MailNotifyPushListener listener = mboxId2Listener.get(mboxId);
+        MailNotifyPushListener listener = mboxId2Listener.remove(mboxId);
         if (null != listener) {
             if (!stopIfPermanent && listener.isPermanent()) {
+                mboxId2Listener.put(mboxId, listener);
                 return StopResult.NONE;
             }
-
-            // Remove
-            mboxId2Listener.remove(mboxId);
 
             boolean reconnected;
             {

@@ -63,25 +63,58 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
 
     private static final String PARAM_PASSWORD = "password";
 
+    private static final String PARAM_SKIP = "skipButton";
+
     private static final String PARAM_NAME = "name";
 
     private static final String PARAM_TOKEN = "token";
 
     private static final String PARAM_SECRET = "secret";
 
+    private static final String PARAM_LANGUAGE = "language";
+
     private final boolean failOnError;
+
+    public static final class GuestCredentials {
+        private final String login;
+        private final String password;
+        private final boolean skipPassword;
+
+        /**
+         * Use the given guest login but omit the password and skip setting one
+         * @param login
+         */
+        public GuestCredentials(String login) {
+            super();
+            this.login = login;
+            password = null;
+            skipPassword = true;
+        }
+
+        /**
+         * Use the given guest login and password
+         * @param login
+         * @param password
+         */
+        public GuestCredentials(String login, String password) {
+            super();
+            this.login = login;
+            this.password = password;
+            skipPassword = false;
+        }
+    }
 
     /**
      * Creates a new guest login request used to access a share.
      *
      * @param share The share's token
      * @param target The share target path, or <code>null</code> if not specified
-     * @param login The login name
-     * @param password The password
+     * @param credentials The guest credentials
+     * @param client The client identifier; may be <code>null</code>
      * @param failOnError <code>true</code> to fail on errors, <code>false</code>, otherwise
      * @return The login request
      */
-    public static LoginRequest createGuestLoginRequest(String share, String target, String login, String password, String client, boolean failOnError) {
+    public static LoginRequest createGuestLoginRequest(String share, String target, GuestCredentials credentials, String client, boolean failOnError) {
         List<Parameter> parameters = new ArrayList<Parameter>();
         parameters.add(new URLParameter(AJAXServlet.PARAMETER_ACTION, "guest"));
         parameters.add(new URLParameter("share", share));
@@ -91,13 +124,17 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
         if (null != client && !client.isEmpty()) {
             parameters.add(new URLParameter(LoginFields.CLIENT_PARAM, client));
         }
-        parameters.add(new FieldParameter(PARAM_NAME, login));
-        parameters.add(new FieldParameter(PARAM_PASSWORD, password));
+        parameters.add(new FieldParameter(PARAM_NAME, credentials.login));
+        if (credentials.skipPassword) {
+            parameters.add(new FieldParameter(PARAM_SKIP, "true"));
+        } else {
+            parameters.add(new FieldParameter(PARAM_PASSWORD, credentials.password));
+        }
         return new LoginRequest(parameters.toArray(new Parameter[parameters.size()]), failOnError);
     }
 
-    public static LoginRequest createGuestLoginRequest(String share, String target, String login, String password, boolean failOnError) {
-        return createGuestLoginRequest(share, target, login, password, null, failOnError);
+    public static LoginRequest createGuestLoginRequest(String share, String target, GuestCredentials credentials, boolean failOnError) {
+        return createGuestLoginRequest(share, target, credentials, null, failOnError);
     }
 
     /**
@@ -150,6 +187,18 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
             new URLParameter(LoginFields.VERSION_PARAM, version),
             new FieldParameter(PARAM_NAME, login),
             new FieldParameter(PARAM_PASSWORD, password)
+        }, failOnError);
+    }
+
+    public LoginRequest(String login, String password, String authId, String client, String version, String language, boolean failOnError) {
+        this(new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
+            new URLParameter(LoginFields.AUTHID_PARAM, authId),
+            new URLParameter(LoginFields.CLIENT_PARAM, client),
+            new URLParameter(LoginFields.VERSION_PARAM, version),
+            new FieldParameter(PARAM_NAME, login),
+            new FieldParameter(PARAM_PASSWORD, password),
+            new FieldParameter(PARAM_LANGUAGE, language)
         }, failOnError);
     }
 

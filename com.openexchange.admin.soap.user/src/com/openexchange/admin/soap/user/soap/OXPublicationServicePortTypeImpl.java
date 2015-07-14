@@ -66,7 +66,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
             final String contextid = parameters.getContextid();
-            if (isEmpty(contextid)) {
+            if (com.openexchange.java.Strings.isEmpty(contextid)) {
                 throw new RemoteException_Exception("Missing context identifier.");
             }
             final com.openexchange.admin.rmi.dataobjects.Publication pub = publicationInterface.getPublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
@@ -98,7 +98,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         final OXPublicationInterface publicationInterface = getPublicationInterface();
         try {
             final String contextid = parameters.getContextid();
-            if (isEmpty(contextid)) {
+            if (com.openexchange.java.Strings.isEmpty(contextid)) {
                 throw new RemoteException_Exception("Missing context identifier.");
             }
             final boolean success = publicationInterface.deletePublication(new com.openexchange.admin.rmi.dataobjects.Context(Integer.valueOf(contextid)), parameters.getUrl(), soap2Credentials(parameters.getAuth()));
@@ -337,7 +337,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         Integer i = soapUser.getImapPort();
         if (i != null) {
             final String s = user.getImapServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.IMAP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -527,7 +527,7 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         i = soapUser.getSmtpPort();
         if (i != null) {
             final String s = user.getSmtpServerString();
-            if (!isEmpty(s)) {
+            if (!com.openexchange.java.Strings.isEmpty(s)) {
                 try {
                     final URIDefaults defaults = URIDefaults.SMTP;
                     final URI uri = URIParser.parse(s, defaults);
@@ -1508,17 +1508,4 @@ public class OXPublicationServicePortTypeImpl implements OXPublicationServicePor
         soapMap.setEntries(entries);
         return soapMap;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

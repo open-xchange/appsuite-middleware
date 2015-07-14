@@ -58,17 +58,21 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tx.ConnectionHolder;
 
@@ -88,26 +92,64 @@ public class ShareHelper {
      * guest user entity, are removed implicitly from the document in order to re-add them afterwards (usually by calling
      * {@link ShareHelper#applyGuestPermissions}).
      *
+     * @param session The session
      * @param fileAccess The file access hosting the document
      * @param document The document being saved
      * @param modifiedColumns The modified fields as supplied by the client, or <code>null</code> if not set
      * @return The compared object permissions yielding new and removed guest object permissions
      */
-    public static ComparedObjectPermissions processGuestPermissions(FileStorageFileAccess fileAccess, File document, List<Field> modifiedColumns) throws OXException {
-        if (supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
+    public static ComparedObjectPermissions processGuestPermissions(Session session, FileStorageFileAccess fileAccess, File document, List<Field> modifiedColumns) throws OXException {
+        if ((null == modifiedColumns || modifiedColumns.contains(Field.OBJECT_PERMISSIONS)) && supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
             ComparedObjectPermissions comparedPermissions;
             if (FileStorageFileAccess.NEW == document.getId()) {
-                comparedPermissions = new ComparedObjectPermissions(null, document, modifiedColumns);
+                comparedPermissions = new ComparedObjectPermissions(session.getContextId(), null, document);
             } else {
                 File oldDocument = fileAccess.getFileMetadata(document.getFolderId(), document.getId(), FileStorageFileAccess.CURRENT_VERSION);
-                comparedPermissions = new ComparedObjectPermissions(oldDocument, document, modifiedColumns);
+                comparedPermissions = new ComparedObjectPermissions(session.getContextId(), oldDocument, document);
             }
-            if (comparedPermissions.hasAddedGuestPermissions()) {
-                document.getObjectPermissions().removeAll(comparedPermissions.getAddedGuestPermissions());
+            /*
+             * Remove new guests from the document and check them in terms of permission bits
+             */
+            if (comparedPermissions.hasNewGuests()) {
+                List<FileStorageGuestObjectPermission> newGuestPermissions = comparedPermissions.getNewGuestPermissions();
+                document.getObjectPermissions().removeAll(newGuestPermissions);
+                for (FileStorageGuestObjectPermission p : newGuestPermissions) {
+                    if (isInvalidGuestPermission(p)) {
+                        throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                    }
+                }
             }
+            /*
+             * Check permission bits of added and modified guests that already exist as users
+             */
+             if (comparedPermissions.hasAddedGuests()) {
+                 for (Integer guest : comparedPermissions.getAddedGuests()) {
+                     FileStorageObjectPermission p = comparedPermissions.getAddedGuestPermission(guest);
+                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest))) {
+                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                     }
+                 }
+             }
+             if (comparedPermissions.hasModifiedGuests()) {
+                 for (Integer guest : comparedPermissions.getModifiedGuests()) {
+                     FileStorageObjectPermission p = comparedPermissions.getModifiedGuestPermission(guest);
+                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest))) {
+                         throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
+                     }
+                 }
+             }
+
             return comparedPermissions;
         }
-        return ComparedObjectPermissions.EMPTY;
+        return new ComparedObjectPermissions(session.getContextId(), (File)null, (File)null);
+    }
+
+    private static boolean isInvalidGuestPermission(FileStorageGuestObjectPermission p) {
+        return p.getRecipient().getType() == RecipientType.ANONYMOUS && (p.canWrite() || p.canDelete());
+    }
+
+    private static boolean isInvalidGuestPermission(FileStorageObjectPermission p, GuestInfo guestInfo) {
+        return guestInfo.getRecipientType() == RecipientType.ANONYMOUS && (p.canWrite() || p.canDelete());
     }
 
     /**
@@ -202,10 +244,10 @@ public class ShareHelper {
     private static List<FileStorageObjectPermission> handleGuestPermissions(Session session, FileStorageFileAccess fileAccess, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
         List<FileStorageObjectPermission> updatedPermissions = null;
         if (null != comparedPermissions) {
-            if (comparedPermissions.hasAddedGuestPermissions()) {
-                updatedPermissions = ShareHelper.handleNewGuestPermissions(session, fileAccess, document, comparedPermissions.getAddedGuestPermissions());
+            if (comparedPermissions.hasNewGuests()) {
+                updatedPermissions = ShareHelper.handleNewGuestPermissions(session, fileAccess, document, comparedPermissions.getNewGuestPermissions());
             }
-            if (comparedPermissions.hasRemovedGuestPermissions()) {
+            if (comparedPermissions.hasRemovedGuests()) {
                 ShareHelper.handleRemovedObjectPermissions(session, fileAccess, document, comparedPermissions.getRemovedGuestPermissions());
             }
         }
@@ -274,11 +316,11 @@ public class ShareHelper {
                 String fileID = new FileID(service, account, document.getFolderId(), document.getId()).toUniqueID();
                 ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
                 shareTarget.setOwnedBy(owner);
-                List<ShareInfo> shares = shareService.addTarget(session, shareTarget, shareRecipients);
+                CreatedShares shares = shareService.addTarget(session, shareTarget, shareRecipients);
                 for (int i = 0; i < guestPermissions.size(); i++) {
                     FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
-                    ShareInfo share = shares.get(i);
-                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuest().getGuestID(), false, guestPermission.getPermissions()));
+                    CreatedShare share = shares.getShare(guestPermission.getRecipient());
+                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuestInfo().getGuestID(), false, guestPermission.getPermissions()));
                 }
 
                 List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();

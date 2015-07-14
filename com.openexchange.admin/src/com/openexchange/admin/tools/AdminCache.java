@@ -174,7 +174,7 @@ public class AdminCache {
     private boolean contextAuthenticationDisabled = false;
 
     private boolean allowMasterOverride = false;
-    
+
     // master credentials for authenticating master admin
     private Credentials masterCredentials = null;
 
@@ -569,7 +569,7 @@ public class AdminCache {
      */
     public String encryptPassword(final PasswordMechObject user) throws StorageException, NoSuchAlgorithmException, UnsupportedEncodingException {
         String passwordMech = user.getPasswordMech();
-        if (isEmpty(passwordMech) || "null".equals(toLowerCase(passwordMech))) {
+        if (com.openexchange.java.Strings.isEmpty(passwordMech) || "null".equals(com.openexchange.java.Strings.toLowerCase(passwordMech))) {
             String pwmech = getProperties().getUserProp(AdminProperties.User.DEFAULT_PASSWORD_MECHANISM, "SHA");
             pwmech = "{" + pwmech + "}";
             if (pwmech.equalsIgnoreCase(PasswordMechObject.CRYPT_MECH)) {
@@ -609,7 +609,7 @@ public class AdminCache {
 
         contextAuthenticationDisabled = Boolean.parseBoolean(context_auth_disabled);
         log.debug("ContextAuthentication mechanism disabled: {}", contextAuthenticationDisabled);
-        
+
         allowMasterOverride = Boolean.parseBoolean(this.prop.getProp("MASTER_ACCOUNT_OVERRIDE", "false"));
         log.debug("Master override: {}", allowMasterOverride);
     }
@@ -710,38 +710,10 @@ public class AdminCache {
         return masterAuthenticationDisabled || (getMasterCredentials() != null && getMasterCredentials().getLogin().equals(auth.getLogin()));
     }
 
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     public void reloadMasterCredentials(ConfigurationService configService) throws OXGenericException {
         readMasterCredentials(configService);
     }
 
-    
     public boolean isAllowMasterOverride() {
         return allowMasterOverride;
     }

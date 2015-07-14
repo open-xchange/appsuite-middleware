@@ -101,11 +101,11 @@ public final class ImapUtility {
     public static String appendCommandInfo(final String info, final String fullName, final String store) {
         final StringBuilder sb = new StringBuilder(info);
         boolean parenthesis = true;
-        if (!isEmpty(fullName)) {
+        if (!com.openexchange.java.Strings.isEmpty(fullName)) {
             sb.append(" (folder=\"").append(fullName).append('"');
             parenthesis = false;
         }
-        if (!isEmpty(store)) {
+        if (!com.openexchange.java.Strings.isEmpty(store)) {
             if (parenthesis) {
                 sb.append(" (");
                 parenthesis = false;
@@ -174,17 +174,4 @@ public final class ImapUtility {
         sResponse = sResponse.toLowerCase(Locale.US);
         return sResponse.indexOf("invalid messageset") >= 0 || sResponse.indexOf("invalid uidset") >= 0;
     }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
 }

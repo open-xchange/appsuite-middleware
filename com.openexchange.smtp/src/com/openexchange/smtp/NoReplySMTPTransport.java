@@ -175,6 +175,11 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
         }
 
         @Override
+        public boolean isSendPartial() {
+            return smtpProperties.isSendPartial();
+        }
+
+        @Override
         public int getSmtpTimeout() {
             return smtpProperties.getSmtpTimeout();
         }

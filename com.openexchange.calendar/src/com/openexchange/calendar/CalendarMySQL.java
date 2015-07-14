@@ -1671,9 +1671,10 @@ public class CalendarMySQL implements CalendarSqlImp {
         return pst;
     }
 
+    private static final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
+
     private static boolean containsWildcards(String pattern) {
-        final Pattern WILDCARD_PATTERN = Pattern.compile("((^|[^\\\\])%)|((^|[^\\\\])_)");
-        return WILDCARD_PATTERN.matcher(pattern).find();
+        return null == pattern ? false : WILDCARD_PATTERN.matcher(pattern).find();
     }
 
     private static String getPlaceholders(int length) {

@@ -76,8 +76,7 @@ public class AutologinRequest extends AbstractRequest<AutologinResponse> {
     public AutologinRequest(AutologinParameters parameters, boolean failOnError) {
         this(new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_AUTOLOGIN),
-            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient()),
-            new URLParameter(LoginFields.SHARE_TOKEN, parameters.getShare())
+            new URLParameter(LoginFields.CLIENT_PARAM, parameters.getClient())
         }, failOnError);
     }
 
@@ -88,14 +87,13 @@ public class AutologinRequest extends AbstractRequest<AutologinResponse> {
 
     public static class AutologinParameters {
 
-        String authId, client, version, share;
+        String authId, client, version;
 
-        public AutologinParameters(String authId, String client, String version, String share) {
+        public AutologinParameters(String authId, String client, String version) {
             super();
             this.authId = authId;
             this.client = client;
             this.version = version;
-            this.share = share;
         }
 
         public String getAuthId() {
@@ -122,13 +120,6 @@ public class AutologinRequest extends AbstractRequest<AutologinResponse> {
             this.version = version;
         }
 
-        public String getShare() {
-            return share;
-        }
-
-        public void setShare(String share) {
-            this.share = share;
-        }
     }
 
 }

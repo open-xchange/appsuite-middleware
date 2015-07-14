@@ -63,7 +63,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class SubscriptionActionFactory implements AJAXActionServiceFactory {
 
-    private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(12);
+    private final Map<String, AJAXActionService> actions = new ConcurrentHashMap<String, AJAXActionService>(12, 0.9f, 1);
 
     public SubscriptionActionFactory(final ServiceLookup services) {
         super();

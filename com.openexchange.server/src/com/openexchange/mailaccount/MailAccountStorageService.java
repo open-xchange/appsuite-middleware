@@ -119,6 +119,18 @@ public interface MailAccountStorageService {
     void setFullNamesForMailAccount(int id, int[] indexes, String[] fullNames, int userId, int contextId) throws OXException;
 
     /**
+     * Sets specified names for specified mail account.
+     *
+     * @param id The account identifier
+     * @param indexes The indexes of the full names to set
+     * @param names The names to set
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If invalidation fails
+     */
+    void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException;
+
+    /**
      * Gets the mail account identified by specified identifier.
      *
      * @param id The mail account identifier
@@ -128,6 +140,19 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be returned
      */
     MailAccount getMailAccount(int id, int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the mail account identified by specified identifier.
+     * <p>
+     * <b>For internal use only.</b>
+     *
+     * @param id The mail account identifier
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The mail account
+     * @throws OXException If the mail account cannot be returned
+     */
+    MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException;
 
     /**
      * Gets the mail account identified by specified identifier.

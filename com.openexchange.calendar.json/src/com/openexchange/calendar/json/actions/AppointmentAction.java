@@ -174,18 +174,6 @@ public abstract class AppointmentAction implements AJAXActionService {
         return RESULT_JSON_NULL;
     }
 
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
     protected void anonymize(final Appointment anonymized) {
         // TODO: Solve dependency problem and use AnonymizingIterator#anonymize instead
         anonymized.setTitle("Private");
@@ -206,11 +194,11 @@ public abstract class AppointmentAction implements AJAXActionService {
         if (!cdao.getPrivateFlag()) {
             return false;
         }
-        
+
         if (cdao.getCreatedBy() == uid) {
             return false;
         }
-        
+
         for (UserParticipant user : cdao.getUsers()) {
             if (user.getIdentifier() == uid) {
                 return false;

@@ -243,6 +243,12 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        UserizedFolder[] folders = getFolderService().getUserSharedFolders(TREE_ID, InfostoreContentType.getInstance(), session, initDecorator()).getResponse();
+        return FolderWriter.writeFolders(folders);
+    }
+
+    @Override
     public String moveFolder(String folderId, String newParentId) throws OXException {
         return moveFolder(folderId, newParentId, null);
     }
@@ -303,7 +309,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     /**
      * Gets the folder service, throwing an appropriate exception in case the service is absent.
-     * 
+     *
      * @return The folder service
      */
     private FolderService getFolderService() throws OXException {
@@ -316,7 +322,7 @@ public class InfostoreFolderAccess implements FileStorageFolderAccess, MediaFold
 
     /**
      * Creates and initializes a folder service decorator ready to use with calls to the underlying folder service.
-     * 
+     *
      * @return A new folder service decorator
      */
     private FolderServiceDecorator initDecorator() {

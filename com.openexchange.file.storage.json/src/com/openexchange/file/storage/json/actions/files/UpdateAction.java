@@ -59,10 +59,10 @@ import com.openexchange.documentation.annotations.Actions;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 

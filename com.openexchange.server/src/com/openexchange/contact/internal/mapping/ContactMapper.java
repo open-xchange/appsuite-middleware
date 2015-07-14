@@ -3163,6 +3163,29 @@ public class ContactMapper extends DefaultMapper<Contact, ContactField> {
             }
         });
 
+        mappings.put(ContactField.VCARD_ID, new StringMapping() {
+
+            @Override
+            public void set(Contact contact, String value) {
+                contact.setVCardId(value);
+            }
+
+            @Override
+            public boolean isSet(Contact contact) {
+                return contact.containsVCardId();
+            }
+
+            @Override
+            public String get(Contact contact) {
+                return contact.getVCardId();
+            }
+
+            @Override
+            public void remove(Contact contact) {
+                contact.removeVCardId();
+            }
+        });
+
     }
 
 }

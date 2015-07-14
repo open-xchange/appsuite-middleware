@@ -50,14 +50,15 @@
 package com.openexchange.groupware.container;
 
 import java.io.Serializable;
-import java.security.acl.Permission;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 
 /**
  * {@link ObjectPermission}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ObjectPermission implements Permission, Serializable {
+public class ObjectPermission implements java.security.acl.Permission, Serializable {
 
     /**
      * The numerical value indicating no object permissions.
@@ -189,6 +190,29 @@ public class ObjectPermission implements Permission, Serializable {
      */
     public boolean canDelete() {
         return permissions >= DELETE;
+    }
+
+    /**
+     * Takes a folder permission bit mask and deduces the according object permissions.
+     *
+     * @param folderPermissionBits The folder permission bit mask
+     * @return The object permission bits
+     */
+    public static int convertFolderPermissionBits(int folderPermissionBits) {
+        int objectBits = ObjectPermission.NONE;
+        int[] permissionBits = Permissions.parsePermissionBits(folderPermissionBits);
+        int rp = permissionBits[1];
+        int wp = permissionBits[2];
+        int dp = permissionBits[3];
+        if (dp >= Permission.DELETE_ALL_OBJECTS) {
+            objectBits = ObjectPermission.DELETE;
+        } else if (wp >= Permission.WRITE_ALL_OBJECTS) {
+            objectBits = ObjectPermission.WRITE;
+        } else if (rp >= Permission.READ_ALL_OBJECTS) {
+            objectBits = ObjectPermission.READ;
+        }
+
+        return objectBits;
     }
 
     @Override

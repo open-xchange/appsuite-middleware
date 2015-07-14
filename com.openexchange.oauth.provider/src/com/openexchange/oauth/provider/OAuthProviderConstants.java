@@ -73,11 +73,6 @@ public interface OAuthProviderConstants {
      */
     public static final String REVOKE_SERVLET_ALIAS = "oauth/provider/revoke";
 
-    /**
-     * Servlet alias of the endpoint for client icons
-     */
-    public static final String AUTH_INFO_SERVLET_ALIAS = "oauth/provider/authinfo";
-
     // -------------------------------------------------------------------------------------------------------
 
     /**
@@ -120,6 +115,9 @@ public interface OAuthProviderConstants {
     /** Required. The user password */
     public static final String PARAM_USER_PASSWORD = "user_password";
 
+    /** Required. The session ID */
+    public static final String PARAM_SESSION = "session";
+
     /** Required. The user password */
     public static final String PARAM_ACCESS_DENIED = "access_denied";
 
@@ -131,6 +129,9 @@ public interface OAuthProviderConstants {
 
     /** The error description */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
+
+    /** The language parameter defining a locale for i18n */
+    public static final String PARAM_LANGUAGE = "language";
 
     // ---------------- Common parameter values --------------------------------------------------------------
 

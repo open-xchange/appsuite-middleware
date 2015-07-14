@@ -70,7 +70,7 @@ public abstract class AbstractParameterizableOAuthInteraction implements Paramet
      */
     protected AbstractParameterizableOAuthInteraction() {
         super();
-        parameters = new ConcurrentHashMap<String, Object>(4);
+        parameters = new ConcurrentHashMap<String, Object>(4, 0.9f, 1);
     }
 
     @Override

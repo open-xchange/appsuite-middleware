@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.login;
 
-import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +58,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.LoginFields;
+import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.authentication.LoginInfo;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -152,7 +152,7 @@ public class AnonymousLogin extends AbstractShareBasedLoginRequestHandler {
 
         // Check password
         if (!decryptedPassword.equals(loginInfo.getPassword())) {
-            throw INVALID_CREDENTIALS.create();
+            throw LoginExceptionCodes.INVALID_GUEST_PASSWORD.create();
         }
 
         return user;

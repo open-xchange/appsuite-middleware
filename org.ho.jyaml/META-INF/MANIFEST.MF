@@ -7,4 +7,5 @@ Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ClassPath: lib/jyaml-1.3.jar
 Eclipse-BuddyPolicy: registered
-Export-Package: org.ho.yaml
+Export-Package: org.ho.yaml,
+ org.ho.yaml.exception

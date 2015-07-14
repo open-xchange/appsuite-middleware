@@ -60,6 +60,7 @@ import java.util.TimeZone;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
+import com.openexchange.calendar.itip.ITipAttributes;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
@@ -90,7 +91,7 @@ public class CancelPerformer extends AbstrakterDingeMacher {
 
 
     @Override
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
+    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> deleted = new ArrayList<Appointment>();
 

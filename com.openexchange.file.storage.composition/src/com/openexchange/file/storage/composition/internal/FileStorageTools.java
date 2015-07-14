@@ -59,9 +59,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.FileStorageAdvancedSearchFileAccess;
-import com.openexchange.file.storage.FileStorageETagProvider;
-import com.openexchange.file.storage.FileStorageEfficientRetrieval;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.file.storage.FileStorageEventHelper.EventProperty;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -69,18 +68,8 @@ import com.openexchange.file.storage.FileStorageExtendedMetadata;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.IDTuple;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
-import com.openexchange.file.storage.FileStorageLockedFileAccess;
 import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.FileStoragePersistentIDs;
-import com.openexchange.file.storage.FileStorageRandomFileAccess;
-import com.openexchange.file.storage.FileStorageRangeFileAccess;
-import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
-import com.openexchange.file.storage.FileStorageVersionedFileAccess;
-import com.openexchange.file.storage.ObjectPermissionAware;
-import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
@@ -102,40 +91,8 @@ public class FileStorageTools {
      * @param capability The capability to check
      * @return <code>true</code> if the capability is supported, <code>false</code>, otherwise
      */
-    public static boolean supports(FileStorageFileAccess fileAccess, FileStorageCapability capability) throws OXException {
-        switch (capability) {
-        case FILE_VERSIONS:
-            return FileStorageVersionedFileAccess.class.isInstance(fileAccess);
-        case FOLDER_ETAGS:
-            return FileStorageETagProvider.class.isInstance(fileAccess);
-        case IGNORABLE_VERSION:
-            return FileStorageIgnorableVersionFileAccess.class.isInstance(fileAccess);
-        case PERSISTENT_IDS:
-            return FileStoragePersistentIDs.class.isInstance(fileAccess);
-        case RANDOM_FILE_ACCESS:
-            return FileStorageRandomFileAccess.class.isInstance(fileAccess);
-        case RECURSIVE_FOLDER_ETAGS:
-            return FileStorageETagProvider.class.isInstance(fileAccess) && ((FileStorageETagProvider) fileAccess).isRecursive();
-        case SEARCH_BY_TERM:
-            return FileStorageAdvancedSearchFileAccess.class.isInstance(fileAccess);
-        case SEQUENCE_NUMBERS:
-            return FileStorageSequenceNumberProvider.class.isInstance(fileAccess);
-        case THUMBNAIL_IMAGES:
-            return ThumbnailAware.class.isInstance(fileAccess);
-        case EFFICIENT_RETRIEVAL:
-            return FileStorageEfficientRetrieval.class.isInstance(fileAccess);
-        case LOCKS:
-            return FileStorageLockedFileAccess.class.isInstance(fileAccess);
-        case OBJECT_PERMISSIONS:
-            return ObjectPermissionAware.class.isInstance(fileAccess);
-        case RANGES:
-            return FileStorageRangeFileAccess.class.isInstance(fileAccess);
-        case EXTENDED_METADATA:
-            return FileStorageExtendedMetadata.class.isInstance(fileAccess);
-        default:
-            org.slf4j.LoggerFactory.getLogger(FileStorageTools.class).warn("Unknown capability: {}", capability);
-            return false;
-        }
+    public static boolean supports(FileStorageFileAccess fileAccess, FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supports(fileAccess, capability);
     }
 
     /**
@@ -334,7 +291,7 @@ public class FileStorageTools {
 
     /**
      * Gets a value indicating whether the supplied folder contains permissions for entities other than the supplied current user.
-     * 
+     *
      * @param userID The entity identifier of the user that should be considered as "not" foreign
      * @param folder The folder to check
      * @return <code>true</code> if foreign permissions were found, <code>false</code>, otherwise
@@ -350,10 +307,10 @@ public class FileStorageTools {
         }
         return false;
     }
-    
+
     /**
-     * Gets the display name for a specific file storage account.   
-     * 
+     * Gets the display name for a specific file storage account.
+     *
      * @param compositingAccess a reference to the compositing access
      * @param serviceID The service identifier to get the account name for
      * @param accountID The account identifier to get the account name for
@@ -365,8 +322,8 @@ public class FileStorageTools {
     }
 
     /**
-     * Gets the display name for the file storage account of a specific folder.   
-     * 
+     * Gets the display name for the file storage account of a specific folder.
+     *
      * @param compositingAccess A reference to the compositing access
      * @param folderID The identifier of the folder to get the account name for
      * @return The account name
@@ -376,8 +333,8 @@ public class FileStorageTools {
     }
 
     /**
-     * Gets the display name for the file storage account of a specific file.   
-     * 
+     * Gets the display name for the file storage account of a specific file.
+     *
      * @param compositingAccess A reference to the compositing access
      * @param fileID The identifier of the file to get the account name for
      * @return The account name
@@ -387,8 +344,8 @@ public class FileStorageTools {
     }
 
     /**
-     * Gets the display name for the file storage account of a specific storage service.   
-     * 
+     * Gets the display name for the file storage account of a specific storage service.
+     *
      * @param compositingAccess A reference to the compositing access
      * @param compositingAccess A reference to the compositing access
      * @return The account name
@@ -396,7 +353,7 @@ public class FileStorageTools {
     public static String getAccountName(AbstractCompositingIDBasedAccess compositingAccess, FileStorageFileAccess fileAccess) throws OXException {
         String accountID = fileAccess.getAccountAccess().getAccountId();
         String serviceID = fileAccess.getAccountAccess().getService().getId();
-        return getAccountName(compositingAccess, serviceID, accountID); 
+        return getAccountName(compositingAccess, serviceID, accountID);
     }
 
 }

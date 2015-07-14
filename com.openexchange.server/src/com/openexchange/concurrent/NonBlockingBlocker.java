@@ -88,7 +88,7 @@ public final class NonBlockingBlocker implements Blocker, Runnable {
         super();
         sync = new AtomicInteger();
         mutex = new AtomicInteger();
-        running = new ConcurrentHashMap<Thread, Object>(4);
+        running = new ConcurrentHashMap<Thread, Object>(4, 0.9f, 1);
         this.runnable = runnable;
     }
 

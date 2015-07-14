@@ -50,8 +50,11 @@
 package com.openexchange.realtime.synthetic;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
@@ -79,6 +82,11 @@ import com.openexchange.threadpool.ThreadPoolService;
  */
 public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
 
+    /**
+     * Middle naming part of the managed RunLoops
+     */
+    public static final String LOOP_NAMING_INFIX = "-handler-";
+    
     /**
      * Keep associations from component ids to distinct clusters of runloops for given ids.
      *
@@ -132,7 +140,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
         String componentId = component.getId();
         if (!loopClusters.containsKey(componentId)) {
             for (int i = 0; i < Math.abs(quantity); i++) {
-                String loopName = componentId + "-handler-" + i;
+                String loopName = componentId + LOOP_NAMING_INFIX + i;
                 SyntheticChannelRunLoop newLoop = new SyntheticChannelRunLoop(loopName);
                 loopClusters.put(componentId, newLoop);
                 executor.execute(newLoop);
@@ -254,7 +262,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
      * @return A Set of <code>ids</code> of {@link Component}s that are managed by this instance
      */
     public Set<String> getManagedComponents() {
-        return loopClusters.keySet();
+        return Collections.unmodifiableSet(loopClusters.keySet());
     }
 
     /**
@@ -272,6 +280,25 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
             }
         }
         return handlesInCluster;
+    }
+    
+    /**
+     * Get a view of the loop clusters. 
+     * 
+     * @return a view of the loop clusters 
+     */
+    public Collection<SyntheticChannelRunLoop> getRunLoopView() {
+        return loopClusters.values();
+        
+    }
+    
+    /**
+     * Get a view of the loop clusters per component. 
+     * 
+     * @return a readonly view of the loop clusters 
+     */
+    public Map<String, Collection<SyntheticChannelRunLoop>> getRunLoopsPerComponent() {
+        return loopClusters.asMap();
     }
 
     @Override

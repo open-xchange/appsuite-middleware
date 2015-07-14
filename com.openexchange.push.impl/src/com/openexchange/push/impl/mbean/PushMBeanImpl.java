@@ -49,6 +49,7 @@
 
 package com.openexchange.push.impl.mbean;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.management.MBeanException;
@@ -78,18 +79,21 @@ public class PushMBeanImpl extends StandardMBean implements PushMBean {
     }
 
     @Override
-    public String[] listPermanentPushUsers() throws MBeanException {
+    public String[] listPushUsers() throws MBeanException {
         try {
             List<PushUserInfo> pushUsers = PushManagerRegistry.getInstance().listPermanentPushUsers();
             Collections.sort(pushUsers);
 
             int size = pushUsers.size();
-            String[] retval = new String[size];
+            List<String> list = new ArrayList<String>(size);
             for (int i = 0; i < size; i++) {
                 PushUserInfo pushUser = pushUsers.get(i);
-                retval[i] = null == pushUser ? "null" : pushUser.toString();
+                if (null != pushUser) {
+                    list.add(new StringBuilder(48).append("user=").append(pushUser.getUserId()).append(", context=").append(pushUser.getContextId()).append(", permanent=").append(pushUser.isPermanent()).toString());
+                }
             }
-            return retval;
+
+            return list.toArray(new String[list.size()]);
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(PushMBeanImpl.class);
             logger.error("", e);

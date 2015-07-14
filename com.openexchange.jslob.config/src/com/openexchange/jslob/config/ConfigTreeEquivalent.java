@@ -71,8 +71,8 @@ public final class ConfigTreeEquivalent {
      */
     public ConfigTreeEquivalent() {
         super();
-        config2lob = new ConcurrentHashMap<String, String>(32);
-        lob2config = new ConcurrentHashMap<String, String>(32);
+        config2lob = new ConcurrentHashMap<String, String>(32, 0.9f, 1);
+        lob2config = new ConcurrentHashMap<String, String>(32, 0.9f, 1);
     }
 
 }

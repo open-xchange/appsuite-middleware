@@ -49,63 +49,76 @@
 
 package com.openexchange.oauth.provider.impl.servlets;
 
-import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.login.Interface.HTTP_JSON;
 import static com.openexchange.osgi.Tools.requireService;
-import static com.openexchange.tools.servlet.http.Tools.sendErrorPage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.apache.http.client.utils.URIBuilder;
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import com.google.common.net.HttpHeaders;
-import com.openexchange.authentication.Authenticated;
+import com.openexchange.ajax.LoginServlet;
+import com.openexchange.ajax.SessionUtility;
+import com.openexchange.ajax.login.HashCalculator;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginRequestImpl;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.LoginExceptionCodes;
-import com.openexchange.authentication.service.Authentication;
-import com.openexchange.authorization.AuthorizationService;
-import com.openexchange.config.ConfigurationService;
+import com.openexchange.authentication.LoginExceptionMessages;
+import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
+import com.openexchange.groupware.contexts.impl.ContextExceptionMessage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.mail.config.MailProperties;
+import com.openexchange.log.LogProperties;
+import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.client.Icon;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionMessages;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.notification.OAuthMailNotificationService;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
-import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.configuration.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionExceptionMessages;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
 import com.openexchange.templating.TemplateService;
+import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link AuthorizationEndpoint} - Authorization request handler for OAuth2.0.
@@ -116,18 +129,17 @@ import com.openexchange.tools.servlet.http.Tools;
  */
 public class AuthorizationEndpoint extends OAuthEndpoint {
 
+    private static final String STRING_SPLITTER = "#split#";
+
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
 
     private static final long serialVersionUID = 6393806486708501254L;
-
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link AuthorizationEndpoint}.
      */
     public AuthorizationEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
-        super(oAuthProvider);
-        this.services = services;
+        super(oAuthProvider, services);
     }
 
     @Override
@@ -144,57 +156,45 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             return;
         }
 
+        // Set JSESSIONID cookie and generate CSRF token
+        HttpSession jSession = request.getSession(true);
+        String csrfToken = UUIDs.getUnformattedStringFromRandom();
+        jSession.setAttribute(ATTR_OAUTH_CSRF_TOKEN, csrfToken);
+
         try {
-            // Set JSESSIONID cookie and generate CSRF token
-            HttpSession session = request.getSession(true);
-            String csrfToken = UUIDs.getUnformattedStringFromRandom();
-            session.setAttribute(ATTR_OAUTH_CSRF_TOKEN, csrfToken);
-
             try {
-                if (respondWithForm(request)) {
-                    // Send login form
-                    String loginPage = compileLoginPage(request, authRequest.getRedirectURI(), authRequest.getState(), csrfToken, authRequest.getClient(), authRequest.getScope(), determineLocale(request));
-                    response.setContentType("text/html; charset=UTF-8");
-                    response.setHeader("Content-Disposition", "inline");
-                    response.setStatus(200);
-                    PrintWriter writer = response.getWriter();
-                    writer.write(loginPage);
-                    writer.flush();
+                String htmlResult;
+                Session session = checkSession(request, response, authRequest);
+                if (session == null) {
+                    LoginError error = optLoginError(request);
+                    htmlResult = compileLoginPage(request, authRequest, csrfToken, error);
                 } else {
-                    // Redirect to appsuite login screen
-                    StringBuilder fragment = new StringBuilder()
-                        .append("login_type=oauth").append('&')
-                        .append("client_id=").append(authRequest.getClient().getId()).append('&')
-                        .append("scope=").append(authRequest.getScope()).append('&')
-                        .append("state=").append(authRequest.getState()).append('&')
-                        .append("csrf_token=").append(csrfToken).append('&')
-                        .append("redirect_uri=").append(authRequest.getRedirectURI()).append('&')
-                        .append("language=").append(determineLocale(request).toString());
-
-                    String uiWebPath = requireService(ConfigurationService.class, services).getProperty(ServerConfig.Property.UI_WEB_PATH.getPropertyName(), "/appsuite/");
-                    URIBuilder redirectLocation = new URIBuilder()
-                        .setScheme("https")
-                        .setHost(URLHelper.getHostname(request))
-                        .setPath(uiWebPath)
-                        .setFragment(fragment.toString());
-                    response.sendRedirect(redirectLocation.build().toString());
+                    htmlResult = compileAuthorizationPage(request, authRequest, csrfToken, session);
                 }
+
+                response.setContentType("text/html; charset=UTF-8");
+                response.setHeader("Content-Disposition", "inline");
+                response.setStatus(200);
+                PrintWriter writer = response.getWriter();
+                writer.write(htmlResult);
+                writer.flush();
             } catch (OXException e) {
                 LOG.error("Authorization GET request failed", e);
+                String redirectLocation;
                 if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "temporarily_unavailable", "The service is currently not available.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
+                    redirectLocation = serviceUnavailable(authRequest);
+                } else {
+                    redirectLocation = serverError(authRequest);
                 }
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "server_error", "An internal error occurred.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
-            } catch (URISyntaxException e) {
-                LOG.error("Authorization GET request failed", e);
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "server_error", "An internal error occurred.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
+
+                response.sendRedirect(redirectLocation);
             }
         } catch (OXException e) {
             /*
-             * Responding with an error redirect failed. We can only display a proper message in the login popup now.
+             * Responding with an error redirect failed. We can only display a proper message in the popup now.
              */
             LOG.error("Could not send error redirect for authorization GET request", e);
-            sendJSONError(request, response, e);
+            respondWithErrorPage(request, response, e);
         }
     }
 
@@ -217,70 +217,386 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         try {
-            // Check if user denied access
-            String accessDenied = request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED);
-            if (Boolean.parseBoolean(accessDenied)) {
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "access_denied", "The user denied your request.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
-                return;
-            }
+            boolean accessDenied = Boolean.parseBoolean(request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED));
+            Session session = checkSession(request, response, authRequest);
 
-            try {
-                Authenticated authenticated = authenticate(request, response);
-                if (authenticated == null) {
-                    return;
-                }
-
-                // Perform user / context lookup
-                Context ctx = findContext(authenticated.getContextInfo());
-                User user = findUser(ctx, authenticated.getUserInfo());
-
-                // Authorize
-                AuthorizationService authService = requireService(AuthorizationService.class, services);
-                authService.authorizeUser(ctx, user);
-
-                // Check if OAuth is deactivated for this user
-                ConfigView configView = requireService(ConfigViewFactory.class, services).getView(user.getId(), ctx.getContextId());
-                if (!configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue() || user.isGuest()) {
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "access_denied", "The user is not allowed to grant OAuth access to 3rd party applications.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
-                    return;
-                }
-
-                // Everything OK, send notification mail and do the redirect with authorization code & state
-                String code = oAuthProvider.generateAuthorizationCodeFor(authRequest.getClient().getId(), authRequest.getRedirectURI(), authRequest.getScope(), user.getId(), ctx.getContextId());
-                try {
-                    OAuthMailNotificationService notificationService = new OAuthMailNotificationService(oAuthProvider);
-                    notificationService.sendNotification(user.getId(), ctx.getContextId(), authRequest.getClient().getId(), request);
-                } catch (OXException e) {
-                    LOG.error("Send oauth notification mail for {} to {} failed.", authRequest.getClient().getName(), user.getMail(), e);
-                }
-
-                String redirectLocation = URLHelper.getRedirectLocation(authRequest.getRedirectURI(), OAuthProviderConstants.PARAM_CODE, code, OAuthProviderConstants.PARAM_STATE, authRequest.getState());
-                if (Boolean.parseBoolean(request.getParameter("redirect"))) {
-                    response.sendRedirect(redirectLocation);
+            // Note: The session was created only for the authorization purpose, so we should terminate it if possible.
+            String redirectLocation;
+            if (accessDenied) {
+                if (session == null) {
+                    redirectLocation = accessDenied(authRequest);
                 } else {
-                    sendJSONRedirect(request, response, redirectLocation);
+                    terminateSession(request, response, authRequest, session);
+                    redirectLocation = accessDenied(authRequest);
                 }
-            } catch (OXException e) {
-                if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e) || ContextExceptionCodes.UPDATE.equals(e) || OAuthProviderExceptionCodes.GRANTS_EXCEEDED.equals(e)) {
-                    // Let the popup display this error so that the user can retry or does at least now why he can't grant access
-                    sendJSONError(request, response, e);
-                    return;
+            } else {
+                if (session == null) {
+                    redirectLocation = handleLogin(request, response, authRequest);
+                } else {
+                    redirectLocation = handleAuthorization(request, response, authRequest, session);
+                    terminateSession(request, response, authRequest, session);
                 }
-
-                LOG.error("Authorization POST request failed", e);
-                if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
-                    response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "temporarily_unavailable", "The service is currently not available.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
-                }
-
-                response.sendRedirect(URLHelper.getErrorRedirectLocation(authRequest.getRedirectURI(), "server_error", "An internal error occurred.", OAuthProviderConstants.PARAM_STATE, authRequest.getState()));
             }
+
+            response.sendRedirect(redirectLocation);
         } catch (OXException e) {
             /*
-             * Responding with an error redirect failed. We can only display a proper message in the login popup now.
+             * Responding with an error redirect failed. We can only display a proper message in the popup now.
              */
             LOG.error("Could not send error redirect for authorization POST request", e);
-            sendJSONError(request, response, e);
+            respondWithErrorPage(request, response, e);
         }
+    }
+
+    /**
+     * Checks if the servlet request contains a valid session ID paramter.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param authRequest The authorization request
+     * @return The session or <code>null</code> if a session ID was not present, invalid or
+     *         a security issue exists.
+     * @throws OXException If a non-recoverable error occurs
+     */
+    private Session checkSession(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest) throws OXException {
+        String sessionId = request.getParameter(OAuthProviderConstants.PARAM_SESSION);
+        if (sessionId != null) {
+            // Session must only be provided by a previous login POST. This is enforced via additional cookie hash parameters.
+            LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
+            Session session = requireService(SessiondService.class, services).getSession(sessionId);
+            if (session != null) {
+                Map<String, Cookie> cookies = Cookies.cookieMapFor(request);
+                Cookie secretCookie = cookies.get(LoginServlet.SECRET_PREFIX + cookieHash(request, authRequest));
+                if (secretCookie != null && session.getSecret().equals(secretCookie.getValue())) {
+                    String remoteAddress = request.getRemoteAddr();
+                    if (loginConfig.isIpCheck()) {
+                        try {
+                            SessionUtility.checkIP(true, loginConfig.getRanges(), session, remoteAddress, loginConfig.getIpCheckWhitelist());
+                            return session;
+                        } catch (OXException e) {
+                            if (SessionExceptionCodes.WRONG_CLIENT_IP.equals(e)) {
+                                LOG.debug("Client IP check failed during OAuth flow.");
+                            } else {
+                                throw e;
+                            }
+                        }
+                    } else {
+                        return session;
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Performs a login based on the credentials contained as servlet request parameters.
+     * On successful authentication the session cookies get set on the servlet response
+     * and the session is returned.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param authRequest The authorization request
+     * @return The created session
+     * @throws OXException If login failed
+     */
+    private Session createSession(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest) throws OXException {
+        // Authenticate
+        LoginConfiguration loginConfig = LoginServlet.getLoginConfiguration();
+        String serverName = URLHelper.getHostname(request);
+        String hash = cookieHash(request, authRequest);
+        LoginRequestImpl loginRequest = new LoginRequestImpl.Builder()
+            .login(request.getParameter("login"))
+            .password(request.getParameter("password"))
+            .clientIP(LoginTools.parseClientIP(request))
+            .userAgent(LoginTools.parseUserAgent(request))
+            .authId(UUIDs.getUnformattedStringFromRandom())
+            .client(getLoginClient(authRequest))
+            .hash(hash)
+            .iface(HTTP_JSON)
+            .headers(Tools.copyHeaders(request))
+            .cookies(Tools.getCookieFromHeader(request))
+            .secure(Tools.considerSecure(request, true))
+            .serverName(serverName)
+            .serverPort(request.getServerPort())
+            .httpSessionID(request.getSession(true).getId())
+            .tranzient(true)
+            .build();
+
+        LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest);
+        Session session = loginResult.getSession();
+
+        // Add session log properties
+        LogProperties.putSessionProperties(session);
+
+        // Add headers and cookies from login result
+        LoginServlet.addHeadersAndCookies(loginResult, response);
+
+        // Add secret and public cookie
+        LoginServlet.writeSecretCookie(request, response, session, hash, true, serverName, loginConfig);
+
+        return session;
+    }
+
+    /**
+     * Terminates the passed session, i.e. a logout is performed and the session cookies are
+     * removed via the servlet response.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param authRequest The authorization request
+     * @param session The session
+     */
+    private void terminateSession(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest, Session session) {
+        try {
+            LoginPerformer.getInstance().doLogout(session.getSessionID());
+        } catch (OXException e) {
+            LOG.warn("Error while terminating OAuth provider authorization session", e);
+        } finally {
+            SessionUtility.removeOXCookies(cookieHash(request, authRequest), request, response);
+        }
+    }
+
+    /**
+     * Handles the authorization request of the user and generates the according redirect location.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param authRequest The authorization request
+     * @param session The session
+     * @return The redirect location
+     * @throws OXException If a non-recoverable error occurs
+     */
+    private String handleAuthorization(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest, Session session) throws OXException {
+        try {
+            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+            Context context = serverSession.getContext();
+            User user = serverSession.getUser();
+
+            // Check if OAuth is deactivated for this user
+            ConfigView configView = requireService(ConfigViewFactory.class, services).getView(user.getId(), context.getContextId());
+            if (!configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue() || user.isGuest()) {
+                return URLHelper.getErrorRedirectLocation(
+                    authRequest.getRedirectURI(),
+                    "access_denied",
+                    "The user is not allowed to grant OAuth access to 3rd party applications.",
+                    OAuthProviderConstants.PARAM_STATE,
+                    authRequest.getState());
+            }
+
+            // Everything OK, send notification mail and do the redirect with authorization code & state
+            String code = oAuthProvider.generateAuthorizationCodeFor(authRequest.getClient().getId(), authRequest.getRedirectURI(), authRequest.getScope(), user.getId(), context.getContextId());
+            String redirectLocation = URLHelper.getRedirectLocation(
+                authRequest.getRedirectURI(),
+                OAuthProviderConstants.PARAM_CODE,
+                code,
+                OAuthProviderConstants.PARAM_STATE,
+                authRequest.getState());
+
+            try {
+                OAuthMailNotificationService notificationService = new OAuthMailNotificationService();
+                notificationService.sendNotification(serverSession, authRequest.getClient(), request);
+            } catch (OXException e) {
+                LOG.error("Sending OAuth notification mail to {} failed for client {}.", user.getMail(), authRequest.getClient().getId(), e);
+            }
+
+            return redirectLocation;
+        } catch (OXException e) {
+            if (SessionExceptionCodes.SESSION_EXPIRED.equals(e) || SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                Map<String, String> redirectParams = prepareSelfRedirectParams(request, authRequest);
+                redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.SESSION_EXPIRED.getCode());
+                return URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
+            }
+
+            throw e;
+        }
+    }
+
+    /**
+     * Compiles the login page and returns it as String.
+     *
+     * @param request
+     * @param authRequest
+     * @param csrfToken
+     * @param error
+     * @return
+     * @throws OXException
+     * @throws IOException
+     */
+    private String compileLoginPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, LoginError error) throws OXException, IOException {
+        ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        TemplateService templateService = requireService(TemplateService.class, services);
+        OXTemplate loginPage = templateService.loadTemplate("oauth-provider-login.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
+
+        // build replacement strings
+        Locale locale = determineLocale(request);
+        Translator translator = translatorFactory.translatorFor(locale);
+        String productName = serverConfigService.getServerConfig(URLHelper.getHostname(request), ConfigProviderService.NO_USER, ConfigProviderService.NO_CONTEXT).getProductName();
+        String title = String.format(translator.translate(OAuthProviderStrings.POPUP_TITLE), authRequest.getClient().getName());
+        String headline = String.format(translator.translate(OAuthProviderStrings.LOGIN_FORM_HEADLINE), productName, authRequest.getClient().getName());
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("lang", locale.getLanguage());
+        vars.put("title", title);
+        vars.put("headline", headline);
+        if (error != null) {
+            vars.put("error", translator.translate(error.getMessage()));
+        }
+        vars.put("target", getAuthorizationEndpointURL(request));
+        vars.put("usernameLabel", translator.translate(OAuthProviderStrings.USERNAME));
+        vars.put("passwordLabel", translator.translate(OAuthProviderStrings.PASSWORD));
+        vars.put("cancelLabel", translator.translate(OAuthProviderStrings.CANCEL));
+        vars.put("loginLabel", translator.translate(OAuthProviderStrings.LOGIN));
+        vars.put("clientId", authRequest.getClient().getId());
+        vars.put("redirectURI", authRequest.getRedirectURI());
+        vars.put("scopes", authRequest.getScope().toString());
+        vars.put("state", authRequest.getState());
+        vars.put("csrfToken", csrfToken);
+        vars.put("language", locale.toString());
+
+        StringWriter writer = new StringWriter();
+        loginPage.process(vars, writer);
+        return writer.toString();
+    }
+
+    /**
+     * Handles the users login request. As a result a redirect location is generated - either containing a
+     * session ID or an error code.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @param authRequest The authorization request
+     * @return The redirect location
+     * @throws OXException If a non-recoverable error occurs
+     */
+    private String handleLogin(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest) throws OXException {
+        Map<String, String> redirectParams = prepareSelfRedirectParams(request, authRequest);
+        String login = request.getParameter("login");
+        String password = request.getParameter("password");
+        if (Strings.isEmpty(login) || Strings.isEmpty(password)) {
+            redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.INVALID_CREDENTIALS.getCode());
+        } else {
+            Session session;
+            try {
+                session = createSession(request, response, authRequest);
+                redirectParams.put(OAuthProviderConstants.PARAM_SESSION, session.getSessionID());
+            } catch (OXException e) {
+                // Let the popup display this error so that the user can retry or does at least now why he can't grant access
+                String redirectLocation;
+                if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
+                    redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.INVALID_CREDENTIALS.getCode());
+                    redirectLocation = URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
+                } else if (ContextExceptionCodes.UPDATE.equals(e)) {
+                    redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.UPDATE_TASK.getCode());
+                    redirectLocation = URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
+                } else if (OAuthProviderExceptionCodes.GRANTS_EXCEEDED.equals(e)) {
+                    redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.GRANTS_EXCEEDED.getCode());
+                    redirectLocation = URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
+                } else if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
+                    LOG.error("Login for OAuth authorization request failed", e);
+                    redirectLocation = URLHelper.getErrorRedirectLocation(
+                        authRequest.getRedirectURI(),
+                        "temporarily_unavailable",
+                        "The service is currently not available.",
+                        OAuthProviderConstants.PARAM_STATE,
+                        authRequest.getState());
+                } else {
+                    LOG.error("Login for OAuth authorization failed", e);
+                    redirectLocation = URLHelper.getErrorRedirectLocation(
+                        authRequest.getRedirectURI(),
+                        "server_error",
+                        "An internal error occurred.",
+                        OAuthProviderConstants.PARAM_STATE,
+                        authRequest.getState());
+                }
+
+                return redirectLocation;
+            }
+        }
+
+        return URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
+    }
+
+    /**
+     * Compiles the authorization page and returns it as String.
+     *
+     * @param request
+     * @param authRequest
+     * @param csrfToken
+     * @param session
+     * @return
+     * @throws OXException
+     * @throws IOException
+     */
+    private String compileAuthorizationPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, Session session) throws OXException, IOException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        TemplateService templateService = requireService(TemplateService.class, services);
+        OXTemplate loginPage = templateService.loadTemplate("oauth-provider-authorization.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
+
+        Locale locale = determineLocale(request);
+        Translator translator = translatorFactory.translatorFor(locale);
+        String title = String.format(translator.translate(OAuthProviderStrings.POPUP_TITLE), authRequest.getClient().getName());
+        String intro = translator.translate(OAuthProviderStrings.AUTHORIZATION_INTRO);
+        int splitIndex = intro.indexOf(STRING_SPLITTER);
+        String introPre = intro;
+        String introPost = "";
+        if (splitIndex >= 0) {
+            introPre = intro.substring(0, splitIndex);
+            if (splitIndex + STRING_SPLITTER.length() <= intro.length()) {
+                introPost = intro.substring(splitIndex + STRING_SPLITTER.length());
+            }
+        }
+
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("lang", locale.getLanguage());
+        vars.put("title", title);
+        vars.put("headline", title);
+        vars.put("clientDescription", authRequest.getClient().getDescription());
+        vars.put("iconURL", icon2HTMLDataSource(authRequest.getClient().getIcon()));
+        vars.put("iconAlternative", authRequest.getClient().getName());
+        vars.put("introPre", introPre);
+        vars.put("clientWebsite", authRequest.getClient().getWebsite());
+        vars.put("clientName", authRequest.getClient().getName());
+        vars.put("introPost", introPost);
+        List<String> descriptions = new ArrayList<>(authRequest.getScope().size());
+        for (String token : authRequest.getScope().get()) {
+            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
+            if (scopeProvider == null) {
+                LOG.warn("No scope provider available for token {}", token);
+                descriptions.add(token);
+            } else {
+                descriptions.add(translator.translate(scopeProvider.getDescription()));
+            }
+        }
+        vars.put("scopeDescriptions", descriptions);
+        vars.put("target", getAuthorizationEndpointURL(request));
+        vars.put("clientId", authRequest.getClient().getId());
+        vars.put("redirectURI", authRequest.getRedirectURI());
+        vars.put("scopes", authRequest.getScope().toString());
+        vars.put("state", authRequest.getState());
+        vars.put("csrfToken", csrfToken);
+        vars.put("session", session.getSessionID());
+        vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
+        vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
+        vars.put("footer", translator.translate(OAuthProviderStrings.AUTHORIZATION_FOOTER));
+        vars.put("language", locale.toString());
+
+        StringWriter writer = new StringWriter();
+        loginPage.process(vars, writer);
+        return writer.toString();
+    }
+
+    /**
+     * Compiles a HTML data-URI for the icon image.
+     *
+     * @param icon The icon
+     * @return A URI in the form of <code>data:image/png;charset=UTF-8;base64,iVBORw0KGgoAAAANS...</code>
+     * @throws IOException
+     */
+    private static String icon2HTMLDataSource(Icon icon) throws IOException {
+        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(icon.getData());
     }
 
     /**
@@ -296,76 +612,128 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      */
     private boolean isPotentialCSRF(HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (isInvalidReferer(request)) {
-            sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid referer header");
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid referer.");
             return true;
         }
 
         if (isInvalidCSRFToken(request)) {
-            sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request contained no or invalid CSRF token. Ensure that cookies are allowed.");
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Missing or invalid CSRF token.");
             return true;
         }
 
         return false;
     }
 
-    private void sendJSONRedirect(HttpServletRequest request, HttpServletResponse response, String redirectLocation) throws IOException {
+    /**
+     * Checks if the current HTTP session already contains a CSRF token and the passed request contains
+     * the same token as parameter.
+     *
+     * @param request
+     * @return <code>true</code> if either the HTTP session or the request did NOT contain a valid CSRF token.
+     */
+    private static boolean isInvalidCSRFToken(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return true;
+        }
+
+        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
+        if (csrfToken == null) {
+            return true;
+        }
+
+        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
+        if (actualToken == null) {
+            return true;
+        }
+
+        if (!csrfToken.equals(actualToken)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if the referer header of the passed request matches the scheme, host, port and
+     * path of this servlet.
+     *
+     * @param request
+     * @return <code>true</code> if the referer header is not set or invalid
+     */
+    private static boolean isInvalidReferer(HttpServletRequest request) {
+        String referer = request.getHeader(HttpHeaders.REFERER);
+        if (Strings.isEmpty(referer)) {
+            return true;
+        }
+
         try {
-            JSONObject data = new JSONObject();
-            data.put("redirect_uri", redirectLocation);
-            sendJSONResponse(request, response, data);
-        } catch (JSONException je) {
-            LOG.error("Could not send redirect response", je);
-            response.reset();
-            Tools.disableCaching(response);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
+            URI actualReferer = new URI(referer);
+            if (!stringsEqual(expectedReferer.getScheme(), actualReferer.getScheme())) {
+                return true;
+            }
+
+            if (!stringsEqual(expectedReferer.getHost(), actualReferer.getHost())) {
+                return true;
+            }
+
+            if (expectedReferer.getPort() != actualReferer.getPort()) {
+                return true;
+            }
+
+            if (!stringsEqual(normalizePath(expectedReferer.getPath()), normalizePath(actualReferer.getPath()))) {
+                return true;
+            }
+        } catch (URISyntaxException e) {
+            return true;
         }
+
+        return false;
     }
 
-    private boolean respondWithForm(HttpServletRequest request) {
-        String respondWith = request.getParameter("respond_with");
-        return "form".equals(respondWith);
+    /**
+     * Null-safe method for comparing two strings
+     *
+     * @param str1 string or <code>null</code>
+     * @param str2 string or <code>null</code>
+     * @return <code>true</code> if both strings are <code>null</code> or equal
+     */
+    private static boolean stringsEqual(String str1, String str2) {
+        if (str1 != null && str2 != null) {
+            return str1.equals(str2);
+        }
+
+        return str1 == null && str2 == null;
     }
 
-    private static final class AuthorizationRequest {
-
-        private final Client client;
-
-        private final String redirectURI;
-
-        private final String state;
-
-        private final Scope scope;
-
-        protected AuthorizationRequest(Client client, String redirectURI, String state, Scope scope) {
-            super();
-            this.client = client;
-            this.redirectURI = redirectURI;
-            this.state = state;
-            this.scope = scope;
+    /**
+     * Normalizes a servlet path for comparison by removing the dispatcher prefix if present.
+     *
+     * @param path The path or <code>null</code>
+     * @return The normalized path or <code>null</code> if the input was also <code>null</code>
+     */
+    private static String normalizePath(String path) {
+        if (path != null) {
+            int index = path.indexOf(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
+            if (index >= 0) {
+                return path.substring(index);
+            }
         }
 
-
-        public Client getClient() {
-            return client;
-        }
-
-
-        public String getRedirectURI() {
-            return redirectURI;
-        }
-
-
-        public String getState() {
-            return state;
-        }
-
-
-        public Scope getScope() {
-            return scope;
-        }
-
+        return null;
     }
 
+    /**
+     * Validates the authorization request and returns an instance of {@link AuthorizationRequest}
+     * that encapsulates all the required request data.
+     *
+     * @param request The servlet request
+     * @param response The servlet response
+     * @return An {@link AuthorizationRequest} or <code>null</code> if the request is invalid. In that case
+     * the response was already submitted after the call returns.
+     * @throws IOException
+     */
     private AuthorizationRequest validate(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             Client client = checkClient(request, response);
@@ -395,23 +763,12 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             return new AuthorizationRequest(client, redirectURI, state, scope);
         } catch (OXException e) {
             /*
-             * Unexpected error. We must not or cannot redirect but will respond with an error payload
-             * that gets displayed by the popup.
+             * Unexpected error. We must not or cannot redirect so we display an error page.
              */
-            sendJSONError(request, response, e);
+            LOG.error("Error while validating OAuth authorization request", e);
+            respondWithErrorPage(request, response, e);
             return null;
         }
-    }
-
-    private Authenticated authenticate(HttpServletRequest request, HttpServletResponse response) throws OXException, IOException {
-        // Check user credentials
-        String login = request.getParameter(OAuthProviderConstants.PARAM_USER_LOGIN);
-        String password = request.getParameter(OAuthProviderConstants.PARAM_USER_PASSWORD);
-        if (Strings.isEmpty(login) || Strings.isEmpty(password)) {
-           throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
-        }
-
-        return Authentication.login(login, password, new HashMap<String, Object>(0));
     }
 
     /**
@@ -431,14 +788,14 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
          */
         String clientId = request.getParameter(OAuthProviderConstants.PARAM_CLIENT_ID);
         if (Strings.isEmpty(clientId)) {
-            sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_CLIENT_ID);
             return null;
         }
 
         try {
             Client client = oAuthProvider.getClientManagement().getClientById(clientId);
             if (client == null || !client.isEnabled()) {
-                sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Client not found: " + clientId);
+                respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid client ID: " + clientId);
                 return null;
             }
 
@@ -466,12 +823,12 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
          */
         String redirectURI = request.getParameter(OAuthProviderConstants.PARAM_REDIRECT_URI);
         if (Strings.isEmpty(redirectURI)) {
-            sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_REDIRECT_URI);
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_REDIRECT_URI);
             return null;
         }
 
         if (!client.hasRedirectURI(redirectURI)) {
-            sendErrorPage(response, HttpServletResponse.SC_BAD_REQUEST, "Invalid redirect URI: " + redirectURI);
+            respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid redirect URI: " + redirectURI);
             return null;
         }
 
@@ -493,7 +850,10 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     private String checkState(HttpServletRequest request, HttpServletResponse response, String redirectURI) throws IOException, OXException {
         String state = request.getParameter(OAuthProviderConstants.PARAM_STATE);
         if (Strings.isEmpty(state)) {
-            response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_request", "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_STATE));
+            response.sendRedirect(URLHelper.getErrorRedirectLocation(
+                redirectURI,
+                "invalid_request",
+                "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_STATE));
             return null;
         }
 
@@ -517,12 +877,22 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     private boolean isValidResponseType(HttpServletRequest request, HttpServletResponse response, Client client, String redirectURI, String state) throws IOException, OXException {
         String responseType = request.getParameter(OAuthProviderConstants.PARAM_RESPONSE_TYPE);
         if (Strings.isEmpty(responseType)) {
-            response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_request", "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_RESPONSE_TYPE, OAuthProviderConstants.PARAM_STATE, state));
+            response.sendRedirect(URLHelper.getErrorRedirectLocation(
+                redirectURI,
+                "invalid_request",
+                "Request was missing a required parameter: " + OAuthProviderConstants.PARAM_RESPONSE_TYPE,
+                OAuthProviderConstants.PARAM_STATE,
+                state));
             return false;
         }
 
         if (!OAuthProviderConstants.RESPONSE_TYPE_AUTH_CODE.equals(responseType)) {
-            response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "unsupported_response_type", "Only response type '" + OAuthProviderConstants.RESPONSE_TYPE_AUTH_CODE + "' is supported.", OAuthProviderConstants.PARAM_STATE, state));
+            response.sendRedirect(URLHelper.getErrorRedirectLocation(
+                redirectURI,
+                "unsupported_response_type",
+                "Only response type '" + OAuthProviderConstants.RESPONSE_TYPE_AUTH_CODE + "' is supported.",
+                OAuthProviderConstants.PARAM_STATE,
+                state));
             return false;
         }
 
@@ -558,92 +928,245 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         return scope;
     }
 
-    private String compileLoginPage(HttpServletRequest request, String redirectURI, String state, String csrfToken, Client client, Scope scope, Locale locale) throws OXException, IOException {
-        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
-        TemplateService templateService = requireService(TemplateService.class, services);
-        HtmlService htmlService = requireService(HtmlService.class, services);
-        OXTemplate loginPage = templateService.loadTemplate("oauth-provider-login.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
-
-        // build replacement strings
-        Translator translator = translatorFactory.translatorFor(locale);
-        Map<String, Object> vars = new HashMap<>();
-        vars.put("lang", locale.getLanguage());
-        String title = translator.translate(OAuthProviderStrings.LOGIN);
-        vars.put("title", title);
-        vars.put("iconURL", icon2HTMLDataSource(client.getIcon()));
-        String clientName = htmlService.htmlFormat(client.getName());
-        vars.put("iconAlternative", clientName);
-        vars.put("intro", translator.translate(String.format(OAuthProviderStrings.OAUTH_INTRO, clientName)));
-        List<String> descriptions = new ArrayList<>(scope.size());
-        for (String token : scope.get()) {
-            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
-            if (scopeProvider == null) {
-                LOG.warn("No scope provider available for token {}", token);
-                descriptions.add(token);
-            } else {
-                descriptions.add(translator.translate(scopeProvider.getDescription()));
-            }
-        }
-        vars.put("scopeDescriptions", descriptions);
-        vars.put("target", getAuthorizationEndpointURL(request));
-        vars.put("formHeading", title);
-        vars.put("usernameLabel", translator.translate(OAuthProviderStrings.USERNAME));
-        vars.put("passwordLabel", translator.translate(OAuthProviderStrings.PASSWORD));
-        vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
-        vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
-        vars.put("clientId", client.getId());
-        vars.put("redirectURI", redirectURI);
-        vars.put("scopes", scope.toString());
-        vars.put("state", state);
-        vars.put("csrfToken", csrfToken);
-
-        StringWriter writer = new StringWriter();
-        loginPage.process(vars, writer);
-        return writer.toString();
+    /**
+     * Calculates the session cookie hash.
+     *
+     * @param request The servlet request
+     * @param authRequest The authorization request
+     * @return The hash
+     */
+    private static String cookieHash(HttpServletRequest request, AuthorizationRequest authRequest) {
+        return HashCalculator.getInstance().getHash(
+            request,
+            LoginTools.parseUserAgent(request),
+            getLoginClient(authRequest),
+            authRequest.getRedirectURI(),
+            authRequest.getScope().toString(),
+            authRequest.getState());
     }
 
-    private final String getAuthorizationEndpointURL(HttpServletRequest request) throws OXException {
+    /**
+     * Gets the client identifier for the login request.
+     *
+     * @param authRequest The authorization request
+     * @return The client identifier
+     */
+    private static String getLoginClient(AuthorizationRequest authRequest) {
+        return "OAuth Client " + authRequest.getClient().getId();
+    }
+
+    /**
+     * Prepares the query parameters for a redirect towards this same servlet
+     * based on the passed {@link AuthorizationRequest}.
+     *
+     * @param request The servlet request
+     * @param authRequest The authorization request
+     * @return A map of query parameters
+     */
+    private static Map<String, String> prepareSelfRedirectParams(HttpServletRequest request, AuthorizationRequest authRequest) {
+        Map<String, String> redirectParams = new LinkedHashMap<>();
+        redirectParams.put(OAuthProviderConstants.PARAM_CLIENT_ID, authRequest.getClient().getId());
+        redirectParams.put(OAuthProviderConstants.PARAM_REDIRECT_URI, authRequest.getRedirectURI());
+        redirectParams.put(OAuthProviderConstants.PARAM_STATE, authRequest.getState());
+        redirectParams.put(OAuthProviderConstants.PARAM_SCOPE, authRequest.getScope().toString());
+        redirectParams.put(OAuthProviderConstants.PARAM_RESPONSE_TYPE, OAuthProviderConstants.RESPONSE_TYPE_AUTH_CODE);
+        redirectParams.put(OAuthProviderConstants.PARAM_LANGUAGE, determineLocale(request).toString());
+        return redirectParams;
+    }
+
+    /**
+     * Checks if an error code is present as query parameter on the servlet request.
+     *
+     * @param request The servlet request
+     * @return The error or <code>null</code> if none is present or the parameter
+     *         value is invalid.
+     */
+    private static LoginError optLoginError(HttpServletRequest request) {
+        String errorCode = request.getParameter(OAuthProviderConstants.PARAM_ERROR);
+        if (errorCode == null) {
+            return null;
+        }
+
+        return LoginError.forCode(errorCode);
+    }
+
+    /**
+     * Gets the URL of this endpoint.
+     *
+     * @param request The servlet request
+     * @return The URL
+     * @throws OXException If generating the URL fails
+     */
+    private static String getAuthorizationEndpointURL(HttpServletRequest request) throws OXException {
         return URLHelper.getBaseLocation(request) + OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS;
     }
 
     /**
-     * Looks up the context for the supplied context info, throwing appropriate exceptions if not found.
+     * Generates the error redirect for type <code>temporarily_unavailable</code>.
      *
-     * @param contextInfo The context info (as usually supplied in the login name)
-     * @return The context
-     * @throws OXException If context look-up fails
+     * @param authRequest The authorization request
+     * @return The redirect location
+     * @throws OXException If building the URI fails
      */
-    private Context findContext(String contextInfo) throws OXException {
-        ContextStorage contextStor = ContextStorage.getInstance();
-        int contextId = contextStor.getContextId(contextInfo);
-        if (ContextStorage.NOT_FOUND == contextId) {
-            throw ContextExceptionCodes.NO_MAPPING.create(contextInfo);
-        }
-        Context context = contextStor.getContext(contextId);
-        if (null == context) {
-            throw ContextExceptionCodes.NOT_FOUND.create(I(contextId));
-        }
-        return context;
+    private static String serviceUnavailable(AuthorizationRequest authRequest) throws OXException {
+        return URLHelper.getErrorRedirectLocation(
+            authRequest.getRedirectURI(),
+            "temporarily_unavailable",
+            "The service is currently not available.",
+            OAuthProviderConstants.PARAM_STATE,
+            authRequest.getState());
     }
 
     /**
-     * Looks up the user for the supplied user info in a context, throwing appropriate exceptions if not found.
+     * Generates the error redirect for type <code>server_error</code>.
      *
-     * @param ctx The context
-     * @param userInfo The user info (as usually supplied in the login name)
-     * @return The user
-     * @throws OXException If user look-up fails
+     * @param authRequest The authorization request
+     * @return The redirect location
+     * @throws OXException If building the URI fails
      */
-    private User findUser(Context ctx, String userInfo) throws OXException {
-        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
-        final UserStorage us = UserStorage.getInstance();
-        int userId;
-        if (null != proxyDelimiter && userInfo.contains(proxyDelimiter)) {
-            userId = us.getUserId(userInfo.substring(userInfo.indexOf(proxyDelimiter) + proxyDelimiter.length(), userInfo.length()), ctx);
-        } else {
-            userId = us.getUserId(userInfo, ctx);
+    private static String serverError(AuthorizationRequest authRequest) throws OXException {
+        return URLHelper.getErrorRedirectLocation(
+            authRequest.getRedirectURI(),
+            "server_error",
+            "An internal error occurred.",
+            OAuthProviderConstants.PARAM_STATE,
+            authRequest.getState());
+    }
+
+    private static String accessDenied(AuthorizationRequest authRequest) throws OXException {
+        return URLHelper.getErrorRedirectLocation(
+            authRequest.getRedirectURI(),
+            "access_denied",
+            "The user denied your request.",
+            OAuthProviderConstants.PARAM_STATE,
+            authRequest.getState());
+    }
+
+    /**
+     * Encapsulates the request data of a valid request towards the authorization endpoint.
+     */
+    private static final class AuthorizationRequest {
+
+        private final Client client;
+
+        private final String redirectURI;
+
+        private final String state;
+
+        private final Scope scope;
+
+        protected AuthorizationRequest(Client client, String redirectURI, String state, Scope scope) {
+            super();
+            this.client = client;
+            this.redirectURI = redirectURI;
+            this.state = state;
+            this.scope = scope;
         }
-        return us.getUser(userId, ctx);
+
+        /**
+         * Gets the client APPs ID.
+         * @return The id
+         */
+        public Client getClient() {
+            return client;
+        }
+
+        /**
+         * Gets the requested redirect URI.
+         * @return The URI
+         */
+        public String getRedirectURI() {
+            return redirectURI;
+        }
+
+        /**
+         * Gets the requested state.
+         * @return The state
+         */
+        public String getState() {
+            return state;
+        }
+
+        /**
+         * Gets the requested scope.
+         * @return The scope
+         */
+        public Scope getScope() {
+            return scope;
+        }
+
+    }
+
+    /**
+     * Enumeration of errors which shall be displayed on the login page on occurrence.
+     */
+    private static enum LoginError {
+        /**
+         * The provided credentials are invalid.
+         */
+        INVALID_CREDENTIALS(1, LoginExceptionMessages.INVALID_CREDENTIALS_MSG),
+        /**
+         * Login not possible, update tasks are running.
+         */
+        UPDATE_TASK(2, ContextExceptionMessage.UPDATE_MSG),
+        /**
+         * The user exceeded the max. number of possible grants.
+         */
+        GRANTS_EXCEEDED(3, OAuthProviderExceptionMessages.GRANTS_EXCEEDED_MSG),
+        /**
+         * The session expired.
+         */
+        SESSION_EXPIRED(4, SessionExceptionMessages.SESSION_EXPIRED_MSG);
+
+        private static final Map<Integer, LoginError> errorsByCodes = new HashMap<>(3, 0.75f);
+        static {
+            for (LoginError error : LoginError.values()) {
+                errorsByCodes.put(error.code, error);
+            }
+        }
+
+        private final int code;
+        private final String msg;
+
+        private LoginError(int code, String msg) {
+            this.code = code;
+            this.msg = msg;
+        }
+
+        /**
+         * Gets the error code that is to be passed around via an URL parameter.
+         * @return The error code
+         */
+        public String getCode() {
+            return Integer.toString(code);
+        }
+
+        /**
+         * Gets the localizable error message.
+         * @return The error message
+         */
+        public String getMessage() {
+            return msg;
+        }
+
+        /**
+         * Gets the error instance for the given code.
+         * @param code The code
+         * @return The error or <code>null</code> if the code is <code>null</code> or invalid
+         */
+        public static LoginError forCode(String code) {
+            if (code == null) {
+                return null;
+            }
+
+            try {
+                int intCode = Integer.parseInt(code);
+                return errorsByCodes.get(intCode);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+        }
+
     }
 
 }

@@ -90,7 +90,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
      * -------------------------------- Guard stuff -------------------------------
      */
 
-    private static final ConcurrentMap<SubscriptionKey, Object> GUARD_MAP = new ConcurrentHashMap<SubscriptionKey, Object>(1024);
+    private static final ConcurrentMap<SubscriptionKey, Object> GUARD_MAP = new ConcurrentHashMap<SubscriptionKey, Object>(1024, 0.9f, 1);
 
     private static final Object PRESENT = new Object();
 

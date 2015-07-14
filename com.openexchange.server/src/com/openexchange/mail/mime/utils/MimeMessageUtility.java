@@ -86,6 +86,7 @@ import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.Address;
 import javax.mail.BodyPart;
 import javax.mail.Header;
@@ -103,6 +104,7 @@ import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimePart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParseException;
+import javax.mail.util.ByteArrayDataSource;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.net.QuotedPrintableCodec;
@@ -115,10 +117,8 @@ import org.apache.james.mime4j.util.ByteArrayBuffer;
 import org.apache.james.mime4j.util.CharsetUtil;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.groupware.ldap.User;
@@ -143,9 +143,11 @@ import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.PlainTextAddress;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.DataHandlerWrapper;
+import com.openexchange.mail.mime.converters.FileBackedMimeBodyPart;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.utils.CP932EmojiMapping;
@@ -540,7 +542,6 @@ public final class MimeMessageUtility {
     }
 
     private static final String IMAGE_ALIAS_APPENDIX = ImageActionFactory.ALIAS_APPENDIX;
-    private static final String DEFAULT_ALT_PREFIX = DispatcherPrefixService.DEFAULT_ALT_PREFIX;
 
     private static final String FILE_ALIAS_APPENDIX = "file";
 
@@ -561,19 +562,12 @@ public final class MimeMessageUtility {
         if (fromIndex < 0) {
             fromIndex = 0;
         }
-        String prefix = DefaultDispatcherPrefixService.getInstance().getPrefix();
-        if (prefix.charAt(0) == '/') {
-            prefix = prefix.substring(1);
-        }
-        if (tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0) {
+        // String prefix = ServerServiceRegistry.getServize(DispatcherPrefixService.class).getPrefix();
+        if (tmp.indexOf('/' + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf('/' + FILE_ALIAS_APPENDIX, fromIndex) >= 0) {
             return true;
         }
-        final String altPrefix = DEFAULT_ALT_PREFIX.substring(1);
-        if (altPrefix.equals(prefix)) {
-            return false;
-        }
-        prefix = altPrefix;
-        return tmp.indexOf(prefix + IMAGE_ALIAS_APPENDIX, fromIndex) >= 0 || tmp.indexOf(prefix + FILE_ALIAS_APPENDIX, fromIndex) >= 0;
+
+        return false;
     }
 
     /**
@@ -2287,6 +2281,152 @@ public final class MimeMessageUtility {
             }
         }
     }
+
+    /**
+     * Constructs a MimeBodyPart by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @return The new {@link MimeBodyPart} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeBodyPart newMimeBodyPart(InputStream is) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            MimeBodyPart tmp;
+            if (null == tempFile) {
+                tmp = new MimeBodyPart(sink.getStream());
+            } else {
+                tmp = new FileBackedMimeBodyPart(tempFile);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    /**
+     * Constructs a DataSource by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @param contentType The Content-Type to set
+     * @return The new {@link DataSource} instance
+     * @throws OXException If a new {@link DataSource} instance cannot be returned
+     */
+    public static DataSource newDataSource(InputStream is, String contentType) throws OXException {
+        InputStream msgSrc = is;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            sink.write(msgSrc);
+            msgSrc = null;
+
+            File tempFile = sink.getTempFile();
+            DataSource tmp;
+            if (null == tempFile) {
+                tmp = new ByteArrayDataSource(sink.getBuffer().toByteArray(), contentType);
+            } else {
+                tmp = new FileDataSource(tempFile, contentType);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param original The original MIME message
+     * @param optReceivedDate The optional received date or <code>null</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage cloneMessage(MimeMessage original, Date optReceivedDate) throws OXException {
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            original.writeTo(sink.asOutputStream());
+
+            File tempFile = sink.getTempFile();
+            MimeMessage tmp;
+            if (null == tempFile) {
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+            } else {
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    /**
+     * Constructs a MimeBodyPart by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
+     * @return The new {@link MimeBodyPart} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeBodyPart clonePart(Part part) throws OXException {
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean closeSink = true;
+        try {
+            part.writeTo(sink.asOutputStream());
+
+            File tempFile = sink.getTempFile();
+            MimeBodyPart tmp;
+            if (null == tempFile) {
+                tmp = new MimeBodyPart(sink.getStream());
+            } else {
+                tmp = new FileBackedMimeBodyPart(tempFile);
+            }
+            closeSink = false;
+            return tmp;
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (closeSink) {
+                sink.close();
+            }
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets the stream of specified part's raw data.

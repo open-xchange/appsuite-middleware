@@ -75,6 +75,7 @@ import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderField;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.StoragePriority;
@@ -115,7 +116,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class VirtualFolderStorage implements FolderStorage {
+public final class VirtualFolderStorage implements ReinitializableFolderStorage {
 
     private static final VirtualFolderStorage INSTANCE = new VirtualFolderStorage();
 
@@ -202,6 +203,25 @@ public final class VirtualFolderStorage implements FolderStorage {
             }
         }
         return tmp.booleanValue();
+    }
+
+    @Override
+    public boolean reinitialize(String treeId, StorageParameters params) throws OXException {
+        // Delete associated folders
+        boolean deleted = Delete.deleteTree(params.getContextId(), unsignedInt(treeId), params.getUserId(), params.getSession());
+
+        if (false == deleted) {
+            return false;
+        }
+
+        MemoryTable table = MemoryTable.optMemoryTableFor(params.getSession());
+        if (null != table) {
+            table.remove(unsignedInt(treeId));
+        }
+
+        checkConsistency(treeId, params);
+
+        return true;
     }
 
     @Override
@@ -566,7 +586,7 @@ public final class VirtualFolderStorage implements FolderStorage {
         /*
          * Create destination map
          */
-        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size);
+        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size, 0.9f, 1);
         int taskCount = 0;
         for (final java.util.Map.Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage tmp = entry.getKey();
@@ -829,6 +849,43 @@ public final class VirtualFolderStorage implements FolderStorage {
         for (final Folder folder : folders) {
             if (cts.equals(folder.getContentType().toString()) && CalculatePermission.calculate(folder, session, contentTypes).isVisible()) {
                 ret.add(new VirtualId(folder.getID(), index++, folder.getLocalizedName(locale)));
+            }
+        }
+        return ret.toArray(new SortableId[ret.size()]);
+    }
+
+    @Override
+    public SortableId[] getUserSharedFolders(final String treeId, final ContentType contentType, final StorageParameters params) throws OXException {
+        final User user = params.getUser();
+        final Locale locale = user.getLocale();
+        /*
+         * Check memory table
+         */
+        final ServerSession session = getServerSession(params);
+        final MemoryTable memoryTable = MemoryTable.getMemoryTableFor(session);
+        final MemoryTree memoryTree = memoryTable.getTree(unsignedInt(treeId), session);
+        if (null == memoryTree) {
+            throw FolderExceptionErrorMessage.TREE_NOT_FOUND.create(treeId);
+        }
+        /*
+         * Get sorted
+         */
+        final List<Pair> list = new ArrayList<Pair>(32);
+        traverse(ROOT_ID, memoryTree, locale, list);
+        Collections.sort(list, new PairComparator(locale));
+        /*
+         * Get associated folders
+         */
+        final List<Folder> folders = loadFolderFor(list, params);
+        final List<SortableId> ret = new ArrayList<SortableId>(folders.size());
+        final String cts = contentType.toString();
+        final List<ContentType> contentTypes = Collections.singletonList(contentType);
+        int index = 0;
+        for (final Folder folder : folders) {
+            if (cts.equals(folder.getContentType().toString()) && CalculatePermission.calculate(folder, session, contentTypes).isVisible()) {
+                if (user.getId() == folder.getCreatedBy() && null != folder.getPermissions() && 1 < folder.getPermissions().length) {
+                    ret.add(new VirtualId(folder.getID(), index++, folder.getLocalizedName(locale)));
+                }
             }
         }
         return ret.toArray(new SortableId[ret.size()]);

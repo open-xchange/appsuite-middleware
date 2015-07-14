@@ -488,7 +488,9 @@ public class RdbUserStorage extends UserStorage {
                         if (false == user.isGuest()) {
                             regularUsers.put(user.getId(), user);
                         } else if (Strings.isEmpty(user.getMail()) && Strings.isEmpty(user.getDisplayName())) {
-                            user.setDisplayName(StringHelper.valueOf(user.getLocale()).getString(Users.GUEST));
+                            String guest = StringHelper.valueOf(user.getLocale()).getString(Users.GUEST);
+                            user.setDisplayName(guest);
+                            user.setLoginInfo(guest);
                         }
                     }
                 } finally {
@@ -814,8 +816,7 @@ public class RdbUserStorage extends UserStorage {
         final String password = user.getUserPassword();
         final String mech = user.getPasswordMech();
         final int shadowLastChanged = user.getShadowLastChange();
-        if ((false == user.isGuest() && null != password && null != mech) ||
-            (user.isGuest() && (null != password || null != mech))) {
+        if (null != password && null != mech) {
             PreparedStatement stmt = null;
             try {
                 String encodedPassword = user.isGuest() ? password : PasswordMechanism.getEncodedPassword(mech, password);
@@ -1394,14 +1395,14 @@ public class RdbUserStorage extends UserStorage {
                 closeSQLStuff(result, stmt);
             }
             try {
-                if (userId == -1 && considerAliases) {
+                if (userId < 0 && considerAliases) {
                     UserAliasStorage alias = ServerServiceRegistry.getInstance().getService(UserAliasStorage.class);
                     int retUserId = alias.getUserId(context.getContextId(), pattern);
-                    if(retUserId != -1) {
+                    if (retUserId > 0) {
                         userId = retUserId;
                     }
                 }
-                if (userId == -1) {
+                if (userId < 0) {
                     //FIXME: javadoc claims to return null if not found...
                     throw LdapExceptionCode.NO_USER_BY_MAIL.create(email).setPrefix("USR");
                 }

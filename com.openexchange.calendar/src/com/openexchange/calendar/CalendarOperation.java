@@ -59,13 +59,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.calendar.api.CalendarCollection;
 import com.openexchange.calendar.storage.ParticipantStorage;
 import com.openexchange.database.provider.SimpleDBProvider;
@@ -814,7 +815,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                     cdao.setTimezone(timezone);
                 }
                 recColl.fillDAO(cdao);
-                
+
+                recColl.checkRecurring(cdao);
+                // cdao.setRecurrenceCalculator(((int) ((cdao.getEndDate().getTime() - cdao.getStartDate().getTime()) /
+                // Constants.MILLI_DAY)));
                 cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
                 Date realStart = calculateRealRecurringStartDate(cdao);
                 if (realStart != null) {
@@ -1041,19 +1045,17 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     /* This fixes bug 16107 */
-    protected static void handleChangeFromFullTimeToNormal(final CalendarDataObject newApp, final CalendarDataObject oldApp) {
+    protected static void handleChangeFromFullTimeToNormal(final CalendarDataObject newApp, final CalendarDataObject oldApp) throws OXException {
         if (oldApp == null || newApp == null || !oldApp.getFullTime() || newApp.getFullTime() || newApp.getUntil() == null) {
             return;
         }
         newApp.setEndDate(calculateRealRecurringEndDate(newApp, oldApp));
     }
 
-    private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) {
-        Date until = cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? edao.getUntil() : cdao.getUntil();
-        boolean fulltime = (cdao.containsFullTime() || edao == null) ? cdao.getFullTime() : edao.getFullTime(); 
-        String timezone = cdao.getTimezone() == null ? edao.getTimezone() : cdao.getTimezone();
-        Date untilDate = null == until ? recColl.getMaxUntilDate(cdao) : until;
-        return calculateRealRecurringEndDate2(untilDate, cdao.getEndDate(), fulltime, timezone);
+    private static final Date calculateRealRecurringEndDate(final CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
+        String tzid = cdao.getTimezone() == null ? edao.getTimezone() : cdao.getTimezone();
+        boolean fulltime = cdao.containsFullTime() ? cdao.getFullTime() : (edao != null ? edao.getFullTime() : false);
+        return cdao.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE ? calculateImplictEndOfSeries(edao, tzid, fulltime) : calculateImplictEndOfSeries(cdao, tzid, fulltime);
     }
 
     /**
@@ -1074,6 +1076,24 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return null;
     }
 
+    private static Date calculateImplictEndOfSeries(CalendarDataObject cdao, String tzid, boolean fulltime) throws OXException {
+        if (cdao.containsUntil() && cdao.getUntil() != null) {
+            return calculateRealRecurringEndDate(cdao.getUntil(), cdao.getEndDate(), fulltime, cdao.getRecurrenceCalculator());
+        }
+        CalendarDataObject clone = cdao.clone();
+        RecurringResultsInterface rresults = recColl.calculateRecurringIgnoringExceptions(clone, 0, 0, 0);
+        RecurringResultInterface rresult = rresults.getRecurringResult(rresults.size()-1);
+        Date retval = new Date(rresult.getEnd());
+
+        TimeZone tz = TimeZone.getTimeZone(tzid);
+        int startOffset = tz.getOffset(calculateRealRecurringStartDate(cdao).getTime());
+        int endOffset = tz.getOffset(retval.getTime());
+        if (!fulltime) {
+            retval.setTime(retval.getTime() + endOffset - startOffset);
+        }
+        return retval;
+    }
+
     private static final Date calculateRealRecurringEndDate(final Date untilDate, final Date endDate, final boolean isFulltime, int recCal) {
         long until = untilDate.getTime();
         // Extract time out of until date
@@ -1092,40 +1112,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         return new Date(until + mod);
     }
 
-    private static final Date calculateRealRecurringEndDate2(final Date untilDate, final Date endDate, final boolean isFulltime, String timezone) {
-        if (isFulltime) {
-            return untilDate;
-        }
-        TimeZone tz = TimeZone.getTimeZone(timezone == null ? "UTC" :  timezone);
-        /*
-         * Create the until without times as UTC.
-         */
-        Calendar untilWithoutTime = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
-        untilWithoutTime.setTime(untilDate);
-        untilWithoutTime.set(Calendar.HOUR_OF_DAY, 0);
-        untilWithoutTime.set(Calendar.MINUTE, 0);
-        untilWithoutTime.set(Calendar.SECOND, 0);
-        untilWithoutTime.set(Calendar.MILLISECOND, 0);
-        
-        /*
-         * Create the given end with given timezone
-         */
-        Calendar end = new GregorianCalendar(tz);
-        end.setTime(endDate);
-        
-        /*
-         * Use the date of the until and the time of the end. All with given tz.
-         */
-        Calendar newEnd = new GregorianCalendar(tz);
-        newEnd.set(untilWithoutTime.get(Calendar.YEAR), untilWithoutTime.get(Calendar.MONTH), untilWithoutTime.get(Calendar.DAY_OF_MONTH));
-        newEnd.set(Calendar.HOUR_OF_DAY, end.get(Calendar.HOUR_OF_DAY));
-        newEnd.set(Calendar.MINUTE, end.get(Calendar.MINUTE));
-        newEnd.set(Calendar.SECOND, end.get(Calendar.SECOND));
-        newEnd.set(Calendar.MILLISECOND, end.get(Calendar.MILLISECOND));
-
-        return newEnd.getTime();
-    }
-
     private static final void calculateAndSetRealRecurringStartAndEndDate(final CalendarDataObject cdao, final CalendarDataObject edao) {
         long startDate = edao.getStartDate().getTime();
         TimeZone tz = null;
@@ -1142,7 +1128,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         long endTime = cdao.getEndDate() == null ? edao.getEndDate().getTime() : cdao.getEndDate().getTime();
         final int startTimeZoneOffset = tz.getOffset(startTime);
         startTime = startTime % Constants.MILLI_DAY;
-        endTime = endTime % Constants.MILLI_DAY + (cdao.getRecurrenceCalculator() * Constants.MILLI_DAY);
+        endTime = endTime % Constants.MILLI_DAY;
         // FIXME daylight saving time offset
         cdao.setStartDate(recColl.calculateRecurringDate(startDate, startTime, startTimeZoneOffset - startDateZoneOffset));
         cdao.setEndDate(recColl.calculateRecurringDate(endDate, endTime, startTimeZoneOffset - startDateZoneOffset));
@@ -2011,7 +1997,6 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             retval = CalendarCollectionService.CHANGE_RECURRING_TYPE;
         } else {
             calculateAndSetRealRecurringStartAndEndDate(cdao, edao);
-            cdao.setEndDate(calculateRealRecurringEndDate(cdao, edao));
             //checkAndRemoveRecurrenceFields(cdao);
             cdao.setRecurrence(edao.getRecurrence());
             /*

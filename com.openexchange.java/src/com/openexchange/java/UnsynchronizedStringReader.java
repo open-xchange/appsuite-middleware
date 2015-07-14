@@ -60,11 +60,8 @@ import java.io.Reader;
 public class UnsynchronizedStringReader extends Reader {
 
     private final String str;
-
     private final int length;
-
     private int next = 0;
-
     private int mark = 0;
 
     /**
@@ -75,6 +72,15 @@ public class UnsynchronizedStringReader extends Reader {
     public UnsynchronizedStringReader(final String s) {
         this.str = s;
         this.length = s.length();
+    }
+
+    /**
+     * Gets the underlying string
+     *
+     * @return The string
+     */
+    public String getString() {
+        return str;
     }
 
     /**

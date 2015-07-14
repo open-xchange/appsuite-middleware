@@ -330,7 +330,7 @@ public class GlobalDbInit {
         /*
          * execute query & read out configs
          */
-        Map<Integer, GlobalDbConfig> dbConfigs = new ConcurrentHashMap<Integer, GlobalDbConfig>(poolIDs.size());
+        Map<Integer, GlobalDbConfig> dbConfigs = new ConcurrentHashMap<Integer, GlobalDbConfig>(poolIDs.size(), 0.9f, 1);
         PreparedStatement statement = null;
         ResultSet resultSet = null;
         try {

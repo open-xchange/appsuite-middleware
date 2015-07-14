@@ -119,87 +119,103 @@ To use RMI as provisioning mechanism you need to link your code against the corr
 
     public class ClientProvisioningRoundtrip {
 
-        public static void main(String[] args) {
-            try {
-                // Lookup remote
-                RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://coolhosting.me:1099/" + RemoteClientManagement.RMI_NAME);
-                // All method calls require the master credentials.
-                Credentials credentials = new Credentials("oxadminmaster", "secret");
+      public static void main(String[] args) {
+        try {
+          // Lookup remote
+          RemoteClientManagement clientManagement = 
+            (RemoteClientManagement) Naming.lookup(
+              "rmi://coolhosting.me:1099/" + RemoteClientManagement.RMI_NAME);
 
-                ClientDataDto clientData = prepareClientData();
-                ClientDto client = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, credentials); // use default context group
-                System.out.println("Client '" + client.getName() + "' was successfully registered: [ID: " + client.getId() + ", secret: " + client.getSecret() + "]");
+          // All method calls require the master credentials.
+          Credentials credentials = new Credentials("oxadminmaster", "secret");
 
-                // You can disable clients temporarily. API access is then prohibited.
-                if (clientManagement.disableClient(client.getId(), credentials)) {
-                    System.out.println("Client '" + client.getName() + "' was disabled");
-                }
+          ClientDataDto clientData = prepareClientData();
+          ClientDto client = clientManagement.registerClient(
+            RemoteClientManagement.DEFAULT_GID, // use default context group
+            clientData,
+            credentials);
 
-                // Of course enabling disabled clients is also possible.
-                if (clientManagement.enableClient(client.getId(), credentials)) {
-                    System.out.println("Client '" + client.getName() + "' was enabled again");
-                }
+          System.out.println("Client '" + client.getName() + "' was successfully " +
+            "registered: [ID: " + client.getId() + ", secret: " + client.getSecret() + "]");
 
-                // You can revoke a clients secret. For security reasons all existing grants are invalidated then.
-                client = clientManagement.revokeClientSecret(client.getId(), credentials);
-                System.out.println("Client '" + client.getName() + "' was assigned a new secret: " + client.getSecret());
+          // You can disable clients temporarily. API access is then prohibited.
+          if (clientManagement.disableClient(client.getId(), credentials)) {
+            System.out.println("Client '" + client.getName() + "' was disabled");
+          }
 
-                // Of course you can update the client data. Every field set within ClientData will be overridden.
-                // Fields that are not set will not be modified. Scope and redirect URIs must always be submitted
-                // in total, no merging will be applied here.
-                clientData = new ClientDataDto();
-                clientData.setDescription("A new and fancy client description.");
-                client = clientManagement.updateClient(client.getId(), clientData, credentials);
-                System.out.println("Client '" + client.getName() + "' got a new description: " + client.getDescription());
+          // Of course enabling disabled clients is also possible.
+          if (clientManagement.enableClient(client.getId(), credentials)) {
+            System.out.println("Client '" + client.getName() + "' was enabled again");
+          }
 
-                // You can unregister clients completely and withdraw their granted accesses.
-                if (clientManagement.unregisterClient(client.getId(), credentials)) {
-                    System.out.println("Client '" + client.getName() + "' was successfully unregistered");
-                }
-            } catch (MalformedURLException | RemoteException | NotBoundException | RemoteClientManagementException | InvalidCredentialsException | FileNotFoundException e) {
-                e.printStackTrace();
-            }
+          // You can revoke a clients secret. For security reasons all existing grants
+          // are invalidated then.
+          client = clientManagement.revokeClientSecret(client.getId(), credentials);
+          System.out.println("Client '" + client.getName() + "' was assigned a new " +
+            "secret: " + client.getSecret());
+
+          // Of course you can update the client data. Every field set within ClientData
+          // will be overridden. Fields that are not set will not be modified. Scope and
+          // redirect URIs must always be submitted in total, no merging will be applied
+          // here.
+          clientData = new ClientDataDto();
+          clientData.setDescription("A new and fancy client description.");
+          client = clientManagement.updateClient(client.getId(), clientData, credentials);
+          System.out.println("Client '" + client.getName() + 
+            "' got a new description: " + client.getDescription());
+
+          // You can unregister clients completely and withdraw their granted accesses.
+          if (clientManagement.unregisterClient(client.getId(), credentials)) {
+            System.out.println("Client '" + client.getName() + 
+              "' was successfully unregistered");
+          }
+        } catch (MalformedURLException | RemoteException | NotBoundException | 
+                 RemoteClientManagementException | InvalidCredentialsException |
+                 FileNotFoundException e) {
+
+            e.printStackTrace();
+        }
+      }
+
+      private static ClientDataDto prepareClientData() throws FileNotFoundException {
+        IconDto icon = new IconDto();
+        icon.setData(loadIcon()); // the icon serialized as an array of bytes
+        icon.setMimeType("image/png");
+
+        List<String> redirectURIs = new ArrayList<>(2);
+        redirectURIs.add("http://localhost/oauth/callback"); // URI for local testing
+        redirectURIs.add("https://example.com/api/oauth/callback"); // production URI
+
+        ClientDataDto clientData = new ClientDataDto();
+        clientData.setName("Example.com");
+        clientData.setDescription("The Example.com web apps description.");
+        clientData.setIcon(icon);
+        clientData.setContactAddress("support@example.com");
+        clientData.setWebsite("http://www.example.com");
+        clientData.setDefaultScope("read_contacts write_contacts");
+        clientData.setRedirectURIs(redirectURIs);
+        return clientData;
+      }
+
+      private static byte[] loadIcon() throws FileNotFoundException {
+        byte[] iconBytes = null;
+        // TODO: change this path accordingly
+        try (FileInputStream fis = new FileInputStream("/path/to/icon.png")) {
+          byte[] buf = new byte[4096];
+          int len = fis.read(buf);
+          ByteArrayOutputStream baos = new ByteArrayOutputStream();
+          do {
+            baos.write(buf, 0, len);
+            len = fis.read(buf);
+          } while (len >= 0);
+
+          iconBytes = baos.toByteArray();
+        } catch (IOException e) {
+          // closing the input stream failed - ignore...
         }
 
-        private static ClientDataDto prepareClientData() throws FileNotFoundException {
-            IconDto icon = new IconDto();
-            icon.setData(loadIcon()); // the icon serialized as an array of bytes
-            icon.setMimeType("image/png");
-
-            List<String> redirectURIs = new ArrayList<>(2);
-            redirectURIs.add("http://localhost/oauth/callback"); // URI for local testing
-            redirectURIs.add("https://example.com/api/oauth/callback"); // production URI
-
-            ClientDataDto clientData = new ClientDataDto();
-            clientData.setName("Example.com");
-            clientData.setDescription("The Example.com web apps description.");
-            clientData.setIcon(icon);
-            clientData.setContactAddress("support@example.com");
-            clientData.setWebsite("http://www.example.com");
-            clientData.setDefaultScope("read_contacts write_contacts"); // read and write contacts
-            clientData.setRedirectURIs(redirectURIs);
-            return clientData;
-        }
-
-        private static byte[] loadIcon() throws FileNotFoundException {
-            byte[] iconBytes = null;
-            // TODO: change this path accordingly
-            try (FileInputStream fis = new FileInputStream("/home/admin/oauth-clients/example_com.png")) {
-                byte[] buf = new byte[4096];
-                int len = fis.read(buf);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                do {
-                    baos.write(buf, 0, len);
-                    len = fis.read(buf);
-                } while (len >= 0);
-
-                iconBytes = baos.toByteArray();
-            } catch (IOException e) {
-                // closing the input stream failed - ignore...
-            }
-
-            return iconBytes;
-        }
+        return iconBytes;
+      }
 
     }
 
@@ -218,7 +234,8 @@ List all clients of a certain context group. Only IDs and names are returned.
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:listClients>
@@ -254,7 +271,8 @@ Get the details of a client by its ID.
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:getClientById>
@@ -285,7 +303,29 @@ Get the details of a client by its ID.
                 <enabled>true</enabled>
                 <icon>
                    <mimeType>image/jpg</mimeType>
-                   <data>/9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZCTUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcHBggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAYAQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAERAhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQAQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjkqIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDVjRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgEDAwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEAAQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oADAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/aAAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGBofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEhMRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIEA1Zp++MBDyCgweFxeCEPH//Z</data>
+                   <data>
+                    /9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZC
+                    TUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1
+                    NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcH
+                    BggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMB
+                    BwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgo
+                    KCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAY
+                    AQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAER
+                    AhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQ
+                    AQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjk
+                    qIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDV
+                    jRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgED
+                    AwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG
+                    452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEA
+                    AQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr
+                    0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oA
+                    DAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/a
+                    AAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGB
+                    ofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEh
+                    MRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64
+                    V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIE
+                    A1Zp++MBDyCgweFxeCEPH//Z
+                  </data>
                 </icon>
              </client>
           </getClientByIdResponse>
@@ -298,7 +338,8 @@ Register a new client. The response contains the whole client data along with th
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:registerClient>
@@ -316,29 +357,29 @@ Register a new client. The response contains the whole client data along with th
                 <soap:redirectURI>https://testbed.example.com/oauth2</soap:redirectURI>
                 <soap:icon>
                    <soap:mimeType>image/jpg</soap:mimeType>
-                   <soap:data>
-                      /9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZC
-                TUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1
-                NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcH
-                BggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMB
-                BwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgo
-                KCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAY
-                AQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAER
-                AhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQ
-                AQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjk
-                qIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDV
-                jRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgED
-                AwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG
-                452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEA
-                AQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr
-                0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oA
-                DAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/a
-                AAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGB
-                ofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEh
-                MRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64
-                V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIE
-                A1Zp++MBDyCgweFxeCEPH//Z
-             </soap:data>
+                   <data>
+                    /9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZC
+                    TUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1
+                    NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcH
+                    BggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMB
+                    BwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgo
+                    KCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAY
+                    AQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAER
+                    AhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQ
+                    AQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjk
+                    qIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDV
+                    jRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgED
+                    AwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG
+                    452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEA
+                    AQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr
+                    0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oA
+                    DAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/a
+                    AAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGB
+                    ofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEh
+                    MRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64
+                    V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIE
+                    A1Zp++MBDyCgweFxeCEPH//Z
+                  </data>
                 </soap:icon>
              </soap:clientData>
              <soap:credentials>
@@ -368,7 +409,29 @@ Register a new client. The response contains the whole client data along with th
                 <enabled>true</enabled>
                 <icon>
                    <mimeType>image/jpg</mimeType>
-                   <data>/9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZCTUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcHBggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAYAQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAERAhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQAQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjkqIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDVjRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgEDAwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEAAQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oADAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/aAAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGBofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEhMRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIEA1Zp++MBDyCgweFxeCEPH//Z</data>
+                   <data>
+                    /9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZC
+                    TUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1
+                    NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcH
+                    BggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMB
+                    BwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgo
+                    KCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAY
+                    AQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAER
+                    AhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQ
+                    AQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjk
+                    qIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDV
+                    jRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgED
+                    AwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG
+                    452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEA
+                    AQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr
+                    0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oA
+                    DAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/a
+                    AAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGB
+                    ofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEh
+                    MRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64
+                    V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIE
+                    A1Zp++MBDyCgweFxeCEPH//Z
+                  </data>
                 </icon>
              </client>
           </registerClientResponse>
@@ -381,7 +444,8 @@ Already registered clients can be modified. The response contains the whole clie
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:updateClient>
@@ -420,8 +484,30 @@ Already registered clients can be modified. The response contains the whole clie
                 <registrationDate>1429028393472</registrationDate>
                 <enabled>true</enabled>
                 <icon>
-                   <mimeType>image/jpg</mimeType>
-                   <data>/9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZCTUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcHBggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAYAQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAERAhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQAQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjkqIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDVjRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgEDAwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEAAQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oADAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/aAAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGBofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEhMRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIEA1Zp++MBDyCgweFxeCEPH//Z</data>
+                  <mimeType>image/jpg</mimeType>
+                  <data>
+                    /9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZC
+                    TUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1
+                    NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcH
+                    BggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMB
+                    BwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgo
+                    KCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAY
+                    AQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAER
+                    AhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQ
+                    AQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjk
+                    qIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDV
+                    jRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgED
+                    AwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG
+                    452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEA
+                    AQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr
+                    0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oA
+                    DAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/a
+                    AAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGB
+                    ofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEh
+                    MRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64
+                    V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIE
+                    A1Zp++MBDyCgweFxeCEPH//Z
+                  </data>
                 </icon>
              </client>
           </updateClientResponse>
@@ -434,7 +520,8 @@ A clients secret can be revoked. This leads to a revocation of all grants author
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:revokeClientSecret>
@@ -466,7 +553,29 @@ A clients secret can be revoked. This leads to a revocation of all grants author
                 <enabled>true</enabled>
                 <icon>
                    <mimeType>image/jpg</mimeType>
-                   <data>/9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZCTUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcHBggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMBBwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAYAQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAERAhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQAQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjkqIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDVjRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgEDAwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEAAQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oADAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/aAAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGBofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEhMRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIEA1Zp++MBDyCgweFxeCEPH//Z</data>
+                   <data>
+                    /9j/4AAQSkZJRgABAgAAAQABAAD/7QCEUGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAGccAigAYkZC
+                    TUQwMTAwMGE4NjAxMDAwMGUxMDEwMDAwMmQwMjAwMDA1OTAyMDAwMDhlMDIwMDAwMDAwMzAwMDA1
+                    NDAzMDAwMDhlMDMwMDAwY2IwMzAwMDAwOTA0MDAwMDg2MDQwMDAwAP/bAEMABgQFBgUEBgYFBgcH
+                    BggKEAoKCQkKFA4PDBAXFBgYFxQWFhodJR8aGyMcFhYgLCAjJicpKikZHy0wLSgwJSgpKP/bAEMB
+                    BwcHCggKEwoKEygaFhooKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgo
+                    KCgoKCgoKP/CABEIADIAMgMAIgABEQECEQH/xAAZAAADAQEBAAAAAAAAAAAAAAAAAQIDBgX/xAAY
+                    AQEBAQEBAAAAAAAAAAAAAAABAAIDBf/EABgBAQEBAQEAAAAAAAAAAAAAAAEAAgMF/9oADAMAAAER
+                    AhEAAAHx9cNfQ8/a8qSoJpEg4dZyHW8+mstZ0+c6Lld4ZBrOTljo821ylQIqWmLaaIAgCv/EABwQ
+                    AQACAwADAAAAAAAAAAAAAAQBAwACECAwQP/aAAgBAAABBQKMjwnkeiSlOMlIV2lKdGXkoGbedZjk
+                    qIkQ7gEtOwxtbGHYWfn/AP/EABoRAAICAwAAAAAAAAAAAAAAAAACEUEgITD/2gAIAQIRAT8BwWDV
+                    jRXL/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAIRQSAhMP/aAAgBAREBPwHBpN0JN8v/xAAjEAACAgED
+                    AwUAAAAAAAAAAAACAwERAAQhMRASUhMUMEBh/9oACAEAAAY/AvnQ3UeqZM8ZyVLF4lV3M4xNyGqG
+                    452nI9zMnqC4EZwe0amt/wB6oVqCYsleMZLVscZVVSOMaNs1R78bRnbrLB48GMfY/8QAIhABAQEA
+                    AQMDBQAAAAAAAAAAAQARMRAhUSBBYTCxwfDx/9oACAEAAAE/IegW+kGG2WW2GDsEeLNNt4a4eEXr
+                    0F1j7h+Js7jYp/PmO2LD3lbEY6A5dwy1Qz7pB2k9zNXjfH3hXkLT9+Jd/NsQw22y2x136f8A/9oA
+                    DAMAAAERAhEAABCmLro7VXJNxDxan8P/xAAeEQACAgEFAQAAAAAAAAAAAAAAAREhMRAgQWHwUf/a
+                    AAgBAhEBPxBjEiBLTnsSrTv30uXH2SBkEaPZ/8QAHhEAAgIBBQEAAAAAAAAAAAAAAREAIUEQIFGB
+                    ofD/2gAIAQERAT8QEBhOh0TWVCb2wvuJQbvzqOCOPd//xAAeEAEAAgICAwEAAAAAAAAAAAABABEh
+                    MRBBIFFhcf/aAAgBAAABPxBxRwhYpcXMHhJXKickhiCmsBi85lCK1ihDVt7OpbSJ1bS51jOxsh64
+                    V5/uLp2tuCWgBK57D1wURjVqLpt04TPTcFAChCyO6M47agH1wzs1XS8pmnRo1MIm32jNPa/R9UIE
+                    A1Zp++MBDyCgweFxeCEPH//Z
+                  </data>
                 </icon>
              </client>
           </revokeClientSecretResponse>
@@ -478,7 +587,8 @@ Of course clients can be unregistered. This leads to a revocation of all grants 
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:unregisterClient>
@@ -506,7 +616,8 @@ Enabled clients can be disabled. This leads to a revocation of all grants author
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:disableClient>
@@ -535,7 +646,8 @@ Disabled clients can of course be enabled again. If the client was already enabl
 
 #####Request#####
 
-    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:soap="http://soap.provider.oauth.openexchange.com">
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+      xmlns:soap="http://soap.provider.oauth.openexchange.com">
        <soapenv:Header/>
        <soapenv:Body>
           <soap:enableClient>

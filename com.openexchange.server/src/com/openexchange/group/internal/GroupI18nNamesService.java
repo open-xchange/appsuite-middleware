@@ -89,7 +89,7 @@ public final class GroupI18nNamesService {
         super();
         services = new ConcurrentHashMap<Locale, I18nService>();
         identifiers = new HashSet<String>(4);
-        i18nNames = new ConcurrentHashMap<String, String>(24);
+        i18nNames = new ConcurrentHashMap<String, String>(24, 0.9f, 1);
         initIdentifiers();
     }
 

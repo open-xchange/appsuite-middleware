@@ -49,31 +49,32 @@
 
 package com.openexchange.oauth.provider.impl.servlets;
 
+import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.net.HttpHeaders;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
-import com.openexchange.java.Strings;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.client.Icon;
-import com.openexchange.oauth.provider.impl.tools.URLHelper;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.templating.OXTemplate;
+import com.openexchange.templating.OXTemplateExceptionHandler;
+import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -92,61 +93,61 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
     protected final OAuthProviderService oAuthProvider;
 
+    protected final ServiceLookup services;
+
     /**
      * Initializes a new {@link OAuthEndpoint}.
      */
-    protected OAuthEndpoint(OAuthProviderService oAuthProvider) {
+    protected OAuthEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
         super();
         this.oAuthProvider = oAuthProvider;
+        this.services = services;
     }
 
     /**
-     * Sends a JSON error response as defined in the HTTP API.
+     * Responds with a HTML error page.
      *
      * @param request The servlet request
      * @param response The servlet response
-     * @param e The OXException
+     * @param statusCode The HTTP status code
+     * @param message The detailed error message to guide client developers
      * @throws IOException
      */
-    protected static void sendJSONError(HttpServletRequest request, HttpServletResponse response, OXException e) throws IOException {
-        Response errorResponse = new Response();
-        errorResponse.setLocale(determineLocale(request));
-        errorResponse.setException(e);
+    protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, int statusCode, String message) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Content-Disposition", "inline");
+        response.setStatus(statusCode);
         try {
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            ResponseWriter.write(errorResponse, response.getWriter());
-        } catch (JSONException je) {
-            LOG.error("Could not send error response", je);
-            response.reset();
-            Tools.disableCaching(response);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            PrintWriter writer = response.getWriter();
+            writeErrorPage(writer, message, determineLocale(request));
+            writer.flush();
+        } catch (OXException e) {
+            LOG.error("Could not write error page", e);
+            Tools.sendErrorPage(response, HttpServletResponse.SC_OK, message);
         }
     }
 
     /**
-     * Sends a JSON response as defined in the HTTP API.
+     * Responds with a HTML error page. The HTTP status code will be <code>500</code>.
+     * The passed exceptions ID is returned as part of the detailed error description.
      *
      * @param request The servlet request
      * @param response The servlet response
-     * @param e The OXException
+     * @param e The OXException causing the error response
      * @throws IOException
      */
-    protected static void sendJSONResponse(HttpServletRequest request, HttpServletResponse response, JSONObject data) throws IOException {
+    protected void respondWithErrorPage(HttpServletRequest request, HttpServletResponse response, OXException e) throws IOException {
+        response.setContentType("text/html; charset=UTF-8");
+        response.setHeader("Content-Disposition", "inline");
+        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+        String message = "An internal error occurred. If you want to contact our support because of this, please provide this error code: " + e.getErrorCode() + "(" + e.getExceptionId() + ").";
         try {
-            Response redirectResponse = new Response();
-            redirectResponse.setData(data);
-            redirectResponse.setLocale(determineLocale(request));
-            response.setCharacterEncoding("UTF-8");
-            response.setContentType("application/json");
-            response.setStatus(HttpServletResponse.SC_OK);
-            ResponseWriter.write(redirectResponse, response.getWriter());
-        } catch (JSONException e) {
-            LOG.error("Could not send redirect response", e);
-            response.reset();
-            Tools.disableCaching(response);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            PrintWriter writer = response.getWriter();
+            writeErrorPage(writer, message, determineLocale(request));
+            writer.flush();
+        } catch (OXException oxe) {
+            LOG.error("Could not write error page", oxe);
+            Tools.sendErrorPage(response, HttpServletResponse.SC_OK, message);
         }
     }
 
@@ -161,8 +162,8 @@ public abstract class OAuthEndpoint extends HttpServlet {
     protected static void fail(HttpServletResponse httpResponse, int statusCode, String error, String errorDescription) throws IOException {
         try {
             JSONObject result = new JSONObject();
-            result.put("error", error);
-            result.put("error_description", errorDescription);
+            result.put(OAuthProviderConstants.PARAM_ERROR, error);
+            result.put(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION, errorDescription);
             sendErrorResponse(httpResponse, statusCode, result.toString());
         } catch (JSONException e) {
             LOG.error("Could not compile error response object", e);
@@ -172,69 +173,29 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
     protected static Locale determineLocale(HttpServletRequest request) {
         Locale locale = LocaleTools.DEFAULT_LOCALE;
-        String language = request.getParameter("language");
+        String language = request.getParameter(OAuthProviderConstants.PARAM_LANGUAGE);
         if (language != null) {
             locale = LocaleTools.getSaneLocale(LocaleTools.getLocale(language));
         }
         return locale;
     }
 
-    protected static String icon2HTMLDataSource(Icon icon) throws IOException {
-        return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(icon.getData());
-    }
+    private void writeErrorPage(Writer writer, String message, Locale locale) throws OXException, IOException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        TemplateService templateService = requireService(TemplateService.class, services);
+        Translator translator = translatorFactory.translatorFor(locale);
 
-    protected static boolean isInvalidCSRFToken(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return true;
-        }
+        Map<String, Object> vars = new HashMap<>();
+        vars.put("lang", locale.getLanguage());
+        vars.put("title", translator.translate(OAuthProviderStrings.ERROR_PAGE_TITLE));
+        vars.put("headline", translator.translate(OAuthProviderStrings.ERROR_HEADLINE));
+        vars.put("message", translator.translate(OAuthProviderStrings.ERROR_MESSAGE));
+        vars.put("detailsSummary", translator.translate(OAuthProviderStrings.ERROR_DETAILS_SUMMARY));
+        vars.put("detailsText", message);
+        vars.put("close", translator.translate(OAuthProviderStrings.CLOSE));
 
-        String csrfToken = (String) session.getAttribute(ATTR_OAUTH_CSRF_TOKEN);
-        if (csrfToken == null) {
-            return true;
-        }
-
-        String actualToken = request.getParameter(OAuthProviderConstants.PARAM_CSRF_TOKEN);
-        if (actualToken == null) {
-            return true;
-        }
-
-        if (!csrfToken.equals(actualToken)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    protected static boolean isInvalidReferer(HttpServletRequest request) {
-        String referer = request.getHeader(HttpHeaders.REFERER);
-        if (Strings.isEmpty(referer)) {
-            return true;
-        }
-
-        try {
-            URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
-            URI actualReferer = new URI(referer);
-            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
-                return true;
-            }
-
-            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
-                return true;
-            }
-
-            if (expectedReferer.getPort() != actualReferer.getPort()) {
-                return true;
-            }
-
-            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
-                return true;
-            }
-        } catch (URISyntaxException e) {
-            return true;
-        }
-
-        return false;
+        OXTemplate loginPage = templateService.loadTemplate("oauth-provider-error.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
+        loginPage.process(vars, writer);
     }
 
 }

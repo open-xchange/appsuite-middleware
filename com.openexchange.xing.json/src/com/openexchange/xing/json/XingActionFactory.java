@@ -95,7 +95,7 @@ public class XingActionFactory implements AJAXActionServiceFactory {
      */
     public XingActionFactory(final ServiceLookup serviceLookup) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractXingAction>(24);
+        actions = new ConcurrentHashMap<String, AbstractXingAction>(24, 0.9f, 1);
         actions.put("invite", new InviteRequestAction(serviceLookup));
         actions.put("contact_request", new ContactRequestAction(serviceLookup));
         actions.put("revoke_contact_request", new RevokeContactRequestAction(serviceLookup));

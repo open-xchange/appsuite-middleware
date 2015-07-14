@@ -98,7 +98,7 @@ public class WildcardFilter implements Filter {
      */
     public WildcardFilter(final String csvWildcards) {
         super();
-        if (isEmpty(csvWildcards)) {
+        if (com.openexchange.java.Strings.isEmpty(csvWildcards)) {
             delegate = DUMMY;
         } else {
             final String[] wildcards = SPLIT.split(csvWildcards);
@@ -112,18 +112,6 @@ public class WildcardFilter implements Filter {
             }
             delegate = new PatternBasedFilter(patterns);
         }
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     @Override

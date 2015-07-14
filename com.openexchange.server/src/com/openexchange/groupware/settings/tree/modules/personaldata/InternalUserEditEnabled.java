@@ -49,8 +49,16 @@
 
 package com.openexchange.groupware.settings.tree.modules.personaldata;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.settings.tree.AbstractModules;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
 
 /**
@@ -71,6 +79,29 @@ public class InternalUserEditEnabled extends AbstractModules {
     @Override
     public String[] getPath() {
         return new String[] { "modules", "com.openexchange.user.personaldata", "internal_user_edit" };
+    }
+
+    @Override
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
+
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                if (user.isGuest() && Strings.isEmpty(user.getMail())) {
+                    /*
+                     * prevent edit of user data for anonymous guests
+                     */
+                    setting.setSingleValue(Boolean.FALSE);
+                } else {
+                    setting.setSingleValue(Boolean.valueOf(getModule(userConfig)));
+                }
+            }
+
+            @Override
+            public boolean isAvailable(final UserConfiguration userConfig) {
+                return true;
+            }
+        };
     }
 
     @Override

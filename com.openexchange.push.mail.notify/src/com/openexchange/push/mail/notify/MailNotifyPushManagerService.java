@@ -114,6 +114,11 @@ public final class MailNotifyPushManagerService implements PushManagerExtendedSe
     }
 
     @Override
+    public boolean supportsPermanentListeners() {
+        return true;
+    }
+
+    @Override
     public PushListener startPermanentListener(PushUser pushUser) throws OXException {
         if (null == pushUser) {
             return null;

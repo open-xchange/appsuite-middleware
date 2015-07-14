@@ -116,7 +116,7 @@ public final class MemoryTable {
         return getMemoryTable0(session, createIfAbsent);
     }
 
-    private static final ConcurrentMap<Key, MemoryTable> MAP = new ConcurrentHashMap<Key, MemoryTable>(1024);
+    private static final ConcurrentMap<Key, MemoryTable> MAP = new ConcurrentHashMap<Key, MemoryTable>(1024, 0.9f, 1);
 
     private static MemoryTable getMemoryTable0(final Session session, final boolean createIfAbsent) throws OXException {
         final Key key = keyFor(session);

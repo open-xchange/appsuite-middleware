@@ -101,7 +101,12 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         /**
          * "%1$s" is a directory.
          */
-        FILE_IS_DIRECTORY(Code.FILE_IS_DIRECTORY_MSG, CATEGORY_ERROR, 1007);
+        FILE_IS_DIRECTORY(Code.FILE_IS_DIRECTORY_MSG, CATEGORY_ERROR, 1007),
+        /**
+         * Edit conflict.
+         */
+        EDIT_CONFLICT(Code.EDIT_CONFLICT_MSG, CATEGORY_CONFLICT, 1008)
+        ;
 
         // A WebDAV error occurred.
         public final static String GENERAL_ERROR_MSG = "A WebDAV error occurred.";
@@ -127,6 +132,9 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         // "%1$s" is a directory.
         public final static String FILE_IS_DIRECTORY_MSG = "\"%1$s\" is a directory.";
 
+        // Edit conflict.
+        public final static String EDIT_CONFLICT_MSG = "Edit conflict.";
+
         private final String message;
 
         private final int detailNumber;
@@ -140,7 +148,7 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
 
         /**
          * Initializes a new {@link Code}.
-         * 
+         *
          * @param message
          * @param category
          * @param detailNumber
@@ -151,7 +159,7 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
 
         /**
          * Initializes a new {@link Code}.
-         * 
+         *
          * @param message
          * @param category
          * @param detailNumber

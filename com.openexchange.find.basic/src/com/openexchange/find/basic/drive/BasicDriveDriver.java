@@ -62,12 +62,16 @@ import java.util.regex.Pattern;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.composition.FileStorageCapability;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -431,15 +435,34 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(FileStorageServiceRegistry.class.getName());
         }
         for (FileStorageService service : registry.getAllServices()) {
-            List<FileStorageAccount> accounts;
-            if (AccountAware.class.isInstance(service)) {
-                accounts = ((AccountAware) service).getAccounts(session);
-            } else {
-                accounts = service.getAccountManager().getAccounts(session);
-            }
+            // Determine accounts
+            List<FileStorageAccount> accounts = AccountAware.class.isInstance(service) ? ((AccountAware) service).getAccounts(session) : service.getAccountManager().getAccounts(session);
+
+            // Check for support of needed capability
             for (FileStorageAccount account : accounts) {
-                if (false == fileAccess.supports(service.getId(), account.getId(), FileStorageCapability.SEARCH_BY_TERM)) {
-                    return false;
+                FileStorageAccountAccess accountAccess = service.getAccountAccess(account.getId(), session);
+
+                boolean checkByInstance = true;
+                if (accountAccess instanceof CapabilityAware) {
+                    Boolean supported = ((CapabilityAware) accountAccess).supports(FileStorageCapability.SEARCH_BY_TERM);
+                    if (null != supported) {
+                        if (false == supported.booleanValue()) {
+                            return false;
+                        }
+                        checkByInstance = false;
+                    }
+                }
+
+                if (checkByInstance) {
+                    accountAccess.connect();
+                    try {
+                        FileStorageFileAccess _fileAccess = accountAccess.getFileAccess();
+                        if (false == FileStorageCapabilityTools.supports(_fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
+                            return false;
+                        }
+                    } finally {
+                        accountAccess.close();
+                    }
                 }
             }
         }

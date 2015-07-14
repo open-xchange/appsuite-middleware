@@ -64,7 +64,7 @@ import com.openexchange.file.storage.composition.FileStreamHandler;
 
 /**
  * {@link FileStreamHandlerRegistryImpl}
- * 
+ *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class FileStreamHandlerRegistryImpl extends ServiceTracker<FileStreamHandler, FileStreamHandler> implements FileStreamHandlerRegistry {
@@ -74,12 +74,12 @@ public final class FileStreamHandlerRegistryImpl extends ServiceTracker<FileStre
 
     /**
      * Initializes a new {@link FileStreamHandlerRegistryImpl}.
-     * 
+     *
      * @param context The bundle context
      */
     public FileStreamHandlerRegistryImpl(final BundleContext context) {
         super(context, FileStreamHandler.class, null);
-        registry = new ConcurrentHashMap<Class<? extends FileStreamHandler>, FileStreamHandler>(8);
+        registry = new ConcurrentHashMap<Class<? extends FileStreamHandler>, FileStreamHandler>(8, 0.9f, 1);
         comparator = new Comparator<FileStreamHandler>() {
 
             @Override

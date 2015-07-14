@@ -101,7 +101,7 @@ public class StoredSession implements PutIfAbsent, Serializable {
      */
     public StoredSession() {
         super();
-        this.parameters = new ConcurrentHashMap<String, Object>(6);
+        this.parameters = new ConcurrentHashMap<String, Object>(6, 0.9f, 1);
     }
 
     /**

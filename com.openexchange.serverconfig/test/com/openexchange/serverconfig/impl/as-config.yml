@@ -2,7 +2,7 @@
 default:
     host: all
     contact: ''
-    
+
 host*.mycloud.net:
     hostRegex: host.*\.mycloud\.net
     someRegexHostKey: someRegexHostValue
@@ -16,6 +16,13 @@ host1.mycloud.net:
     pageHeader: ''
     signinTheme: 'host1.mycloud.net'
     contact: 'E-Mail: cloudservice@host1-support.de'
+    notificationMails:
+        button:
+            textColor: '#ffffff'
+            backgroundColor: '#3c73aa'
+            borderColor: '#356697'
+        footer:
+            text: 'Footer text'
 
 host2.mycloud.net:
     host: host2.mycloud.net
@@ -24,6 +31,11 @@ host2.mycloud.net:
     pageHeaderPrefix: 'OX'
     pageHeader: 'Cloud Service'
     forgotPassword: false
+    notificationMails:
+        button:
+            textColor: '#ffffff'
+            backgroundColor: '#3c73aa'
+            borderColor: '#356697'
 
 host3.mycloud.net:
     host: host3.mycloud.net
@@ -33,3 +45,11 @@ host3.mycloud.net:
     pageHeader: ''
     contact: 'Please contact your service provider'
     signinTheme: 'host3.mycloud.net'
+    notificationMails:
+        button:
+            textColor: '#000000'
+            backgroundColor: '#ffffff'
+            borderColor: '#000000'
+        footer:
+            image: 'custom_logo.png'
+            text: 'Footer text'

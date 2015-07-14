@@ -120,7 +120,7 @@ public class Lc4jLanguageDetectionService implements LanguageDetectionService {
         super();
         warnAboutUnknownModel = false;
         defaultLocale = DEFAULT_LOCALE;
-        languageCodes = new ConcurrentHashMap<String, Locale>(64);
+        languageCodes = new ConcurrentHashMap<String, Locale>(64, 0.9f, 1);
         languageModelsDir = new AtomicReference<File>();
         defaultLanguageCategorization = new LanguageCategorization();
         defaultLanguageCategorization.setMaxLanguages(10);

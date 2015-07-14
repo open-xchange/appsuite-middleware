@@ -758,6 +758,30 @@ public class InfostoreQueryCatalog {
         return builder.toString();
     }
 
+    public String getSharedDocumentsByUserQuery(int contextId, int userId, Metadata[] metadata, Metadata sort, int order, int start, int end, DocumentWins wins) {
+        StringBuilder stringBuilder = new StringBuilder(STR_SELECT)
+            .append(fields(metadata, wins))
+            .append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId)
+            .append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid")
+            .append(" AND object_permission.folder_id = infostore.folder_id AND object_permission.object_id = infostore.id")
+            .append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND")
+            .append(" infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id")
+            .append(" WHERE object_permission.created_by = ").append(userId)
+        ;
+        if (sort != null) {
+            stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
+        }
+        if (start >= 0 && end > 0) {
+            stringBuilder.append(STR_LIMIT);
+            if (start > 0) {
+                stringBuilder.append(start).append(',');
+            }
+            stringBuilder.append(end - start);
+        }
+
+        return stringBuilder.toString();
+    }
+
     public String getSharedDocumentsSequenceNumbersQuery(final boolean versionsOnly, final boolean deleted, final int contextId, final int userId, final int[] groups) {
         final StringBuilder builder = new StringBuilder(STR_SELECT);
         if (deleted) {

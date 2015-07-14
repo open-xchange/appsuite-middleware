@@ -59,8 +59,10 @@ import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.tools.AdminCacheExtended;
@@ -87,7 +89,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
-     * 
+     *
      * @return an instance implementing the group storage interface.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
@@ -217,9 +219,12 @@ public abstract class OXContextStorageInterface {
      * @param ctx
      * @param admin_user
      * @param access
-     * @throws StorageException
+     * @param schemaSelectStrategy
+     * @throws StorageException If a general storage error occurs
+     * @throws InvalidDataException If there is already a context with the same name
+     * @throws ContextExistsException If there is already a context with the same context identifier
      */
-    public abstract Context create(final Context ctx, final User admin_user, final UserModuleAccess access) throws StorageException, InvalidDataException;
+    public abstract Context create(final Context ctx, final User admin_user, final UserModuleAccess access, SchemaSelectStrategy schemaSelectStrategy) throws StorageException, InvalidDataException, ContextExistsException;
 
     /**
      * @param ctx
@@ -306,7 +311,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * This method deletes all inaccessible data in a context.
-     * 
+     *
      * @param ctx Context.
      * @throws StorageException if some problem occurs.
      */
@@ -329,7 +334,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * Updates the context references after a replay
-     * 
+     *
      * @param sourceSchema The source schema
      * @param targetSchema The target schema
      * @param targetClusterId The target cluster identifier
@@ -339,7 +344,7 @@ public abstract class OXContextStorageInterface {
 
     /**
      * Create a new database schema
-     * 
+     *
      * @param targetClusterId The identifier of the target cluster
      * @return The name of the new database schema
      * @throws StorageException

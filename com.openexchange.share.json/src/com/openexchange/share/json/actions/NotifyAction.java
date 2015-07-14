@@ -49,26 +49,11 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.List;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.GuestInfo;
-import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.tools.TokenParser;
-import com.openexchange.share.notification.LinkProvider;
-import com.openexchange.share.notification.mail.MailNotifications;
-import com.openexchange.share.notification.mail.MailNotifications.ShareCreatedBuilder;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -91,68 +76,70 @@ public class NotifyAction extends AbstractShareAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String token = null;
-        String mailAddress = null;
-        String message = null;
-
-        try {
-            JSONObject request = (JSONObject) requestData.requireData();
-            token = request.getString("token");
-            mailAddress = request.getString("mail_address");
-            message = request.optString("message");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-
-        ShareService shareService = getShareService();
-        GuestShare share = TokenParser.resolveShare(token, shareService);
-        List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
-        GuestInfo guest = shareService.resolveGuest(token);
-
-        String shareToken;
-        if (share.isMultiTarget()) {
-            shareToken = share.getGuest().getBaseToken();
-        } else {
-            shareToken = share.getGuest().getBaseToken() + '/' + share.getSingleTarget().getPath();
-        }
-
-        InternetAddress internetAddress;
-        try {
-            internetAddress = new InternetAddress(mailAddress, true);
-        } catch (AddressException e) {
-            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
-        }
-
-        LinkProvider linkProvider = buildLinkProvider(session, requestData, shareToken);
-        //TODO: This should generate another type of notification once it is actively used.
-        ShareCreatedBuilder builder = MailNotifications.shareCreated()
-            .setTransportInfo(internetAddress)
-            .setLinkProvider(linkProvider)
-            .setGuestContext(guest.getContextID())
-            .setGuestID(guest.getGuestID())
-            .setLocale(guest.getLocale())
-            .setSession(session)
-            .setTargets(targets)
-            .setMessage(message)
-            ;
-
-        AuthenticationMode authMode = guest.getAuthentication();
-        switch (authMode) {
-            case ANONYMOUS:
-                builder.setAuthMode(AuthenticationMode.ANONYMOUS);
-                break;
-            case ANONYMOUS_PASSWORD:
-                builder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
-                builder.setPassword(guest.getPassword());
-                break;
-            case GUEST_PASSWORD:
-                builder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
-                builder.setUsername(guest.getEmailAddress());
-                break;
-        }
-
-        getNotificationService().send(builder.build());
-        return new AJAXRequestResult(new JSONObject(), "json");
+        throw ShareExceptionCodes.UNEXPECTED_ERROR.create("This action is currently not implemented");
+//
+//        String token = null;
+//        String mailAddress = null;
+//        String message = null;
+//
+//        try {
+//            JSONObject request = (JSONObject) requestData.requireData();
+//            token = request.getString("token");
+//            mailAddress = request.getString("mail_address");
+//            message = request.optString("message");
+//        } catch (JSONException e) {
+//            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+//        }
+//
+//        ShareService shareService = getShareService();
+//        GuestShare share = TokenParser.resolveShare(token, shareService);
+//        List<ShareTarget> targets = TokenParser.resolveTargets(share, token);
+//        GuestInfo guest = shareService.resolveGuest(token);
+//
+//        String shareToken;
+//        if (share.isMultiTarget()) {
+//            shareToken = share.getGuest().getBaseToken();
+//        } else {
+//            shareToken = share.getGuest().getBaseToken() + '/' + share.getSingleTarget().getPath();
+//        }
+//
+//        InternetAddress internetAddress;
+//        try {
+//            internetAddress = new InternetAddress(mailAddress, true);
+//        } catch (AddressException e) {
+//            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(mailAddress);
+//        }
+//
+//        LinkProvider linkProvider = buildLinkProvider(session, requestData, shareToken);
+//        //TODO: This should generate another type of notification once it is actively used.
+//        ShareCreatedBuilder builder = MailNotifications.shareCreated()
+//            .setTransportInfo(internetAddress)
+//            .setLinkProvider(linkProvider)
+//            .setGuestContext(guest.getContextID())
+//            .setGuestID(guest.getGuestID())
+//            .setLocale(guest.getLocale())
+//            .setSession(session)
+//            .setTargets(targets)
+//            .setMessage(message)
+//            ;
+//
+//        AuthenticationMode authMode = guest.getAuthentication();
+//        switch (authMode) {
+//            case ANONYMOUS:
+//                builder.setAuthMode(AuthenticationMode.ANONYMOUS);
+//                break;
+//            case ANONYMOUS_PASSWORD:
+//                builder.setAuthMode(AuthenticationMode.ANONYMOUS_PASSWORD);
+//                builder.setPassword(guest.getPassword());
+//                break;
+//            case GUEST_PASSWORD:
+//                builder.setAuthMode(AuthenticationMode.GUEST_PASSWORD);
+//                builder.setUsername(guest.getEmailAddress());
+//                break;
+//        }
+//
+//        getNotificationService().send(builder.build());
+//        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
 }

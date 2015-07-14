@@ -60,6 +60,7 @@ import java.util.Set;
 import javax.management.MBeanException;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.InMemoryAttachmentBase;
@@ -71,7 +72,6 @@ import com.openexchange.groupware.infostore.database.InMemoryInfostoreDatabase;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
@@ -484,9 +484,10 @@ public class ConsistencyTest extends TestCase {
         }
 
         @Override
-        protected FileStorage getFileStorage(final Context ctx) {
+        protected List<FileStorage> getFileStorages(final Context ctx) {
             storage.setContext(ctx);
-            return new FileStorage(storage);
+            FileStorage retval = storage;
+            return Arrays.asList(retval);
         }
     }
 

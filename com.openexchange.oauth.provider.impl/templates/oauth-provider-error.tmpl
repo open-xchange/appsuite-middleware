@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="${lang}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>${title?html}</title>
+    <style>
+      <#include "oauth-provider-common-css.tmpl">
+      #details p {
+        background-color: #f3ccaa;
+        border-radius: 5px;
+        padding: 10px 5px;
+        margin-top: 0;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      #details {
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="main">
+      <h1 id="headline">${headline?html}</h1>
+      <span id="message">${message?html}</span>
+      <details id ="details">
+        <summary>${detailsSummary?html}</summary>
+        <p>${detailsText?html}</p>
+      </details>
+      <div id="escape">
+        <button type="button" onclick="window.close();">${close?html}</button>
+      </div>
+    </div>
+  </body>
+</html>

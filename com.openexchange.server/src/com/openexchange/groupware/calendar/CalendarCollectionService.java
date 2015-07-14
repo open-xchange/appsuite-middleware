@@ -786,7 +786,7 @@ public interface CalendarCollectionService {
      */
     public RecurringResultsInterface calculateRecurring(final CalendarObject cdao, final long range_start, final long range_end, final int pos, final int PMAXTC, final boolean ignore_exceptions, final boolean calc_until) throws OXException;
 
-    public void fillMap(final RecurringResultsInterface rss, final long s, final long diff, final int d, final int counter, String timezone);
+    public void fillMap(final RecurringResultsInterface rss, final long s, final long diff, final int d, final int counter);
 
     public Date calculateRecurringDate(final long date, final long time, int timeZoneOffsetDiff);
 

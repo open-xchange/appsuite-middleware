@@ -80,6 +80,7 @@ import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
+import com.openexchange.folderstorage.ReinitializableFolderStorage;
 import com.openexchange.folderstorage.RemoveAfterAccessFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParameters;
@@ -125,7 +126,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class CacheFolderStorage implements FolderStorage, FolderCacheInvalidationService {
+public final class CacheFolderStorage implements ReinitializableFolderStorage, FolderCacheInvalidationService {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CacheFolderStorage.class);
 
@@ -261,6 +262,30 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         if (service != null) {
             cacheService = null;
         }
+    }
+
+    @Override
+    public boolean reinitialize(String treeId, StorageParameters storageParameters) throws OXException {
+        boolean reinitialized = false;
+        for (FolderStorage folderStorage : registry.getFolderStoragesForTreeID(treeId)) {
+            if (folderStorage instanceof ReinitializableFolderStorage) {
+                boolean started = folderStorage.startTransaction(storageParameters, false);
+                try {
+                    reinitialized |= ((ReinitializableFolderStorage) folderStorage).reinitialize(treeId, storageParameters);
+                    if (started) {
+                        folderStorage.commitTransaction(storageParameters);
+                        started = false;
+                    }
+                } catch (RuntimeException e) {
+                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+                } finally {
+                    if (started) {
+                        folderStorage.rollback(storageParameters);
+                    }
+                }
+            }
+        }
+        return reinitialized;
     }
 
     protected static final Set<String> IGNORABLES = RemoveAfterAccessFolder.IGNORABLES;
@@ -1267,6 +1292,29 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
     }
 
     @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = registry.getFolderStorageByContentType(treeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(treeId, contentType);
+        }
+        boolean started = startTransaction(Mode.WRITE_AFTER_READ, storageParameters, folderStorage);
+        try {
+            SortableId[] ret = folderStorage.getUserSharedFolders(treeId, contentType, storageParameters);
+            if (started) {
+                folderStorage.commitTransaction(storageParameters);
+                started = false;
+            }
+            return ret;
+        } catch (RuntimeException e) {
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (started) {
+                folderStorage.rollback(storageParameters);
+            }
+        }
+    }
+
+    @Override
     public SortableId[] getSubfolders(final String treeId, final String parentId, final StorageParameters storageParameters) throws OXException {
         Folder parent = getFolder(treeId, parentId, storageParameters);
         String[] subfolders = ROOT_ID.equals(parentId) ? null : parent.getSubfolderIDs();
@@ -1393,7 +1441,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
             storageVersion = getFolder(treeId, oldFolderId, storageParameters);
         }
         boolean isMove = null != folder.getParentID();
-        String oldParentId = isMove ? storageVersion.getParentID() : null;
+        String oldParentId = storageVersion.getParentID();
         {
             UpdatePerformer updatePerformer = new UpdatePerformer(storageParameters, registry);
             updatePerformer.setCheck4Duplicates(false);
@@ -1422,10 +1470,10 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         int contextId = storageParameters.getContextId();
         {
             FolderMapManagement folderMapManagement = FolderMapManagement.getInstance();
-            List<String> ids = isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId);
-            folderMapManagement.dropFor(ids, treeId, userId, contextId, session);
+            List<String> ids = new ArrayList<String>(isMove ? Arrays.asList(oldFolderId, oldParentId, updatedFolder.getParentID()) : Arrays.asList(oldFolderId, oldParentId));
+            folderMapManagement.dropHierarchyFor(ids, treeId, userId, contextId);
             if (!treeId.equals(realTreeId)) {
-                folderMapManagement.dropFor(ids, realTreeId, userId, contextId, session);
+                folderMapManagement.dropHierarchyFor(ids, realTreeId, userId, contextId);
             }
 
             List<Serializable> keys = new LinkedList<Serializable>();
@@ -1745,7 +1793,7 @@ public final class CacheFolderStorage implements FolderStorage, FolderCacheInval
         /*
          * Create destination map
          */
-        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size);
+        final Map<String, Folder> ret = new ConcurrentHashMap<String, Folder>(size, 0.9f, 1);
         int taskCount = 0;
         for (java.util.Map.Entry<FolderStorage, TIntList> entry : map.entrySet()) {
             final FolderStorage fs = entry.getKey();

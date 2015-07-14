@@ -865,7 +865,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
     private static final Pattern SPLIT_WORDS = Pattern.compile(" +");
 
     private static String prefixBlock(final String value, final String cssPrefix) {
-        if (isEmpty(value) || isEmpty(cssPrefix)) {
+        if (com.openexchange.java.Strings.isEmpty(value) || com.openexchange.java.Strings.isEmpty(cssPrefix)) {
             return value;
         }
         final int length = value.length();
@@ -899,18 +899,6 @@ public final class FilterJerichoHandler implements JerichoHandler {
 
     private static String replaceDots(final String word, final String cssPrefix) {
         return DOT.matcher(word).replaceAll('.' + cssPrefix + '-');
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     private String checkPossibleURL(final String val) {

@@ -311,6 +311,8 @@ public class Contact extends CommonObject {
     public static final int ADDRESS_BUSINESS = 620;
     public static final int ADDRESS_OTHER = 621;
 
+    public static final int VCARD_ID = 622;
+
     /**
      * Sorted array of fields belonging to business address.
      */
@@ -592,6 +594,8 @@ public class Contact extends CommonObject {
 
     protected String addressOther;
 
+    protected String vCardId;
+
     protected boolean b_display_name;
 
     protected boolean b_given_name;
@@ -819,6 +823,8 @@ public class Contact extends CommonObject {
     protected boolean b_addressBusiness;
 
     protected boolean b_addressOther;
+
+    protected boolean b_vCardId;
 
     protected DistributionListEntryObject[] dlists;
 
@@ -1285,6 +1291,10 @@ public class Contact extends CommonObject {
 
     public String getAddressOther() {
         return addressOther;
+    }
+
+    public String getVCardId() {
+        return vCardId;
     }
 
     // SET METHODS
@@ -1831,6 +1841,11 @@ public class Contact extends CommonObject {
         b_addressOther = true;
     }
 
+    public void setVCardId(final String vCardId) {
+        this.vCardId = vCardId;
+        b_vCardId = true;
+    }
+
     // REMOVE METHODS
 
     public void removeDisplayName() {
@@ -2372,6 +2387,11 @@ public class Contact extends CommonObject {
         b_addressOther = false;
     }
 
+    public void removeVCardId() {
+        vCardId = null;
+        b_vCardId = false;
+    }
+
     // CONTAINS METHODS
 
     public boolean containsDisplayName() {
@@ -2806,6 +2826,10 @@ public class Contact extends CommonObject {
         return b_addressOther;
     }
 
+    public boolean containsVCardId() {
+        return b_vCardId;
+    }
+
     @Override
     public void set(final int field, final Object value) {
         switch (field) {
@@ -3133,6 +3157,9 @@ public class Contact extends CommonObject {
         case ADDRESS_OTHER:
             setAddressOther((String) value);
             break;
+        case VCARD_ID:
+            setVCardId((String) value);
+            break;
         default:
             super.set(field, value);
 
@@ -3360,6 +3387,8 @@ public class Contact extends CommonObject {
             return getAddressOther();
         case SPECIAL_SORTING:
             return getSortName();
+        case VCARD_ID:
+            return getVCardId();
         default:
             return super.get(field);
 
@@ -3585,6 +3614,8 @@ public class Contact extends CommonObject {
             return containsAddressHome();
         case ADDRESS_OTHER:
             return containsAddressOther();
+        case VCARD_ID:
+            return containsVCardId();
         default:
             return super.contains(field);
 
@@ -3915,6 +3946,9 @@ public class Contact extends CommonObject {
         case ADDRESS_OTHER:
             removeAddressOther();
             break;
+        case VCARD_ID:
+            removeVCardId();
+            break;
         default:
             super.remove(field);
 
@@ -4070,6 +4104,16 @@ public class Contact extends CommonObject {
     }
 
     public String getSortName() {
+        /*
+         * prefer display name for distribution lists
+         */
+        if (getMarkAsDistribtuionlist()) {
+            String sortName = getDisplayName();
+            if (Strings.isEmpty(sortName)) {
+                sortName = getSurName();
+            }
+            return sortName;
+        }
         /*
          * prefer lastname if set
          */

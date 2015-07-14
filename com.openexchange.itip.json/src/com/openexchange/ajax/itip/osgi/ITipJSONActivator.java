@@ -51,7 +51,6 @@ package com.openexchange.ajax.itip.osgi;
 
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
-
 import com.openexchange.ajax.itip.ITipActionFactory;
 import com.openexchange.ajax.itip.servlet.ITipJSONServlet;
 import com.openexchange.calendar.itip.ITipAnalyzerService;
@@ -73,6 +72,8 @@ import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
  */
 public class ITipJSONActivator extends HousekeepingActivator {
 
+    private volatile String alias;
+
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { ITipParser.class, ConversionService.class, ITipMailGeneratorFactory.class, HttpService.class, DispatcherPrefixService.class, ITipDingeMacherFactoryService.class };
@@ -87,12 +88,26 @@ public class ITipJSONActivator extends HousekeepingActivator {
         rememberTracker(factoryTracker);
         rememberTracker(capabilityTracker);
         openTrackers();
-    
+
         ITipActionFactory.INSTANCE = new ITipActionFactory(this, rankingTracker, factoryTracker);
 
         registerService(MultipleHandlerFactoryService.class, new AJAXActionServiceAdapterHandler(ITipActionFactory.INSTANCE, "calendar/itip"));
 
-        getService(HttpService.class).registerServlet(getService(DispatcherPrefixService.class).getPrefix() + "calendar/itip", new ITipJSONServlet(this), null, null);
+        String alias = getService(DispatcherPrefixService.class).getPrefix() + "calendar/itip";
+        getService(HttpService.class).registerServlet(alias, new ITipJSONServlet(this), null, null);
+        this.alias = alias;
     }
 
+    @Override
+    protected void stopBundle() throws Exception {
+        HttpService httpService = getService(HttpService.class);
+        if (null != httpService) {
+            String alias = this.alias;
+            if (null != alias) {
+                this.alias = null;
+                httpService.unregister(alias);
+            }
+        }
+        super.stopBundle();
+    }
 }

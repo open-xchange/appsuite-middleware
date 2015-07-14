@@ -54,7 +54,7 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.framework.AJAXSession;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -107,10 +107,10 @@ public class ParallelGuestSessionsTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share, using the same ajax session as the sharing user
          */
@@ -118,7 +118,7 @@ public class ParallelGuestSessionsTest extends ShareTest {
         String oldSessionID = sharedSession.getId();
         try {
             sharedSession.setId(null);
-            GuestClient guestClient = new GuestClient(sharedSession, share.getShareURL(), guestPermission.getRecipient(), true, false);
+            GuestClient guestClient = new GuestClient(sharedSession, guest.getShareURL(), guestPermission.getRecipient(), true, false);
             guestClient.checkShareModuleAvailable();
             guestClient.checkShareAccessible(guestPermission);
         } finally {
@@ -126,10 +126,10 @@ public class ParallelGuestSessionsTest extends ShareTest {
             sharedSession.setId(oldSessionID);
         }
         /*
-         * re-discover share, using the sharing user's session, thus verifying the old session is still alive, too
+         * re-discover guest, using the sharing user's session, thus verifying the old session is still alive, too
          */
-        share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
     }
 
 }

@@ -167,6 +167,10 @@ public final class LoginTools {
         return parseParameter(req, LoginFields.AUTOLOGIN_PARAM, defaultAutoLogin);
     }
 
+    public static String parseLanguage(HttpServletRequest req) {
+        return parseParameter(req, LoginFields.LANGUAGE_PARAM, "");
+    }
+
     public static String parseParameter(HttpServletRequest req, String paramName, boolean strict, String fallback) throws OXException {
         final String value = req.getParameter(paramName);
         if (null == value) {
@@ -266,6 +270,7 @@ public final class LoginTools {
         b.hash(HashCalculator.getInstance().getHash(req, userAgent, client, additionalsForHash));
         b.iface(HTTP_JSON).headers(headers).cookies(cookies).secure(Tools.considerSecure(req, forceHTTPS));
         b.serverName(req.getServerName()).serverPort(req.getServerPort()).httpSessionID(httpSessionId);
+        b.language(parseLanguage(req));
         return b.build();
     }
 

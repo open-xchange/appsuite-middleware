@@ -221,7 +221,7 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
         Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
 
         if (httpServletResponse.isCommitted()) {
-            throw new IllegalStateException("Respone is already committed");
+            throw new IllegalStateException("Response is already committed");
         }
 
         if (headerValue == null) {

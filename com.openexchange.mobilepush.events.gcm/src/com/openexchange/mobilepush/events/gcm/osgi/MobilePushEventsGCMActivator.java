@@ -49,9 +49,13 @@
 
 package com.openexchange.mobilepush.events.gcm.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.java.Strings;
 import com.openexchange.mobilepush.events.MobilePushEventService;
+import com.openexchange.mobilepush.events.gcm.GCMKeyProvider;
 import com.openexchange.mobilepush.events.gcm.impl.MobilePushGCMPublisherImpl;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -74,7 +78,6 @@ public class MobilePushEventsGCMActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         LOG.info("starting bundle: {}", context.getBundle().getSymbolicName());
         Services.set(this);
-
         ConfigurationService configService = Services.getService(ConfigurationService.class, true);
         if (configService.getBoolProperty("com.openxchange.mobilepush.events.gcm.enabled", false)) {
             final String configuredKey = configService.getProperty("com.openxchange.mobilepush.events.gcm.key");
@@ -82,10 +85,22 @@ public class MobilePushEventsGCMActivator extends HousekeepingActivator {
                 /*
                  * register publisher
                  */
-                getService(MobilePushEventService.class).registerPushPublisher(new MobilePushGCMPublisherImpl());
+                Dictionary<String, Object> dictionary = new Hashtable<String, Object>(1);
+                dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(1));
+                registerService(GCMKeyProvider.class, new GCMKeyProvider() {
+
+                    @Override
+                    public String getKey() {
+                        return configuredKey;
+                    }
+                }, dictionary);
+
+                LOG.info("Successfully registered GCM key provider.");
             } else {
                 LOG.info("Mobile push events via GCM are disabled. A GCM key is not set in the properties.");
             }
+
+            getService(MobilePushEventService.class).registerPushPublisher(new MobilePushGCMPublisherImpl());
         } else {
             LOG.info("Mobile push events via GCM are disabled, skipping publisher registration.");
         }

@@ -61,7 +61,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -70,6 +69,8 @@ import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
 import com.openexchange.admin.rmi.dataobjects.MaintenanceReason;
+import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -78,7 +79,8 @@ import com.openexchange.admin.storage.sqlStorage.OXAdminPoolInterface;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.database.Assignment;
+import com.openexchange.database.AssignmentInsertData;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -201,12 +203,12 @@ public class OXContextMySQLStorageCommon {
             loadDynamicAttributes(oxdb_read, cs);
             return cs;
         } finally {
-            closePreparedStatement(prep);
+            Databases.closeSQLStuff(prep);
             if (oxdb_read != null) {
                 try {
-                        cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
+                    cache.pushConnectionForContextAfterReading(context_id, oxdb_read);
                 } catch (final PoolException exp) {
-                    log.error("Pool Error pushing ox read connection to pool!",exp);
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
                 }
             }
         }
@@ -327,7 +329,7 @@ public class OXContextMySQLStorageCommon {
         }
         try {
             startTransaction(con);
-            cache.getPool().lock(con);
+            cache.getPool().lock(con, poolId);
             deleteEmptySchema(con, poolId, dbSchema);
             con.commit();
         } catch (SQLException e) {
@@ -373,8 +375,8 @@ public class OXContextMySQLStorageCommon {
         try {
             // This creates a lock on context_server2db_pool on the rows with contexts in the same schema. Concurrent create and delete of
             // context can cause removed schemas while creating a context in it. This can not happen anymore with the introduced lock.
-            pool.lock(con);
             final int poolId = pool.getWritePool(contextId);
+            pool.lock(con, poolId);
             final String dbSchema = pool.getSchemaName(contextId);
             pool.deleteAssignment(con, contextId);
             deleteEmptySchema(con, poolId, dbSchema);
@@ -395,7 +397,7 @@ public class OXContextMySQLStorageCommon {
             log.error(e.getMessage(), e);
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closePreparedStatement(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
@@ -416,7 +418,17 @@ public class OXContextMySQLStorageCommon {
         return tmp.toArray(new String[tmp.size()]);
     }
 
-    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException {
+    /**
+     * Inserts context data to appropriate tables.
+     *
+     * @param ctx The context to add
+     * @param con The connection to the configdb
+     * @param db The database associated with the context
+     * @throws StorageException If a general storage error occurs
+     * @throws ContextExistsException If there is already a context with the same context identifier
+     * @throws InvalidDataException If there is already a context with the same name
+     */
+    public void fillContextAndServer2DBPool(final Context ctx, final Connection con, final Database db) throws StorageException, ContextExistsException, InvalidDataException {
         // dbid is the id in db_pool of database engine to use for next context
 
         // if read id -1 (not set by client ) or 0 (there is no read db for this
@@ -429,7 +441,7 @@ public class OXContextMySQLStorageCommon {
 
         try {
             final int serverId = ClientAdminThread.cache.getServerId();
-            ClientAdminThread.cache.getPool().writeAssignment(con, new Assignment() {
+            ClientAdminThread.cache.getPool().writeAssignment(con, new AssignmentInsertData() {
                 @Override
                 public int getContextId() {
                     return i(ctx.getId());
@@ -545,16 +557,28 @@ public class OXContextMySQLStorageCommon {
         return retval;
     }
 
-    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException {
+    /**
+     * <code>INSERT</code>s the data row into the "context" table.
+     *
+     * @param ctx The context to insert
+     * @param configdbCon A connection to the configdb
+     * @throws StorageException If a general SQL error occurs
+     * @throws ContextExistsException If there is already a context with the same context identifier
+     * @throws InvalidDataException If there is already a context with the same name
+     */
+    private final void fillContextTable(final Context ctx, final Connection configdbCon) throws StorageException, ContextExistsException, InvalidDataException {
+        String name;
+        if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
+            name = ctx.getName();
+        } else {
+            name = ctx.getIdAsString();
+        }
+
         PreparedStatement stmt = null;
         try {
             stmt = configdbCon.prepareStatement("INSERT INTO context (cid,name,enabled,filestore_id,filestore_name,quota_max) VALUES (?,?,?,?,?,?)");
             stmt.setInt(1, ctx.getId().intValue());
-            if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
-                stmt.setString(2, ctx.getName());
-            } else {
-                stmt.setString(2, ctx.getIdAsString());
-            }
+            stmt.setString(2, name);
             stmt.setBoolean(3, true);
             stmt.setInt(4, ctx.getFilestoreId().intValue());
             stmt.setString(5, ctx.getFilestore_name());
@@ -566,65 +590,43 @@ public class OXContextMySQLStorageCommon {
             stmt.setLong(6, quota_max_temp);
             stmt.executeUpdate();
         } catch (final SQLException e) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                throw new ContextExistsException("Context already exists!");
+            }
+            if (Databases.isKeyConflictInMySQL(e, "context_name_unique")) {
+                throw new InvalidDataException("Context " + name + " already exists!");
+            }
             throw new StorageException(e.getMessage(), e);
         } finally {
-            closePreparedStatement(stmt);
+            Databases.closeSQLStuff(stmt);
         }
     }
 
-    public void fillLogin2ContextTable(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
-        final HashSet<String> loginMappings = ctx.getLoginMappings();
-        final Integer ctxid = ctx.getId();
+    public void fillLogin2ContextTable(Context ctx, Connection configdb_write_con) throws SQLException, StorageException {
+        int contextId = ctx.getId().intValue();
+        for (String mapping : ctx.getLoginMappings()) {
+            if (null != mapping) {
+                insertLogin2ContextMapping(mapping, contextId, configdb_write_con);
+            }
+        }
+    }
+
+    private void insertLogin2ContextMapping(String mapping, int contextId, Connection configdb_write_con) throws SQLException, StorageException {
         PreparedStatement stmt = null;
-        PreparedStatement checkAvailable = null;
-        ResultSet found = null;
         try {
-            checkAvailable = configdb_write_con.prepareStatement("SELECT 1 FROM login2context WHERE login_info = ?");
             stmt = configdb_write_con.prepareStatement("INSERT INTO login2context (cid,login_info) VALUES (?,?)");
-            for (final String mapping : loginMappings) {
-                if (null != mapping) {
-                    checkAvailable.setString(1, mapping);
-                    found = checkAvailable.executeQuery();
-                    final boolean mappingTaken = found.next();
-                    found.close();
-
-                    if(mappingTaken) {
-                        throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.");
-                    }
-
-                    stmt.setInt(1, ctxid.intValue());
-                    stmt.setString(2, mapping);
-                    stmt.executeUpdate();
-                }
+            stmt.setInt(1, contextId);
+            stmt.setString(2, mapping);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            if (Databases.isPrimaryKeyConflictInMySQL(e)) {
+                throw new StorageException("Cannot map '"+mapping+"' to the newly created context. This mapping is already in use.", e);
             }
-        } catch (final SQLException sql) {
-            log.error("SQL Error", sql);
-            throw sql;
+            log.error("SQL Error", e);
+            throw e;
         } finally {
-            closeResultSet(found);
-            closePreparedStatement(checkAvailable);
-            closePreparedStatement(stmt);
-
+            Databases.closeSQLStuff(stmt);
         }
     }
 
-    private void closeResultSet(final ResultSet rs) {
-        if (rs != null) {
-            try {
-                    rs.close();
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-        }
-    }
-
-    private void closePreparedStatement(final PreparedStatement stmt) {
-        if (stmt != null) {
-            try {
-                    stmt.close();
-            } catch (final SQLException e) {
-                log.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT, e);
-            }
-        }
-    }
 }

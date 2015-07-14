@@ -53,7 +53,7 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
@@ -122,14 +122,14 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
     }
@@ -160,14 +160,14 @@ public class CreateWithGuestPermissionTest extends ShareTest {
         assertNotNull("No matching permission in created file found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
         /*
-         * discover & check share
+         * discover & check guest
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), file.getId());
-        checkShare(guestPermission, file, share);
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
          */
-        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission, contents);
     }

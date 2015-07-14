@@ -85,7 +85,7 @@ public class VersionsAction extends AbstractFileAction {
 
         IDBasedFileAccess fileAccess = request.getFileAccess();
 
-        List<Field> columns = new ArrayList<File.Field>(request.getColumns());
+        List<Field> columns = new ArrayList<File.Field>(request.getFieldsToLoad());
         if(!columns.contains(File.Field.VERSION)) {
             columns.add(File.Field.VERSION);
         }

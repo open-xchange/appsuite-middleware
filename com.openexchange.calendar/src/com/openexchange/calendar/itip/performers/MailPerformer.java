@@ -56,6 +56,7 @@ import java.util.List;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
 import com.openexchange.calendar.itip.ITipAnnotation;
+import com.openexchange.calendar.itip.ITipAttributes;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
@@ -83,7 +84,7 @@ public class MailPerformer extends AbstrakterDingeMacher {
     }
 
     @Override
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
+    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         for (ITipChange change : changes) {
             CalendarDataObject appointment = change.getNewAppointment();

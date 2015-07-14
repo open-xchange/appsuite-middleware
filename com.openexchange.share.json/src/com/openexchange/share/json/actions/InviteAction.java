@@ -51,7 +51,6 @@ package com.openexchange.share.json.actions;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -59,12 +58,16 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.CreatedShare;
+import com.openexchange.share.CreatedShares;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -98,13 +101,20 @@ public class InviteAction extends AbstractShareAction {
             /*
              * create the shares, notify recipients
              */
+
+            for (ShareRecipient recipient : recipients) {
+                if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                    throw ShareExceptionCodes.NO_INVITE_ANONYMOUS.create();
+                }
+            }
+
             CreatePerformer createPerformer = new CreatePerformer(recipients, targets, session, services);
-            Map<ShareRecipient, List<ShareInfo>> createdShares = createPerformer.perform();
+            CreatedShares createdShares = createPerformer.perform();
             /*
              * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
              */
             ShareNotificationService shareNotificationService = services.getService(ShareNotificationService.class);
-            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session, requestData);
+            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session, DefaultRequestContext.newInstance(requestData));
             /*
              * construct & return appropriate json result
              */
@@ -112,17 +122,11 @@ public class InviteAction extends AbstractShareAction {
             result.addWarnings(warnings);
             JSONArray jTokens = new JSONArray(recipients.size());
             for (ShareRecipient recipient : recipients) {
-                List<ShareInfo> shares = createdShares.get(recipient);
-                if (null == shares || 0 == shares.size()) {
-                    // internal recipient
+                if (recipient.isInternal()) {
                     jTokens.put(JSONObject.NULL);
                 } else {
-                    // external recipient
-                    if (1 == shares.size()) {
-                        jTokens.put(shares.get(0).getToken());
-                    } else {
-                        jTokens.put(shares.get(0).getGuest().getBaseToken());
-                    }
+                    CreatedShare share = createdShares.getShare(recipient);
+                    jTokens.put(share.getToken());
                 }
             }
             result.setResultObject(jTokens, "json");

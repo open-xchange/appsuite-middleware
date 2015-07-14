@@ -11,6 +11,6 @@ Package: open-xchange-oauth
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@)
 Depends: ${misc:Depends}
-Conflicts: open-xchange-http-deferrer, open-xchange-oauth-facebook, open-xchange-oauth-json, open-xchange-oauth-linkedin, open-xchange-oauth-msn, open-xchange-oauth-twitter, open-xchange-oauth-yahoo
-Replaces: open-xchange-http-deferrer, open-xchange-oauth-facebook, open-xchange-oauth-json, open-xchange-oauth-linkedin, open-xchange-oauth-msn, open-xchange-oauth-twitter, open-xchange-oauth-yahoo
+Conflicts: open-xchange-http-deferrer, open-xchange-oauth-json, open-xchange-oauth-linkedin, open-xchange-oauth-msn, open-xchange-oauth-twitter, open-xchange-oauth-yahoo
+Replaces: open-xchange-http-deferrer, open-xchange-oauth-json, open-xchange-oauth-linkedin, open-xchange-oauth-msn, open-xchange-oauth-twitter, open-xchange-oauth-yahoo
 Description: The Open-Xchange OAuth implementation

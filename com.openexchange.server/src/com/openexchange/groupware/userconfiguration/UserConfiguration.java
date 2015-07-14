@@ -521,7 +521,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * <p>
      * The <code>int</code> values matches the constants <code>{@link FolderObject#TASK}</code>, <code>{@link FolderObject#CALENDAR}</code>,
      * <code>{@link FolderObject#CONTACT}</code>, <code>{@link FolderObject#UNBOUND}</code>, <code>{@link FolderObject#SYSTEM_MODULE}</code>, <code>{@link FolderObject#MAIL}</code>, <code>{@link FolderObject#INFOSTORE}</code>
-     * 
+     *
      * @return A sorted array of <code>int</code> carrying accessible module integer constants
      */
     public int[] getAccessibleModules() {
@@ -699,7 +699,7 @@ public class UserConfiguration implements Serializable, Cloneable {
         }
 
         for (Permission p : Permission.byBits(permissionBit)) {
-            if (!capabilities.contains(toLowerCase(p.name()))) {
+            if (!capabilities.contains(com.openexchange.java.Strings.toLowerCase(p.name()))) {
                 return false;
             }
         }
@@ -716,7 +716,7 @@ public class UserConfiguration implements Serializable, Cloneable {
         if (null == permission) {
             return false;
         }
-        return capabilities.contains(toLowerCase(permission.name()));
+        return capabilities.contains(com.openexchange.java.Strings.toLowerCase(permission.name()));
     }
 
     /**
@@ -726,7 +726,7 @@ public class UserConfiguration implements Serializable, Cloneable {
      * @return <code>true</code> if this user configuration enabled named permission; otherwise <code>false</code>
      */
     public boolean hasPermission(final String name) {
-        return getExtendedPermissions().contains(toLowerCase(name));
+        return getExtendedPermissions().contains(com.openexchange.java.Strings.toLowerCase(name));
     }
 
     /**
@@ -782,62 +782,5 @@ public class UserConfiguration implements Serializable, Cloneable {
      */
     public UserPermissionBits getUserPermissionBits() {
         return new UserPermissionBits(getPermissionBits(), userId, ctx.getContextId()).setGroups(groups);
-    }
-
-    /**
-     * Calculates this user configuration's extended permissions.
-     *
-     * @return The extended permissions
-     *
-    public Set<String> calcExtendedPermissions() {
-        final Set<String> retval = new HashSet<String>(128);
-        Permission.addByBits(permissionBits, retval);
-        // Now apply modifiers from the config cascade
-        final ConfigViewFactory configViews = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
-        if (configViews != null) {
-            try {
-                final ConfigView view = configViews.getView(userId, ctx.getContextId());
-                final String property = PERMISSION_PROPERTY;
-                for (final String scope : configViews.getSearchPath()) {
-                    final String permissions = view.property(property, String.class).precedence(scope).get();
-                    if (permissions != null && permissions.length() > 0) {
-                        for (final String permissionModifier : P_SPLIT.split(permissions)) {
-                            if (!isEmpty(permissionModifier)) {
-                                final char firstChar = permissionModifier.charAt(0);
-                                if ('-' == firstChar) {
-                                    retval.remove(toLowerCase(permissionModifier.substring(1)));
-                                } else {
-                                    if ('+' == firstChar) {
-                                        retval.add(toLowerCase(permissionModifier.substring(1)));
-                                    } else {
-                                        retval.add(toLowerCase(permissionModifier));
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (final OXException x) {
-                if (UserExceptionCode.USER_NOT_FOUND.equals(x)) {
-                    LOG.debug("", x);
-                } else {
-                    LOG.error("", x);
-                }
-            } catch (final RuntimeException x) {
-                LOG.error("", x);
-            }
-        }
-        return retval;
-    } */
-
-    /** ASCII-wise lower-case */
-    static String toLowerCase(final CharSequence chars) {
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

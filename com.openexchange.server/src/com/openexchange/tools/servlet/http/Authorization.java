@@ -50,7 +50,6 @@
 package com.openexchange.tools.servlet.http;
 
 import java.nio.charset.UnsupportedCharsetException;
-import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.encoding.Base64;
 
 /**
@@ -229,6 +228,6 @@ public final class Authorization {
     public static boolean checkLogin(final String pass) {
         // check if the user wants to login without password.
         // ldap bind doesn't fail with empty password. so check it here.
-        return (pass != null && !StringCollection.isEmpty(pass));
+        return (pass != null && !com.openexchange.java.Strings.isEmpty(pass));
     }
 }

@@ -59,11 +59,14 @@ import java.util.List;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.java.Collators;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorDelegator;
+import com.openexchange.tools.iterator.SearchIterators;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CreatedByComparator} - Comparator for "created-by" field.
@@ -163,6 +166,31 @@ public class CreatedByComparator implements Comparator<File> {
             if (close) {
                 iter.close();
             }
+        }
+    }
+
+    /**
+     * Re-sorts a search iterator based on the creator's display name in the session user's locale.
+     *
+     * @param session The session
+     * @param searchIterator The iterator to re-sort
+     * @param sortDirection The sort direction
+     * @return The re-sorted search iterator
+     */
+    public static SearchIterator<File> resort(ServerSession session, SearchIterator<File> searchIterator, SortDirection sortDirection) throws OXException {
+        if (null == searchIterator) {
+            return null;
+        }
+        try {
+            List<File> files = SearchIterators.asList(searchIterator);
+            if (1 < files.size()) {
+                CreatedByComparator comparator = new CreatedByComparator(session.getUser().getLocale(), session.getContext());
+                comparator.setDescending(SortDirection.DESC.equals(sortDirection));
+                Collections.sort(files, comparator);
+            }
+            return new SearchIteratorDelegator<File>(files);
+        } finally {
+            SearchIterators.close(searchIterator);
         }
     }
 

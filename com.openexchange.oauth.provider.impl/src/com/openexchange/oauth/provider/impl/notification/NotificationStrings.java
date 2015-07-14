@@ -60,10 +60,19 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class NotificationStrings implements LocalizableStrings {
 
-    public static final String NEW_EXTERNAL_APPLICATION_TITLE = "New external application connected with your %1$s";
+    // Successfully connected ExampleApp with your account
+    public static final String SUBJECT = "Successfully connected %1$s with your account";
 
-    public static final String NEW_EXTERNAL_APPLICATION_INTRO = "Hello %1$s,";
+    // Salutation with name: "Hello Peter,"
+    public static final String SALUTATION = "Hello %1$s,";
 
-    public static final String NEW_EXTERNAL_APPLICATION_MESSAGE = "you have have connected the application %1$s with your %2$s. You can manage and check the access of external applications in your %3$s.";
+    // your account peter@example.com has been successfully connected to ExampleApp.
+    public static final String APP_CONNECTED = "your account %1$s has been successfully connected to %2$s.";
+
+    // You may revoke access for this application at any time, by visiting your settings page.
+    public static final String REVOKE_ACCESS = "You may revoke access for this application at any time, by visiting your settings page.";
+
+    // Go to settings
+    public static final String GO_TO_SETTINGS = "Go to settings";
 
 }

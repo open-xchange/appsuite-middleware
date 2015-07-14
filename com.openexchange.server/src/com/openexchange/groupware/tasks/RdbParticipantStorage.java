@@ -123,6 +123,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
                     new InternalParticipant(participant, groupId);
                 taskParticipant.setConfirm(result.getInt(pos++));
                 taskParticipant.setConfirmMessage(result.getString(pos++));
+                // Only for removed participants the folder is stored in the participant table. For all active participants the folder
+                // is stored in the task_folder table.
                 if (StorageType.REMOVED == type) {
                     final int folderId = result.getInt(pos++);
                     if (0 == folderId) {
@@ -150,13 +152,8 @@ public class RdbParticipantStorage extends ParticipantStorage {
         return retval;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    void updateInternal(final Context ctx, final Connection con,
-        final int taskId, final Set<InternalParticipant> participants,
-        final StorageType type) throws OXException {
+    void updateInternal(Context ctx, Connection con, int taskId, Set<InternalParticipant> participants, StorageType type) throws OXException {
         PreparedStatement stmt = null;
         try {
             // UPDATE table SET group_id=?, accepted=?, description=? WHERE cid=? AND task=? AND user=?

@@ -51,6 +51,7 @@ package com.openexchange.ajax.task.actions;
 
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.groupware.tasks.Task;
 
 /**
  * Data object for the response of a task update request.
@@ -63,5 +64,11 @@ public class UpdateResponse extends AbstractAJAXResponse {
      */
     UpdateResponse(final Response response) {
         super(response);
+    }
+
+    public void fillTask(Task... tasks) {
+        for (Task task : tasks) {
+            task.setLastModified(getTimestamp());
+        }
     }
 }

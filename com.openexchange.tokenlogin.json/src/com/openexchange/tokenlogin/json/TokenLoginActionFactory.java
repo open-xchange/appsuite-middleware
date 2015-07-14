@@ -66,7 +66,7 @@ import com.openexchange.tokenlogin.json.actions.TokenLoginAction;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  */
 public class TokenLoginActionFactory implements AJAXActionServiceFactory {
-    
+
     private final Map<String, TokenLoginAction> actions;
 
     /**
@@ -74,7 +74,7 @@ public class TokenLoginActionFactory implements AJAXActionServiceFactory {
      */
     public TokenLoginActionFactory(ServiceLookup lookup) {
         super();
-        actions = new ConcurrentHashMap<String, TokenLoginAction>(1);
+        actions = new ConcurrentHashMap<String, TokenLoginAction>(1, 0.9f, 1);
         actions.put("acquireToken", new AcquireTokenAction(lookup));
     }
 

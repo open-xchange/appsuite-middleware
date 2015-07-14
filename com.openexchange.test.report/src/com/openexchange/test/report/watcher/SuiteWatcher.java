@@ -54,6 +54,7 @@ import org.jsoup.nodes.Element;
 import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.java.Strings;
 import com.openexchange.test.report.AssertationResults;
 import com.openexchange.test.report.util.FileUtil;
 
@@ -71,7 +72,7 @@ public class SuiteWatcher extends TestWatcher {
 
     /**
      * Initializes a new {@link SuiteWatcher}.
-     * 
+     *
      * @param name Suite's name
      */
     public SuiteWatcher(String name, String formatterId, String writerId, String path) {

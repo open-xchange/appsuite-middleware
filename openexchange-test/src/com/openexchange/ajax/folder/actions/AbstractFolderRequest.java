@@ -73,7 +73,7 @@ import com.openexchange.share.recipient.ShareRecipient;
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
-abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
 
     private final API api;
     private AllowedModules[] allowedModules;

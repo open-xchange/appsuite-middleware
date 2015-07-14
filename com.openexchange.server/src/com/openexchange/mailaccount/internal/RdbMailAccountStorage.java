@@ -93,7 +93,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.ldap.UserStorage;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.MailProviderRegistry;
 import com.openexchange.mail.MailSessionCache;
 import com.openexchange.mail.MailSessionParameterNames;
@@ -241,7 +240,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         }
     }
 
-    private void fillMailAccount(final AbstractMailAccount mailAccount, final int id, final int userId, final int contextId, final Connection con) throws OXException {
+    private void fillMailAccount(AbstractMailAccount mailAccount, int id, int userId, int contextId, boolean raw, Connection con) throws OXException {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -292,7 +291,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 Session session = null == sessiondService ? null : sessiondService.getAnyActiveSessionForUser(userId, contextId);
                 if (null != session) {
                     String parameterName = MailSessionParameterNames.getParamDefaultFolderArray();
-                    String[] fullNames = MailSessionCache.getInstance(session).getParameter(id, parameterName);
+                    String[] fullNames = raw ? null : MailSessionCache.getInstance(session).<String[]> getParameter(id, parameterName);
                     String s = getOptionalString(result.getString(15));
                     mailAccount.setTrashFullname(s == null ? (null == fullNames ? null : fullNames[StorageUtility.INDEX_TRASH]) : s);
                     s = getOptionalString(result.getString(16));
@@ -677,6 +676,104 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     }
 
     @Override
+    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId) throws OXException {
+        Connection con = Database.get(contextId, true);
+        boolean rollback = false;
+        try {
+            con.setAutoCommit(false);
+            rollback = true;
+            setNamesForMailAccount(id, indexes, names, userId, contextId, con);
+            con.commit();
+            rollback = false;
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                rollback(con);
+            }
+            autocommit(con);
+            Database.back(contextId, true, con);
+        }
+    }
+
+    /**
+     * Sets specified full names for specified mail account using given connection.
+     *
+     * @param id The account ID
+     * @param indexes The indexes of the full names to set
+     * @param fullNames The full names to set
+     * @param userId The user ID
+     * @param contextId The context ID
+     * @param con The connection
+     * @throws OXException If invalidation fails
+     */
+    public void setNamesForMailAccount(int id, int[] indexes, String[] names, int userId, int contextId, Connection con) throws OXException {
+        if (null == con) {
+            setNamesForMailAccount(id, indexes, names, userId, contextId);
+            return;
+        }
+        PreparedStatement stmt = null;
+        try {
+            StringBuilder sqlBuilder = new StringBuilder("UPDATE user_mail_account SET ");
+            List<String> strings = new ArrayList<String>(names.length);
+
+            boolean somethingAdded = false;
+            for (int i = indexes.length; i-- > 0;) {
+                int index = indexes[i];
+                switch (index) {
+                    case StorageUtility.INDEX_DRAFTS:
+                        sqlBuilder.append("drafts=?, ");
+                        strings.add(names[i]);
+                        somethingAdded = true;
+                        break;
+                    case StorageUtility.INDEX_SENT:
+                        sqlBuilder.append("sent=?, ");
+                        strings.add(names[i]);
+                        somethingAdded = true;
+                        break;
+                    case StorageUtility.INDEX_SPAM:
+                        sqlBuilder.append("spam=?, ");
+                        strings.add(names[i]);
+                        somethingAdded = true;
+                        break;
+                    case StorageUtility.INDEX_TRASH:
+                        sqlBuilder.append("trash=?, ");
+                        strings.add(names[i]);
+                        somethingAdded = true;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            if (!somethingAdded) {
+                return;
+            }
+
+            sqlBuilder.setLength(sqlBuilder.length() - 2);
+            sqlBuilder.append(" WHERE cid=? AND id=? AND user=?");
+
+            stmt = con.prepareStatement(sqlBuilder.toString());
+            int num = 1;
+            for (String string : strings) {
+                stmt.setString(num++, string);
+            }
+            stmt.setLong(num++, contextId);
+            stmt.setLong(num++, id);
+            stmt.setLong(num++, userId);
+            stmt.executeUpdate();
+        } catch (final SQLException e) {
+            throw MailAccountExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw MailAccountExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
+    @Override
     public void deleteMailAccount(final int id, final Map<String, Object> properties, final int userId, final int contextId) throws OXException {
         deleteMailAccount(id, properties, userId, contextId, false);
     }
@@ -926,7 +1023,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return getMailAccount(id, userId, contextId);
         }
         AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
-        fillMailAccount(retval, id, userId, contextId, con);
+        fillMailAccount(retval, id, userId, contextId, false, con);
         fillTransportAccount(retval, id, userId, contextId, con);
         return retval;
     }
@@ -938,6 +1035,19 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             return getMailAccount(id, userId, contextId, rcon);
         } finally {
             Database.back(contextId, false, rcon);
+        }
+    }
+
+    @Override
+    public MailAccount getRawMailAccount(int id, int userId, int contextId) throws OXException {
+        final Connection con = Database.get(contextId, false);
+        try {
+            AbstractMailAccount retval = MailAccount.DEFAULT_ID == id ? new DefaultMailAccount() : new CustomMailAccount();
+            fillMailAccount(retval, id, userId, contextId, true, con);
+            fillTransportAccount(retval, id, userId, contextId, con);
+            return retval;
+        } finally {
+            Database.back(contextId, false, con);
         }
     }
 

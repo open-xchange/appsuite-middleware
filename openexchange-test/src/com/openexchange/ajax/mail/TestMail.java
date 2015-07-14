@@ -79,7 +79,7 @@ import com.openexchange.mail.utils.DateUtils;
  * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
  */
 public class TestMail implements IdentitySource<TestMail> {
-    
+
     private String from;
 
     private List<String> to, cc, bcc;
@@ -401,7 +401,6 @@ public class TestMail implements IdentitySource<TestMail> {
         if (field == MailListField.FROM) {
             return getFrom();
         }
-
         if (field == MailListField.TO) {
             return getTo();
         }

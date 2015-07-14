@@ -95,9 +95,17 @@ public enum QuotaExceptionCodes implements DisplayableOXExceptionCode {
      */
     QUOTA_EXCEEDED_ATTACHMENTS("Quota exceeded for attachments. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_ATTACHMENTS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
-     * Quota exceeded for attachments. Quota used: %1$s. Quota limit: %2$s.
+     * Quota exceeded for shares. Quota used: %1$s. Quota limit: %2$s.
      */
     QUOTA_EXCEEDED_SHARES("Quota exceeded for shares. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_SHARES_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    /**
+     * Quota exceeded for share links. Quota used: %1$s. Quota limit: %2$s.
+     */
+    QUOTA_EXCEEDED_SHARE_LINKS("Quota exceeded for share links. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_SHARE_LINKS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    /**
+     * Quota exceeded for guest users. Quota used: %1$s. Quota limit: %2$s.
+     */
+    QUOTA_EXCEEDED_INVITE_GUESTS("Quota exceeded for guest users. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_INVITE_GUESTS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
      * No account %1$s exists for module %2$s.
      */

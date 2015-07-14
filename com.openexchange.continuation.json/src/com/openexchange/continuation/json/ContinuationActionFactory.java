@@ -77,7 +77,7 @@ public class ContinuationActionFactory implements AJAXActionServiceFactory {
      */
     public ContinuationActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(2);
+        actions = new ConcurrentHashMap<String, AJAXActionService>(2, 0.9f, 1);
         actions.put("get", new GetAction(services));
     }
 

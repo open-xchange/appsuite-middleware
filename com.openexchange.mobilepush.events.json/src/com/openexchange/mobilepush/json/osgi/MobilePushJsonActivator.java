@@ -50,6 +50,7 @@
 package com.openexchange.mobilepush.json.osgi;
 
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mobilepush.events.storage.MobilePushStorageService;
 import com.openexchange.mobilepush.json.AliasMobilePushActionFactory;
@@ -74,7 +75,7 @@ public class MobilePushJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, MobilePushStorageService.class, PushListenerService.class };
+        return new Class<?>[] { ConfigViewFactory.class, MobilePushStorageService.class, PushListenerService.class, CapabilityService.class };
     }
 
     @Override

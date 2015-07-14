@@ -56,14 +56,13 @@ import com.openexchange.ajax.conversion.VCardMailPartAttachTest;
 public class VCardTestSuite extends TestSuite{
 
 	public static Test suite(){
-		final TestSuite tests = new TestSuite();
-		tests.addTestSuite( VCardImportBugTests.class );
-		tests.addTestSuite( VCardExportTest.class );
-		tests.addTestSuite(Bug15229Test.class);
+		TestSuite tests = new TestSuite();
 		tests.addTestSuite(Bug18094Test_VCardRoundtrip.class);
 		tests.addTestSuite(VCardMailPartAttachTest.class);
 		tests.addTestSuite(Bug27151Test_RoundtripOfYomiFields.class);
         tests.addTestSuite(Bug25701Test.class);
+        tests.addTestSuite(Bug15400Test.class);
+        tests.addTestSuite(VCardImportExportServletTest.class);
 		return tests;
 	}
 }

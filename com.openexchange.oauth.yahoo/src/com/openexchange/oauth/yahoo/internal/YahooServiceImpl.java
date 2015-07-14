@@ -176,7 +176,7 @@ public class YahooServiceImpl implements YahooService {
             final CompletionService<Void> completionService = new BoundedCompletionService<Void>(ThreadPools.getThreadPool(), 10).setTrackable(true);
             int numTasks = 0;
             final int length = allContactsArray.length();
-            final ConcurrentMap<Integer, Contact> contactMap = new ConcurrentHashMap<Integer, Contact>(length);
+            final ConcurrentMap<Integer, Contact> contactMap = new ConcurrentHashMap<Integer, Contact>(length, 0.9f, 1);
             // get each contact with its own request
             for (int i = 0; i < length; i++) {
                 final JSONObject entry = allContactsArray.getJSONObject(i);

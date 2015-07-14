@@ -115,7 +115,14 @@ public class HtmlTestReportFormatter implements TestReportFormatter {
         request.appendElement("div").attr("class", "verb").text(result.getAction());
         request.appendElement("div").attr("class", "nbsp");
         request.appendElement("div").attr("class", "sideHeader").text("Request Parameters:");
-        request.appendElement("div").attr("class", "content").text(result.getParameters().toString());
+        
+        Element tableRoot = request.appendElement("div").attr("class", "content").appendElement("div").attr("class", "table");
+        for (String key : result.getParameters().keySet()) {
+            Element row = tableRoot.appendElement("div").attr("class", "row");
+            row.appendElement("div").attr("class", "headerCell").text(key + ":");
+            row.appendElement("div").attr("class", "cell").text(result.getParameters().get(key));
+        }
+        
         request.appendElement("div").attr("class", "nbsp");
         if (result.getBody() != null) {
             request.appendElement("div").attr("class", "sideHeader").text("Request Body:");

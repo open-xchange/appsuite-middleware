@@ -149,9 +149,9 @@ public final class ConfigJSlobService implements JSlobService {
         final ConfigurationService service = services.getService(ConfigurationService.class);
         final File file = service.getFileByName("paths.perfMap");
         if (null == file) {
-            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2);
+            configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(2, 0.9f, 1);
         } else {
-            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48);
+            final ConcurrentMap<String, ConfigTreeEquivalent> configTreeEquivalents = new ConcurrentHashMap<String, ConfigTreeEquivalent>(48, 0.9f, 1);
             readPerfMap(file, configTreeEquivalents);
             this.configTreeEquivalents = configTreeEquivalents;
         }
@@ -175,7 +175,7 @@ public final class ConfigJSlobService implements JSlobService {
             reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), Charsets.ISO_8859_1));
             for (String line = reader.readLine(); null != line; line = reader.readLine()) {
                 line = line.trim();
-                if (!isEmpty(line) && '#' != line.charAt(0)) {
+                if (!com.openexchange.java.Strings.isEmpty(line) && '#' != line.charAt(0)) {
                     final int pos = line.indexOf('>');
                     if (pos > 0) {
                         final String configTreePath = line.substring(0, pos).trim();
@@ -219,7 +219,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param jslobPath The associated jslob path
      */
     public void addConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -254,7 +254,7 @@ public final class ConfigJSlobService implements JSlobService {
      * @param jslobPath The associated jslob path
      */
     public void removeConfigTreeEquivalent(final String configTreePath, final String jslobPath) {
-        if (isEmpty(configTreePath) || isEmpty(jslobPath)) {
+        if (com.openexchange.java.Strings.isEmpty(configTreePath) || com.openexchange.java.Strings.isEmpty(jslobPath)) {
             return;
         }
         String path = jslobPath.trim();
@@ -322,6 +322,29 @@ public final class ConfigJSlobService implements JSlobService {
         return services.getService(SessiondService.class);
     }
 
+    private void mergeWithSharedJSlobs(String id, JSlob jsonJSlob, Map<String, SharedJSlobService> sharedJSlobs, Session session) throws OXException {
+        for (Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
+            String sharedId = entry.getKey();
+            if (sharedId.startsWith(id)) {
+                try {
+                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
+                    JSONObject jsonObject = jsonJSlob.getJsonObject();
+                    if (sharedId.equals(id)) {
+                        JSONObject sharedJsonObject = sharedJSlob.getJsonObject();
+                        for (Entry<String,Object> sharedEntry : sharedJsonObject.entrySet()) {
+                            jsonObject.put(sharedEntry.getKey(), sharedEntry.getValue());
+                        }
+                    } else {
+                        String newId = sharedId.substring(id.length() + 1, sharedId.length());
+                        jsonObject.put(newId, sharedJSlob.getJsonObject());
+                    }
+                } catch (JSONException e) {
+                    // should not happen
+                }
+            }
+        }
+    }
+
     @Override
     public Collection<JSlob> get(final Session session) throws OXException {
         final int userId = session.getUserId();
@@ -362,24 +385,12 @@ public final class ConfigJSlobService implements JSlobService {
             addConfigTreeToJslob(session, jSlob);
         }
 
-        for (JSlob jSlob : ret) {
-            String id = jSlob.getId().getId();
-            for (String sharedId : sharedJSlobs.keySet()) {
-                if (sharedId.startsWith(id)) {
-                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                    JSONObject jsonObject = jSlob.getJsonObject();
-                    JSONObject sharedObject = sharedJSlob.getJsonObject();
-                    for (String key : sharedObject.keySet()) {
-                        if (sharedObject.hasAndNotNull(key)) {
-                            try {
-                                jsonObject.put(newId, sharedObject);
-                            } catch (JSONException e) {
-                                // should not happen
-                            }
-                        }
-                    }
-                }
+        // Search for shared jslobs and merge them if necessary
+        Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        if (!sharedJSlobs.isEmpty()) {
+            for (JSlob jSlob : ret) {
+                String id = jSlob.getId().getId();
+                mergeWithSharedJSlobs(id, jSlob, sharedJSlobs, session);
             }
         }
         return ret;
@@ -424,19 +435,7 @@ public final class ConfigJSlobService implements JSlobService {
         }
 
         // Search for shared jslobs and merge them if necessary
-        final Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
-        for (final Entry<String, SharedJSlobService> entry : sharedJSlobs.entrySet()) {
-            final String sharedId = entry.getKey();
-            if (sharedId.startsWith(id)) {
-                try {
-                    JSlob sharedJSlob = entry.getValue().getJSlob(session);
-                    String newId = id.length() < sharedId.length() ? sharedId.substring(id.length() + 1, sharedId.length()) : sharedId;
-                    jsonJSlob.getJsonObject().put(newId, sharedJSlob.getJsonObject());
-                } catch (JSONException e) {
-                    // should not happen
-                }
-            }
-        }
+        mergeWithSharedJSlobs(id, jsonJSlob, this.sharedJSlobs, session);
 
         return jsonJSlob;
     }
@@ -485,25 +484,12 @@ public final class ConfigJSlobService implements JSlobService {
             ret.add(jsonJSlob);
         }
 
-        for (JSlob jslob : ret) {
-            String id = jslob.getId().getId();
-            // Search for shared jslobs and merge them if neccessary
-            for (String sharedId : sharedJSlobs.keySet()) {
-                if (sharedId.startsWith(id)) {
-                    JSlob sharedJSlob = sharedJSlobs.get(sharedId).getJSlob(session);
-                    String newId = sharedId.substring(id.length() + 1, sharedId.length());
-                    JSONObject jsonObject = jslob.getJsonObject();
-                    JSONObject sharedObject = sharedJSlob.getJsonObject();
-                    for (String key : sharedObject.keySet()) {
-                        if (sharedObject.hasAndNotNull(key)) {
-                            try {
-                                jsonObject.put(newId, sharedObject);
-                            } catch (JSONException e) {
-                                // should not happen
-                            }
-                        }
-                    }
-                }
+        // Search for shared jslobs and merge them if necessary
+        Map<String, SharedJSlobService> sharedJSlobs = this.sharedJSlobs;
+        if (!sharedJSlobs.isEmpty()) {
+            for (JSlob jslob : ret) {
+                String id = jslob.getId().getId();
+                mergeWithSharedJSlobs(id, jslob, sharedJSlobs, session);
             }
         }
 
@@ -1213,18 +1199,6 @@ public final class ConfigJSlobService implements JSlobService {
             path = JSONPathElement.parsePath(preferencePath);
         }
     } // End of class AttributedProperty
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
 
     private static final class CompletionServiceReference {
 

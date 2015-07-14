@@ -98,9 +98,9 @@ public class ReminderActivator extends AJAXModuleActivator {
 
     private static final class OAuthScopeDescription implements LocalizableStrings {
         // Application 'xyz' requires following permissions:
-        //  - Fetch reminders for appointments and tasks.
+        //  - Read reminders for appointments and tasks.
         //  - ...
-        public static final String READ_ONLY = "Fetch reminders for appointments and tasks.";
+        public static final String READ_ONLY = "Read reminders for appointments and tasks.";
 
         // Application 'xyz' requires following permissions:
         //  - Set or change reminders for appointments and tasks.

@@ -73,7 +73,10 @@ import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.services.SessionInspector;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.inspector.Reason;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
@@ -112,25 +115,37 @@ public class AutoLogin extends AbstractLoginRequestHandler {
                 // Auto-login disabled per configuration.
                 // Try to perform a login using HTTP request/response to see if invocation signals that an auto-login should proceed afterwards
                 if (doAutoLogin(req, resp)) {
+                    if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_DISABLED, req, resp)) {
+                        return;
+                    }
                     throw AjaxExceptionCodes.DISABLED_ACTION.create("autologin");
                 }
                 return;
             }
             /*
-             * perform auto-login
+             * try guest auto-login first
              */
-            String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
-            LoginResult loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
+            LoginResult loginResult = AutoLoginTools.tryGuestAutologin(conf, req, resp);
             if (null == loginResult) {
                 /*
-                 * auto-login failed
+                 * try auto-login for regular user
                  */
-                SessionUtility.removeOXCookies(hash, req, resp);
-                SessionUtility.removeJSESSIONID(req, resp);
-                if (doAutoLogin(req, resp)) {
-                    throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                String hash = HashCalculator.getInstance().getHash(req, LoginTools.parseUserAgent(req), LoginTools.parseClient(req, false, conf.getDefaultClient()), LoginTools.parseShareInformation(req));
+                loginResult = AutoLoginTools.tryAutologin(conf, req, resp, hash);
+                if (null == loginResult) {
+                    /*
+                     * auto-login failed
+                     */
+                    SessionUtility.removeOXCookies(hash, req, resp);
+                    SessionUtility.removeJSESSIONID(req, resp);
+                    if (doAutoLogin(req, resp)) {
+                        if (Reply.STOP == SessionInspector.getInstance().getChain().onAutoLoginFailed(Reason.AUTO_LOGIN_FAILED, req, resp)) {
+                            return;
+                        }
+                        throw OXJSONExceptionCodes.INVALID_COOKIE.create();
+                    }
+                    return;
                 }
-                return;
             }
             /*
              * auto-login successful, prepare result

@@ -50,7 +50,6 @@
 package com.openexchange.share;
 
 import java.util.Locale;
-import com.openexchange.exception.OXException;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -73,7 +72,7 @@ public interface GuestInfo {
      *
      * @return The base token
      */
-    String getBaseToken() throws OXException;
+    String getBaseToken();
 
     /**
      * Gets the e-mail address of the guest user if it denotes a named recipient.
@@ -87,7 +86,7 @@ public interface GuestInfo {
      *
      * @return The password of the anonymous share recipient, or <code>null</code> if no password is set or the guest user is not anonymous
      */
-    String getPassword() throws OXException;
+    String getPassword();
 
     /**
      * Gets the recipient type of the guest user.
@@ -118,17 +117,17 @@ public interface GuestInfo {
     int getCreatedBy();
 
     /**
+     * Gets the display name of the underlying guest user.
+     *
+     * @return The display name or <code>null</code> if the guest is anonymous or none is set.
+     */
+    String getDisplayName();
+
+    /**
      * Gets the guest user's configured locale.
      *
      * @return The locale
      */
     Locale getLocale();
-
-    /**
-     * Checks if guest's password is set
-     * 
-     * @return
-     */
-    boolean isPasswordSet();
 
 }

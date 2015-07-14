@@ -59,8 +59,7 @@ import java.util.Set;
 import com.openexchange.event.impl.EventClient;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
-import com.openexchange.groupware.container.Participant;
-import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
@@ -84,6 +83,7 @@ public final class ConfirmTask {
     private final String message;
 
     private Task origTask;
+    private FolderObject folder;
     private Set<TaskParticipant> participants;
     private Set<Folder> folders;
     private Task changedTask;
@@ -110,8 +110,9 @@ public final class ConfirmTask {
      * the database.
      */
     void prepare() throws OXException {
-        // Check if task exists.
-        getOrigTask();
+        // Load full task.
+        fillParticipants();
+        fillTask();
         // Load participant and set confirmation
         changedParticipant = getOrigParticipant();
         changedParticipant.setConfirm(confirm);
@@ -164,8 +165,6 @@ public final class ConfirmTask {
                     throw TaskExceptionCode.UNKNOWN_DELEGATOR.create(I(orig.getCreatedBy()));
                 }
             }
-            orig.setUsers(new UserParticipant[0]);
-            orig.setParticipants(new Participant[0]);
         }
         final EventClient eventClient = new EventClient(session);
         switch (changedParticipant.getConfirm()) {
@@ -192,10 +191,6 @@ public final class ConfirmTask {
 
     // =========================== internal helper methods =====================
 
-    /**
-     * @return the original task.
-     * @throws OXException if loading of the original tasks fails.
-     */
     private Task getOrigTask() throws OXException {
         if (null == origTask) {
             origTask = storage.selectTask(ctx, taskId, StorageType.ACTIVE);
@@ -204,7 +199,7 @@ public final class ConfirmTask {
     }
 
     /**
-     * @return the original participant.
+     * @return the participant getting the confirmation applied.
      */
     private InternalParticipant getOrigParticipant() throws OXException {
         if (null == origParticipant) {
@@ -214,6 +209,48 @@ public final class ConfirmTask {
             }
         }
         return origParticipant;
+    }
+
+    /**
+     * @return the folder of the confirming participant through that the task is seen.
+     */
+    private FolderObject getFolder() throws OXException {
+        if (null == folder) {
+            Folder tmpFolder = FolderStorage.extractFolderOfUser(getFolders(), userId);
+            if (null == tmpFolder) {
+                if (getFolders().isEmpty()) {
+                    throw TaskExceptionCode.MISSING_FOLDER.create(I(taskId));
+                }
+                tmpFolder = getFolders().iterator().next();
+            }
+            folder = Tools.getFolder(ctx, tmpFolder.getIdentifier());
+        }
+        return folder;
+    }
+
+    private boolean filledParts = false;
+
+    private void fillParticipants() throws OXException {
+        if (filledParts) {
+            return;
+        }
+        if (!Tools.isFolderPublic(getFolder())) {
+            Tools.fillStandardFolders(ctx.getContextId(), taskId, getParticipants(), getFolders(), true);
+        }
+        filledParts = true;
+    }
+
+    private boolean filledTask = false;
+
+    private void fillTask() throws OXException {
+        if (filledTask) {
+            return;
+        }
+        Task task = getOrigTask();
+        task.setParticipants(TaskLogic.createParticipants(getParticipants()));
+        task.setUsers(TaskLogic.createUserParticipants(getParticipants()));
+        task.setParentFolderID(getFolder().getObjectID());
+        filledTask = true;
     }
 
     private Set<TaskParticipant> getParticipants() throws OXException {
@@ -230,26 +267,19 @@ public final class ConfirmTask {
         return folders;
     }
 
-    private final boolean filledTask = false;
+    private boolean filledChangedTask = false;
 
     private Task getFilledChangedTask() throws OXException {
-        if (!filledTask) {
+        if (!filledChangedTask) {
             final Task oldTask = getOrigTask();
             for (final Mapper mapper : Mapping.MAPPERS) {
                 if (!mapper.isSet(changedTask) && mapper.isSet(getOrigTask())) {
                     mapper.set(changedTask, mapper.get(getOrigTask()));
                 }
             }
-            changedTask.setParticipants(TaskLogic.createParticipants(getParticipants()));
-            changedTask.setUsers(TaskLogic.createUserParticipants(getParticipants()));
-            Folder folder = FolderStorage.extractFolderOfUser(getFolders(), userId);
-            if (null == folder) {
-                if (getFolders().isEmpty()) {
-                    throw TaskExceptionCode.MISSING_FOLDER.create(I(taskId));
-                }
-                folder = getFolders().iterator().next();
-            }
-            changedTask.setParentFolderID(folder.getIdentifier());
+            changedTask.setParticipants(origTask.getParticipants());
+            changedTask.setUsers(origTask.getUsers());
+            changedTask.setParentFolderID(oldTask.getParentFolderID());
         }
         return changedTask;
     }

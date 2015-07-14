@@ -440,6 +440,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_CAPABILITIES_TO_REMOVE = "capabilities-to-remove";
     protected static final String OPT_CAPABILITIES_TO_DROP = "capabilities-to-drop";
 
+    protected static final String OPT_PERSONAL = "personal";
+
     protected static final String OPT_QUOTA_MODULE = "quota-module";
     protected static final String OPT_QUOTA_VALUE = "quota-value";
 
@@ -625,6 +627,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected CLIOption capsToRemove = null;
     protected CLIOption capsToDrop = null;
 
+    protected CLIOption personal = null;
+
     protected CLIOption quotaModule = null;
     protected CLIOption quotaValue = null;
 
@@ -670,6 +674,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     // For right error output
     protected String username = null;
+    protected String displayName = null;
     protected Integer userid = null;
     private CLIOption email1Option;
     private CLIOption mailenabledOption;
@@ -939,7 +944,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     private static final Set<String> BOOL_VALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("true","1","yes","y","on")));
 
     private static boolean parseBool(final String parameter) {
-        return (null != parameter) && BOOL_VALS.contains(toLowerCase(parameter.trim()));
+        return (null != parameter) && BOOL_VALS.contains(com.openexchange.java.Strings.toLowerCase(parameter.trim()));
     }
 
     protected static Credentials getCreds(final String[] nextLine, final int[] idarray) {
@@ -1791,6 +1796,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.accessRightsCombinationName = setLongOpt(parser,OPT_ACCESSRIGHTS_COMBINATION_NAME,"Access combination name", true, false,false);
     }
 
+    protected void setPersonal(final AdminParser parser) {
+        this.personal = setLongOpt(parser,OPT_PERSONAL,"The personal of user's mail address or special value \"NULL\" to drop the personal (if any)", true, false, false);
+    }
+
     protected void setCapsToAdd(final AdminParser parser) {
         this.capsToAdd = setLongOpt(parser,OPT_CAPABILITIES_TO_ADD,"The capabilities to add as a comma-separated string; e.g. \"portal, -autologin\"", true, false,false);
     }
@@ -1832,11 +1841,11 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setConfigOption(final AdminParser adminParser){
-        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.facebook=false|true'", false, false);
+        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false|true'", false, false);
     }
 
     protected final void setRemoveConfigOption(final AdminParser adminParser){
-        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.facebook'", false, false);
+        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
     }
 
     /**
@@ -1916,7 +1925,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
             return null;
         }
         final String tmp = object.toString().trim();
-        return isEmpty(tmp) ? null : tmp;
+        return com.openexchange.java.Strings.isEmpty(tmp) ? null : tmp;
     }
 
     public Long parseAndSetQuotaValue(final AdminParser parser) throws InvalidDataException {
@@ -1932,6 +1941,17 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         } catch (NumberFormatException e) {
             throw new InvalidDataException("Quota value must be a number.");
         }
+    }
+
+    public String parseAndSetPersonal(final AdminParser parser) {
+        if (null == personal) {
+            setPersonal(parser);
+        }
+        Object object = parser.getOptionValue(personal);
+        if (null == object) {
+            return null;
+        }
+        return object.toString().trim();
     }
 
     public Set<String> parseAndSetCapabilitiesToAdd(final AdminParser parser) {
@@ -1957,7 +1977,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
     private Set<String> parseAndSetCapabilities(final CLIOption cliOption, final AdminParser parser) {
         String s = (String) parser.getOptionValue(cliOption);
-        if (isEmpty(s)) {
+        if (com.openexchange.java.Strings.isEmpty(s)) {
             return Collections.emptySet();
         }
         s = s.trim();
@@ -1966,7 +1986,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 return Collections.emptySet();
             }
             s = s.substring(1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -1975,7 +1995,7 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 return Collections.emptySet();
             }
             s = s.substring(0, s.length() - 1);
-            if (isEmpty(s)) {
+            if (com.openexchange.java.Strings.isEmpty(s)) {
                 return Collections.emptySet();
             }
         }
@@ -1984,8 +2004,8 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         final Set<String> set = new HashSet<String>(arr.length);
         for (String element : arr) {
             final String cap = element;
-            if (!isEmpty(cap)) {
-                set.add(toLowerCase(cap));
+            if (!com.openexchange.java.Strings.isEmpty(cap)) {
+                set.add(com.openexchange.java.Strings.toLowerCase(cap));
             }
         }
         return set;
@@ -2006,6 +2026,13 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
         this.username = (String) parser.getOptionValue(this.userNameOption);
         if (null != this.username) {
             usr.setName(this.username);
+        }
+    }
+
+    protected void parseAndSetDisplayName(final AdminParser parser, final User usr) {
+        this.displayName = (String) parser.getOptionValue(this.displayNameOption);
+        if (null != this.displayName) {
+            usr.setDisplay_name(displayName);
         }
     }
 
@@ -3438,32 +3465,5 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
 
         checkRequired(idarray);
         return idarray;
-    }
-
-    /** Check for an empty string */
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 }

@@ -28,6 +28,9 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contactcollector.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.storage.rdb"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.storage"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contact.vcard.storage.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.contacts.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.continuation.json"/>
@@ -98,6 +101,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.logging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.autoconfig.json"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.attachment.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mailmapping"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.management.impl"/>
@@ -137,6 +141,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.serverconfig"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessiond"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.session.reservation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessionstorage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.sessionstorage.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.share"/>

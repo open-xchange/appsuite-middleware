@@ -41,7 +41,7 @@ public class Common {
             simConfigurationService.stringProperties.put(MailFilterProperties.Values.SIEVE_MASTERPASSWORD.property, masterPassword);
         }
 
-        final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<Class<?>, Object>(2);
+        final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<Class<?>, Object>(2, 0.9f, 1);
         services.put(ConfigurationService.class, simConfigurationService);
         Services.setServiceLookup(new ServiceLookup() {
 

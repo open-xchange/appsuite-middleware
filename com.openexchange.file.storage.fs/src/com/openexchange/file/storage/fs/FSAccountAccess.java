@@ -51,7 +51,9 @@ package com.openexchange.file.storage.fs;
 
 import java.io.File;
 import com.openexchange.file.storage.AbstractFileStorageAccountAccess;
-import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.CapabilityAware;
+import com.openexchange.file.storage.FileStorageCapability;
+import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.session.Session;
 
 
@@ -60,11 +62,15 @@ import com.openexchange.session.Session;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class FSAccountAccess extends AbstractFileStorageAccountAccess implements FileStorageAccountAccess {
+public class FSAccountAccess extends AbstractFileStorageAccountAccess implements CapabilityAware {
 
     public FSAccountAccess(String accountId, File file, Session session, FSFileStorageServiceFactory fsFileStorageServiceFactory) {
         super(fsFileStorageServiceFactory, session, accountId);
-        
+    }
+
+    @Override
+    public Boolean supports(FileStorageCapability capability) {
+        return FileStorageCapabilityTools.supportsByClass(FSFileAccess.class, capability);
     }
 
 }

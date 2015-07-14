@@ -59,6 +59,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
@@ -146,6 +147,9 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static final char OPT_NIO_BUFFER_STATS_SHORT = 'n';
     private static final String OPT_NIO_BUFFER_STATS_LONG = "niobufferstats";
+    
+    private static final char OPT_RT_BUFFER_STATS_SHORT= 'R';
+    private static final String OPT_RT_BUFFER_STATS_LONG = "rtstats";
 
     private CLIOption xchangestats = null;
     private CLIOption threadpoolstats = null;
@@ -173,6 +177,7 @@ public class StatisticTools extends AbstractJMXTools {
     private CLIOption overviewstats = null;
     private CLIOption memorypoolstats = null;
     private CLIOption niobufferstats = null;
+    private CLIOption rtstats = null;
 
     /**
      * Option for garbage collection statistics
@@ -254,7 +259,8 @@ public class StatisticTools extends AbstractJMXTools {
             System.out.print(showGcData(mbc));
             System.out.print(getStats(mbc, "com.openexchange.usm.session", "name", "com.openexchange.usm.session.impl.USMSessionInformation"));
             System.out.print(showEventAdminData(mbc));
-            System.out.println(showNioBufferData(mbc));
+            System.out.print(showNioBufferData(mbc));
+            System.out.println(showRtData(mbc));
             count++;
         }
         if (null != parser.getOptionValue(this.showoperation) && 0 == count) {
@@ -314,6 +320,10 @@ public class StatisticTools extends AbstractJMXTools {
         }
         if (null != parser.getOptionValue(this.niobufferstats) && 0 == count) {
             System.out.print(showNioBufferData(mbc));
+            count++;
+        }
+        if (null != parser.getOptionValue(this.rtstats) && 0 == count) {
+            System.out.print(showRtData(mbc));
             count++;
         }
         if (0 == count) {
@@ -570,6 +580,7 @@ public class StatisticTools extends AbstractJMXTools {
             "shows the NIO buffer stats",
             false,
             NeededQuadState.notneeded);
+        this.rtstats = setShortLongOpt(parser, OPT_RT_BUFFER_STATS_SHORT, OPT_RT_BUFFER_STATS_LONG, "shows stats for the realtime component", false, NeededQuadState.notneeded);
 
 
     }
@@ -887,6 +898,35 @@ public class StatisticTools extends AbstractJMXTools {
         return getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=direct")
         .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
         .toString();
+    }
+    
+    static String showRtData(final MBeanServerConnection mbeanServerConnection) {
+        String runLoopFillSum = "RunLoopFillSum";
+        StringBuilder sb = new StringBuilder();
+        try {
+            final ObjectName objectName = new ObjectName("com.openexchange.realtime:name=RunLoopManager");
+            Object fillSum = mbeanServerConnection.getAttribute(objectName, runLoopFillSum);
+            if (fillSum instanceof Map) {
+                Map<?, ?> fillSums = Map.class.cast(fillSum);
+                for (Entry<?, ?> entry : fillSums.entrySet()) {
+                    sb.append(objectName);
+                    sb.append(',');
+                    sb.append(runLoopFillSum);
+                    sb.append(',');
+                    sb.append(entry.getKey());
+                    sb.append(" = ");
+                    sb.append(entry.getValue());
+                    sb.append(LINE_SEPARATOR);
+                }
+            }
+        } catch (final Exception e) {
+            sb.append("com.openexchange.realtime");
+            sb.append(" = ");
+            sb.append('[');
+            sb.append(e.toString());
+            sb.append(']');
+        }
+        return sb.toString();
     }
 
     private static String extractTextInBrackets(final String value, final int startIdx) {

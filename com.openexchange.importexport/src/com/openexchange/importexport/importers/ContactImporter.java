@@ -49,14 +49,21 @@
 
 package com.openexchange.importexport.importers;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
 import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -67,7 +74,6 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class ContactImporter extends AbstractImporter {
-
 
     protected ContactImporter(ServiceLookup services) {
         super(services);
@@ -90,10 +96,62 @@ public abstract class ContactImporter extends AbstractImporter {
      * @throws OXException
      */
     protected void createContact(Session session, Contact contact, String folderID) throws OXException {
+        this.createContact(session, contact, folderID, (InputStream) null);
+    }
+
+    /**
+     * Creates a new contact, implicitly trying again with trimmed values in
+     * case of truncation errors.
+     *
+     * @param session the current session
+     * @param contact the contact to create
+     * @param folderID the target folder ID
+     * @param vCard the FileHolder containing the original vCard
+     * @throws OXException
+     */
+    protected void createContact(Session session, Contact contact, String folderID, IFileHolder vCard) throws OXException {
+        this.createContact(session, contact, folderID, vCard == null ? null : vCard.getStream());
+    }
+
+    /**
+     * Creates a new contact, implicitly trying again with trimmed values in
+     * case of truncation errors.
+     *
+     * @param session the current session
+     * @param contact the contact to create
+     * @param folderID the target folder ID
+     * @param vCard the VCard to persist or null if not available
+     * @throws OXException
+     */
+    protected void createContact(Session session, Contact contact, String folderID, String vCard) throws OXException {
+        this.createContact(session, contact, folderID, vCard == null ? null : new ByteArrayInputStream(vCard.getBytes()));
+    }
+
+    /**
+     * Creates a new contact, implicitly trying again with trimmed values in
+     * case of truncation errors.
+     *
+     * @param session the current session
+     * @param contact the contact to create
+     * @param folderID the target folder ID
+     * @param vCard the InputStream providing the original vCard
+     * @throws OXException
+     */
+    protected void createContact(Session session, Contact contact, String folderID, InputStream vCard) throws OXException {
         ContactService contactService = ImportExportServices.getContactService();
+        VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
+
         if (null == contactService) {
             throw ImportExportExceptionCodes.CONTACT_INTERFACE_MISSING.create();
         }
+
+        if (vCard != null && vCardStorage != null && contactService.supports(session, folderID, ContactField.VCARD_ID)) {
+            String vCardId = vCardStorage.saveVCard(vCard, session.getContextId());
+            if (vCardId != null) {
+                contact.setVCardId(vCardId);
+            }
+        }
+
         for (int retryCount = 1; retryCount <= MAX_RETRIES; retryCount++) {
             try {
                 contactService.createContact(session, folderID, contact);
@@ -103,9 +161,13 @@ public abstract class ContactImporter extends AbstractImporter {
                     // try again
                     LOG.debug("{} - trying again ({}/{})", e.getMessage(), retryCount, MAX_RETRIES, e);
                     continue;
-                } else {
-                    // re-throw
-                    throw e;
+                }
+                // re-throw
+                throw e;
+            } finally {
+                if (vCardStorage != null && contact.getVCardId() != null && contact.getObjectID() == 0) {
+                    vCardStorage.deleteVCard(contact.getVCardId(), session.getContextId());
+                    contact.removeVCardId();
                 }
             }
         }

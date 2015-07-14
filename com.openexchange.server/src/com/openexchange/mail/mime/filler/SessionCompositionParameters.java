@@ -51,16 +51,15 @@ package com.openexchange.mail.mime.filler;
 
 import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Set;
-import javax.mail.MessageRemovedException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.internal.VCardUtil;
+import com.openexchange.contact.vcard.VCardExport;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
@@ -68,13 +67,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.image.ImageDataSource;
 import com.openexchange.image.ImageLocation;
-import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
-import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
-import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MimeMessageFiller.ImageDataImageProvider;
 import com.openexchange.mail.mime.filler.MimeMessageFiller.ImageProvider;
@@ -86,12 +83,6 @@ import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 import com.openexchange.user.UserService;
 
 public final class SessionCompositionParameters implements CompositionParameters {
@@ -255,30 +246,14 @@ public final class SessionCompositionParameters implements CompositionParameters
     }
 
     @Override
-    public final String getUserVCard(final String charset) throws OXException {
+    public byte[] getUserVCard() throws OXException {
+        Contact contact = ServerServiceRegistry.getInstance().getService(ContactService.class).getUser(session, session.getUserId());
+        VCardExport vCardExport = null;
         try {
-            ContactService contactService = ServerServiceRegistry.getInstance().getService(ContactService.class);
-            Contact contact = contactService.getUser(session, session.getUserId());
-            final OXContainerConverter converter = new OXContainerConverter(session, ctx);
-            try {
-                final VersitObject versitObj = converter.convertContact(contact, "3.0");
-                final ByteArrayOutputStream os = new UnsynchronizedByteArrayOutputStream();
-                final VersitDefinition def = Versit.getDefinition(MimeTypes.MIME_TEXT_VCARD);
-                final VersitDefinition.Writer w = def.getWriter(os, charset);
-                def.write(w, versitObj);
-                w.flush();
-                os.flush();
-                return new String(os.toByteArray(), Charsets.forName(charset));
-            } finally {
-                converter.close();
-            }
-        } catch (final ConverterException e) {
-            throw MailExceptionCode.VERSIT_ERROR.create(e, e.getMessage());
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
-            }
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            vCardExport = VCardUtil.exportContact(contact, session);
+            return vCardExport.toByteArray();
+        } finally {
+            Streams.close(vCardExport);
         }
     }
 

@@ -59,6 +59,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
 
@@ -78,8 +79,8 @@ public class RevokeEndpoint extends OAuthEndpoint {
      * Initializes a new {@link RevokeEndpoint}.
      * @param oAuthProvider
      */
-    public RevokeEndpoint(OAuthProviderService oAuthProvider) {
-        super(oAuthProvider);
+    public RevokeEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
+        super(oAuthProvider, services);
     }
 
     @Override

@@ -86,7 +86,7 @@ public final class MessageTimelineManagement {
      */
     private MessageTimelineManagement() {
         super();
-        maps = new ConcurrentHashMap<Key, ConcurrentMap<String,BlockingQueue<Message>>>(1024);
+        maps = new ConcurrentHashMap<Key, ConcurrentMap<String,BlockingQueue<Message>>>(1024, 0.9f, 1);
     }
 
     /**
@@ -112,7 +112,7 @@ public final class MessageTimelineManagement {
             final Key key = Key.valueOf(session);
             queues = maps.get(key);
             if (null == queues) {
-                final ConcurrentMap<String, BlockingQueue<Message>> newQueues = new ConcurrentHashMap<String, BlockingQueue<Message>>(4);
+                final ConcurrentMap<String, BlockingQueue<Message>> newQueues = new ConcurrentHashMap<String, BlockingQueue<Message>>(4, 0.9f, 1);
                 queues = maps.putIfAbsent(key, newQueues);
                 if (null == queues) {
                     queues = newQueues;
@@ -144,7 +144,7 @@ public final class MessageTimelineManagement {
             final Key key = Key.valueOf(session);
             queues = maps.get(key);
             if (null == queues) {
-                final ConcurrentMap<String, BlockingQueue<Message>> newQueues = new ConcurrentHashMap<String, BlockingQueue<Message>>(4);
+                final ConcurrentMap<String, BlockingQueue<Message>> newQueues = new ConcurrentHashMap<String, BlockingQueue<Message>>(4, 0.9f, 1);
                 queues = maps.putIfAbsent(key, newQueues);
                 if (null == queues) {
                     queues = newQueues;

@@ -54,11 +54,11 @@ import java.util.Map;
 import java.util.Vector;
 import com.gargoylesoftware.htmlunit.TextPage;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactUtil;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.subscribe.crawler.internal.AbstractStep;
 import com.openexchange.subscribe.crawler.internal.Mappings;
-import com.openexchange.tools.versit.converter.ConverterException;
 
 /**
  * {@link ContactsByCsvFileStep}
@@ -110,7 +110,7 @@ public class ContactsByCsvFileStep extends AbstractStep<Contact[], TextPage> {
 
                     try {
                         contact = Mappings.translateMapToContact(resultMap);
-                    } catch (final ConverterException e) {
+                    } catch (final OXException e) {
                         LOG.error("{} for Context : {}, User : {}, Folder : {}.", e.getMessage(), workflow.getSubscription().getContext().getContextId(), workflow.getSubscription().getUserId(), workflow.getSubscription().getFolderId());
 
                         exception = e;

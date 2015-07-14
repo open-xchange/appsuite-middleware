@@ -86,7 +86,7 @@ public class MessageTimelineActionFactory implements AJAXActionServiceFactory {
      */
     public MessageTimelineActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AbstractMessageTimelineAction>(4);
+        actions = new ConcurrentHashMap<String, AbstractMessageTimelineAction>(4, 0.9f, 1);
         {
             final PutAction putAction = new PutAction(services, actions);
             actions.put(putAction.getAction(), putAction);

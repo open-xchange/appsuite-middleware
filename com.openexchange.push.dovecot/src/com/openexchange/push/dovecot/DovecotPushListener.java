@@ -218,7 +218,9 @@ public class DovecotPushListener implements PushListener, Runnable {
                         cmdBuilder.append("user=").append(session.getUserId()).append('@').append(session.getContextId());
 
                         // URL
-                        cmdBuilder.append('\t').append("url=").append(uri);
+                        if (null != uri) {
+                            cmdBuilder.append('\t').append("url=").append(uri);
+                        }
 
                         // Auth data
                         if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {

@@ -51,6 +51,7 @@ package com.openexchange.osgi;
 
 import static com.openexchange.osgi.util.RankedService.getRanking;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -68,6 +69,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
 
     private final SortableConcurrentList<RankedService<S>> services;
     private final int defaultRanking;
+    private volatile boolean empty;
 
     /**
      * Initializes a new {@link RankingAwareNearRegistryServiceTracker} with <tt>0</tt> (zero) as default ranking.
@@ -90,6 +92,25 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
         super(context, clazz, null);
         services = new SortableConcurrentList<RankedService<S>>();
         this.defaultRanking = defaultRanking;
+        empty = true; // Initially empty
+    }
+
+    /**
+     * Called when a service gets added.
+     *
+     * @param service The added service
+     */
+    protected void onServiceAdded(S service) {
+        // Nothing
+    }
+
+    /**
+     * Called when a service gets removed.
+     *
+     * @param service The removed service
+     */
+    protected void onServiceRemoved(S service) {
+        // Nothing
     }
 
     /**
@@ -99,8 +120,12 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
      */
     @Override
     public List<S> getServiceList() {
-        final List<S> ret = new ArrayList<S>(services.size());
-        for (final RankedService<S> rs : services) {
+        if (empty) {
+            return Collections.emptyList();
+        }
+
+        List<S> ret = new ArrayList<S>(services.size());
+        for (RankedService<S> rs : services) {
             ret.add(rs.service);
         }
         return ret;
@@ -112,6 +137,8 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
         final int ranking = getRanking(reference, defaultRanking);
         final RankedService<S> rankedService = new RankedService<S>(service, ranking);
         if (services.addAndSort(rankedService)) { // Append
+            empty = false;
+            onServiceAdded(service);
             return service;
         }
         context.ungetService(reference);
@@ -120,7 +147,10 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
 
     @Override
     public void removedService(final ServiceReference<S> reference, final S service) {
-        services.remove(new RankedService<S>(service, getRanking(reference)));
+        if (services.remove(new RankedService<S>(service, getRanking(reference)))) {
+            empty = services.isEmpty();
+            onServiceRemoved(service);
+        }
         context.ungetService(reference);
     }
 

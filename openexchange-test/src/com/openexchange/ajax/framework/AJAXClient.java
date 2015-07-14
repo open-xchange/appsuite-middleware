@@ -189,6 +189,10 @@ public class AJAXClient {
         this.protocol = protocol;
     }
 
+    public void setMustLogout(boolean mustLogout) {
+        this.mustLogout = mustLogout;
+    }
+
     /**
      * @return the values
      */

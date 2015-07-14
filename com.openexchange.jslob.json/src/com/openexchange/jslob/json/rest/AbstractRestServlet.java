@@ -71,9 +71,10 @@ public abstract class AbstractRestServlet extends DispatcherServlet {
 
     /**
      * Initializes a new {@link AbstractRestServlet}.
+     * @param prefix The dispatcher servlet prefix
      */
-    protected AbstractRestServlet() {
-        super();
+    protected AbstractRestServlet(String prefix) {
+        super(prefix);
         ajaxRequestDataTools = new RestRequestDataTools(this);
     }
 

@@ -109,17 +109,6 @@ public class ICal4JEmitter implements ICalEmitter {
     }
 
     @Override
-    public String writeAppointmentRequest(final Appointment appointment, final Context ctx, final List<ConversionError> errors, final List<ConversionWarning> warnings) {
-        final Calendar calendar = new Calendar();
-        initCalendar(calendar);
-        final Mode mode = new SimpleMode(ZoneInfo.OUTLOOK);
-        final VEvent event = createEvent(mode, 0, appointment, ctx, errors, warnings);
-        calendar.getComponents().add(event);
-        addVTimeZone(mode.getZoneInfo(), calendar, appointment);
-        return calendar.toString();
-    }
-
-    @Override
     public String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
         Calendar calendar = new Calendar();
         calendar.getProperties().add(new ProdId(com.openexchange.version.Version.NAME));
@@ -181,7 +170,7 @@ public class ICal4JEmitter implements ICalEmitter {
 
         return vevent;
     }
-    
+
     //protected VEvent createEvent(Mode mode, int index, Appointment appointment, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings, )
 
     /**
@@ -351,7 +340,7 @@ public class ICal4JEmitter implements ICalEmitter {
 
     protected void replaceMethod(Calendar calendar, Method newMethod) {
         if (newMethod != null) {
-            
+
             Property oldMethod = calendar.getProperty("METHOD");
             while (oldMethod != null) {
                 calendar.getProperties().remove(oldMethod);

@@ -73,6 +73,15 @@ public interface FolderService {
     Map<Integer, ContentType> getAvailableContentTypes();
 
     /**
+     * Reinitializes the denoted tree (if necessary).
+     *
+     * @param treeId The tree identifier
+     * @param session The session
+     * @throws OXException If re-initialization fails
+     */
+    void reinitialize(String treeId, Session session) throws OXException;
+
+    /**
      * Checks the consistency of given tree.
      *
      * @param treeId The tree identifier
@@ -282,6 +291,8 @@ public interface FolderService {
      * @throws OXException If operation fails
      */
     FolderResponse<UserizedFolder[]> getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final boolean all, final Session session, final FolderServiceDecorator decorator) throws OXException;
+
+    FolderResponse<UserizedFolder[]> getUserSharedFolders(final String treeId, final ContentType contentType, final Session session, final FolderServiceDecorator decorator) throws OXException;
 
     /**
      * Gets the subfolders of specified parent in given tree.

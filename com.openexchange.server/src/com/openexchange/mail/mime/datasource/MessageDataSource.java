@@ -50,7 +50,6 @@
 package com.openexchange.mail.mime.datasource;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -62,7 +61,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link MessageDataSource} - Allows creation of a data source by either an input stream, a string or a byte array.
@@ -96,7 +94,7 @@ public final class MessageDataSource implements DataSource {
      */
     public MessageDataSource(final InputStream inputStream, final String contentType, final String name) throws IOException {
         this.contentType = contentType;
-        data = copyStream(inputStream);
+        data = Streams.stream2bytes(inputStream);
         this.name = name;
     }
 
@@ -131,7 +129,7 @@ public final class MessageDataSource implements DataSource {
     /**
      * Create a data source from a String
      */
-    public MessageDataSource(final String data, final ContentType contentType) throws UnsupportedEncodingException {
+    public MessageDataSource(final String data, final ContentType contentType) {
         final ContentType ct;
         if (contentType.containsCharsetParameter()) {
             ct = contentType;
@@ -201,17 +199,4 @@ public final class MessageDataSource implements DataSource {
         return name;
     }
 
-    protected static byte[] copyStream(final InputStream inputStream) throws IOException {
-        try {
-            final ByteArrayOutputStream baos = new UnsynchronizedByteArrayOutputStream(DEFAULT_BUF_SIZE << 1);
-            final byte[] bbuf = new byte[DEFAULT_BUF_SIZE];
-            int len;
-            while ((len = inputStream.read(bbuf, 0, bbuf.length)) > 0) {
-                baos.write(bbuf, 0, len);
-            }
-            return baos.toByteArray();
-        } finally {
-            Streams.close(inputStream);
-        }
-    }
 }

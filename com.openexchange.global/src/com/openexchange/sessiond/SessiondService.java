@@ -133,6 +133,25 @@ public interface SessiondService {
     public void removeContextSessionsGlobal(Set<Integer> contextIds) throws OXException;
 
     /**
+     * Removes all sessions belonging to given contexts from this and all other cluster nodes.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @throws OXException If removing session fails on one of the remote nodes
+     */
+    public void removeUserSessionsGlobally(int userId, int contextId) throws OXException;
+
+    /**
+     * Removes all sessions which match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * (hazelcast-)cluster.
+     *
+     * @param filter The filter
+     * @return The IDs of the removed sessions, possibly empty but never <code>null</code>
+     * @throws OXException If an error occurs while removing
+     */
+    Collection<String> removeSessionsGlobally(SessionFilter filter) throws OXException;
+
+    /**
      * Gets the number of active sessions belonging to given user in specified context.
      *
      * @param userId The user identifier
@@ -215,6 +234,16 @@ public interface SessiondService {
      * @throws OXException if one of the tokens does not match.
      */
     Session getSessionWithTokens(String clientToken, String serverToken) throws OXException;
+
+    /**
+     * Returns all session IDs whose sessions match the given {@link SessionFilter}. The filter is matched against all sessions in the
+     * (hazelcast-)cluster.
+     *
+     * @param filter The filter
+     * @return The IDs of the found sessions, possibly empty but never <code>null</code>
+     * @throws OXException If an error occurs while filtering
+     */
+    Collection<String> findSessionsGlobally(SessionFilter filter) throws OXException;
 
     /**
      * Gets the number of active sessions.

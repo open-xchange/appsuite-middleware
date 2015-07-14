@@ -77,7 +77,7 @@ public final class ResultConverterRegistry implements ServiceTrackerCustomizer<R
     public ResultConverterRegistry(final BundleContext context) {
         super();
         this.context = context;
-        converters = new ConcurrentHashMap<String, ResultConverter>(16);
+        converters = new ConcurrentHashMap<String, ResultConverter>(16, 0.9f, 1);
     }
 
     /**

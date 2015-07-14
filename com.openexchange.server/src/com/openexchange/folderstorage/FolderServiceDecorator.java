@@ -84,7 +84,7 @@ public final class FolderServiceDecorator {
     public FolderServiceDecorator() {
         super();
         allowedContentTypes = Collections.<ContentType> emptyList();
-        properties = new ConcurrentHashMap<String, Object>(8);
+        properties = new ConcurrentHashMap<String, Object>(8, 0.9f, 1);
     }
 
     /**

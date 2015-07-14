@@ -222,7 +222,12 @@ public final class MessagingFolderStorage implements FolderStorage {
 
     @Override
     public SortableId[] getVisibleFolders(final String treeId, final ContentType contentType, final Type type, final StorageParameters storageParameters) throws OXException {
-        throw new UnsupportedOperationException("VirtualFolderStorage.getVisibleSubfolders()");
+        throw new UnsupportedOperationException("MessagingFolderStorage.getVisibleSubfolders()");
+    }
+
+    @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        throw new UnsupportedOperationException("MessagingFolderStorage.getSharedFolders()");
     }
 
     private MessagingAccountAccess getMessagingAccessForAccount(final String serviceId, final int accountId, final Session session, final ConcurrentMap<Key, MessagingAccountAccess> accesses) throws OXException {
@@ -605,9 +610,6 @@ public final class MessagingFolderStorage implements FolderStorage {
                 if ("com.openexchange.messaging.rss".equals(serviceId)) {
                     retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, messagingService.getStaticRootPermissions());
                     hasSubfolders = false;
-                } else if ("com.openexchange.messaging.facebook".equals(serviceId)) {
-                    retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, messagingService.getStaticRootPermissions());
-                    hasSubfolders = true;
                 } else if ("com.openexchange.messaging.twitter".equals(serviceId)) {
                     retval = new ExternalMessagingAccountRootFolder(messagingAccount, serviceId, session, messagingService.getStaticRootPermissions());
                     hasSubfolders = false;

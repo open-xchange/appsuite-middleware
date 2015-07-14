@@ -71,13 +71,13 @@ public abstract class AbstractContactHalo implements HaloContactDataSource {
     protected boolean isUserThemselves(final User user, final List<String> addresses) {
         final Set<String> ownAddresses = new HashSet<String>(8);
         for (final String alias : user.getAliases()) {
-            if (!isEmpty(alias)) {
-                ownAddresses.add(toLowerCase(alias));
+            if (!com.openexchange.java.Strings.isEmpty(alias)) {
+                ownAddresses.add(com.openexchange.java.Strings.toLowerCase(alias));
             }
         }
-        ownAddresses.add(toLowerCase(user.getMail()));
+        ownAddresses.add(com.openexchange.java.Strings.toLowerCase(user.getMail()));
         for (final String requested : addresses) {
-            if (!ownAddresses.contains(toLowerCase(requested))) {
+            if (!ownAddresses.contains(com.openexchange.java.Strings.toLowerCase(requested))) {
                 return false;
             }
         }
@@ -111,32 +111,4 @@ public abstract class AbstractContactHalo implements HaloContactDataSource {
     public boolean isAvailable(final ServerSession session) throws OXException {
         return true;
     }
-
-    /** Check for an empty string */
-    protected static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
-    }
-
-    /** ASCII-wise to lower-case */
-    protected static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

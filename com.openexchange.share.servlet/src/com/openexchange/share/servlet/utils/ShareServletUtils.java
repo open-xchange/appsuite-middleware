@@ -49,32 +49,41 @@
 
 package com.openexchange.share.servlet.utils;
 
+import static com.openexchange.ajax.LoginServlet.SHARE_PREFIX;
+import static com.openexchange.ajax.LoginServlet.configureCookie;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
+import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.AutoLoginTools;
+import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestImpl;
 import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.login.LoginResult;
+import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.servlet.auth.ShareLoginMethod;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.servlet.ShareServletStrings;
+import com.openexchange.share.servlet.internal.ShareLoginConfiguration;
 import com.openexchange.share.servlet.internal.ShareServiceLookup;
-import com.openexchange.user.UserService;
+import com.openexchange.tools.servlet.http.Tools;
 
 
 /**
@@ -86,6 +95,8 @@ import com.openexchange.user.UserService;
 public final class ShareServletUtils {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServletUtils.class);
+    private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*", Pattern.CASE_INSENSITIVE);
+    private static final AtomicReference<ShareLoginConfiguration> SHARE_LOGIN_CONFIG = new AtomicReference<ShareLoginConfiguration>();
 
     /**
      * Initializes a new {@link ShareServletUtils}.
@@ -95,57 +106,117 @@ public final class ShareServletUtils {
     }
 
     /**
-     * Authenticates the request to the share and performs a guest login, sending an appropriate HTTP response in case of unauthorized
-     * access.
+     * Sets the login configuration for shares needed by redirecting handlers.
+     *
+     * @param configuration The login configuration for shares
+     */
+    public static void setShareLoginConfiguration(ShareLoginConfiguration configuration) {
+        SHARE_LOGIN_CONFIG.set(configuration);
+    }
+
+    /**
+     * Gets the login configuration for shares
+     *
+     * @return The login configuration for shares
+     */
+    public static ShareLoginConfiguration getShareLoginConfiguration() {
+        ShareLoginConfiguration config = SHARE_LOGIN_CONFIG.get();
+        if (config == null) {
+            throw new IllegalStateException("ShareServletUtils have not been initialized yet!");
+        }
+        return config;
+    }
+
+    public static boolean createSessionAndRedirect(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response, LoginMethodClosure loginMethod) throws OXException {
+        Session session = null;
+        try {
+            /*
+             * get, authenticate and login as associated guest user
+             */
+            ShareLoginConfiguration shareLoginConfig = getShareLoginConfiguration();
+            LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(share);
+            LoginResult loginResult = ShareServletUtils.login(share, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), loginMethod);
+            if (null == loginResult) {
+                return false;
+            }
+            session = loginResult.getSession();
+            Tools.disableCaching(response);
+            /*
+             * set secret, share and public session cookies
+             */
+            LoginServlet.addHeadersAndCookies(loginResult, response);
+            LoginServlet.writeSecretCookie(request, response, session, session.getHash(), request.isSecure(), request.getServerName(), loginConfig);
+            String hash = HashCalculator.getInstance().getHash(request, LoginTools.parseClient(request, false, loginConfig.getDefaultClient()));
+            response.addCookie(configureCookie(new Cookie(SHARE_PREFIX + hash, share.getGuest().getBaseToken()), request, loginConfig));
+            /*
+             * construct & send redirect
+             */
+            String url = ShareRedirectUtils.getWebSessionRedirectURL(session, loginResult.getUser(), share, loginConfig);
+            LOG.debug("Redirecting share {} to {}...", share.getGuest().getBaseToken(), url);
+            response.sendRedirect(url);
+            return true;
+        } catch (IOException e) {
+            throw ShareExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Authenticates the request to the share and performs a guest login.
      *
      * @param share The share
      * @param request The request
      * @param response The response
      * @param loginConfig The login configuration to use
      * @param tranzient <code>true</code> to mark the session as transient, <code>false</code>, otherwise
+     * @param loginMethod The login method to use
      * @return The login result, or <code>null</code> if not successful
      */
-    public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient) throws OXException, IOException {
+    public static LoginResult login(GuestShare share, HttpServletRequest request, HttpServletResponse response, LoginConfiguration loginConfig, boolean tranzient, LoginMethodClosure loginMethod) throws OXException, IOException {
         /*
-         * acquire guest information associated with the share
+         * try guest auto-login at this stage if enabled
          */
-        GuestInfo guestInfo = share.getGuest();
-        UserService userService = ShareServiceLookup.getService(UserService.class, true);
-        Context context = userService.getContext(guestInfo.getContextID());
-        User user = userService.getUser(guestInfo.getGuestID(), context);
-        if (false == context.isEnabled() || false == user.isMailEnabled()) {
-            return null;
+        GuestInfo guest = share.getGuest();
+        LoginResult loginResult = AutoLoginTools.tryGuestAutologin(guest, loginConfig, request, response);
+        if (null != loginResult) {
+            LOG.debug("Successful autologin for share {} with guest user {} in context {}, using session {}.",
+                guest.getBaseToken(), guest.getGuestID(), guest.getContextID(), loginResult.getSession().getSessionID());
+            return loginResult;
         }
         /*
          * parse login request
          */
-        String[] additionalsForHash = new String[] { String.valueOf(context.getContextId()), String.valueOf(user.getId()) };
-        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, user.getMail(), user.getUserPassword(), false,
+        String[] additionalsForHash = new String[] { String.valueOf(guest.getContextID()), String.valueOf(guest.getGuestID()) };
+        LoginRequestImpl loginRequest = LoginTools.parseLogin(request, getLogin(guest), null, false,
             loginConfig.getDefaultClient(), loginConfig.isCookieForceHTTPS(), false, additionalsForHash);
         loginRequest.setTransient(tranzient);
         /*
-         * try auto-login at this stage if enabled
-         */
-        LoginResult loginResult = AutoLoginTools.tryAutologin(loginConfig, request, response, loginRequest.getHash());
-        if (null != loginResult) {
-            LOG.debug("Successful autologin for share {} with guest user {} in context {}, using session {}.",
-                guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID(), loginResult.getSession().getSessionID());
-            return loginResult;
-        }
-        /*
          * perform regular guest login
          */
-        ShareLoginMethod loginMethod = new ShareLoginMethod(context, user);
         Map<String, Object> properties = new HashMap<String, Object>();
         loginResult = LoginPerformer.getInstance().doLogin(loginRequest, properties, loginMethod);
         if (null == loginResult || null == loginResult.getSession()) {
-            loginMethod.sendUnauthorized(request, response);
             return null;
         }
         LOG.debug("Successful login for share {} with guest user {} in context {}, using session {}.",
-            guestInfo.getBaseToken(), guestInfo.getGuestID(), guestInfo.getContextID(), loginResult.getSession().getSessionID());
+            guest.getBaseToken(), guest.getGuestID(), guest.getContextID(), loginResult.getSession().getSessionID());
         loginResult.getSession().setParameter(Session.PARAM_GUEST, Boolean.TRUE);
         return loginResult;
+    }
+
+    /**
+     * Determines the most appropriate login name for a guest user, falling back to the generic "Guest" name for anonymous guest.
+     *
+     * @param guestUser The guest user to get the login for
+     * @return The login
+     */
+    private static String getLogin(GuestInfo guest) {
+        if (false == Strings.isEmpty(guest.getEmailAddress())) {
+            return guest.getEmailAddress();
+        }
+        TranslatorFactory factory = ShareServiceLookup.getService(TranslatorFactory.class);
+        return null != factory ? factory.translatorFor(guest.getLocale()).translate(ShareServletStrings.GUEST) : ShareServletStrings.GUEST;
     }
 
     /**
@@ -159,8 +230,6 @@ public final class ShareServletUtils {
             LoginPerformer.getInstance().doLogout(session.getSessionID());
         }
     }
-
-    private static final Pattern PATH_PATTERN = Pattern.compile("/+([a-f0-9]{32})(?:/+items(?:/+([0-9]+))?)?/*", Pattern.CASE_INSENSITIVE);
 
     /**
      * Extracts the token from a HTTP request's path info.
@@ -179,7 +248,7 @@ public final class ShareServletUtils {
     /**
      * Splits the supplied path by the separator char <code>/</code> into their components. Empty components are removed implicitly.
      *
-     * @param pathInfo the path info to split
+     * @param pathInfo The path info to split
      * @return The splitted path
      */
     public static String[] splitPath(String pathInfo) {

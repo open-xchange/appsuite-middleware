@@ -1032,7 +1032,7 @@ public final class IMAPCommandsCollection {
         int cnt = 0;
         {
             final String resp = statusResponse.toString();
-            if (isEmpty(resp)) {
+            if (com.openexchange.java.Strings.isEmpty(resp)) {
                 throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
             }
             int pos = -1;
@@ -1095,7 +1095,7 @@ public final class IMAPCommandsCollection {
         int cnt = 0;
         {
             final String resp = statusResponse.toString();
-            if (isEmpty(resp)) {
+            if (com.openexchange.java.Strings.isEmpty(resp)) {
                 throw new ParsingException("Parse error in STATUS response: No opening parenthesized list found.");
             }
             int pos = -1;
@@ -1142,18 +1142,6 @@ public final class IMAPCommandsCollection {
             }
         }
         return -1;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**
@@ -2283,7 +2271,9 @@ public final class IMAPCommandsCollection {
                         /*
                          * The BYE response is always untagged, and indicates that the server is about to close the connection.
                          */
-                        throw new StoreClosedException(imapFolder.getStore(), protocolException.getMessage());
+                        Store store = imapFolder.getStore();
+                        ((IMAPStore) store).setAllowUnsafeConnectedCheck(false);
+                        throw new StoreClosedException(store, protocolException.getMessage());
                     }
                     final Throwable cause = protocolException.getCause();
                     if (cause instanceof StoreClosedException) {
@@ -3092,7 +3082,7 @@ public final class IMAPCommandsCollection {
                 boolean streamed = false;
                 if (p.isREV1()) {
                     /*-
-                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "65536");
                      *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {
@@ -3135,7 +3125,7 @@ public final class IMAPCommandsCollection {
             }
 
             private boolean isApplicationSmil(final BODYSTRUCTURE bodystructure) {
-                return bodystructure.isMulti() && "related".equals(toLowerCase(bodystructure.subtype)) && "application/smil".equals(toLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
+                return bodystructure.isMulti() && "related".equals(com.openexchange.java.Strings.toLowerCase(bodystructure.subtype)) && "application/smil".equals(com.openexchange.java.Strings.toLowerCase(MimeMessageUtility.decodeEnvelopeHeader(bodystructure.cParams.get("type"))));
             }
 
         }));
@@ -3250,7 +3240,7 @@ public final class IMAPCommandsCollection {
                 boolean streamed = false;
                 if (p.isREV1()) {
                     /*-
-                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "51200");
+                     * Would always yield true since hard-coded: properties.put("mail.imap.fetchsize", "65536");
                      *
                     final String property = IMAPSessionProperties.getDefaultSessionProperties().getProperty("mail.imap.fetchsize");
                     if (null != property && Integer.parseInt(property.trim()) > 0) {
@@ -3860,18 +3850,4 @@ public final class IMAPCommandsCollection {
         }
 
     }
-
-    static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
-
 }

@@ -52,8 +52,8 @@ package com.openexchange.drive.impl.internal;
 import java.util.Collection;
 import com.openexchange.drive.DirectoryVersion;
 import com.openexchange.drive.DriveExceptionCodes;
-import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 

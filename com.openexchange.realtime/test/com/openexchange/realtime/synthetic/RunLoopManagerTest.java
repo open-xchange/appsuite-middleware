@@ -230,7 +230,7 @@ public class RunLoopManagerTest {
         }
 
         @Override
-        public void process(Stanza stanza) throws OXException {}
+        public void process(Stanza stanza) {}
 
         @Override
         public boolean shouldBeDoneInGlobalThread(Stanza stanza) {
