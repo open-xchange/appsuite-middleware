@@ -380,7 +380,7 @@ public class DBQuotaFileStorage implements QuotaFileStorage, Serializable /* For
         if (ownerId > 0) {
             LOGGER.info("Recalculating usage for owner {} in context {}", ownerId, contextId);
         } else {
-            LOGGER.info("Recalculating usage forcontext {}", contextId);
+            LOGGER.info("Recalculating usage for context {}", contextId);
         }
 
         SortedSet<String> filenames = fileStorage.getFileList();
