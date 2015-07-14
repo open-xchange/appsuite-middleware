@@ -59,9 +59,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -159,12 +161,47 @@ public class DatabaseImpl extends DBService {
 
     private static final Fetch FETCH = Fetch.PREFETCH;
 
+    private static final String[] INFOSTORE_DATACOLUMNS = new String[] {
+        "infostore.cid", "infostore.id", "infostore.folder_id", "infostore.version", "infostore.locked_until", "infostore.creating_date",
+        "infostore.last_modified", "infostore.created_by", "infostore.changed_by", "infostore.color_label", "infostore_document.cid",
+        "infostore_document.infostore_id", "infostore_document.version_number", "infostore_document.creating_date",
+        "infostore_document.last_modified", "infostore_document.created_by", "infostore_document.changed_by", "infostore_document.title",
+        "infostore_document.url", "infostore_document.description", "infostore_document.categories", "infostore_document.filename",
+        "infostore_document.file_store_location", "infostore_document.file_size", "infostore_document.file_mimetype",
+        "infostore_document.file_md5sum", "infostore_document.file_version_comment" };
+
+    private static class FileInfo {
+
+        final String fileId;
+        final int folderAdmin;
+        final int contextId;
+
+        FileInfo(String fileId, int folderAdmin, int contextId) {
+            super();
+            this.fileId = fileId;
+            this.folderAdmin = folderAdmin;
+            this.contextId = contextId;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ThreadLocal<List<FileInfo>> fileIdAddList = new ThreadLocal<List<FileInfo>>();
+    private final ThreadLocal<List<FileInfo>> fileIdRemoveList = new ThreadLocal<List<FileInfo>>();
     private FetchMode fetchMode;
 
+    /**
+     * Initializes a new {@link DatabaseImpl}.
+     */
     public DatabaseImpl() {
         this(null);
     }
 
+    /**
+     * Initializes a new {@link DatabaseImpl}.
+     *
+     * @param provider The initial database provider instance
+     */
     public DatabaseImpl(final DBProvider provider) {
         super(provider);
 
@@ -182,21 +219,6 @@ public class DatabaseImpl extends DBService {
             fetchMode = new PrefetchMode();
         }
     }
-
-    private static final String[] INFOSTORE_DATACOLUMNS = new String[] {
-        "infostore.cid", "infostore.id", "infostore.folder_id", "infostore.version", "infostore.locked_until", "infostore.creating_date",
-        "infostore.last_modified", "infostore.created_by", "infostore.changed_by", "infostore.color_label", "infostore_document.cid",
-        "infostore_document.infostore_id", "infostore_document.version_number", "infostore_document.creating_date",
-        "infostore_document.last_modified", "infostore_document.created_by", "infostore_document.changed_by", "infostore_document.title",
-        "infostore_document.url", "infostore_document.description", "infostore_document.categories", "infostore_document.filename",
-        "infostore_document.file_store_location", "infostore_document.file_size", "infostore_document.file_mimetype",
-        "infostore_document.file_md5sum", "infostore_document.file_version_comment" };
-
-    private final ThreadLocal<List<String>> fileIdAddList = new ThreadLocal<List<String>>();
-
-    private final ThreadLocal<List<String>> fileIdRemoveList = new ThreadLocal<List<String>>();
-
-    private final ThreadLocal<Context> ctxHolder = new ThreadLocal<Context>();
 
     public boolean exists(final int id, final int version, final Context ctx) throws OXException {
         boolean retval = false;
@@ -1135,7 +1157,6 @@ public class DatabaseImpl extends DBService {
                 }
             }
 
-            List<FileStorage> fileStorages = getFileStorages(ctx);
 
             // Remove the files. No rolling back from this point onward
 
@@ -1146,12 +1167,15 @@ public class DatabaseImpl extends DBService {
                 }
             }
 
-            for (String fileId : files) {
-                for (FileStorage fileStorage : fileStorages) {
-                    try {
-                        fileStorage.deleteFile(fileId);
-                    } catch (Exception e) {
-                        // Ignore
+            if (!files.isEmpty()) {
+                List<FileStorage> fileStorages = getFileStorages(ctx);
+                for (String fileId : files) {
+                    for (FileStorage fileStorage : fileStorages) {
+                        try {
+                            fileStorage.deleteFile(fileId);
+                        } catch (Exception e) {
+                            // Ignore
+                        }
                     }
                 }
             }
@@ -1190,13 +1214,15 @@ public class DatabaseImpl extends DBService {
                 clearFolder(folder, session, files, holder);
             }
 
-            List<FileStorage> fileStorages = getFileStorages(ctx);
-            for (String fileId : files) {
-                for (FileStorage fileStorage : fileStorages) {
-                    try {
-                        fileStorage.deleteFile(fileId);
-                    } catch (Exception e) {
-                        // Ignore
+            if (!files.isEmpty()) {
+                List<FileStorage> fileStorages = getFileStorages(ctx);
+                for (String fileId : files) {
+                    for (FileStorage fileStorage : fileStorages) {
+                        try {
+                            fileStorage.deleteFile(fileId);
+                        } catch (Exception e) {
+                            // Ignore
+                        }
                     }
                 }
             }
@@ -1526,24 +1552,37 @@ public class DatabaseImpl extends DBService {
         return FileStorages.getFileStorage2ContextsResolver().getFileStoragesUsedBy(ctx.getContextId(), true);
     }
 
+    protected FileStorage getFileStorage(int folderOwner, int contextId) throws OXException {
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, contextId);
+    }
+
     @Override
     public void startTransaction() throws OXException {
-        fileIdRemoveList.set(new ArrayList<String>());
-        fileIdAddList.set(new ArrayList<String>());
-        ctxHolder.set(null);
+        fileIdRemoveList.set(new ArrayList<FileInfo>());
+        fileIdAddList.set(new ArrayList<FileInfo>());
         super.startTransaction();
     }
 
     @Override
     public void commit() throws OXException {
-        Context ctx = ctxHolder.get();
-        List<FileStorage> fileStorages = getFileStorages(ctx);
-        for (String id : fileIdRemoveList.get()) {
-            for (FileStorage fileStorage : fileStorages) {
-                try {
-                    fileStorage.deleteFile(id);
-                } catch (Exception e) {
-                    // Ignore
+        List<FileInfo> list = fileIdRemoveList.get();
+        if (null != list && !list.isEmpty()) {
+            if (1 == list.size()) {
+                FileInfo removeInfo = list.get(0);
+                getFileStorage(removeInfo.folderAdmin, removeInfo.contextId).deleteFile(removeInfo.fileId);
+            } else {
+                Map<FileStorage, List<String>> removalsPerStorage = new HashMap<FileStorage, List<String>>();
+                for (FileInfo removeInfo : list) {
+                    FileStorage fileStorage = getFileStorage(removeInfo.folderAdmin, removeInfo.contextId);
+                    List<String> removals = removalsPerStorage.get(fileStorage);
+                    if (null == removals) {
+                        removals = new ArrayList<String>();
+                        removalsPerStorage.put(fileStorage, removals);
+                    }
+                    removals.add(removeInfo.fileId);
+                }
+                for (Map.Entry<FileStorage, List<String>> entry : removalsPerStorage.entrySet()) {
+                    entry.getKey().deleteFiles(entry.getValue().toArray(new String[entry.getValue().size()]));
                 }
             }
         }
@@ -1554,23 +1593,29 @@ public class DatabaseImpl extends DBService {
     public void finish() throws OXException {
         fileIdRemoveList.set(null);
         fileIdAddList.set(null);
-        ctxHolder.set(null);
         super.finish();
     }
 
     @Override
     public void rollback() throws OXException {
-        Context ctx = ctxHolder.get();
-        List<FileStorage> fileStorages = getFileStorages(ctx);
-        List<String> list = fileIdAddList.get();
+        List<FileInfo> list = fileIdAddList.get();
         if (null != list && !list.isEmpty()) {
-            for (String id : list) {
-                for (FileStorage fileStorage : fileStorages) {
-                    try {
-                        fileStorage.deleteFile(id);
-                    } catch (Exception e) {
-                        // Ignore
+            if (1 == list.size()) {
+                FileInfo removeInfo = list.get(0);
+                getFileStorage(removeInfo.folderAdmin, removeInfo.contextId).deleteFile(removeInfo.fileId);
+            } else {
+                Map<FileStorage, List<String>> removalsPerStorage = new HashMap<FileStorage, List<String>>();
+                for (FileInfo removeInfo : list) {
+                    FileStorage fileStorage = getFileStorage(removeInfo.folderAdmin, removeInfo.contextId);
+                    List<String> removals = removalsPerStorage.get(fileStorage);
+                    if (null == removals) {
+                        removals = new ArrayList<String>();
+                        removalsPerStorage.put(fileStorage, removals);
                     }
+                    removals.add(removeInfo.fileId);
+                }
+                for (Map.Entry<FileStorage, List<String>> entry : removalsPerStorage.entrySet()) {
+                    entry.getKey().deleteFiles(entry.getValue().toArray(new String[entry.getValue().size()]));
                 }
             }
         }

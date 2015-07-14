@@ -103,10 +103,18 @@ public abstract class DBService implements TransactionAware, DBProviderUser, DBP
         this.provider.setTransactional(true);
     }
 
+    /**
+     * Initializes a new {@link DBService}.
+     */
     public DBService() {
         super();
     }
 
+    /**
+     * Initializes a new {@link DBService}.
+     *
+     * @param provider The initial database provider instance
+     */
     public DBService(final DBProvider provider) {
         super();
         setProvider(provider);
