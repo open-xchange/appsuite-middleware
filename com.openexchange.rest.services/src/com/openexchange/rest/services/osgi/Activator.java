@@ -80,8 +80,11 @@ public class Activator implements BundleActivator {
 
     private ServiceTracker<ConfigurationService, ConfigurationService> csTracker;
 
-    private AtomicBoolean authRegistered = new AtomicBoolean();
+    final AtomicBoolean authRegistered = new AtomicBoolean();
 
+    /**
+     * Initializes a new {@link Activator}.
+     */
     public Activator() {
         super();
     }
