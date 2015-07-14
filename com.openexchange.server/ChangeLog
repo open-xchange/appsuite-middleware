@@ -1,3 +1,7 @@
+* 2015-07-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 37472: Do not update message flags when saving message as draft
+
 * 2015-07-08 - thorben.betten@open-xchange.com
 
  - Fix for bug 39451: Orderly invalidate & removed cached IMAPStore instances which lost connectivity
