@@ -87,10 +87,10 @@ public class ShareHelper {
     private static final int MODULE_FILE_STORAGE = 8;
 
     /**
-     * Pre-processes the supplied document to extract added or removed guest object permissions required for sharing support. Guest object
+     * Pre-processes the supplied document to extract added, modified or removed guest object permissions required for sharing support. Guest object
      * permissions that are considered as "new", i.e. guest object permissions from the document metadata that are not yet resolved to a
      * guest user entity, are removed implicitly from the document in order to re-add them afterwards (usually by calling
-     * {@link ShareHelper#applyGuestPermissions}).
+     * {@link ShareHelper#applyGuestPermissions}). Additionally some validity checks are performed to fail fast in case of invalid requests.
      *
      * @param session The session
      * @param fileAccess The file access hosting the document
@@ -120,12 +120,13 @@ public class ShareHelper {
                 }
             }
             /*
-             * Check permission bits of added and modified guests that already exist as users
+             * Check permission bits of added and modified guests that already exist as users.
+             * Especially existing anonymous guests must not be added as permission entities.
              */
              if (comparedPermissions.hasAddedGuests()) {
                  for (Integer guest : comparedPermissions.getAddedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getAddedGuestPermission(guest);
-                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest))) {
+                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest), true)) {
                          throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                      }
                  }
@@ -133,7 +134,7 @@ public class ShareHelper {
              if (comparedPermissions.hasModifiedGuests()) {
                  for (Integer guest : comparedPermissions.getModifiedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getModifiedGuestPermission(guest);
-                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest))) {
+                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest), false)) {
                          throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                      }
                  }
@@ -148,8 +149,16 @@ public class ShareHelper {
         return p.getRecipient().getType() == RecipientType.ANONYMOUS && (p.canWrite() || p.canDelete());
     }
 
-    private static boolean isInvalidGuestPermission(FileStorageObjectPermission p, GuestInfo guestInfo) {
-        return guestInfo.getRecipientType() == RecipientType.ANONYMOUS && (p.canWrite() || p.canDelete());
+    private static boolean isInvalidGuestPermission(FileStorageObjectPermission p, GuestInfo guestInfo, boolean prohibitAnonymous) {
+        if (guestInfo.getRecipientType() == RecipientType.ANONYMOUS) {
+            if (prohibitAnonymous) {
+                return true;
+            }
+
+            return (p.canWrite() || p.canDelete());
+        }
+
+        return false;
     }
 
     /**

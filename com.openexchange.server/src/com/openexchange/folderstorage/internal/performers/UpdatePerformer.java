@@ -327,7 +327,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 /*
                  * Check permissions of anonymous guest users
                  */
-                checkAnonymousPermissions(comparedPermissions);
+                checkAnonymousPermissions(storageFolder, comparedPermissions);
 
                 boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
                 if (!isRecursion) {

@@ -717,17 +717,23 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     /**
-     * Verifies that all added or modified permissions for guest users are read-only if they are anonymous.
+     * Verifies that a permission change is valid in terms of anonymous guest users. I.e.:
+     * <ul>
+     *  <li>every folder can carry at most one anonymous guest permission</li>
+     *  <li>anonymous guest permissions must be read-only</li>
+     *  <li>existing anonymous guests must not be added as permission entities (only new ones are allowed)</li>
+     * </ul>
      *
      * @param comparedPermissions The compared permissions
      * @throws OXException if at least one permission is invalid, {@link FolderExceptionErrorMessage#INVALID_PERMISSIONS} is thrown
      */
-    protected void checkAnonymousPermissions(ComparedFolderPermissions comparedPermissions) throws OXException {
+    protected void checkAnonymousPermissions(Folder folder, ComparedFolderPermissions comparedPermissions) throws OXException {
         if (comparedPermissions.hasAddedGuests()) {
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer addedGuest : addedGuests) {
                 if (isAnonymous(comparedPermissions.getGuestInfo(addedGuest))) {
-                    checkReadOnly(comparedPermissions.getAddedGuestPermission(addedGuest));
+                    Permission permission = comparedPermissions.getAddedGuestPermission(addedGuest);
+                    throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(permission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
                 }
             }
         }
@@ -735,7 +741,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasModifiedGuests()) {
             for (Integer guest : comparedPermissions.getModifiedGuests()) {
                 if (isAnonymous(comparedPermissions.getGuestInfo(guest))) {
-                    checkReadOnly(comparedPermissions.getModifiedGuestPermission(guest));
+                    checkReadOnly(folder, comparedPermissions.getModifiedGuestPermission(guest));
                 }
             }
         }
@@ -743,18 +749,18 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasNewGuests()) {
             for (GuestPermission guestPermission : comparedPermissions.getNewGuestPermissions()) {
                 if (guestPermission.getRecipient().getType() == RecipientType.ANONYMOUS) {
-                    checkReadOnly(guestPermission);
+                    checkReadOnly(folder, guestPermission);
                 }
             }
         }
     }
 
-    private static void checkReadOnly(Permission p) throws OXException {
+    private static void checkReadOnly(Folder folder, Permission p) throws OXException {
         boolean writeFolder = p.getFolderPermission() > Permission.READ_FOLDER;
         boolean writeItems = p.getWritePermission() > Permission.NO_PERMISSIONS;
         boolean deleteItems = p.getDeletePermission() > Permission.NO_PERMISSIONS;
         if (writeFolder || writeItems || deleteItems) {
-            throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create();
+            throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(p), p.getEntity(), folder.getID() == null ? folder.getName() : folder.getID());
         }
     }
 

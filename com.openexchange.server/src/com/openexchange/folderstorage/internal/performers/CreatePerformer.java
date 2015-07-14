@@ -315,7 +315,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         /*
          * Check permissions of anonymous guest users
          */
-        checkAnonymousPermissions(comparedPermissions);
+        checkAnonymousPermissions(toCreate, comparedPermissions);
 
         if (comparedPermissions.hasNewGuests()) {
             /*
