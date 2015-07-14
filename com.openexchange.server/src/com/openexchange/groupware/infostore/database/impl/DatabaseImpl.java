@@ -59,8 +59,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import com.openexchange.database.Databases;
@@ -70,7 +72,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -84,8 +85,8 @@ import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Autoboxing;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
@@ -329,43 +330,46 @@ public class DatabaseImpl extends DBService {
         return result;
     }
 
-    public InputStream getDocument(final int id, final int version, final Context ctx) throws OXException {
-        InputStream retval = null;
-
-        final StringBuilder sql = new StringBuilder();
-        if (version != -1) {
-            sql.append("SELECT file_store_location FROM infostore_document WHERE cid=? AND infostore_id=? AND version_number=? AND file_store_location is not null");
-        } else {
-            sql.append("SELECT infostore_document.file_store_location from infostore_document JOIN infostore ON infostore.cid=? AND infostore.id=? AND infostore_document.cid=? AND infostore_document.infostore_id=? AND infostore_document.version_number=infostore.version AND file_store_location is not null");
-        }
+    public InputStream getDocument(int id, int version, Context ctx) throws OXException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
             con = getReadConnection(ctx);
 
-            stmt = con.prepareStatement(sql.toString());
-            stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, id);
             if (version != -1) {
+                stmt = con.prepareStatement("SELECT d.file_store_location, i.folder_id FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.infostore_id=? AND d.version_number=? AND d.file_store_location IS NOT NULL");
                 stmt.setInt(3, version);
             } else {
+                stmt = con.prepareStatement("SELECT d.file_store_location, i.folder_id from infostore_document AS d JOIN infostore AS i ON i.cid=? AND i.id=? AND d.cid=? AND d.infostore_id=? AND d.version_number=i.version AND d.file_store_location is not null");
                 stmt.setInt(3, ctx.getContextId());
                 stmt.setInt(4, id);
             }
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, id);
             result = stmt.executeQuery();
-            if (result.next()) {
-                final FileStorage fs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-                retval = fs.getFile(result.getString(1));
-                fs.close();
+            if (false == result.next()) {
+                return null;
             }
+
+            String fileStorageLoaction = result.getString(1);
+            int folderId = result.getInt(2);
+            close(stmt, result);
+            result = null;
+            stmt = null;
+
+            int folderOwner = new OXFolderAccess(con, ctx).getFolderOwner(folderId);
+            releaseReadConnection(ctx, con);
+            con = null;
+
+            FileStorage fs = FileStorages.getQuotaFileStorageService().getQuotaFileStorage(folderOwner, ctx.getContextId());
+            return fs.getFile(fileStorageLoaction);
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, getStatement(stmt));
         } finally {
             close(stmt, result);
             releaseReadConnection(ctx, con);
         }
-        return retval;
     }
 
     public int[] removeDocument(final String identifier, final Context ctx) throws OXException {
@@ -458,6 +462,32 @@ public class DatabaseImpl extends DBService {
             finishDBTransaction();
         }
         return retval;
+    }
+
+    /**
+     * Gets the identifier of the user holding the document (owner of the folder in which the document resides)
+     *
+     * @param fileIdentifier The identifier of the document in file storage
+     * @param ctx The context
+     * @return The document holder or <code>-1</code>
+     * @throws OXException If document holder cannot be returned
+     */
+    public int getDocumentHolderFor(String fileIdentifier, Context ctx) throws OXException {
+        Connection con = getReadConnection(ctx);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT t.created_from FROM infostore AS i JOIN infostore_document AS d ON i.cid=d.cid AND i.id=d.infostore_id JOIN oxfolder_tree AS t ON i.cid=t.cid AND i.folder_id=t.fuid WHERE i.cid=? AND d.file_store_location=?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setString(2, fileIdentifier);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } catch (final SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            releaseReadConnection(ctx, con);
+        }
     }
 
     public int modifyDocument(final String oldidentifier, final String newidentifier, final String description, final String mimetype, final Context ctx) throws OXException {
@@ -652,25 +682,86 @@ public class DatabaseImpl extends DBService {
         }
     }
 
-    public SortedSet<String> getDocumentFileStoreLocationsperContext(final Context ctx) throws OXException {
+    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx) throws OXException {
         Connection con = getReadConnection(ctx);
+        try {
+            return getDocumentFileStoreLocationsperContext(ctx, con);
+        } finally {
+            releaseReadConnection(ctx, con);
+        }
+    }
+
+    public SortedSet<String> getDocumentFileStoreLocationsperContext(Context ctx, Connection con) throws OXException {
+        int contextId = ctx.getContextId();
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT file_store_location from infostore_document where infostore_document.cid=? AND file_store_location is not null");
-            stmt.setInt(1, ctx.getContextId());
+            // Determine users with a specific file storage set
+            stmt = con.prepareStatement("SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0");
+            stmt.setInt(1, contextId);
             result = stmt.executeQuery();
-            SortedSet<String> _strReturnArray = new TreeSet<String>();
-            while (result.next()) {
-                _strReturnArray.add(result.getString(1));
+            Set<Integer> userIds;
+            if (result.next()) {
+                userIds = new LinkedHashSet<Integer>(16, 0.9F);
+                do {
+                    userIds.add(Integer.valueOf(result.getInt(1)));
+                } while (result.next());
+            } else {
+                userIds = null;
             }
-            return _strReturnArray;
+            close(stmt, result);
+            result = null;
+            stmt = null;
+
+            SortedSet<String> fileStorageLocations;
+            if (null == userIds) {
+                // There are no users in this context with a specific file storage. Just grab all from "infostore_document" table for given context.
+                stmt = con.prepareStatement("SELECT file_store_location FROM infostore_document WHERE infostore_document.cid=? AND file_store_location IS NOT NULL");
+                stmt.setInt(1, contextId);
+                result = stmt.executeQuery();
+                fileStorageLocations = new TreeSet<String>();
+                while (result.next()) {
+                    fileStorageLocations.add(result.getString(1));
+                }
+            } else {
+                // All in context w/o user-association
+                stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id NOT IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from IN (SELECT DISTINCT user.id FROM user WHERE user.cid=? AND user.filestore_id>0))");
+                stmt.setInt(1, contextId);
+                stmt.setInt(2, contextId);
+                stmt.setInt(3, FolderObject.INFOSTORE);
+                stmt.setInt(4, contextId);
+                result = stmt.executeQuery();
+                fileStorageLocations = new TreeSet<String>();
+                while (result.next()) {
+                    fileStorageLocations.add(result.getString(1));
+                }
+                close(stmt, result);
+                result = null;
+                stmt = null;
+
+                // Iterate users with a specific file storage
+                for (Integer userId : userIds) {
+                    stmt = con.prepareStatement("SELECT d.file_store_location FROM infostore_document AS d JOIN infostore AS i ON d.cid=i.cid AND d.infostore_id=i.id WHERE d.cid=? AND d.file_store_location IS NOT NULL AND i.folder_id IN (SELECT t.fuid FROM oxfolder_tree AS t WHERE t.cid=? AND t.module=? AND t.created_from=?)");
+                    stmt.setInt(1, contextId);
+                    stmt.setInt(2, contextId);
+                    stmt.setInt(3, FolderObject.INFOSTORE);
+                    stmt.setInt(4, userId.intValue());
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        fileStorageLocations.add(result.getString(1));
+                    }
+                    close(stmt, result);
+                    result = null;
+                    stmt = null;
+                }
+            }
+
+            return fileStorageLocations;
         } catch (final SQLException e) {
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, getStatement(stmt));
         } finally {
             close(stmt, result);
-            releaseReadConnection(ctx, con);
         }
     }
 
@@ -981,13 +1072,7 @@ public class DatabaseImpl extends DBService {
         } catch (final SQLException x) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, query.toString());
         } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (final SQLException e) {
-                    // Ignore
-                }
-            }
+            Databases.closeSQLStuff(stmt);
             if (writeCon != null) {
                 releaseWriteConnection(ctx, writeCon);
             }
@@ -1050,7 +1135,7 @@ public class DatabaseImpl extends DBService {
                 }
             }
 
-            final FileStorage fs = getFileStorage(ctx);
+            List<FileStorage> fileStorages = getFileStorages(ctx);
 
             // Remove the files. No rolling back from this point onward
 
@@ -1060,7 +1145,17 @@ public class DatabaseImpl extends DBService {
                     files.add(version.getFilestoreLocation());
                 }
             }
-            fs.deleteFiles(files.toArray(new String[files.size()]));
+
+            for (String fileId : files) {
+                for (FileStorage fileStorage : fileStorages) {
+                    try {
+                        fileStorage.deleteFile(fileId);
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+
           //FIXME
 //            final EventClient ec = new EventClient(session);
 //
@@ -1095,9 +1190,16 @@ public class DatabaseImpl extends DBService {
                 clearFolder(folder, session, files, holder);
             }
 
-            final FileStorage fileStorage = getFileStorage(ctx);
-            final String[] filesArray = files.toArray(new String[files.size()]);
-            fileStorage.deleteFiles(filesArray);
+            List<FileStorage> fileStorages = getFileStorages(ctx);
+            for (String fileId : files) {
+                for (FileStorage fileStorage : fileStorages) {
+                    try {
+                        fileStorage.deleteFile(fileId);
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
         } catch (final SQLException x) {
             LOG.error("", x);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(x, x.toString());
@@ -1420,8 +1522,8 @@ public class DatabaseImpl extends DBService {
         return dmi;
     }
 
-    protected FileStorage getFileStorage(final Context ctx) throws OXException {
-        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+    protected List<FileStorage> getFileStorages(final Context ctx) throws OXException {
+        return FileStorages.getFileStorage2ContextsResolver().getFileStoragesUsedBy(ctx.getContextId(), true);
     }
 
     @Override
@@ -1434,9 +1536,16 @@ public class DatabaseImpl extends DBService {
 
     @Override
     public void commit() throws OXException {
-        final Context ctx = ctxHolder.get();
-        for (final String id : fileIdRemoveList.get()) {
-            getFileStorage(ctx).deleteFile(id);
+        Context ctx = ctxHolder.get();
+        List<FileStorage> fileStorages = getFileStorages(ctx);
+        for (String id : fileIdRemoveList.get()) {
+            for (FileStorage fileStorage : fileStorages) {
+                try {
+                    fileStorage.deleteFile(id);
+                } catch (Exception e) {
+                    // Ignore
+                }
+            }
         }
         super.commit();
     }
@@ -1451,11 +1560,18 @@ public class DatabaseImpl extends DBService {
 
     @Override
     public void rollback() throws OXException {
-        final Context ctx = ctxHolder.get();
-        final List<String> list = fileIdAddList.get();
+        Context ctx = ctxHolder.get();
+        List<FileStorage> fileStorages = getFileStorages(ctx);
+        List<String> list = fileIdAddList.get();
         if (null != list && !list.isEmpty()) {
-            for (final String id : list) {
-                getFileStorage(ctx).deleteFile(id);
+            for (String id : list) {
+                for (FileStorage fileStorage : fileStorages) {
+                    try {
+                        fileStorage.deleteFile(id);
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
             }
         }
         super.rollback();

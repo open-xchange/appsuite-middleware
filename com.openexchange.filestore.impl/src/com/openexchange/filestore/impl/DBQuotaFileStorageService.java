@@ -163,6 +163,11 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
     }
 
     @Override
+    public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
+        return getQuotaFileStorage(userId, contextId).getUri();
+    }
+
+    @Override
     public QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException {
         FileStorageService fileStorageService = this.fileStorageService;
         if (fileStorageService == null) {

@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore;
 
+import java.util.List;
 import com.openexchange.exception.OXException;
 
 /**
@@ -76,5 +77,17 @@ public interface FileStorage2ContextsResolver {
      * @throws OXException If identifiers cannot be returned
      */
     int[] getIdsOfFileStoragesUsedBy(int contextId) throws OXException;
+
+    /**
+     * Gets those file storages that are used by given context. The one used by itself and the ones used by context's users.
+     * <p>
+     * The file storage used by context is always the first in return listing.
+     *
+     * @param contextId The context identifier
+     * @param quotaAware Whether returned <code>FileStorage</code> instances are supposed to be quota-aware or not
+     * @return The used file storages with the one used by context at first positions
+     * @throws OXException If file storages cannot be returned
+     */
+    List<FileStorage> getFileStoragesUsedBy(int contextId, boolean quotaAware) throws OXException;
 
 }
