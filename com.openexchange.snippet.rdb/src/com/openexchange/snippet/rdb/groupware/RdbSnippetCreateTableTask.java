@@ -92,13 +92,13 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     }
 
     private String getSnippetContentTable() {
-        return "CREATE TABLE " + getSnippetContentName() + " (" +
-            " cid INT4 unsigned NOT NULL," +
-            " user INT4 unsigned NOT NULL," +
-            " id INT4 unsigned NOT NULL," +
-            " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-            " PRIMARY KEY (cid, user, id)" +
-            ") ENGINE=InnoDB";
+        return "CREATE TABLE "+getSnippetContentName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id INT4 unsigned NOT NULL," +
+               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
+               " PRIMARY KEY (cid, user, id)" +
+               ") ENGINE=InnoDB";
     }
 
     /*-
@@ -110,14 +110,14 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     }
 
     private String getSnippetAttachmentTable() {
-        return "CREATE TABLE " + getSnippetAttachmentName() + " (" +
-            " cid INT4 unsigned NOT NULL," +
-            " user INT4 unsigned NOT NULL," +
-            " id INT4 unsigned NOT NULL," +
-            " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-            " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-            " PRIMARY KEY (cid, user, id, referenceId(64))" +
-            ") ENGINE=InnoDB";
+        return "CREATE TABLE "+getSnippetAttachmentName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id INT4 unsigned NOT NULL," +
+               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
+               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
+               " PRIMARY KEY (cid, user, id, referenceId(64))" +
+               ") ENGINE=InnoDB";
     }
 
     /*-
@@ -129,35 +129,18 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
     }
 
     private String getSnippetMiscTable() {
-        return "CREATE TABLE " + getSnippetMiscName() + " (" +
-            " cid INT4 unsigned NOT NULL," +
-            " user INT4 unsigned NOT NULL," +
-            " id INT4 unsigned NOT NULL," +
-            " json TEXT CHARACTER SET latin1 NOT NULL," +
-            " PRIMARY KEY (cid, user, id)" +
-            ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetAttachmentBinaryName() {
-        return "snippetAttachmentBinary";
-    }
-
-    private String getSnippetAttachmentBinaryTable() {
-        return "CREATE TABLE " + getSnippetAttachmentBinaryName() + " (" +
-            " cid INT4 unsigned NOT NULL," +
-            " referenceId VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
-            " data MEDIUMBLOB NOT NULL," +
-            " PRIMARY KEY (cid, referenceId)" +
-            ") ENGINE=InnoDB";
+        return "CREATE TABLE "+getSnippetMiscName()+" (" +
+               " cid INT4 unsigned NOT NULL," +
+               " user INT4 unsigned NOT NULL," +
+               " id INT4 unsigned NOT NULL," +
+               " json TEXT CHARACTER SET latin1 NOT NULL," +
+               " PRIMARY KEY (cid, user, id)" +
+               ") ENGINE=InnoDB";
     }
 
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentTable(), getSnippetAttachmentTable(), getSnippetMiscTable(), getSnippetAttachmentBinaryTable() };
+        return new String[] { Tables.getSnippetTable(), getSnippetContentTable(), getSnippetAttachmentTable(), getSnippetMiscTable() };
     }
 
     @Override
@@ -180,7 +163,6 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
             createTable(getSnippetContentName(), getSnippetContentTable(), writeCon);
             createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
             createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
-            createTable(getSnippetAttachmentBinaryName(), getSnippetAttachmentBinaryTable(), writeCon);
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
