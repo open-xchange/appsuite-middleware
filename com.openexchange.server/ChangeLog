@@ -4,10 +4,6 @@
 
 * 2015-07-15 - ioannis.chouklis@open-xchange.com
 
- - Fix for bug 39767: Ensure that the 'snippetAttachmentBinary' table is created upon fresh installation
-
-* 2015-07-15 - ioannis.chouklis@open-xchange.com
-
  - Fix for bug 39712: Distinguish between wildcard and literal search in contacts
 
 * 2015-07-14 - lars.hoogestraat@open-xchange.com
