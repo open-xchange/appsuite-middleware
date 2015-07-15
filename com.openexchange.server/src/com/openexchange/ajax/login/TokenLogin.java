@@ -51,17 +51,13 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.authentication.LoginExceptionCodes;
@@ -70,6 +66,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 
 /**
@@ -96,14 +93,7 @@ public final class TokenLogin implements LoginRequestHandler {
     }
 
     private void doTokenLogin(HttpServletRequest req, HttpServletResponse resp) throws OXException, IOException {
-        LoginRequestImpl request = LoginTools.parseLogin(
-            req,
-            LoginFields.LOGIN_PARAM,
-            true,
-            conf.getDefaultClient(),
-            conf.isCookieForceHTTPS(),
-            conf.isDisableTrimLogin(),
-            true);
+        LoginRequestImpl request = LoginTools.parseLogin(req, LoginFields.LOGIN_PARAM, true, conf.getDefaultClient(), conf.isCookieForceHTTPS(), conf.isDisableTrimLogin(), true);
         request.setClientToken(LoginTools.parseParameter(req, LoginFields.CLIENT_TOKEN, true, null));
         Map<String, Object> properties = new HashMap<String, Object>(1);
         {
@@ -121,36 +111,22 @@ public final class TokenLogin implements LoginRequestHandler {
         User user = result.getUser();
 
         Tools.disableCaching(resp);
-        
-        if (req.getParameter("jsonResponse") != null && req.getParameter("jsonResponse").equalsIgnoreCase("true")) {
-        	JSONObject response = new JSONObject();
-        	try {
-				response.put("serverToken", serverToken);
-				response.put("jsessionid", request.getHttpSessionID());
-				response.put(PARAMETER_USER, session.getLogin());
-				response.put(PARAMETER_USER_ID, session.getUserId());
-				response.put("url", generateRedirectURL(
-                    LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
-                    LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
-                    session,
-                    user.getPreferredLanguage(),
-                    conf.getUiWebPath(),
-                    request.getHttpSessionID(),
-                    serverToken));
-				resp.getWriter().print(response);
-        	} catch (JSONException e) {
 
-			}
-        	
+        String redirectURL = generateRedirectURL(LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true), LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true), session, user.getPreferredLanguage(), conf.getUiWebPath(), request.getHttpSessionID(), serverToken);
+        if (req.getParameter("jsonResponse") != null && req.getParameter("jsonResponse").equalsIgnoreCase("true")) {
+            JSONObject response = new JSONObject();
+            try {
+                response.put("serverToken", serverToken);
+                response.put("jsessionid", request.getHttpSessionID());
+                response.put(PARAMETER_USER, session.getLogin());
+                response.put(PARAMETER_USER_ID, session.getUserId());
+                response.put("url", redirectURL);
+                response.write(resp.getWriter());
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+            }
         } else {
-            resp.sendRedirect(generateRedirectURL(
-                    LoginTools.encodeUrl(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), true),
-                    LoginTools.encodeUrl(req.getParameter(LoginFields.AUTOLOGIN_PARAM), true),
-                    session,
-                    user.getPreferredLanguage(),
-                    conf.getUiWebPath(),
-                    request.getHttpSessionID(),
-                    serverToken));        	
+            resp.sendRedirect(redirectURL);
         }
     }
 
