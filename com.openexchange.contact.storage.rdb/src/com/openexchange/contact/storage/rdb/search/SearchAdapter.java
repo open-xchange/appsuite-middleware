@@ -74,7 +74,7 @@ public interface SearchAdapter {
 	 *
 	 * @return the search clause
 	 */
-	public StringBuilder getClause();
+	public String getClause();
 
 	/**
 	 * Sets the detected database parameters in the supplied prepared statement,
