@@ -102,7 +102,12 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
 
         @Override
         public int nextInt(int max) {
-            int next = count.getAndIncrement();
+            int cur;
+            int next;
+            do {
+                cur = count.get();
+                next = cur < 0 ? 0 : cur + 1;
+            } while (count.compareAndSet(cur, next));
             return next % max;
         }
     }
@@ -162,7 +167,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
      * @param component The component that needs a new set of {@link SyntheticChannelRunLoop}s to feed {@link ComponentHandle}s synchronously.
      * @param quantity The number of {@link SyntheticChannelRunLoop}s to create.
      */
-    public void createRunLoops(Component component, int quantity) {
+    public synchronized void createRunLoops(Component component, int quantity) {
         ExecutorService executor = services.getService(ThreadPoolService.class).getExecutor();
         String componentId = component.getId();
         if (!loopClusters.containsKey(componentId)) {
