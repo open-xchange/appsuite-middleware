@@ -53,6 +53,7 @@ import static org.junit.Assert.assertArrayEquals;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.mail.BodyPart;
@@ -69,8 +70,6 @@ import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
-import com.openexchange.ajax.manifests.actions.ConfigRequest;
-import com.openexchange.ajax.manifests.actions.ConfigResponse;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
@@ -81,6 +80,8 @@ import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
@@ -98,14 +99,12 @@ public class MailNotificationTest extends ShareTest {
 
     private InfostoreTestManager infostoreTestManager;
     private FolderObject testFolder1;
-    private FolderObject testFolder2;
     private FolderObject publicDriveFolder;
     private File image1, image2, file1, file2;
     private final String IMAGENAME1 = "image1.jpg", IMAGENAME2 = "image2.png";
     private final String IMAGETYPE1 = "image/jpeg", IMAGETYPE2 = "image/png";
     private final String FILENAME1 = "snippet1.ad", FILENAME2 = "snippet2.md";
     private final String FILETYPE1 = "text/plain", FILETYPE2 = "text/plain";
-    private String productName;
     private Contact clientContact;
     private String clientFullName, clientEmail;
     private final String clientShareMessage = "Hey there, i've got some shares for you!";
@@ -128,23 +127,15 @@ public class MailNotificationTest extends ShareTest {
         userValues = client.getValues();
         infostoreTestManager = new InfostoreTestManager(client);
         testFolder1 = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userValues.getPrivateInfostoreFolder());
-        testFolder2 = insertPrivateFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userValues.getPrivateInfostoreFolder());
         publicDriveFolder = insertPublicFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE);
         image1 = createFile(testFolder1, IMAGENAME1, IMAGETYPE1);
         image2 = createFile(testFolder1, IMAGENAME2, IMAGETYPE2);
         file1 = createFile(testFolder1, FILENAME1, FILETYPE1);
         file2 = createFile(testFolder1, FILENAME2, FILETYPE2);
         client.execute(new StartSMTPRequest());
-        initProductName();
         initUserConfig();
         shareExpireDate = new SimpleDateFormat("yyyy-MM-dd", userValues.getLocale()).parse("2048-12-02");
         dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, userValues.getLocale());
-    }
-
-    private void initProductName() throws JSONException, OXException, IOException {
-        ConfigRequest request = new ConfigRequest();
-        ConfigResponse response = client.execute(request);
-        productName = response.getConfig().getString("productName");
     }
 
     private void initUserConfig() throws OXException, IOException, JSONException {
@@ -374,6 +365,57 @@ public class MailNotificationTest extends ShareTest {
             clientShareMessage,
             shareExpireDate
             );
+    }
+
+    //---PERMISSION APIs--------------------------------------------------------------------------------------------------------------------
+
+    public void testGuestGetsMessageIfAddedViaFolderPermission() throws Exception {
+        OCLGuestPermission guestPermission = createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null);
+        FolderObject toUpdate = new FolderObject();
+        toUpdate.setObjectID(testFolder1.getObjectID());
+        toUpdate.setLastModified(testFolder1.getLastModified());
+        toUpdate.setFolderName(testFolder1.getFolderName());
+        toUpdate.setPermissions(testFolder1.getPermissions());
+        toUpdate.addPermission(guestPermission);
+        updateFolder(EnumAPI.OX_NEW, toUpdate);
+
+        Message message = assertAndGetMessage();
+        Document document = message.getHtml();
+        String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName());
+        String hasSharedString = String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_FOLDER, clientFullName, clientEmail, testFolder1.getFolderName()), NotificationStrings.PLEASE_CLICK_IT);
+        String viewItemStringString = NotificationStrings.VIEW_FOLDER;
+
+        assertSubject(message.getMimeMessage(), initialSubject);
+        assertHasSharedItems(document, hasSharedString);
+        assertViewItems(document, viewItemStringString);
+
+        assertSignatureText(document, "");
+        assertSignatureImage(message);
+    }
+
+    public void testGuestGetsMessageIfAddedViaFilePermission() throws Exception {
+        FileStorageObjectPermission guestPermission = asObjectPermission(createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null));
+        File testFile = insertFile(testFolder1.getObjectID());
+
+        DefaultFile toUpdate = new DefaultFile();
+        toUpdate.setFolderId(testFile.getFolderId());
+        toUpdate.setId(testFile.getId());
+        toUpdate.setLastModified(testFile.getLastModified());
+        toUpdate.setObjectPermissions(Collections.singletonList(guestPermission));
+        updateFile(testFile, new Field[] { Field.OBJECT_PERMISSIONS });
+
+        Message message = assertAndGetMessage();
+        Document document = message.getHtml();
+        String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, testFolder1.getFolderName());
+        String hasSharedString = String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_FILE, clientFullName, clientEmail, testFolder1.getFolderName()), NotificationStrings.PLEASE_CLICK_IT);
+        String viewItemStringString = NotificationStrings.VIEW_FILE;
+
+        assertSubject(message.getMimeMessage(), initialSubject);
+        assertHasSharedItems(document, hasSharedString);
+        assertViewItems(document, viewItemStringString);
+
+        assertSignatureText(document, "");
+        assertSignatureImage(message);
     }
 
     //---HELPERS----------------------------------------------------------------------------------------------------------------------------
