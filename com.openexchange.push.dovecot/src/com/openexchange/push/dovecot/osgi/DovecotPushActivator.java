@@ -234,6 +234,7 @@ public class DovecotPushActivator extends HousekeepingActivator {
             track(HazelcastConfigurationService.class, new HzConfigTracker(context, configuration, this));
         } else {
             // Register PushManagerService instance
+            trackService(HazelcastInstance.class);
             registerService(PushManagerService.class, DovecotPushManagerService.newInstance(configuration.getEndPoint(), configuration.getClusterLock(), this));
         }
         openTrackers();
