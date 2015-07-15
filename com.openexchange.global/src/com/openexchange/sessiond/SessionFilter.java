@@ -164,48 +164,48 @@ public class SessionFilter {
 
         @Override
         public boolean matches(String attr, String value, FilterType type) {
-            if (CONTEXT_ID.equals(type)) {
-                return Integer.toString(session.getContextId()).equals(value);
-            } else if (USER_ID.equals(type)) {
-                return Integer.toString(session.getUserId()).equals(value);
-            } else if (SESSION_ID.equals(type)) {
+            if (CONTEXT_ID.equals(attr)) {
+                return type.isApplicable(Integer.toString(session.getContextId()), value);
+            } else if (USER_ID.equals(attr)) {
+                return type.isApplicable(Integer.toString(session.getUserId()), (value));
+            } else if (SESSION_ID.equals(attr)) {
                 String sessionID = session.getSessionID();
                 if (sessionID == null) {
                     return false;
                 }
-                return sessionID.equals(value);
-            } else if (SECRET.equals(type)) {
+                return type.isApplicable(sessionID, value);
+            } else if (SECRET.equals(attr)) {
                 String secret = session.getSecret();
                 if (secret == null) {
                     return false;
                 }
-                return secret.equals(value);
-            } else if (HASH.equals(type)) {
+                return type.isApplicable(secret, value);
+            } else if (HASH.equals(attr)) {
                 String hash = session.getHash();
                 if (hash == null) {
                     return false;
                 }
-                return hash.equals(value);
-            } else if (AUTH_ID.equals(type)) {
+                return type.isApplicable(hash, value);
+            } else if (AUTH_ID.equals(attr)) {
                 String authId = session.getAuthId();
                 if (authId == null) {
                     return false;
                 }
-                return authId.equals(value);
-            } else if (CLIENT.equals(type)) {
+                return type.isApplicable(authId, value);
+            } else if (CLIENT.equals(attr)) {
                 String client = session.getClient();
                 if (client == null) {
                     return false;
                 }
-                return client.equals(value);
+                return type.isApplicable(client, value);
             }
 
             Object parameter = session.getParameter(attr);
-            if (parameter == null) {
-                return false;
+            if (parameter != null && String.class.isAssignableFrom(parameter.getClass())) {
+                return type.isApplicable((String) parameter, value);
             }
 
-            return parameter.toString().equals(value);
+            return false;
         }
 
     }
@@ -343,8 +343,39 @@ public class SessionFilter {
         boolean matches(String attr, String value, FilterType type);
     }
 
-    static enum FilterType {
-        EQUAL;
+    static interface Applicator {
+        boolean isApplicable(String str1, String str2);
+    }
+
+    static enum FilterType implements Applicator {
+        EQUAL(new Applicator() {
+            @Override
+            public boolean isApplicable(String str1, String str2) {
+                if (str1 == null) {
+                    if (str2 == null) {
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                if (str2 == null) {
+                    return false;
+                }
+
+                return str1.equals(str2);
+            }
+        });
+
+        private final Applicator applicator;
+        private FilterType(Applicator applicator) {
+            this.applicator = applicator;
+        }
+        @Override
+        public boolean isApplicable(String str1, String str2) {
+            return applicator.isApplicable(str1, str2);
+        }
+
     }
 
     static final class Not implements Matcher {
