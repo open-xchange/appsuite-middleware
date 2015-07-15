@@ -119,7 +119,7 @@ public final class CreateAction extends AbstractFolderAction {
          * Parse folder object
          */
         final JSONObject folderObject = (JSONObject) request.requireData();
-        final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
+        final Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));
         folder.setParentID(parentId);
         folder.setTreeID(treeId);
         /*
@@ -140,7 +140,7 @@ public final class CreateAction extends AbstractFolderAction {
     @OAuthScopeCheck
     public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
         JSONObject folderObject = (JSONObject) request.requireData();
-        Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
+        Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));
         ContentType contentType = folder.getContentType();
         return mayWriteViaOAuthRequest(contentType, grant);
     }

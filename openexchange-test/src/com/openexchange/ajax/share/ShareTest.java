@@ -851,7 +851,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param actual The actual extended permission
      */
     protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
-        assertNotNull("No guest permission entitiy", actual);
+        assertNotNull("No guest permission entitiy for entity " + expectedPermission.getEntity(), actual);
         assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getExpiry());
         checkPermissions(expectedPermission, actual.toFolderPermission(expectedPermission.getFuid()));
         checkRecipient(expectedPermission.getRecipient(), actual);

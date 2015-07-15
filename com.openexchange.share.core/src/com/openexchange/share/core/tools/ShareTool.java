@@ -200,9 +200,10 @@ public class ShareTool {
      * @param sharingUser The sharing user
      * @param guestUserID The guest user ID
      * @param target The share target
+     * @param expiryDate The date when this share expires, i.e. it should be no longer accessible, or <code>null</code> if not defined
      * @return The share
      */
-    public static Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target) {
+    public static Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, Date expiryDate) {
         Date now = new Date();
         Share share = new Share();
         share.setTarget(target);
@@ -211,6 +212,7 @@ public class ShareTool {
         share.setCreatedBy(sharingUser.getId());
         share.setModifiedBy(sharingUser.getId());
         share.setGuest(guestUserID);
+        share.setExpiryDate(expiryDate);
         return share;
     }
 

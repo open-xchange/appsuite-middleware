@@ -149,7 +149,7 @@ public final class UpdateAction extends AbstractFolderAction {
          * Parse folder object
          */
         final JSONObject folderObject = (JSONObject) request.requireData();
-        final ParsedFolder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject);
+        final ParsedFolder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));
         folder.setID(id);
         try {
             final String fieldName = FolderField.SUBSCRIBED.getName();

@@ -116,8 +116,8 @@ public class ExtendedPermissionEntity {
         displayName = json.optString("display_name", null);
         password = json.optString("password", null);
         bits = json.getInt("bits");
-        if (json.hasAndNotNull("expiry")) {
-            expiry = new Date(json.getLong("expiry"));
+        if (json.hasAndNotNull("expiry_date")) {
+            expiry = new Date(json.getLong("expiry_date"));
         } else {
             expiry = null;
         }

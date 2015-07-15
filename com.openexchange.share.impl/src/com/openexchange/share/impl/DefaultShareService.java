@@ -248,7 +248,6 @@ public class DefaultShareService implements ShareService {
         if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
             return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
         }
-
         ShareTool.validateTargets(targets);
         int contextID = session.getContextId();
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
@@ -282,8 +281,9 @@ public class DefaultShareService implements ShareService {
                 /*
                  * prepare shares for each target, remember new guest shares for storing
                  */
+                Date expiry = RecipientType.ANONYMOUS.equals(recipient.getType()) ? ((AnonymousRecipient) recipient).getExpiryDate() : null;
                 for (ShareTarget target : targets) {
-                    Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target);
+                    Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, expiry);
                     if (guestUser.isGuest()) {
                         sharesForGuest.add(new DefaultShareInfo(services, contextID, guestUser, share, false));
                         sharesToStore.add(share);
