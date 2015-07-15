@@ -119,9 +119,9 @@ public class ReportClientBaseTest {
 
     private static final String MAC_COUNT = "268422943 15    4   0";
 
-    private static final String USER_COUNT = "4        16    22";
+    private static final String USER_COUNT = "4        16    22       10";
 
-    private static final String USER_HEADER = "contexts users guests";
+    private static final String USER_HEADER = "contexts users guests links";
 
     private static final String MAC_HEADER = "mac       count adm disabled";
 
