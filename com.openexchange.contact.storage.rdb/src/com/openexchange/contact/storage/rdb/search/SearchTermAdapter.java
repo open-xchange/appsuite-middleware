@@ -112,9 +112,9 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
      * @return the search clause
      */
     @Override
-    public StringBuilder getClause() {
+    public String getClause() {
         final StringBuilder clause = Strings.trim(this.stringBuilder);
-        return 0 < clause.length() ? clause : new StringBuilder("TRUE");
+        return 0 < clause.length() ? clause.toString() : new StringBuilder("TRUE").toString();
     }
 
     private void append(final SearchTerm<?> term) throws OXException {
