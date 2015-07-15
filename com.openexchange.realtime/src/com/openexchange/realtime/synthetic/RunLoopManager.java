@@ -106,8 +106,11 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, Loa
             int next;
             do {
                 cur = count.get();
-                next = cur < 0 ? 0 : cur + 1;
-            } while (count.compareAndSet(cur, next));
+                next = cur + 1;
+                if (next < 0) {
+                    next = 0;
+                }
+            } while (!count.compareAndSet(cur, next));
             return next % max;
         }
     }
