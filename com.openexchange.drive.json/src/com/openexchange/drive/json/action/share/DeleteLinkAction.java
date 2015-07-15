@@ -51,13 +51,20 @@ package com.openexchange.drive.json.action.share;
 
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link DeleteLinkAction}
@@ -69,12 +76,26 @@ public class DeleteLinkAction extends AbstractDriveShareAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        String token = requestData.requireParameter("token");
-        DriveService driveService = Services.getService(DriveService.class, true);
-        driveService.deleteLinks(session, Collections.<String> singletonList(token));
-        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-        result.setTimestamp(new Date());
-        return result;
+        try {
+            JSONObject json = (JSONObject) requestData.requireData();
+            DriveShareTarget target = DriveShareJSONParser.parseTarget(json, getTimeZone(requestData, session.getServerSession()));
+            DriveService driveService = Services.getService(DriveService.class, true);
+            List<DriveShareInfo> shares = driveService.getAllLinks(session);
+            if (!shares.isEmpty()) {
+                for (DriveShareInfo info : shares) {
+                    if (info.getDriveShare().getTarget().equals(target) && RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
+                        driveService.deleteLinks(session, Collections.<String> singletonList(info.getToken()));
+                        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+                        result.setTimestamp(new Date());
+                        return result;
+                    }
+                }
+            }
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create();
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+
     }
 
 }

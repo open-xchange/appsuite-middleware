@@ -57,6 +57,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
+import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
@@ -67,6 +68,7 @@ import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -78,7 +80,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class GetLinkAction extends AbstractDriveShareAction {
 
-    private static final int DEFAULT_PERMISSION_BITS = Permissions.createPermissionBits(
+    private static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
         Permission.READ_FOLDER,
         Permission.READ_ALL_OBJECTS,
         Permission.NO_PERMISSIONS,
@@ -89,27 +91,46 @@ public class GetLinkAction extends AbstractDriveShareAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(json, getTimeZone(requestData, session.getServerSession()));
-            int permissionBits = json.hasAndNotNull("bits") ? json.getInt("bits") : DEFAULT_PERMISSION_BITS;
+            DriveShareTarget target = DriveShareJSONParser.parseTarget(json, getTimeZone(requestData, session.getServerSession()));
+            DriveService driveService = Services.getService(DriveService.class, true);
+
+            List<DriveShareInfo> shares = driveService.getAllLinks(session);
+            if (!shares.isEmpty()) {
+                for (DriveShareInfo info : shares) {
+                    if (info.getDriveShare().getTarget().equals(target) && RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
+                        JSONObject jResult = new JSONObject();
+                        jResult.put("url", info.getShareURL(DefaultRequestContext.newInstance(requestData)));
+                        if (null != info.getDriveShare().getTarget().getExpiryDate()) {
+                            jResult.put("expiry_date", info.getDriveShare().getTarget().getExpiryDate().getTime());
+                        }
+                        if (null != info.getGuest().getPassword()) {
+                            jResult.put("password", info.getGuest().getPassword());
+                        }
+                        return new AJAXRequestResult(jResult, new Date(), "json");
+                    }
+                }
+            }
+
             String password = json.hasAndNotNull("password") ? json.getString("password") : null;
             /*
              * prepare anonymous recipient
              */
             AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setBits(permissionBits);
+            recipient.setBits(DEFAULT_READONLY_PERMISSION_BITS);
             recipient.setPassword(password);
             /*
              * create share
              */
-            DriveService driveService = Services.getService(DriveService.class, true);
-            CreatedShares createdShares = driveService.createShare(session, Collections.<ShareRecipient> singletonList(recipient), targets);
+            CreatedShares createdShares = driveService.createShare(session, Collections.<ShareRecipient> singletonList(recipient), Collections.<DriveShareTarget> singletonList(target));
             CreatedShare share = createdShares.getShare(recipient);
             /*
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
             jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
-            jResult.put("token", share.getToken());
+            if (null != target.getExpiryDate()) {
+                jResult.put("expiry_date", target.getExpiryDate().getTime());
+            }
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
