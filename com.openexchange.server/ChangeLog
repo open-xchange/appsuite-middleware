@@ -1,3 +1,7 @@
+* 2015-07-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39769: Introduced remote look-up of local sessions to verify a session does exist
+
 * 2015-07-15 - ioannis.chouklis@open-xchange.com
 
  - Fix for bug 39712: Distinguish between wildcard and literal search in contacts

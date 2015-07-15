@@ -140,7 +140,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
         }
 
         // Check if valid
-        if (validValue(previous, now)) {
+        if (validValue(previous, now, hzInstance)) {
             // Locked
             return false;
         }
