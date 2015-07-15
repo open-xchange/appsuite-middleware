@@ -147,7 +147,9 @@ public interface CustomPortable extends Portable {
      * <li><code>  108</code>: com.openexchange.mail.attachment.impl.portable.PortableAttachmentToken</li>
      *
      * <li><code>  300</code>: com.openexchange.saml.impl.hz.PortableAuthnRequestInfo</li>
-     * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li>
+     * <li><code>  301</code>: com.openexchange.saml.impl.hz.PortableLogoutRequestInfo</li
+     *
+     * <li><code>  400</code>: com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck</li>>
      * </ul>
      *
      * @return The class ID

@@ -238,6 +238,7 @@ public class ImapIdleActivator extends HousekeepingActivator {
         } else {
             // Register PushManagerService instance
             registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, this));
+            trackService(HazelcastInstance.class);
         }
         trackService(SessionStorageService.class);
         openTrackers();
