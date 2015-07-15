@@ -594,18 +594,19 @@ public final class StringCollection {
     }
 
     /**
-     * Pattern to check whether a string contains REGEX wildcards or not
+     * Pattern to check whether a string contains escaped REGEX wildcards or not
      */
-    private static final Pattern REGEX_WILDCARD_PATTERN = Pattern.compile("(\\*|\\?)");
+    private static final Pattern ESCAPED_REGEX_WILDCARD_PATTERN = Pattern.compile("(([\\\\]+)(\\*|\\?))");
+    
+    private static final Pattern REGEX_WILDCARD_PATTERN = Pattern.compile("((\\*|\\?))");
 
     /**
-     * Determines whether the specified string contains any REGEX wildcard characters '*' or '?'
+     * Determines whether the specified string contains any REGEX wildcard characters '*' or '?' that are not escaped
      * 
      * @param s The string to check
-     * @return true if the specified string contains REGEX wildcards '*' or '?'; false otherwise
+     * @return true if the specified string contains REGEX wildcards '*' or '?' that are not escaped; false otherwise
      */
     public static boolean containsWildcards(final String s) {
-        return REGEX_WILDCARD_PATTERN.matcher(s).find();
+        return REGEX_WILDCARD_PATTERN.matcher(s).find() && !ESCAPED_REGEX_WILDCARD_PATTERN.matcher(s).find();
     }
-
 }
