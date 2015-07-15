@@ -506,7 +506,7 @@ public class RdbUserStorage extends UserStorage {
             }
         }
         loadLoginInfo(ctx, con, regularUsers);
-        loadContact(ctx, con, regularUsers);
+        loadContact(ctx, con, users);
         loadAttributes(ctx.getContextId(), con, users, false);
         loadGroups(ctx, con, users);
         final User[] retval = new User[users.size()];
