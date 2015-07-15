@@ -1,3 +1,7 @@
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39712: Distinguish between wildcard and literal search in contacts
+
 * 2015-07-09 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38946: Invalidate caches when rsync is used to move filestore
