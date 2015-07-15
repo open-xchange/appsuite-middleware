@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
 import org.junit.Assert;
@@ -59,7 +60,12 @@ import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
+import com.openexchange.file.storage.DefaultFile;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -200,7 +206,7 @@ public class AnonymousGuestTest extends ShareTest {
     }
 
     @Test
-    public void testUpdateAnonymousGuestPermissionToWritable() throws Exception {
+    public void testUpdateAnonymousGuestPermissionToWritableOnFolder() throws Exception {
         OCLGuestPermission guestPermission = createAnonymousGuestPermission();
         FolderObject updated = addPermissions(folder, guestPermission);
         OCLPermission entityPermission = findAndCheckPermission(updated);
@@ -211,6 +217,132 @@ public class AnonymousGuestTest extends ShareTest {
         boolean thrown = false;
         try {
             updateFolder(EnumAPI.OX_NEW, updated);
+        } catch (AssertionError e) {
+            Assert.assertTrue(e.getMessage().contains("PERMISSION_DENIED"));
+            thrown = true;
+        }
+        assertTrue(thrown);
+    }
+
+    @Test
+    public void testAddAnonymousGuestToFile() throws Exception {
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
+
+        File updated = addPermissions(file, guestPermission);
+        FileStorageObjectPermission matchingPermission = findAndCheckPermission(updated);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+    }
+
+    @Test
+    public void testAddAnonymousGuestWithInvalidPermissionToFile() throws Exception {
+        /*
+         * Permission bits are ignored for anonymous guests, therefore the update should succeed
+         * and the created permission will be read-only
+         */
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createInvalidAnonymousGuestPermission());
+
+        File updated = addPermissions(file, guestPermission);
+        FileStorageObjectPermission matchingPermission = findAndCheckPermission(updated);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+    }
+
+    @Test
+    public void testAddTwoAnonymousGuestsToFile() throws Exception {
+        /*
+         * Only one anonymous permission is allowed, so the update must fail.
+         */
+        FileStorageGuestObjectPermission guestPermission1 = asObjectPermission(createAnonymousGuestPermission());
+        FileStorageGuestObjectPermission guestPermission2 = asObjectPermission(createAnonymousGuestPermission());
+
+        boolean thrown = false;
+        try {
+            addPermissions(file, guestPermission1, guestPermission2);
+        } catch (AssertionError e) {
+            assertTrue(e.getMessage().contains("PERMISSION_DENIED"));
+            thrown = true;
+        }
+        assertTrue(thrown);
+    }
+
+    @Test
+    public void testAddTwoAnonymousGuestsSubsequentlyToFile() throws Exception {
+        /*
+         * Only one anonymous permission is allowed, so the second update must fail.
+         */
+        FileStorageGuestObjectPermission guestPermission1 = asObjectPermission(createAnonymousGuestPermission());
+        File updated = addPermissions(file, guestPermission1);
+        FileStorageGuestObjectPermission guestPermission2 = asObjectPermission(createAnonymousGuestPermission());
+        boolean thrown = false;
+        try {
+            addPermissions(updated, guestPermission2);
+        } catch (AssertionError e) {
+            Assert.assertTrue(e.getMessage().contains("PERMISSION_DENIED"));
+            thrown = true;
+        }
+        assertTrue(thrown);
+    }
+
+    @Test
+    public void testAddExistingAnonymousGuestToNewFile() throws Exception {
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
+        File updated = addPermissions(file, guestPermission);
+        FileStorageObjectPermission entityPermission = findAndCheckPermission(updated);
+
+        File newFile = insertFile(client.getValues().getPrivateInfostoreFolder());
+        remember(newFile);
+
+        boolean thrown = false;
+        try {
+            addPermissions(newFile, entityPermission);
+        } catch (AssertionError e) {
+            Assert.assertTrue(e.getMessage().contains("PERMISSION_DENIED"));
+            thrown = true;
+        }
+        assertTrue(thrown);
+    }
+
+    @Test
+    public void testUpdateAnonymousGuestPermissionToWritableOnFile() throws Exception {
+        FileStorageGuestObjectPermission guestPermission = asObjectPermission(createAnonymousGuestPermission());
+        File updated = addPermissions(file, guestPermission);
+        FileStorageObjectPermission entityPermission = findAndCheckPermission(updated);
+         /*
+          * Change to writable
+          */
+        List<FileStorageObjectPermission> newPermissions = new ArrayList<>(2);
+        newPermissions.addAll(updated.getObjectPermissions());
+        newPermissions.remove(entityPermission);
+        newPermissions.add(new DefaultFileStorageObjectPermission(entityPermission.getEntity(), false, FileStorageObjectPermission.DELETE));
+
+        DefaultFile toUpdate = new DefaultFile();
+        toUpdate.setId(file.getId());
+        toUpdate.setFolderId(file.getFolderId());
+        toUpdate.setLastModified(file.getLastModified());
+        toUpdate.setObjectPermissions(newPermissions);
+
+        boolean thrown = false;
+        try {
+            updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS });
         } catch (AssertionError e) {
             Assert.assertTrue(e.getMessage().contains("PERMISSION_DENIED"));
             thrown = true;
@@ -253,6 +385,24 @@ public class AnonymousGuestTest extends ShareTest {
         return updateFolder(EnumAPI.OX_NEW, toUpdate);
     }
 
+    private File addPermissions(File file, FileStorageObjectPermission... permissions) throws Exception {
+        DefaultFile metadata = new DefaultFile();
+        metadata.setId(file.getId());
+        metadata.setFolderId(file.getFolderId());
+        metadata.setLastModified(file.getLastModified());
+        List<FileStorageObjectPermission> newPermissions = new ArrayList<>(2);
+        List<FileStorageObjectPermission> oldPermissions = file.getObjectPermissions();
+        if (oldPermissions != null) {
+            newPermissions.addAll(oldPermissions);
+        }
+
+        for (FileStorageObjectPermission p : permissions) {
+            newPermissions.add(p);
+        }
+        metadata.setObjectPermissions(newPermissions);
+        return updateFile(metadata, new Field[] { Field.OBJECT_PERMISSIONS });
+    }
+
     private OCLPermission findAndCheckPermission(FolderObject folder) throws Exception {
         List<OCLPermission> permissions = folder.getPermissions();
         Assert.assertEquals("Wrong number of permissions", 2, permissions.size());
@@ -270,6 +420,24 @@ public class AnonymousGuestTest extends ShareTest {
                 Assert.assertFalse(p.canWriteAllObjects());
                 Assert.assertFalse(p.canDeleteOwnObjects());
                 Assert.assertFalse(p.canDeleteAllObjects());
+                matchingPermission = p;
+            }
+        }
+        Assert.assertNotNull("Missing expected guest permission", matchingPermission);
+        return matchingPermission;
+    }
+
+    private FileStorageObjectPermission findAndCheckPermission(File file) throws Exception {
+        List<FileStorageObjectPermission> permissions = file.getObjectPermissions();
+        Assert.assertNotNull("Missing object permissions", permissions);
+        Assert.assertEquals("Wrong number of permissions", 1, permissions.size());
+
+        FileStorageObjectPermission matchingPermission = null;
+        for (FileStorageObjectPermission p : permissions) {
+            if (p.getEntity() != client.getValues().getUserId()) {
+                Assert.assertTrue(p.canRead());
+                Assert.assertFalse(p.canWrite());
+                Assert.assertFalse(p.canDelete());
                 matchingPermission = p;
             }
         }

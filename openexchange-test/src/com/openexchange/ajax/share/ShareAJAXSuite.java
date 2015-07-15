@@ -55,6 +55,7 @@ import com.openexchange.ajax.share.tests.AddGuestPermissionTest;
 import com.openexchange.ajax.share.tests.AggregateSharesTest;
 import com.openexchange.ajax.share.tests.AllTest;
 import com.openexchange.ajax.share.tests.AnonymousGuestPasswordTest;
+import com.openexchange.ajax.share.tests.AnonymousGuestTest;
 import com.openexchange.ajax.share.tests.ConvertToInternalPermissionTest;
 import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
@@ -122,6 +123,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(SystemMessagesTest.class);
         tests.addTestSuite(FolderItemCountTest.class);
         tests.addTestSuite(ShowSharedFilesFolderTest.class);
+        tests.addTestSuite(AnonymousGuestTest.class);
         return tests;
     }
 
