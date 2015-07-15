@@ -73,7 +73,6 @@ import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link GetLinkAction}
  *
@@ -112,7 +111,10 @@ public class GetLinkAction extends AbstractShareAction {
                         if (null != info.getShare().getExpiryDate()) {
                             jResult.put("expiry_date", info.getShare().getExpiryDate().getTime());
                         }
-                        jResult.put("has_password", null != info.getGuest().getPassword());
+                        if (null != info.getGuest().getPassword()) {
+                            jResult.put("password", info.getGuest().getPassword());
+                        }
+                        jResult.put("is_new", false);
                         return new AJAXRequestResult(jResult, new Date(), "json");
                     }
                 }
@@ -138,7 +140,7 @@ public class GetLinkAction extends AbstractShareAction {
             if (null != share.getFirstInfo().getShare().getExpiryDate()) {
                 jResult.put("expiry_date", share.getFirstInfo().getShare().getExpiryDate().getTime());
             }
-            jResult.put("has_password", null != share.getGuestInfo().getPassword());
+            jResult.put("is_new", true);
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
