@@ -100,7 +100,7 @@ public class GetLinkAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            ShareTarget target = ShareJSONParser.parseTarget(json.getJSONObject("target"), getTimeZone(requestData, session),
+            ShareTarget target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session),
                 services.getService(ModuleSupport.class));
 
             ShareService shareService = services.getService(ShareService.class);

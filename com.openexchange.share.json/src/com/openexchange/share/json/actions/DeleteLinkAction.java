@@ -92,7 +92,7 @@ public class DeleteLinkAction extends AbstractShareAction {
          */
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            ShareTarget target = ShareJSONParser.parseTarget(json.getJSONObject("target"), getTimeZone(requestData, session),
+            ShareTarget target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session),
                 services.getService(ModuleSupport.class));
             ShareService shareService = services.getService(ShareService.class);
             List<ShareInfo> shares = shareService.getShares(session, Module.getModuleString(target.getModule(), Integer.parseInt(target.getFolder())), target.getFolder(), target.getItem());
@@ -100,17 +100,17 @@ public class DeleteLinkAction extends AbstractShareAction {
                 for (ShareInfo info : shares) {
                     if (RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
                         getShareService().deleteShares(session, Collections.singletonList(info.getToken()));
+                        /*
+                         * return empty result in case of success
+                         */
+                        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+                        result.setTimestamp(new Date());
+                        return result;
                     }
                 }
-            } else {
-                throw ShareExceptionCodes.UNKNOWN_SHARE.create();
             }
-            /*
-             * return empty result in case of success
-             */
-            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-            result.setTimestamp(new Date());
-            return result;
+            throw ShareExceptionCodes.UNKNOWN_SHARE.create();
+
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
