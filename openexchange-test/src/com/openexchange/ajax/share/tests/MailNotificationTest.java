@@ -388,13 +388,11 @@ public class MailNotificationTest extends ShareTest {
         InviteRequest inviteRequest = new InviteRequest();
         for (File file : files) {
             ShareTarget shareTarget = new ShareTarget(FolderObject.INFOSTORE, file.getFolderId(), file.getId());
-            shareTarget.setExpiryDate(expiryDate);
             inviteRequest.addTarget(shareTarget);
         }
         if (files.length == 0) {
             for (FolderObject testFolder : testFolders) {
                 ShareTarget shareTarget = new ShareTarget(testFolder.getModule(), Integer.toString(testFolder.getObjectID()));
-                shareTarget.setExpiryDate(expiryDate);
                 inviteRequest.addTarget(shareTarget);
             }
         }

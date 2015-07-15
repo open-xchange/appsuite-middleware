@@ -115,6 +115,9 @@ public class ParsedShare {
             case ANONYMOUS:
                 AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
                 anonymousRecipient.setPassword(jsonObject.optString("password", null));
+                if (jsonObject.hasAndNotNull("expiry_date")) {
+                    anonymousRecipient.setExpiryDate(new Date(json.getLong("expiry_date")));
+                }
                 recipient = anonymousRecipient;
                 break;
             case GUEST:

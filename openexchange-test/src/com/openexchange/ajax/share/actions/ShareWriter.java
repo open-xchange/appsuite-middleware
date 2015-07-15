@@ -56,7 +56,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.java.Strings;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -113,6 +112,7 @@ public class ShareWriter {
 
     public static void writeAnonymousRecipient(AnonymousRecipient recipient, JSONObject jRecipient) throws JSONException {
         jRecipient.put("password", recipient.getPassword());
+        jRecipient.put("expiry_date", recipient.getExpiryDate() == null ? null : recipient.getExpiryDate().getTime());
     }
 
     public static void writeInternalRecipient(InternalRecipient recipient, JSONObject jRecipient) throws JSONException {
@@ -133,7 +133,6 @@ public class ShareWriter {
         jTarget.put("module", Module.getModuleString(target.getModule(), -1));
         jTarget.put("folder", target.getFolder());
         jTarget.put("item", target.getItem());
-        jTarget.put("expiry_date", target.getExpiryDate() == null ? null : target.getExpiryDate().getTime());
         if (null != target.getMeta()) {
             Set<String> keySet = target.getMeta().keySet();
             JSONObject meta = new JSONObject(keySet.size());
