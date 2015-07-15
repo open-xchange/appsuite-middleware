@@ -808,13 +808,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected static void checkShare(FileStorageGuestObjectPermission expectedPermission, File expectedFile, ParsedShare actual) {
         assertNotNull("No share", actual);
-//        assertEquals("Expiry date wrong", expected.getExpiryDate(), actual.getTarget().getExpiryDate());
         checkAuthentication(expectedPermission.getRecipient(), actual);
         checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
         assertNotNull("No share target", actual.getTarget());
         assertEquals("Target module wrong", FolderObject.INFOSTORE, actual.getTarget().getModule());
         assertEquals("Target folder wrong", expectedFile.getFolderId(), actual.getTarget().getFolder());
         assertEquals("Target item wrong", expectedFile.getId(), actual.getTarget().getItem());
+        assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getTarget().getExpiryDate());
     }
 
     /**
@@ -833,6 +833,57 @@ public abstract class ShareTest extends AbstractAJAXSession {
         assertEquals("Target folder wrong", String.valueOf(expectedFolder.getObjectID()), actual.getTarget().getFolder());
     }
 
+    /**
+     * Checks the supplied extended guest permission against the expected guest permissions.
+     *
+     * @param expectedPermission The expected permissions
+     * @param actual The actual extended permission
+     */
+    protected static void checkGuestPermission(FileStorageGuestObjectPermission expectedPermission, ExtendedPermissionEntity actual) {
+        assertNotNull("No guest permission entitiy", actual);
+        assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getExpiry());
+        checkPermissions(expectedPermission, actual.toObjectPermission());
+        checkRecipient(expectedPermission.getRecipient(), actual);
+    }
+
+    /**
+     * Checks the supplied extended guest permission against the expected guest permissions.
+     *
+     * @param expectedPermission The expected permissions
+     * @param actual The actual extended permission
+     */
+    protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
+        assertNotNull("No guest permission entitiy", actual);
+        assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getExpiry());
+        checkPermissions(expectedPermission, actual.toFolderPermission(expectedPermission.getFuid()));
+        checkRecipient(expectedPermission.getRecipient(), actual);
+    }
+
+    private static void checkRecipient(ShareRecipient expected, ShareRecipient actual) {
+        assertNotNull("No recipient", actual);
+        assertEquals("Wrong recipient type", expected.getType(), actual.getType());
+        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
+            assertEquals("Wrong password", ((AnonymousRecipient) expected).getPassword(), ((AnonymousRecipient) actual).getPassword());
+        } else if (RecipientType.GUEST.equals(expected.getType())) {
+            GuestRecipient expectedRecipient = (GuestRecipient) expected;;
+            GuestRecipient actualRecipient = (GuestRecipient) actual;
+            assertEquals("Wrong e-mail address", expectedRecipient.getEmailAddress(), actualRecipient.getEmailAddress());
+            assertEquals("Wrong display name", expectedRecipient.getDisplayName(), actualRecipient.getDisplayName());
+        }
+    }
+
+    private static void checkRecipient(ShareRecipient expected, ExtendedPermissionEntity actual) {
+        assertEquals("Wrong recipient type", expected.getType(), actual.getType());
+        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
+            assertEquals("Wrong password", ((AnonymousRecipient) expected).getPassword(), actual.getPassword());
+        } else if (RecipientType.GUEST.equals(expected.getType())) {
+            GuestRecipient guestRecipient = (GuestRecipient) expected;
+            assertEquals("Wrong display name", guestRecipient.getDisplayName(), actual.getDisplayName());
+            assertNotNull("No contact", actual.getContact());
+            assertEquals("Wrong e-mail address", guestRecipient.getEmailAddress(), actual.getContact().getEmail1());
+        }
+    }
+
     private static void checkAuthentication(ShareRecipient expected, ParsedShare actual) {
         if (RecipientType.ANONYMOUS.equals(expected.getType())) {
             if (null == ((AnonymousRecipient) expected).getPassword()) {
@@ -846,71 +897,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
             } else {
                 assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
             }
-        }
-    }
-
-    /**
-     * Checks the supplied extended guest permission against the expected guest permissions.
-     *
-     * @param expectedPermission The expected permissions
-     * @param actual The actual extended permission
-     */
-    protected static void checkGuestPermission(FileStorageGuestObjectPermission expectedPermission, ExtendedPermissionEntity actual) {
-        assertNotNull("No guest permission entitiy", actual);
-//        assertEquals("Expiry date wrong", expected.getExpiryDate(), actual.getTarget().getExpiryDate());
-//        checkAuthentication(expectedPermission.getRecipient(), actual);
-//        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
-//        assertNotNull("No share target", actual.getTarget());
-//        assertEquals("Target module wrong", FolderObject.INFOSTORE, actual.getTarget().getModule());
-//        assertEquals("Target folder wrong", expectedFile.getFolderId(), actual.getTarget().getFolder());
-//        assertEquals("Target item wrong", expectedFile.getId(), actual.getTarget().getItem());
-    }
-
-    /**
-     * Checks the supplied extended guest permission against the expected guest permissions.
-     *
-     * @param expectedPermission The expected permissions
-     * @param actual The actual extended permission
-     */
-    protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
-        assertNotNull("No guest permission entitiy", actual);
-        assertEquals(expectedPermission.getPermissionBits(), actual.getBits());
-
-
-
-//        checkAuthentication(expectedPermission.getRecipient(), actual);
-//        checkRecipient(expectedPermission.getRecipient(), actual.getRecipient());
-//        assertNotNull("No share target", actual.getTarget());
-//        assertEquals("Target module wrong", expectedFolder.getModule(), actual.getTarget().getModule());
-//        assertEquals("Target folder wrong", String.valueOf(expectedFolder.getObjectID()), actual.getTarget().getFolder());
-    }
-
-//    private static void checkAuthentication(ShareRecipient expected, ExtendedPermissionEntity actual) {
-//        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
-//            if (null == ((AnonymousRecipient) expected).getPassword()) {
-//                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS, actual.getAuthentication());
-//            } else {
-//                assertEquals("Wrong authentication", AuthenticationMode.ANONYMOUS_PASSWORD, actual.getAuthentication());
-//            }
-//        } else if (RecipientType.GUEST.equals(expected.getType())) {
-//            if (null == ((GuestRecipient) expected).getPassword()) {
-//                assertEquals("Wrong authentication", AuthenticationMode.GUEST, actual.getAuthentication());
-//            } else {
-//                assertEquals("Wrong authentication", AuthenticationMode.GUEST_PASSWORD, actual.getAuthentication());
-//            }
-//        }
-//    }
-
-    private static void checkRecipient(ShareRecipient expected, ShareRecipient actual) {
-        assertNotNull("No recipient", actual);
-        assertEquals("Wrong recipient type", expected.getType(), actual.getType());
-        if (RecipientType.ANONYMOUS.equals(expected.getType())) {
-            assertEquals("Wrong password", ((AnonymousRecipient) expected).getPassword(), ((AnonymousRecipient) actual).getPassword());
-        } else if (RecipientType.GUEST.equals(expected.getType())) {
-            GuestRecipient expectedRecipient = (GuestRecipient) expected;;
-            GuestRecipient actualRecipient = (GuestRecipient) actual;
-            assertEquals("Wrong e-mail address", expectedRecipient.getEmailAddress(), actualRecipient.getEmailAddress());
-//            assertEquals("Wrong display name address", expectedRecipient.getDisplayName(), actualRecipient.getDisplayName());
         }
     }
 

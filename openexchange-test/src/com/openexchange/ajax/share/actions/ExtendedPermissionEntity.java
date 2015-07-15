@@ -57,8 +57,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.parser.ContactParser;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
+import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Enums;
+import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -83,7 +87,7 @@ public class ExtendedPermissionEntity {
     private final int entity;
     private final RecipientType type;
     private final String displayName;
-    private final long bits;
+    private final int bits;
     private final String shareURL;
     private final String password;
     private final Date expiry;
@@ -111,7 +115,7 @@ public class ExtendedPermissionEntity {
         shareURL = json.optString("share_url", null);
         displayName = json.optString("display_name", null);
         password = json.optString("password", null);
-        bits = json.getLong("bits");
+        bits = json.getInt("bits");
         if (json.hasAndNotNull("expiry")) {
             expiry = new Date(json.getLong("expiry"));
         } else {
@@ -123,6 +127,10 @@ public class ExtendedPermissionEntity {
         return entity;
     }
 
+    public Contact getContact() {
+        return contact;
+    }
+
     public RecipientType getType() {
         return type;
     }
@@ -131,7 +139,7 @@ public class ExtendedPermissionEntity {
         return displayName;
     }
 
-    public long getBits() {
+    public int getBits() {
         return bits;
     }
 
@@ -145,6 +153,19 @@ public class ExtendedPermissionEntity {
 
     public Date getExpiry() {
         return expiry;
+    }
+
+    public OCLPermission toFolderPermission(int folderID) {
+        OCLPermission permission = new OCLPermission(entity, folderID);
+        permission.setGroupPermission(RecipientType.GROUP.equals(type));
+        int[] permissionBits = Permissions.parsePermissionBits(bits);
+        permission.setAllPermission(permissionBits[0], permissionBits[1], permissionBits[2], permissionBits[3]);
+        permission.setFolderAdmin(0 < permissionBits[4]);
+        return permission;
+    }
+
+    public FileStorageObjectPermission toObjectPermission() {
+        return new DefaultFileStorageObjectPermission(entity, RecipientType.GROUP.equals(type), bits);
     }
 
 }
