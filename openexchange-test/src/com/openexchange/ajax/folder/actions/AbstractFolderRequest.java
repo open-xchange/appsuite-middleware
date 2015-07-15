@@ -51,6 +51,7 @@ package com.openexchange.ajax.folder.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -77,10 +78,16 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
 
     private final API api;
     private AllowedModules[] allowedModules;
+    private final TimeZone timeZone;
 
     protected AbstractFolderRequest(final API api) {
+        this(api, null);
+    }
+
+    protected AbstractFolderRequest(final API api, TimeZone timeZone) {
         super();
         this.api = api;
+        this.timeZone = timeZone;
     }
 
     @Override
@@ -110,6 +117,13 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
                     case ANONYMOUS:
                         AnonymousRecipient anonymousRecipient = (AnonymousRecipient) recipient;
                         jsonPermission.putOpt(FolderField.PASSWORD.getName(), anonymousRecipient.getPassword());
+                        if (null != anonymousRecipient.getExpiryDate()) {
+                            long date = anonymousRecipient.getExpiryDate().getTime();
+                            if (null != timeZone) {
+                                date += timeZone.getOffset(date);
+                            }
+                            jsonPermission.put(FolderField.EXPIRY_DATE.getName(), date);
+                        }
                         break;
                     case GUEST:
                         GuestRecipient guestRecipient = (GuestRecipient) recipient;
@@ -122,9 +136,6 @@ public abstract class AbstractFolderRequest<T extends AbstractAJAXResponse> impl
                     default:
                         Assert.fail("Unsupported recipient: " + recipient.getType());
                         break;
-                    }
-                    if (null != guestPerm.getExpiryDate()) {
-                        jsonPermission.put(FolderField.EXPIRY_DATE.getName(), guestPerm.getExpiryDate().getTime());
                     }
                 } else {
                     jsonPermission.put(FolderFields.ENTITY, perm.getEntity());

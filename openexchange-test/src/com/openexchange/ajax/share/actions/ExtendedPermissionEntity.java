@@ -52,6 +52,7 @@ package com.openexchange.ajax.share.actions;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -72,13 +73,13 @@ import com.openexchange.share.recipient.RecipientType;
  */
 public class ExtendedPermissionEntity {
 
-    public static List<ExtendedPermissionEntity> parse(JSONArray json) throws JSONException {
+    public static List<ExtendedPermissionEntity> parse(JSONArray json, TimeZone timeZone) throws JSONException {
         if (null == json) {
             return null;
         }
         List<ExtendedPermissionEntity> entities = new ArrayList<ExtendedPermissionEntity>(json.length());
         for (int i = 0; i < json.length(); i++) {
-            entities.add(new ExtendedPermissionEntity(json.getJSONObject(i)));
+            entities.add(new ExtendedPermissionEntity(json.getJSONObject(i), timeZone));
         }
         return entities;
     }
@@ -96,8 +97,9 @@ public class ExtendedPermissionEntity {
      * Initializes a new {@link ExtendedPermissionEntity}.
      *
      * @param json The JSON object to parse
+     * @param timeZone The timezone to use
      */
-    public ExtendedPermissionEntity(JSONObject json) throws JSONException {
+    public ExtendedPermissionEntity(JSONObject json, TimeZone timeZone) throws JSONException {
         super();
         JSONObject jsonContact = json.optJSONObject("contact");
         if (null != jsonContact) {
@@ -117,7 +119,11 @@ public class ExtendedPermissionEntity {
         password = json.optString("password", null);
         bits = json.getInt("bits");
         if (json.hasAndNotNull("expiry_date")) {
-            expiry = new Date(json.getLong("expiry_date"));
+            long date = json.getLong("expiry_date");
+            if (null != timeZone) {
+                date -= timeZone.getOffset(date);
+            }
+            expiry = new Date(date);
         } else {
             expiry = null;
         }

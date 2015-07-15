@@ -136,7 +136,7 @@ public class FileStorageTransactionTest extends ShareTest {
         }
 
         List<FileShare> fileShares = new ArrayList<FileShare>(sharedFiles.size());
-        List<FileShare> allShares = client.execute(new FileSharesRequest()).getShares();
+        List<FileShare> allShares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
         for (DefaultFile file : sharedFiles) {
             for (FileShare share : allShares) {
                 if (share.getId().equals(file.getId())) {

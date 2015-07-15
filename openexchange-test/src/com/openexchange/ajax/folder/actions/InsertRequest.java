@@ -50,6 +50,7 @@
 package com.openexchange.ajax.folder.actions;
 
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONException;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.FolderFields;
@@ -70,14 +71,49 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
     final boolean failOnError;
 
     /**
-     * Default constructor.
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
      */
     public InsertRequest(API api, FolderObject folder) {
         this(api, folder, true);
     }
 
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
+     * @param failOnError <code>true</code> to let the the test fail in case of an erroneous response, <code>false</code>, otherwise
+     */
     public InsertRequest(API api, FolderObject folder, boolean failOnError) {
         super(api);
+        this.failOnError = failOnError;
+        this.folder = folder;
+    }
+
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
+     * @param timeZone The client timezone
+     */
+    public InsertRequest(API api, FolderObject folder, TimeZone timeZone) {
+        this(api, folder, timeZone, true);
+    }
+
+    /**
+     * Initializes a new {@link InsertRequest}.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to create
+     * @param timeZone The client timezone
+     * @param failOnError <code>true</code> to let the the test fail in case of an erroneous response, <code>false</code>, otherwise
+     */
+    public InsertRequest(API api, FolderObject folder, TimeZone timeZone, boolean failOnError) {
+        super(api, timeZone);
         this.failOnError = failOnError;
         this.folder = folder;
     }

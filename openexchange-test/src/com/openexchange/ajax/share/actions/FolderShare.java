@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.actions;
 
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.folder.actions.Parser;
@@ -63,23 +64,37 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class FolderShare extends FolderObject {
 
+    /**
+     * Parses a {@link FolderShare}.
+     *
+     * @param jsonFolder The json array from a <code>shares</code> response
+     * @param columns The requested columns
+     * @param timeZone The client timezone
+     */
+    public static FolderShare parse(JSONArray jsonFolder, int[] columns, TimeZone timeZone) throws JSONException, OXException {
+        FolderShare folderShare = new FolderShare();
+        for (int i = 0; i < columns.length; i++) {
+            switch (columns[i]) {
+                case 3060:
+                    folderShare.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonFolder.optJSONArray(i), timeZone);
+                    break;
+                default:
+                    Parser.parse(jsonFolder.get(i), columns[i], folderShare);
+                    break;
+            }
+        }
+        return folderShare;
+    }
+
     private static final long serialVersionUID = 4389215025150629747L;
 
     private List<ExtendedPermissionEntity> extendedFolderPermissions;
 
     /**
      * Initializes a new {@link FolderShare}.
-     *
-     * @param json The json array from a <code>shares</code> response
-     * @param columns The requested columns
      */
-    public FolderShare(JSONArray json, int[] columns) throws JSONException {
+    public FolderShare() throws JSONException {
         super();
-        try {
-            parse(json, columns);
-        } catch (OXException e) {
-            throw new JSONException(e);
-        }
     }
 
     /**
@@ -89,19 +104,6 @@ public class FolderShare extends FolderObject {
      */
     public List<ExtendedPermissionEntity> getExtendedPermissions() {
         return extendedFolderPermissions;
-    }
-
-    private void parse(JSONArray jsonFolder, int[] columns) throws JSONException, OXException {
-        for (int i = 0; i < columns.length; i++) {
-            switch (columns[i]) {
-                case 3060:
-                    this.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonFolder.optJSONArray(i));
-                    break;
-                default:
-                    Parser.parse(jsonFolder.get(i), columns[i], this);
-                    break;
-            }
-        }
     }
 
 }

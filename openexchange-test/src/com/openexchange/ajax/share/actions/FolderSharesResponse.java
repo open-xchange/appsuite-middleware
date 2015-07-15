@@ -51,10 +51,12 @@ package com.openexchange.ajax.share.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FolderSharesResponse}
@@ -63,7 +65,8 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
  */
 public class FolderSharesResponse extends AbstractAJAXResponse {
 
-    private final List<FolderShare> shares;
+    private final int[] columns;
+    private final JSONArray data;
 
     /**
      * Initializes a new {@link FolderSharesResponse}.
@@ -73,22 +76,27 @@ public class FolderSharesResponse extends AbstractAJAXResponse {
      */
     public FolderSharesResponse(Response response, int[] columns) throws JSONException {
         super(response);
-        this.shares = response.hasError() ? null : parse(((JSONArray) response.getData()), columns);
+        this.columns = columns;
+        this.data = response.hasError() ? null : (JSONArray) response.getData();
     }
 
     /**
      * Gets the shared folders.
      *
+     * @param timeZone The client timezone to consider
      * @return The shared folders
      */
-    public List<FolderShare> getShares() {
-        return shares;
+    public List<FolderShare> getShares(TimeZone timeZone) throws JSONException, OXException {
+        if (null != data) {
+            return parse(data, columns, timeZone);
+        }
+        return null;
     }
 
-    private static List<FolderShare> parse(JSONArray jsonArray, int[] columns) throws JSONException {
+    private static List<FolderShare> parse(JSONArray jsonArray, int[] columns, TimeZone timeZone) throws JSONException, OXException {
         List<FolderShare> folders = new ArrayList<FolderShare>(jsonArray.length());
         for (int i = 0; i < jsonArray.length(); i++) {
-            folders.add(new FolderShare(jsonArray.getJSONArray(i), columns));
+            folders.add(FolderShare.parse(jsonArray.getJSONArray(i), columns, timeZone));
         }
         return folders;
     }

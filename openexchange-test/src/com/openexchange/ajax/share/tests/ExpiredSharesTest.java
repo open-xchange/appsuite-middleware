@@ -78,29 +78,29 @@ public class ExpiredSharesTest extends ShareTest {
     }
 
     public void testAccessExpiredShareRandomly() throws Exception {
-        testAccessExpiredShare(randomFolderAPI(), randomModule(), createAnonymousGuestPermission());
+        testAccessExpiredShare(randomFolderAPI(), randomModule());
     }
 
     public void noTestAccessExpiredShareExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (int module : TESTED_MODULES) {
-                testAccessExpiredShare(api, module, createAnonymousGuestPermission());
+                testAccessExpiredShare(api, module);
             }
         }
     }
 
-    private void testAccessExpiredShare(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
-        testAccessExpiredShare(api, module, getDefaultFolder(module), guestPermission);
+    private void testAccessExpiredShare(EnumAPI api, int module) throws Exception {
+        testAccessExpiredShare(api, module, getDefaultFolder(module));
     }
 
-    private void testAccessExpiredShare(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
+    private void testAccessExpiredShare(EnumAPI api, int module, int parent) throws Exception {
         /*
          * apply expiration time to permission
          */
         long expirationTime = 10000L; // 10 seconds
         Date expires = new Date(System.currentTimeMillis() + expirationTime);
-        guestPermission = (OCLGuestPermission) guestPermission.clone();
-        guestPermission.setExpiryDate(expires);
+        OCLGuestPermission guestPermission = createAnonymousGuestPermission();
+        ((AnonymousRecipient) guestPermission.getRecipient()).setExpiryDate(expires);
         /*
          * create folder shared to guest user
          */

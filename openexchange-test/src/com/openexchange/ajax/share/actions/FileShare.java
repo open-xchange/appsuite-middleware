@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.actions;
 
 import java.util.List;
+import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
@@ -65,21 +66,36 @@ import com.openexchange.file.storage.meta.FileFieldSet;
  */
 public class FileShare extends DefaultFile {
 
+    /**
+     * Parses a {@link FileShare}.
+     *
+     * @param jsonFile The json array from a <code>shares</code> response
+     * @param columns The requested columns
+     * @param timeZone The client timezone
+     */
+    public static FileShare parse(JSONArray jsonFile, int[] columns, TimeZone timeZone) throws JSONException, OXException {
+        FileShare fileShare = new FileShare();
+        FileFieldSet fileFieldSet = new FileFieldSet();
+        for (int i = 0; i < columns.length; i++) {
+            switch (columns[i]) {
+                case 7010:
+                    fileShare.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonFile.optJSONArray(i), timeZone);
+                    break;
+                default:
+                    Field field = File.Field.get(columns[i]);
+                    Object orig = jsonFile.get(i);
+                    Object converted = FileMetadataFieldParser.convert(field, orig);
+                    field.doSwitch(fileFieldSet, fileShare, converted);
+                    break;
+            }
+        }
+        return fileShare;
+    }
+
     private List<ExtendedPermissionEntity> extendedFolderPermissions;
 
-    /**
-     * Initializes a new {@link FileShare}.
-     *
-     * @param json The json array from a <code>shares</code> response
-     * @param columns The requested columns
-     */
-    public FileShare(JSONArray json, int[] columns) throws JSONException {
+    private FileShare() throws JSONException {
         super();
-        try {
-            parse(json, columns);
-        } catch (OXException e) {
-            throw new JSONException(e);
-        }
     }
 
     /**
@@ -89,23 +105,6 @@ public class FileShare extends DefaultFile {
      */
     public List<ExtendedPermissionEntity> getExtendedPermissions() {
         return extendedFolderPermissions;
-    }
-
-    private void parse(JSONArray jsonFile, int[] columns) throws JSONException, OXException {
-        FileFieldSet fileFieldSet = new FileFieldSet();
-        for (int i = 0; i < columns.length; i++) {
-            switch (columns[i]) {
-                case 7010:
-                    this.extendedFolderPermissions = ExtendedPermissionEntity.parse(jsonFile.optJSONArray(i));
-                    break;
-                default:
-                    Field field = File.Field.get(columns[i]);
-                    Object orig = jsonFile.get(i);
-                    Object converted = FileMetadataFieldParser.convert(field, orig);
-                    field.doSwitch(fileFieldSet, this, converted);
-                    break;
-            }
-        }
     }
 
 }

@@ -421,7 +421,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     protected FolderObject insertFolder(EnumAPI api, FolderObject folder) throws Exception {
-        InsertResponse insertResponse = client.execute(new InsertRequest(api, folder));
+        InsertResponse insertResponse = client.execute(new InsertRequest(api, folder, client.getValues().getTimeZone()));
         insertResponse.fillObject(folder);
         remember(folder);
         FolderObject createdFolder = getFolder(api, folder.getObjectID());
@@ -472,7 +472,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The folder shares
      */
     protected static List<FolderShare> getFolderShares(AJAXClient client, EnumAPI api, int module) throws OXException, IOException, JSONException {
-        return client.execute(new FolderSharesRequest(api, Module.getModuleString(module, -1))).getShares();
+        return client.execute(new FolderSharesRequest(api, Module.getModuleString(module, -1))).getShares(client.getValues().getTimeZone());
     }
 
     /**
@@ -528,7 +528,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @return The share, or <code>null</code> if not found
      */
     protected static ExtendedPermissionEntity discoverGuestEntity(AJAXClient client, String folder, String item, int guest) throws OXException, IOException, JSONException {
-        List<FileShare> shares = client.execute(new FileSharesRequest()).getShares();
+        List<FileShare> shares = client.execute(new FileSharesRequest()).getShares(client.getValues().getTimeZone());
         for (FileShare share : shares) {
             if (share.getId().equals(item)) {
                 return discoverGuestEntity(share.getExtendedPermissions(), guest);
@@ -852,7 +852,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected static void checkGuestPermission(OCLGuestPermission expectedPermission, ExtendedPermissionEntity actual) {
         assertNotNull("No guest permission entitiy for entity " + expectedPermission.getEntity(), actual);
-        assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getExpiry());
         checkPermissions(expectedPermission, actual.toFolderPermission(expectedPermission.getFuid()));
         checkRecipient(expectedPermission.getRecipient(), actual);
     }
