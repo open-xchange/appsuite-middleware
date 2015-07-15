@@ -50,6 +50,7 @@
 package com.openexchange.share.notification.impl.mail;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.session.Session;
@@ -133,6 +134,7 @@ public class MailNotifications {
         private String message;
         private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
         private String shareUrl;
+        private Date expiryDate;
 
         private ShareCreatedBuilder() {
             super(NotificationType.SHARE_CREATED);
@@ -186,6 +188,17 @@ public class MailNotifications {
          */
         public ShareCreatedBuilder setShareUrl(String shareUrl) {
             this.shareUrl = shareUrl;
+            return this;
+        }
+
+        /**
+         * Sets the expiry date.
+         *
+         * @param expiryDate The expiry date
+         * @return A self reference
+         */
+        public ShareCreatedBuilder setExpiryDate(Date expiryDate) {
+            this.expiryDate = expiryDate;
             return this;
         }
 

@@ -364,7 +364,7 @@ public class ShareTool {
             Iterator<Share> iterator = shares.iterator();
             while (iterator.hasNext()) {
                 Share share = iterator.next();
-                if (null != share.getTarget() && share.getTarget().isExpired()) {
+                if (share.isExpired()) {
                     if (null == expiredShares) {
                         expiredShares = new ArrayList<Share>();
                     }

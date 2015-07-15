@@ -99,7 +99,7 @@ public class UpdateRecipientAction extends AbstractShareAction {
          */
         AnonymousRecipient recipient = null;
         try {
-            ShareRecipient tmp = ShareJSONParser.parseRecipient((JSONObject) requestData.requireData());
+            ShareRecipient tmp = ShareJSONParser.parseRecipient((JSONObject) requestData.requireData(), getTimeZone(requestData, session));
             if (false == AnonymousRecipient.class.isInstance(tmp)) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create();//TODO
             }

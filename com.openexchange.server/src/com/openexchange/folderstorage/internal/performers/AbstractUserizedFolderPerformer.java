@@ -109,7 +109,6 @@ import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
@@ -705,9 +704,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = new HashMap<ShareTarget, List<GuestPermission>>();
         for (GuestPermission permission : permissions) {
             ShareTarget target = new ShareTarget(contentType.getModule(), String.valueOf(folderID));
-            if (RecipientType.ANONYMOUS.equals(permission.getRecipient().getType())) {
-                target.setExpiryDate(((AnonymousRecipient) permission.getRecipient()).getExpiryDate());
-            }
             target.setOwnedBy(ownedBy);
             List<GuestPermission> exitingPermissions = permissionsPerTarget.get(target);
             if (null == exitingPermissions) {

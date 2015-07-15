@@ -97,13 +97,13 @@ public class RdbShare {
             folder = target.getFolder();
             item = target.getItem();
             owner = target.getOwnedBy();
-            expires = target.getExpiryDate();
             meta = target.getMeta();
         }
         created = share.getCreated();
         createdBy = share.getCreatedBy();
         modified = share.getModified();
         modifiedBy = share.getModifiedBy();
+        expires = share.getExpiryDate();
     }
 
     /**
@@ -118,8 +118,8 @@ public class RdbShare {
         share.setGuest(guest);
         share.setModified(modified);
         share.setModifiedBy(modifiedBy);
+        share.setExpiryDate(expires);
         ShareTarget target = new ShareTarget(module, folder, item);
-        target.setExpiryDate(expires);
         target.setOwnedBy(owner);
         target.setMeta(meta);
         share.setTarget(target);

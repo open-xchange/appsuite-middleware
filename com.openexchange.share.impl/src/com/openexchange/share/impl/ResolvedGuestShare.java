@@ -50,6 +50,7 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
@@ -72,6 +73,7 @@ public class ResolvedGuestShare implements GuestShare {
     protected final List<ShareTarget> targets;
     protected final DefaultGuestInfo guestInfo;
     protected ServiceLookup services;
+    protected Date expiryDate;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}.
@@ -107,6 +109,7 @@ public class ResolvedGuestShare implements GuestShare {
             if (share.getGuest() != guestUser.getId()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);
             }
+            expiryDate = share.getExpiryDate(); //TODO: expiry date as user attribute for the anonymous guest?
             if (null == moduleSupport) {
                 targets.add(share.getTarget());
             } else {
@@ -183,6 +186,11 @@ public class ResolvedGuestShare implements GuestShare {
     @Override
     public ShareTarget getSingleTarget() {
         return null != targets && 1 == targets.size() ? targets.get(0) : null;
+    }
+
+    @Override
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
     @Override

@@ -82,7 +82,7 @@ public class InviteAction extends AbstractDriveShareAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
+            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"), getTimeZone(requestData, session.getServerSession()));
             List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data, getTimeZone(requestData, session.getServerSession()));
             String message = data.optString("message", null);
             /*

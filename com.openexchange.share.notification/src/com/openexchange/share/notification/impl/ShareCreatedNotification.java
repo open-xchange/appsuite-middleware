@@ -49,6 +49,7 @@
 
 package com.openexchange.share.notification.impl;
 
+import java.util.Date;
 import java.util.List;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
@@ -96,5 +97,12 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
      * @return The URL
      */
     String getShareUrl();
+
+    /**
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    Date getExpiryDate();
 
 }

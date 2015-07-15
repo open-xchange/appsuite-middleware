@@ -129,7 +129,7 @@ public abstract class ExtendedPermission {
             if (null != requestData) {
                 jsonObject.putOpt("share_url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
             }
-            Date expiryDate = share.getShare().getTarget().getExpiryDate();
+            Date expiryDate = share.getShare().getExpiryDate();
             if (null != expiryDate) {
                 long time = null != requestData ? addTimeZoneOffset(expiryDate.getTime(), getTimeZone(requestData)) : expiryDate.getTime();
                 jsonObject.put("expiry", time);

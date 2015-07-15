@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -115,5 +116,12 @@ public interface GuestShare {
      * @return The single share target in case there is exactly one contained target in this guest share, <code>null</code>, otherwise
      */
     ShareTarget getSingleTarget();
+
+    /**
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    Date getExpiryDate();
 
 }

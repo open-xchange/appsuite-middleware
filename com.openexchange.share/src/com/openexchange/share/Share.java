@@ -68,6 +68,7 @@ public class Share implements Serializable {
     private int createdBy;
     private Date modified;
     private int modifiedBy;
+    private Date expiryDate;
 
     /**
      * Initializes a new, empty {@link Share}.
@@ -194,6 +195,33 @@ public class Share implements Serializable {
      */
     public void setModifiedBy(int modifiedBy) {
         this.modifiedBy = modifiedBy;
+    }
+
+    /**
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * Sets the date when this share expires, i.e. it should be no longer accessible.
+     *
+     * @param expiryDate The expiry date of the share
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    /**
+     * Gets a value indicating whether the share is considered as expired, i.e. an expiry date is set and is passed in the meantime.
+     *
+     * @return <code>true</code> if the share is expired, <code>false</code>, otherwise
+     */
+    public boolean isExpired() {
+        return expiryDate != null && new Date().after(expiryDate);
     }
 
     @Override

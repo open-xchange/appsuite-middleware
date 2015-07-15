@@ -59,6 +59,7 @@ import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
@@ -92,6 +93,16 @@ public abstract class AbstractShareAction implements AJAXActionService {
      */
     protected ShareService getShareService() throws OXException {
         return requireService(ShareService.class, services);
+    }
+
+    /**
+     * Gets the module support service.
+     *
+     * @return The module support service
+     * @throws OXException if the service is unavailable
+     */
+    protected ModuleSupport getModuleSupport() throws OXException {
+        return requireService(ModuleSupport.class, services);
     }
 
     /**

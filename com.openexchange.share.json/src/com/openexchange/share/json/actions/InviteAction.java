@@ -94,7 +94,7 @@ public class InviteAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"));
+            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"), getTimeZone(requestData, session));
             List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"), getTimeZone(requestData, session),
                 services.getService(ModuleSupport.class));
             String message = data.optString("message", null);

@@ -152,7 +152,6 @@ public class ShareInfoResultConverter implements ResultConverter {
     private JSONObject convert(ShareInfo share, TimeZone timeZone, AJAXRequestData requestData) throws OXException {
         try {
             JSONObject json = new JSONObject();
-
             /*
              * common share properties
              */
@@ -163,6 +162,10 @@ public class ShareInfoResultConverter implements ResultConverter {
             json.put("created_by", share.getShare().getCreatedBy());
             json.putOpt("last_modified", null != share.getShare().getModified() ? addTimeZoneOffset(share.getShare().getModified().getTime(), timeZone) : null);
             json.put("modified_by", share.getShare().getModifiedBy());
+            Date expiryDate = share.getShare().getExpiryDate();
+            if (null != expiryDate) {
+                json.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
+            }
             /*
              * share targets & recipient
              */
@@ -188,10 +191,6 @@ public class ShareInfoResultConverter implements ResultConverter {
         jsonTarget.put("module", module.isEmpty() ? String.valueOf(target.getModule()) : module);
         jsonTarget.putOpt("folder", target.getFolder());
         jsonTarget.putOpt("item", target.getItem());
-        Date expiryDate = target.getExpiryDate();
-        if (null != expiryDate) {
-            jsonTarget.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
-        }
         Map<String, Object> meta = target.getMeta();
         if (null != meta) {
             jsonTarget.put("meta", JSONCoercion.coerceToJSON(meta));

@@ -108,15 +108,6 @@ public class UpdateLinkAction extends AbstractShareAction {
                         /*
                          * apply changes based on present data in update request
                          */
-                        if (json.has("expiry_date")) {
-                            String expiry = json.optString("expiry_date");
-                            try {
-                                updatePerformer.setExpiry(null == expiry ? null :
-                                    new Date(ShareJSONParser.removeTimeZoneOffset(Long.valueOf(expiry), getTimeZone(requestData, session))));
-                            } catch (NumberFormatException e) {
-                                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
-                            }
-                        }
                         if (json.has("meta")) {
                             if (json.isNull("meta")) {
                                 updatePerformer.setMeta(null);
@@ -124,9 +115,16 @@ public class UpdateLinkAction extends AbstractShareAction {
                                 updatePerformer.setMeta((Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
                             }
                         }
-                        if (json.has("password")) {
+                        if (json.has("password") || json.has("expiry_date")) {
+                            Date expiry;
+                            try {
+                                expiry = new Date(ShareJSONParser.removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session)));
+                            } catch (NumberFormatException e) {
+                                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", json.get("expiry_date"), e);
+                            }
                             AnonymousRecipient recipient = new AnonymousRecipient();
                             recipient.setPassword(json.optString("password", null));
+                            recipient.setExpiryDate(expiry);
                             updatePerformer.setRecipient(recipient);
                         }
                         /*

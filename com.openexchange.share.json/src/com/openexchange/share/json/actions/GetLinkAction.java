@@ -110,8 +110,8 @@ public class GetLinkAction extends AbstractShareAction {
                     if (RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
                         JSONObject jResult = new JSONObject();
                         jResult.put("url", info.getShareURL(DefaultRequestContext.newInstance(requestData)));
-                        if (null != info.getShare().getTarget().getExpiryDate()) {
-                            jResult.put("expiry_date", info.getShare().getTarget().getExpiryDate().getTime());
+                        if (null != info.getShare().getExpiryDate()) {
+                            jResult.put("expiry_date", info.getShare().getExpiryDate().getTime());
                         }
                         jResult.put("has_password", null != info.getGuest().getPassword());
                         return new AJAXRequestResult(jResult, new Date(), "json");
@@ -136,8 +136,8 @@ public class GetLinkAction extends AbstractShareAction {
              */
             JSONObject jResult = new JSONObject();
             jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
-            if (null != target.getExpiryDate()) {
-                jResult.put("expiry_date", target.getExpiryDate().getTime());
+            if (null != share.getFirstInfo().getShare().getExpiryDate()) {
+                jResult.put("expiry_date", share.getFirstInfo().getShare().getExpiryDate().getTime());
             }
             jResult.put("has_password", null != share.getGuestInfo().getPassword());
             return new AJAXRequestResult(jResult, new Date(), "json");

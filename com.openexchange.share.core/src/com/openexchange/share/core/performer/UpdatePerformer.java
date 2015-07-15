@@ -92,8 +92,6 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     private final Date clientLastModified;
 
     private AnonymousRecipient recipient;
-    private Date expiry;
-    private boolean expirySet;
     private Map<String, Object> meta;
     private boolean metaSet;
 
@@ -116,12 +114,6 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
         return this;
     }
 
-    public UpdatePerformer setExpiry(Date expiry) {
-        this.expiry = expiry;
-        this.expirySet = true;
-        return this;
-    }
-
     public UpdatePerformer setMeta(Map<String, Object> meta) {
         this.meta = meta;
         this.metaSet = true;
@@ -133,7 +125,7 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     }
 
     private boolean needsTargetUpdate() {
-        return metaSet || expirySet;
+        return metaSet;
     }
 
     private boolean needsPermissionUpdate() {
@@ -235,7 +227,7 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     }
 
     private List<ShareTarget> getTargetsForShareUpdate(List<ShareInfo> originalShares) {
-        if (null == originalShares || (false == metaSet && false == expirySet)) {
+        if (null == originalShares || false == metaSet) {
             return Collections.emptyList();
         }
         List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(originalShares.size());
@@ -251,17 +243,6 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
     private ShareTarget getTargetForShareUpdate(ShareInfo originalShare) {
         ShareTarget originalTarget = originalShare.getShare().getTarget();
         ShareTarget modifiedTarget = null;
-        if (expirySet) {
-            Date originalExpiry = originalTarget.getExpiryDate();
-            if (null == expiry && null != originalExpiry ||
-                null != expiry && null == originalExpiry ||
-                null != expiry && null != originalExpiry && false == expiry.equals(originalExpiry)) {
-                if (null == modifiedTarget) {
-                    modifiedTarget = originalTarget.clone();
-                }
-                modifiedTarget.setExpiryDate(expiry);
-            }
-        }
         if (metaSet) {
             Map<String, Object> originalMeta = originalTarget.getMeta();
             if (null == meta && null != originalMeta ||

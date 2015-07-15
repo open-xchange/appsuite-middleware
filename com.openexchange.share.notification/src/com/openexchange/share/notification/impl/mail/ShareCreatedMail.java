@@ -224,7 +224,7 @@ public class ShareCreatedMail extends NotificationMail {
             vars.put(USER_MESSAGE, data.notification.getMessage());
         }
 
-        Date expiryDate = data.notification.getShareTargets().iterator().next().getExpiryDate();
+        Date expiryDate = data.notification.getExpiryDate();
         if (data.targetUser.isGuest() && expiryDate != null) { // no expiry for internal users yet
             DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, data.targetUser.getLocale());
             Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(data.targetUser.getTimeZone()).getOffset(expiryDate.getTime()));

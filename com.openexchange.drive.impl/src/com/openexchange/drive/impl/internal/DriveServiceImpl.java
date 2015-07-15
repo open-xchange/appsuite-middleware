@@ -543,7 +543,6 @@ public class DriveServiceImpl implements DriveService {
         for (DriveShareTarget target : targets) {
             String path = target.getPath();
             ShareTarget shareTarget = new ShareTarget();
-            shareTarget.setExpiryDate(target.getExpiryDate());
             shareTarget.setModule(FolderObject.INFOSTORE);
             if (target.getName() != null && !Strings.isEmpty(target.getName())) {
                 String name = target.getName();
@@ -578,12 +577,12 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
         UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
-        updatePerformer.setExpiry(expiry);
         updatePerformer.setMeta(meta);
-        if (password != null || bits != -1) {
+        if (password != null || bits != -1 || null != expiry) {
             AnonymousRecipient recipient = new AnonymousRecipient();
             recipient.setPassword(password);
             recipient.setBits(bits);
+            recipient.setExpiryDate(expiry);
             updatePerformer.setRecipient(recipient);
         }
         updatePerformer.perform();
