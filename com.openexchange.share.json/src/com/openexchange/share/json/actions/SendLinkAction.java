@@ -49,49 +49,48 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Collections;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.CreatedShare;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.DefaultRequestContext;
-import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link GetLinkAction}
+ * {@link SendLinkAction}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class GetLinkAction extends AbstractShareAction {
-
-    /** The default permission bits to use if not supplied by the client */
-    static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
-        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
+public class SendLinkAction extends AbstractShareAction {
 
     /**
-     * Initializes a new {@link GetLinkAction}.
+     * Initializes a new {@link SendLinkAction}.
      *
-     * @param services A service lookup reference
+     * @param services The service lookup
      */
-    public GetLinkAction(ServiceLookup services) {
+    public SendLinkAction(ServiceLookup services) {
         super(services);
     }
 
@@ -99,51 +98,62 @@ public class GetLinkAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            ShareTarget target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session),
-                services.getService(ModuleSupport.class));
-
-            ShareService shareService = services.getService(ShareService.class);
-            List<ShareInfo> shares = shareService.getShares(session, moduleFor(target), target.getFolder(), target.getItem());
-            if (!shares.isEmpty()) {
-                for (ShareInfo info : shares) {
-                    if (RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
-                        JSONObject jResult = new JSONObject();
-                        jResult.put("url", info.getShareURL(DefaultRequestContext.newInstance(requestData)));
-                        if (null != info.getShare().getExpiryDate()) {
-                            jResult.put("expiry_date", info.getShare().getExpiryDate().getTime());
-                        }
-                        jResult.put("has_password", null != info.getGuest().getPassword());
-                        return new AJAXRequestResult(jResult, new Date(), "json");
+            ShareTarget target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session), services.getService(ModuleSupport.class));
+            String jTransport = json.optString("transport", null);
+            if (jTransport == null || "mail".equals(jTransport)) {
+                ShareService shareService = services.getService(ShareService.class);
+                List<ShareInfo> shares = shareService.getShares(session, moduleFor(target), target.getFolder(), target.getItem());
+                ShareInfo link = null;
+                for (ShareInfo share : shares) {
+                    if (share.getGuest().getRecipientType() == RecipientType.ANONYMOUS) {
+                        link = share;
+                        break;
                     }
                 }
+
+                if (link == null) {
+                    throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
+                }
+
+                JSONArray jRecipients = json.getJSONArray("recipients");
+                List<Object> transportInfos = new ArrayList<>();
+                for (int i = 0; i < jRecipients.length(); i++) {
+                    transportInfos.add(parseAddress(jRecipients.getJSONArray(i)));
+                }
+
+                ShareNotificationService shareNotificationService = services.getService(ShareNotificationService.class);
+                List<OXException> warnings = shareNotificationService.sendLinkNotifications(
+                    Transport.MAIL,
+                    transportInfos,
+                    json.optString("message", null),
+                    link,
+                    session,
+                    DefaultRequestContext.newInstance(requestData));
+
+                AJAXRequestResult result = new AJAXRequestResult();
+                result.addWarnings(warnings);
+                result.setResultObject(new JSONObject(), "json");
+                result.setTimestamp(new Date());
+                return result;
             }
 
-            String password = json.hasAndNotNull("password") ? json.getString("password") : null;
-            /*
-             * prepare anonymous recipient
-             */
-            AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setBits(DEFAULT_READONLY_PERMISSION_BITS);
-            recipient.setPassword(password);
-            /*
-             * create share
-             */
-            CreatePerformer createPerformer = new CreatePerformer(Collections.<ShareRecipient> singletonList(recipient), Collections.<ShareTarget> singletonList(target), session, services);
-            CreatedShare share = createPerformer.perform().getShare(recipient);
-            /*
-             * wrap share token & url into JSON result & return
-             */
-            JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
-            if (null != share.getFirstInfo().getShare().getExpiryDate()) {
-                jResult.put("expiry_date", share.getFirstInfo().getShare().getExpiryDate().getTime());
-            }
-            jResult.put("has_password", null != share.getGuestInfo().getPassword());
-            return new AJAXRequestResult(jResult, new Date(), "json");
+            throw ShareNotifyExceptionCodes.UNKNOWN_NOTIFICATION_TRANSPORT.create(jTransport);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        } catch (ClassCastException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    private static InternetAddress parseAddress(JSONArray jRecipient) throws JSONException, OXException {
+        try {
+            if (jRecipient.length() == 1) {
+                return new QuotedInternetAddress(jRecipient.getString(0));
+            } else if (jRecipient.length() == 2) {
+                return new QuotedInternetAddress(jRecipient.getString(1), jRecipient.getString(0), "UTF-8");
+            }
+
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+        } catch (AddressException | UnsupportedEncodingException e) {
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
         }
     }
 

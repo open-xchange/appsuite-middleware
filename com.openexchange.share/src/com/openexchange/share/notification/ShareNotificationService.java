@@ -55,6 +55,7 @@ import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.RequestContext;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -85,7 +86,19 @@ public interface ShareNotificationService {
      */
     List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares shares, String message, Session session, RequestContext requestContext);
 
-    List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, ShareTarget target, Session session, RequestContext requestContext);
+    /**
+     * Sends notifications about one or more created shares to multiple recipients.
+     *
+     * @param transport The type of {@link Transport} to use when sending notifications
+     * @param entities The entities to notify
+     * @param message The (optional) additional message for the notification. Can be <code>null</code>.
+     * @param session The session of the notifying user
+     * @param requestContext The request context
+     * @return Any exceptions occurred during notification, or an empty list if all was fine
+     */
+    List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, RequestContext requestContext);
+
+    List<OXException> sendLinkNotifications(Transport transport, List<Object> transportInfos, String message, ShareInfo link, Session session, RequestContext requestContext);
 
     /**
      * Send a notification mail that requests a confirmation for a requested password reset from the user.

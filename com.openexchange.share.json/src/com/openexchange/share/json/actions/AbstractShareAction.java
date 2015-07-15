@@ -55,10 +55,12 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.tools.session.ServerSession;
@@ -151,6 +153,16 @@ public abstract class AbstractShareAction implements AJAXActionService {
         }
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
         return timeZone;
+    }
+
+    /**
+     * Gets the string representation of a share targets module identifier.
+     *
+     * @param target The share target
+     * @return The module string
+     */
+    protected static String moduleFor(ShareTarget target) {
+        return Module.getModuleString(target.getModule(), -1);
     }
 
 }

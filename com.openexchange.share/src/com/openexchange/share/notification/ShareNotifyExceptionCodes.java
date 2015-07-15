@@ -101,6 +101,11 @@ public enum ShareNotifyExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_MAIL_ADDRESS("\"%1$s\" is not a valid email address.", INVALID_MAIL_ADDRESS_MSG, Category.CATEGORY_USER_INPUT, 4),
 
+    /**
+     * Unknown notification transport: %1$s.
+     */
+    UNKNOWN_NOTIFICATION_TRANSPORT("Unknown notification transport: %1$s.", null, Category.CATEGORY_ERROR, 5)
+
     ;
 
     public static final String PREFIX = "SHR_NOT";

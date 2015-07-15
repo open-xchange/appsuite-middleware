@@ -145,7 +145,10 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
     NO_MULTIPLE_TARGETS_LINK(ShareExceptionMessages.NO_MULTIPLE_TARGETS_LINK_MSG, ShareExceptionMessages.NO_MULTIPLE_TARGETS_LINK_MSG, Category.CATEGORY_PERMISSION_DENIED, 21),
 
     /** You cannot create more than one link per folder or item. **/
-    LINK_ALREADY_EXISTS(ShareExceptionMessages.LINK_ALREADY_EXISTS_MSG, ShareExceptionMessages.LINK_ALREADY_EXISTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 22)
+    LINK_ALREADY_EXISTS(ShareExceptionMessages.LINK_ALREADY_EXISTS_MSG, ShareExceptionMessages.LINK_ALREADY_EXISTS_MSG, Category.CATEGORY_PERMISSION_DENIED, 22),
+
+    /** A link for target [%1$s - %2$s - %2$s] does not exist. **/
+    INVALID_LINK_TARGET("A link for target [%1$s - %2$s - %2$s] does not exist.", null, Category.CATEGORY_ERROR, 23),
 
     ;
 

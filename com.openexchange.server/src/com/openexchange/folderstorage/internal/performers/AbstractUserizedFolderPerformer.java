@@ -678,7 +678,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 storageParameters.addWarning(e);
             }
         } else {
-            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, requestContext);
+            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, null, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, requestContext);
             if (storageParameters != null) {
                 for (OXException warning : warnings) {
                     storageParameters.addWarning(warning);

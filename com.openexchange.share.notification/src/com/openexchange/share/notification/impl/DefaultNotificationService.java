@@ -74,6 +74,7 @@ import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.RequestContext;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
@@ -197,7 +198,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, ShareTarget target, Session session, RequestContext requestContext) {
+    public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, RequestContext requestContext) {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -268,12 +269,48 @@ public class DefaultNotificationService implements ShareNotificationService {
                 } else {
                     shareUrl = ShareLinks.generateInternal(requestContext, target);
                 }
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, Collections.singletonList(target), null, shareUrl, session, requestContext);
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, Collections.singletonList(target), message, shareUrl, session, requestContext);
                 send(shareNotification);
             } catch (Exception e) {
                 String mailAddress = null;
                 if (user != null) {
                     mailAddress = user.getMail();
+                }
+                collectWarning(warnings, e, mailAddress);
+            }
+        }
+
+        return warnings;
+    }
+
+    @Override
+    public List<OXException> sendLinkNotifications(Transport transport, List<Object> transportInfos, String message, ShareInfo link, Session session, RequestContext requestContext) {
+        if (transport != Transport.MAIL) {
+            throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
+        }
+
+        GuestInfo guestInfo = link.getGuest();
+        List<OXException> warnings = new ArrayList<OXException>();
+        for (Object transportInfoObj : transportInfos) {
+            InternetAddress transportInfo = null;
+            try {
+                transportInfo = (InternetAddress) transportInfoObj;
+                ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
+                    .setTransportInfo(transportInfo)
+                    .setContextID(session.getContextId())
+                    .setGuestID(guestInfo.getGuestID())
+                    .setLocale(guestInfo.getLocale())
+                    .setSession(session)
+                    .setTargets(Collections.singletonList(link.getShare().getTarget()))
+                    .setMessage(message)
+                    .setRequestContext(requestContext)
+                    .setShareUrl(link.getShareURL(requestContext))
+                    .build();
+                send(notification);
+            } catch (Exception e) {
+                String mailAddress = null;
+                if (transportInfo != null) {
+                    mailAddress = transportInfo.getAddress();
                 }
                 collectWarning(warnings, e, mailAddress);
             }

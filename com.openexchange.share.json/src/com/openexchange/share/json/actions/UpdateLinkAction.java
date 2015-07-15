@@ -58,7 +58,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
@@ -100,7 +99,7 @@ public class UpdateLinkAction extends AbstractShareAction {
             ShareTarget target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session),
                 services.getService(ModuleSupport.class));
             ShareService shareService = services.getService(ShareService.class);
-            List<ShareInfo> shares = shareService.getShares(session, Module.getModuleString(target.getModule(), Integer.parseInt(target.getFolder())), target.getFolder(), target.getItem());
+            List<ShareInfo> shares = shareService.getShares(session, moduleFor(target), target.getFolder(), target.getItem());
             if (!shares.isEmpty()) {
                 for (ShareInfo info : shares) {
                     if (RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
@@ -140,9 +139,8 @@ public class UpdateLinkAction extends AbstractShareAction {
                     }
                 }
             }
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create();
 
-
+            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
