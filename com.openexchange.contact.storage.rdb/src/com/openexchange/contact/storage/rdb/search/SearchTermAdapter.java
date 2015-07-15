@@ -350,11 +350,15 @@ public class SearchTermAdapter extends DefaultSearchAdapter {
                     parameters.add(Integer.valueOf(Tools.parse(stringValue)));
                 }
             } else {
-                String preparedPattern = StringCollection.prepareForSearch(stringValue, false, true);
-                if (containsWildcards(preparedPattern)) {
+                String preparedPattern;
+                if (StringCollection.containsWildcards(stringValue)) {
                     // use "LIKE" search
+                    preparedPattern = StringCollection.prepareForSearch(stringValue, false, true);
                     final int index = stringBuilder.lastIndexOf("=");
                     stringBuilder.replace(index, index + 1, "LIKE");
+                } else {
+                    // use "EQUALS" search
+                    preparedPattern = stringValue;
                 }
                 parameters.add(preparedPattern);
             }

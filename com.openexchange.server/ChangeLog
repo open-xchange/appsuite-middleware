@@ -1,3 +1,7 @@
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39712: Distinguish between wildcard and literal search in contacts
+
 * 2015-07-14 - lars.hoogestraat@open-xchange.com
 
  - Fix for bug 37472: Do not update message flags when saving message as draft
