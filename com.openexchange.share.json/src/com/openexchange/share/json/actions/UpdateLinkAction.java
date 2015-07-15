@@ -116,15 +116,15 @@ public class UpdateLinkAction extends AbstractShareAction {
                             }
                         }
                         if (json.has("password") || json.has("expiry_date")) {
-                            Date expiry;
-                            try {
-                                expiry = new Date(ShareJSONParser.removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session)));
-                            } catch (NumberFormatException e) {
-                                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", json.get("expiry_date"), e);
-                            }
                             AnonymousRecipient recipient = new AnonymousRecipient();
+                            if (json.has("expiry_date")) {
+                                try {
+                                    recipient.setExpiryDate(new Date(ShareJSONParser.removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session))));
+                                } catch (NumberFormatException e) {
+                                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", json.get("expiry_date"), e);
+                                }
+                            }
                             recipient.setPassword(json.optString("password", null));
-                            recipient.setExpiryDate(expiry);
                             updatePerformer.setRecipient(recipient);
                         }
                         /*
