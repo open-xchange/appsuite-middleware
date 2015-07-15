@@ -60,7 +60,6 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.util.ImapUtility;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -218,14 +217,22 @@ public class DovecotPushListener implements PushListener, Runnable {
                         cmdBuilder.append("user=").append(session.getUserId()).append('@').append(session.getContextId());
 
                         // URL
+                        /*-
+                         * Currently not needed as statically configured in Dovecot plugin
+                         *
                         if (null != uri) {
                             cmdBuilder.append('\t').append("url=").append(uri);
                         }
+                        */
 
                         // Auth data
+                        /*-
+                         * Currently not needed as statically configured in Dovecot plugin
+                         *
                         if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
                             cmdBuilder.append('\t').append("auth=basic:").append(authLogin).append(':').append(authPassword);
                         }
+                        */
 
                         cmdBuilder.append(")");
                         command = cmdBuilder.toString();
