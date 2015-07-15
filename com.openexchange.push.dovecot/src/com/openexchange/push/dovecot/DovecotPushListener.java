@@ -214,7 +214,7 @@ public class DovecotPushListener implements PushListener, Runnable {
                         cmdBuilder.append("(/private/vendor/vendor.dovecot/http-notify ");
 
                         // User
-                        cmdBuilder.append("user=").append(session.getUserId()).append('@').append(session.getContextId());
+                        cmdBuilder.append("\"user=").append(session.getUserId()).append('@').append(session.getContextId()).append('"');
 
                         // URL
                         /*-
