@@ -54,7 +54,6 @@ public final class CapabilitiesEventHandler implements EventHandler {
                     }
 
                     LOGGER.info("Cleared capabilities caches for user {} in context {} as last active session was dropped.", userId, contextId);
-
                 }
             }
         }

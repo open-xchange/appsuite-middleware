@@ -97,7 +97,7 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      */
     INVALID_CREDENTIALS_MISSING_USER_MAPPING("Missing user mapping for user \"%1$s\". Login failed.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
-     * Missing context mapping for context "%1$s". Login failed. 
+     * Missing context mapping for context "%1$s". Login failed.
      */
     INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING("Missing context mapping for context \"%1$s\". Login failed.", INVALID_CREDENTIALS_MSG, Category.CATEGORY_USER_INPUT, 6),
     /**
@@ -142,6 +142,14 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
      * Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.
      */
     DONT_USER_AGENT("Value of User-Agent header must not be used as value for the client parameter. Please use a string identifying the client software.", MESSAGE, Category.CATEGORY_USER_INPUT, 21),
+    /**
+     * Thrown on login attempts that target a disabled authentication mechanism. I.e. a proprietary login mechanism is used that bypasses
+     * the authentication service. In those cases an authentication service can be registered that always throws this exception, which
+     * in turn leads to responses that denote the unavailability of the used login mechanism (e.g. '403 Forbidden' for WebDAV requests).
+     *
+     * Authentication via this method is disabled.
+     */
+    AUTHENTICATION_DISABLED("Authentication via this method is disabled.", LoginExceptionMessages.AUTHENTICATION_DISABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 22)
 
     ;
 

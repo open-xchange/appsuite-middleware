@@ -119,10 +119,8 @@ public class ExtendedMDCFilterTest {
         ExtendedMDCFilter filter = new ExtendedMDCFilter(Collections.singleton("com.openexchange"));
         filter.addTuple("context", "3");
         filter.addLogger("com.openexchange.a", Level.TRACE);
-
         Logger logger = mock(Logger.class);
         when(logger.getName()).thenReturn("com.openexchange.a.some.logger");
-        
         Assert.assertEquals(FilterReply.NEUTRAL, filter.decide(null, logger, Level.TRACE, "Some message", null, null));
 
         try {

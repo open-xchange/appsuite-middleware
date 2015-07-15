@@ -136,7 +136,7 @@ public class RdbUserStorage extends UserStorage {
     private static final String INSERT_LOGIN_INFO = "INSERT INTO login2user (cid, id, uid) VALUES (?, ?, ?)";
 
     private final ConcurrentMap<String, Boolean> v780Schemas;
-    
+
     /**
      * Default constructor.
      */
@@ -1160,13 +1160,13 @@ public class RdbUserStorage extends UserStorage {
             		stmt.setInt(++parameterIndex, contextId);
                     TIntIterator iterator = userIds.iterator();
                 	while (iterator.hasNext()) {
-                		stmt.setInt(++parameterIndex, iterator.next());               		
+                		stmt.setInt(++parameterIndex, iterator.next());
                 	}
                     result = stmt.executeQuery();
                     while (result.next()) {
                     	int guestCreatedBy = result.getInt(1);
                     	if (0 < guestCreatedBy) {
-                    		userIds.remove(guestCreatedBy);	
+                    		userIds.remove(guestCreatedBy);
                     	}
                     }
             	} catch (SQLException e) {
@@ -1394,11 +1394,11 @@ public class RdbUserStorage extends UserStorage {
     protected void stopInternal() {
         // Nothing to tear down.
     }
-    
+
     /**
-     * Gets a value indicating whether the supplied database connection points to a database schema that already contains changes 
+     * Gets a value indicating whether the supplied database connection points to a database schema that already contains changes
      * introduced with version <code>7.8.0</code>, i.e. if the <code>user</code> table already has the <code>guestCreatedBy</code> column.
-     * 
+     *
      * @param connection The connection to check
      * @param contextID The context identifier
      * @return <code>true</code> if the <code>user</code> table has the <code>guestCreatedBy</code> column, <code>false</code>, otherwise
@@ -1421,12 +1421,12 @@ public class RdbUserStorage extends UserStorage {
     			} finally {
     				DBUtils.closeSQLStuff(result);
         		}
-        		v780Schemas.putIfAbsent(schemaName, value);    		
+        		v780Schemas.putIfAbsent(schemaName, value);
         	}
         	return value.booleanValue();
 		} catch (SQLException e) {
 			throw LdapExceptionCode.SQL_ERROR.create(e, e.getMessage()).setPrefix("USR");
-		}    	
+		}
     }
 
 }

@@ -23,12 +23,10 @@ if ( $ARGV[0] and $ARGV[0] eq "config")
 	print "graph_args --base 1000 -l 0\n";
 	print "graph_category Open Xchange\n";
 	print "graph_vlabel Number\n";
-	print "a.label Overall count\n";
+	print "a.label Locally owned\n";
 	print "a.draw LINE1\n";
-	print "b.label Locally owned\n";
+	print "b.label Locally backed up\n";
 	print "b.draw LINE1\n";
-	print "c.label Locally backed up\n";
-	print "c.draw LINE1\n";
 	exit 0;
 }
 
@@ -37,9 +35,8 @@ my $username = $ENV{oxJolokiaUser};
 my $password = $ENV{oxJolokiaPassword};
 
 testHazelcast();
-callUrl("a","/read/com.hazelcast:*,type=IMap,name=sessions-*/size","size");
-callUrl("b","/read/com.hazelcast:*,type=IMap,name=sessions-*/localBackupEntryCount","localBackupEntryCount");
-callUrl("c","/read/com.hazelcast:*,type=IMap,name=sessions-*/localOwnedEntryCount","localOwnedEntryCount",);
+callUrl("a","/read/com.hazelcast:*,type=IMap,name=sessions-*/localBackupEntryCount","localBackupEntryCount");
+callUrl("b","/read/com.hazelcast:*,type=IMap,name=sessions-*/localOwnedEntryCount","localOwnedEntryCount",);
 
 sub callUrl {
 	my $ua = LWP::UserAgent->new();

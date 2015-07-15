@@ -112,12 +112,12 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** Do we want to send absolute or relative redirects */
     private boolean isAbsoluteRedirect = false;
 
+    /** The maximum header size for an HTTP request in bytes. */
+    private int maxHttpHeaderSize = 8192;
+
     /** Do we want to enable the AJP Filter for incoming requests */
     private boolean isAJPEnabled = false;
 
-    /** The maximum header size for an HTTP request in bytes. */
-    private int maxHttpHeaderSize = 8192;
-    
 
     // server properties
 
@@ -502,10 +502,10 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     public int getMaxNumberOfHttpSessions() {
         return maxNumberOfHttpSessions;
     }
-    
+
     /**
      * Get the maximum header size for an HTTP request in bytes.
-     * 
+     *
      * @return the maximum header size for an HTTP request in bytes.
      */
     public int getMaxHttpHeaderSize() {

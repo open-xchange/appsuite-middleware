@@ -100,6 +100,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // Indicates a deactivated user
     public static final String USER_NOT_ACTIVE_MSG = "The user account is not activated.";
 
+    // Authentication via this method is disabled.
+    public static final String AUTHENTICATION_DISABLED_MSG = "Authentication via this method is disabled.";
+
     private LoginExceptionMessages() {
         super();
     }

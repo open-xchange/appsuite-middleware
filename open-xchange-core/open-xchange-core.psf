@@ -134,6 +134,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.secret.recovery.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.server"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessiond"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.session.reservation.impl"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessionstorage"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.sessionstorage.hazelcast.serialization"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,com.openexchange.snippet"/>

@@ -74,6 +74,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-recaptcha"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-report-client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-rest"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-saml-core"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-sessionstorage-hazelcast"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-smtp"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,master,open-xchange-soap-cxf"/>

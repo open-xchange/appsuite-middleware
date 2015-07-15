@@ -284,4 +284,5 @@ public interface SessionStorageService {
      * @throws OXException
      */
     int getUserSessionCount(int userId, int contextId) throws OXException;
+
 }

@@ -88,14 +88,28 @@ Build for patch 2015-06-08 (2540)
 Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-05-15 (2529)
+* Fri May 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-12 (2478)
+* Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2497)
 * Thu Apr 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-05-04 (2496)
+* Tue Apr 28 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-05-04 (2505)
 * Fri Apr 24 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-09 (2495)
+* Tue Apr 14 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-04-13 (2473)
 * Wed Apr 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-04-13 (2474)
 * Tue Apr 07 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2013-04-09 (2486)
+* Thu Mar 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-03-30 (2459)
+* Mon Mar 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-03-20
+* Tue Mar 17 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-03-18
 * Fri Mar 13 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Twelfth candidate for 7.6.2 release
 * Fri Mar 06 2015 Marcus Klein <marcus.klein@open-xchange.com>

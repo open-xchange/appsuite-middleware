@@ -139,6 +139,10 @@
 
  - Fix for bug 37112: Ensure that the complete appointment data is loaded for change exceptions before applying outgoing patches
 
+* 2015-03-04 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37106: Prevent from preliminary deletion of temporary files
+
 * 2015-03-07 - thorben.betten@open-xchange.com
 
  - Fix for bug 37141: Do not discard subsequent inline test parts
@@ -293,6 +297,15 @@
 * 2015-02-05 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 36484: In case of a negative IP check, invalidate the previous session and continue with the form-login procedure
+
+* 2015-02-03 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36420: Do not change OAuth configuration anymore for RPM based distros.
+
+* 2015-02-02 - thorben.betten@open-xchange.com
+
+ - Fix for bug 36320: Improved detection of transfer-encoding from a message part
+ - Fix for bug 36412: Proper handling of weird pseudo CSS attributes in HTML elements
 
 * 2015-02-03 - thorben.betten@open-xchange.com
 
