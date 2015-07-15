@@ -95,7 +95,8 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  */
 public class DovecotPushListener implements PushListener, Runnable {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
+    /** The logger */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
     private static final long TIMEOUT_THRESHOLD_MILLIS = DovecotPushClusterLock.TIMEOUT_MILLIS - 60000L;
@@ -200,7 +201,7 @@ public class DovecotPushListener implements PushListener, Runnable {
             mailAccess.connect(false);
 
             // Get IMAP store
-            IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+            final IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
 
             imapFolder.doCommand(new ProtocolCommand() {
@@ -242,6 +243,7 @@ public class DovecotPushListener implements PushListener, Runnable {
                     Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
                     Response response = r[r.length - 1];
                     if (response.isOK()) {
+                        LOGGER.info("Advertised push notification for {} using {}", imapStore, command);
                         return Boolean.TRUE;
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
