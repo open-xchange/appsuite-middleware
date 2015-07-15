@@ -3,7 +3,7 @@ Name:           open-xchange-meta
 BuildArch:	noarch
 #!BuildIgnore: post-build-checks
 Version:	@OXVERSION@
-%define        ox_release 24
+%define        ox_release 25
 Release:	%{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -419,6 +419,8 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Jul 15 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-07-20 (2614)
 * Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-07-10
 * Fri Jul 03 2015 Carsten Hoeger <choeger@open-xchange.com>
@@ -438,9 +440,9 @@ Build for patch 2015-05-15 (2529)
 * Fri May 08 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-05-12 (2478)
 * Thu Apr 30 2015 Carsten Hoeger <choeger@open-xchange.com>
-Build for patch 2015-05-04 (2497)
-* Thu Apr 30 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-05-04 (2496)
+* Thu Apr 30 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-05-04 (2497)
 * Tue Apr 28 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-05-04 (2505)
 * Fri Apr 24 2015 Carsten Hoeger <choeger@open-xchange.com>

@@ -65,7 +65,9 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %defattr(-,root,root)
 
 %changelog
-* Fri May 08 2015 Steffen Templin <steffen.templin@open-xchange.com>
-Build for patch 2015-05-12 (2478)
+* Wed Jul 15 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Build for patch 2015-07-20 (2614)
+* Tue Jul 14 2015 Steffen Templin <steffen.templin@open-xchange.com>
+Prepare for 7.6.2 hotfix
 * Tue Mar 24 2015 Steffen Templin <steffen.templin@open-xchange.com>
 initial packaging for SAML core package
