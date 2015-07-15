@@ -218,9 +218,6 @@ public final class FolderParser {
              */
             ParsedGuestPermission parsedGuestPermission = new ParsedGuestPermission();
             parsedGuestPermission.setRecipient(parseRecipient(type, jsonObject));
-            if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
-                parsedGuestPermission.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
-            }
             permission = parsedGuestPermission;
         } else {
             /*
@@ -265,6 +262,10 @@ public final class FolderParser {
         switch (type) {
         case ANONYMOUS:
             AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
+            anonymousRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
+            if (jsonObject.hasAndNotNull(FolderField.EXPIRY_DATE.getName())) {
+                anonymousRecipient.setExpiryDate(new Date(jsonObject.getLong(FolderField.EXPIRY_DATE.getName())));
+            }
             anonymousRecipient.setPassword(jsonObject.optString(FolderField.PASSWORD.getName(), null));
             recipient = anonymousRecipient;
             break;

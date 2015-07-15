@@ -814,7 +814,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
         assertEquals("Target module wrong", FolderObject.INFOSTORE, actual.getTarget().getModule());
         assertEquals("Target folder wrong", expectedFile.getFolderId(), actual.getTarget().getFolder());
         assertEquals("Target item wrong", expectedFile.getId(), actual.getTarget().getItem());
-        assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getTarget().getExpiryDate());
     }
 
     /**
@@ -841,7 +840,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected static void checkGuestPermission(FileStorageGuestObjectPermission expectedPermission, ExtendedPermissionEntity actual) {
         assertNotNull("No guest permission entitiy", actual);
-        assertEquals("Expiry date wrong", expectedPermission.getExpiryDate(), actual.getExpiry());
         checkPermissions(expectedPermission, actual.toObjectPermission());
         checkRecipient(expectedPermission.getRecipient(), actual);
     }
@@ -875,7 +873,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
     private static void checkRecipient(ShareRecipient expected, ExtendedPermissionEntity actual) {
         assertEquals("Wrong recipient type", expected.getType(), actual.getType());
         if (RecipientType.ANONYMOUS.equals(expected.getType())) {
-            assertEquals("Wrong password", ((AnonymousRecipient) expected).getPassword(), actual.getPassword());
+            AnonymousRecipient anonymousRecipient = (AnonymousRecipient) expected;
+            assertEquals("Wrong password", anonymousRecipient.getPassword(), actual.getPassword());
+            assertEquals("Expiry date wrong", anonymousRecipient.getExpiryDate(), actual.getExpiry());
         } else if (RecipientType.GUEST.equals(expected.getType())) {
             GuestRecipient guestRecipient = (GuestRecipient) expected;
             assertEquals("Wrong display name", guestRecipient.getDisplayName(), actual.getDisplayName());
@@ -984,7 +984,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected static FileStorageGuestObjectPermission asObjectPermission(OCLGuestPermission guestPermission) {
         DefaultFileStorageGuestObjectPermission objectPermission = new DefaultFileStorageGuestObjectPermission();
         objectPermission.setEntity(guestPermission.getEntity());
-        objectPermission.setExpiryDate(guestPermission.getExpiryDate());
         objectPermission.setGroup(guestPermission.isGroupPermission());
         objectPermission.setRecipient(guestPermission.getRecipient());
         if (guestPermission.canDeleteAllObjects()) {
