@@ -865,7 +865,6 @@ public abstract class ShareTest extends AbstractAJAXSession {
             GuestRecipient expectedRecipient = (GuestRecipient) expected;;
             GuestRecipient actualRecipient = (GuestRecipient) actual;
             assertEquals("Wrong e-mail address", expectedRecipient.getEmailAddress(), actualRecipient.getEmailAddress());
-            assertEquals("Wrong display name", expectedRecipient.getDisplayName(), actualRecipient.getDisplayName());
         }
     }
 
