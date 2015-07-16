@@ -211,15 +211,17 @@ public class DovecotPushListener implements PushListener, Runnable {
                     // Craft IMAP command
                     String command;
                     {
-                        StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA \"\" ");
-                        cmdBuilder.append("(/private/vendor/vendor.dovecot/http-notify ");
+                        StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA \"\" (");
+
+                        // Append path for Dovecot HTTP-Notify plug-in
+                        cmdBuilder.append("/private/vendor/vendor.dovecot/http-notify ");
 
                         // User
                         cmdBuilder.append("\"user=").append(session.getUserId()).append('@').append(session.getContextId()).append('"');
 
                         // URL
                         /*-
-                         * Currently not needed as statically configured in Dovecot plugin
+                         * Currently not needed as statically configured in Dovecot plug-in
                          *
                         if (null != uri) {
                             cmdBuilder.append('\t').append("url=").append(uri);
@@ -228,13 +230,14 @@ public class DovecotPushListener implements PushListener, Runnable {
 
                         // Auth data
                         /*-
-                         * Currently not needed as statically configured in Dovecot plugin
+                         * Currently not needed as statically configured in Dovecot plug-in
                          *
                         if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
                             cmdBuilder.append('\t').append("auth=basic:").append(authLogin).append(':').append(authPassword);
                         }
                         */
 
+                        // Closing parenthesis
                         cmdBuilder.append(")");
                         command = cmdBuilder.toString();
                     }
@@ -243,7 +246,7 @@ public class DovecotPushListener implements PushListener, Runnable {
                     Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
                     Response response = r[r.length - 1];
                     if (response.isOK()) {
-                        LOGGER.info("Advertised push notification for {} using {}", imapStore, command);
+                        LOGGER.info("Advertised push notification for {} using: {}", imapStore, command);
                         return Boolean.TRUE;
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
