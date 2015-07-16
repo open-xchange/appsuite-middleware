@@ -50,10 +50,13 @@
 package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.text.DateFormat;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
@@ -65,8 +68,8 @@ import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.BasicNotificationTemplate;
-import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.notification.FullNameBuilder;
+import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
@@ -74,39 +77,32 @@ import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.groupware.TargetProxy;
-import com.openexchange.share.groupware.TargetProxyType;
-import com.openexchange.share.notification.impl.ShareCreatedNotification;
+import com.openexchange.share.notification.impl.LinkCreatedNotification;
+import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.share.notification.impl.TextSnippets;
 import com.openexchange.user.UserService;
 
 /**
- * {@link ShareCreatedMail}
+ * {@link LinkCreatedMail}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class ShareCreatedMail extends NotificationMail {
+public class LinkCreatedMail extends NotificationMail {
 
-    static final String HAS_SHARED_ITEMS = "has_shared_items";
-    static final String PLEASE_CLICK = "please_click";
-    static final String USER_MESSAGE = "user_message";
-    static final String VIEW_ITEMS_LINK = "view_items_link";
-    static final String VIEW_ITEMS_LABEL = "view_items_label";
+    private static final String WILL_EXPIRE = "will_expire";
 
-    protected ShareCreatedMail(MailData data) {
+    private static final String USE_PASSWORD = "use_password";
+
+    /**
+     * Initializes a new {@link LinkCreatedMail}.
+     * @param data
+     */
+    public LinkCreatedMail(MailData data) {
         super(data);
     }
 
-    private static class CollectVarsData {
-        ShareCreatedNotification<InternetAddress> notification;
-        User sharingUser;
-
-        TextSnippets textSnippets;
-        String shareOwnerName;
-        HashMap<ShareTarget, TargetProxy> targetProxies;
-    }
-
-    public static ShareCreatedMail init(ShareCreatedNotification<InternetAddress> notification, TransportProvider transportProvider, ServiceLookup services) throws OXException {
+    public static LinkCreatedMail init(LinkCreatedNotification<InternetAddress> notification, TransportProvider transportProvider, ServiceLookup services) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
@@ -120,22 +116,11 @@ public class ShareCreatedMail extends NotificationMail {
         Translator translator = translatorFactory.translatorFor(targetUser.getLocale());
         TextSnippets textSnippets = new TextSnippets(translator);
 
-        List<ShareTarget> shareTargets = notification.getShareTargets();
-        HashMap<ShareTarget, TargetProxy> targetProxies = new HashMap<>(shareTargets.size());
-        HashSet<TargetProxyType> targetProxyTypes = new HashSet<>(shareTargets.size());
-        for (ShareTarget target : shareTargets) {
-            TargetProxy targetProxy = moduleSupport.load(target, notification.getSession());
-            TargetProxyType proxyType = targetProxy.getProxyType();
-            targetProxies.put(target, targetProxy);
-            targetProxyTypes.add(proxyType);
-        }
+        ShareTarget target = notification.getShareTarget();
+        TargetProxy targetProxy = moduleSupport.load(target, notification.getSession());
+        List<TargetProxy> targetProxies = Collections.singletonList(targetProxy);
 
-        CollectVarsData data = new CollectVarsData();
-        data.notification = notification;
-        data.sharingUser = sharingUser;
-        data.shareOwnerName = FullNameBuilder.buildFullName(sharingUser, translator);
-        data.targetProxies = targetProxies;
-        data.textSnippets = textSnippets;
+        String shareOwnerName = FullNameBuilder.buildFullName(sharingUser, translator);
 
         ServerConfig serverConfig = serverConfigService.getServerConfig(
             notification.getRequestContext().getHostname(),
@@ -143,7 +128,34 @@ public class ShareCreatedMail extends NotificationMail {
             context.getContextId());
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
         BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
-        Map<String, Object> vars = prepareShareCreatedVars(data);
+
+        Map<String, Object> vars = new HashMap<String, Object>();
+        boolean hasMessage = Strings.isNotEmpty(notification.getMessage());
+        String shareUrl = notification.getShareUrl();
+        String email = sharingUser.getMail();
+
+        vars.put(ShareCreatedMail.HAS_SHARED_ITEMS, textSnippets.shareStatementLong(shareOwnerName, email, targetProxies, hasMessage));
+        if (hasMessage) {
+            vars.put(ShareCreatedMail.USER_MESSAGE, notification.getMessage());
+        } else {
+            vars.put(ShareCreatedMail.PLEASE_CLICK, textSnippets.linkIntro());
+        }
+
+        vars.put(ShareCreatedMail.VIEW_ITEMS_LINK, shareUrl);
+        vars.put(ShareCreatedMail.VIEW_ITEMS_LABEL, textSnippets.linkLabel(targetProxies));
+
+        String password = notification.getPassword();
+        if (Strings.isNotEmpty(password)) {
+            vars.put(USE_PASSWORD, String.format(translator.translate(NotificationStrings.USE_PASSWORD), password));
+        }
+
+        Date expiryDate = notification.getExpiryDate();
+        if (expiryDate != null) {
+            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, targetUser.getLocale());
+            Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(targetUser.getTimeZone()).getOffset(expiryDate.getTime()));
+            vars.put(WILL_EXPIRE, String.format(translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
+        }
+
         basicTemplate.applyStyle(vars);
         FooterImage footerImage = basicTemplate.applyFooter(vars);
         String htmlContent = compileTemplate("notify.share.create.mail.html.tmpl", vars, services);
@@ -151,7 +163,7 @@ public class ShareCreatedMail extends NotificationMail {
         MailData mailData = new MailData();
         mailData.sender = getSenderAddress(configService, notification.getSession(), sharingUser);
         mailData.recipient = notification.getTransportInfo();
-        mailData.subject = textSnippets.shareStatementShort(data.shareOwnerName, data.targetProxies.values());
+        mailData.subject = textSnippets.shareStatementShort(shareOwnerName, targetProxies);
         mailData.htmlContent = htmlContent;
         mailData.footerImage = footerImage;
         mailData.context = context;
@@ -159,46 +171,7 @@ public class ShareCreatedMail extends NotificationMail {
         mailData.mailHeaders = new HashMap<>(5);
         mailData.mailHeaders.put("X-Open-Xchange-Share-Type", notification.getType().getId());
         mailData.mailHeaders.put("X-Open-Xchange-Share-URL", notification.getShareUrl());
-        return new ShareCreatedMail(mailData);
-    }
-
-    /**
-     * Prepares a mapping from template keywords to actual textual values that will be used during template rendering.
-     *
-     * @param data
-     *
-     * @param data.notification The {@link ShareCreatedNotification} containing infos about the created share
-     * @param user The {@link User} that created a new share
-     * @param data.translator The {@link Translator} used for adapting the textual template values to the recipients locale
-     * @return A mapping from template keywords to actual textual values
-     * @throws OXException
-     */
-    private static Map<String, Object> prepareShareCreatedVars(CollectVarsData data) throws OXException {
-        Map<String, Object> vars = new HashMap<String, Object>();
-        boolean hasMessage = Strings.isNotEmpty(data.notification.getMessage());
-        String shareUrl = data.notification.getShareUrl();
-        String email = data.sharingUser.getMail();
-        String fullName = data.shareOwnerName;
-
-        vars.put(HAS_SHARED_ITEMS, data.textSnippets.shareStatementLong(fullName, email, data.targetProxies.values(), hasMessage));
-        if (hasMessage) {
-            vars.put(USER_MESSAGE, data.notification.getMessage());
-        } else {
-            vars.put(PLEASE_CLICK, data.textSnippets.linkIntro());
-        }
-
-        vars.put(VIEW_ITEMS_LINK, shareUrl);
-        vars.put(VIEW_ITEMS_LABEL, data.textSnippets.linkLabel(data.targetProxies.values()));
-
-//        FIXME: for anonymous
-//        Date expiryDate = data.notification.getShareTargets().iterator().next().getExpiryDate();
-//        if (data.targetUser.isGuest() && expiryDate != null) { // no expiry for internal users yet
-//            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, data.targetUser.getLocale());
-//            Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(data.targetUser.getTimeZone()).getOffset(expiryDate.getTime()));
-//            vars.put(WILL_EXPIRE, String.format(data.translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
-//        }
-
-        return vars;
+        return new LinkCreatedMail(mailData);
     }
 
 }

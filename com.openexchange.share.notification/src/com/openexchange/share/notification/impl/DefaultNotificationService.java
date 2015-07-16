@@ -74,6 +74,7 @@ import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.RequestContext;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
@@ -295,16 +296,19 @@ public class DefaultNotificationService implements ShareNotificationService {
             InternetAddress transportInfo = null;
             try {
                 transportInfo = (InternetAddress) transportInfoObj;
-                ShareCreatedNotification<InternetAddress> notification = MailNotifications.shareCreated()
+                Share share = link.getShare();
+                LinkCreatedNotification<InternetAddress> notification = MailNotifications.linkCreated()
                     .setTransportInfo(transportInfo)
                     .setContextID(session.getContextId())
                     .setGuestID(guestInfo.getGuestID())
                     .setLocale(guestInfo.getLocale())
                     .setSession(session)
-                    .setTargets(Collections.singletonList(link.getShare().getTarget()))
+                    .setTarget(share.getTarget())
                     .setMessage(message)
                     .setRequestContext(requestContext)
                     .setShareUrl(link.getShareURL(requestContext))
+                    .setExpiryDate(share.getExpiryDate())
+                    .setPassword(guestInfo.getPassword())
                     .build();
                 send(notification);
             } catch (Exception e) {

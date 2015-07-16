@@ -49,52 +49,100 @@
 
 package com.openexchange.share.notification.impl;
 
-import java.util.List;
+import java.util.Date;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
- * A notification to inform users about created shares.
+ * A default implementation of {@link ShareCreatedNotification} that contains all
+ * necessary data as fields. Plain setters can be used to initialize an instance.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareCreatedNotification<T> extends ShareNotification<T> {
+public class DefaultLinkCreatedNotification<T> extends AbstractNotification<T> implements LinkCreatedNotification<T> {
+
+    private Session session;
+    private ShareTarget target;
+    private String message;
+    private int targetUserID;
+    private String shareUrl;
+    private Date expiryDate;
+    private String password;
 
     /**
-     * Gets the session of the new shares creator.
-     *
-     * @return The session
+     * Initializes a new {@link DefaultLinkCreatedNotification}.
      */
-    Session getSession();
+    public DefaultLinkCreatedNotification(Transport transport) {
+        super(transport, NotificationType.LINK_CREATED);
+    }
 
-    /**
-     * Gets the share targets to notify the recipient about.
-     *
-     * @return The share targets, never <code>null</code>
-     */
-    List<ShareTarget> getShareTargets();
+    public DefaultLinkCreatedNotification(Transport transport, NotificationType type) {
+        super(transport, type);
+    }
 
-    /**
-     * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
-     * {@link NotificationType}.
-     *
-     * @return The message or <code>null</code>, if nothing was provided
-     */
-    String getMessage();
+    @Override
+    public Session getSession() {
+        return session;
+    }
 
-    /**
-     * Get the id of the user something is shared to
-     *
-     * @return The user ID
-     */
-    int getTargetUserID();
+    @Override
+    public ShareTarget getShareTarget() {
+        return target;
+    }
 
-    /**
-     * Gets the URL to the according share.
-     *
-     * @return The URL
-     */
-    String getShareUrl();
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public int getTargetUserID() {
+        return targetUserID;
+    }
+
+    @Override
+    public String getShareUrl() {
+        return shareUrl;
+    }
+
+    @Override
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setTarget(ShareTarget target) {
+        this.target = target;
+    }
+
+    public void setSession(Session session) {
+        this.session = session;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setTargetUserID(int targetUserID) {
+        this.targetUserID = targetUserID;
+    }
+
+    public void setShareUrl(String shareUrl) {
+        this.shareUrl = shareUrl;
+    }
+
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
 }

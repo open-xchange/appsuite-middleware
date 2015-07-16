@@ -49,17 +49,17 @@
 
 package com.openexchange.share.notification.impl;
 
-import java.util.List;
+import java.util.Date;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
 
 /**
- * A notification to inform users about created shares.
+ * A notification to inform arbitrary recipients about created links.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ShareCreatedNotification<T> extends ShareNotification<T> {
+public interface LinkCreatedNotification<T> extends ShareNotification<T> {
 
     /**
      * Gets the session of the new shares creator.
@@ -69,11 +69,11 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
     Session getSession();
 
     /**
-     * Gets the share targets to notify the recipient about.
+     * Gets the share target to notify the recipient about.
      *
-     * @return The share targets, never <code>null</code>
+     * @return The share target, never <code>null</code>
      */
-    List<ShareTarget> getShareTargets();
+    ShareTarget getShareTarget();
 
     /**
      * Gets an optional message that will be shown to the recipient if appropriate. Whether a message is shown or not depends on the
@@ -96,5 +96,19 @@ public interface ShareCreatedNotification<T> extends ShareNotification<T> {
      * @return The URL
      */
     String getShareUrl();
+
+    /**
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible.
+     *
+     * @return The expiry date of the share, or <code>null</code> if not defined
+     */
+    Date getExpiryDate();
+
+    /**
+     * Gets the password that is necessary to access the link.
+     *
+     * @return The password or <code>null</code> if none was set.
+     */
+    String getPassword();
 
 }

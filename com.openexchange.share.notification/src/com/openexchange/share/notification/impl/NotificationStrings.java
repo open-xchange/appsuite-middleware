@@ -167,10 +167,11 @@ public class NotificationStrings implements LocalizableStrings {
     /** View items */
     public static final String VIEW_ITEMS = "View items";
 
-
-    // expires
-    /** The link will expire on $preformatted_date */
+    /** The link will expire on 01/01/16 **/
     public static final String LINK_EXPIRE = "The link will expire on %1$s";
+
+    /** The link is password protected. To see it you must use the following password: kac7Nede **/
+    public static final String USE_PASSWORD = "The link is password protected. To see it you must use the following password: %1$s";
 
     /*
      * Password reset confirm mails
