@@ -343,8 +343,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return createdFile;
     }
 
+
     /**
-     * Updates and remembers a folder.
+     * Updates and remembers a folder without cascading permission.
      *
      * @param api The folder tree to use
      * @param folder The folder to udpate
@@ -352,7 +353,22 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder) throws Exception {
-        InsertResponse insertResponse = client.execute(new UpdateRequest(api, folder));
+        return updateFolder(api, folder, false);
+    }
+
+    /**
+     * Updates and remembers a folder.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to udpate
+     * @param cascadePermissions If changed permissions shall be also applied to subfolders
+     * @return The udpated folder
+     * @throws Exception
+     */
+    protected FolderObject updateFolder(EnumAPI api, FolderObject folder, boolean cascadePermissions) throws Exception {
+        UpdateRequest request = new UpdateRequest(api, folder);
+        request.setCascadePermissions(cascadePermissions);
+        InsertResponse insertResponse = client.execute(request);
         insertResponse.fillObject(folder);
         remember(folder);
         FolderObject updatedFolder = getFolder(api, folder.getObjectID());

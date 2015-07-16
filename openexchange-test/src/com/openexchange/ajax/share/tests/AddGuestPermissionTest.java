@@ -50,6 +50,7 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Collections;
+import java.util.List;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
@@ -102,6 +103,22 @@ public class AddGuestPermissionTest extends ShareTest {
         }
     }
 
+    public void testUpdateSharedFolderWithCascadingPermissionsRandomly() throws Exception {
+        int module = randomModule();
+        testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission());
+    }
+
+    public void testUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
+                for (int module : TESTED_MODULES) {
+                    testUpdateSharedFolderWithCascadingPermissions(api, module, getDefaultFolder(module), guestPermission);
+                }
+            }
+        }
+    }
+
+
     private void testUpdateSharedFolder(EnumAPI api, int module, OCLGuestPermission guestPermission) throws Exception {
         testUpdateSharedFolder(api, module, getDefaultFolder(module), guestPermission);
     }
@@ -132,6 +149,66 @@ public class AddGuestPermissionTest extends ShareTest {
          * discover & check guest
          */
         ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
+        /*
+         * check access to share
+         */
+        GuestClient guestClient = resolveShare(guest, guestPermission.getRecipient());
+        guestClient.checkShareModuleAvailable();
+        guestClient.checkShareAccessible(guestPermission);
+    }
+
+    private void testUpdateSharedFolderWithCascadingPermissions(EnumAPI api, int module, int parent, OCLGuestPermission guestPermission) throws Exception {
+        /*
+         * create folder hierarchy
+         */
+        FolderObject rootFolder = insertPrivateFolder(api, module, parent);
+        FolderObject subLevel1 = insertPrivateFolder(api, module, rootFolder.getObjectID());
+        FolderObject subLevel2 = insertPrivateFolder(api, module, subLevel1.getObjectID());
+        /*
+         * update root folder, add permission for guest
+         */
+        rootFolder.addPermission(guestPermission);
+        rootFolder = updateFolder(api, rootFolder, true);
+        /*
+         * Reload subfolders
+         */
+        subLevel1 = getFolder(api, subLevel1.getObjectID());
+        subLevel2 = getFolder(api, subLevel1.getObjectID());
+        /*
+         * check permissions
+         */
+        OCLPermission matchingRootPermission = null;
+        for (FolderObject folder : new FolderObject[] { rootFolder, subLevel1, subLevel2 }) {
+            OCLPermission matchingPermission = null;
+            List<OCLPermission> permissions = folder.getPermissions();
+            assertNotNull("No permissions fround for folder " + folder.getObjectID(), permissions);
+            assertEquals("Wrong number of permissions on folder " + folder.getObjectID(), 2, permissions.size());
+            for (OCLPermission permission : permissions) {
+                if (permission.getEntity() != client.getValues().getUserId()) {
+                    matchingPermission = permission;
+                    break;
+                }
+            }
+            assertNotNull("No matching permission in created folder found", matchingPermission);
+            checkPermissions(guestPermission, matchingPermission);
+            if (folder == rootFolder) {
+                matchingRootPermission = matchingPermission;
+            } else {
+                assertEquals("Unexpected permission entity for subfolder " + folder.getObjectID(), matchingRootPermission.getEntity(), matchingPermission.getEntity());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getReadPermission(), matchingPermission.getReadPermission());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getWritePermission(), matchingPermission.getWritePermission());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getDeletePermission(), matchingPermission.getDeletePermission());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getFolderPermission(), matchingPermission.getFolderPermission());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.getSystem(), matchingPermission.getSystem());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.isFolderAdmin(), matchingPermission.isFolderAdmin());
+                assertEquals("Unexpected permission bits for subfolder " + folder.getObjectID(), matchingRootPermission.isGroupPermission(), matchingPermission.isGroupPermission());
+            }
+        }
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, rootFolder.getObjectID(), matchingRootPermission.getEntity());
         checkGuestPermission(guestPermission, guest);
         /*
          * check access to share
