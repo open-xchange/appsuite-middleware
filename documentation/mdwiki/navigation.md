@@ -14,5 +14,7 @@
   - - - -
   * # Cross-Context Databases (GlobalDB)
   * [Basics](../Components/GlobalDB/globaldb.md)
+  - - - -
+  * [Sharing & Guest Mode](../Components/sharing/sharing.md)
 
 [gimmick:theme](cerulean)
