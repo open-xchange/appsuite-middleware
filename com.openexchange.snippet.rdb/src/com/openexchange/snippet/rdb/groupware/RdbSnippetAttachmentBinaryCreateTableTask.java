@@ -82,22 +82,9 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
         super();
     }
 
-    private String getSnippetAttachmentBinaryName() {
-        return "snippetAttachmentBinary";
-    }
-
-    private String getSnippetAttachmentBinaryTable() {
-        return "CREATE TABLE "+getSnippetAttachmentBinaryName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " referenceId VARCHAR(64) CHARACTER SET latin1 NOT NULL," +
-               " data MEDIUMBLOB NOT NULL," +
-               " PRIMARY KEY (cid, referenceId)" +
-               ") ENGINE=InnoDB";
-    }
-
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { getSnippetAttachmentBinaryName() };
+        return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryName() };
     }
 
     @Override
@@ -116,7 +103,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
         DatabaseService ds = getService(DatabaseService.class);
         Connection writeCon = ds.getForUpdateTask(contextId);
         try {
-            createTable(getSnippetAttachmentBinaryName(), getSnippetAttachmentBinaryTable(), writeCon);
+            createTable(RdbSnippetTables.getSnippetAttachmentBinaryName(), RdbSnippetTables.getSnippetAttachmentBinaryTable(), writeCon);
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
@@ -174,7 +161,7 @@ public final class RdbSnippetAttachmentBinaryCreateTableTask extends AbstractCre
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { getSnippetAttachmentBinaryName() };
+        return new String[] { RdbSnippetTables.getSnippetAttachmentBinaryName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {
