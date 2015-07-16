@@ -70,20 +70,22 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ShareInfoResultConverter}
+ * {@link ShareResultConverter}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ShareInfoResultConverter implements ResultConverter {
-
-    private final ModuleSupport service;
+public class ShareResultConverter implements ResultConverter {
 
     public static final String INPUT_FORMAT = "shareinfo";
 
+    private final ModuleSupport service;
+
     /**
-     * Initializes a new {@link ShareInfoResultConverter}.
+     * Initializes a new {@link ShareResultConverter}.
+     *
+     * @param service A reference to the module support service
      */
-    public ShareInfoResultConverter(ModuleSupport service) {
+    public ShareResultConverter(ModuleSupport service) {
         super();
         this.service = service;
     }
@@ -117,20 +119,46 @@ public class ShareInfoResultConverter implements ResultConverter {
          * convert result object
          */
         Object resultObject = result.getResultObject();
-        if (ShareInfo.class.isInstance(resultObject)) {
-            resultObject = convert((ShareInfo)resultObject, timeZone, requestData);
-        } else {
-            resultObject = convert((List<ShareInfo>) resultObject, timeZone, requestData);
+        try {
+            if (ShareLink.class.isInstance(resultObject)) {
+                resultObject = convert((ShareLink) resultObject, timeZone, requestData);
+            } else if (ShareInfo.class.isInstance(resultObject)) {
+                resultObject = convert((ShareInfo) resultObject, timeZone, requestData);
+            } else {
+                resultObject = convert((List<ShareInfo>) resultObject, timeZone, requestData);
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e);
         }
         result.setResultObject(resultObject, "json");
     }
 
     /**
-     * Serializes multiple guest shares to JSON.
+     * Serializes a share link to JSON.
+     *
+     * @param link The share link to serialize
+     * @param timeZone The client timezone
+     * @param requestData The underlying ajax request data
+     * @return The serialized guest share
+     */
+    private JSONObject convert(ShareLink link, TimeZone timeZone, AJAXRequestData requestData) throws OXException, JSONException {
+        JSONObject json = new JSONObject();
+        ShareInfo shareInfo = link.getShareInfo();
+        json.put("url", shareInfo.getShareURL(DefaultRequestContext.newInstance(requestData)));
+        json.put("is_new", link.isNew());
+        Date expiryDate = shareInfo.getShare().getExpiryDate();
+        if (null != expiryDate) {
+            json.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
+        }
+        return json;
+    }
+
+    /**
+     * Serializes multiple shares to JSON.
      *
      * @param shares The shares to serialize
      * @param timeZone The client timezone
-     * @param requestData
+     * @param requestData The underlying ajax request data
      * @return The serialized guest shares
      */
     private JSONArray convert(List<ShareInfo> shares, TimeZone timeZone, AJAXRequestData requestData) throws OXException {
@@ -146,7 +174,7 @@ public class ShareInfoResultConverter implements ResultConverter {
      *
      * @param share The share to serialize
      * @param timeZone The client timezone
-     * @param requestData
+     * @param requestData The underlying ajax request data
      * @return The serialized guest share
      */
     private JSONObject convert(ShareInfo share, TimeZone timeZone, AJAXRequestData requestData) throws OXException {

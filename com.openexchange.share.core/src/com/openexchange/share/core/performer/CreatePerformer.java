@@ -52,6 +52,7 @@ package com.openexchange.share.core.performer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
@@ -93,6 +94,18 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
         super(session, services);
         this.recipients = recipients;
         this.targets = targets;
+    }
+
+    /**
+     * Initializes a new {@link CreatePerformer}.
+     *
+     * @param recipient The share recipient to add for the target
+     * @param target The target to add share for
+     * @param session The session of the sharing user
+     * @param services A service lookup reference
+     */
+    public CreatePerformer(ShareRecipient recipient, ShareTarget target, ServerSession session, ServiceLookup services) {
+        this(Collections.singletonList(recipient), Collections.singletonList(target), session, services);
     }
 
     @Override

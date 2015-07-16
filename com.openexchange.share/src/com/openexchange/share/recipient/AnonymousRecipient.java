@@ -69,6 +69,20 @@ public class AnonymousRecipient extends ShareRecipient {
         super();
     }
 
+    /**
+     * Initializes a new {@link AnonymousRecipient}.
+     * 
+     * @param bits The permission bits to set
+     * @param password The password to set, or <code>null</code> for no password
+     * @param expiryDate The expiration date, or <code>null</code> if not set
+     */
+    public AnonymousRecipient(int bits, String password, Date expiryDate) {
+        this();
+        setBits(bits);
+        setPassword(password);
+        setExpiryDate(expiryDate);
+    }
+
     @Override
     public RecipientType getType() {
         return RecipientType.ANONYMOUS;

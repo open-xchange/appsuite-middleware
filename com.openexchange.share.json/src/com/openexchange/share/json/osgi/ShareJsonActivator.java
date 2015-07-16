@@ -70,7 +70,7 @@ import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.json.ShareActionFactory;
-import com.openexchange.share.json.ShareInfoResultConverter;
+import com.openexchange.share.json.ShareResultConverter;
 import com.openexchange.share.json.fields.ExtendedFolderPermissionsField;
 import com.openexchange.share.json.fields.ExtendedObjectPermissionsField;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -110,7 +110,7 @@ public class ShareJsonActivator extends AJAXModuleActivator {
         openTrackers();
 
         registerModule(new ShareActionFactory(this), "share/management");
-        registerService(ResultConverter.class, new ShareInfoResultConverter(getService(ModuleSupport.class)));
+        registerService(ResultConverter.class, new ShareResultConverter(getService(ModuleSupport.class)));
         registerService(AdditionalFolderField.class, new ExtendedFolderPermissionsField(this));
         registerService(AdditionalFileField.class, new ExtendedObjectPermissionsField(this));
     }

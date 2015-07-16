@@ -47,69 +47,48 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.share.json;
 
-import java.util.Date;
-import java.util.List;
-import org.json.JSONArray;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.json.ShareResultConverter;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link AllAction}
+ * {@link ShareLink}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @since v7.8.0
  */
-public class AllAction extends AbstractShareAction {
+public class ShareLink {
+
+    private final ShareInfo shareInfo;
+    private final boolean isNew;
 
     /**
-     * Initializes a new {@link AllAction}.
+     * Initializes a new {@link ShareLink}.
      *
-     * @param services The service lookup
-     * @param translatorFactory
+     * @param shareInfo The underlying share info
+     * @param isNew <code>true</code> if the share links is new, <code>false</code>, otherwise
      */
-    public AllAction(ServiceLookup services) {
-        super(services);
+    public ShareLink(ShareInfo shareInfo, boolean isNew) {
+        super();
+        this.shareInfo = shareInfo;
+        this.isNew = isNew;
     }
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String module = null;
-        if (requestData.containsParameter("module")) {
-            module = requestData.checkParameter("module");
-        }
-        /*
-         * get shares from storage
-         */
-        List<ShareInfo> shares = null;
-        if (null != module) {
-            shares = getShareService().getAllShares(session, module);
-        } else {
-            shares = getShareService().getAllShares(session);
-        }
-        if (null == shares || 0 == shares.size()) {
-            return new AJAXRequestResult(new JSONArray());
-        }
-        /*
-         * determine overall last modified
-         */
-        Date lastModified = null;
-        for (ShareInfo shareInfo : shares) {
-            Date shareLastModified = shareInfo.getShare().getModified();
-            if (null == lastModified || null != shareLastModified && shareLastModified.after(lastModified)) {
-                lastModified = shareLastModified;
-            }
-        }
-        /*
-         * return appropriate result
-         */
-        return new AJAXRequestResult(shares, lastModified, ShareResultConverter.INPUT_FORMAT);
+    /**
+     * Gets the shareInfo
+     *
+     * @return The shareInfo
+     */
+    public ShareInfo getShareInfo() {
+        return shareInfo;
+    }
+
+    /**
+     * Gets the isNew
+     *
+     * @return The isNew
+     */
+    public boolean isNew() {
+        return isNew;
     }
 
 }
