@@ -61,7 +61,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.UpdateLinkPerformer;
+import com.openexchange.share.core.performer.UpdatePerformer;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -105,7 +105,7 @@ public class UpdateLinkAction extends AbstractShareAction {
         /*
          * prepare update based on present data in update request
          */
-        UpdateLinkPerformer updatePerformer = new UpdateLinkPerformer(session, services, shareInfo, clientTimestamp);
+        UpdatePerformer updatePerformer = new UpdatePerformer(session, services, shareInfo, clientTimestamp);
         try {
             if (json.has("meta")) {
                 updatePerformer.setMeta(json.isNull("meta") ? null : (Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
