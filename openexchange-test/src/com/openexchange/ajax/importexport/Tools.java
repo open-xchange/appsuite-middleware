@@ -49,10 +49,7 @@
 
 package com.openexchange.ajax.importexport;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import org.json.JSONException;
 import org.xml.sax.SAXException;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -66,13 +63,6 @@ import com.openexchange.ajax.importexport.actions.OutlookCSVImportResponse;
 import com.openexchange.ajax.importexport.actions.VCardImportRequest;
 import com.openexchange.ajax.importexport.actions.VCardImportResponse;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Appointment;
-import com.openexchange.tools.versit.ICalendar;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitDefinition.Writer;
-import com.openexchange.tools.versit.VersitObject;
-import com.openexchange.tools.versit.converter.ConverterException;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  *
@@ -111,23 +101,4 @@ public final class Tools {
         return (OutlookCSVImportResponse) Executor.execute(client, request);
     }
 
-    public static InputStream toICal(final AJAXClient client,
-        final Appointment appointment) throws OXException, IOException,
-        SAXException, JSONException, ConverterException {
-        final VersitDefinition definition = ICalendar.vEvent2;
-        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        final OXContainerConverter conv = new OXContainerConverter(
-            client.getValues().getTimeZone(), client.getValues()
-            .getDefaultAddress());
-        final VersitObject versit = conv.convertAppointment(appointment);
-        final Writer writer = definition.getWriter(baos, "UTF-8");
-        final VersitObject container = OXContainerConverter.newCalendar("2.0");
-        definition.writeProperties(writer, container);
-        definition.write(writer, versit);
-        definition.writeEnd(writer, container);
-        baos.flush();
-        writer.flush();
-        conv.close();
-        return new ByteArrayInputStream(baos.toByteArray());
-    }
 }

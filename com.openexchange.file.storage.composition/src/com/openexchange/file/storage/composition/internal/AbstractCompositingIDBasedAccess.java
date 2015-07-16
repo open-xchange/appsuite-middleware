@@ -204,7 +204,7 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
 
     /**
      * Adds multiple warnings.
-     * 
+     *
      * @param warnings The warnings to add
      */
     protected void addWarnings(Collection<OXException> warnings) {
@@ -264,11 +264,12 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
      * @return The account access
      */
     protected FileStorageAccountAccess getAccountAccess(String serviceId, String accountId) throws OXException {
-        FileStorageAccountAccess accountAccess = connectedAccounts.get().get(serviceId + '/' + accountId);
+        String id = new StringBuilder(serviceId).append('/').append(accountId).toString();
+        FileStorageAccountAccess accountAccess = connectedAccounts.get().get(id);
         if (null == accountAccess) {
             FileStorageService fileStorage = getFileStorageServiceRegistry().getFileStorageService(serviceId);
             accountAccess = fileStorage.getAccountAccess(accountId, session);
-            return connect(accountAccess);
+            return connect(accountAccess, id);
         }
         return accountAccess;
     }
@@ -299,12 +300,22 @@ public abstract class AbstractCompositingIDBasedAccess extends AbstractService<T
 
     /**
      * Connects the supplied account access if not already done, remembering the account for closing during the {@link #finish()}.
-     * 
+     *
      * @param accountAccess The account access to connect
      * @return The account access, or a previously connected account access.
      */
     private FileStorageAccountAccess connect(FileStorageAccountAccess accountAccess) throws OXException {
-        String id = accountAccess.getService().getId() + '/' + accountAccess.getAccountId();
+        return connect(accountAccess, new StringBuilder(accountAccess.getService().getId()).append('/').append(accountAccess.getAccountId()).toString());
+    }
+
+    /**
+     * Connects the supplied account access if not already done, remembering the account for closing during the {@link #finish()}.
+     *
+     * @param accountAccess The account access to connect
+     * @param id The account identifier for look-up purpose
+     * @return The account access, or a previously connected account access.
+     */
+    private FileStorageAccountAccess connect(FileStorageAccountAccess accountAccess, String id) throws OXException {
         Map<String, FileStorageAccountAccess> accounts = connectedAccounts.get();
         FileStorageAccountAccess connectedAccountAccess = accounts.get(id);
         if (null != connectedAccountAccess) {

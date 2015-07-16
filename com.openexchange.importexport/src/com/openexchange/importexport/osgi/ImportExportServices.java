@@ -51,7 +51,11 @@ package com.openexchange.importexport.osgi;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageFactory;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -71,23 +75,35 @@ public class ImportExportServices {
         return LOOKUP.get().getService(FolderUpdaterRegistry.class);
     }
 
-	public static ICalParser getIcalParser() {
-		return LOOKUP.get().getService(ICalParser.class);
-	}
+    public static ICalParser getIcalParser() {
+        return LOOKUP.get().getService(ICalParser.class);
+    }
 
-	public static AppointmentSqlFactoryService getAppointmentFactoryService() {
-		return LOOKUP.get().getService(AppointmentSqlFactoryService.class);
-	}
+    public static AppointmentSqlFactoryService getAppointmentFactoryService() {
+        return LOOKUP.get().getService(AppointmentSqlFactoryService.class);
+    }
 
-	public static CalendarCollectionService getCalendarCollectionService() {
-		return LOOKUP.get().getService(CalendarCollectionService.class);
-	}
+    public static CalendarCollectionService getCalendarCollectionService() {
+        return LOOKUP.get().getService(CalendarCollectionService.class);
+    }
 
-	public static ConfigurationService getConfigurationService() {
-		return LOOKUP.get().getService(ConfigurationService.class);
-	}
+    public static ConfigurationService getConfigurationService() {
+        return LOOKUP.get().getService(ConfigurationService.class);
+    }
 
-	public static ICalEmitter getICalEmitter() {
-		return LOOKUP.get().getService(ICalEmitter.class);
-	}
+    public static ICalEmitter getICalEmitter() {
+        return LOOKUP.get().getService(ICalEmitter.class);
+    }
+
+    public static VCardService getVCardService() {
+        return LOOKUP.get().getService(VCardService.class);
+    }
+
+    public static VCardStorageService getVCardStorageService(int contextId) {
+        VCardStorageFactory vCardStorageFactory = LOOKUP.get().getOptionalService(VCardStorageFactory.class);
+        if (vCardStorageFactory != null) {
+            return vCardStorageFactory.getVCardStorageService(LOOKUP.get().getService(ConfigViewFactory.class), contextId);
+        }
+        return null;
+    }
 }

@@ -204,7 +204,7 @@ public interface OAuthServiceMetaData {
     String modifyCallbackURL(String callbackUrl, String currentHost, Session session);
 
     /**
-     * Gets the style of API (e.g. Facebook, Twitter...).
+     * Gets the style of API (e.g. Twitter...).
      *
      * @return The API reference
      */

@@ -67,6 +67,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.crawler.CrawlerBlacklister;
@@ -101,6 +102,7 @@ public class CrawlersActivator implements BundleActivator {
     private final AtomicLong lastTimeChecked = new AtomicLong(0L);
 
     private final AtomicReference<ICalParser> iCalParserRef = new AtomicReference<ICalParser>(null);
+    private final AtomicReference<VCardService> vCardServiceRef = new AtomicReference<VCardService>(null);
     private final AtomicReference<ConfigurationService> configServiceRef = new AtomicReference<ConfigurationService>(null);
 
     @Override
@@ -301,6 +303,14 @@ public class CrawlersActivator implements BundleActivator {
 
     public ICalParser getICalParser() {
         return iCalParserRef.get();
+    }
+
+    public void setVCardService(VCardService vCardService) {
+        vCardServiceRef.set(vCardService);
+    }
+
+    public VCardService getVCardService() {
+        return vCardServiceRef.get();
     }
 
     /**

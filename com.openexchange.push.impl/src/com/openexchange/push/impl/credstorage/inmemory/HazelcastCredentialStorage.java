@@ -97,7 +97,7 @@ public class HazelcastCredentialStorage implements CredentialStorage {
         this.obfuscator = obfuscator;
         this.services = services;
         this.notActiveExceptionHandler = notActiveExceptionHandler;
-        sources = new ConcurrentHashMap<PushUser, Credentials>(256, 0.9f, 1);
+        sources = new ConcurrentHashMap<PushUser, Credentials>(256);
     }
 
     private void handleNotActiveException(HazelcastInstanceNotActiveException e) {

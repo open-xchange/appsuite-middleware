@@ -51,7 +51,6 @@ package com.openexchange.mail.dataobjects.compose;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 import javax.mail.MessageRemovedException;
@@ -197,11 +196,7 @@ public abstract class TextBodyMailPart extends MailPart implements ComposedMailP
          * Lazy creation
          */
         if (null == dataSource) {
-            try {
-                dataSource = new MessageDataSource(getHTMLContent(), getContentType());
-            } catch (final UnsupportedEncodingException e) {
-                throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
-            }
+            dataSource = new MessageDataSource(getHTMLContent(), getContentType());
         }
         return dataSource;
     }

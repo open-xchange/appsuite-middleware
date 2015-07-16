@@ -73,6 +73,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.realtime.cleanup.AbstractRealtimeJanitor;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
+import com.openexchange.realtime.dispatch.DispatchExceptionCode;
 import com.openexchange.realtime.dispatch.LocalMessageDispatcher;
 import com.openexchange.realtime.dispatch.MessageDispatcher;
 import com.openexchange.realtime.dispatch.Utils;
@@ -116,6 +117,10 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
 
     @Override
     public void send(Stanza stanza) throws OXException {
+        IDMap<Resource> idMap = directory.get(stanza.getTo());
+        if(idMap == null || idMap.isEmpty()) {
+            throw DispatchExceptionCode.RESOURCE_OFFLINE.create(stanza.getTo());
+        }
         Map<ID, OXException> exceptions = send(stanza, directory.get(stanza.getTo()));
         if(!exceptions.isEmpty()) {
             throw exceptions.values().iterator().next();
@@ -138,8 +143,11 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         }
 
         if (recipients.isEmpty()) {
-            LOG.warn("Received empty map of recipients for '{}', giving up.", stanza.getTo());
-            stanza.trace("Received empty map of recipients, giving up.");
+            String logString = String.format(
+                "Received empty map of recipients when trying to send from %1$s, giving up. Resource missing for ID: %2$s."
+                , stanza.getFrom(), stanza.getTo());
+            LOG.warn(logString);
+            stanza.trace(logString);
             return Collections.emptyMap();
         }
 
@@ -252,6 +260,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
      * @throws OXException
      */
     private void resend(Stanza stanza) throws OXException {
+        stanza.setResendCount(stanza.getResendCount()+1);
         send(stanza);
     }
 

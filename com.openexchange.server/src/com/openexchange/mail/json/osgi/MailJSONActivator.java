@@ -233,7 +233,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
             registerService(EventHandler.class, eventHandler, props);
         }
 
-        registerModule(new MailActionFactory(serviceLookup), "mail");
+        registerModule(MailActionFactory.initializeActionFactory(serviceLookup), "mail");
         final MailConverter converter = MailConverter.getInstance();
         registerService(ResultConverter.class, converter);
         registerService(ResultConverter.class, new MailJSONConverter(converter));
@@ -249,6 +249,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
         DefaultMailAttachmentStorageRegistry.dropInstance();
+        MailActionFactory.releaseActionFactory();
         SERVICES.set(null);
     }
 

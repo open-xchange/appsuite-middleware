@@ -53,10 +53,19 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import org.apache.commons.lang.Validate;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
+import org.slf4j.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.rolling.FixedWindowRollingPolicy;
+import ch.qos.logback.core.rolling.RollingFileAppender;
+import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy;
+import ch.qos.logback.core.status.ErrorStatus;
+import ch.qos.logback.core.status.Status;
 import com.openexchange.api2.FolderSQLInterface;
 import com.openexchange.api2.RdbFolderSQLInterface;
 import com.openexchange.audit.configuration.AuditConfiguration;
@@ -64,6 +73,8 @@ import com.openexchange.audit.services.Services;
 import com.openexchange.contact.ContactService;
 import com.openexchange.event.CommonEvent;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
+import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.file.storage.FileStorageEventConstants;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -75,7 +86,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tools.iterator.FolderObjectIterator;
-import com.openexchange.java.Strings;
+import com.openexchange.logback.extensions.ExtendedPatternLayoutEncoder;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -86,58 +97,151 @@ import com.openexchange.user.UserService;
  */
 public class AuditEventHandler implements EventHandler {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AuditEventHandler.class);
+    private Logger createLogger() throws OXException {
+        ch.qos.logback.classic.Logger templateLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(AuditEventHandler.class);
+        LoggerContext context = templateLogger.getLoggerContext();
 
-    private static final SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String filePattern = AuditConfiguration.getLogfileLocation();
 
+        ExtendedPatternLayoutEncoder encoder = new ExtendedPatternLayoutEncoder();
+        encoder.setContext(context);
+        encoder.setPattern("%date{\"yyyy-MM-dd'T'HH:mm:ss,SSSZ\"} %-5level [%thread] %class.%method\\(%class{0}.java:%line\\)%n%message%n%lmdc%exception{full}");
+
+        SizeBasedTriggeringPolicy<ILoggingEvent> triggeringPolicy = new SizeBasedTriggeringPolicy<ILoggingEvent>();
+        triggeringPolicy.setContext(context);
+        triggeringPolicy.setMaxFileSize(Integer.toString(AuditConfiguration.getLogfileLimit()));
+
+        FixedWindowRollingPolicy rollingPolicy = new FixedWindowRollingPolicy();
+        rollingPolicy.setContext(context);
+        rollingPolicy.setFileNamePattern(filePattern + ".%i");
+        rollingPolicy.setMinIndex(1);
+        rollingPolicy.setMaxIndex(AuditConfiguration.getLogfileLimit());
+
+        RollingFileAppender<ILoggingEvent> rollingFileAppender = new RollingFileAppender<ILoggingEvent>();
+        rollingFileAppender.setAppend(AuditConfiguration.getLogfileAppend());
+        rollingFileAppender.setContext(context);
+        rollingFileAppender.setEncoder(encoder);
+        rollingFileAppender.setFile(filePattern);
+        rollingFileAppender.setName("AuditAppender");
+        rollingFileAppender.setPrudent(false);
+        rollingFileAppender.setRollingPolicy(rollingPolicy);
+        rollingFileAppender.setTriggeringPolicy(triggeringPolicy);
+
+        rollingPolicy.setParent(rollingFileAppender);
+
+        encoder.start();
+        rollingPolicy.start();
+        rollingFileAppender.start();
+
+        List<Status> statuses = context.getStatusManager().getCopyOfStatusList();
+        if (null != statuses && false == statuses.isEmpty()) {
+            for (Status status : statuses) {
+                if (status instanceof ErrorStatus) {
+                    ErrorStatus errorStatus = (ErrorStatus) status;
+                    Throwable throwable = errorStatus.getThrowable();
+                    if (null == throwable) {
+                        class FastThrowable extends Throwable {
+
+                            private static final long serialVersionUID = -6877996474956999361L;
+
+                            FastThrowable(String msg) {
+                                super(msg);
+                            }
+
+                            @Override
+                            public synchronized Throwable fillInStackTrace() {
+                                return this;
+                            }
+                        }
+                        throwable = new FastThrowable(errorStatus.getMessage());
+                    }
+                    throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]);
+                }
+            }
+        }
+
+        ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger("AuditLogger");
+        {
+            ch.qos.logback.classic.Level l;
+            int iLevel = AuditConfiguration.getLoglevel().intValue();
+            if (java.util.logging.Level.ALL.intValue() == iLevel) {
+                l = ch.qos.logback.classic.Level.ALL;
+            } else if (java.util.logging.Level.SEVERE.intValue() == iLevel) {
+                l = ch.qos.logback.classic.Level.ERROR;
+            } else if (java.util.logging.Level.WARNING.intValue() == iLevel) {
+                l = ch.qos.logback.classic.Level.WARN;
+            } else if (java.util.logging.Level.INFO.intValue() == iLevel) {
+                l = ch.qos.logback.classic.Level.INFO;
+            } else if (java.util.logging.Level.CONFIG.intValue() == iLevel || java.util.logging.Level.FINE.intValue() == iLevel) {
+                l = ch.qos.logback.classic.Level.DEBUG;
+            } else if (java.util.logging.Level.FINER.intValue() == iLevel || java.util.logging.Level.FINEST.intValue() == iLevel) {
+                l = ch.qos.logback.classic.Level.TRACE;
+            } else {
+                l = ch.qos.logback.classic.Level.ALL;
+            }
+            logbackLogger.setLevel(l);
+        }
+        logbackLogger.setAdditive(false);
+        logbackLogger.addAppender(rollingFileAppender);
+
+        return logbackLogger;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    /** The logger to use */
+    private final org.slf4j.Logger logger;
+
+    /** The date format */
+    private final SimpleDateFormat logDateFormat;
+
+    /** The user service */
     private final UserService userService;
 
     /**
      * Initializes a new {@link AuditEventHandler}.
+     *
      * @param userService
+     * @throws OXException If initialization fails
      */
-    public AuditEventHandler(UserService userService) {
+    public AuditEventHandler(UserService userService) throws OXException {
         super();
         this.userService = userService;
+        logDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-        try {
-            if (AuditConfiguration.getEnabled() == true) {
-                LOG.info("Using own Logging instance.");
-            } else {
-                LOG.info("Using global Logging instance.");
-            }
-        } catch (final OXException e) {
-            LOG.error("", e);
+        Logger defaultLogger = org.slf4j.LoggerFactory.getLogger(AuditEventHandler.class);
+        if (AuditConfiguration.getEnabled()) {
+            defaultLogger.info("Using own Logging instance.");
+            logger = createLogger();
+        } else {
+            defaultLogger.info("Using global Logging instance.");
+            logger = defaultLogger;
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void handleEvent(final Event event) {
         Validate.notNull(event, "Event must not be null.");
 
-        if (!LOG.isInfoEnabled()) {
+        if (!logger.isInfoEnabled()) {
             // Not allowed to log
             return;
         }
         try {
-            final StringBuilder log = new StringBuilder(2048);
-            final String topic = event.getTopic();
+            StringBuilder logBuilder = new StringBuilder(2048);
+            String topic = event.getTopic();
 
             if (topic.startsWith("com/openexchange/groupware/infostore/")) {
-                handleInfostoreEvent(event, log);
+                handleInfostoreEvent(event, logBuilder);
             } else if (topic.startsWith("com/openexchange/groupware/")) {
-                handleGroupwareEvent(event, log);
+                handleGroupwareEvent(event, logBuilder);
             }
 
-            final String infoMsg = log.toString();
-            if (!Strings.isEmpty(infoMsg)) {
-                LOG.info(infoMsg);
+            if (logBuilder.length() > 0) {
+                logger.info(logBuilder.toString());
             }
         } catch (final Exception e) {
-            LOG.error("", e);
+            logger.error("", e);
         }
     }
 
@@ -145,33 +249,33 @@ public class AuditEventHandler implements EventHandler {
      * Handles events that belong to the infostore.
      *
      * @param event - the {@link Event} that was received
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleInfostoreEvent(Event event, StringBuilder log) throws OXException {
+    protected void handleInfostoreEvent(Event event, StringBuilder logBuilder) throws OXException {
         Validate.notNull(event, "Event mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         String topic = event.getTopic();
 
         if (topic.equals(FileStorageEventConstants.ACCESS_TOPIC)) {
             if (AuditConfiguration.getFileAccessLogging()) {
-                log.append("EVENT TYPE: ACCESS; ");
+                logBuilder.append("EVENT TYPE: ACCESS; ");
             } else {
                 return;
             }
         }
         if (topic.equals(FileStorageEventConstants.CREATE_TOPIC)) {
-            log.append("EVENT TYPE: INSERT; ");
+            logBuilder.append("EVENT TYPE: INSERT; ");
         } else if (topic.equals(FileStorageEventConstants.UPDATE_TOPIC)) {
-            log.append("EVENT TYPE: UPDATE; ");
+            logBuilder.append("EVENT TYPE: UPDATE; ");
         } else if (topic.equals(FileStorageEventConstants.DELETE_TOPIC)) {
-            log.append("EVENT TYPE: DELETE; ");
+            logBuilder.append("EVENT TYPE: DELETE; ");
         }
         synchronized (logDateFormat) {
-            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
+            logBuilder.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
         }
-        log.append("OBJECT TYPE: FILE; ");
+        logBuilder.append("OBJECT TYPE: FILE; ");
 
         final Session session = (Session) event.getProperty(FileStorageEventConstants.SESSION);
         if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_PUBLICATION))) {
@@ -186,30 +290,30 @@ public class AuditEventHandler implements EventHandler {
                 remoteAddress = "unknown";
             }
 
-            log.append("PUBLISH: ");
-            log.append(remoteAddress);
-            log.append("; ");
+            logBuilder.append("PUBLISH: ");
+            logBuilder.append(remoteAddress);
+            logBuilder.append("; ");
         } else {
-            appendUserInformation(session.getUserId(), session.getContextId(), log);
+            appendUserInformation(session.getUserId(), session.getContextId(), logBuilder);
         }
-        log.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
-        log.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
+        logBuilder.append("CONTEXT ID: ").append(session.getContextId()).append("; ");
+        logBuilder.append("OBJECT ID: ").append(event.getProperty(FileStorageEventConstants.OBJECT_ID)).append("; ");
         {
             final Object fileName = event.getProperty(FileStorageEventConstants.FILE_NAME);
             if (null != fileName) {
-                log.append("FILE NAME: ").append(fileName).append("; ");
+                logBuilder.append("FILE NAME: ").append(fileName).append("; ");
             }
         }
-        log.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
-        log.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
+        logBuilder.append("SERVICE ID: ").append(event.getProperty(FileStorageEventConstants.SERVICE)).append("; ");
+        logBuilder.append("ACCOUNT ID: ").append(event.getProperty(FileStorageEventConstants.ACCOUNT_ID)).append("; ");
         {
             final String folderId = (String) event.getProperty(FileStorageEventConstants.FOLDER_ID);
             if (null != folderId) {
                 try {
                     final int iFolderId = Integer.parseInt(folderId);
-                    log.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
+                    logBuilder.append("FOLDER: ").append(getPathToRoot(iFolderId, session)).append(';');
                 } catch (NumberFormatException e) {
-                    log.append("FOLDER: ").append(folderId).append(';');
+                    logBuilder.append("FOLDER: ").append(folderId).append(';');
                 }
             }
         }
@@ -219,12 +323,12 @@ public class AuditEventHandler implements EventHandler {
      * Handles events that belong to other server parts
      *
      * @param event - the {@link Event} that was received
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleGroupwareEvent(Event event, StringBuilder log) throws OXException {
+    protected void handleGroupwareEvent(Event event, StringBuilder logBuilder) throws OXException {
         Validate.notNull(event, "Event must not be null.");
-        Validate.notNull(log, "StringBuilder to write to must not be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to must not be null.");
 
         final CommonEvent commonEvent = (CommonEvent) event.getProperty(CommonEvent.EVENT_KEY);
 
@@ -232,31 +336,31 @@ public class AuditEventHandler implements EventHandler {
             final int contextId = commonEvent.getContextId();
             final Context context = ContextStorage.getInstance().getContext(contextId);
 
-            handleMainCommmonEvent(commonEvent, log);
+            handleMainCommmonEvent(commonEvent, logBuilder);
 
             ModuleSwitch: switch (commonEvent.getModule()) {
-            default:
-                break ModuleSwitch;
+                default:
+                    break ModuleSwitch;
 
-            case Types.APPOINTMENT:
-                handleAppointmentCommonEvent(commonEvent, context, log);
-                break ModuleSwitch;
+                case Types.APPOINTMENT:
+                    handleAppointmentCommonEvent(commonEvent, context, logBuilder);
+                    break ModuleSwitch;
 
-            case Types.CONTACT:
-                handleContactCommonEvent(commonEvent, context, log);
-                break ModuleSwitch;
+                case Types.CONTACT:
+                    handleContactCommonEvent(commonEvent, context, logBuilder);
+                    break ModuleSwitch;
 
-            case Types.TASK:
-                handleTaskCommonEvent(commonEvent, context, log);
-                break ModuleSwitch;
+                case Types.TASK:
+                    handleTaskCommonEvent(commonEvent, context, logBuilder);
+                    break ModuleSwitch;
 
-            case Types.INFOSTORE:
-                handleInfostoreCommonEvent(commonEvent, context, log);
-                break ModuleSwitch;
+                case Types.INFOSTORE:
+                    handleInfostoreCommonEvent(commonEvent, context, logBuilder);
+                    break ModuleSwitch;
 
-            case Types.FOLDER:
-                handleFolderCommonEvent(commonEvent, context, log);
-                break ModuleSwitch;
+                case Types.FOLDER:
+                    handleFolderCommonEvent(commonEvent, context, logBuilder);
+                    break ModuleSwitch;
             }
         }
     }
@@ -265,22 +369,22 @@ public class AuditEventHandler implements EventHandler {
      * Handles the general information of a CommonEvent that should be logged for all action objects.
      *
      * @param commonEvent
-     * @param log
+     * @param logBuilder
      */
-    protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder log) {
+    protected void handleMainCommmonEvent(CommonEvent commonEvent, StringBuilder logBuilder) {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         if (commonEvent.getAction() == CommonEvent.INSERT) {
-            log.append("EVENT TYPE: INSERT; ");
+            logBuilder.append("EVENT TYPE: INSERT; ");
         } else if (commonEvent.getAction() == CommonEvent.UPDATE) {
-            log.append("EVENT TYPE: UPDATE; ");
+            logBuilder.append("EVENT TYPE: UPDATE; ");
         } else if (commonEvent.getAction() == CommonEvent.DELETE) {
-            log.append("EVENT TYPE: DELETE; ");
+            logBuilder.append("EVENT TYPE: DELETE; ");
         }
 
         synchronized (logDateFormat) {
-            log.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
+            logBuilder.append("EVENT TIME: ").append(logDateFormat.format(new Date())).append("; ");
         }
     }
 
@@ -289,24 +393,22 @@ public class AuditEventHandler implements EventHandler {
      *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleFolderCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+    protected void handleFolderCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         final FolderObject folder = (FolderObject) commonEvent.getActionObj();
 
-        log.append("OBJECT TYPE: FOLDER; ");
-        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
-        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        log.append("FOLDER ID: ").append(folder.getObjectID()).append("; ");
-        log.append("CREATED BY: ").append(userService.getUser(folder.getCreatedBy(), context).getDisplayName()).append(
-            "; ");
-        log.append("MODIFIED BY: ").append(userService.getUser(folder.getModifiedBy(), context).getDisplayName()).append(
-            "; ");
-        log.append("NAME: ").append(folder.getFolderName()).append("; ");
+        logBuilder.append("OBJECT TYPE: FOLDER; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
+        logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        logBuilder.append("FOLDER ID: ").append(folder.getObjectID()).append("; ");
+        logBuilder.append("CREATED BY: ").append(userService.getUser(folder.getCreatedBy(), context).getDisplayName()).append("; ");
+        logBuilder.append("MODIFIED BY: ").append(userService.getUser(folder.getModifiedBy(), context).getDisplayName()).append("; ");
+        logBuilder.append("NAME: ").append(folder.getFolderName()).append("; ");
     }
 
     /**
@@ -314,56 +416,56 @@ public class AuditEventHandler implements EventHandler {
      *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+    protected void handleAppointmentCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         final Appointment appointment = (Appointment) commonEvent.getActionObj();
         Appointment oldAppointment = (Appointment) commonEvent.getOldObj();
 
-        log.append("OBJECT TYPE: APPOINTMENT; ");
-        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
-        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        log.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
+        logBuilder.append("OBJECT TYPE: APPOINTMENT; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
+        logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        logBuilder.append("OBJECT ID: ").append(appointment.getObjectID()).append("; ");
         {
             int createdBy = appointment.getCreatedBy();
             if (createdBy > 0) {
                 try {
-                    log.append("CREATED BY: ").append(userService.getUser(createdBy, context).getDisplayName()).append("; ");
+                    logBuilder.append("CREATED BY: ").append(userService.getUser(createdBy, context).getDisplayName()).append("; ");
                 } catch (OXException e) {
-                    LOG.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
-                    log.append("CREATED BY: <unknown>; ");
+                    logger.debug("Failed to load user {} in context {}", createdBy, context.getContextId(), e);
+                    logBuilder.append("CREATED BY: <unknown>; ");
                 }
             } else {
-                log.append("CREATED BY: <unknown>; ");
+                logBuilder.append("CREATED BY: <unknown>; ");
             }
         }
         {
             int modifiedBy = appointment.getModifiedBy();
             if (modifiedBy > 0) {
                 try {
-                    log.append("MODIFIED BY: ").append(userService.getUser(modifiedBy, context).getDisplayName()).append("; ");
+                    logBuilder.append("MODIFIED BY: ").append(userService.getUser(modifiedBy, context).getDisplayName()).append("; ");
                 } catch (OXException e) {
-                    LOG.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
-                    log.append("MODIFIED BY: <unknown>; ");
+                    logger.debug("Failed to load user {} in context {}", modifiedBy, context.getContextId(), e);
+                    logBuilder.append("MODIFIED BY: <unknown>; ");
                 }
             } else {
-                log.append("MODIFIED BY: <unknown>; ");
+                logBuilder.append("MODIFIED BY: <unknown>; ");
             }
         }
-        log.append("TITLE: ").append(appointment.getTitle()).append("; ");
-        log.append("START DATE: ").append(appointment.getStartDate()).append("; ");
-        log.append("END DATE: ").append(appointment.getEndDate()).append("; ");
-        log.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append("; ");
-        log.append("PARTICIPANTS: ").append(Arrays.toString(appointment.getParticipants())).append("; ");
+        logBuilder.append("TITLE: ").append(appointment.getTitle()).append("; ");
+        logBuilder.append("START DATE: ").append(appointment.getStartDate()).append("; ");
+        logBuilder.append("END DATE: ").append(appointment.getEndDate()).append("; ");
+        logBuilder.append("FOLDER: ").append(getPathToRoot(appointment.getParentFolderID(), commonEvent.getSession())).append("; ");
+        logBuilder.append("PARTICIPANTS: ").append(Arrays.toString(appointment.getParticipants())).append("; ");
         if (oldAppointment != null) {
-            log.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
+            logBuilder.append("OLD PARTICIPANTS: ").append(Arrays.toString(oldAppointment.getParticipants())).append("; ");
         }
         if (commonEvent.getSession() != null) {
-            log.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
+            logBuilder.append("CLIENT: ").append(commonEvent.getSession().getClient()).append("; ");
         }
     }
 
@@ -372,28 +474,28 @@ public class AuditEventHandler implements EventHandler {
      *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleContactCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+    protected void handleContactCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
         Contact contact = extractContact(commonEvent);
-        log.append("OBJECT TYPE: CONTACT; ");
-        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
-        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        logBuilder.append("OBJECT TYPE: CONTACT; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
+        logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
         if (null != contact) {
-            log.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
+            logBuilder.append("OBJECT ID: ").append(contact.getObjectID()).append("; ");
             if (contact.containsCreatedBy()) {
-                log.append("CREATED BY: ").append(
+                logBuilder.append("CREATED BY: ").append(
                     userService.getUser(contact.getCreatedBy(), context).getDisplayName()).append("; ");
             }
             if (contact.containsModifiedBy()) {
-                log.append("MODIFIED BY: ").append(
+                logBuilder.append("MODIFIED BY: ").append(
                     userService.getUser(contact.getModifiedBy(), context).getDisplayName()).append("; ");
             }
-            log.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
-            log.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
+            logBuilder.append("CONTACT FULLNAME: ").append(contact.getDisplayName()).append(';');
+            logBuilder.append("FOLDER: ").append(getPathToRoot(contact.getParentFolderID(), commonEvent.getSession())).append(';');
         }
     }
 
@@ -408,7 +510,7 @@ public class AuditEventHandler implements EventHandler {
         Contact contact = (Contact) commonEvent.getActionObj();
         if (CommonEvent.DELETE != commonEvent.getAction() && null != commonEvent.getSession() && (
             null == contact || false == contact.containsDisplayName() || false == contact.containsCreatedBy() ||
-            false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
+                false == contact.containsModifiedBy() || false == contact.containsObjectID() || false == contact.containsParentFolderID())) {
             /*
              * try and get more details
              */
@@ -418,7 +520,7 @@ public class AuditEventHandler implements EventHandler {
                     ContactField.DISPLAY_NAME, ContactField.FOLDER_ID, ContactField.CREATED_BY, ContactField.MODIFIED_BY
                 };
                 return contactService.getContact(commonEvent.getSession(), String.valueOf(contact.getParentFolderID()),
-                    String.valueOf(contact.getObjectID()), requestedFields );
+                    String.valueOf(contact.getObjectID()), requestedFields);
             }
         }
         return contact;
@@ -429,23 +531,23 @@ public class AuditEventHandler implements EventHandler {
      *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleTaskCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+    protected void handleTaskCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         final Task task = (Task) commonEvent.getActionObj();
 
-        log.append("OBJECT TYPE: TASK; ");
-        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
-        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        log.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
-        log.append("CREATED BY: ").append(userService.getUser(task.getCreatedBy(), context).getDisplayName()).append("; ");
-        log.append("MODIFIED BY: ").append(userService.getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
-        log.append("TITLE: ").append(task.getTitle()).append("; ");
-        log.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
+        logBuilder.append("OBJECT TYPE: TASK; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
+        logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        logBuilder.append("OBJECT ID: ").append(task.getObjectID()).append("; ");
+        logBuilder.append("CREATED BY: ").append(userService.getUser(task.getCreatedBy(), context).getDisplayName()).append("; ");
+        logBuilder.append("MODIFIED BY: ").append(userService.getUser(task.getModifiedBy(), context).getDisplayName()).append("; ");
+        logBuilder.append("TITLE: ").append(task.getTitle()).append("; ");
+        logBuilder.append("FOLDER: ").append(getPathToRoot(task.getParentFolderID(), commonEvent.getSession())).append(';');
     }
 
     /**
@@ -453,25 +555,24 @@ public class AuditEventHandler implements EventHandler {
      *
      * @param event - the {@link CommonEvent} that was received
      * @param context - the {@link Context}
-     * @param log - the log to add information
+     * @param logBuilder - the log to add information
      * @throws OXException
      */
-    protected void handleInfostoreCommonEvent(CommonEvent commonEvent, Context context, StringBuilder log) throws OXException {
+    protected void handleInfostoreCommonEvent(CommonEvent commonEvent, Context context, StringBuilder logBuilder) throws OXException {
         Validate.notNull(commonEvent, "CommonEvent mustn't be null.");
-        Validate.notNull(log, "StringBuilder to write to mustn't be null.");
+        Validate.notNull(logBuilder, "StringBuilder to write to mustn't be null.");
 
         final DocumentMetadata document = (DocumentMetadata) commonEvent.getActionObj();
 
-        log.append("OBJECT TYPE: INFOSTORE; ");
-        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), log);
-        log.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
-        log.append("OBJECT ID: ").append(document.getId()).append("; ");
-        log.append("CREATED BY: ").append(userService.getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
-        log.append("MODIFIED BY: ").append(userService.getUser(document.getModifiedBy(), context).getDisplayName()).append(
-            "; ");
-        log.append("TITLE: ").append(document.getTitle()).append("; ");
-        log.append("TITLE: ").append(document.getFileName()).append("; ");
-        log.append("FOLDER: ").append(getPathToRoot((int) document.getFolderId(), commonEvent.getSession())).append(';');
+        logBuilder.append("OBJECT TYPE: INFOSTORE; ");
+        appendUserInformation(commonEvent.getUserId(), commonEvent.getContextId(), logBuilder);
+        logBuilder.append("CONTEXT ID: ").append(commonEvent.getContextId()).append("; ");
+        logBuilder.append("OBJECT ID: ").append(document.getId()).append("; ");
+        logBuilder.append("CREATED BY: ").append(userService.getUser(document.getCreatedBy(), context).getDisplayName()).append("; ");
+        logBuilder.append("MODIFIED BY: ").append(userService.getUser(document.getModifiedBy(), context).getDisplayName()).append("; ");
+        logBuilder.append("TITLE: ").append(document.getTitle()).append("; ");
+        logBuilder.append("TITLE: ").append(document.getFileName()).append("; ");
+        logBuilder.append("FOLDER: ").append(getPathToRoot((int) document.getFolderId(), commonEvent.getSession())).append(';');
     }
 
     /**
@@ -493,13 +594,13 @@ public class AuditEventHandler implements EventHandler {
                 retval = iter.next().getFolderName() + "/" + retval;
             }
         } catch (final OXException e) {
-            LOG.error("", e);
+            logger.error("", e);
         }
 
         return retval;
     }
 
-    private void appendUserInformation(final int userId, final int contextId, final StringBuilder log) {
+    private void appendUserInformation(final int userId, final int contextId, final StringBuilder logBuilder) {
         String displayName;
         try {
             displayName = userService.getUser(userId, ContextStorage.getInstance().getContext(contextId)).getDisplayName();
@@ -507,14 +608,14 @@ public class AuditEventHandler implements EventHandler {
             // Ignore
             displayName = null;
         }
-        log.append("USER: ");
+        logBuilder.append("USER: ");
         if (null == displayName) {
-            log.append(userId);
+            logBuilder.append(userId);
         } else {
-            log.append(displayName);
-            log.append(" (").append(userId).append(')');
+            logBuilder.append(displayName);
+            logBuilder.append(" (").append(userId).append(')');
         }
-        log.append("; ");
+        logBuilder.append("; ");
     }
 
 }

@@ -50,6 +50,7 @@
 package com.openexchange.groupware;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 
@@ -58,19 +59,19 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class TestServiceRegistry {
-    
+public class TestServiceRegistry implements ServiceLookup {
+
     private static final TestServiceRegistry REGISTRY = new TestServiceRegistry();
-    
-    
+
+
     private TestServiceRegistry() {
         super();
     }
-    
+
     public static TestServiceRegistry getInstance() {
         return REGISTRY;
     }
-    
+
     public void clearRegistry() {
         ServerServiceRegistry.getInstance().clearRegistry();
     }
@@ -83,11 +84,21 @@ public class TestServiceRegistry {
         ServerServiceRegistry.getInstance().addService(clazz, service);
     }
 
+    @Override
     public <S extends Object> S getService(final Class<? extends S> clazz) {
         return ServerServiceRegistry.getInstance().getService(clazz);
     }
 
     public <S extends Object> S getService(final Class<? extends S> clazz, final boolean failOnError) throws OXException {
         return ServerServiceRegistry.getInstance().getService(clazz, failOnError);
+    }
+
+    @Override
+    public <S> S getOptionalService(Class<? extends S> clazz) {
+        try {
+            return ServerServiceRegistry.getInstance().getService(clazz, false);
+        } catch (OXException e) {
+            return null;
+        }
     }
 }

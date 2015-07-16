@@ -71,7 +71,7 @@ import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -187,7 +187,7 @@ public class ThrottlingDriveService implements DriveService {
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
+    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
         return delegate.createShare(session, recipients, targets);
     }
 

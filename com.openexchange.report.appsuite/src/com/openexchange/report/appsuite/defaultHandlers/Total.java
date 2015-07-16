@@ -76,6 +76,8 @@ public class Total implements ContextReportCumulator{
 
         // Sum up the totals of the capabilities combinations from the CapabilityHandler
         long users = report.get("total", "users", 0l, Long.class);
+        long guests = report.get("total", "guests", 0l, Long.class);
+        long links = report.get("total", "links", 0l, Long.class);
 
         Map<String, Object> macdetail = contextReport.getNamespace("macdetail");
 
@@ -85,12 +87,20 @@ public class Total implements ContextReportCumulator{
             if (counts != null && counts.containsKey("total")) {
                 users += counts.get("total");
             }
+
+            if (counts != null && counts.containsKey("guests")) {
+                guests += counts.get("guests");
+            }
+
+            if (counts != null && counts.containsKey("links")) {
+                links += counts.get("links");
+            }
         }
 
         report.set("total", "users", users);
+        report.set("total", "guests", guests);
+        report.set("total", "links", links);
 
         report.set("total", "report-format", "appsuite-short");
     }
-
-
 }

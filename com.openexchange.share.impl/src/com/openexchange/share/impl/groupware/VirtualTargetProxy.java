@@ -50,7 +50,6 @@
 package com.openexchange.share.impl.groupware;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
@@ -60,7 +59,7 @@ import com.openexchange.share.groupware.VirtualTargetProxyType;
 
 /**
  * {@link VirtualTargetProxy} - A {@link TargetProxy} for non groupware modules aka. third party plugins like e.g. messenger. This
- * {@link TargetProxy} only contains the minimum set of infos.  
+ * {@link TargetProxy} only contains the minimum set of infos.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
@@ -128,18 +127,19 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     public void removePermissions(List<TargetPermission> permissions) {
         //
     }
-    
+
     @Override
     public TargetProxyType getProxyType() {
         return VirtualTargetProxyType.getInstance();
     }
 
     private static String getTitle(ShareTarget target) {
-        Map<String, Object> meta = target.getMeta();
-        if (null != meta && meta.containsKey("title")) {
-            return String.valueOf(meta.get("title"));
-        }
-        return target.toString();
+        return null != target.getItem() ? target.getItem() : target.toString();
+    }
+
+    @Override
+    public boolean isPublic() {
+        return false;
     }
 
 }

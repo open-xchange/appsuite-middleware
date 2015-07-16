@@ -60,7 +60,6 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.util.ImapUtility;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -96,7 +95,8 @@ import com.sun.mail.imap.protocol.IMAPProtocol;
  */
 public class DovecotPushListener implements PushListener, Runnable {
 
-    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
+    /** The logger */
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(DovecotPushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
     private static final long TIMEOUT_THRESHOLD_MILLIS = DovecotPushClusterLock.TIMEOUT_MILLIS - 60000L;
@@ -201,7 +201,7 @@ public class DovecotPushListener implements PushListener, Runnable {
             mailAccess.connect(false);
 
             // Get IMAP store
-            IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+            final IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
 
             imapFolder.doCommand(new ProtocolCommand() {
@@ -211,20 +211,33 @@ public class DovecotPushListener implements PushListener, Runnable {
                     // Craft IMAP command
                     String command;
                     {
-                        StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA \"\" ");
-                        cmdBuilder.append("(/private/vendor/vendor.dovecot/http-notify ");
+                        StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA \"\" (");
+
+                        // Append path for Dovecot HTTP-Notify plug-in
+                        cmdBuilder.append("/private/vendor/vendor.dovecot/http-notify ");
 
                         // User
-                        cmdBuilder.append("user=").append(session.getUserId()).append('@').append(session.getContextId());
+                        cmdBuilder.append("\"user=").append(session.getUserId()).append('@').append(session.getContextId()).append('"');
 
                         // URL
-                        cmdBuilder.append('\t').append("url=").append(uri);
+                        /*-
+                         * Currently not needed as statically configured in Dovecot plug-in
+                         *
+                        if (null != uri) {
+                            cmdBuilder.append('\t').append("url=").append(uri);
+                        }
+                        */
 
                         // Auth data
+                        /*-
+                         * Currently not needed as statically configured in Dovecot plug-in
+                         *
                         if (!Strings.isEmpty(authLogin) && !Strings.isEmpty(authPassword)) {
                             cmdBuilder.append('\t').append("auth=basic:").append(authLogin).append(':').append(authPassword);
                         }
+                        */
 
+                        // Closing parenthesis
                         cmdBuilder.append(")");
                         command = cmdBuilder.toString();
                     }
@@ -233,6 +246,7 @@ public class DovecotPushListener implements PushListener, Runnable {
                     Response[] r = IMAPCommandsCollection.performCommand(protocol, command);
                     Response response = r[r.length - 1];
                     if (response.isOK()) {
+                        LOGGER.info("Advertised push notification for {} using: {}", imapStore, command);
                         return Boolean.TRUE;
                     } else if (response.isBAD()) {
                         throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));

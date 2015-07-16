@@ -50,6 +50,8 @@
 package com.openexchange.contact.vcard.storage;
 
 import java.io.InputStream;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * Handles storing of VCards for contacts
@@ -64,28 +66,20 @@ public interface VCardStorageService {
      *
      * @param file The stream to save as a file
      * @param contextId The context identifier
-     * @return The VCard's identifier or <code>null</code> if an error occurred
+     * @return The VCard's identifier
+     * @throws OXException
      */
-    String saveVCard(InputStream file, int contextId);
-
-    /**
-     * Updates denoted VCard content with the given one
-     *
-     * @param file The stream to save as a file
-     * @param contextId The context identifier
-     * @param identifier The VCard identifier
-     * @return The new VCard identifier or <code>null</code> if an error occurred
-     */
-    String updateVCard(InputStream file, int contextId, String identifier);
+    String saveVCard(InputStream file, int contextId) throws OXException;
 
     /**
      * Gets denoted VCard content as a stream.
      *
      * @param identifier The VCard identifier
      * @param contextId The context identifier
-     * @return The content stream or <code>null</code> if an error occurred
+     * @return The content stream returned from the file storage
+     * @throws OXException
      */
-    InputStream getVCard(String identifier, int contextId);
+    InputStream getVCard(String identifier, int contextId) throws OXException;
 
     /**
      * Deletes denoted VCard.
@@ -93,6 +87,14 @@ public interface VCardStorageService {
      * @param identifier The VCard identifier
      * @param contextId The context identifier
      * @return <code>true</code> if deletion was successful; otherwise <code>false</code>
+     * @throws OXException
      */
-    boolean deleteVCard(String identifier, int contextId);
+    boolean deleteVCard(String identifier, int contextId) throws OXException;
+
+    /**
+     * Signals the list of needed capabilities or <code>null</code>/empty list if nothing is needed.
+     *
+     * @return The list of needed capabilities or <code>null</code>
+     */
+    List<String> neededCapabilities();
 }

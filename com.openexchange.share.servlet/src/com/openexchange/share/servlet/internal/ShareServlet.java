@@ -49,14 +49,13 @@
 
 package com.openexchange.share.servlet.internal;
 
-import static com.openexchange.share.servlet.utils.ShareRedirectUtils.translate;
 import java.io.IOException;
-import java.util.Locale;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.httpclient.util.URIUtil;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.RankingAwareNearRegistryServiceTracker;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.ShareExceptionCodes;
@@ -65,8 +64,10 @@ import com.openexchange.share.ShareTarget;
 import com.openexchange.share.servlet.ShareServletStrings;
 import com.openexchange.share.servlet.handler.ShareHandler;
 import com.openexchange.share.servlet.handler.ShareHandlerReply;
-import com.openexchange.share.servlet.utils.ShareRedirectUtils;
+import com.openexchange.share.servlet.utils.MessageType;
+import com.openexchange.share.servlet.utils.LoginLocationBuilder;
 import com.openexchange.share.servlet.utils.ShareServletUtils;
+import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 
 /**
@@ -76,13 +77,11 @@ import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class ShareServlet extends HttpServlet {
+public class ShareServlet extends AbstractShareServlet {
 
     private static final long serialVersionUID = -598653369873570676L;
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareServlet.class);
-
-    // --------------------------------------------------------------------------------------------------------------------------------- //
 
     private final RankingAwareNearRegistryServiceTracker<ShareHandler> shareHandlerRegistry;
 
@@ -99,71 +98,104 @@ public class ShareServlet extends HttpServlet {
 
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Tools.disableCaching(response);
+        Translator translator = Translator.EMPTY;
+        GuestShare share = null;
         try {
-            // Create a new HttpSession if it is missing
+            TranslatorFactory translatorFactory = ShareServiceLookup.getService(TranslatorFactory.class, true);
+            translator = translatorFactory.translatorFor(determineLocale(request, null));
+
             request.getSession(true);
 
             // Extract share from path info
-            GuestShare share;
             ShareTarget target;
             {
                 String pathInfo = request.getPathInfo();
                 String[] paths = ShareServletUtils.splitPath(pathInfo);
-                Locale locale = request.getLocale();
                 if (paths == null || paths.length == 0) {
                     LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
-                    response.setStatus(HttpServletResponse.SC_FOUND);
-                    response.sendRedirect(redirectUrl);
+                    sendNotFound(response, translator);
+                    return;
+                }
+                share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
+                if (null == share) {
+                    LOG.debug("No share with token '{}' found at '{}'", paths[0], pathInfo);
+                    sendNotFound(response, translator);
                     return;
                 }
 
-                try {
-                    share = ShareServiceLookup.getService(ShareService.class, true).resolveToken(paths[0]);
-                } catch (OXException e) {
-                    LOG.debug("No share found at '{}'", pathInfo);
-                    String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
-                    response.setStatus(HttpServletResponse.SC_FOUND);
-                    response.sendRedirect(redirectUrl);
-                    return;
-                }
                 LOG.debug("Successfully resolved token at '{}' to {}", pathInfo, share);
                 if (1 < paths.length) {
                     target = share.resolveTarget(paths[1]);
                     if (null == target) {
                         //TODO: fallback to share without target?
-                        LOG.debug("No share target found at '{}'", pathInfo);
-                        String redirectUrl = ShareRedirectUtils.getErrorRedirectUrl(URIUtil.encodeQuery(translate(ShareServletStrings.SHARE_NOT_FOUND, locale)), "not_found");
-                        response.setStatus(HttpServletResponse.SC_FOUND);
-                        response.sendRedirect(redirectUrl);
+                        LOG.debug("Share target '{}' not found in share '{}' at '{}'", paths[1], paths[0], pathInfo);
+                        sendNotFound(response, translator);
                         return;
                     }
                 } else {
                     target = null;
                 }
-//                target = 1 < paths.length ? share.resolveTarget(paths[1]) : null;
             }
 
-            // Determine appropriate ShareHandler and handle the share
-            for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
-                ShareHandlerReply reply = handler.handle(share, target, request, response);
-                if (ShareHandlerReply.NEUTRAL != reply) {
-                    return;
-                }
-            }
+            // Switch language for errors if appropriate
+            translator = translatorFactory.translatorFor(determineLocale(request, share.getGuest()));
 
-            // No appropriate ShareHandler available
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
+            /*
+             * Determine appropriate ShareHandler and handle the share
+             */
+            if (false == handle(share, target, request, response)) {
+                // No appropriate ShareHandler available
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No share handler found");
+            }
         } catch (RateLimitedException e) {
-            response.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                response.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            response.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(response);
         } catch (OXException e) {
-            LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+            if (ShareExceptionCodes.INVALID_TOKEN.equals(e) || ShareExceptionCodes.UNKNOWN_SHARE.equals(e)) {
+                sendNotFound(response, translator);
+            } else {
+                LOG.error("Error processing share '{}': {}", request.getPathInfo(), e.getMessage(), e);
+                String redirectUrl = new LoginLocationBuilder()
+                    .status("internal_error")
+                    .message(MessageType.ERROR, translator.translate(OXExceptionStrings.MESSAGE_RETRY))
+                    .build();
+                response.sendRedirect(redirectUrl);
+            }
         }
+    }
+
+    /**
+     * Passes the resolved share to the most appropriate handler and lets him serve the request.
+     *
+     * @param share The guest share
+     * @param target The share target within the share, or <code>null</code> if not addressed
+     * @param request The associated HTTP request
+     * @param response The associated HTTP response
+     * @return <code>true</code> if the share request was handled, <code>false</code>, otherwise
+     */
+    private boolean handle(GuestShare share, ShareTarget target, HttpServletRequest request, HttpServletResponse response) throws OXException {
+        for (ShareHandler handler : shareHandlerRegistry.getServiceList()) {
+            ShareHandlerReply reply = handler.handle(share, target, request, response);
+            if (ShareHandlerReply.NEUTRAL != reply) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Sends a redirect with an appropriate error message for a not found share.
+     *
+     * @param response The HTTP servlet response to redirect
+     * @param translator The translator
+     */
+    private static void sendNotFound(HttpServletResponse response, Translator translator) throws IOException {
+        String redirectUrl = new LoginLocationBuilder()
+            .status("not_found")
+            .message(MessageType.ERROR, translator.translate(ShareServletStrings.SHARE_NOT_FOUND))
+            .build();
+        response.sendRedirect(redirectUrl);
+        return;
     }
 
 }

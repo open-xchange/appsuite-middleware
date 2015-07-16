@@ -422,7 +422,6 @@ public final class OneDriveFileStorageService implements AccountAware, OAuthAcco
         public boolean isTransient() {
             return false;
         }
-
     }
 
 }

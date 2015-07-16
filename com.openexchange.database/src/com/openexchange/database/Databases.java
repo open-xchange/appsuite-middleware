@@ -386,4 +386,47 @@ public final class Databases {
         return retval;
     }
 
+    private static final Pattern DUPLICATE_KEY = Pattern.compile("Duplicate entry '([^']+)' for key '([^']+)'");
+
+    /**
+     * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a PRIMARY KEY conflict.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @return <code>true</code> if given {@link SQLException} instance denotes a PRIMARY KEY conflict; otherwise <code>false</code>
+     */
+    public static boolean isPrimaryKeyConflictInMySQL(SQLException e) {
+        return isKeyConflictInMySQL(e, "PRIMARY");
+    }
+
+    /**
+     * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a conflict caused by the specified key.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @param keyName The name of the key causing the integrity constraint violation
+     * @return <code>true</code> if given {@link SQLException} instance denotes a conflict caused by the specified ke; otherwise <code>false</code>
+     */
+    public static boolean isKeyConflictInMySQL(SQLException e, String keyName) {
+        if (null == e || null == keyName) {
+            return false;
+        }
+
+        /*
+         * SQLState 23000: Integrity Constraint Violation
+         * Error: 1586 SQLSTATE: 23000 (ER_DUP_ENTRY_WITH_KEY_NAME)
+         * Error: 1062 SQLSTATE: 23000 (ER_DUP_ENTRY)
+         * com.mysql.jdbc.exceptions.jdbc4.MySQLIntegrityConstraintViolationException: Duplicate entry 'some-data' for key 'key-name'
+         * Message: Duplicate entry '%s' for key '%s'
+         */
+        if ("23000".equals(e.getSQLState())) {
+            int errorCode = e.getErrorCode();
+            if (1062 == errorCode || 1586 == errorCode) {
+                Matcher matcher = DUPLICATE_KEY.matcher(e.getMessage());
+                if (matcher.matches() && keyName.equals(matcher.group(2))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

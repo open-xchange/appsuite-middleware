@@ -50,7 +50,6 @@
 package com.openexchange.share.servlet.internal;
 
 import java.util.Date;
-import java.util.List;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigTools;
@@ -59,7 +58,6 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.ShareTarget;
 
 /**
  * {@link ShareLoginConfiguration}
@@ -75,6 +73,7 @@ public class ShareLoginConfiguration {
     private Integer shareCookieTTL;
     private boolean shareTransientSessions;
     private byte[] cookieHashSalt;
+    private int emptyGuestPasswords;
 
     /**
      * Initializes a new {@link ShareLoginConfiguration}.
@@ -152,6 +151,16 @@ public class ShareLoginConfiguration {
     }
 
     /**
+     * Gets the configured "empty guest password" setting. If set to <code>0</code> a password is required immediately, positive values
+     * represent the number of allowed logins without password, negative values means guest users do not need to set a password.
+     *
+     * @return The configured "empty guest password" setting
+     */
+    public int getEmptyGuestPasswords() {
+        return emptyGuestPasswords;
+    }
+
+    /**
      * (Re-)initializes the configuration.
      *
      * @param configService A reference to the configuration service
@@ -173,6 +182,7 @@ public class ShareLoginConfiguration {
         }
         this.shareTransientSessions = configService.getBoolProperty("com.openexchange.share.transientSessions", true);
         this.cookieHashSalt = configService.getProperty("com.openexchange.cookie.hash.salt", "replaceMe1234567890").getBytes();
+        this.emptyGuestPasswords = configService.getIntProperty("com.openexchange.share.emptyGuestPasswords", -1);
     }
 
     /**
@@ -189,7 +199,7 @@ public class ShareLoginConfiguration {
         /*
          * determine maximum expiry of all contained share targets (if all targets are decorated with an expiry date)
          */
-        Date effectiveExpiry = getEffectiveExpiryDate(share.getTargets());
+        Date effectiveExpiry = share.getExpiryDate();
         if (null != effectiveExpiry) {
             int shareExpiry = (int) ((effectiveExpiry.getTime() - System.currentTimeMillis()) / 1000);
             if (0 <= shareExpiry && loginConfig.getCookieExpiry() > shareExpiry) {
@@ -221,28 +231,6 @@ public class ShareLoginConfiguration {
          * use supplied login config as default fallback
          */
         return loginConfig;
-    }
-
-    /**
-     * Gets the maximum expiry date of all supplied shared targets in case all of them have an expiry date defined.
-     *
-     * @param targets The targets to get the maximum expiry for
-     * @return The maxium expiry date, or <code>null</code> if at least one of the targets has no expiry date set
-     */
-    private static Date getEffectiveExpiryDate(List<ShareTarget> targets) {
-        Date effectiveExpiry = null;
-        if (null != targets && 0 < targets.size()) {
-            for (ShareTarget target : targets) {
-                Date targetExpiry = target.getExpiryDate();
-                if (null == targetExpiry) {
-                    return null;
-                }
-                if (null == effectiveExpiry || targetExpiry.after(effectiveExpiry)) {
-                    effectiveExpiry = targetExpiry;
-                }
-            }
-        }
-        return effectiveExpiry;
     }
 
 }

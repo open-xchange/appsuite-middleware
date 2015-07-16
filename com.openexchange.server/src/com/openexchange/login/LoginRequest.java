@@ -126,4 +126,6 @@ public interface LoginRequest {
      */
     boolean isTransient();
 
+    String getLanguage();
+
 }

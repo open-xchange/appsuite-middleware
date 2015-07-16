@@ -58,6 +58,7 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.cluster.timer.ClusterTimerService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -86,7 +87,9 @@ import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
+import com.openexchange.share.impl.groupware.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
+import com.openexchange.share.impl.groupware.ShareLinksQuotaProvider;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
 import com.openexchange.share.impl.groupware.ShareQuotaProvider;
 import com.openexchange.share.storage.ShareStorage;
@@ -120,7 +123,7 @@ public class ShareActivator extends HousekeepingActivator {
             DatabaseService.class, HtmlService.class, UserPermissionService.class, UserConfigurationService.class, ContactService.class,
             ContactUserStorage.class, ThreadPoolService.class, TimerService.class, ExecutorService.class, ConfigViewFactory.class,
             QuotaService.class, FolderCacheInvalidationService.class, ClusterTimerService.class, GuestService.class,
-            DispatcherPrefixService.class};
+            DispatcherPrefixService.class, CapabilityService.class };
     }
 
     @Override
@@ -192,6 +195,8 @@ public class ShareActivator extends HousekeepingActivator {
         ModuleSupport moduleSupport = new ModuleSupportImpl(this);
         registerService(ModuleSupport.class, moduleSupport);
         registerService(QuotaProvider.class, new ShareQuotaProvider(this));
+        registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
+        registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 
         trackService(ContactCollectorService.class);
         trackService(ModuleSupport.class);

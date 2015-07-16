@@ -49,6 +49,8 @@
 
 package com.openexchange.share.recipient;
 
+import java.util.Date;
+
 /**
  * {@link AnonymousRecipient}
  *
@@ -58,12 +60,27 @@ package com.openexchange.share.recipient;
 public class AnonymousRecipient extends ShareRecipient {
 
     private String password;
+    private Date expiryDate;
 
     /**
      * Initializes a new {@link AnonymousRecipient}.
      */
     public AnonymousRecipient() {
         super();
+    }
+
+    /**
+     * Initializes a new {@link AnonymousRecipient}.
+     * 
+     * @param bits The permission bits to set
+     * @param password The password to set, or <code>null</code> for no password
+     * @param expiryDate The expiration date, or <code>null</code> if not set
+     */
+    public AnonymousRecipient(int bits, String password, Date expiryDate) {
+        this();
+        setBits(bits);
+        setPassword(password);
+        setExpiryDate(expiryDate);
     }
 
     @Override
@@ -87,6 +104,24 @@ public class AnonymousRecipient extends ShareRecipient {
      */
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    /**
+     * Gets the expiration date of the anonymous guest.
+     *
+     * @return The expiration date, or <code>null</code> if not set
+     */
+    public Date getExpiryDate() {
+        return expiryDate;
+    }
+
+    /**
+     * Sets the expiration date for the anonymous guest.
+     *
+     * @param expiryDate The expiration date, or <code>null</code> if not set
+     */
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
 
     @Override

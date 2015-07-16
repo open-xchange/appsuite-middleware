@@ -137,6 +137,25 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
                         }
                     }
 
+                    // Now the guests of the context
+                    User[] guests = loadGuests(ctx);
+                    for (User guest: guests) {
+                        UserReport guestReport = new UserReport(uuid, reportType, ctx, guest, contextReport);
+                        // Run User Analyzers
+                        for(ReportUserHandler userHandler: Services.getUserHandlers()) {
+                            if (userHandler.appliesTo(reportType)) {
+                                userHandler.runUserReport(guestReport);
+                            }
+                        }
+
+                        // Compact User Analysis and add to context report
+                        for (UserReportCumulator cumulator: Services.getUserReportCumulators()) {
+                            if (cumulator.appliesTo(reportType)) {
+                                cumulator.merge(guestReport, contextReport);
+                            }
+                        }
+                    }
+
                     // Add context to general report and mark context as done
                     Orchestration.getInstance().done(contextReport);
                 } catch (Throwable t) {
@@ -163,6 +182,10 @@ public class AnalyzeContextBatch implements Runnable, Serializable {
 
     private User[] loadUsers(Context ctx) throws OXException {
         return Services.getService(UserService.class).getUser(ctx);
+    }
+
+    private User[] loadGuests(Context ctx) throws OXException {
+        return Services.getService(UserService.class).getUser(ctx, true, true);
     }
 
     private Context loadContext(int contextId) throws OXException {

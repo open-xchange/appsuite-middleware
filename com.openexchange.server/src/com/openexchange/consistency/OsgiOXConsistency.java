@@ -54,17 +54,17 @@ import java.util.List;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.provider.DBPoolProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.groupware.attach.Attachments;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.infostore.database.impl.DatabaseImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorage2ContextsResolver;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.
@@ -98,21 +98,15 @@ public class OsgiOXConsistency extends Consistency {
     }
 
     @Override
-    protected FileStorage getFileStorage(final Context ctx) throws OXException {
-        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+    protected List<FileStorage> getFileStorages(final Context ctx) throws OXException {
+        FileStorage2ContextsResolver resolver = FileStorages.getFileStorage2ContextsResolver();
+        return resolver.getFileStoragesUsedBy(ctx.getContextId(), true);
     }
 
     @Override
     protected List<Context> getContextsForFilestore(final int filestoreId) throws OXException {
-        // Dear Santa.
-        // For next christmas I would like to have blocks and closures
-        // for Java.
-        // Thanks
-        //   Francisco
-        
-        final ContextStorage ctxstor = ContextStorage.getInstance();
-        final List<Integer> list = ctxstor.getAllContextIdsForFilestore(filestoreId);
-        return loadContexts(list);
+        int[] ids = FileStorages.getFileStorage2ContextsResolver().getIdsOfContextsUsing(filestoreId);
+        return loadContexts(ids);
     }
 
     @Override
@@ -134,10 +128,19 @@ public class OsgiOXConsistency extends Consistency {
         return loadContexts(list);
     }
 
-    private List<Context> loadContexts(final List<Integer> list) throws OXException {
-        final ContextStorage ctxstor = ContextStorage.getInstance();
-        final List<Context> contexts = new ArrayList<Context>(list.size());
-        for(final int id : list) {
+    private List<Context> loadContexts(List<Integer> list) throws OXException {
+        ContextStorage ctxstor = ContextStorage.getInstance();
+        List<Context> contexts = new ArrayList<Context>(list.size());
+        for (int id : list) {
+            contexts.add(ctxstor.getContext(id));
+        }
+        return contexts;
+    }
+
+    private List<Context> loadContexts(int[] list) throws OXException {
+        ContextStorage ctxstor = ContextStorage.getInstance();
+        List<Context> contexts = new ArrayList<Context>(list.length);
+        for (int id : list) {
             contexts.add(ctxstor.getContext(id));
         }
         return contexts;

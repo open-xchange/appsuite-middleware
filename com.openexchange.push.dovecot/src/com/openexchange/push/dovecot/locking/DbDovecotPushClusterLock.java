@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
+import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -134,7 +135,7 @@ public class DbDovecotPushClusterLock extends AbstractDovecotPushClusterLock {
             Databases.closeSQLStuff(rs, stmt);
 
             // Check if valid
-            if (validValue(previous, now)) {
+            if (validValue(previous, now, services.getOptionalService(HazelcastInstance.class))) {
                 // Locked
                 return false;
             }

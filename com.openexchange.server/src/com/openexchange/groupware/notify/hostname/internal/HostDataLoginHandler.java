@@ -49,14 +49,14 @@
 
 package com.openexchange.groupware.notify.hostname.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.systemname.SystemNameService;
-import com.openexchange.version.Version;
 
 /**
  * Adds the host data to every session.
@@ -65,13 +65,15 @@ import com.openexchange.version.Version;
  */
 public final class HostDataLoginHandler implements BlockingLoginHandlerService {
 
-    private final AtomicReference<HostnameService> hostnameService;
-    private final AtomicReference<SystemNameService> systemNameService;
+    private final SystemNameService systemNameService;
+    private final DispatcherPrefixService dispatcherPrefixService;
+    private final ServiceLookup services;
 
-    public HostDataLoginHandler() {
+    public HostDataLoginHandler(ServiceLookup services) {
         super();
-        hostnameService = new AtomicReference<HostnameService>();
-        systemNameService = new AtomicReference<SystemNameService>();
+        this.services = services;
+        this.systemNameService = services.getService(SystemNameService.class);
+        this.dispatcherPrefixService = services.getService(DispatcherPrefixService.class);
     }
 
     @Override
@@ -82,13 +84,14 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
             request.isSecure(),
             determineHost(request, session.getContextId(), session.getUserId()),
             request.getServerPort(),
-            determineHttpSessionId(request.getHttpSessionID()));
+            determineHttpSessionId(request.getHttpSessionID()),
+            dispatcherPrefixService.getPrefix());
         session.setParameter(HostnameService.PARAM_HOST_DATA, hostData);
     }
 
     private String determineHost(LoginRequest request, int contextId, int userId) {
         String host = request.getServerName();
-        final HostnameService hostnameService = this.hostnameService.get();
+        final HostnameService hostnameService = services.getOptionalService(HostnameService.class);
         if (null != hostnameService) {
             String tmp = hostnameService.getHostname(userId, contextId);
             if (null != tmp) {
@@ -101,14 +104,12 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
     private String determineHttpSessionId(String httpSessionId) {
         final String retval;
         if (null == httpSessionId) {
-            final SystemNameService systemNameService = this.systemNameService.get();
-            retval = "0123456789." + (null == systemNameService ? Version.NAME : systemNameService.getSystemName());
+            retval = "0123456789." + systemNameService.getSystemName();
         } else {
             if (httpSessionId.indexOf('.') > 0) {
                 retval = httpSessionId;
             } else {
-                final SystemNameService systemNameService = this.systemNameService.get();
-                retval = httpSessionId + '.' + (null == systemNameService ? Version.NAME : systemNameService.getSystemName());
+                retval = httpSessionId + '.' + systemNameService.getSystemName();
             }
         }
         return retval;
@@ -119,11 +120,4 @@ public final class HostDataLoginHandler implements BlockingLoginHandlerService {
         // Nothing to do.
     }
 
-    public void setHostnameService(HostnameService hostnameService) {
-        this.hostnameService.set(hostnameService);
-    }
-
-    public void setSystemNameService(SystemNameService systemNameService) {
-        this.systemNameService.set(systemNameService);
-    }
 }

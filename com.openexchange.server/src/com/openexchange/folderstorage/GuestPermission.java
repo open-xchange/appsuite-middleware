@@ -49,14 +49,13 @@
 
 package com.openexchange.folderstorage;
 
-import java.util.Date;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link GuestPermission}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @since v7.8.0
  */
 public interface GuestPermission extends Permission {
 
@@ -66,13 +65,5 @@ public interface GuestPermission extends Permission {
      * @return The share recipient
      */
     ShareRecipient getRecipient();
-
-    /**
-     * If defined, gets the date when the share target associated with the permission should expire, i.e. it should be no longer
-     * accessible.
-     *
-     * @return The expiry date of the share, or <code>null</code> if not defined
-     */
-    Date getExpiryDate();
 
 }

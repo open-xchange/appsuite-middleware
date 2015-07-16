@@ -55,7 +55,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
-import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -69,10 +68,22 @@ public interface ShareService {
     /**
      * Resolves the supplied guest token to a guest share, holding all accessible share targets from the guest user's point of view.
      *
-     * @param token The token to resolve
+     * @param token The guest users base token
      * @return The guest share, containing all shares the user has access to, or <code>null</code> if no valid share could be looked up
+     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
      */
     GuestShare resolveToken(String token) throws OXException;
+
+    /**
+     * Resolves the guest associated to the given token.
+     *
+     * @param token - the token the GuestInfo should be resolved for
+     * @return GuestInfo with information about the guest associated to the token
+     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
+     */
+    GuestInfo resolveGuest(String token) throws OXException;
 
     /**
      * Resolves the supplied base token to a list of shares. If the session's user is the guest user behind the base token himself, the
@@ -82,6 +93,8 @@ public interface ShareService {
      * @param session The session
      * @param token The token to resolve
      * @return A list of shares the guest user behind the token has access to, or <code>null</code> if no valid share could be looked up
+     * @throws OXException If any of the passed tokens is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
      */
     List<ShareInfo> getShares(Session session, String token) throws OXException;
 
@@ -94,6 +107,8 @@ public interface ShareService {
      * @param token The token to resolve
      * @param path The path to the share target
      * @return The share info, or <code>null</code> if no valid share could be looked up
+     * @throws OXException If the passed token is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
+     * is thrown.
      */
     ShareInfo getShare(Session session, String token, String path) throws OXException;
 
@@ -106,9 +121,6 @@ public interface ShareService {
      * caller to take care of the referenced share targets on his own</li>
      * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
      * or not, so again it's up to the caller to perform the necessary checks</li>
-     * <li>Recipients of type {@link GuestRecipient} always need a password. If a new guest user is created for a guest recipient and the
-     * recipient object had no password set, a new password is generated and set by the service implementation. It is guaranteed that the
-     * passed recipients contain valid passwords after this call returns.</li>
      * </ul>
      *
      * @param session The session
@@ -116,7 +128,28 @@ public interface ShareService {
      * @param recipients The recipients for the shares
      * @return The created shares for each recipient, where each share corresponds to a target, in the same order as the supplied target list
      */
-    Map<ShareRecipient, List<ShareInfo>> addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+    CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
+
+    /**
+     * Adds multiple targets to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share targets on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
+     * or not, so again it's up to the caller to perform the necessary checks</li>
+     * <li>If specified, the metadata is is stored for each created share (i.e. for each recipient & target). If different metadata is
+     * required for different recipients or targets, this method should be invoked multiple times.</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param targets The share targets to add
+     * @param recipients The recipients for the shares
+     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
+     * @return The created shares for each recipient, where each share corresponds to a target, in the same order as the supplied target list
+     */
+    CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException;
 
     /**
      * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
@@ -127,9 +160,27 @@ public interface ShareService {
      * caller to take care of the referenced share target on his own</li>
      * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
      * or not, so again it's up to the caller to perform the necessary checks</li>
-     *  <li>Recipients of type {@link GuestRecipient} always need a password. If a new guest user is created for a guest recipient and the
-     * recipient object had no password set, a new password is generated and set by the service implementation. It is guaranteed that the
-     * passed recipients contain valid passwords after this call returns.</li>
+     * <li>If specified, the metadata is is stored for each created share (i.e. for each recipient). If different metadata is required
+     * for different recipients, this method should be invoked multiple times.</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share target to add
+     * @param recipients The recipients for the shares
+     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
+     * @return The created shares for each recipient, in the same order as the supplied recipient list
+     */
+    CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException;
+
+    /**
+     * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest users on the share target are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share target on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
+     * or not, so again it's up to the caller to perform the necessary checks</li>
      * </ul>
      *
      * @param session The session
@@ -137,7 +188,7 @@ public interface ShareService {
      * @param recipients The recipients for the shares
      * @return The created shares for each recipient, in the same order as the supplied recipient list
      */
-    List<ShareInfo> addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
+    CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.
@@ -177,18 +228,6 @@ public interface ShareService {
     void deleteTargets(Session session, List<ShareTarget> targets, boolean includeItems) throws OXException;
 
     /**
-     * Updates multiple targets shared to a specific guest user. This currently includes updating the "meta" information or adjusting the
-     * expiry date.
-     *
-     * @param session The session
-     * @param targets The share targets to update
-     * @param guestID The identifier of the guest user to update the share targets for
-     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
-     * @return A guest share reflecting the updated shares for the guest user
-     */
-    GuestShare updateTargets(Session session, List<ShareTarget> targets, int guestID, Date clientTimestamp) throws OXException;
-
-    /**
      * Removes all shares identified by the supplied tokens. The tokens might either be in their absolute format (i.e. base token plus
      * path), as well as in their base format only, which in turn leads to all share targets associated with the base token being
      * removed.
@@ -208,6 +247,25 @@ public interface ShareService {
     void deleteShares(Session session, List<String> tokens) throws OXException;
 
     /**
+     * Updates certain properties of a specific share. This currently includes the expiry date and the arbitrary meta-field.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * <li>The supplied share must contain the target, as well as the referenced guest identifier</li>
+     * <li>Only modified properties are updated, i.e. those properties where the {@link Share#containsXXX}</li>-methods return
+     * <code>true</code>
+     * </ul>
+     *
+     * @param session The session
+     * @param share The share to update, with only modified fields being set
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
+     * @return A share info representing the updated share
+     */
+    ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
+
+    /**
      * Gets all shares that were created by the supplied session's user.
      *
      * @param session The session
@@ -225,6 +283,17 @@ public interface ShareService {
     List<ShareInfo> getAllShares(Session session, String module) throws OXException;
 
     /**
+     * Gets all shares for a specific target.
+     *
+     * @param session The session
+     * @param module The module
+     * @param folder The folder
+     * @param item The item, or <code>null</code> if not applicable
+     * @return The shares, or an empty list if there are none
+     */
+    List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException;
+
+    /**
      * Gets all users that shared something to specified guest.
      *
      * @param contextId The context identifier
@@ -234,12 +303,13 @@ public interface ShareService {
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
 
     /**
-     * Resolves the guest associated to the given token.
+     * Gets the guest info for the given user. If the user is no guest, <code>null</code> is returned.
      *
-     * @param token - the token the GuestInfo should be resolved for
-     * @return GuestInfo with information about the guest associated to the token
-     * @throws OXException
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The guest info or <code>null</code>
+     * @throws OXException If loading the according user object fails
      */
-    GuestInfo resolveGuest(String token) throws OXException;
+    GuestInfo getGuestInfo(int contextId, int userId) throws OXException;
 
 }

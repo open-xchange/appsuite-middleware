@@ -332,6 +332,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         });
     }
 
+    private static final int _5MB = 5242880; /* 5MB */
+
     /*-
      * Members
      */
@@ -1335,6 +1337,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             add(FetchProfile.Item.ENVELOPE);
             add(FetchProfile.Item.FLAGS);
             add(FetchProfile.Item.CONTENT_INFO);
+            add(FetchProfile.Item.SIZE);
             add(IMAPFolder.FetchProfileItem.HEADERS);
         }
     };
@@ -1410,17 +1413,38 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 }
                 msg = (IMAPMessage) imapFolder.getMessage(msgnum);
             }
+
+            // Check existence
             if (msg == null || msg.isExpunged()) {
-                // throw new OXException(OXException.Code.MAIL_NOT_FOUND,
-                // String.valueOf(msgUID), imapFolder
-                // .toString());
                 return null;
             }
             msg.setUID(msgUID);
             msg.setPeek(!markSeen);
-            final MailMessage mail;
+
+            // Convert to a MailMessage instance
+            MailMessage mail;
             try {
-                mail = MimeMessageConverter.convertMessage(msg, false);
+                long size = msg.getSize();
+                if (size > _5MB && isComplex(msg.getBodystructure())) {
+                    int blkSize = imapStore.getFetchBlockSize();
+                    try {
+                        // Copy complete MIME stream
+                        imapStore.setFetchBlockSize(_5MB);
+                        MimeMessage copy = MimeMessageUtility.newMimeMessage(msg.getMimeStream(), null);
+                        mail = MimeMessageConverter.convertMessage(copy, false);
+                        // Set flags and received date
+                        MimeMessageConverter.parseFlags(msg.getFlags(), mail);
+                        if (!mail.containsColorLabel()) {
+                            mail.setColorLabel(MailMessage.COLOR_LABEL_NONE);
+                        }
+                        mail.setReceivedDate(msg.getReceivedDate());
+                    } finally {
+                        // Restore fetch block size
+                        imapStore.setFetchBlockSize(blkSize);
+                    }
+                } else {
+                    mail = MimeMessageConverter.convertMessage(msg, false);
+                }
                 mail.setFolder(fullName);
                 mail.setMailId(Long.toString(msgUID));
                 mail.setUnreadMessages(IMAPCommandsCollection.getUnread(imapFolder));
@@ -1477,6 +1501,34 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         } catch (final RuntimeException e) {
             throw handleRuntimeException(e);
         }
+    }
+
+    private boolean isComplex(BODYSTRUCTURE bodystructure) {
+        int threshold = 10;
+        return countNested(bodystructure, 0, threshold) >= threshold;
+    }
+
+    private int countNested(BODYSTRUCTURE bodystructure, int current, int threshold) {
+        int count = current;
+        if (count >= threshold) {
+            return count;
+        }
+
+        if (bodystructure.isNested()) {
+            count++;
+        }
+
+        BODYSTRUCTURE[] bodies = bodystructure.bodies;
+        if (null != bodies) {
+            for (BODYSTRUCTURE subbody : bodies) {
+                count = countNested(subbody, count, threshold);
+                if (count >= threshold) {
+                    return count;
+                }
+            }
+        }
+
+        return count;
     }
 
     private void setSeenFlag(final String fullName, final MailMessage mail, final IMAPMessage msg) {
@@ -1614,7 +1666,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         /*
          * Do application sort
          */
-        return fetchSortAndSlice(msgIds, sortField, order, fields, indexRange, headerNames, messageCount);
+        return fetchSortAndSlice(msgIds, sortField, order, fields, indexRange, headerNames);
     }
 
     private MailMessage[] performInAppSearch(MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailFields usedFields, IndexRange indexRange, String[] headerNames, int messageCount) throws MessagingException, OXException {
@@ -1629,33 +1681,25 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             msgIds = IMAPSearch.searchByTerm(imapFolder, searchTerm, chunkSize, messageCount);
         }
 
-        return fetchSortAndSlice(msgIds, sortField, order, usedFields, indexRange, headerNames, messageCount);
+        return fetchSortAndSlice(msgIds, sortField, order, usedFields, indexRange, headerNames);
     }
 
-    private MailMessage[] fetchSortAndSlice(int[] msgIds, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames, int messageCount) throws OXException, MessagingException {
+    private MailMessage[] fetchSortAndSlice(int[] msgIds, MailSortField sortField, OrderDirection order, MailFields fields, IndexRange indexRange, String[] headerNames) throws OXException, MessagingException {
         boolean fastFetch = getIMAPProperties().isFastFetch();
         boolean hasIMAP4rev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
         char separator = getSeparator(imapFolder);
 
-        if (null != indexRange) {
-            // Grab messages only with ID and sort field information
+        if (null == indexRange) {
+            // Fetch them all
+            FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
             List<MailMessage> list;
-            {
-                int[] seqnums;
-                if (null != msgIds) {
-                    seqnums = msgIds;
-                } else {
-                    seqnums = new int[messageCount];
-                    for (int i = 0; i < messageCount; i++) {
-                        seqnums[i] = i + 1;
-                    }
-                }
-
-                FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
-                MailMessage[] mailMessages = fetchMessages(seqnums, fp, hasIMAP4rev1, separator);
-
-                list = new ArrayList<MailMessage>(mailMessages.length);
-                for (MailMessage mailMessage : mailMessages) {
+            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+            if (fetchBody) {
+                list = fetchMessages(msgIds, fetchProfile);
+            } else {
+                MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
+                list = new ArrayList<MailMessage>(tmp.length);
+                for (MailMessage mailMessage : tmp) {
                     if (null != mailMessage) {
                         list.add(mailMessage);
                     }
@@ -1666,43 +1710,22 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 return EMPTY_RETVAL;
             }
 
-            // Sort them
+            // Sort
             Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
 
-            // Apply index range
-            list = applyIndexRange(list, indexRange);
-
-            // Determine UIDs
-            long[] uids = new long[list.size()];
-            int i = 0;
-            for (MailMessage mailMessage : list) {
-                uids[i++] = ((IDMailMessage) mailMessage).getUid();
-            }
-
-            // Fetch with proper attributes by UID
-            FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
-            MailMessage[] mailMessages;
-            boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
-            if (fetchBody) {
-                List<MailMessage> tmp = fetchMessages(uids, fetchProfile);
-                mailMessages = tmp.toArray(new MailMessage[tmp.size()]);
-            } else {
-                mailMessages = fetchMessages(uids, fetchProfile, hasIMAP4rev1, separator);
-            }
-            setAccountInfo(mailMessages);
-            return mailMessages;
+            // Return
+            MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
+            return mailMessages.length > 0 ? mailMessages : EMPTY_RETVAL;
         }
 
-        // Fetch
-        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+        // A certain range is requested, thus grab messages only with ID and sort field information
         List<MailMessage> list;
-        boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
-        if (fetchBody) {
-            list = fetchMessages(msgIds, fetchProfile);
-        } else {
-            MailMessage[] tmp = fetchMessages(msgIds, fetchProfile, hasIMAP4rev1, separator);
-            list = new ArrayList<MailMessage>(tmp.length);
-            for (MailMessage mailMessage : tmp) {
+        {
+            FetchProfile fp = getFetchProfile(new MailField[] { MailField.ID, MailField.toField(sortField.getListField()) }, fastFetch);
+            MailMessage[] mailMessages = fetchMessages(msgIds, fp, hasIMAP4rev1, separator);
+
+            list = new ArrayList<MailMessage>(mailMessages.length);
+            for (MailMessage mailMessage : mailMessages) {
                 if (null != mailMessage) {
                     list.add(mailMessage);
                 }
@@ -1713,12 +1736,31 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             return EMPTY_RETVAL;
         }
 
-        // Sort
+        // Sort them
         Collections.sort(list, new MailMessageComparator(sortField, order == OrderDirection.DESC, getLocale()));
 
-        // Return
-        MailMessage[] mailMessages = list.toArray(new MailMessage[list.size()]);
-        return mailMessages.length > 0 ? mailMessages : EMPTY_RETVAL;
+        // Apply index range
+        list = applyIndexRange(list, indexRange);
+
+        // Determine UIDs
+        long[] uids = new long[list.size()];
+        int i = 0;
+        for (MailMessage mailMessage : list) {
+            uids[i++] = ((IDMailMessage) mailMessage).getUid();
+        }
+
+        // Fetch with proper attributes by UID
+        FetchProfile fetchProfile = getFetchProfile(fields.toArray(), headerNames, null, null, fastFetch);
+        MailMessage[] mailMessages;
+        boolean fetchBody = fields.contains(MailField.BODY) || fields.contains(MailField.FULL);
+        if (fetchBody) {
+            List<MailMessage> tmp = fetchMessages(uids, fetchProfile);
+            mailMessages = tmp.toArray(new MailMessage[tmp.size()]);
+        } else {
+            mailMessages = fetchMessages(uids, fetchProfile, hasIMAP4rev1, separator);
+        }
+        setAccountInfo(mailMessages);
+        return mailMessages;
     }
 
     private MailMessage[] fetchMessages(long[] uids, FetchProfile fetchProfile, boolean hasIMAP4rev1, char separator) throws MessagingException {
@@ -1773,10 +1815,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     private MailMessage[] fetchMessages(int[] seqnums, FetchProfile fetchProfile, boolean hasIMAP4rev1, char separator) throws MessagingException {
         try {
             long start = System.currentTimeMillis();
-            MailMessage[] mailMessages = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, seqnums, fetchProfile, imapServerInfo).doCommand();
+            MailMessageFetchIMAPCommand command = null == seqnums ? new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, fetchProfile, imapServerInfo) : new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, seqnums, fetchProfile, imapServerInfo);
+            MailMessage[] mailMessages = command.doCommand();
             long time = System.currentTimeMillis() - start;
             mailInterfaceMonitor.addUseTime(time);
-            LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(seqnums.length), Long.valueOf(time));
+            LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(mailMessages.length), Long.valueOf(time));
             return mailMessages;
         } catch (MessagingException e) {
             if (!MimeMailException.isCommandFailedException(e)) {
@@ -1785,7 +1828,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
             // Chunk-wise
             List<MailMessage> l = new LinkedList<MailMessage>();
-            int length = seqnums.length;
+            int length = null == seqnums ? imapFolder.getMessageCount() : seqnums.length;
             int chunkSize = 25;
 
             int off = 0;
@@ -1800,7 +1843,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     mseqnums = new int[chunkSize];
                 }
 
-                System.arraycopy(seqnums, off, mseqnums, 0, mseqnums.length);
+                if (null == seqnums) {
+                    for (int i = mseqnums.length, v = end; i-- > 0;) {
+                        mseqnums[i] = v--;
+                    }
+                } else {
+                    System.arraycopy(seqnums, off, mseqnums, 0, mseqnums.length);
+                }
 
                 long start = System.currentTimeMillis();
                 MailMessage[] mms = new MailMessageFetchIMAPCommand(imapFolder, separator, hasIMAP4rev1, mseqnums, fetchProfile, imapServerInfo).doCommand();

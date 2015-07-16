@@ -60,4 +60,6 @@ public class TableNameConstants {
 
     public static final String PRG_CONTACTS = "prg_contacts";
 
+    public static final String DEL_CONTACTS = "del_contacts";
+
 }

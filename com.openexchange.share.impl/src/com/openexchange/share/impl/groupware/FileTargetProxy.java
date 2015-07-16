@@ -54,6 +54,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageObjectPermission;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxyType;
 
@@ -68,11 +69,12 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     private File file;
     private TargetProxyType proxyType;
+    private final boolean isPublic;
 
-
-    public FileTargetProxy(File file) {
+    public FileTargetProxy(File file, boolean isPublic) {
         super();
         this.file = file;
+        this.isPublic = isPublic;
     }
 
     @Override
@@ -111,8 +113,8 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     public File getFile() {
         return file;
-    };
-    
+    }
+
     @Override
     public TargetProxyType getProxyType() {
         if (proxyType == null) {
@@ -120,6 +122,12 @@ public class FileTargetProxy extends AbstractTargetProxy {
         }
         return proxyType;
     }
+
+    @Override
+    public boolean isPublic() {
+        return isPublic;
+    }
+
 
     private static final PermissionConverter<FileStorageObjectPermission> CONVERTER = new PermissionConverter<FileStorageObjectPermission>() {
 
@@ -140,7 +148,7 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
         @Override
         public FileStorageObjectPermission convert(TargetPermission permission) {
-            return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), getObjectPermissionBits(permission.getBits()));
+            return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), ObjectPermission.convertFolderPermissionBits(permission.getBits()));
         }
     };
 

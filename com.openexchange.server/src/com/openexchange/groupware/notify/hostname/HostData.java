@@ -83,4 +83,12 @@ public interface HostData {
      * @return <code>true</code> for a secure connection; otherwise <code>false</code>
      */
     boolean isSecure();
+
+    /**
+     * Gets the prefix of the dispatcher servlet, e.g. /appsuite/api/
+     *
+     * @return The servlet prefix
+     */
+    String getDispatcherPrefix();
+
 }

@@ -113,6 +113,7 @@ public final class MailTestSuite extends TestSuite {
         mailSuite.addTestSuite(Bug29437Test.class);
         mailSuite.addTestSuite(Bug34254Test.class);
         mailSuite.addTestSuite(Bug36333Test.class);
+        mailSuite.addTestSuite(Bug37247Test.class);
 
         mailSuite.addTestSuite(MaxMailSizeTest.class);
         mailSuite.addTestSuite(MSISDNAddressTest.class);

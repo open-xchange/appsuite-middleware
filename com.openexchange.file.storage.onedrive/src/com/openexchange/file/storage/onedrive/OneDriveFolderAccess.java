@@ -227,6 +227,11 @@ public final class OneDriveFolderAccess extends AbstractOneDriveResourceAccess i
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         return perform(new OneDriveClosure<FileStorageFolder[]>() {
 

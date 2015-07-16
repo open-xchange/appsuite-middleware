@@ -49,11 +49,28 @@
 
 package com.openexchange.file.storage;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.File.Field;
+import com.openexchange.tools.iterator.SearchIterator;
+
 /**
  * {@link ObjectPermissionAware}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public interface ObjectPermissionAware extends FileStorageFileAccess {
+
+    /**
+     * Gets all documents that are considered as "shared" by the user, i.e. those documents of the user that have been shared to at least
+     * one other entity.
+     *
+     * @param fields The fields to load, or <code>null</code> to load all fields
+     * @param sort The field to sort by, or <code>null</code> for no specific sort order
+     * @param order The sorting direction, or <code>null</code> for no specific sort order
+     * @return The documents
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException;
 
 }

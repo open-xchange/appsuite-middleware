@@ -69,6 +69,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.OAuthProviderService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
@@ -161,8 +162,8 @@ public abstract class OAuthEndpoint extends HttpServlet {
     protected static void fail(HttpServletResponse httpResponse, int statusCode, String error, String errorDescription) throws IOException {
         try {
             JSONObject result = new JSONObject();
-            result.put("error", error);
-            result.put("error_description", errorDescription);
+            result.put(OAuthProviderConstants.PARAM_ERROR, error);
+            result.put(OAuthProviderConstants.PARAM_ERROR_DESCRIPTION, errorDescription);
             sendErrorResponse(httpResponse, statusCode, result.toString());
         } catch (JSONException e) {
             LOG.error("Could not compile error response object", e);
@@ -172,7 +173,7 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
     protected static Locale determineLocale(HttpServletRequest request) {
         Locale locale = LocaleTools.DEFAULT_LOCALE;
-        String language = request.getParameter("language");
+        String language = request.getParameter(OAuthProviderConstants.PARAM_LANGUAGE);
         if (language != null) {
             locale = LocaleTools.getSaneLocale(LocaleTools.getLocale(language));
         }

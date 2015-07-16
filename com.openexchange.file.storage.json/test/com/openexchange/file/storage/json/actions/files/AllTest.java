@@ -55,7 +55,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.json.FileMetadataWriter;
 import com.openexchange.groupware.results.Results;
 
 
@@ -94,15 +93,7 @@ public class AllTest extends FileActionTest {
 
     @Override
     public AbstractFileAction createAction() {
-        return new AllAction() {
-
-            @Override
-            protected FileMetadataWriter getWriter() {
-                return writer();
-            }
-        };
+        return new AllAction();
     }
-
-
 
 }

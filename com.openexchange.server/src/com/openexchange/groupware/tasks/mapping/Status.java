@@ -62,7 +62,7 @@ import com.openexchange.groupware.tasks.Task;
 public final class Status implements Mapper<Integer> {
 
     /**
-     * Singleton instance.
+     * Singleton
      */
     public static final Mapper<Integer> SINGLETON = new Status();
 
@@ -73,25 +73,16 @@ public final class Status implements Mapper<Integer> {
         super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getId() {
         return Task.STATUS;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean isSet(final Task task) {
         return task.containsStatus();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getDBColumnName() {
         return "state";
@@ -102,18 +93,12 @@ public final class Status implements Mapper<Integer> {
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void toDB(final PreparedStatement stmt, final int pos,
         final Task task) throws SQLException {
         stmt.setInt(pos, task.getStatus());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void fromDB(final ResultSet result, final int pos,
         final Task task) throws SQLException {
@@ -123,25 +108,16 @@ public final class Status implements Mapper<Integer> {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean equals(final Task task1, final Task task2) {
         return task1.getStatus() == task2.getStatus();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Integer get(final Task task) {
         return Integer.valueOf(task.getStatus());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void set(final Task task, final Integer value) {
         task.setStatus(value.intValue());

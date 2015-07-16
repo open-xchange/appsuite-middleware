@@ -84,6 +84,27 @@ public abstract class ShareRecipient {
     }
 
     /**
+     * Gets whether this recipient is of type user or guest and can therefore be
+     * casted to {@link InternalRecipient}.
+     *
+     * @return <code>true</code> if this recipient denotes an internal entity
+     */
+    public boolean isInternal() {
+        return InternalRecipient.class.isAssignableFrom(getClass());
+    }
+
+    /**
+     * Casts this recipient into an internal recipient.
+     *
+     * @return The casted instance
+     * @throws ClassCastException If this recipient is not an internal one
+     * @see #isInternal()
+     */
+    public InternalRecipient toInternal() {
+        return InternalRecipient.class.cast(this);
+    }
+
+    /**
      * Sets the bits
      *
      * @param bits The bits to set

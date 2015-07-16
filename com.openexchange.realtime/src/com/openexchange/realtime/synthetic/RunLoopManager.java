@@ -56,10 +56,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang.Validate;
 import com.google.common.base.Optional;
 import com.google.common.collect.ArrayListMultimap;
@@ -68,6 +68,7 @@ import com.openexchange.management.ManagementAware;
 import com.openexchange.management.ManagementObject;
 import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
+import com.openexchange.realtime.LoadFactorCalculator;
 import com.openexchange.realtime.management.RunLoopManagerMBean;
 import com.openexchange.realtime.management.RunLoopManagerManagement;
 import com.openexchange.realtime.packet.ID;
@@ -80,13 +81,47 @@ import com.openexchange.threadpool.ThreadPoolService;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.2
  */
-public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
+public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>, LoadFactorCalculator {
+
+    private static interface LoadBalancer {
+
+        int nextInt(int max);
+    }
+
+    private static class RoundRobinLoadBalancer implements LoadBalancer {
+
+        private final AtomicInteger count;
+
+        /**
+         * Initializes a new {@link RunLoopManager.RoundRobinLoadBalancer}.
+         */
+        RoundRobinLoadBalancer() {
+            super();
+            count = new AtomicInteger();
+        }
+
+        @Override
+        public int nextInt(int max) {
+            int cur;
+            int next;
+            do {
+                cur = count.get();
+                next = cur + 1;
+                if (next < 0) {
+                    next = 0;
+                }
+            } while (!count.compareAndSet(cur, next));
+            return next % max;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Middle naming part of the managed RunLoops
      */
     public static final String LOOP_NAMING_INFIX = "-handler-";
-    
+
     /**
      * Keep associations from component ids to distinct clusters of runloops for given ids.
      *
@@ -110,11 +145,11 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
      * calcdocument1 -> CalcLoop4
      * <pre>
      */
-    private final ConcurrentHashMap<ID, SyntheticChannelRunLoop> loopMap = new ConcurrentHashMap<ID, SyntheticChannelRunLoop>();
+    private final ConcurrentHashMap<ID, SyntheticChannelRunLoop> loopMap = new ConcurrentHashMap<ID, SyntheticChannelRunLoop>(16, 0.9F, 1);
 
     private final ServiceLookup services;
 
-    private final Random loadBalancer;
+    private final LoadBalancer loadBalancer;
 
     private final RunLoopManagerManagement runLoopManagerManagement;
 
@@ -125,7 +160,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
      */
     public RunLoopManager(ServiceLookup services) {
         this.services = services;
-        loadBalancer = new Random();
+        loadBalancer = new RoundRobinLoadBalancer();
         this.runLoopManagerManagement = new RunLoopManagerManagement(this);
     }
 
@@ -135,7 +170,7 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
      * @param component The component that needs a new set of {@link SyntheticChannelRunLoop}s to feed {@link ComponentHandle}s synchronously.
      * @param quantity The number of {@link SyntheticChannelRunLoop}s to create.
      */
-    public void createRunLoops(Component component, int quantity) {
+    public synchronized void createRunLoops(Component component, int quantity) {
         ExecutorService executor = services.getService(ThreadPoolService.class).getExecutor();
         String componentId = component.getId();
         if (!loopClusters.containsKey(componentId)) {
@@ -174,8 +209,11 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
         SyntheticChannelRunLoop runLoop = loopMap.get(handleId);
         if (runLoop == null && associateIfMissing) {
             List<SyntheticChannelRunLoop> list = loopClusters.get(handleId.getComponent());
-            runLoop = list.get(loadBalancer.nextInt(list.size()));
-            loopMap.put(handleId, runLoop);
+            SyntheticChannelRunLoop nextRunLoop = list.get(loadBalancer.nextInt(list.size()));
+            runLoop = loopMap.putIfAbsent(handleId, nextRunLoop);
+            if (null == runLoop) {
+                runLoop = nextRunLoop;
+            }
         }
         return Optional.fromNullable(runLoop);
     }
@@ -281,21 +319,21 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
         }
         return handlesInCluster;
     }
-    
+
     /**
-     * Get a view of the loop clusters. 
-     * 
-     * @return a view of the loop clusters 
+     * Get a view of the loop clusters.
+     *
+     * @return a view of the loop clusters
      */
     public Collection<SyntheticChannelRunLoop> getRunLoopView() {
         return loopClusters.values();
-        
+
     }
-    
+
     /**
-     * Get a view of the loop clusters per component. 
-     * 
-     * @return a readonly view of the loop clusters 
+     * Get a view of the loop clusters per component.
+     *
+     * @return a readonly view of the loop clusters
      */
     public Map<String, Collection<SyntheticChannelRunLoop>> getRunLoopsPerComponent() {
         return loopClusters.asMap();
@@ -306,4 +344,20 @@ public class RunLoopManager implements ManagementAware<RunLoopManagerMBean>{
         return runLoopManagerManagement;
     }
 
+    @Override
+    public float getCurrentLoad(Component component) {
+        Collection<SyntheticChannelRunLoop> runLoops = getRunLoopsPerComponent().get(component.getId());
+        int runLoopCount = runLoops.size();
+        long sum = 0;
+        for (SyntheticChannelRunLoop syntheticChannelRunLoop : runLoops) {
+            sum += syntheticChannelRunLoop.getQueueSize();
+        }
+        return ((float)sum/(float)runLoopCount);
+    }
+
+    @Override
+    public int getRunLoopCount(Component component) {
+        Collection<SyntheticChannelRunLoop> runLoops = getRunLoopsPerComponent().get(component.getId());
+        return runLoops.size();
+    }
 }

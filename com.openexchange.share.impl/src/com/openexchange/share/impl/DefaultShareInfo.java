@@ -49,12 +49,27 @@
 
 package com.openexchange.share.impl;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareLinks;
+import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.user.UserService;
 
 /**
  * {@link DefaultShareInfo}
@@ -63,6 +78,55 @@ import com.openexchange.share.ShareInfo;
  * @since v7.8.0
  */
 public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
+
+    /**
+     * Creates a list of extended share info objects for the supplied shares. The underlying share targets are used in their original from
+     * (i.e. not personalized for the guest user).
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param shares The shares
+     * @return The share infos
+     */
+    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares) throws OXException {
+        return createShareInfos(services, contextID, shares, false);
+    }
+
+    /**
+     * Creates a list of extended share info objects for the supplied shares.
+     *
+     * @param services A service lookup reference
+     * @param contextID The context ID
+     * @param shares The shares
+     * @param adjustTargets <code>true</code> to adjust the share targets for the guest user, <code>false</code>, otherwise
+     * @return The share infos
+     */
+    public static List<ShareInfo> createShareInfos(ServiceLookup services, int contextID, List<Share> shares, boolean adjustTargets) throws OXException {
+        if (null == shares || 0 == shares.size()) {
+            return Collections.emptyList();
+        }
+        /*
+         * retrieve referenced guest users
+         */
+        Context context = services.getService(ContextService.class).getContext(contextID);
+        Set<Integer> guestIDs = ShareTool.getGuestIDs(shares);
+        User[] users = services.getService(UserService.class).getUser(context, I2i(guestIDs));
+        Map<Integer, User> guestUsers = new HashMap<Integer, User>(users.length);
+        for (User user : users) {
+            if (false == user.isGuest()) {
+                throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(user.getId()));
+            }
+            guestUsers.put(Integer.valueOf(user.getId()), user);
+        }
+        /*
+         * build & return share infos
+         */
+        List<ShareInfo> shareInfos = new ArrayList<ShareInfo>(shares.size());
+        for (Share share : shares) {
+            shareInfos.add(new DefaultShareInfo(services, contextID, guestUsers.get(I(share.getGuest())), share, adjustTargets));
+        }
+        return shareInfos;
+    }
 
     private final Share share;
 
@@ -91,8 +155,18 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
     }
 
     @Override
-    public String getToken() throws OXException {
+    public String getToken() {
         return super.getToken(share.getTarget());
+    }
+
+    @Override
+    public String getShareURL(RequestContext context) {
+        ShareTarget target = getSingleTarget();
+        if (target == null) {
+            return ShareLinks.generateExternal(context, guestInfo.getBaseToken());
+        }
+
+        return ShareLinks.generateExternal(context, getToken());
     }
 
 }

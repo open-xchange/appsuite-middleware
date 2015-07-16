@@ -130,6 +130,7 @@ public class UnitTests {
 
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserBasicTests.class);
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalParserBugTests.class);
+        tests.addTest(com.openexchange.data.conversion.ical.bugs.UnitTests.suite());
         tests.addTestSuite(com.openexchange.data.conversion.ical.ICalEmitterTest.class);
         tests.addTest(com.openexchange.groupware.importexport.ImportExportStandaloneSuite.suite());
         tests.addTestSuite(com.openexchange.groupware.importexport.importers.Bug12380RecoveryParserTest.class);

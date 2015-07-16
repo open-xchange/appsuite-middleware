@@ -50,11 +50,11 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import com.openexchange.dispatcher.DispatcherPrefixService;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
@@ -72,8 +72,10 @@ import com.openexchange.share.groupware.ModuleSupport;
 public class ResolvedGuestShare implements GuestShare {
 
     protected final List<ShareTarget> targets;
-    protected ServiceLookup services;
-    private final DefaultGuestInfo guestInfo;
+    protected final DefaultGuestInfo guestInfo;
+    protected final ServiceLookup services;
+    protected final Date expiryDate;
+    protected final Map<String, Object> meta;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}.
@@ -103,6 +105,13 @@ public class ResolvedGuestShare implements GuestShare {
         super();
         this.services = services;
         this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
+        if (1 == shares.size()) {
+            expiryDate = shares.get(0).getExpiryDate();
+            meta = shares.get(0).getMeta();
+        } else {
+            expiryDate = null;
+            meta = null;
+        }
         ModuleSupport moduleSupport = adjustTargets ? services.getService(ModuleSupport.class) : null;;
         this.targets = new ArrayList<ShareTarget>(shares.size());
         for (Share share : shares) {
@@ -128,7 +137,7 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public String getToken(ShareTarget target) throws OXException {
+    public String getToken(ShareTarget target) {
         return guestInfo.getBaseToken() + '/' + target.getPath();
     }
 
@@ -188,40 +197,13 @@ public class ResolvedGuestShare implements GuestShare {
     }
 
     @Override
-    public String getShareURL(String protocol, String fallbackHostname) throws OXException {
-        return getShareURL(protocol, fallbackHostname, getSingleTarget());
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
     @Override
-    public String getShareURL(String protocol, String fallbackHostname, ShareTarget target) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder()
-            .append(null == protocol ? "https://" : protocol)
-            .append(getHostname(guestInfo.getCreatedBy(), guestInfo.getContextID(), fallbackHostname))
-            .append(getServletPrefix())
-            .append(ShareTool.SHARE_SERVLET).append('/')
-            .append(guestInfo.getBaseToken());
-        if (null != target) {
-            stringBuilder.append('/').append(target.getPath());
-        }
-        return stringBuilder.toString();
-    }
-
-    private String getHostname(int userID, int contextID, String fallbackHostname) {
-        HostnameService hostnameService = services.getService(HostnameService.class);
-        if (hostnameService == null) {
-            return fallbackHostname;
-        }
-
-        return hostnameService.getHostname(userID, contextID);
-    }
-
-    private String getServletPrefix() {
-        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-
-        return prefixService.getPrefix();
+    public Map<String, Object> getMeta() {
+        return meta;
     }
 
     @Override

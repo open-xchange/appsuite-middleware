@@ -49,8 +49,9 @@
 
 package com.openexchange.share;
 
+import java.util.Date;
 import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.Map;
 
 /**
  * {@link GuestShare}
@@ -72,7 +73,7 @@ public interface GuestShare {
      *
      * @return The token
      */
-    String getToken(ShareTarget target) throws OXException;
+    String getToken(ShareTarget target);
 
     /**
      * Gets a list of all share targets the guest has access to.
@@ -118,28 +119,18 @@ public interface GuestShare {
     ShareTarget getSingleTarget();
 
     /**
-     * Gets the share URL to access the share as guest user. If there is a single target behind this guest share, the target's path is
-     * appended to the base share URL implicitly, otherwise, just the base share URL is returned.
+     * If defined, gets the date when this share expires, i.e. it should be no longer accessible. This is only available for "single"
+     * share targets.
      *
-     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code>, <code>https://</code> is used. You probably
-     *        want to pass <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
-     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
-     *        <code>HttpServletRequest.getServerName()</code> here.
-     * @return The share URL as used to access the share as guest
+     * @return The expiry date of the share, or <code>null</code> if not defined
      */
-    String getShareURL(String protocol, String fallbackHostname) throws OXException;
+    Date getExpiryDate();
 
     /**
-     * Gets the (base) share URL to access the share as guest user and jump to the supplied target directly.
+     * If defined, gets arbitrary metadata for the share in a map. This is only available for "single" share targets.
      *
-     * @param protocol The protocol to use (e.g. <code>http://</code>). If <code>null</code>, <code>https://</code> is used. You probably
-     *        want to pass <code>com.openexchange.tools.servlet.http.Tools.getProtocol()</code> here.
-     * @param fallbackHostname The hostname to use if no HostnameService is available. You probably want to pass
-     *        <code>HttpServletRequest.getServerName()</code> here.
-     * @param target One of this share's targets to address by appending the it's path, or <code>null</code> to always return the base
-     *        share URL for the guest
-     * @return The share URL as used to access the share as guest
+     * @return The metadata, or <code>null</code> if not defined
      */
-    String getShareURL(String protocol, String fallbackHostname, ShareTarget target) throws OXException;
+    Map<String, Object> getMeta();
 
 }

@@ -55,6 +55,7 @@ import static com.openexchange.authentication.LoginExceptionMessages.CLIENT_DENI
 import static com.openexchange.authentication.LoginExceptionMessages.COMMUNICATION_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.INVALID_CREDENTIALS_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG;
+import static com.openexchange.authentication.LoginExceptionMessages.NEW_PASSWORD_REQUIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.NOT_SUPPORTED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.PASSWORD_EXPIRED_MSG;
 import static com.openexchange.authentication.LoginExceptionMessages.REDIRECT_MSG;
@@ -146,9 +147,24 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * You exceeded the maximum count of logins without password.
      */
-    LOGINS_WITHOUT_PASSWORD_EXCEEDED("You exceeded the maximum count of logins without password.", LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 22)
+    LOGINS_WITHOUT_PASSWORD_EXCEEDED("You exceeded the maximum count of logins without password.", LOGINS_WITHOUT_PASSWORD_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 22),
+    /**
+     * A password is required to continue. Please choose one and try again.
+     */
+    NEW_PASSWORD_REQUIRED("A password is required to continue. Please choose one and try again.", NEW_PASSWORD_REQUIRED_MSG, Category.CATEGORY_USER_INPUT, 23),
+    /**
+     * Thrown on login attempts that target a disabled authentication mechanism. I.e. a proprietary login mechanism is used that bypasses
+     * the authentication service. In those cases an authentication service can be registered that always throws this exception, which
+     * in turn leads to responses that denote the unavailability of the used login mechanism (e.g. '403 Forbidden' for WebDAV requests).
+     *
+     * Authentication via this method is disabled.
+     */
+    AUTHENTICATION_DISABLED("Authentication via this method is disabled.", LoginExceptionMessages.AUTHENTICATION_DISABLED_MSG, Category.CATEGORY_PERMISSION_DENIED, 24),
+    /**
+     * The password is incorrect.
+     */
+    INVALID_GUEST_PASSWORD("Invalid credentials.", LoginExceptionMessages.INVALID_GUEST_PASSWORD_MSG, Category.CATEGORY_USER_INPUT, 25);
 
-    ;
 
     private final String message;
 

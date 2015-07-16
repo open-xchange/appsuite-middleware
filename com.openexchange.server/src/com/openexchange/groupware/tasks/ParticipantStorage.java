@@ -167,9 +167,7 @@ public abstract class ParticipantStorage {
      * @param type storage type of participants that should be updated.
      * @throws OXException if an error occurs.
      */
-    abstract void updateInternal(Context ctx, Connection con, int taskId,
-        Set<InternalParticipant> participants, StorageType type)
-        throws OXException;
+    abstract void updateInternal(Context ctx, Connection con, int taskId, Set<InternalParticipant> participants, StorageType type) throws OXException;
 
     final void updateInternal(final Context ctx, final Connection con,
         final int taskId, final InternalParticipant participant,

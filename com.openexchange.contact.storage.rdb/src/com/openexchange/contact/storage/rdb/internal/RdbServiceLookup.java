@@ -92,12 +92,6 @@ public class RdbServiceLookup {
         return service;
     }
 
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
-    }
-
     /**
      * Sets the service look-up
      *

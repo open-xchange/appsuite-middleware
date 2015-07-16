@@ -65,10 +65,11 @@ import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
-import com.openexchange.folderstorage.osgi.UserServiceHolder;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -144,7 +145,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
      */
     public void doDelete(final String treeId, final String folderId, final Date timeStamp) throws OXException {
         if (KNOWN_TREES.contains(treeId)) {
-            final FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
+            FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);
             if (null == folderStorage) {
                 throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(treeId, folderId);
             }
@@ -276,8 +277,8 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
         /*
          * check for any present guest permissions
          */
-        ComparedPermissions comparedPermissions = new ComparedPermissions(
-            session.getContext(), new Permission[0], folder.getPermissions(), UserServiceHolder.requireUserService(), transactionManager.getConnection());
+        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+        ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session.getContext(), new Permission[0], folder.getPermissions(), shareService);
         /*
          * delete folder
          */
@@ -286,7 +287,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
          * process removed guest permissions
          */
         if (comparedPermissions.hasRemovedGuests()) {
-            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
+            processRemovedGuestPermissions(folder.getID(), folder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
         }
     }
 

@@ -72,7 +72,7 @@ public class DefaultFileStorageObjectPermission implements FileStorageObjectPerm
      * Initializes a new {@link DefaultFileStorageObjectPermission}.
      *
      * @param entity The entity associated with this permission
-     * @param <code>true</code> if this permission represents a group, <code>false</code>, otherwise
+     * @param group <code>true</code> if this permission represents a group, <code>false</code>, otherwise
      * @param permissions The numerical permission value (also known as permission bits)
      *
      */

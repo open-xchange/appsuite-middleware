@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler;
 
-import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import java.io.IOException;
 import java.io.InputStream;
@@ -77,6 +76,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult.ResultType;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
@@ -87,12 +87,16 @@ import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.Pair;
 import com.openexchange.log.LogProperties;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.server.services.SessionInspector;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.session.SessionSecretChecker;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
@@ -146,24 +150,6 @@ public class DispatcherServlet extends SessionServlet {
         return DISPATCHER.get();
     }
 
-    /**
-     * Sets the prefix.
-     *
-     * @param prefix The prefix or <code>null</code> to remove
-     */
-    public static void setPrefix(String prefix) {
-        PREFIX.set(prefix);
-    }
-
-    /**
-     * Gets the prefix.
-     *
-     * @return The prefix or <code>null</code> if absent
-     */
-    public static String getPrefix() {
-        return PREFIX.get();
-    }
-
     private static final AtomicReference<List<ResponseRenderer>> RESPONSE_RENDERERS = new AtomicReference<List<ResponseRenderer>>(Collections.<ResponseRenderer> emptyList());
 
     /**
@@ -176,12 +162,18 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected final String lineSeparator;
 
+    /**
+     * The dispatcher servlet prefix (e.g. /appsuite/api/)
+     */
+    protected final String prefix;
+
 
     /**
      * Initializes a new {@link DispatcherServlet}.
      */
-    public DispatcherServlet() {
+    public DispatcherServlet(String prefix) {
         super();
+        this.prefix = prefix;
         defaultRequestDataTools = AJAXRequestDataTools.getInstance();
         lineSeparator = System.getProperty("line.separator");
     }
@@ -193,6 +185,21 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected AJAXRequestDataTools getAjaxRequestDataTools() {
         return defaultRequestDataTools;
+    }
+
+    /**
+     * The prefix reference for dispatcher; e.g. <tt>"/ajax/"</tt> (default).
+     * <p>
+     * All requests starting with this prefix are directed to dispatcher framework.
+     *
+     * @deprecated Use {@link DispatcherPrefixService} instead! Classes of the AJAX framework (i.e.
+     *             non-module-specific classes below the com.openexchange.ajax package might also
+     *             use {@link Dispatchers#getPrefix()} after the framework is guaranteed to be initialized.
+     *
+     */
+    @Deprecated
+    public static String getPrefix() {
+        return Dispatchers.getPrefix();
     }
 
     /**
@@ -253,61 +260,99 @@ public class DispatcherServlet extends SessionServlet {
     }
 
     @Override
-    protected void initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
-        if (null != SessionUtility.getSessionObject(req, true)) {
-            return;
+    protected SessionResult<ServerSession> initializeSession(HttpServletRequest req, HttpServletResponse resp) throws OXException {
+        ServerSession session = getSessionObject(req, true);
+        if (null != session) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, session);
         }
-        // Remember session
+
+        // Require SessionD service
         SessiondService sessiondService = ServerServiceRegistry.getInstance().getService(SessiondService.class);
         if (sessiondService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SessiondService.class.getName());
         }
-        ServerSession session;
-        boolean sessionParamFound;
-        {
-            String sessionId = req.getParameter(PARAMETER_SESSION);
-            if (sessionId != null && sessionId.length() > 0) {
-                try {
-                    session = SessionUtility.getSession(req, sessionId, sessiondService);
-                } catch (OXException e) {
-                    if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
-                        throw e;
-                    }
-                    // Got a wrong or missing secret
-                    String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
-                    if (!"null".equals(wrongSecret)) {
-                        // No information available or a differing secret
-                        throw e;
-                    }
-                    // Missing secret cookie
-                    session = SessionUtility.getSession(SessionUtility.getHashSource(), req, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), e, getAjaxRequestDataTools()));
+
+        // Check "session" parameter
+        String sessionId = req.getParameter(PARAMETER_SESSION);
+        boolean sessionParamFound = sessionId != null && sessionId.length() > 0;
+
+        // Associated module & action pair
+        Pair<String, String> pair = null;
+        boolean mayOmitSession = false;
+
+        // Check for possible session inspector chain
+        if (!SessionInspector.getInstance().getChain().isEmpty()) {
+            // Session inspectors available -- bypass those requests that do not require a session
+            if (!sessionParamFound) {
+                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+                String module = requestDataTools.getModule(prefix, req);
+                String action = requestDataTools.getAction(req);
+                pair = new Pair<String, String>(module, action);
+                Dispatcher dispatcher = DISPATCHER.get();
+                mayOmitSession = dispatcher.mayOmitSession(module, action);
+                if (mayOmitSession) {
+                    return new SessionResult<ServerSession>(Reply.CONTINUE, session);
                 }
-                SessionUtility.verifySession(req, sessiondService, sessionId, session);
-                SessionUtility.rememberSession(req, session);
-                SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
-                sessionParamFound = true;
-            } else {
-                session = null;
-                sessionParamFound = false;
             }
         }
+
+        // Look-up & remember session
+        SessionResult<ServerSession> result;
+        if (sessionParamFound) {
+            try {
+                result = SessionUtility.getSession(req, resp, sessionId, sessiondService);
+            } catch (OXException e) {
+                if (!SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
+                    throw e;
+                }
+                // Got a wrong or missing secret
+                String wrongSecret = e.getProperty(SessionExceptionCodes.WRONG_SESSION_SECRET.name());
+                if (!"null".equals(wrongSecret)) {
+                    // No information available or a differing secret
+                    throw e;
+                }
+                // Missing secret cookie
+                result = SessionUtility.getSession(SessionUtility.getHashSource(), req, resp, sessionId, sessiondService, new NoSecretCallbackChecker(DISPATCHER.get(), prefix, e, getAjaxRequestDataTools()));
+            }
+            if (Reply.STOP == result.getReply()) {
+                return result;
+            }
+            session = result.getSession();
+            if (null == session) {
+                // Should not occur
+                throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+            }
+            SessionUtility.verifySession(req, sessiondService, sessionId, session);
+            SessionUtility.rememberSession(req, session);
+            SessionUtility.checkPublicSessionCookie(req, resp, session, sessiondService);
+            sessionParamFound = true;
+        }
+
         // Check if associated request allows no session (if no "session" parameter was found)
-        boolean mayOmitSession = false;
         boolean mayUseFallbackSession = false;
         boolean mayPerformPublicSessionAuth = false;
         if (!sessionParamFound) {
-            AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-            String module = requestDataTools.getModule(PREFIX.get(), req);
-            String action = requestDataTools.getAction(req);
+            String module, action;
+            if (null == pair) {
+                AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
+                module = requestDataTools.getModule(prefix, req);
+                action = requestDataTools.getAction(req);
+            } else {
+                module = pair.getFirst();
+                action = pair.getSecond();
+            }
             Dispatcher dispatcher = DISPATCHER.get();
             mayOmitSession = dispatcher.mayOmitSession(module, action);
             mayUseFallbackSession = dispatcher.mayUseFallbackSession(module, action);
             mayPerformPublicSessionAuth = dispatcher.mayPerformPublicSessionAuth(module, action);
         }
+
         // Try public session
         if (!mayOmitSession) {
             SessionUtility.findPublicSessionId(req, session, sessiondService, mayUseFallbackSession, mayPerformPublicSessionAuth);
         }
+
+        return new SessionResult<ServerSession>(Reply.CONTINUE, session);
     }
 
     @Override
@@ -378,10 +423,10 @@ public class DispatcherServlet extends SessionServlet {
 
         ServerSession session = null;
         AJAXState state = null;
+        AJAXRequestData requestData = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-
-            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
+            requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
             /*
              * Start dispatcher processing
              */
@@ -432,6 +477,9 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResponse, false, false);
         } finally {
+            if (null != requestData) {
+                requestData.cleanUploads();
+            }
             if (null != state) {
                 dispatcher.end(state);
             }
@@ -538,13 +586,13 @@ public class DispatcherServlet extends SessionServlet {
      */
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-        String module = requestDataTools.getModule(PREFIX.get(), httpRequest);
+        String module = requestDataTools.getModule(prefix, httpRequest);
         String action = requestDataTools.getAction(httpRequest);
         ServerSession session = getSession(httpRequest, DISPATCHER.get(), module, action);
         /*
          * Parse AJAXRequestData
          */
-        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
+        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, prefix, httpResponse);
         requestData.setSession(session);
         return requestData;
     }
@@ -701,22 +749,24 @@ public class DispatcherServlet extends SessionServlet {
         private static final String PARAM_TOKEN = Session.PARAM_TOKEN;
 
         private final Dispatcher dispatcher;
+        private final String prefix;
         private final OXException e;
         private final AJAXRequestDataTools requestDataTools;
 
         /**
          * Initializes a new {@link SessionSecretCheckerImplementation}.
          */
-        protected NoSecretCallbackChecker(Dispatcher dispatcher, OXException e, AJAXRequestDataTools requestDataTools) {
+        protected NoSecretCallbackChecker(Dispatcher dispatcher, String prefix, OXException e, AJAXRequestDataTools requestDataTools) {
             super();
             this.requestDataTools = requestDataTools;
+            this.prefix = prefix;
             this.dispatcher = dispatcher;
             this.e = e;
         }
 
         @Override
         public void checkSecret(Session session, HttpServletRequest req, String cookieHashSource) throws OXException {
-            String module = requestDataTools.getModule(PREFIX.get(), req);
+            String module = requestDataTools.getModule(prefix, req);
             String action = requestDataTools.getAction(req);
             boolean noSecretCallback = dispatcher.noSecretCallback(module, action);
             if (!noSecretCallback) {

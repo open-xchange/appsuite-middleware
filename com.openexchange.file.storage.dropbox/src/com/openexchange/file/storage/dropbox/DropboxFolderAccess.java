@@ -136,6 +136,11 @@ public final class DropboxFolderAccess extends AbstractDropboxAccess implements 
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         String path = toPath(parentIdentifier);
         try {

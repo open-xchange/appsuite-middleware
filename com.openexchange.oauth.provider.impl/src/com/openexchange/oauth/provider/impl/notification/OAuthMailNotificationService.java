@@ -51,19 +51,16 @@ package com.openexchange.oauth.provider.impl.notification;
 
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import javax.activation.DataHandler;
-import javax.mail.BodyPart;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimeMessage.RecipientType;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.config.ConfigurationService;
@@ -82,13 +79,14 @@ import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.notification.BasicNotificationTemplate;
+import com.openexchange.notification.BasicNotificationTemplate.FooterImage;
 import com.openexchange.notification.FullNameBuilder;
-import com.openexchange.notification.TemplateHelper;
 import com.openexchange.oauth.provider.client.Client;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
+import com.openexchange.serverconfig.NotificationMailConfig;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
@@ -146,12 +144,57 @@ public class OAuthMailNotificationService {
         vars.put("settingsURL", getSettingsUrl(request));
 
         // style substitutions
-        TemplateHelper.injectNotificationMailConfig(vars, serverConfig.getNotificationMailConfig(), templateService);
-        MimeMessage mail = prepareEnvelope(subject, new InternetAddress(user.getMail(), userName));
-        mail.setHeader("Auto-Submitted", "auto-generated");
-        mail.setContent(prepareContent(templateService, "notify.oauthprovider.accessgranted.txt.tmpl", vars, "notify.oauthprovider.accessgranted.html.tmpl", vars));
-        mail.saveChanges();
-        return new ContentAwareComposedMailMessage(mail, contextId);
+        NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
+        BasicNotificationTemplate basicTemplate = BasicNotificationTemplate.newInstance(mailConfig);
+        basicTemplate.applyStyle(vars);
+        FooterImage footerImage = basicTemplate.applyFooter(vars);
+
+        OXTemplate template = templateService.loadTemplate("notify.oauthprovider.accessgranted.html.tmpl");
+        StringWriter writer = new StringWriter();
+        template.process(vars, writer);
+
+        ComposedMailMessage mail;
+        if (footerImage == null) {
+            // no image, no multipart
+            mail = transportProvider.getNewComposedMailMessage(session, session.getContext());
+            mail.setSubject(subject);
+            mail.setHeader("Auto-Submitted", "auto-generated");
+            mail.setBodyPart(transportProvider.getNewTextBodyPart(writer.toString()));
+        } else {
+            MimeBodyPart htmlPart = new MimeBodyPart();
+            ContentType ct = new ContentType();
+            ct.setPrimaryType("text");
+            ct.setSubType("html");
+            ct.setCharsetParameter("UTF-8");
+            String contentType = ct.toString();
+            HtmlService htmlService = Services.requireService(HtmlService.class);
+            String conformContent = htmlService.getConformHTML(writer.toString(), "UTF-8");
+            htmlPart.setDataHandler(new DataHandler(new MessageDataSource(conformContent, ct)));
+            htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
+
+            MimeBodyPart imagePart = new MimeBodyPart();
+            imagePart.setDisposition("inline; filename=\"" + footerImage.getFileName() + "\"");
+            imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, footerImage.getContentType() + "; name=\"" + footerImage.getFileName() + "\"");
+            imagePart.setContentID("<" + footerImage.getContentId() + ">");
+            imagePart.setHeader("X-Attachment-Id", footerImage.getContentId());
+            imagePart.setDataHandler(new DataHandler(new MessageDataSource(footerImage.getData(), footerImage.getContentType())));
+
+            MimeMultipart multipart = new MimeMultipart("related");
+            multipart.addBodyPart(htmlPart);
+            multipart.addBodyPart(imagePart);
+
+            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            mimeMessage.setSubject(subject, "UTF-8");
+            mimeMessage.setHeader("Auto-Submitted", "auto-generated");
+            mimeMessage.setContent(multipart);
+            mimeMessage.saveChanges();
+            mail = new ContentAwareComposedMailMessage(mimeMessage, contextId);
+        }
+
+        InternetAddress recipient = new InternetAddress(user.getMail(), userName);
+        mail.addRecipient(recipient);
+        mail.addTo(recipient);
+        return mail;
     }
 
     private static String getLogin(Session session, User user) {
@@ -173,58 +216,6 @@ public class OAuthMailNotificationService {
         }
 
         return login;
-    }
-
-    private MimeMessage prepareEnvelope(String subject, InternetAddress recipient) throws MessagingException {
-        MimeMessage mail = new MimeMessage(MimeDefaultSession.getDefaultSession());
-        mail.addRecipient(RecipientType.TO, recipient);
-        mail.setSubject(subject, "UTF-8");
-        return mail;
-    }
-
-    private BodyPart prepareTextPart(Writer writer) throws MessagingException {
-        MimeBodyPart textPart = new MimeBodyPart();
-        MessageUtility.setText(writer.toString(), "UTF-8", textPart);
-        textPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-        final ContentType ct = new ContentType();
-        ct.setPrimaryType("text");
-        ct.setSubType("plain");
-        ct.setCharsetParameter("UTF-8");
-        textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, ct.toString());
-        return textPart;
-    }
-
-    private BodyPart prepareHtmlPart(Writer writer) throws OXException, UnsupportedEncodingException, MessagingException {
-        MimeBodyPart htmlPart = new MimeBodyPart();
-        ContentType ct = new ContentType();
-        ct.setPrimaryType("text");
-        ct.setSubType("html");
-        ct.setCharsetParameter("UTF-8");
-        String contentType = ct.toString();
-        HtmlService htmlService = Services.requireService(HtmlService.class);
-        String conformContent = htmlService.getConformHTML(writer.toString(), "UTF-8");
-        htmlPart.setDataHandler(new DataHandler(new MessageDataSource(conformContent, ct)));
-        htmlPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-        htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, contentType);
-
-        return htmlPart;
-    }
-
-    private MimeMultipart prepareContent(TemplateService templateService, String txtTemplate, Map<String, Object> txtVars, String htmlTemplate, Map<String, Object> htmlVars) throws MessagingException, OXException, UnsupportedEncodingException {
-        OXTemplate template = templateService.loadTemplate(txtTemplate);
-        StringWriter writer = new StringWriter();
-        template.process(txtVars, writer);
-        BodyPart textPart = prepareTextPart(writer);
-
-        template = templateService.loadTemplate(htmlTemplate);
-        writer = new StringWriter();
-        template.process(htmlVars, writer);
-        BodyPart htmlPart = prepareHtmlPart(writer);
-
-        MimeMultipart multipart = new MimeMultipart("alternative");
-        multipart.addBodyPart(textPart);
-        multipart.addBodyPart(htmlPart);
-        return multipart;
     }
 
     private String getSettingsUrl(HttpServletRequest request) throws OXException, URISyntaxException {

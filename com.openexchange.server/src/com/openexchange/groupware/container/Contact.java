@@ -4105,6 +4105,16 @@ public class Contact extends CommonObject {
 
     public String getSortName() {
         /*
+         * prefer display name for distribution lists
+         */
+        if (getMarkAsDistribtuionlist()) {
+            String sortName = getDisplayName();
+            if (Strings.isEmpty(sortName)) {
+                sortName = getSurName();
+            }
+            return sortName;
+        }
+        /*
          * prefer lastname if set
          */
         String sortName = getYomiLastName();

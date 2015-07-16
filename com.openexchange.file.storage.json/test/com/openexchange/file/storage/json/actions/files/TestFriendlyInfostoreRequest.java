@@ -63,8 +63,12 @@ import com.openexchange.tools.session.SimServerSession;
 public class TestFriendlyInfostoreRequest extends AJAXInfostoreRequest {
 
     public TestFriendlyInfostoreRequest() {
+        this("UTC");
+    }
+
+    public TestFriendlyInfostoreRequest(String userTimeZone) {
         super(new AJAXRequestData(), new SimServerSession(new SimContext(1), new SimUser(), null));
-        ((SimUser) getSimSession().getUser()).setTimeZone("UTC");
+        ((SimUser) getSimSession().getUser()).setTimeZone(userTimeZone);
     }
 
     public TestFriendlyInfostoreRequest param(String key, String value) {

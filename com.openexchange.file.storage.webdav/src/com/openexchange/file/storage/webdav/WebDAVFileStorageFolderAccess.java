@@ -280,6 +280,11 @@ public final class WebDAVFileStorageFolderAccess extends AbstractWebDAVAccess im
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentId, final boolean all) throws OXException {
         try {
             /*

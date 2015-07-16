@@ -315,7 +315,7 @@ public final class Cookies {
      * Creates a cookie map for given HTTP request.
      *
      * @param req The HTTP request
-     * @return The cookie map
+     * @return The cookie map or {@link java.util.Collections#emptyMap()}
      */
     public static Map<String, Cookie> cookieMapFor(final HttpServletRequest req) {
         if (null == req) {

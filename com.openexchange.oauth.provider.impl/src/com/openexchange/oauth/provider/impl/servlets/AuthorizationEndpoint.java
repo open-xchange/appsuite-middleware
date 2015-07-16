@@ -129,9 +129,6 @@ import com.openexchange.tools.session.ServerSessionAdapter;
  */
 public class AuthorizationEndpoint extends OAuthEndpoint {
 
-    /**
-     *
-     */
     private static final String STRING_SPLITTER = "#split#";
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AuthorizationEndpoint.class);
@@ -220,14 +217,25 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         try {
-            String redirectLocation;
+            boolean accessDenied = Boolean.parseBoolean(request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED));
             Session session = checkSession(request, response, authRequest);
-            if (session == null) {
-                redirectLocation = handleLogin(request, response, authRequest);
+
+            // Note: The session was created only for the authorization purpose, so we should terminate it if possible.
+            String redirectLocation;
+            if (accessDenied) {
+                if (session == null) {
+                    redirectLocation = accessDenied(authRequest);
+                } else {
+                    terminateSession(request, response, authRequest, session);
+                    redirectLocation = accessDenied(authRequest);
+                }
             } else {
-                redirectLocation = handleAuthorization(request, response, authRequest, session);
-                // The session was created only for the authorization purpose, so we should terminate it if possible.
-                terminateSession(request, response, authRequest, session);
+                if (session == null) {
+                    redirectLocation = handleLogin(request, response, authRequest);
+                } else {
+                    redirectLocation = handleAuthorization(request, response, authRequest, session);
+                    terminateSession(request, response, authRequest, session);
+                }
             }
 
             response.sendRedirect(redirectLocation);
@@ -366,17 +374,6 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             Context context = serverSession.getContext();
             User user = serverSession.getUser();
 
-            // Check if user denied access
-            String accessDenied = request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED);
-            if (Boolean.parseBoolean(accessDenied)) {
-                return URLHelper.getErrorRedirectLocation(
-                    authRequest.getRedirectURI(),
-                    "access_denied",
-                    "The user denied your request.",
-                    OAuthProviderConstants.PARAM_STATE,
-                    authRequest.getState());
-            }
-
             // Check if OAuth is deactivated for this user
             ConfigView configView = requireService(ConfigViewFactory.class, services).getView(user.getId(), context.getContextId());
             if (!configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue() || user.isGuest()) {
@@ -407,8 +404,8 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             return redirectLocation;
         } catch (OXException e) {
             if (SessionExceptionCodes.SESSION_EXPIRED.equals(e) || SessionExceptionCodes.WRONG_SESSION_SECRET.equals(e)) {
-                Map<String, String> redirectParams = prepareSelfRedirectParams(authRequest);
-                redirectParams.put("error", LoginError.SESSION_EXPIRED.getCode());
+                Map<String, String> redirectParams = prepareSelfRedirectParams(request, authRequest);
+                redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.SESSION_EXPIRED.getCode());
                 return URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
             }
 
@@ -457,6 +454,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         vars.put("scopes", authRequest.getScope().toString());
         vars.put("state", authRequest.getState());
         vars.put("csrfToken", csrfToken);
+        vars.put("language", locale.toString());
 
         StringWriter writer = new StringWriter();
         loginPage.process(vars, writer);
@@ -474,22 +472,11 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      * @throws OXException If a non-recoverable error occurs
      */
     private String handleLogin(HttpServletRequest request, HttpServletResponse response, AuthorizationRequest authRequest) throws OXException {
-        // Check if user denied access
-        String accessDenied = request.getParameter(OAuthProviderConstants.PARAM_ACCESS_DENIED);
-        if (Boolean.parseBoolean(accessDenied)) {
-            return URLHelper.getErrorRedirectLocation(
-                authRequest.getRedirectURI(),
-                "access_denied",
-                "The user denied your request.",
-                OAuthProviderConstants.PARAM_STATE,
-                authRequest.getState());
-        }
-
-        Map<String, String> redirectParams = prepareSelfRedirectParams(authRequest);
+        Map<String, String> redirectParams = prepareSelfRedirectParams(request, authRequest);
         String login = request.getParameter("login");
         String password = request.getParameter("password");
         if (Strings.isEmpty(login) || Strings.isEmpty(password)) {
-            redirectParams.put("error", LoginError.INVALID_CREDENTIALS.getCode());
+            redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.INVALID_CREDENTIALS.getCode());
         } else {
             Session session;
             try {
@@ -499,13 +486,13 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 // Let the popup display this error so that the user can retry or does at least now why he can't grant access
                 String redirectLocation;
                 if (LoginExceptionCodes.INVALID_CREDENTIALS.equals(e)) {
-                    redirectParams.put("error", LoginError.INVALID_CREDENTIALS.getCode());
+                    redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.INVALID_CREDENTIALS.getCode());
                     redirectLocation = URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
                 } else if (ContextExceptionCodes.UPDATE.equals(e)) {
-                    redirectParams.put("error", LoginError.UPDATE_TASK.getCode());
+                    redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.UPDATE_TASK.getCode());
                     redirectLocation = URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
                 } else if (OAuthProviderExceptionCodes.GRANTS_EXCEEDED.equals(e)) {
-                    redirectParams.put("error", LoginError.GRANTS_EXCEEDED.getCode());
+                    redirectParams.put(OAuthProviderConstants.PARAM_ERROR, LoginError.GRANTS_EXCEEDED.getCode());
                     redirectLocation = URLHelper.getRedirectLocation(getAuthorizationEndpointURL(request), redirectParams);
                 } else if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(e)) {
                     LOG.error("Login for OAuth authorization request failed", e);
@@ -594,6 +581,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         vars.put("denyLabel", translator.translate(OAuthProviderStrings.DENY));
         vars.put("allowLabel", translator.translate(OAuthProviderStrings.ALLOW));
         vars.put("footer", translator.translate(OAuthProviderStrings.AUTHORIZATION_FOOTER));
+        vars.put("language", locale.toString());
 
         StringWriter writer = new StringWriter();
         loginPage.process(vars, writer);
@@ -682,11 +670,11 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         try {
             URI expectedReferer = new URI(URLHelper.getSecureLocation(request));
             URI actualReferer = new URI(referer);
-            if (!expectedReferer.getScheme().equals(actualReferer.getScheme())) {
+            if (!stringsEqual(expectedReferer.getScheme(), actualReferer.getScheme())) {
                 return true;
             }
 
-            if (!expectedReferer.getHost().equals(actualReferer.getHost())) {
+            if (!stringsEqual(expectedReferer.getHost(), actualReferer.getHost())) {
                 return true;
             }
 
@@ -694,7 +682,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
                 return true;
             }
 
-            if (!expectedReferer.getPath().equals(actualReferer.getPath())) {
+            if (!stringsEqual(normalizePath(expectedReferer.getPath()), normalizePath(actualReferer.getPath()))) {
                 return true;
             }
         } catch (URISyntaxException e) {
@@ -702,6 +690,38 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         return false;
+    }
+
+    /**
+     * Null-safe method for comparing two strings
+     *
+     * @param str1 string or <code>null</code>
+     * @param str2 string or <code>null</code>
+     * @return <code>true</code> if both strings are <code>null</code> or equal
+     */
+    private static boolean stringsEqual(String str1, String str2) {
+        if (str1 != null && str2 != null) {
+            return str1.equals(str2);
+        }
+
+        return str1 == null && str2 == null;
+    }
+
+    /**
+     * Normalizes a servlet path for comparison by removing the dispatcher prefix if present.
+     *
+     * @param path The path or <code>null</code>
+     * @return The normalized path or <code>null</code> if the input was also <code>null</code>
+     */
+    private static String normalizePath(String path) {
+        if (path != null) {
+            int index = path.indexOf(OAuthProviderConstants.AUTHORIZATION_SERVLET_ALIAS);
+            if (index >= 0) {
+                return path.substring(index);
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -939,16 +959,18 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      * Prepares the query parameters for a redirect towards this same servlet
      * based on the passed {@link AuthorizationRequest}.
      *
+     * @param request The servlet request
      * @param authRequest The authorization request
      * @return A map of query parameters
      */
-    private static Map<String, String> prepareSelfRedirectParams(AuthorizationRequest authRequest) {
+    private static Map<String, String> prepareSelfRedirectParams(HttpServletRequest request, AuthorizationRequest authRequest) {
         Map<String, String> redirectParams = new LinkedHashMap<>();
         redirectParams.put(OAuthProviderConstants.PARAM_CLIENT_ID, authRequest.getClient().getId());
         redirectParams.put(OAuthProviderConstants.PARAM_REDIRECT_URI, authRequest.getRedirectURI());
         redirectParams.put(OAuthProviderConstants.PARAM_STATE, authRequest.getState());
         redirectParams.put(OAuthProviderConstants.PARAM_SCOPE, authRequest.getScope().toString());
         redirectParams.put(OAuthProviderConstants.PARAM_RESPONSE_TYPE, OAuthProviderConstants.RESPONSE_TYPE_AUTH_CODE);
+        redirectParams.put(OAuthProviderConstants.PARAM_LANGUAGE, determineLocale(request).toString());
         return redirectParams;
     }
 
@@ -960,7 +982,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      *         value is invalid.
      */
     private static LoginError optLoginError(HttpServletRequest request) {
-        String errorCode = request.getParameter("error");
+        String errorCode = request.getParameter(OAuthProviderConstants.PARAM_ERROR);
         if (errorCode == null) {
             return null;
         }
@@ -1007,6 +1029,15 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             authRequest.getRedirectURI(),
             "server_error",
             "An internal error occurred.",
+            OAuthProviderConstants.PARAM_STATE,
+            authRequest.getState());
+    }
+
+    private static String accessDenied(AuthorizationRequest authRequest) throws OXException {
+        return URLHelper.getErrorRedirectLocation(
+            authRequest.getRedirectURI(),
+            "access_denied",
+            "The user denied your request.",
             OAuthProviderConstants.PARAM_STATE,
             authRequest.getState());
     }

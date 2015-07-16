@@ -142,13 +142,12 @@ public interface CompositionParameters {
     String getUserVCardFileName() throws OXException;
 
     /**
-     * Gets session user's VCard as a string.
-     *
-     * @param charset The charset to use for returned string
-     * @return The session user's VCard as a string
-     * @throws OXException If a mail error occurs
+     * Gets the session user's vCard.
+     * 
+     * @return The vCard as byte array
+     * @throws OXException
      */
-    String getUserVCard(String charset) throws OXException;
+    byte[] getUserVCard() throws OXException;
 
     /**
      * Gets the character count after which a line break is added in <code>text/plain</code> messages

@@ -109,6 +109,7 @@ public final class FolderActionFactory implements AJAXActionServiceFactory {
         tmp.put(UpdatesAction.ACTION, new UpdatesAction());
         tmp.put(VisibleFoldersAction.ACTION, new VisibleFoldersAction());
         tmp.put(SubscribeAction.ACTION, new SubscribeAction());
+        tmp.put(SharesAction.ACTION, new SharesAction());
         return Collections.unmodifiableMap(tmp);
     }
 

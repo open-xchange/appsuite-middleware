@@ -50,21 +50,21 @@
 package com.openexchange.share.json.actions;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.List;
 import java.util.TimeZone;
-import javax.servlet.http.HttpServletRequest;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.context.ContextService;
-import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
-import com.openexchange.share.notification.DefaultLinkProvider;
-import com.openexchange.share.notification.LinkProvider;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -97,6 +97,16 @@ public abstract class AbstractShareAction implements AJAXActionService {
      */
     protected ShareService getShareService() throws OXException {
         return requireService(ShareService.class, services);
+    }
+
+    /**
+     * Gets the module support service.
+     *
+     * @return The module support service
+     * @throws OXException if the service is unavailable
+     */
+    protected ModuleSupport getModuleSupport() throws OXException {
+        return requireService(ModuleSupport.class, services);
     }
 
     /**
@@ -138,20 +148,6 @@ public abstract class AbstractShareAction implements AJAXActionService {
         return translatorFactory.translatorFor(session.getUser().getLocale());
     }
 
-    protected String getServletPrefix() {
-        DispatcherPrefixService prefixService = services.getService(DispatcherPrefixService.class);
-        if (prefixService == null) {
-            return DispatcherPrefixService.DEFAULT_PREFIX;
-        }
-
-        return prefixService.getPrefix();
-    }
-
-    // FIXME: hostname service or share service or whatever, but we need a single point to generate those URLs
-    protected LinkProvider buildLinkProvider(ServerSession session, AJAXRequestData requestData, String shareToken) {
-        return new DefaultLinkProvider(determineProtocol(requestData), determineHostname(session, requestData), getServletPrefix(), shareToken);
-    }
-
     protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
         String timeZoneID = requestData.getParameter("timezone");
         if (null == timeZoneID) {
@@ -161,26 +157,33 @@ public abstract class AbstractShareAction implements AJAXActionService {
         return timeZone;
     }
 
-    protected static String determineProtocol(AJAXRequestData requestData) {
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return com.openexchange.tools.servlet.http.Tools.getProtocol(servletRequest);
-        } else {
-            return requestData.isSecure() ? "https://" : "http://";
-        }
+    /**
+     * Gets the string representation of a share targets module identifier.
+     *
+     * @param target The share target
+     * @return The module string
+     */
+    protected String moduleFor(ShareTarget target) throws OXException {
+        return getModuleSupport().getShareModule(target.getModule());
     }
 
-    protected String determineHostname(ServerSession session, AJAXRequestData requestData) {
-        HostnameService hostNameService = services.getOptionalService(HostnameService.class);
-        if(hostNameService != null) {
-            return hostNameService.getHostname(session.getUserId(), session.getContextId());
+    /**
+     * Gets an existing link, i.e. an anonymous share, for a specific share target.
+     *
+     * @param session The session
+     * @param target The target to get the link for
+     * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
+     */
+    protected ShareInfo discoverLink(ServerSession session, ShareTarget target) throws OXException {
+        List<ShareInfo> shares = getShareService().getShares(session, moduleFor(target), target.getFolder(), target.getItem());
+        if (null != shares && 0 < shares.size()) {
+            for (ShareInfo share : shares) {
+                if (RecipientType.ANONYMOUS.equals(share.getGuest().getRecipientType())) {
+                    return share;
+                }
+            }
         }
-        HttpServletRequest servletRequest = requestData.optHttpServletRequest();
-        if (null != servletRequest) {
-            return servletRequest.getServerName();
-        } else {
-            return requestData.getHostname();
-        }
+        return null;
     }
 
 }

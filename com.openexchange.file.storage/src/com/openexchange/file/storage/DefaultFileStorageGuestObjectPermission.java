@@ -49,7 +49,6 @@
 
 package com.openexchange.file.storage;
 
-import java.util.Date;
 import com.openexchange.share.recipient.ShareRecipient;
 
 
@@ -62,7 +61,6 @@ import com.openexchange.share.recipient.ShareRecipient;
 public class DefaultFileStorageGuestObjectPermission extends DefaultFileStorageObjectPermission implements FileStorageGuestObjectPermission {
 
     private ShareRecipient recipient;
-    private Date expiryDate;
 
     /**
      * Initializes an empty {@link DefaultFileStorageGuestObjectPermission}.
@@ -76,17 +74,8 @@ public class DefaultFileStorageGuestObjectPermission extends DefaultFileStorageO
         return recipient;
     }
 
-    @Override
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
     public void setRecipient(ShareRecipient recipient) {
         this.recipient = recipient;
-    }
-
-    public void setExpiryDate(Date date) {
-        this.expiryDate = date;
     }
 
 }

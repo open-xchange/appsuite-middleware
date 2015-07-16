@@ -185,7 +185,7 @@ public abstract class StanzaSequenceGate extends AbstractRealtimeJanitor impleme
                 threshold = new AtomicLong(0);
                 AtomicLong meantime = sequenceNumbers.putIfAbsent(stanza.getSequencePrincipal(), threshold);
                 if(meantime != null) {
-                    LOG.debug("Found another number: {}in the meantime for the SequencePrincipal: {}", meantime, stanza.getSequencePrincipal());
+                    LOG.debug("Found another number: {} in the meantime for the SequencePrincipal: {}", meantime, stanza.getSequencePrincipal());
                     threshold = meantime;
                 }
             }

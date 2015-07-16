@@ -1,6 +1,137 @@
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39767: Introduced an update task along side the create table service task for the 'snippetAttachmentBinary' table
+
+* 2015-07-15 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39769: Introduced remote look-up of local sessions to verify a session does exist
+
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39712: Distinguish between wildcard and literal search in contacts
+
+* 2015-07-14 - lars.hoogestraat@open-xchange.com
+
+ - Fix for bug 37472: Do not update message flags when saving message as draft
+
+* 2015-07-08 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39451: Orderly invalidate & removed cached IMAPStore instances which lost connectivity
+
+* 2015-07-08 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 39347: Respect maximum numer of years during recurrence calculation.
+ - Fix for bug 39528: Bad usage of enumeration constants. Store confirmation message in separate attributes.
+
+* 2015-07-07 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38783: Fixed NPE.
+
+* 2015-07-03 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39283: Use (possible overridden) default folders from config tree in folder service
+
+* 2015-07-01 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38936: Prefer display name as sort name for distribution lists
+
+* 2015-07-01 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39063: Signal proper file name when putting a mail attachment into file storage
+ - Fix for bug 38948: Return proper MIME message version after transport (which is stored into standard send folder)
+
+* 2015-06-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38639: Orderly invalidate folder cache when (un)subscribing multiple nested folders
+
+* 2015-06-30 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39085: Added support for AWS signature v4
+
+* 2015-06-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38233: Delete filestore before removing context from database
+
+* 2015-06-26 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 39069: Optimize tokenized autocomplete patterns and don't allow more than 5 of them
+
+* 2015-06-24 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38892: Proper stop of MsCacheEventHandler on bundle shut-down
+
+* 2015-06-24 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 37422: Set language chosen in login screen as user's preferred language (if differing) before rampUp
+
+* 2015-06-23 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38664: Orderly check for "CONTEXT=SEARCH" and/or "CONTEXT=SORT" capability prior to performing a SORT RETURN PARTIAL command
+ - Fix for bug 38901: Added null guard
+ - Fix for bug 38893: Properly read-in and adapt to audit settings
+
+* 2015-06-23 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug #38822: Don't overwrite displayname of distribution list member if not set in referenced contact
+
+* 2015-06-22 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38030: Send appropriate event for standard sent folder when appending sent message
+
+* 2015-06-22 - marcus.klein@open-xchange.com
+
+ - Fix for bug 36886: Load all task participants for the confirm action as this information is later needed for notification mails.
+
+* 2015-06-19 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38021: Date formatting for participant notification mails used server time zone instead of UTC.
+
+* 2015-06-19 - thorben.betten@open-xchange.com
+
+ - Fix for bug 37637: Remember alias for registered servlets
+
+* 2015-06-19 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38778: Don't try to strip the dispatcher prefix if it's not known
+ - Fix for bug 38283: Pass reloaded filestore reference to data mover
+
+* 2015-06-19 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 23275: Added attach value to analyze response of invitations.
+ - Fix for bug 37061: Avoid NPE if no occurrences could be calculated. Log debug message instead.
+
+* 2015-06-18 - marcus.klein@open-xchange.com
+
+ - Fix for bug 37002: Retain task user confirmation status even if client is sending always the full participant array.
+
+* 2015-06-17 - marc.arens@open-xchange.com
+
+ - Fix for bug 38787: Properly dispose GroupDispatcher
+ - Fix for bug 38231: Don't allow client to join a GroupDispatcher twice
+
+* 2015-06-17 - marcus.klein@open-xchange.com
+
+ - Fix for bug 38782: Do not allow tasks anymore having a recurrence but lacking of start or end date.
+
+* 2015-06-16 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38484: Apply "special" sorting for contact results by default
+
+* 2015-06-15 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38550: Make the iOS client use the default contact folder as first collection
+
+* 2015-06-12 - marc.arens@open-xchange.com
+
+ - Fix for bug 38634: Improve RealtimeExceptionsCodes and handling
+
 * 2015-06-10 - thorben.betten@open-xchange.com
 
  - Fix for bug 21064: Support display of S/MIME signed messages
+
+* 2015-06-09 - marc.arens@open-xchange.com
+
+ - Fix for bug 38632: Enhance RunLoopManagerMBean to monitor fill status of loop clusters
 
 * 2015-06-09 - martin.herfurth@open-xchange.com
 
@@ -9,7 +140,6 @@
 * 2015-06-09 - thorben.betten@open-xchange.com
 
  - Fix for bug 38616: Fixed various null dereferences
- - Fix for bug 38605: Introduced separate method to OXUserInterface to retrieve only users' display names
 
 * 2015-06-08 - thorben.betten@open-xchange.com
 
@@ -18,13 +148,25 @@
                       transport
  - Fix for bug 38604: Aligned .yml configuration file to current T-Online page layout for contact subscription
 
+* 2015-06-03 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38592: Ensure existence of table 'configdb.context2push_registration'
+
+* 2015-06-02 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38571: Added debug logging to track down unwanted notification mails.
+
 * 2015-06-01 - thorben.betten@open-xchange.com
 
  - Fix for bug 37237: Respond with regular JSON error for OX6 UI in case of an exception when initializing an OAuth account
  - Fix for bug 38553: Live connect against IMAP server to determine whether special folders are supposed to be used for standard mail folders
                       (e.g. through advertising SPECIAL-USE flags)
 
-* 2015-08-28 - jan.bauerdick@open-xchange.com
+* 2015-05-29 - tobias.friedrich@open-xchange.com
+
+ - Fix for bug 38324: Make the corrupt group permission check aware of the virtual group for guest users
+
+* 2015-05-28 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38260: Include distribution list entries when searching in contact module
 

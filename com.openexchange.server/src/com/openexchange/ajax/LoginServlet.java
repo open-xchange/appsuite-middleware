@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax;
 
-import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import static com.openexchange.ajax.ConfigMenu.convert2JS;
 import static com.openexchange.tools.servlet.http.Cookies.getDomainValue;
 import java.io.File;
@@ -112,7 +111,9 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.IPRange;
@@ -121,6 +122,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Servlet doing the login and logout stuff.
@@ -170,6 +172,11 @@ public class LoginServlet extends AJAXServlet {
     public static final String SECRET_PREFIX = "open-xchange-secret-".intern();
 
     /**
+     * <code>"open-xchange-share-"</code>
+     */
+    public static final String SHARE_PREFIX = "open-xchange-share-".intern();
+
+    /**
      * <code>"open-xchange-public-session-"</code>
      */
     public static final String PUBLIC_SESSION_PREFIX = "open-xchange-public-session-".intern();
@@ -217,6 +224,7 @@ public class LoginServlet extends AJAXServlet {
 
     /**
      * Gets the name of the public session cookie for specified HTTP request.
+     *
      * <pre>
      *  "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
      * </pre>
@@ -317,7 +325,7 @@ public class LoginServlet extends AJAXServlet {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 String randomToken = null;
-                if(conf.isRandomTokenEnabled()) {
+                if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
@@ -344,7 +352,12 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                    LOG.info(
+                                        "Changing IP of session {} with authID: {} from {} to {}.",
+                                        session.getSessionID(),
+                                        session.getAuthId(),
+                                        oldIP,
+                                        newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -374,7 +387,10 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info(
+                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
+                            context.getContextId(),
+                            user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -383,7 +399,10 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info(
+                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
+                        session.getContextId(),
+                        session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -441,14 +460,22 @@ public class LoginServlet extends AJAXServlet {
                             session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
                             if (null != secret) {
-                                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
+                                LOG.info(
+                                    "Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".",
+                                    secret,
+                                    session.getSecret());
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
                             // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
-                            LOG.info("Changing IP of session {} with authID: {} from {} to {}", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                            LOG.info(
+                                "Changing IP of session {} with authID: {} from {} to {}",
+                                session.getSessionID(),
+                                session.getAuthId(),
+                                oldIP,
+                                newIP);
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");
@@ -480,7 +507,7 @@ public class LoginServlet extends AJAXServlet {
                 Tools.disableCaching(resp);
                 resp.setContentType(CONTENTTYPE_JAVASCRIPT);
                 String randomToken = null;
-                if(conf.isRandomTokenEnabled()) {
+                if (conf.isRandomTokenEnabled()) {
                     randomToken = req.getParameter(LoginFields.RANDOM_PARAM);
                 }
                 if (randomToken == null) {
@@ -507,7 +534,12 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
+                                    LOG.info(
+                                        "Changing IP of session {} with authID: {} from {} to {}.",
+                                        session.getSessionID(),
+                                        session.getAuthId(),
+                                        oldIP,
+                                        newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -537,7 +569,10 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
+                        LOG.info(
+                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
+                            context.getContextId(),
+                            user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -546,7 +581,10 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
+                    LOG.info(
+                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
+                        session.getContextId(),
+                        session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -679,12 +717,7 @@ public class LoginServlet extends AJAXServlet {
                 return;
             }
         } catch (RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            int retryAfter = e.getRetryAfter();
-            if (retryAfter > 0) {
-                resp.setHeader(RETRY_AFTER, Integer.toString(retryAfter));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+            e.send(resp);
         } finally {
             LogProperties.removeProperties(LOG_PROPERTIES);
         }
@@ -716,7 +749,15 @@ public class LoginServlet extends AJAXServlet {
         if (null == sessionId) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_SESSION);
         }
-        final Session session = SessionUtility.getSession(conf.getHashSource(), req, sessionId, sessiond);
+        SessionResult<ServerSession> result = SessionUtility.getSession(conf.getHashSource(), req, resp, sessionId, sessiond);
+        if (Reply.STOP == result.getReply()) {
+            return;
+        }
+        Session session = result.getSession();
+        if (null == session) {
+            // Should not occur
+            throw SessionExceptionCodes.SESSION_EXPIRED.create(sessionId);
+        }
         try {
             SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
             if (type == CookieType.SESSION) {
@@ -756,27 +797,11 @@ public class LoginServlet extends AJAXServlet {
         doGet(req, resp);
     }
 
-    /**
-     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
-     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
-     *
-     * @param resp The HTTP servlet response
-     * @param session The session providing the secret cookie identifier
-     * @param hash The hash string used for composing cookie name
-     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
-     * @param serverName The HTTP request's server name
-     */
-    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
-        final Cookie cookie = new Cookie(SESSION_PREFIX + hash, session.getSessionID());
-        configureCookie(cookie, secure, serverName, confReference.get());
-        resp.addCookie(cookie);
-    }
-
     public static void addHeadersAndCookies(final LoginResult result, final HttpServletResponse resp) {
         final com.openexchange.authentication.Cookie[] cookies = result.getCookies();
         if (null != cookies) {
             for (final com.openexchange.authentication.Cookie cookie : cookies) {
-                resp.addCookie(wrapCookie(cookie));
+                resp.addCookie(wrapCookie(cookie, result));
             }
         }
         final com.openexchange.authentication.Header[] headers = result.getHeaders();
@@ -787,8 +812,10 @@ public class LoginServlet extends AJAXServlet {
         }
     }
 
-    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie) {
-        return new Cookie(cookie.getName(), cookie.getValue());
+    private static Cookie wrapCookie(final com.openexchange.authentication.Cookie cookie, LoginResult result) {
+        Cookie servletCookie = new Cookie(cookie.getName(), cookie.getValue());
+        configureCookie(servletCookie, result.getRequest().isSecure(), result.getRequest().getServerName(), confReference.get());
+        return servletCookie;
     }
 
     /**
@@ -823,6 +850,20 @@ public class LoginServlet extends AJAXServlet {
     }
 
     /**
+     * Writes the (groupware's) session cookie to specified HTTP servlet response whose name is composed by cookie prefix
+     * <code>"open-xchange-session-"</code> and a secret cookie identifier.
+     *
+     * @param resp The HTTP servlet response
+     * @param session The session providing the secret cookie identifier
+     * @param hash The hash string used for composing cookie name
+     * @param secure <code>true</code> to set cookie's secure flag; otherwise <code>false</code>
+     * @param serverName The HTTP request's server name
+     */
+    public static void writeSessionCookie(final HttpServletResponse resp, final Session session, final String hash, final boolean secure, final String serverName) {
+        resp.addCookie(configureCookie(new Cookie(SESSION_PREFIX + hash, session.getSessionID()), secure, serverName, confReference.get()));
+    }
+
+    /**
      * Writes the (groupware's) secret cookie to specified HTTP servlet response whose name is composed by cookie prefix
      * <code>"open-xchange-secret-"</code> and a secret cookie identifier.
      *
@@ -834,10 +875,7 @@ public class LoginServlet extends AJAXServlet {
      * @param serverName The HTTP request's server name
      */
     public static void writeSecretCookie(HttpServletRequest req, HttpServletResponse resp, Session session, String hash, boolean secure, String serverName, LoginConfiguration conf) {
-        Cookie cookie = new Cookie(LoginServlet.SECRET_PREFIX + hash, session.getSecret());
-        configureCookie(cookie, secure, serverName, conf);
-        resp.addCookie(cookie);
-
+        resp.addCookie(configureCookie(new Cookie(SECRET_PREFIX + hash, session.getSecret()), secure, serverName, conf));
         writePublicSessionCookie(req, resp, session, secure, serverName, conf);
     }
 
@@ -854,15 +892,23 @@ public class LoginServlet extends AJAXServlet {
     public static boolean writePublicSessionCookie(final HttpServletRequest req, final HttpServletResponse resp, final Session session, final boolean secure, final String serverName, final LoginConfiguration conf) {
         final String altId = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
         if (null != altId) {
-            final Cookie cookie = new Cookie(getPublicSessionCookieName(req), altId);
-            configureCookie(cookie, secure, serverName, conf);
-            resp.addCookie(cookie);
+            resp.addCookie(configureCookie(new Cookie(getPublicSessionCookieName(req), altId), secure, serverName, conf));
             return true;
         }
         return false;
     }
 
-    public static void configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
+    /**
+     * Configures specific cookie properties, which includes setting the cookie path to <code>/</code>, applying the <code>secure</code>
+     * flag and domain setting the max-age and cookie domain.
+     *
+     * @param cookie The cookie to configure
+     * @param secure <code>true</code> to enforce the cookie's <code>secure</code>-flag, <code>false</code> to set the flag based on configuration
+     * @param serverName The server name as extracted from the request
+     * @param conf the login configuration
+     * @return The cookie
+     */
+    public static Cookie configureCookie(final Cookie cookie, final boolean secure, final String serverName, final LoginConfiguration conf) {
         cookie.setPath("/");
         if (secure || (conf.isCookieForceHTTPS() && !Cookies.isLocalLan(serverName))) {
             cookie.setSecure(true);
@@ -878,11 +924,25 @@ public class LoginServlet extends AJAXServlet {
         if (null != domain) {
             cookie.setDomain(domain);
         }
+        return cookie;
+    }
+
+    /**
+     * Configures specific cookie properties based on configuration and the incoming request, which includes setting the cookie path
+     * to <code>/</code>, applying the <code>secure</code> flag and domain setting the max-age and cookie domain.
+     *
+     * @param cookie The cookie to configure
+     * @param request The underlying servlet request
+     * @param loginConfig the login configuration
+     * @return The cookie
+     */
+    public static Cookie configureCookie(Cookie cookie, HttpServletRequest request, LoginConfiguration loginConfig) {
+        return configureCookie(cookie, request.isSecure(), request.getServerName(), loginConfig);
     }
 
     private static String determineServerNameByLogProperty() {
         return LogProperties.getLogProperty(LogProperties.Name.GRIZZLY_SERVER_NAME);
     }
 
-    private static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
+    public static final String ERROR_PAGE_TEMPLATE = "<html>\n" + "<script type=\"text/javascript\">\n" + "// Display normal HTML for 5 seconds, then redirect via referrer.\n" + "setTimeout(redirect,5000);\n" + "function redirect(){\n" + " var referrer=document.referrer;\n" + " var redirect_url;\n" + " // If referrer already contains failed parameter, we don't add a 2nd one.\n" + " if(referrer.indexOf(\"login=failed\")>=0){\n" + "  redirect_url=referrer;\n" + " }else{\n" + "  // Check if referrer contains multiple parameter\n" + "  if(referrer.indexOf(\"?\")<0){\n" + "   redirect_url=referrer+\"?login=failed\";\n" + "  }else{\n" + "   redirect_url=referrer+\"&login=failed\";\n" + "  }\n" + " }\n" + " // Redirect to referrer\n" + " window.location.href=redirect_url;\n" + "}\n" + "</script>\n" + "<body>\n" + "<h1>ERROR_MESSAGE</h1>\n" + "</body>\n" + "</html>\n";
 }

@@ -68,6 +68,11 @@ public enum AuthenticationMode {
     ANONYMOUS_PASSWORD,
 
     /**
+     * Access is granted for guest users providing a user name but no password.
+     */
+    GUEST,
+
+    /**
      * Access is granted for guest users providing a user name and password.
      */
     GUEST_PASSWORD,

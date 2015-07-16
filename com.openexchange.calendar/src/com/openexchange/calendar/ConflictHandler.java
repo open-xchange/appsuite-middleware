@@ -55,6 +55,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -170,6 +171,12 @@ public class ConflictHandler {
 
         // Using optimized method {@link #resolveResourceConflicts(Date, Date, RecurringResults)} for series appointments.
         final RecurringResultsInterface results = recColl.calculateRecurring(cdao, 0, 0, 0);
+        
+        if (results == null || results.size() < 1) {
+            LOG.debug("No occurrences for this appointment: " + cdao.toString());
+            return new CalendarDataObject[]{};
+        }
+        
         final Date resultStart = new Date(results.getRecurringResult(0).getStart());
         final Date resultEnd = new Date(results.getRecurringResult(results.size() - 1).getEnd());
         final CalendarDataObject[] resultConflicts = resolveResourceConflicts(resultStart, resultEnd, results);

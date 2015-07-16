@@ -53,6 +53,7 @@ import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.DatabaseService;
@@ -203,6 +204,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public Map<String, Integer> getContextCountPerSchema(Connection con, int poolId, int maxContexts) throws OXException {
+        return configDatabaseService.getContextCountPerSchema(con, poolId, maxContexts);
+    }
+
+    @Override
     public void invalidate( int... contextIds) {
         configDatabaseService.invalidate(contextIds);
     }
@@ -218,8 +224,8 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
-    public void lock(Connection con) throws OXException {
-        configDatabaseService.lock(con);
+    public void lock(Connection con, int writePoolId) throws OXException {
+        configDatabaseService.lock(con, writePoolId);
     }
 
     // Delegate global database service methods.

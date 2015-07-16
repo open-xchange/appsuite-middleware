@@ -66,7 +66,6 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.HashCalculator;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.requesthandler.DefaultDispatcherPrefixService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -92,6 +91,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
     private DispatcherPrefixService prefixService;
 
     private LoginServlet login;
+    private volatile String alias;
 
     public LoginServletRegisterer(final BundleContext context, final ServiceSet<LoginRampUpService> rampUp) {
         super();
@@ -127,10 +127,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             if (null != tmp && tmp instanceof String) {
                 String action = (String) tmp;
                 LoginRequestHandler handler = (LoginRequestHandler) obj;
-                handlers.put(action, handler);
-                if (null != login) {
-                    login.addRequestHandler(action, handler);
-                }
+                addLoginRequestHandler(action, handler);
             }
         }
         if (needsRegistration) {
@@ -163,7 +160,9 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             addProperty(params, ConfigurationProperty.RANDOM_TOKEN);
             try {
                 LOG.info("Registering login servlet.");
-                httpService.registerServlet(prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX, login, params, null);
+                String alias = prefixService.getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX;
+                httpService.registerServlet(alias, login, params, null);
+                this.alias = alias;
             } catch (final ServletException e) {
                 LOG.error("Registering login servlet failed.", e);
             } catch (final NamespaceException e) {
@@ -224,15 +223,30 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             lock.unlock();
         }
         if (null != removeAction) {
-            handlers.remove(removeAction);
-            if (null != login) {
-                login.removeRequestHandler(removeAction);
-            }
+            removeLoginRequestHandler(removeAction);
         }
         if (null != unregister) {
             LOG.info("Unregistering login servlet.");
-            unregister.unregister(DefaultDispatcherPrefixService.getInstance().getPrefix() + LoginServlet.SERVLET_PATH_APPENDIX);
+            String alias = this.alias;
+            if (null != alias) {
+                unregister.unregister(alias);
+                this.alias = null;
+            }
         }
         context.ungetService(reference);
+    }
+
+    public void addLoginRequestHandler(String action, LoginRequestHandler handler) {
+        handlers.put(action, handler);
+        if (null != login) {
+            login.addRequestHandler(action, handler);
+        }
+    }
+
+    public void removeLoginRequestHandler(String action) {
+        handlers.remove(action);
+        if (null != login) {
+            login.removeRequestHandler(action);
+        }
     }
 }

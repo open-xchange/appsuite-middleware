@@ -48,9 +48,6 @@ dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/crawlers/xing.yml 7.6.
 # SoftwareChange_Request-2154
 dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/msnsubscribe.properties 7.6.1~ -- "$@"
 
-# SoftwareChange_Request-2444
-dpkg-maintscript-helper rm_conffile /opt/open-xchange/etc/facebooksubscribe.properties 7.6.2~ -- "$@"
-
 . /opt/open-xchange/lib/oxfunctions.sh
 
 postFix() {

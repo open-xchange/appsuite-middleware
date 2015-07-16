@@ -68,77 +68,21 @@ public enum OAuthProviderExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNEXPECTED_ERROR("An error occurred: %1$s", Category.CATEGORY_ERROR, 1),
     /**
-     * An I/O error occurred: %1$s
-     */
-    IO_ERROR("An I/O error occurred: %1$s", Category.CATEGORY_ERROR, 2),
-    /**
-     * A JSON error occurred: %1$s
-     */
-    JSON_ERROR("A JSON error occurred: %1$s", Category.CATEGORY_ERROR, 3),
-    /**
-     * Unknown OAuth service meta data: %1$s
-     */
-    UNKNOWN_OAUTH_SERVICE_META_DATA("Unknown OAuth service meta data: %1$s", Category.CATEGORY_ERROR, 4),
-    /**
      * A SQL error occurred: %1$s
      */
-    SQL_ERROR("A SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 5),
-    /**
-     * Account not found with identifier %1$s for user %2$s in context %3$s.
-     */
-    ACCOUNT_NOT_FOUND("Account not found with identifier %1$s for user %2$s in context %3$s.", OAuthProviderExceptionMessages.ACCOUNT_NOT_FOUND_MSG, Category.CATEGORY_ERROR, 6),
-    /**
-     * Unsupported OAuth service: %1$s
-     */
-    UNSUPPORTED_SERVICE("Unsupported OAuth service: %1$s", Category.CATEGORY_ERROR, 7),
-    /**
-     * Missing argument: %1$s
-     */
-    MISSING_ARGUMENT("Missing argument: %1$s", Category.CATEGORY_ERROR, 8),
-    /**
-     * An OAuth error occurred: %1$s
-     */
-    OAUTH_ERROR("An OAuth error occurred: %1$s", Category.CATEGORY_ERROR, 9),
-    /**
-     * No registered client was found for identifier %1$s.
-     */
-    CLIENT_NOT_FOUND("No registered client was found for identifier %1$s.", Category.CATEGORY_ERROR, 10),
-    /**
-     * Invalid authorization code: %1$s
-     */
-    INVALID_AUTH_CODE("Invalid authorization code: %1$s", Category.CATEGORY_ERROR, 11),
-    /**
-     * Concurrent attempt to revoke secret for client %1$s
-     */
-    CONCURRENT_SECRET_REVOKE("Concurrent attempt to revoke secret for client %1$s", OAuthProviderExceptionMessages.CONCURRENT_SECRET_REVOKE_MSG, Category.CATEGORY_ERROR, 12),
-    /**
-     * '%1$s' is not a valid redirect URI.
-     */
-    INVALID_REDIRECT_URI("'%1$s' is not a valid redirect URI.", OAuthProviderExceptionMessages.INVALID_REDIRECT_URI_MSG, Category.CATEGORY_USER_INPUT, 13),
-    /**
-     * The client '%1$s' could not be enabled.
-     */
-    FAILED_ENABLEMENT("The client '%1$s' could not be enabled.", OAuthProviderExceptionMessages.FAILED_ENABLEMENT_MSG, Category.CATEGORY_USER_INPUT, 14),
-    /**
-     * The client '%1$s' could not be disabled.
-     */
-    FAILED_DISABLEMENT("The client '%1$s' could not be disabled.", OAuthProviderExceptionMessages.FAILED_DISABLEMENT_MSG, Category.CATEGORY_USER_INPUT, 15),
+    SQL_ERROR("A SQL error occurred: %1$s", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 2),
     /**
      * User %1$d in context %1$d already reached the max. number of possible OAuth grants but tries to acquire another one.
      */
-    GRANTS_EXCEEDED("User %1$d in context %1$d already reached the max. number of possible OAuth grants (%3$d) but tries to acquire another one.", OAuthProviderExceptionMessages.GRANTS_EXCEEDED_MSG, Category.CATEGORY_CAPACITY, 16),
+    GRANTS_EXCEEDED("User %1$d in context %1$d already reached the max. number of possible OAuth grants (%3$d) but tries to acquire another one.", OAuthProviderExceptionMessages.GRANTS_EXCEEDED_MSG, Category.CATEGORY_CAPACITY, 3),
     /**
      * Thrown when the oauth client id does not contain a valid group id
      */
-    BAD_CONTEXT_GROUP_IN_CLIENT_ID("Given client id does not contain a base64 encoded context group id. Client id is: %1$s", Category.CATEGORY_ERROR, 17),
+    BAD_CONTEXT_GROUP_IN_CLIENT_ID("Given client id does not contain a base64 encoded context group id. Client id is: %1$s", Category.CATEGORY_ERROR, 4),
     /**
      * Thrown when the oauth client id does not contain a valid base token
      */
-    BAD_BASE_TOKEN_IN_CLIENT_ID("Given client id is not valid as it does not contain a seperator '%1$s' that seperates the encoded context group id from the base token. Client id is: %2$s", Category.CATEGORY_ERROR, 18),
-    /**
-     * Thrown when the oauth client id is not valid.
-     */
-    BAD_CLIENT_ID("Given client id is not valid. Client id is: %1$s", Category.CATEGORY_ERROR, 19),
+    BAD_BASE_TOKEN_IN_CLIENT_ID("Given client id is not valid as it does not contain a seperator '%1$s' that seperates the encoded context group id from the base token. Client id is: %2$s", Category.CATEGORY_ERROR, 5),
 
     ;
 

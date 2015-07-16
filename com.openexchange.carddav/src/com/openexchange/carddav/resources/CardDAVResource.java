@@ -49,23 +49,16 @@
 
 package com.openexchange.carddav.resources;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.Versit;
-import com.openexchange.tools.versit.VersitDefinition;
-import com.openexchange.tools.versit.VersitObject;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -91,9 +84,13 @@ public abstract class CardDAVResource extends AbstractResource {
 
     protected GroupwareCarddavFactory factory;
     protected WebdavPath url;
-	private String cachedVCard = null;
-	private String originalVCard = null;
 
+    /**
+     * Initializes a new {@link CardDAVResource}.
+     *
+     * @param factory A reference to the CardDAV factory
+     * @param url The resource URL
+     */
     public CardDAVResource(GroupwareCarddavFactory factory, WebdavPath url) {
         super();
         this.factory = factory;
@@ -117,51 +114,7 @@ public abstract class CardDAVResource extends AbstractResource {
         return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
     }
 
-	protected abstract void applyVersitObject(VersitObject versitObject) throws WebdavProtocolException;
-	protected abstract String generateVCard() throws WebdavProtocolException;
 	protected abstract String getUID();
-
-	private String getVCard() throws WebdavProtocolException {
-		if (null == this.cachedVCard) {
-			this.cachedVCard = this.generateVCard();
-		}
-		return this.cachedVCard;
-	}
-
-    private VersitObject readBody(InputStream in) throws WebdavProtocolException {
-        InputStream body = null;
-        ByteArrayOutputStream outputStream = null;
-    	try {
-    	    // Ensure non-empty input stream
-    	    body = Streams.getNonEmpty(in);
-    	    if (null == body) {
-    	        throw this.protocolException(HttpServletResponse.SC_BAD_REQUEST);
-            }
-
-    	    // Read from it
-            VersitDefinition def = Versit.getDefinition("text/vcard");
-            VersitDefinition.Reader versitReader = null;
-            if (LOG.isTraceEnabled()) {
-                int length = 2048;
-                byte[] buffer = new byte[length];
-                outputStream = new UnsynchronizedByteArrayOutputStream(8192);
-                for (int read = body.read(buffer, 0, length); read > 0; read = body.read(buffer, 0, length)) {
-                    outputStream.write(buffer, 0, read);
-                }
-                byte[] bytes = outputStream.toByteArray();
-                LOG.trace(new String(bytes, "UTF-8"));
-                versitReader = def.getReader(new UnsynchronizedByteArrayInputStream(bytes), "UTF-8");
-            } else {
-                versitReader = def.getReader(body, "UTF-8");
-            }
-            return def.parse(versitReader);
-        } catch (IOException e) {
-        	throw this.protocolException(e);
-        } finally {
-            Streams.close(outputStream);
-            Streams.close(body);
-        }
-    }
 
 	@Override
 	protected WebdavFactory getFactory() {
@@ -184,11 +137,12 @@ public abstract class CardDAVResource extends AbstractResource {
 
 	@Override
 	public Long getLength() throws WebdavProtocolException {
-		if (this.exists()) {
-			String vCard = this.getVCard();
-			if (null != vCard && 0 < vCard.length()) {
-				return new Long(vCard.getBytes().length);
-			}
+		if (exists()) {
+		    try {
+                return Long.valueOf(Streams.countInputStream(getBody()));
+            } catch (IOException e) {
+                throw protocolException(e);
+            }
 		}
 		return 0L;
 	}
@@ -225,13 +179,6 @@ public abstract class CardDAVResource extends AbstractResource {
 	}
 
 	@Override
-	public InputStream getBody() throws WebdavProtocolException {
-	    String body = this.getVCard();
-	    LOG.trace(body);
-        return null != body ? new ByteArrayInputStream(body.getBytes()) : null;
-	}
-
-	@Override
 	public void lock(WebdavLock lock) throws WebdavProtocolException {
 	}
 
@@ -260,21 +207,6 @@ public abstract class CardDAVResource extends AbstractResource {
 	}
 
 	@Override
-	public void putBody(InputStream body, boolean guessSize) throws WebdavProtocolException {
-	    try {
-            this.originalVCard = IOUtils.toString(body);
-        } catch (IOException ioException) {
-            LOG.warn("Unable to read original VCard from stream.", ioException);
-        }
-	    String copy = new String(this.originalVCard);
-    	VersitObject versitObject = this.readBody(new ByteArrayInputStream(copy.getBytes()));
-    	if (null == versitObject) {
-    	    throw this.protocolException(HttpServletResponse.SC_BAD_REQUEST);
-        }
-        this.applyVersitObject(versitObject);
-	}
-
-	@Override
 	public boolean hasBody() throws WebdavProtocolException {
 		return true;
 	}
@@ -298,9 +230,17 @@ public abstract class CardDAVResource extends AbstractResource {
 
 	@Override
 	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-        if (CarddavProtocol.CARD_NS.getURI().equals(namespace) && "address-data".equals(name)) {
+        if (CarddavProtocol.CARD_NS.getURI().equals(namespace) && "address-data".equals(name) && exists()) {
             WebdavProperty property = new WebdavProperty(namespace, name);
-            property.setValue(this.getVCard());
+            InputStream inputStream = null;
+            try {
+                inputStream = getBody();
+                property.setValue(Streams.stream2string(inputStream, Charsets.UTF_8_NAME));
+            } catch (IOException e) {
+                throw protocolException(e);
+            } finally {
+                Streams.close(inputStream);
+            }
             return property;
         }
         return null;
@@ -311,12 +251,4 @@ public abstract class CardDAVResource extends AbstractResource {
 		return true;
 	}
 
-    /**
-     * Gets the originalVCard
-     *
-     * @return The originalVCard
-     */
-    public String getOriginalVCard() {
-        return originalVCard;
-    }
 }

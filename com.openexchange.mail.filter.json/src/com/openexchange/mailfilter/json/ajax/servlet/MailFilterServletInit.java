@@ -115,8 +115,8 @@ public class MailFilterServletInit implements Initialization {
              */
             DispatcherPrefixService dispatcherPrefix = Services.getService(DispatcherPrefixService.class);
             String alias = dispatcherPrefix.getPrefix() + "mailfilter";
-            this.alias = alias;
             httpService.registerServlet(alias, new MailFilterServlet(), null, null);
+            this.alias = alias;
         } catch (ServletException e) {
             throw MailFilterExceptionCode.SERVLET_REGISTRATION_FAILED.create(e, e.getMessage());
         } catch (NamespaceException e) {

@@ -102,12 +102,14 @@ import com.openexchange.groupware.container.FolderObject;
 public class BasicDriveTest extends AbstractFindTest {
 
     private File metadata;
+    private List<File> files;
 
     private FolderObject testFolder;
 
     private InfostoreTestManager manager;
 
     private static final String SEARCH = "BasicDriveTest";
+    private static final String SUBFOLDER_SEARCH = "jpg";
 
     /**
      * Initializes a new {@link BasicDriveTest}.
@@ -127,7 +129,8 @@ public class BasicDriveTest extends AbstractFindTest {
         java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
         String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
-        testFolder = folderManager.generatePrivateFolder(folderName,
+        testFolder = folderManager.generatePrivateFolder(
+            folderName,
             FolderObject.INFOSTORE,
             client.getValues().getPrivateInfostoreFolder(),
             client.getValues().getUserId());
@@ -141,6 +144,7 @@ public class BasicDriveTest extends AbstractFindTest {
         metadata.setFolderId(String.valueOf(testFolder.getObjectID()));
         metadata.setMeta(Collections.singletonMap("key", (Object) "value"));
         manager.newAction(metadata, file);
+
     }
 
     @Override
@@ -159,6 +163,57 @@ public class BasicDriveTest extends AbstractFindTest {
         SearchResult result = response.getSearchResult();
         assertTrue("Nothing found in BasicDriveTest", result.getSize() > 0);
     }
+    
+    public void testSearchInSubFolders() throws Exception {
+
+        // Generate subfolders and files
+        int parentId = testFolder.getObjectID();
+        int fileCounter = 0;
+        final int num_of_subfolders = 3;
+        files = new LinkedList<File>();
+        for (int x = 0; x < num_of_subfolders; x++) {
+            FolderObject subfolder = folderManager.generatePrivateFolder(
+                "findApiDriveTestFolder_" + System.currentTimeMillis(),
+                FolderObject.INFOSTORE,
+                parentId,
+                client.getValues().getUserId());
+            subfolder = folderManager.insertFolderOnServer(subfolder);
+            parentId = subfolder.getObjectID();
+
+            File f = new DefaultFile();
+            String name = (fileCounter++) + ".jpg";
+            f.setFileName(name);
+            f.setTitle(name);
+            f.setDescription("No desc");
+            f.setFolderId(String.valueOf(parentId));
+            f.setMeta(Collections.singletonMap("key", (Object) "value"));
+            manager.newAction(f);
+            files.add(f);
+            f = new DefaultFile();
+            name = (fileCounter++) + ".jpg";
+            f.setFileName(name);
+            f.setTitle(name);
+            f.setDescription("No desc");
+            f.setFolderId(String.valueOf(parentId));
+            f.setMeta(Collections.singletonMap("key", (Object) "value"));
+            manager.newAction(f);
+            files.add(f);
+        }
+
+        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+            Collections.singletonList(Constants.FIELD_FILE_NAME),
+            SUBFOLDER_SEARCH));
+        ActiveFacet fileNameFacet2 = new ActiveFacet(CommonFacetType.FOLDER, String.valueOf(testFolder.getObjectID()), new Filter(
+            Collections.singletonList(Constants.FIELD_FILE_NAME),
+            SUBFOLDER_SEARCH));
+        List<ActiveFacet> facetList = new LinkedList<ActiveFacet>();
+        facetList.add(fileNameFacet);
+        facetList.add(fileNameFacet2);
+        QueryRequest request = new QueryRequest(0, 10, facetList, Module.DRIVE.getIdentifier());
+        QueryResponse response = client.execute(request);
+        SearchResult result = response.getSearchResult();
+        assertTrue("Found " + result.getSize() + " instead of " + files.size() + " files.", result.getSize() == files.size());
+    }
 
     public void testSizeFacet() throws Exception {
         verifyDocumentExists();
@@ -172,7 +227,7 @@ public class BasicDriveTest extends AbstractFindTest {
         assertTrue("Nothing found in file size test", result.getSize() > 0);
         for (Document d : result.getDocuments()) {
             PropDocument file = (PropDocument) d;
-            assertTrue("File is too small", (Integer)file.getProps().get("file_size")  >= 1024*1024);
+            assertTrue("File is too small", (Integer) file.getProps().get("file_size") >= 1024 * 1024);
         }
     }
 

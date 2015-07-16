@@ -427,7 +427,6 @@ public final class GoogleDriveFileStorageService implements AccountAware, OAuthA
         public boolean isTransient() {
             return false;
         }
-
     }
 
 }

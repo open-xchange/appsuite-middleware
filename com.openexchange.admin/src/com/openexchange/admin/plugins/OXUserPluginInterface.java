@@ -73,6 +73,17 @@ public interface OXUserPluginInterface {
     public boolean canHandleContextAdmin();
 
     /**
+     * Changes the personal part of specified user's E-Mail address.
+     *
+     * @param ctx The context
+     * @param user The user
+     * @param personal The personal to set or <code>null</code> to drop the personal information (if any)
+     * @param auth The credentials
+     * @throws PluginException If operation fails
+     */
+    public void changeMailAddressPersonal(Context ctx, User user, String personal, Credentials auth) throws PluginException;
+
+    /**
      * Changes specified user's capabilities.
      *
      * @param ctx The context

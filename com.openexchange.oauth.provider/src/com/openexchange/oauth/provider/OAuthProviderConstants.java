@@ -130,6 +130,9 @@ public interface OAuthProviderConstants {
     /** The error description */
     public static final String PARAM_ERROR_DESCRIPTION = "error_description";
 
+    /** The language parameter defining a locale for i18n */
+    public static final String PARAM_LANGUAGE = "language";
+
     // ---------------- Common parameter values --------------------------------------------------------------
 
     /** Response type <b><code>code</code></b> */

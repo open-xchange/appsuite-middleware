@@ -54,7 +54,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
-import com.openexchange.exception.OXException;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.threadpool.RunLoop;
@@ -75,7 +74,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
     */
     private final static MessageDispatch NOOP = new MessageDispatch(null, null) {
         @Override
-        public void tick() throws OXException {}
+        public void tick() {/*NOOP*/}
     };
 
     public SyntheticChannelRunLoop(String name) {
@@ -83,7 +82,7 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
     }
 
     @Override
-    protected void handle(MessageDispatch element) throws OXException {
+    protected void handle(MessageDispatch element) {
         element.tick();
     }
 
@@ -99,8 +98,9 @@ public class SyntheticChannelRunLoop extends RunLoop<MessageDispatch> {
         try {
             pauseHandling();
             // Check currently handled element(leave?) first. Set to null so it doesn't get handled if it isdestinedForID
+            MessageDispatch currentElement = this.currentElementReference.get();
             if (currentElement != null && isDestinedForID(destination, currentElement)) {
-                currentElement=null;
+                this.currentElementReference.compareAndSet(currentElement, null);
             }
 
             // remove remaining messages from queue

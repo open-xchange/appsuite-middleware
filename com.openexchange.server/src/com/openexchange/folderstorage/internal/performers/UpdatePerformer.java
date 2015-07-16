@@ -72,9 +72,10 @@ import com.openexchange.folderstorage.filestorage.contentType.FileStorageContent
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.TransactionManager;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.osgi.UserServiceHolder;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.session.ServerSession;
@@ -133,8 +134,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     public UpdatePerformer(final StorageParameters storageParameters, final FolderStorageDiscoverer folderStorageDiscoverer) throws OXException {
         super(storageParameters, folderStorageDiscoverer);
     }
-
-    private static final String RECURSION_MARKER = UpdatePerformer.class.getName() + ".RECURSION_MARKER";
 
     /**
      * Performs the <code>UPDATE</code> request.
@@ -229,13 +228,9 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                 }
             }
-            final ComparedPermissions comparedPermissions = new ComparedPermissions(
-                getContext(),
-                folder,
-                storageFolder,
-                UserServiceHolder.requireUserService(),
-                transactionManager.getConnection());
 
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(getContext(), folder, storageFolder, shareService);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {
@@ -329,6 +324,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     doRenameVirtual(folder, storage, openedStorages);
                 }
             } else if (comparedPermissions.hasChanges() || cascadePermissions) {
+                /*
+                 * Check permissions of anonymous guest users
+                 */
+                checkAnonymousPermissions(storageFolder, comparedPermissions);
 
                 boolean isRecursion = decorator.containsProperty(RECURSION_MARKER);
                 if (!isRecursion) {
@@ -341,7 +340,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
                         processAddedGuestPermissions(storageFolder.getCreatedBy(), folderId, storageFolder.getContentType(),
-                            comparedPermissions.getAddedGuests(), transactionManager.getConnection());
+                            comparedPermissions.getNewGuestPermissions(), transactionManager.getConnection());
                     }
                     /*
                      * Change permissions either in real or in virtual storage
@@ -359,12 +358,12 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (cascadePermissions) {
                             // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
                             boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
-                            
+
                             decorator.put("cascadePermissions", false);
                             checkOpenedStorage(realStorage, openedStorages);
                             List<String> ids = new ArrayList<String>();
                             gatherSubfolders(folder, realStorage, treeId, ids, ignoreWarnings);
-                            
+
                             if (ignoreWarnings) {
                                 cascadeFolderPermissions(folder, realStorage, treeId, ids);
                             }
@@ -381,7 +380,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      * delete existing shares for removed guest permissions
                      */
                     if (!isRecursion && comparedPermissions.hasRemovedGuests()) {
-                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuests(), transactionManager.getConnection());
+                        processRemovedGuestPermissions(folderId, storageFolder.getContentType(), comparedPermissions.getRemovedGuestPermissions(), transactionManager.getConnection());
                     }
                 } finally {
                     if (!isRecursion) {

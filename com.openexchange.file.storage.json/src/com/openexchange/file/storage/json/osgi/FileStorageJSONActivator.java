@@ -51,6 +51,7 @@ package com.openexchange.file.storage.json.osgi;
 
 import org.osgi.service.event.EventAdmin;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.ajax.customizer.file.AdditionalFileField;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
@@ -85,8 +86,13 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     @Override
     protected void startBundle() throws Exception {
         try {
+
             Services.setServiceLookup(this);
             rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
+            FileFieldCollector fieldCollector = new FileFieldCollector(context);
+            Services.setFieldCollector(fieldCollector);
+            rememberTracker(new ServiceTracker<AdditionalFileField, AdditionalFileField>(context, AdditionalFileField.class.getName(), fieldCollector));
+
             trackService(RdiffService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
@@ -94,7 +100,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             registerModule(AliasFileActionFactory.ALIAS_INSTANCE, "files");
             registerModule(new AccountActionFactory(getService(FileStorageServiceRegistry.class)), "fileaccount");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
-            registerService(ResultConverter.class, new FileConverter());
+            registerService(ResultConverter.class, new FileConverter(fieldCollector));
         } catch (final Exception x) {
             org.slf4j.LoggerFactory.getLogger(FileStorageJSONActivator.class).error("", x);
             throw x;
@@ -103,8 +109,9 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
         Services.setServiceLookup(null);
+        Services.setFieldCollector(null);
+        super.stopBundle();
     }
 
 }

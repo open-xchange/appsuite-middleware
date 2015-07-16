@@ -49,6 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.osgi;
 
+import static com.openexchange.osgi.Tools.requireService;
 import java.util.Map;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -61,14 +62,17 @@ import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.authorization.AuthorizationService;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -86,7 +90,9 @@ import com.openexchange.oauth.provider.impl.groupware.CreateOAuthGrantTableTask;
 import com.openexchange.oauth.provider.impl.groupware.OAuthProviderDeleteListener;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -233,7 +239,7 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ConfigurationService.class, ContextService.class, UserService.class,
             HttpService.class, DispatcherPrefixService.class, CryptoService.class, CacheService.class, ServerConfigService.class,
-            SessiondService.class };
+            SessiondService.class, CapabilityService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -256,13 +262,25 @@ public final class OAuthProviderActivator extends HousekeepingActivator {
         }
 
         trackService(HostnameService.class);
-        trackService(ConfigViewFactory.class);
         trackService(AuthorizationService.class);
-        trackService(CapabilityService.class);
         trackService(TemplateService.class);
         trackService(TranslatorFactory.class);
         trackService(HtmlService.class);
         track(OAuthScopeProvider.class, new OAuthScopeProviderTracker(context));
+
+        getService(CapabilityService.class).declareCapability("oauth-grants");
+        final ServiceLookup serviceLookup = this;
+        registerService(CapabilityChecker.class, new CapabilityChecker() {
+            @Override
+            public boolean isEnabled(String capability, Session session) throws OXException {
+                if ("oauth-grants".equals(capability) && session != null) {
+                    ConfigView configView = requireService(ConfigViewFactory.class, serviceLookup).getView(session.getUserId(), session.getContextId());
+                    return configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue();
+                }
+
+                return true;
+            }
+        });
 
         OAuthProvider provider = new OAuthProvider(this, context);
         this.provider = provider;

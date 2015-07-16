@@ -95,6 +95,7 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("versions", new VersionsAction());
         actions.put("get", new GetAction());
         actions.put("search", new SearchAction());
+        actions.put("shares", new SharesAction());
 
         actions.put("saveAs", new SaveAsAction());
 

@@ -19,7 +19,7 @@ set -e
 
 . /opt/open-xchange/lib/oxfunctions.sh
 
-PROTECT="boxcomoauth.properties dropboxoauth.properties facebookoauth.properties googleoauth.properties msliveconnectoauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
+PROTECT="boxcomoauth.properties dropboxoauth.properties googleoauth.properties msliveconnectoauth.properties xingoauth.properties yahoooauth.properties settings/flickroauth.properties settings/tumblroauth.properties"
 
 postFix() {
     local version=${1%-*}
@@ -35,14 +35,6 @@ postFix() {
            ox_set_property com.openexchange.oauth.yahoo false $pfile
        else
            ox_set_property com.openexchange.oauth.yahoo true $pfile
-       fi
-    fi
-    pfile=/opt/open-xchange/etc/facebookoauth.properties
-    if ! ox_exists_property com.openexchange.oauth.facebook $pfile; then
-       if grep -E '^com.openexchange.*INSERT_YOUR_API_KEY_HERE' $pfile > /dev/null; then
-           ox_set_property com.openexchange.oauth.facebook false $pfile
-       else
-           ox_set_property com.openexchange.oauth.facebook true $pfile
        fi
     fi
 
@@ -75,16 +67,6 @@ postFix() {
         ox_add_property com.openexchange.oauth.twitter.apiSecret "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
         ox_remove_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties
     fi
-    PFILE=/opt/open-xchange/etc/facebookoauth.properties
-    OLDNAMES=( com.openexchange.facebook.apiKey com.openexchange.facebook.secretKey )
-    NEWNAMES=( com.openexchange.oauth.facebook.apiKey com.openexchange.oauth.facebook.apiSecret )
-    for I in $(seq 1 ${#OLDNAMES[@]}); do
-        VALUE=$(ox_read_property ${OLDNAMES[$I-1]} $PFILE)
-        if [ "" != "$VALUE" ]; then
-            ox_add_property ${NEWNAMES[$I-1]} "$VALUE" $PFILE
-            ox_remove_property ${OLDNAMES[$I-1]} $PFILE
-        fi
-    done
 
     # SoftwareChange_Request-2532
     VALUE=$(ox_read_property com.openexchange.oauth.google.redirectUrl /opt/open-xchange/etc/googleoauth.properties)
@@ -121,9 +103,6 @@ esac
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/deferrer.properties /opt/open-xchange/etc/deferrer.properties 6.20.99 \
     open-xchange-http-deferrer -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-http-deferrer)
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/oauth.properties /opt/open-xchange/etc/oauth.properties 6.20.99 -- "$@"
-dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/facebookoauth.properties \
-    /opt/open-xchange/etc/facebookoauth.properties 6.20.99 open-xchange-oauth-facebook -- $1 \
-    $(dpkg-query -W -f='${Config-Version}' open-xchange-oauth-facebook)
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/twitteroauth.properties /opt/open-xchange/etc/twitteroauth.properties \
     6.20.99 open-xchange-oauth-twitter -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-oauth-twitter)
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/yahoooauth.properties /opt/open-xchange/etc/yahoooauth.properties \

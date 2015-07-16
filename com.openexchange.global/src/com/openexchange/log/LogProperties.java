@@ -273,10 +273,6 @@ public final class LogProperties {
          * com.openexchange.login.version
          */
         LOGIN_VERSION("com.openexchange.login.version"),
-        /**
-         * com.openexchange.system.tempfile
-         */
-        TEMP_FILE("com.openexchange.system.tempfile"),
 
         ;
 
@@ -322,6 +318,123 @@ public final class LogProperties {
     private LogProperties() {
         super();
     }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private static final ThreadLocal<Map<String, Object>> TMP_FILES = new ThreadLocal<Map<String, Object>>();
+
+    private static final Object PRESENT = new Object();
+
+    /**
+     * Gets the temporary file property.
+     *
+     * @return The removed temporary file property or <code>null</code>
+     */
+    public static String[] getTempFiles() {
+        Map<String, Object> map = TMP_FILES.get();
+        if (map == null) {
+            return null;
+        }
+        int size = map.size();
+        if (size <= 0) {
+            return null;
+        }
+        return map.keySet().toArray(new String[size]);
+    }
+
+    /**
+     * Gets (and removes) the temporary file property.
+     *
+     * @return The removed temporary file property or <code>null</code>
+     */
+    public static String[] getAndRemoveTempFiles() {
+        Map<String, Object> map = TMP_FILES.get();
+        if (map == null) {
+            return null;
+        }
+        int size = map.size();
+        if (size <= 0) {
+            return null;
+        }
+        String[] pathNames = map.keySet().toArray(new String[size]);
+        map.clear();
+        return pathNames;
+    }
+
+    /**
+     * Adds given temporary file.
+     *
+     * @param file The temporary file
+     */
+    public static void addTempFile(File file) {
+        if (null != file) {
+            addTempFile(file.getPath());
+        }
+    }
+
+    /**
+     * Adds given denoted temporary file.
+     *
+     * @param pathName The denoted temporary file
+     */
+    public static void addTempFile(String pathName) {
+        if (Strings.isEmpty(pathName)) {
+            return;
+        }
+        Map<String, Object> oldMap = TMP_FILES.get();
+        if (oldMap == null) {
+            Map<String, Object> newMap = new HashMap<String, Object>(4, 0.9F);
+            TMP_FILES.set(newMap);
+            newMap.put(pathName, PRESENT);
+        } else {
+            oldMap.put(pathName, PRESENT);
+        }
+    }
+
+    /**
+     * Removes given temporary file.
+     *
+     * @param file The temporary file
+     */
+    public static void removeTempFile(File file) {
+        if (null != file) {
+            removeTempFile(file.getPath());
+        }
+    }
+
+    /**
+     * Removes given denoted temporary file.
+     *
+     * @param pathName The denoted temporary file
+     */
+    public static void removeTempFile(String pathName) {
+        if (Strings.isEmpty(pathName)) {
+            return;
+        }
+        Map<String, Object> map = TMP_FILES.get();
+        if (map != null) {
+            map.remove(pathName);
+        }
+    }
+
+    /**
+     * Removes all temporary files.
+     */
+    public static void removeAllTempFiles() {
+        Map<String, Object> map = TMP_FILES.get();
+        if (map != null) {
+            map.clear();
+        }
+    }
+
+    /**
+     * Drops temporary files association.
+     */
+    public static void dropTempFiles() {
+        TMP_FILES.remove();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
 
     private static final ConcurrentMap<Class<? extends MDCAdapter>, Field> FIELD_CACHE = new ConcurrentHashMap<Class<? extends MDCAdapter>, Field>(4, 0.9f, 1);
 
@@ -468,42 +581,6 @@ public final class LogProperties {
     }
 
     /**
-     * Gets the temporary file property.
-     *
-     * @return The temporary file property or <code>null</code>
-     */
-    public static String[] getTempFileProperty() {
-        String str = MDC.get(Name.TEMP_FILE.getName());
-        return null == str ? null : Strings.splitByComma(str);
-    }
-
-    /**
-     * Appends temporary file.
-     *
-     * @param tempFile The temporary file
-     */
-    public static void appendTempFileProperty(File tempFile) {
-        if (null == tempFile) {
-            return;
-        }
-        appendTempFileProperty(tempFile.getPath());
-    }
-
-    /**
-     * Appends temporary file.
-     *
-     * @param tempFilePath The path of the temporary file
-     */
-    public static void appendTempFileProperty(String tempFilePath) {
-        if (null == tempFilePath) {
-            return;
-        }
-        String sName = Name.TEMP_FILE.getName();
-        String prev = MDC.get(sName);
-        MDC.put(sName, null == prev ? tempFilePath : new StringBuilder(prev).append(',').append(tempFilePath).toString());
-    }
-
-    /**
      * Appends denoted property
      *
      * @param name The name
@@ -524,13 +601,6 @@ public final class LogProperties {
      */
     public static void remove(final LogProperties.Name name) {
         removeProperty(name);
-    }
-
-    /**
-     * Removes temporary file property
-     */
-    public static void removeTempFileProperty() {
-        MDC.remove(Name.TEMP_FILE.getName());
     }
 
     /**

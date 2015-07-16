@@ -49,8 +49,6 @@
 
 package com.openexchange.share.storage.mapping;
 
-import java.util.Date;
-import java.util.Map;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareTarget;
 
@@ -62,23 +60,13 @@ import com.openexchange.share.ShareTarget;
 public class RdbShare {
 
     private int cid;
-    private int guest;
-    private int module;
-    private String folder;
-    private String item;
-    private int owner;
-    private Date expires;
-    private Date created;
-    private int createdBy;
-    private Date modified;
-    private int modifiedBy;
-    private Map<String, Object> meta;
+    private Share share;
 
     /**
      * Initializes a new {@link RdbShare}.
      */
     public RdbShare() {
-        super();
+        this(0, new Share(0 , new ShareTarget()));
     }
 
     /**
@@ -88,22 +76,9 @@ public class RdbShare {
      * @param share The share to inherit the properties from
      */
     public RdbShare(int contextID, Share share) {
-        this();
-        cid = contextID;
-        guest = share.getGuest();
-        if (null != share.getTarget()) {
-            ShareTarget target = share.getTarget();
-            module = target.getModule();
-            folder = target.getFolder();
-            item = target.getItem();
-            owner = target.getOwnedBy();
-            expires = target.getExpiryDate();
-            meta = target.getMeta();
-        }
-        created = share.getCreated();
-        createdBy = share.getCreatedBy();
-        modified = share.getModified();
-        modifiedBy = share.getModifiedBy();
+        super();
+        this.cid = contextID;
+        this.share = share;
     }
 
     /**
@@ -111,18 +86,7 @@ public class RdbShare {
      *
      * @return The share
      */
-    public Share toShare() {
-        Share share = new Share();
-        share.setCreated(created);
-        share.setCreatedBy(createdBy);
-        share.setGuest(guest);
-        share.setModified(modified);
-        share.setModifiedBy(modifiedBy);
-        ShareTarget target = new ShareTarget(module, folder, item);
-        target.setExpiryDate(expires);
-        target.setOwnedBy(owner);
-        target.setMeta(meta);
-        share.setTarget(target);
+    public Share getShare() {
         return share;
     }
 
@@ -145,201 +109,12 @@ public class RdbShare {
     }
 
     /**
-     * Gets the guest
+     * Sets the share
      *
-     * @return The guest
+     * @param share The share to set
      */
-    public int getGuest() {
-        return guest;
-    }
-
-    /**
-     * Sets the guest
-     *
-     * @param guest The guest to set
-     */
-    public void setGuest(int guest) {
-        this.guest = guest;
-    }
-
-    /**
-     * Gets the module
-     *
-     * @return The module
-     */
-    public int getModule() {
-        return module;
-    }
-
-    /**
-     * Sets the module
-     *
-     * @param module The module to set
-     */
-    public void setModule(int module) {
-        this.module = module;
-    }
-
-    /**
-     * Gets the folder
-     *
-     * @return The folder
-     */
-    public String getFolder() {
-        return folder;
-    }
-
-        /**
-     * Sets the folder
-     *
-     * @param folder The folder to set
-     */
-    public void setFolder(String folder) {
-        this.folder = folder;
-    }
-
-    /**
-     * Gets the item
-     *
-     * @return The item
-     */
-    public String getItem() {
-        return item;
-    }
-
-        /**
-     * Sets the item
-     *
-     * @param item The item to set
-     */
-    public void setItem(String item) {
-        this.item = item;
-    }
-
-    /**
-     * Gets the owner
-     *
-     * @return The owner
-     */
-    public int getOwner() {
-        return owner;
-    }
-
-    /**
-     * Sets the owner
-     *
-     * @param owner The owner to set
-     */
-    public void setOwner(int owner) {
-        this.owner = owner;
-    }
-
-    /**
-     * Gets the expires
-     *
-     * @return The expires
-     */
-    public Date getExpires() {
-        return expires;
-    }
-
-    /**
-     * Sets the expires
-     *
-     * @param expires The expires to set
-     */
-    public void setExpires(Date expires) {
-        this.expires = expires;
-    }
-
-    /**
-     * Gets the created
-     *
-     * @return The created
-     */
-    public Date getCreated() {
-        return created;
-    }
-
-    /**
-     * Sets the created
-     *
-     * @param created The created to set
-     */
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    /**
-     * Gets the createdBy
-     *
-     * @return The createdBy
-     */
-    public int getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * Sets the createdBy
-     *
-     * @param createdBy The createdBy to set
-     */
-    public void setCreatedBy(int createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    /**
-     * Gets the modified
-     *
-     * @return The modified
-     */
-    public Date getModified() {
-        return modified;
-    }
-
-    /**
-     * Sets the modified
-     *
-     * @param modified The modified to set
-     */
-    public void setModified(Date modified) {
-        this.modified = modified;
-    }
-
-    /**
-     * Gets the modifiedBy
-     *
-     * @return The modifiedBy
-     */
-    public int getModifiedBy() {
-        return modifiedBy;
-    }
-
-    /**
-     * Sets the modifiedBy
-     *
-     * @param modifiedBy The modifiedBy to set
-     */
-    public void setModifiedBy(int modifiedBy) {
-        this.modifiedBy = modifiedBy;
-    }
-
-    /**
-     * Gets the meta
-     *
-     * @return The meta
-     */
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-    /**
-     * Sets the meta
-     *
-     * @param meta The meta to set
-     */
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
+    public void setShare(Share share) {
+        this.share = share;
     }
 
 }

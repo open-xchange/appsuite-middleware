@@ -115,12 +115,11 @@ import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.Strings;
+import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.performer.CreatePerformer;
-import com.openexchange.share.core.performer.UpdatePerformer;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -534,7 +533,7 @@ public class DriveServiceImpl implements DriveService {
     }
 
     @Override
-    public Map<ShareRecipient, List<ShareInfo>> createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
+    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
         SyncSession syncSession = new SyncSession(session);
         DriveStorage storage = syncSession.getStorage();
         Map<String, String> folderIds = new HashMap<String, String>();
@@ -542,7 +541,6 @@ public class DriveServiceImpl implements DriveService {
         for (DriveShareTarget target : targets) {
             String path = target.getPath();
             ShareTarget shareTarget = new ShareTarget();
-            shareTarget.setExpiryDate(target.getExpiryDate());
             shareTarget.setModule(FolderObject.INFOSTORE);
             if (target.getName() != null && !Strings.isEmpty(target.getName())) {
                 String name = target.getName();
@@ -570,22 +568,22 @@ public class DriveServiceImpl implements DriveService {
 
         }
 
-        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, session.getServerSession(), DriveServiceLookup.get());
+        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, null, session.getServerSession(), DriveServiceLookup.get());
         return cp.perform();
     }
 
     @Override
     public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
-        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
-        updatePerformer.setExpiry(expiry);
-        updatePerformer.setMeta(meta);
-        if (password != null || bits != -1) {
-            AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setPassword(password);
-            recipient.setBits(bits);
-            updatePerformer.setRecipient(recipient);
-        }
-        updatePerformer.perform();
+//        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
+//        updatePerformer.setMeta(meta);
+//        if (password != null || bits != -1 || null != expiry) {
+//            AnonymousRecipient recipient = new AnonymousRecipient();
+//            recipient.setPassword(password);
+//            recipient.setBits(bits);
+//            recipient.setExpiryDate(expiry);
+//            updatePerformer.setRecipient(recipient);
+//        }
+//        updatePerformer.perform();
     }
 
     @Override
@@ -644,7 +642,7 @@ public class DriveServiceImpl implements DriveService {
                 DriveShare driveShare = new DriveShare(shareInfo.getShare());
                 driveShare.setTarget(driveShareTarget);
                 driveShareInfo.setDriveShare(driveShare);
-                
+
                 if (file != null) {
                     driveShareTarget.setName(file.getFileName());
                 }
@@ -655,12 +653,12 @@ public class DriveServiceImpl implements DriveService {
 
         return retval;
     }
-    
+
     private StoredChecksum calculateChecksum(String folderId, File file, SyncSession syncSession) throws OXException {
         if (file != null) {
             return ChecksumProvider.getChecksum(syncSession, file);
         }
-        
+
         return ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderId)).get(0);
     }
 

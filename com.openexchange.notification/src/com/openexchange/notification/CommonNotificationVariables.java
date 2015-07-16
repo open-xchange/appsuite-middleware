@@ -63,13 +63,9 @@ public class CommonNotificationVariables {
      */
     public static final String FOOTER_TEXT = "footer_text";
     /**
-     * Variable <code>footer_image</code>
+     * Variable <code>footer_image_src</code>
      */
-    public static final String FOOTER_IMAGE = "footer_image";
-    /**
-     * Variable <code>footer_image_content_type</code>
-     */
-    public static final String FOOTER_IMAGE_CONTENT_TYPE = "footer_image_content_type";
+    public static final String FOOTER_IMAGE_SRC = "footer_image_src";
     /**
      * Variable <code>button_border_color</code>
      */

@@ -68,6 +68,7 @@ import com.openexchange.sso.servlet.SSOServlet;
 public final class SSOServletRegisterer implements ServiceTrackerCustomizer<HttpService,HttpService> {
 
     private final BundleContext context;
+    private volatile String alias;
 
     /**
      * Initializes a new {@link SSOServletRegisterer}.
@@ -83,7 +84,9 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer<Http
     public HttpService addingService(final ServiceReference<HttpService> reference) {
         final HttpService service = context.getService(reference);
         try {
-            service.registerServlet(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX, new SSOServlet(), null, null);
+            String alias = SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX;
+            service.registerServlet(alias, new SSOServlet(), null, null);
+            this.alias = alias;
         } catch (final ServletException e) {
             org.slf4j.LoggerFactory.getLogger(SSOServletRegisterer.class).error("", e);
         } catch (final NamespaceException e) {
@@ -100,7 +103,13 @@ public final class SSOServletRegisterer implements ServiceTrackerCustomizer<Http
     @Override
     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
         final HttpService httpService = service;
-        httpService.unregister(SSOServiceRegistry.getInstance().getService(DispatcherPrefixService.class).getPrefix() + SSOConstants.SERVLET_PATH_APPENDIX);
+
+        String alias = this.alias;
+        if (null != httpService) {
+            httpService.unregister(alias);
+            this.alias = null;
+        }
+
         context.ungetService(reference);
     }
 

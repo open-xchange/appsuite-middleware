@@ -50,8 +50,6 @@
 package com.openexchange.share;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * {@link ShareTarget}
@@ -67,8 +65,6 @@ public class ShareTarget implements Cloneable, Serializable {
     private String folder;
     private String item;
     private int ownedBy;
-    private Date expiryDate;
-    private Map<String, Object> meta;
 
     /**
      * Initializes a new, empty {@link ShareTarget}.
@@ -109,8 +105,6 @@ public class ShareTarget implements Cloneable, Serializable {
     public ShareTarget(ShareTarget target) {
         this(target.getModule(), target.getFolder(), target.getItem());
         this.ownedBy = target.getOwnedBy();
-        this.expiryDate = target.getExpiryDate();
-        this.meta = target.getMeta();
     }
 
     /**
@@ -194,51 +188,6 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setOwnedBy(int ownedBy) {
         this.ownedBy = ownedBy;
-    }
-
-    /**
-     * If defined, gets the date when this target expires, i.e. it should be no longer accessible.
-     *
-     * @return The expiry date of the share, or <code>null</code> if not defined
-     */
-    public Date getExpiryDate() {
-        return expiryDate;
-    }
-
-    /**
-     * Sets the date when this share target, i.e. it should be no longer accessible.
-     *
-     * @param expiryDate The expiry date of the target
-     */
-    public void setExpiryDate(Date expiryDate) {
-        this.expiryDate = expiryDate;
-    }
-
-    /**
-     * Gets a value indicating whether the target is considered as expired, i.e. an expiry date is set and is passed in the meantime.
-     *
-     * @return <code>true</code> if the share is expired, <code>false</code>, otherwise
-     */
-    public boolean isExpired() {
-        return expiryDate != null && new Date().after(expiryDate);
-    }
-
-    /**
-     * Gets arbitrary metadata in a map.
-     *
-     * @return The metadata
-     */
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-    /**
-     * Sets the metadata,
-     *
-     * @param meta The metadata to set
-     */
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
     }
 
     /**

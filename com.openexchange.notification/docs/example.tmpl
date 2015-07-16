@@ -1,0 +1,16 @@
+<#include "notify.common.button.tmpl">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>
+  <meta charset="UTF-8"></meta>
+</head>
+<body class="content">
+  <#escape x as x?html>
+    <#-- Your mail content -->
+  </#escape>
+  <@styledButton link="//path/to/some/resource">Button text</@styledButton>
+
+  <#include "notify.common.footer.html.tmpl">
+</body>
+</html>

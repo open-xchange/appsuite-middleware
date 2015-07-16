@@ -52,7 +52,7 @@ package com.openexchange.report.client;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
-import com.openexchange.report.client.impl.ReportClientTest;
+import com.openexchange.report.client.impl.ReportClientBaseTest;
 
 /**
  * Unit tests for the project com.openexchange.report.client
@@ -62,7 +62,7 @@ import com.openexchange.report.client.impl.ReportClientTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({
- ReportClientTest.class
+    ReportClientBaseTest.class
 })
 public class UnitTests {
 

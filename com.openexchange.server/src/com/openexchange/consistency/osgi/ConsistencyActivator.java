@@ -49,32 +49,42 @@
 
 package com.openexchange.consistency.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+import org.slf4j.Logger;
+import com.openexchange.contact.vcard.storage.VCardStorageMetadataStore;
 import com.openexchange.management.ManagementService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
  * {@link ConsistencyActivator}
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public final class ConsistencyActivator implements BundleActivator {
+public final class ConsistencyActivator extends HousekeepingActivator {
 
-    private ServiceTracker<ManagementService,ManagementService> tracker;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ConsistencyActivator.class);
 
-    public ConsistencyActivator() {
-        super();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return EMPTY_CLASSES;
     }
 
     @Override
-    public void start(final BundleContext context) {
-        tracker = new ServiceTracker<ManagementService,ManagementService>(context, ManagementService.class, new MBeanRegisterer(context));
-        tracker.open();
+    protected void startBundle() throws Exception {
+        LOG.info("starting bundle: com.openexchange.consistency");
+        ConsistencyServiceLookup.set(this);
+
+        track(ManagementService.class, new MBeanRegisterer(context));
+        trackService(VCardStorageMetadataStore.class);
+
+        openTrackers();
     }
 
     @Override
-    public void stop(final BundleContext context) {
-        tracker.close();
+    public void stopBundle() throws Exception {
+        LOG.info("stopping bundle: com.openexchange.consistency");
+        ConsistencyServiceLookup.set(null);
+
+        closeTrackers();
+        super.stopBundle();
     }
 }

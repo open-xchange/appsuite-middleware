@@ -58,6 +58,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
@@ -460,6 +461,21 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             return defaultValue;
         }
         return TRUES.contains(com.openexchange.java.Strings.toLowerCase(string).trim());
+    }
+
+    /**
+     * Gets the timezone applicable for a request.
+     *
+     * @param requestData The underlying request data
+     * @param session The associated session
+     * @return The timezone
+     */
+    protected static TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
+        String timeZoneID = requestData.getParameter("timezone");
+        if (null == timeZoneID) {
+            timeZoneID = session.getUser().getTimeZone();
+        }
+        return TimeZone.getTimeZone(timeZoneID);
     }
 
     protected Map<String, Object> parametersFor(final Object... objects) {

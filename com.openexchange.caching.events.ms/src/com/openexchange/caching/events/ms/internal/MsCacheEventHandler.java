@@ -49,17 +49,14 @@
 
 package com.openexchange.caching.events.ms.internal;
 
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.caching.events.CacheEvent;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.caching.events.CacheListener;
 import com.openexchange.exception.OXException;
 import com.openexchange.ms.Message;
 import com.openexchange.ms.MessageListener;
-import com.openexchange.ms.MsService;
 import com.openexchange.ms.PortableMsService;
 import com.openexchange.ms.Topic;
-import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link MsCacheEventHandler}
@@ -71,27 +68,19 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MsCacheEventHandler.class);
 
     private static final String TOPIC_NAME = "cacheEvents-3";
-    private static final AtomicReference<PortableMsService> MS_REFERENCE = new AtomicReference<PortableMsService>();
 
+    private final PortableMsService messagingService;
     private final CacheEventService cacheEvents;
     private final String senderId;
-
-    /**
-     * Sets the specified {@link PortableMsService}.
-     *
-     * @param service The {@link PortableMsService}
-     */
-    public static void setMsService(final PortableMsService service) {
-        MS_REFERENCE.set(service);
-    }
 
     /**
      * Initializes a new {@link MsCacheEventHandler}.
      *
      * @throws OXException
      */
-    public MsCacheEventHandler(CacheEventService cacheEvents) throws OXException {
+    public MsCacheEventHandler(PortableMsService messagingService, CacheEventService cacheEvents) throws OXException {
         super();
+        this.messagingService = messagingService;
         this.cacheEvents = cacheEvents;
         cacheEvents.addListener(this);
         Topic<PortableCacheEvent> topic = getTopic();
@@ -121,11 +110,7 @@ public final class MsCacheEventHandler implements CacheListener, MessageListener
     }
 
     private Topic<PortableCacheEvent> getTopic() throws OXException {
-        PortableMsService msService = MS_REFERENCE.get();
-        if (null == msService) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MsService.class.getName());
-        }
-        return msService.getTopic(TOPIC_NAME);
+        return messagingService.getTopic(TOPIC_NAME);
     }
 
     @Override

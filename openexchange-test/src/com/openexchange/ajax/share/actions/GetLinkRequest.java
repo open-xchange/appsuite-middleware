@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
@@ -71,28 +70,17 @@ import com.openexchange.share.ShareTarget;
  */
 public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
-    private final List<ShareTarget> targets;
-
+    private final ShareTarget target;
     private boolean failOnError = true;
-
-    private int bits = -1;
-
-    private String password = null;
 
     /**
      * Initializes a new {@link GetLinkRequest}.
+     *
+     * @param target The share target
      */
-    public GetLinkRequest(List<ShareTarget> targets) {
+    public GetLinkRequest(ShareTarget target) {
         super();
-        this.targets = targets;
-    }
-
-    public void setBits(int bits) {
-        this.bits = bits;
-    }
-
-    public void setPassword(String password) {
-        this.password  = password;
+        this.target = target;
     }
 
     @Override
@@ -119,15 +107,7 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        if (bits >= 0) {
-            json.put("bits", bits);
-        }
-        if (password != null) {
-            json.put("password", password);
-        }
-        return json;
+        return  ShareWriter.writeTarget(target);
     }
 
     @Override
@@ -148,7 +128,7 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
         @Override
         protected GetLinkResponse createResponse(Response response) throws JSONException {
             JSONObject json = ResponseWriter.getJSON(response).getJSONObject("data");
-            return new GetLinkResponse(response, json.getString("url"), json.getString("token"));
+            return new GetLinkResponse(response, json.getString("url"), json.optBoolean("is_new"));
         }
 
     }

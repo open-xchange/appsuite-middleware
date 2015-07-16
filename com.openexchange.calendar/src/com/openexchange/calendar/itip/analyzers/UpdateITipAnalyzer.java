@@ -122,6 +122,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             update = original;
         }
     	analysis.setUid(update.getUid());
+    	if (update.getAttachmentLink() != null) {
+    	    analysis.getAttributes().put("attach", update.getAttachmentLink());
+    	}
 
     	CalendarDataObject master = update;
         List<Appointment> exceptions = Collections.emptyList();
@@ -134,6 +137,9 @@ public class UpdateITipAnalyzer extends AbstractITipAnalyzer {
             if (isOutdated(update, original)) {
                 analysis.addAnnotation(new ITipAnnotation(Messages.OLD_UPDATE, locale));
                 analysis.recommendAction(ITipAction.IGNORE);
+                change.setCurrentAppointment(original);
+                change.setType(ITipChange.Type.UPDATE);
+                analysis.addChange(change);
                 return analysis;
             }
             change.setType(ITipChange.Type.UPDATE);

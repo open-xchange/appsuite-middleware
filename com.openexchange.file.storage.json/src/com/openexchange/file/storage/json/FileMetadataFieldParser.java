@@ -129,9 +129,6 @@ public class FileMetadataFieldParser {
                      */
                     DefaultFileStorageGuestObjectPermission parsedGuestPermission = new DefaultFileStorageGuestObjectPermission();
                     parsedGuestPermission.setRecipient(parseRecipient(type, jsonObject));
-                    if (jsonObject.hasAndNotNull("expiry_date")) {
-                        parsedGuestPermission.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
-                    }
                     parsedGuestPermission.setPermissions(bits);
                     permission = parsedGuestPermission;
                 } else {
@@ -171,6 +168,9 @@ public class FileMetadataFieldParser {
         case ANONYMOUS:
             AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
             anonymousRecipient.setPassword(jsonObject.optString("password", null));
+            if (jsonObject.hasAndNotNull("expiry_date")) {
+                anonymousRecipient.setExpiryDate(new Date(jsonObject.getLong("expiry_date")));
+            }
             recipient = anonymousRecipient;
             break;
         case GUEST:

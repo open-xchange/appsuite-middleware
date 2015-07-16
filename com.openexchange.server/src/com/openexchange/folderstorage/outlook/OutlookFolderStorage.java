@@ -577,6 +577,32 @@ public final class OutlookFolderStorage implements FolderStorage {
     }
 
     @Override
+    public SortableId[] getUserSharedFolders(String treeId, ContentType contentType, StorageParameters storageParameters) throws OXException {
+        FolderStorage folderStorage = folderStorageRegistry.getFolderStorageByContentType(realTreeId, contentType);
+        if (null == folderStorage) {
+            throw FolderExceptionErrorMessage.NO_STORAGE_FOR_CT.create(realTreeId, contentType);
+        }
+        boolean ownsTransaction = folderStorage.startTransaction(storageParameters, false);
+        try {
+            SortableId[] sharedFolderIDs = folderStorage.getUserSharedFolders(treeId, contentType, storageParameters);
+            if (ownsTransaction) {
+                folderStorage.commitTransaction(storageParameters);
+            }
+            return sharedFolderIDs;
+        } catch (OXException e) {
+            if (ownsTransaction) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw e;
+        } catch (RuntimeException e) {
+            if (ownsTransaction) {
+                folderStorage.rollback(storageParameters);
+            }
+            throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    @Override
     public void restore(final String treeId, final String folderId, final StorageParameters storageParameters) throws OXException {
         // Nothing to restore, not a real storage
     }

@@ -52,13 +52,11 @@ package com.openexchange.contact.storage.rdb.osgi;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.ContactStorage;
-import com.openexchange.contact.storage.rdb.internal.DefaultVCardStorageService;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.sql.AddFilenameColumnTask;
 import com.openexchange.contact.storage.rdb.sql.CorrectNumberOfImagesTask;
-import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
@@ -104,7 +102,6 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
                 new CorrectNumberOfImagesTask(dbService)
             ));
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
-            registerService(VCardStorageService.class, new DefaultVCardStorageService());
             track(I18nService.class, new I18nTracker(context));
             track(ManagementService.class, new ManagementRegisterer(context));
             openTrackers();

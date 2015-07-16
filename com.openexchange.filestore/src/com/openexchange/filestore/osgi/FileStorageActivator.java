@@ -55,6 +55,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
+import com.openexchange.filestore.FileStorage2ContextsResolver;
 import com.openexchange.filestore.FileStorageService;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageService;
@@ -70,6 +71,7 @@ public class FileStorageActivator implements BundleActivator {
 
     private volatile ServiceTracker<FileStorageService, FileStorageService> fsTracker;
     private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
+    private volatile ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver> resolverTracker;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -87,8 +89,12 @@ public class FileStorageActivator implements BundleActivator {
             ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker = new ServiceTracker<QuotaFileStorageService, QuotaFileStorageService>(context, QuotaFileStorageService.class, new QFSTrackerCustomizer(context));
             this.qfsTracker = qfsTracker;
 
+            ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver> resolverTracker = new ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver>(context, FileStorage2ContextsResolver.class, new ResolverTrackerCustomizer(context));
+            this.resolverTracker = resolverTracker;
+
             fsTracker.open();
             qfsTracker.open();
+            resolverTracker.open();
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
             logger.error("Failed to start {}", context.getBundle().getSymbolicName(), e);
@@ -109,6 +115,12 @@ public class FileStorageActivator implements BundleActivator {
             if (null != qfsTracker) {
                 qfsTracker.close();
                 this.qfsTracker = null;
+            }
+
+            ServiceTracker<FileStorage2ContextsResolver, FileStorage2ContextsResolver> resolverTracker = this.resolverTracker;
+            if (null != resolverTracker) {
+                resolverTracker.close();
+                this.resolverTracker = null;
             }
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
@@ -170,6 +182,35 @@ public class FileStorageActivator implements BundleActivator {
         @Override
         public void removedService(ServiceReference<QuotaFileStorageService> reference, QuotaFileStorageService service) {
             FileStorages.setQuotaFileStorageService(null);
+            context.ungetService(reference);
+        }
+
+    }
+
+    private static class ResolverTrackerCustomizer implements ServiceTrackerCustomizer<FileStorage2ContextsResolver, FileStorage2ContextsResolver> {
+
+        private final BundleContext context;
+
+        ResolverTrackerCustomizer(final BundleContext context) {
+            this.context = context;
+        }
+
+        @Override
+        public FileStorage2ContextsResolver addingService(ServiceReference<FileStorage2ContextsResolver> reference) {
+            FileStorage2ContextsResolver service = context.getService(reference);
+            FileStorages.setFileStorage2ContextsResolver(service);
+            return service;
+        }
+
+        @Override
+        public void modifiedService(ServiceReference<FileStorage2ContextsResolver> reference, FileStorage2ContextsResolver service) {
+            // Nothing to do here
+
+        }
+
+        @Override
+        public void removedService(ServiceReference<FileStorage2ContextsResolver> reference, FileStorage2ContextsResolver service) {
+            FileStorages.setFileStorage2ContextsResolver(null);
             context.ungetService(reference);
         }
 

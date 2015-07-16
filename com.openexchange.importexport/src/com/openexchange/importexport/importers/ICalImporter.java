@@ -97,14 +97,11 @@ import com.openexchange.tools.TimeZoneUtils;
 import com.openexchange.tools.exceptions.SimpleTruncatedAttribute;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.versit.converter.OXContainerConverter;
 
 /**
  * Imports ICal files. ICal files can be translated to either tasks or
  * appointments within the OX, so the importer works with both SQL interfaces.
  *
- * @see OXContainerConverter OXContainerConverter - if you have a problem with
- *      the contend of the parsed ICAL file
  * @see AppointmentSQLInterface AppointmentSQLInterface - if you have a problem
  *      entering the parsed entry as Appointment
  * @see TasksSQLInterface TasksSQLInterface - if you have trouble entering the

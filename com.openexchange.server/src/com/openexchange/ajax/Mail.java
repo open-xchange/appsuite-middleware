@@ -113,7 +113,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.writer.ResponseWriter;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.configuration.ServerConfig.Property;
+import com.openexchange.contact.internal.VCardUtil;
 import com.openexchange.contactcollector.ContactCollectorService;
+import com.openexchange.data.conversion.ical.internal.ICalUtil;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
@@ -123,8 +125,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.i18n.MailStrings;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.ldap.User;
@@ -154,7 +154,7 @@ import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.attachment.AttachmentToken;
 import com.openexchange.mail.attachment.AttachmentTokenConstants;
-import com.openexchange.mail.attachment.AttachmentTokenRegistry;
+import com.openexchange.mail.attachment.AttachmentTokenService;
 import com.openexchange.mail.cache.MailMessageCache;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -204,7 +204,6 @@ import com.openexchange.tools.servlet.UploadServletException;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.openexchange.tools.versit.utility.VersitUtility;
 
 /**
  * {@link Mail} - The servlet to handle mail requests.
@@ -326,6 +325,8 @@ public class Mail extends PermissionServlet implements UploadListener {
      * Parameter to define the maximum desired content length (in bytes) returned for the requested mail.
      */
     public static final String PARAMETER_MAX_SIZE = "max_size";
+
+    public static final String PARAMETER_ALLOW_NESTED_MESSAGES = "allow_nested_messages";
 
     public static final String PARAMETER_SAVE = "save";
 
@@ -1780,32 +1781,19 @@ public class Mail extends PermissionServlet implements UploadListener {
                     /*
                      * Save dependent on content type
                      */
-                    final Context ctx = ContextStorage.getStorageContext(session.getContextId());
                     final List<CommonObject> retvalList = new ArrayList<CommonObject>();
                     if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCARD) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_VCARD)) {
                         /*
                          * Save VCard
                          */
-                        VersitUtility.saveVCard(
-                            versitPart.getInputStream(),
-                            versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                                retvalList,
-                                session,
-                                ctx);
+                        retvalList.add(VCardUtil.importContactToDefaultFolder(versitPart.getInputStream(), session));
                     } else if (versitPart.getContentType().isMimeType(MimeTypes.MIME_TEXT_X_VCALENDAR) || versitPart.getContentType().isMimeType(
                         MimeTypes.MIME_TEXT_CALENDAR)) {
                         /*
                          * Save ICalendar
                          */
-                        VersitUtility.saveICal(
-                            versitPart.getInputStream(),
-                            versitPart.getContentType().getBaseType(),
-                            versitPart.getContentType().containsCharsetParameter() ? versitPart.getContentType().getCharsetParameter() : MailProperties.getInstance().getDefaultMimeCharset(),
-                                retvalList,
-                                session,
-                                ctx);
+                        retvalList.addAll(ICalUtil.importToDefaultFolder(versitPart.getInputStream(), session));
                     } else {
                         throw MailExceptionCode.UNSUPPORTED_VERSIT_ATTACHMENT.create(versitPart.getContentType());
                     }
@@ -2081,7 +2069,8 @@ public class Mail extends PermissionServlet implements UploadListener {
                 final AttachmentToken token = new AttachmentToken(ttlMillis <= 0 ? AttachmentTokenConstants.DEFAULT_TIMEOUT : ttlMillis);
                 token.setAccessInfo(mailInterface.getAccountID(), session);
                 token.setAttachmentInfo(folderPath, uid, sequenceId);
-                AttachmentTokenRegistry.getInstance().putToken(token.setOneTime(true), session);
+                AttachmentTokenService service = ServerServiceRegistry.getInstance().getService(AttachmentTokenService.class, true);
+                service.putToken(token.setOneTime(true), session);
                 final JSONObject attachmentObject = new JSONObject();
                 attachmentObject.put("id", token.getId());
                 attachmentObject.put("jsessionid", token.getJSessionId());
@@ -4785,6 +4774,8 @@ public class Mail extends PermissionServlet implements UploadListener {
         }
         try {
             final MailServletInterface mailInterface = MailServletInterface.getInstance(session);
+            boolean cleanUp = true;
+            UploadEvent uploadEvent = null;
             try {
                 /*
                  * Set response headers according to html spec
@@ -4801,7 +4792,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                 UserSettingMail usm = session.getUserSettingMail();
                 long maxFileSize = usm.getUploadQuotaPerFile();
                 long maxSize = usm.getUploadQuota();
-                final UploadEvent uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
+                uploadEvent = processUpload(req, maxFileSize > 0 ? maxFileSize : -1L, maxSize > 0 ? maxSize : -1L);
                 uploadEvent.setParameter(UPLOAD_PARAM_MAILINTERFACE, mailInterface);
                 uploadEvent.setParameter(UPLOAD_PARAM_WRITER, resp.getWriter());
                 uploadEvent.setParameter(UPLOAD_PARAM_SESSION, session);
@@ -4810,7 +4801,11 @@ public class Mail extends PermissionServlet implements UploadListener {
                 uploadEvent.setParameter(UPLOAD_PARAM_GID, groupId);
                 uploadEvent.setParameter(PARAMETER_ACTION, actionStr);
                 fireUploadEvent(uploadEvent, listeners);
+                cleanUp = false;
             } finally {
+                if (cleanUp && null != uploadEvent) {
+                    uploadEvent.cleanUp();
+                }
                 if (mailInterface != null) {
                     try {
                         mailInterface.close(true);

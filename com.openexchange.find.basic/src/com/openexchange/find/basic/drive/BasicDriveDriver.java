@@ -71,10 +71,13 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccess;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.search.TitleTerm;
@@ -146,9 +149,15 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         if (null == fileAccessFactory) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFileAccessFactory.class.getName());
         }
+        
+        IDBasedFolderAccessFactory folderAccessFactory = Services.getIdBasedFolderAccessFactory();
+        if (null == folderAccessFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(IDBasedFolderAccessFactory.class.getName());
+        }
 
         // Create file access
         IDBasedFileAccess fileAccess = fileAccessFactory.createAccess(session);
+        IDBasedFolderAccess folderAccess = folderAccessFactory.createAccess(session);
 
         // Folder identifier
         String folderId = searchRequest.getFolderId();
@@ -171,7 +180,10 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             }
 
             // Search...
-            List<String> folderIds = null != folderId ? Collections.singletonList(folderId) : null;
+            List<String> folderIds=new LinkedList<String>();
+            if(folderId!=null)
+                findSubfolders(folderId, folderAccess, folderIds);
+                
             SearchIterator<File> it = null;
             try {
                 it = fileAccess.search(folderIds, term, fields, Field.TITLE, SortDirection.DEFAULT, start, start + searchRequest.getSize());
@@ -212,6 +224,30 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
         }
         return new SearchResult(-1, start, results, searchRequest.getActiveFacets());
     }
+    
+    /**
+     * Return all folders that are below given folder, including that folder itsetlf.
+     * 
+     * @return
+     * @throws OXException
+     */
+    private void findSubfolders(String folderId, IDBasedFolderAccess folderAccess, List<String> result) throws OXException {
+        if (folderId == null) {
+            return;
+        }
+
+        FileStorageFolder[] fileStorageFolderIds = folderAccess.getSubfolders(folderId, true);
+        if (fileStorageFolderIds == null || fileStorageFolderIds.length == 0) {
+            result.add(folderId);
+        } else {
+            result.add(folderId);
+            for (FileStorageFolder f : fileStorageFolderIds)
+                findSubfolders(f.getId(), folderAccess, result);
+        }
+        return;
+    }
+    
+    
 
     /**
      * Extracts the file type used in the filter of the supplied active facets.

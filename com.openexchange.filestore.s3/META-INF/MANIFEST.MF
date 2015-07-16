@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.amazonaws,
  com.amazonaws.auth,
  com.amazonaws.handlers,
+ com.amazonaws.http,
  com.amazonaws.regions,
  com.amazonaws.services.s3,
  com.amazonaws.services.s3.internal,

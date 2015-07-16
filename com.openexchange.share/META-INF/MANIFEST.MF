@@ -19,5 +19,6 @@ Import-Package: com.google.common.base,
  org.slf4j
 Export-Package: com.openexchange.share,
  com.openexchange.share.groupware,
+ com.openexchange.share.notification,
  com.openexchange.share.recipient,
  com.openexchange.share.tools

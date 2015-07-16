@@ -152,6 +152,8 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
      */
     FileStorageFolder[] getRootFolders(Locale locale) throws OXException;
 
+    FileStorageFolder[] getUserSharedFolders() throws OXException;
+
     /**
      * Checks user's default folder as defined in user's file storage settings and creates them if any is missing.
      * <p>
@@ -166,9 +168,9 @@ public interface IDBasedFolderAccess extends TransactionAware, WarningsAware {
     /**
      * Creates a new file storage folder with attributes taken from given file storage folder description.
      * <p>
-     * <b>Note</b>: If underlying file storage system does not support the capability to store an attribute, the creation fails with an 
+     * <b>Note</b>: If underlying file storage system does not support the capability to store an attribute, the creation fails with an
      * exception.
-     * 
+     *
      * @param toCreate The file storage folder to create
      * @return The identifier of the created file storage folder
      * @throws OXException If creation fails

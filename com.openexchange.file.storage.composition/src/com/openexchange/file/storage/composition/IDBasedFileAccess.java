@@ -437,6 +437,20 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     TimedResult<File> getDocuments(String folderId, List<File.Field> fields, File.Field sort, SortDirection order, Range range) throws OXException;
 
     /**
+     * Gets all documents that are considered as "shared" by the user, i.e. those documents of the user that have been shared to at least
+     * one other entity.
+     * <p/><b>Note:</b>
+     * Only available if at least one underlying account supports the {@link FileStorageCapability#OBJECT_PERMISSIONS} capability.
+     *
+     * @param fields The fields to load, or <code>null</code> to load all fields
+     * @param sort The field to sort by, or <code>null</code> for no specific sort order
+     * @param order The sorting direction, or <code>null</code> for no specific sort order
+     * @return The shared documents of all accounts, or an empty iterator if there are none, or no storage supports object permissions
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> getUserSharedDocuments(List<Field> fields, Field sort, SortDirection order) throws OXException;
+
+    /**
      * List all versions of a document
      * @param id The documents id
      * @return

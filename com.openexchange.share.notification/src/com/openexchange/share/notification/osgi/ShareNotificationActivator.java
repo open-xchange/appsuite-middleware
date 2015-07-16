@@ -6,15 +6,18 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.group.GroupService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.notification.ShareNotificationHandler;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.impl.DefaultNotificationService;
-import com.openexchange.share.notification.mail.impl.MailNotificationHandler;
+import com.openexchange.share.notification.impl.ShareNotificationHandler;
+import com.openexchange.share.notification.impl.mail.MailNotificationHandler;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
 
@@ -24,9 +27,19 @@ public class ShareNotificationActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {ConfigurationService.class, ServerConfigService.class, UserService.class, TemplateService.class,
-            HtmlService.class, ModuleSupport.class, TranslatorFactory.class, ConfigViewFactory.class
-            };
+        return new Class<?>[] {
+            ContextService.class,
+            UserService.class,
+            GroupService.class,
+            ServerConfigService.class,
+            TranslatorFactory.class,
+            ModuleSupport.class,
+            ConfigurationService.class,
+            ConfigViewFactory.class,
+            TemplateService.class,
+            HtmlService.class,
+            ShareService.class
+        };
     }
 
     @Override

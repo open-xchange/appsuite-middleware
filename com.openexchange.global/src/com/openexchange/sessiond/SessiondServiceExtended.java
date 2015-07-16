@@ -77,13 +77,13 @@ public interface SessiondServiceExtended extends SessiondService {
     boolean isActive(String sessionId);
 
     /**
-     * Gets a list of <i>active</i> sessions, i.e. those sessions that are <code>locally</code> available and located in one of the 
+     * Gets a list of <i>active</i> sessions, i.e. those sessions that are <code>locally</code> available and located in one of the
      * short-term containers.
-     * 
+     *
      * @return The identifiers of all active sessions in a list
      */
     List<String> getActiveSessionIDs();
-    
+
     /**
      * Get the session object related to the given session identifier.
      *

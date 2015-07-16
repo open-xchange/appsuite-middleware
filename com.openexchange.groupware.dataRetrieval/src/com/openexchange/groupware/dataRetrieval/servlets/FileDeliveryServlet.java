@@ -81,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class FileDeliveryServlet extends HttpServlet {
 
+    private static final long serialVersionUID = -1246179982601539367L;
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileDeliveryServlet.class);
 
     public static RandomTokenContainer<Map<String, Object>> PARAM_MAP = null;
@@ -92,12 +93,8 @@ public class FileDeliveryServlet extends HttpServlet {
             // create a new HttpSession if it's missing
             req.getSession(true);
             super.service(new CountingHttpServletRequest(req), resp);
-        } catch (final RateLimitedException e) {
-            resp.setContentType("text/plain; charset=UTF-8");
-            if(e.getRetryAfter() > 0) {
-                resp.setHeader("Retry-After", String.valueOf(e.getRetryAfter()));
-            }
-            resp.sendError(429, "Too Many Requests - Your request is being rate limited.");
+        } catch (RateLimitedException e) {
+            e.send(resp);
         }
     }
 

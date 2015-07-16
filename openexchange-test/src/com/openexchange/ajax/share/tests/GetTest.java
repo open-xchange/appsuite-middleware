@@ -126,7 +126,7 @@ public class GetTest extends ShareTest {
         /*
          * discover & check share
          */
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
+        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID(), null);
         checkShare(guestPermission, folder, share);
         /*
          * get share by token as sharing user & check target
@@ -138,7 +138,7 @@ public class GetTest extends ShareTest {
         /*
          * get share by token as guest user & check target
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(share.getShareURL(), guestPermission.getRecipient());
         getResponse = guestClient.execute(new GetRequest(share.getToken(), share.getTarget().getPath()));
         parsedShare = getResponse.getParsedShare();
         assertEquals(guestClient.getModuleID(), parsedShare.getTarget().getModule());
@@ -183,7 +183,7 @@ public class GetTest extends ShareTest {
         /*
          * get share by token as guest user & check target
          */
-        GuestClient guestClient = resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient = resolveShare(share.getShareURL(), guestPermission.getRecipient());
         getResponse = guestClient.execute(new GetRequest(share.getToken(), share.getTarget().getPath()));
         parsedShare = getResponse.getParsedShare();
         assertEquals(guestClient.getModuleID(), parsedShare.getTarget().getModule());

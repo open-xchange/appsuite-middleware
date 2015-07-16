@@ -233,7 +233,7 @@ public class IMAPStore extends Store
     protected final int defaultPort;	// default IMAP port
     protected final boolean isSSL;	// use SSL?
 
-    private final int blksize;		// Block size for data requested
+    private int blksize;		// Block size for data requested
 					// in FETCH requests. Defaults to
 					// 16K
 
@@ -277,6 +277,7 @@ public class IMAPStore extends Store
     private final String guid;			// for Yahoo! Mail IMAP
     private boolean throwSearchException = false;
     private boolean peek = false;
+    private volatile boolean allowUnsafeConnectedCheck = true; // Whether isConnectedUnsafe() may bypass NOOP connectivity check
 
     private long myValidity;
 
@@ -1614,9 +1615,20 @@ public class IMAPStore extends Store
 
     /**
      * Get the block size to use for fetch requests on this Store.
+     *
+     * @return The block size
      */
-    int getFetchBlockSize() {
+    public int getFetchBlockSize() {
 	return blksize;
+    }
+
+    /**
+     * Sets the block size to use for fetch requests on this Store.
+     *
+     * @param blksize The block size
+     */
+    public void setFetchBlockSize(int blksize) {
+        this.blksize = blksize;
     }
 
     /**
@@ -2112,6 +2124,7 @@ public class IMAPStore extends Store
 	    } catch (BadCommandException bex) {
 		// NAMESPACE not supported, ignore it
 	    } catch (ConnectionException cex) {
+        allowUnsafeConnectedCheck = false;
 		throw new StoreClosedException(this, cex.getMessage(), cex);
 	    } catch (ProtocolException pex) {
 		throw new MessagingException(pex.getMessage(), pex);
@@ -2172,6 +2185,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("QUOTA not supported", bex);
 	} catch (ConnectionException cex) {
+        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2200,6 +2214,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("QUOTA not supported", bex);
 	} catch (ConnectionException cex) {
+        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2346,6 +2361,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("IDLE not supported", bex);
 	} catch (ConnectionException cex) {
+        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2405,6 +2421,7 @@ public class IMAPStore extends Store
 	} catch (BadCommandException bex) {
 	    throw new MessagingException("ID not supported", bex);
 	} catch (ConnectionException cex) {
+        allowUnsafeConnectedCheck = false;
 	    throw new StoreClosedException(this, cex.getMessage(), cex);
 	} catch (ProtocolException pex) {
 	    throw new MessagingException(pex.getMessage(), pex);
@@ -2487,7 +2504,16 @@ public class IMAPStore extends Store
      * @return <code>true</code> if the service is connected, <code>false</code> if it is not connected
      */
     public boolean isConnectedUnsafe() {
-        return super.isConnected();
+        return allowUnsafeConnectedCheck ? super.isConnected() : isConnected();
+    }
+
+    /**
+     * Sets the whether an unsafe connectivity check may be performed
+     *
+     * @param allowUnsafeConnectedCheck <code>true</code> to allow an unsafe connectivity check; otherwise <code>false</code>
+     */
+    public void setAllowUnsafeConnectedCheck(boolean allowUnsafeConnectedCheck) {
+        this.allowUnsafeConnectedCheck = allowUnsafeConnectedCheck;
     }
 
 }

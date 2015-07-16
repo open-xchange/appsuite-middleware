@@ -156,6 +156,11 @@ public final class GoogleDriveFolderAccess extends AbstractGoogleDriveAccess imp
     }
 
     @Override
+    public FileStorageFolder[] getUserSharedFolders() throws OXException {
+        return new FileStorageFolder[0];
+    }
+
+    @Override
     public FileStorageFolder[] getSubfolders(final String parentIdentifier, final boolean all) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);

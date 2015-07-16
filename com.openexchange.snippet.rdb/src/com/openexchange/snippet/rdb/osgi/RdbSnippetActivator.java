@@ -70,8 +70,11 @@ import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.rdb.RdbSnippetFilestoreLocationUpdater;
 import com.openexchange.snippet.rdb.RdbSnippetService;
 import com.openexchange.snippet.rdb.Services;
+import com.openexchange.snippet.rdb.groupware.RdbSnippetAttachmentBinaryCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetDeleteListener;
+import com.openexchange.snippet.rdb.groupware.RdbSnipptetAttachmentBinaryCreateTableUpdateTask;
+import com.openexchange.snippet.rdb.groupware.RdbSnipptetFixAttachmentPrimaryKey;
 
 /**
  * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
@@ -101,11 +104,13 @@ public class RdbSnippetActivator extends HousekeepingActivator {
         try {
             Services.setServiceLookup(this);
             /*
-             * Register groupware stuff
+             * Register Groupware stuff
              */
-            final RdbSnippetCreateTableTask createTableTask = new RdbSnippetCreateTableTask();
-            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask));
+            RdbSnippetCreateTableTask createTableTask = new RdbSnippetCreateTableTask();
+            RdbSnippetAttachmentBinaryCreateTableTask binaryCreateTableTask = new RdbSnippetAttachmentBinaryCreateTableTask();
+            registerService(UpdateTaskProviderService.class.getName(), new DefaultUpdateTaskProviderService(createTableTask, new RdbSnipptetFixAttachmentPrimaryKey(), binaryCreateTableTask, new RdbSnipptetAttachmentBinaryCreateTableUpdateTask()));
             registerService(CreateTableService.class, createTableTask);
+            registerService(CreateTableService.class, binaryCreateTableTask);
             registerService(DeleteListener.class, new RdbSnippetDeleteListener());
 
             /*
@@ -118,7 +123,7 @@ public class RdbSnippetActivator extends HousekeepingActivator {
              */
             final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(SnippetService.class, new RdbSnippetService(), properties);
+            registerService(SnippetService.class, new RdbSnippetService(this), properties);
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;

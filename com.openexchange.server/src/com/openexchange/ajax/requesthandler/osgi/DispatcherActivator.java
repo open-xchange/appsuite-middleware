@@ -71,6 +71,7 @@ import com.openexchange.ajax.requesthandler.DefaultDispatcher;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherNotesProcessor;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
+import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.ResponseRenderer;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.ajax.requesthandler.cache.PreviewFilestoreLocationUpdater;
@@ -128,8 +129,10 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
 
     @Override
     protected void startBundle() throws Exception {
-
-    	prefix = getService(DispatcherPrefixService.class).getPrefix();
+    	DispatcherPrefixService dispatcherPrefixService = getService(DispatcherPrefixService.class);
+        prefix = dispatcherPrefixService.getPrefix();
+    	Dispatchers.setDispatcherPrefixService(dispatcherPrefixService);
+    	Dispatcher.PREFIX.set(prefix);
 
     	final DefaultDispatcher dispatcher = new DefaultDispatcher();
         /*
@@ -234,8 +237,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         registerService(AJAXActionAnnotationProcessor.class, new DispatcherNotesProcessor());
         registerService(AJAXActionAnnotationProcessor.class, new OAuthAnnotationProcessor());
 
-        final DispatcherServlet dispatcherServlet = new DispatcherServlet();
-        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionProvider(this));
+        final DispatcherServlet dispatcherServlet = new DispatcherServlet(prefix);
+        final OAuthDispatcherServlet oAuthDispatcherServlet = new OAuthDispatcherServlet(this, new DefaultSessionProvider(this), prefix);
         trackService(OAuthResourceService.class);
         trackService(ContextService.class);
         trackService(UserService.class);
@@ -267,8 +270,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
             }
 
         });
-
-//        registerSessionServlet("/ajax", servlet);
 
         track(AJAXActionServiceFactory.class, new SimpleRegistryListener<AJAXActionServiceFactory>() {
 
@@ -355,7 +356,6 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         super.stopBundle();
         DispatcherServlet.clearRenderer();
         DispatcherServlet.setDispatcher(null);
-        DispatcherServlet.setPrefix(null);
         ServerServiceRegistry.getInstance().removeService(AJAXResultDecoratorRegistry.class);
         DecoratingAJAXActionCustomizer.REGISTRY_REF.set(null);
         CoverExtractorRegistry.REGISTRY_REFERENCE.set(null);
@@ -365,6 +365,8 @@ public class DispatcherActivator extends AbstractSessionServletActivator {
         ImageMatcher.setPrefixService(null);
         Multiple.setDispatcher(null);
         AJAXRequestDataTools.setBodyParserRegistry(null);
+        Dispatchers.setDispatcherPrefixService(null);
+        Dispatcher.PREFIX.set(DispatcherPrefixService.DEFAULT_PREFIX);
     }
 
     @Override

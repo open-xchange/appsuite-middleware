@@ -1,0 +1,5 @@
+open-xchange-push-dovecot (7.8.0-0) unstable; urgency=medium
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 01 Jul 2015 09:41:11 +0200

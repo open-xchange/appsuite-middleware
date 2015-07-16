@@ -85,7 +85,7 @@ public class Utils {
         }
         if (cause instanceof OXException) {
             OXException oxexception = (OXException) cause;
-            if ( DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxexception)) {
+            if ( DispatchExceptionCode.RESOURCE_OFFLINE.equals(oxexception) && stanza.getResendCount() < 1) {
                 return true;
             }
         }

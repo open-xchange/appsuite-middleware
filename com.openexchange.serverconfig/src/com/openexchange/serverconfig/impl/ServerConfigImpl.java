@@ -58,6 +58,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.capabilities.Capability;
+import com.openexchange.java.Strings;
 import com.openexchange.serverconfig.ClientServerConfigFilter;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.NotificationMailConfig;
@@ -124,7 +125,13 @@ public class ServerConfigImpl implements ServerConfig {
 
     @Override
     public String getProductName() {
-        return (String) mappings.get("productName");
+        String productName = (String) mappings.get("productName");
+        if (Strings.isEmpty(productName)) {
+            LOG.warn("No 'productName' config was found, please fix 'as-config.yml'. Falling back to default 'OX App Suite'.");
+            return "OX App Suite";
+        }
+
+        return productName;
     }
 
     @Override

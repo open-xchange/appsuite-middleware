@@ -51,7 +51,9 @@ package com.openexchange.folderstorage.cache.memory;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
@@ -288,6 +290,55 @@ public final class FolderMapManagement {
         }
         if (notify) {
             fireInvalidateCacheEvent(folderIds, treeId, optUser, contextId);
+        }
+    }
+
+    /**
+     * Drop folders hierarchies from all user caches for given context.
+     *
+     * @param folderIds The folder identifiers
+     * @param treeId The tree id
+     * @param optUser The optional user identifier
+     * @param contextId The context identifier
+     * @param notify Whether to post notification or not
+     */
+    public void dropHierarchyFor(List<String> folderIds, String treeId, int optUser, int contextId) {
+        dropHierarchyFor(folderIds, treeId, optUser, contextId, true);
+    }
+
+    /**
+     * Drop folders hierarchies from all user caches for given context.
+     *
+     * @param folderIds The folder identifiers
+     * @param treeId The tree id
+     * @param optUser The optional user identifier
+     * @param contextId The context identifier
+     * @param notify Whether to post notification or not
+     */
+    public void dropHierarchyFor(List<String> folderIds, String treeId, int optUser, int contextId, boolean notify) {
+        if ((null == folderIds) || (null == treeId)) {
+            return;
+        }
+        ConcurrentMap<Integer, FolderMap> contextMap = map.get(Integer.valueOf(contextId));
+        if (null == contextMap) {
+            return;
+        }
+        Set<String> ids = notify ? new HashSet<String>(16, 0.9f) : null;
+        for (String folderId : folderIds) {
+            if (optUser > 0 && Tools.getUnsignedInteger(folderId) < 0) {
+                FolderMap folderMap = contextMap.get(Integer.valueOf(optUser));
+                if (null != folderMap) {
+                    folderMap.removeHierarchy(folderId, treeId, ids);
+                }
+            } else {
+                // Delete all known
+                for (FolderMap folderMap : contextMap.values()) {
+                    folderMap.removeHierarchy(folderId, treeId, ids);
+                }
+            }
+        }
+        if (notify && (null != ids && !ids.isEmpty())) {
+            fireInvalidateCacheEvent(new ArrayList<String>(ids), treeId, optUser, contextId);
         }
     }
 

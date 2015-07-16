@@ -68,14 +68,13 @@ import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
-import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.UserParticipant;
+import com.openexchange.java.Strings;
 import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.test.CalendarTestManager;
 
 /**
@@ -140,9 +139,11 @@ public class BasicAuthTest extends ShareTest {
         assertNotNull("No matching permission in created folder found", matchingPermission);
         checkPermissions(guestPermission, matchingPermission);
 
-        // Discover & check share
-        ParsedShare share = discoverShare(matchingPermission.getEntity(), folder.getObjectID());
-        checkShare(guestPermission, folder, share);
+        /*
+         * discover & check guest
+         */
+        ExtendedPermissionEntity guest = discoverGuestEntity(api, module, folder.getObjectID(), matchingPermission.getEntity());
+        checkGuestPermission(guestPermission, guest);
 
         // Create some appointments for that folder
         {
@@ -157,11 +158,11 @@ public class BasicAuthTest extends ShareTest {
 
                 UserParticipant user = new UserParticipant(client.getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
-                UserParticipant guest = new UserParticipant(guestPermission.getEntity());
+                UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
 
-                appointment.setParticipants(new Participant[] { user, guest });
-                appointment.setUsers(new UserParticipant[] { user, guest });
+                appointment.setParticipants(new Participant[] { user, guestParticipant });
+                appointment.setUsers(new UserParticipant[] { user, guestParticipant });
 
                 calendarManager.insert(appointment);
             }
@@ -176,11 +177,11 @@ public class BasicAuthTest extends ShareTest {
 
                 UserParticipant user = new UserParticipant(client.getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
-                UserParticipant guest = new UserParticipant(guestPermission.getEntity());
+                UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
 
-                appointment.setParticipants(new Participant[] { user, guest });
-                appointment.setUsers(new UserParticipant[] { user, guest });
+                appointment.setParticipants(new Participant[] { user, guestParticipant });
+                appointment.setUsers(new UserParticipant[] { user, guestParticipant });
 
                 calendarManager.insert(appointment);
             }
@@ -195,11 +196,11 @@ public class BasicAuthTest extends ShareTest {
 
                 UserParticipant user = new UserParticipant(client.getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
-                UserParticipant guest = new UserParticipant(guestPermission.getEntity());
+                UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
 
-                appointment.setParticipants(new Participant[] { user, guest });
-                appointment.setUsers(new UserParticipant[] { user, guest });
+                appointment.setParticipants(new Participant[] { user, guestParticipant });
+                appointment.setUsers(new UserParticipant[] { user, guestParticipant });
 
                 calendarManager.insert(appointment);
             }
@@ -214,18 +215,18 @@ public class BasicAuthTest extends ShareTest {
 
                 UserParticipant user = new UserParticipant(client.getValues().getUserId());
                 user.setConfirm(Appointment.NONE);
-                UserParticipant guest = new UserParticipant(guestPermission.getEntity());
+                UserParticipant guestParticipant = new UserParticipant(guestPermission.getEntity());
                 user.setConfirm(Appointment.NONE);
 
-                appointment.setParticipants(new Participant[] { user, guest });
-                appointment.setUsers(new UserParticipant[] { user, guest });
+                appointment.setParticipants(new Participant[] { user, guestParticipant });
+                appointment.setUsers(new UserParticipant[] { user, guestParticipant });
 
                 calendarManager.insert(appointment);
             }
         }
 
         // Check access to share (via guest client)
-        GuestClient guestClient =  resolveShare(share, guestPermission.getRecipient());
+        GuestClient guestClient =  resolveShare(guest, guestPermission.getRecipient());
         guestClient.checkShareModuleAvailable();
         guestClient.checkShareAccessible(guestPermission);
 
@@ -239,28 +240,16 @@ public class BasicAuthTest extends ShareTest {
         HttpConnectionParams.setSoTimeout(httpParams, 5000);
         HttpConnectionParams.setSocketBufferSize(httpParams, 8192);
 
-        switch (share.getAuthentication()) {
-        case ANONYMOUS:
-            break;
-        case ANONYMOUS_PASSWORD:
-            AnonymousRecipient anonymousRecipient = ((AnonymousRecipient) guestPermission.getRecipient());
-            BasicCredentialsProvider anonymousCredentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials anonymousCredentials = new UsernamePasswordCredentials("guest", anonymousRecipient.getPassword());
-            anonymousCredentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, anonymousCredentials);
-            httpClient.setCredentialsProvider(anonymousCredentialsProvider);
-            break;
-        case GUEST_PASSWORD:
-            GuestRecipient guestRecipient = ((GuestRecipient) guestPermission.getRecipient());
-            BasicCredentialsProvider guestCredentialsProvider = new BasicCredentialsProvider();
-            UsernamePasswordCredentials guestCredentials = new UsernamePasswordCredentials(guestRecipient.getEmailAddress(), guestRecipient.getPassword());
-            guestCredentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, guestCredentials);
-            httpClient.setCredentialsProvider(guestCredentialsProvider);
-            break;
-        default:
-            Assert.fail("unknown authentication: " + share.getAuthentication());
-            break;
+        String password = ShareTest.getPassword(guestPermission.getRecipient());
+        if (false == Strings.isEmpty(password)) {
+            String username = ShareTest.getUsername(guestPermission.getRecipient());
+            BasicCredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+            UsernamePasswordCredentials anonymousCredentials = new UsernamePasswordCredentials(username, password);
+            credentialsProvider.setCredentials(org.apache.http.auth.AuthScope.ANY, anonymousCredentials);
+            httpClient.setCredentialsProvider(credentialsProvider);
         }
-        HttpGet httpGet = new HttpGet(share.getShareURL());
+
+        HttpGet httpGet = new HttpGet(guest.getShareURL());
         httpGet.setHeader("Accept", "text/calendar");
         httpGet.setHeader("User-Agent", "Microsoft Outlook");
 

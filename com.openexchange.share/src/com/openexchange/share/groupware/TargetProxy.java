@@ -118,12 +118,21 @@ public interface TargetProxy {
      *         (e.g. {@link #applyPermissions(List)}), otherwise <code>false</code>.
      */
     boolean wasModified();
-    
+
     /**
-     * Returns the type of the {@link TargetProxy} 
-     * 
+     * Returns the type of the {@link TargetProxy}
+     *
      * @return The type of the {@link TargetProxy}
      */
     TargetProxyType getProxyType();
+
+    /**
+     * Gets whether the underlying object is either placed in a public folder or is a
+     * public folder itself.
+     *
+     * @return <code>true</code> if this is a public target, <code>false</code> if it's a
+     * private one.
+     */
+    boolean isPublic();
 
 }

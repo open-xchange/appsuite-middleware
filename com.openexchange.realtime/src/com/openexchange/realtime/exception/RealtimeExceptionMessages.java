@@ -94,4 +94,25 @@ public class RealtimeExceptionMessages implements LocalizableStrings {
     /** You are no member of the GroupDispatcher: %1$s. Please join first. */
     public static final String NOT_A_MEMBER_MSG = "You are no member of the GroupDispatcher: %1$s. Please join first.";
 
+    /** The request didn't yield any response. */
+    public static final String RESULT_MISSING_MSG = "The request didn't yield any response.";
+
+    /** The GroupDispatcher %1$s was already disposed. */
+    public static final String GROUP_DISPOSED_MSG = "The GroupDispatcher %1$s was already disposed.";
+    
+    /** "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s. */
+    public static final String STANZA_PROCESSING_FAILED_MSG = "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.";
+    
+    /** Joining the GroupDispatcher %1$s failed. */
+    public static final String JOIN_FAILED_MSG = "Joining the GroupDispatcher %1$s failed.";
+    
+    /** Leaving the GroupDispatcher %1$s failed. */
+    public static final String LEAVE_FAILED_MSG = "Leaving the GroupDispatcher %1$s failed.";
+    
+    /** ResponseChannel timed out while simulating synchronous behaviour. */
+    public static final String RESPONSE_AWAIT_TIMEOUT_MSG = "ResponseChannel timed out while simulating synchronous behaviour.";
+
+    /** You are already a member of the GroupDispatcher %1$s */
+    public static final String ALREADY_MEMBER_MSG = "You are already a member of the GroupDispatcher %1$s";
+
 }

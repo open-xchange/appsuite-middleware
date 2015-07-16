@@ -51,6 +51,7 @@ package com.openexchange.sessiond.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -66,6 +67,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessionExceptionCodes;
+import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessionMatcher;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -479,6 +481,38 @@ final class SessionData {
             }
         }
         return null;
+    }
+
+    public List<Session> filterSessions(SessionFilter filter) {
+        List<Session> sessions = new LinkedList<Session>();
+        rlock.lock();
+        try {
+            for (final SessionContainer container : sessionList) {
+                collectSessions(filter, container.getSessionControls(), sessions);
+            }
+        } finally {
+            rlock.unlock();
+        }
+
+        rlongTermLock.lock();
+        try {
+            for (final SessionMap longTermMap : longTermList) {
+                collectSessions(filter, longTermMap.values(), sessions);
+            }
+        } finally {
+            rlongTermLock.unlock();
+        }
+
+        return sessions;
+    }
+
+    private static void collectSessions(SessionFilter filter, Collection<SessionControl> sessionControls, List<Session> sessions) {
+        for (SessionControl sessionControl : sessionControls) {
+            SessionImpl session = sessionControl.getSession();
+            if (filter.apply(session)) {
+                sessions.add(session);
+            }
+        }
     }
 
     /**
@@ -1081,4 +1115,5 @@ final class SessionData {
             }
         }
     }
+
 }

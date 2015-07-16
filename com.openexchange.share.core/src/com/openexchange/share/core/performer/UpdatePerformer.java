@@ -51,11 +51,10 @@ package com.openexchange.share.core.performer;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -63,16 +62,12 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.GuestInfo;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.TargetPermission;
-import com.openexchange.share.groupware.TargetUpdate;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -85,37 +80,39 @@ import com.openexchange.user.UserService;
  */
 public class UpdatePerformer extends AbstractPerformer<Void> {
 
-    private final String token;
+    private final ShareInfo originalShare;
     private final Date clientLastModified;
 
-    private AnonymousRecipient recipient;
-    private Date expiry;
-    private boolean expirySet;
     private Map<String, Object> meta;
     private boolean metaSet;
+    private String password;
+    private boolean passwordSet;
+    private Date expiryDate;
+    private boolean expiryDateSet;
 
     /**
-     * Initializes a new {@link UpdatePerformer}.
+     * Initializes a new {@link UpdateLinkPerformer}.
      *
-     * @param token The (base) token of the anonymous to update
-     * @param clientLastModified The last client timestamp to catch concurrent modifications
      * @param session The session
      * @param services A service lookup reference
+     * @param originalShare The original share link
+     * @param clientLastModified The last client timestamp to catch concurrent modifications
      */
-    public UpdatePerformer(String token, Date clientLastModified, ServerSession session, ServiceLookup services) {
+    public UpdatePerformer(ServerSession session, ServiceLookup services, ShareInfo originalShare, Date clientLastModified) {
         super(session, services);
-        this.token = token;
+        this.originalShare = originalShare;
         this.clientLastModified = clientLastModified;
     }
 
-    public UpdatePerformer setRecipient(AnonymousRecipient recipient) {
-        this.recipient = recipient;
+    public UpdatePerformer setPasword(String password) {
+        this.password = password;
+        this.passwordSet = true;
         return this;
     }
 
-    public UpdatePerformer setExpiry(Date expiry) {
-        this.expiry = expiry;
-        this.expirySet = true;
+    public UpdatePerformer setEypiryDate(Date expiryDate) {
+        this.expiryDate= expiryDate;
+        this.expiryDateSet = true;
         return this;
     }
 
@@ -125,89 +122,45 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
         return this;
     }
 
-    private boolean needsGuestUpdate() {
-        return null != recipient;
-    }
-
-    private boolean needsTargetUpdate() {
-        return metaSet || expirySet;
-    }
-
-    private boolean needsPermissionUpdate() {
-        return null != recipient && 0 < recipient.getBits();
-    }
-
     @Override
     public Void perform() throws OXException {
-        if (false == needsGuestUpdate() && false == needsTargetUpdate() && false == needsPermissionUpdate()) {
+        if (false == metaSet && false == passwordSet && false == expiryDateSet) {
             return null;
+        }
+        /*
+         * check "share_links" capability
+         */
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null == capabilities || !capabilities.contains("share_links")) {
+            throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
         }
         /*
          * prepare transaction
          */
-        ShareService shareService = getShareService();
         DatabaseService dbService = services.getService(DatabaseService.class);
         Context context = session.getContext();
         Connection connection = dbService.getWritable(context);
         session.setParameter(Connection.class.getName(), connection);
         try {
             Databases.startTransaction(connection);
-            boolean guestUserUpdated = false;
-            GuestInfo originalGuest = null;
-            if (needsTargetUpdate() || needsPermissionUpdate()) {
-                /*
-                 * resolve all original share targets and the anonymous guest user behind the token
-                 */
-                List<ShareInfo> shares = shareService.getShares(session, token);
-                if (null == shares || 0 == shares.size()) {
-                    throw ShareExceptionCodes.UNKNOWN_SHARE.create(token);
-                }
-                originalGuest = shares.get(0).getGuest();
-                /*
-                 * update guest user as needed
-                 */
-                if (needsGuestUpdate()) {
-                    guestUserUpdated = updateRecipient(connection, originalGuest);
-                }
-                /*
-                 * update share targets as needed
-                 */
-                if (needsTargetUpdate()) {
-                    List<ShareTarget> targetsForShareUpdate = getTargetsForShareUpdate(shares);
-                    if (null != targetsForShareUpdate && 0 < targetsForShareUpdate.size()) {
-                        shareService.updateTargets(session, targetsForShareUpdate, originalGuest.getGuestID(), clientLastModified);
-                    }
-                }
-                /*
-                 * update target permissions
-                 */
-                if (needsPermissionUpdate()) {
-                    TargetPermission permission = new TargetPermission(originalGuest.getGuestID(), false, recipient.getBits());
-                    List<ShareTarget> targets = getTargets(shares);
-                    TargetUpdate update = getModuleSupport().prepareUpdate(session, connection);
-                    try {
-                        update.fetch(targets);
-                        for (ShareTarget target : targets) {
-                            update.get(target).applyPermissions(Collections.singletonList(permission));
-                        }
-                        update.run();
-                    } finally {
-                        update.close();
-                    }
-                }
-            } else if (needsGuestUpdate()) {
-                /*
-                 * resolve token to guest user, update guest as needed
-                 */
-                originalGuest = shareService.resolveGuest(token);
-                guestUserUpdated = updateRecipient(connection, originalGuest);
-            }
+            /*
+             * update password for anonymous guest user as needed
+             */
+            boolean guestUserUpdated = updatePassword(connection);
+            /*
+             * update share expiry & meta as needed
+             */
+            updateShare();
             /*
              * commit changes, invalidate guest user afterwards if modified
              */
             connection.commit();
-            if (guestUserUpdated && null != originalGuest) {
-                getUserService().invalidateUser(context, originalGuest.getGuestID());
+            if (guestUserUpdated) {
+                getUserService().invalidateUser(context, originalShare.getGuest().getGuestID());
             }
             return null;
         } catch (OXException e) {
@@ -223,63 +176,23 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
         }
     }
 
-    private List<ShareTarget> getTargetsForShareUpdate(List<ShareInfo> originalShares) {
-        if (null == originalShares || (false == metaSet && false == expirySet)) {
-            return Collections.emptyList();
-        }
-        List<ShareTarget> modifiedTargets = new ArrayList<ShareTarget>(originalShares.size());
-        for (ShareInfo originalShare : originalShares) {
-            ShareTarget targetForShareUpdate = getTargetForShareUpdate(originalShare);
-            if (null != targetForShareUpdate) {
-                modifiedTargets.add(targetForShareUpdate);
-            }
-        }
-        return modifiedTargets;
-    }
-
-    private ShareTarget getTargetForShareUpdate(ShareInfo originalShare) {
-        ShareTarget originalTarget = originalShare.getShare().getTarget();
-        ShareTarget modifiedTarget = null;
-        if (expirySet) {
-            Date originalExpiry = originalTarget.getExpiryDate();
-            if (null == expiry && null != originalExpiry ||
-                null != expiry && null == originalExpiry ||
-                null != expiry && null != originalExpiry && false == expiry.equals(originalExpiry)) {
-                if (null == modifiedTarget) {
-                    modifiedTarget = originalTarget.clone();
-                }
-                modifiedTarget.setExpiryDate(expiry);
-            }
-        }
-        if (metaSet) {
-            Map<String, Object> originalMeta = originalTarget.getMeta();
-            if (null == meta && null != originalMeta ||
-                null != meta && null == originalMeta ||
-                null != meta && null != originalMeta && false == meta.equals(originalMeta)) {
-                if (null == modifiedTarget) {
-                    modifiedTarget = originalTarget.clone();
-                }
-                modifiedTarget.setMeta(meta);
-            }
-        }
-        return modifiedTarget;
-    }
-
     /**
-     * Extracts all targets from the supplied shares.
+     * Updates meta & expiry date for the share as needed.
      *
-     * @param shareInfos The share infos
-     * @return The extracted targets
+     * @return A share info as result of the update, or <code>null</code> if no update was necessary
      */
-    private static List<ShareTarget> getTargets(List<ShareInfo> shareInfos) {
-        if (null == shareInfos) {
-            return null;
+    private ShareInfo updateShare() throws OXException {
+        if (metaSet || expiryDateSet) {
+            Share toUpdate = new Share(originalShare.getGuest().getGuestID(), originalShare.getShare().getTarget());
+            if (metaSet) {
+                toUpdate.setMeta(meta);
+            }
+            if (expiryDateSet) {
+                toUpdate.setExpiryDate(expiryDate);
+            }
+            return getShareService().updateShare(session, toUpdate, clientLastModified);
         }
-        List<ShareTarget> targets = new ArrayList<ShareTarget>(shareInfos.size());
-        for (ShareInfo share : shareInfos) {
-            targets.add(share.getShare().getTarget());
-        }
-        return targets;
+        return null;
     }
 
     /**
@@ -287,20 +200,17 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
      * itself in case it differs from the updated recipient.
      *
      * @param connection A (writable) database connection
-     * @param originalGuest The original guest
      * @return <code>true</code> if the user was updated, <code>false</code>, otherwise
-     * @throws OXException
      */
-    private boolean updateRecipient(Connection connection, GuestInfo originalGuest) throws OXException {
-        if (null != this.recipient) {
-            String password = recipient.getPassword();
-            String originalPassword = originalGuest.getPassword();
+    private boolean updatePassword(Connection connection) throws OXException {
+        if (passwordSet) {
+            String originalPassword = originalShare.getGuest().getPassword();
             if (null == password && null != originalPassword ||
                 null != password && null == originalPassword ||
                 null != password && null != originalPassword && false == password.equals(originalPassword)) {
                 Context context = getContextService().getContext(session.getContextId());
                 UserService userService = getUserService();
-                User guestUser = userService.getUser(connection, originalGuest.getGuestID(), context);
+                User guestUser = userService.getUser(connection, originalShare.getGuest().getGuestID(), context);
                 UserImpl updatedUser = new UserImpl(guestUser);
                 if (Strings.isEmpty(password)) {
                     updatedUser.setPasswordMech("");

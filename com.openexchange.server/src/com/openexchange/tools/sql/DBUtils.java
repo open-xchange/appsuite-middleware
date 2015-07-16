@@ -62,6 +62,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
@@ -455,6 +456,27 @@ public final class DBUtils {
         final Statement statement = connection.createStatement();
         statement.execute("SET @@foreign_key_checks = " + value);
         statement.close();
+    }
+
+    /**
+     * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a PRIMARY KEY conflict.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @return <code>true</code> if given {@link SQLException} instance denotes a PRIMARY KEY conflict; otherwise <code>false</code>
+     */
+    public static boolean isPrimaryKeyConflictInMySQL(SQLException e) {
+        return Databases.isPrimaryKeyConflictInMySQL(e);
+    }
+
+    /**
+     * Checks if given {@link SQLException} instance denotes an integrity constraint violation due to a conflict caused by the specified key.
+     *
+     * @param e The <code>SQLException</code> instance to check
+     * @param keyName The name of the key causing the integrity constraint violation
+     * @return <code>true</code> if given {@link SQLException} instance denotes a conflict caused by the specified ke; otherwise <code>false</code>
+     */
+    public static boolean isKeyConflictInMySQL(SQLException e, String keyName) {
+        return Databases.isKeyConflictInMySQL(e, keyName);
     }
 
     /**

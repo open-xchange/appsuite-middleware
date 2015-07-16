@@ -49,8 +49,11 @@
 
 package com.openexchange.mail.parser;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -82,6 +85,7 @@ import net.freeutils.tnef.mime.TNEFMime;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.mail.smime.SMIMEException;
 import org.bouncycastle.mail.smime.SMIMESigned;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
@@ -95,10 +99,12 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeFilter;
+import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSmilFixer;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.MimeTypes;
 import com.openexchange.mail.mime.TNEFBodyPart;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
@@ -1179,6 +1185,56 @@ public final class MailMessageParser {
 
     private static boolean isSigned(String lcct, ContentType ct) {
         return "application/pkcs7-mime".equals(lcct) && "signed-data".equals(ct.getParameter("smime-type")) && "smime.p7m".equals(ct.getNameParameter());
+    }
+
+    /**
+     * Gets the <code>MailMessage</code> content from given mail part.
+     *
+     * @param mailPart The mail part to get the <code>MailMessage</code> content from
+     * @return The <code>MailMessage</code> content or <code>null</code>
+     * @throws OXException If <code>MailMessage</code> content cannot be returned
+     */
+    public static MailMessage getMessageContentFrom(MailPart mailPart) throws OXException {
+        if (null == mailPart) {
+            return null;
+        }
+
+        ThresholdFileHolder backup = null;
+        try {
+            Object content = mailPart.getContent();
+            if (content instanceof MailMessage) {
+                return (MailMessage) content;
+            } else if (content instanceof MimeMessage) {
+                return MimeMessageConverter.convertMessage((MimeMessage) content, false);
+            } else if (content instanceof InputStream) {
+                try {
+                    backup = new ThresholdFileHolder();
+                    backup.write((InputStream) content);
+                    FileBackedMimeMessage mimeMessage = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), backup.getSharedStream());
+                    MailMessage mailMessage = MimeMessageConverter.convertMessage(mimeMessage, false);
+                    backup = null; // Avoid preliminary closing
+                    return mailMessage;
+                } catch (IOException e) {
+                    throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+                } catch (MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            } else if (content instanceof String) {
+                try {
+                    MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), new ByteArrayInputStream(((String) content).getBytes("UTF-8")));
+                    return MimeMessageConverter.convertMessage(mimeMessage, false);
+                } catch (UnsupportedEncodingException e) {
+                    throw MailExceptionCode.ENCODING_ERROR.create(e, e.getMessage());
+                } catch (MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e);
+                }
+            }
+            return null;
+        } finally {
+            if (null != backup) {
+                backup.close();
+            }
+        }
     }
 
 }

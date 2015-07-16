@@ -57,8 +57,30 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
+import com.openexchange.folderstorage.Type;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
+import com.openexchange.folderstorage.type.DocumentsType;
+import com.openexchange.folderstorage.type.MusicType;
+import com.openexchange.folderstorage.type.PicturesType;
+import com.openexchange.folderstorage.type.TemplatesType;
+import com.openexchange.folderstorage.type.TrashType;
+import com.openexchange.folderstorage.type.VideosType;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.settings.impl.ConfigTree;
+import com.openexchange.java.Strings;
+import com.openexchange.session.Session;
+import com.openexchange.share.RequestContext;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link Tools} - A utility class for folder storage processing.
@@ -253,6 +275,127 @@ public final class Tools {
     @Deprecated
     public static int createPermissionBits(final int fp, final int rp, final int wp, final int dp, final boolean adminFlag) {
         return Permissions.createPermissionBits(fp, rp, wp, dp, adminFlag);
+    }
+
+    /**
+     * Gets the identifier of a specific default folder as defined by the config tree setting.
+     * <p/>
+     * Currently, only config tree paths of infostore default folders are mapped.
+     *
+     * @param session The session
+     * @param contentType The content type to get the default folder for
+     * @param type The folder type
+     * @return The default folder identifier, or <code>null</code> if not set
+     * @throws OXException
+     */
+    public static String getConfiguredDefaultFolder(ServerSession session, ContentType contentType, Type type) throws OXException {
+        String settingsPath = getDefaultFolderSettingsPath(contentType, type);
+        if (null != settingsPath) {
+            Setting setting = ConfigTree.getInstance().getSettingByPath(settingsPath);
+            if (null != setting) {
+                setting.getShared().getValue(session, session.getContext(), session.getUser(), session.getUserConfiguration(), setting);
+                Object value = setting.getSingleValue();
+                if (null != value && String.class.isInstance(value)) {
+                    return (String) value;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets the settings path in the config tree for a given content- and folder-type.
+     * <p/>
+     * Currently, only config tree paths of infostore default folders are mapped.
+     *
+     * @param contentType The content type
+     * @param type The folder type
+     * @return The settings path, or <code>null</code> if not known
+     */
+    private static String getDefaultFolderSettingsPath(ContentType contentType, Type type) {
+        if (InfostoreContentType.class.isInstance(contentType)) {
+            if (TrashType.getInstance().equals(type)) {
+                return "modules/infostore/folder/trash";
+            } else if (DocumentsType.getInstance().equals(type)) {
+                return "modules/infostore/folder/documents";
+            } else if (TemplatesType.getInstance().equals(type)) {
+                return "modules/infostore/folder/templates";
+            } else if (VideosType.getInstance().equals(type)) {
+                return "modules/infostore/folder/videos";
+            } else if (MusicType.getInstance().equals(type)) {
+                return "modules/infostore/folder/music";
+            } else if (PicturesType.getInstance().equals(type)) {
+                return "modules/infostore/folder/pictures";
+            } else  {
+                return "folder/infostore";
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Tries to construct a {@link RequestContext} instance based on the given properties of the session
+     * and decorator.
+     *
+     * @param session The session or <code>null</code>
+     * @param decorator The decorator or <code>null</code>
+     * @return A request context or <code>null</code> if none could be constructed due to missing data
+     * @throws OXException If a service lookup fails
+     */
+    public static RequestContext getRequestContext(Session session, FolderServiceDecorator decorator) throws OXException {
+        if (session != null) {
+            HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            if (hostData != null) {
+                return new FolderStorageRequestContext(hostData.isSecure() ? "https" : "http", hostData.getHost(), hostData.getDispatcherPrefix());
+            }
+        }
+
+        if (decorator != null) {
+            AJAXRequestData requestData = (AJAXRequestData) decorator.getProperty("ajaxRequestData");
+            String prefix = FolderStorageServices.requireService(DispatcherPrefixService.class).getPrefix();
+            if (requestData != null) {
+                return new FolderStorageRequestContext(requestData.isSecure() ? "https" : "http", requestData.getHostname(), prefix);
+            }
+
+            String protocol = (String) decorator.getProperty("http.protocol");
+            String host = (String) decorator.getProperty("http.host");
+            if (Strings.isNotEmpty(protocol) && Strings.isNotEmpty(host)) {
+                return new FolderStorageRequestContext(protocol, host, prefix);
+            }
+        }
+
+        return null;
+    }
+
+    private static final class FolderStorageRequestContext implements RequestContext {
+
+        private final String protocol;
+        private final String host;
+        private final String prefix;
+
+
+        public FolderStorageRequestContext(String protocol, String host, String prefix) {
+            super();
+            this.protocol = protocol;
+            this.host = host;
+            this.prefix = prefix;
+        }
+
+        @Override
+        public String getProtocol() {
+            return protocol;
+        }
+
+        @Override
+        public String getHostname() {
+            return host;
+        }
+
+        @Override
+        public String getServletPrefix() {
+            return prefix;
+        }
+
     }
 
 }

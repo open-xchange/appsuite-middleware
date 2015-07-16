@@ -147,11 +147,11 @@ public class ShareLoginMethod implements LoginMethodClosure {
             /*
              * anonymous
              */
-            if (Strings.isEmpty(user.getPasswordMech())) {
+            if (Strings.isEmpty(user.getUserPassword())) {
                 /*
                  * ... without password
                  */
-                authenticated = anonymous(loginResult);
+                authenticated = new ShareAuthenticated(user, context);
             } else {
                 /*
                  * ... with password
@@ -159,10 +159,17 @@ public class ShareLoginMethod implements LoginMethodClosure {
                 authenticated = basic(loginResult, ANONYMOUS_AUTHENTICATOR);
             }
         } else {
-            /*
-             * named guest user with password
-             */
-            authenticated = basic(loginResult, GUEST_AUTHENTICATOR);
+            if (Strings.isEmpty(user.getUserPassword())) {
+                /*
+                 * ... without password
+                 */
+                authenticated = new ShareAuthenticated(user, context);
+            } else {
+                /*
+                 * ... with password
+                 */
+                authenticated = basic(loginResult, GUEST_AUTHENTICATOR);
+            }
         }
 
         // Check returned ShareAuthenticated instance
@@ -186,10 +193,6 @@ public class ShareLoginMethod implements LoginMethodClosure {
             }
         }
         return authenticated;
-    }
-
-    private ShareAuthenticated anonymous(LoginResultImpl loginResult) throws OXException {
-        return new ShareAuthenticated(user, context);
     }
 
     private ShareAuthenticated basic(LoginResultImpl loginResult, CredentialsAuthenticator authenticator) throws OXException {

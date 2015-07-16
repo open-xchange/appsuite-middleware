@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.requesthandler.oauth;
 
-import static com.openexchange.ajax.requesthandler.Dispatcher.PREFIX;
 import static com.openexchange.osgi.Tools.requireService;
 import static com.openexchange.tools.servlet.http.Tools.isMultipartContent;
 import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
@@ -80,7 +79,9 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
+import com.openexchange.session.SessionResult;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Authorization;
 import com.openexchange.tools.session.ServerSession;
@@ -102,16 +103,17 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private final OAuthSessionProvider sessionProvider;
 
-    public OAuthDispatcherServlet(ServiceLookup services, OAuthSessionProvider sessionProvider) {
-        super();
+    public OAuthDispatcherServlet(ServiceLookup services, OAuthSessionProvider sessionProvider, String prefix) {
+        super(prefix);
         this.services = services;
         this.sessionProvider = sessionProvider;
     }
 
     @Override
-    protected void initializeSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
-        if (SessionUtility.getSessionObject(httpRequest, false) != null) {
-            return;
+    protected SessionResult<ServerSession> initializeSession(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws OXException {
+        Session session = SessionUtility.getSessionObject(httpRequest, false);
+        if (session != null) {
+            return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
         }
 
         String authHeader = httpRequest.getHeader(HttpHeaders.AUTHORIZATION);
@@ -126,16 +128,17 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
         OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
         OAuthGrant grant = oAuthResourceService.validate(authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1));
-        Session session = sessionProvider.getSession(grant, httpRequest);
+        session = sessionProvider.getSession(grant, httpRequest);
         SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
         httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);
+        return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
     }
 
     @Override
     protected AJAXRequestData initializeRequestData(HttpServletRequest httpRequest, HttpServletResponse httpResponse, boolean preferStream) throws OXException, IOException {
         Dispatcher dispatcher = DISPATCHER.get();
         AJAXRequestDataTools requestDataTools = getAjaxRequestDataTools();
-        String module = requestDataTools.getModule(PREFIX.get() + "oauth/modules/", httpRequest);
+        String module = requestDataTools.getModule(prefix + "oauth/modules/", httpRequest);
         String action = requestDataTools.getAction(httpRequest);
         ServerSession session = SessionUtility.getSessionObject(httpRequest, false);
         if (session == null) {
@@ -152,7 +155,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         /*
          * Parse AJAXRequestData
          */
-        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, PREFIX.get(), httpResponse);
+        AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, prefix, httpResponse);
         requestData.setModule(module);
         requestData.setSession(session);
         requestData.setProperty(OAuthConstants.PARAM_OAUTH_GRANT, grant);

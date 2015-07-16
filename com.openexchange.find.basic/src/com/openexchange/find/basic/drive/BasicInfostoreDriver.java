@@ -283,6 +283,37 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return Collections.emptyList();
     }
 
+    
+    
+    /*
+     * Returns all folders that are below the given folder, including that
+     * folder itself, where the user has the necessary permissions.
+     */
+    private static List<Integer> determineSubFolderIDs(ServerSession session, int folderId) throws OXException {
+        final Context context = session.getContext();
+        final int userId = session.getUserId();
+        final UserConfiguration userConfig = session.getUserConfiguration();
+        final OXFolderAccess folderAccess = new OXFolderAccess(context);
+        FolderObject infostoreFolder = folderAccess.getFolderObject(folderId);
+        FolderFilter filter = new FolderFilter() {
+
+            @Override
+            public boolean accept(FolderObject folder) throws OXException {
+                EffectivePermission perm = folder.getEffectiveUserPermission(userId, userConfig);
+                return perm.isFolderVisible() && perm.canReadOwnObjects();
+            }
+        };
+
+        List<Integer> folderIDs = new LinkedList<Integer>();
+        if (filter.accept(infostoreFolder)) {
+            folderIDs.add(infostoreFolder.getObjectID());
+        }
+
+        addSubfolderIDs(folderIDs, infostoreFolder, folderAccess, context, filter);
+        return folderIDs;
+    }
+    
+    
     /*
      * Returns all folders that are below the users default folder (i.e. "My Files"), including that
      * folder itself, where the user has the necessary permissions.
@@ -420,7 +451,7 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
             }
         } else {
             try {
-                folderIDs = Collections.singletonList(Integer.valueOf(requestFolderId));
+                folderIDs = determineSubFolderIDs(session, Integer.valueOf(requestFolderId));
             } catch (NumberFormatException e) {
                 throw FindExceptionCode.INVALID_FOLDER_ID.create(requestFolderId, Module.DRIVE.getIdentifier());
             }

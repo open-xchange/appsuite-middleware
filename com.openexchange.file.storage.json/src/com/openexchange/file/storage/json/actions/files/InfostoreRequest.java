@@ -57,8 +57,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Document;
 import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
@@ -176,12 +176,20 @@ public interface InfostoreRequest {
     String getFolderId() throws OXException;
 
     /**
-     * Gets the available columns
+     * Gets the metadata fields to load from the storage based on the requested column identifiers.
      *
-     * @return The available columns or an empty list
+     * @return The fields to load
      * @throws OXException If request specifies an unknown column
      */
-    List<Field> getColumns() throws OXException;
+    List<Field> getFieldsToLoad() throws OXException;
+
+    /**
+     * Gets the column identifiers as requested by the client.
+     *
+     * @return The column identifiers
+     * @throws OXException If request specifies an unknown column
+     */
+    int[] getRequestedColumns() throws OXException;
 
     /**
      * Gets the field to sort by
@@ -205,9 +213,8 @@ public interface InfostoreRequest {
      * Either parsed from <code>"timezone"</code> parameter or the time zone of the associated user
      *
      * @return The time zone associated with this request
-     * @throws OXException If any error occurs while returning the time zone
      */
-    TimeZone getTimezone() throws OXException;
+    TimeZone getTimezone();
 
     /**
      * Gets the associated session

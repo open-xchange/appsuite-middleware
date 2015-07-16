@@ -378,17 +378,6 @@ public interface ContactStorage {
     void delete(Session session, String folderId, String id, Date lastRead) throws OXException;
 
     /**
-     * Deletes a contact <b>and the VCard<b> related to the contact.
-     *
-     * @param session the session
-     * @param folderId the ID of the parent folder
-     * @param contact the contact to delete
-     * @param lastRead the time the object was last read from the storage
-     * @throws OXException
-     */
-    void delete(Session session, String folderId, Contact contact, Date lastRead) throws OXException;
-
-    /**
      * Deletes multiple contacts.
      *
      * @param session the session
@@ -400,18 +389,7 @@ public interface ContactStorage {
     void delete(Session session, String folderId, String[] ids, Date lastRead) throws OXException;
 
     /**
-     * Deletes multiple contacts <b>including persisted VCards</b>.
-     *
-     * @param session the session
-     * @param folderId the ID of the parent folder
-     * @param contacts the {@link Contact} to remove
-     * @param lastRead the time the objects were last read from the storage
-     * @throws OXException
-     */
-    void delete(Session session, String folderId, List<Contact> contacts, Date lastRead) throws OXException;
-
-    /**
-     * Deletes all contacts in a folder <b>including the persisted VCards</b> of the given contacts.
+     * Deletes all contacts in a folder.
      *
      * @param session the session
      * @param folderId the ID of the parent folder
@@ -461,4 +439,15 @@ public interface ContactStorage {
      * @throws OXException
      */
     SearchIterator<Contact> autoComplete(Session session, List<String> folderIDs, String query, AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException;
+
+    /**
+     * Returns if the provided {@link ContactField}s are supported by the storage. To 'support' the given field the storage should be able to set new values for it. If at least one of the provided fields is not supported <code>false</code> will be
+     * returned.
+     *
+     * @param fields The fields to check
+     * @return <code>true</code> if all provided fields are supported, otherwise <code>false</code>
+     * @throws OXException
+     */
+    boolean supports(ContactField... fields) throws OXException;
+
 }
