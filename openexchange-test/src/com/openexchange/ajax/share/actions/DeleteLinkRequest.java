@@ -51,12 +51,14 @@ package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
+import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -67,34 +69,44 @@ import com.openexchange.ajax.framework.Params;
  */
 public class DeleteLinkRequest implements AJAXRequest<DeleteLinkResponse> {
 
-    private final String token;
-
+    private final ShareTarget target;
+    private final long timestamp;
     private final boolean failOnError = true;
 
     /**
      * Initializes a new {@link DeleteLinkRequest}.
+     *
+     * @param target The share target
+     * @param timestamp The client timestamp
      */
-    public DeleteLinkRequest(String token) {
+    public DeleteLinkRequest(ShareTarget target, long timestamp) {
         super();
-        this.token = token;
+        this.timestamp = timestamp;
+        this.target = target;
     }
 
     @Override
     public Method getMethod() {
-        return Method.GET;
-    }
-
-    @Override
-    public String getServletPath() {
-        return "/ajax/share/management";
+        return Method.PUT;
     }
 
     @Override
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Params(
             AJAXServlet.PARAMETER_ACTION, "deleteLink",
-            "token", token
+            AJAXServlet.PARAMETER_TIMESTAMP, Long.toString(timestamp)
         ).toArray();
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        JSONObject json = ShareWriter.writeTarget(target);
+        return json;
+    }
+
+    @Override
+    public String getServletPath() {
+        return "/ajax/share/management";
     }
 
     @Override
@@ -105,11 +117,6 @@ public class DeleteLinkRequest implements AJAXRequest<DeleteLinkResponse> {
                 return new DeleteLinkResponse(response);
             }
         };
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return null;
     }
 
     @Override

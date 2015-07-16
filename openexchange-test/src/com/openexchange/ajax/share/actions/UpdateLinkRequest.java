@@ -60,6 +60,7 @@ import com.openexchange.ajax.framework.AbstractAJAXParser;
 import com.openexchange.ajax.framework.Header;
 import com.openexchange.ajax.framework.Params;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.share.ShareTarget;
 
 
 /**
@@ -70,26 +71,23 @@ import com.openexchange.ajax.tools.JSONCoercion;
  */
 public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
-    private final String token;
-
+    private final ShareTarget target;
     private final long timestamp;
-
     private boolean failOnError = true;
-
     private int bits = -1;
-
     private String password = null;
-
     private long expiry;
-
     private Map<String, Object> meta;
 
     /**
      * Initializes a new {@link UpdateLinkRequest}.
+     *
+     * @param target The share target
+     * @param timestamp The client timestamp
      */
-    public UpdateLinkRequest(String token, long timestamp) {
+    public UpdateLinkRequest(ShareTarget target, long timestamp) {
         super();
-        this.token = token;
+        this.target = target;
         this.timestamp = timestamp;
     }
 
@@ -134,8 +132,7 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("token", token);
+        JSONObject json = ShareWriter.writeTarget(target);
         if (expiry >= 0) {
             json.put("expiry_date", expiry);
         }

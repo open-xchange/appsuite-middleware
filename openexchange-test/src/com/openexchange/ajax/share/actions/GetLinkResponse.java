@@ -62,16 +62,18 @@ import com.openexchange.ajax.framework.AbstractAJAXResponse;
 public class GetLinkResponse extends AbstractAJAXResponse {
 
     private final String url;
-    private final String token;
+    private final boolean isNew;
 
     /**
      * Initializes a new {@link GetLinkResponse}.
+     *
      * @param response
+     * @param url The share URL
      */
-    protected GetLinkResponse(Response response, String url, String token) {
+    protected GetLinkResponse(Response response, String url, boolean isNew) {
         super(response);
         this.url = url;
-        this.token = token;
+        this.isNew = isNew;
     }
 
     /**
@@ -84,12 +86,12 @@ public class GetLinkResponse extends AbstractAJAXResponse {
     }
 
     /**
-     * Gets the token
+     * Gets the isNew
      *
-     * @return The token
+     * @return The isNew
      */
-    public String getToken() {
-        return token;
+    public boolean isNew() {
+        return isNew;
     }
 
 }

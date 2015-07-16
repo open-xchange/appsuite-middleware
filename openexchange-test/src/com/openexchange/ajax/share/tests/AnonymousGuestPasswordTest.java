@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -61,6 +59,7 @@ import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.UpdateLinkRequest;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -110,16 +109,7 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * update recipient, set a password for the anonymous guest
          */
-        String token = null;
-        {
-            //TODO: update link via target?
-            Pattern pattern = Pattern.compile("[a-f0-9]{48}", Pattern.CASE_INSENSITIVE);
-            Matcher matcher = pattern.matcher(guest.getShareURL());
-            if (matcher.find()) {
-                token = matcher.group();
-            }
-        }
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(token, System.currentTimeMillis());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(new ShareTarget(module, String.valueOf(folder.getObjectID())), System.currentTimeMillis());
         updateLinkRequest.setBits(guestPermission.getPermissionBits());
         updateLinkRequest.setPassword("secret");
         client.execute(updateLinkRequest);
