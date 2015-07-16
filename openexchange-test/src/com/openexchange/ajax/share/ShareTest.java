@@ -1031,6 +1031,14 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return TESTED_PERMISSIONS[random.nextInt(TESTED_PERMISSIONS.length)];
     }
 
+    protected static OCLGuestPermission randomGuestPermission(RecipientType type) {
+        OCLGuestPermission permission;
+        do {
+            permission = TESTED_PERMISSIONS[random.nextInt(TESTED_PERMISSIONS.length)];
+        } while (false == type.equals(permission.getRecipient().getType()));
+        return permission;
+    }
+
     protected static FileStorageGuestObjectPermission randomGuestObjectPermission() {
         return TESTED_OBJECT_PERMISSIONS[random.nextInt(TESTED_OBJECT_PERMISSIONS.length)];
     }

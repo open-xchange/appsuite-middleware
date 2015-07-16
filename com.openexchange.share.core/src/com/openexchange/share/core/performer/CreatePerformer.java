@@ -54,6 +54,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
@@ -79,7 +80,7 @@ import com.openexchange.tools.session.ServerSession;
 public class CreatePerformer extends AbstractPerformer<CreatedShares> {
 
     private final List<ShareRecipient> recipients;
-
+    private final Map<String, Object> meta;
     private final List<ShareTarget> targets;
 
     /**
@@ -87,13 +88,15 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
      *
      * @param recipients The share recipients to add for each target
      * @param targets The targets to add shares for
+     * @param meta Additional metadata for the shares, or <code>null</code> if not set
      * @param session The session of the sharing user
      * @param services A service lookup reference
      */
-    public CreatePerformer(List<ShareRecipient> recipients, List<ShareTarget> targets, ServerSession session, ServiceLookup services) {
+    public CreatePerformer(List<ShareRecipient> recipients, List<ShareTarget> targets, Map<String, Object> meta, ServerSession session, ServiceLookup services) {
         super(session, services);
         this.recipients = recipients;
         this.targets = targets;
+        this.meta = meta;
     }
 
     /**
@@ -101,11 +104,12 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
      *
      * @param recipient The share recipient to add for the target
      * @param target The target to add share for
+     * @param meta Additional metadata for the shares, or <code>null</code> if not set
      * @param session The session of the sharing user
      * @param services A service lookup reference
      */
-    public CreatePerformer(ShareRecipient recipient, ShareTarget target, ServerSession session, ServiceLookup services) {
-        this(Collections.singletonList(recipient), Collections.singletonList(target), session, services);
+    public CreatePerformer(ShareRecipient recipient, ShareTarget target, Map<String, Object> meta, ServerSession session, ServiceLookup services) {
+        this(Collections.singletonList(recipient), Collections.singletonList(target), meta, session, services);
     }
 
     @Override
@@ -137,7 +141,7 @@ public class CreatePerformer extends AbstractPerformer<CreatedShares> {
             /*
              * create shares & corresponding guest user entities for external recipients first
              */
-            CreatedShares sharesPerRecipient = getShareService().addTargets(session, targets, recipients);
+            CreatedShares sharesPerRecipient = getShareService().addTargets(session, targets, recipients, meta);
             /*
              * add appropriate target permissions for corresponding guest entities
              * (only need to consider the first share per recipient, since the guest's permissions will be equal for each target

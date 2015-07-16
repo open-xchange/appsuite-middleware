@@ -568,7 +568,7 @@ public class DriveServiceImpl implements DriveService {
 
         }
 
-        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, session.getServerSession(), DriveServiceLookup.get());
+        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, null, session.getServerSession(), DriveServiceLookup.get());
         return cp.perform();
     }
 

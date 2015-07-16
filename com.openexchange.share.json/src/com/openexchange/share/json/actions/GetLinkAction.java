@@ -106,7 +106,7 @@ public class GetLinkAction extends AbstractShareAction {
         ShareInfo shareInfo = discoverLink(session, target);
         if (null == shareInfo) {
             AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-            CreatedShare createdShare = new CreatePerformer(recipient, target, session, services).perform().getShare(recipient);
+            CreatedShare createdShare = new CreatePerformer(recipient, target, null, session, services).perform().getShare(recipient);
             shareInfo = createdShare.getFirstInfo();
             isNew = true;
         }
