@@ -83,64 +83,9 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         super();
     }
 
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetContentName() {
-        return "snippetContent";
-    }
-
-    private String getSnippetContentTable() {
-        return "CREATE TABLE "+getSnippetContentName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id INT4 unsigned NOT NULL," +
-               " content TEXT CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL," +
-               " PRIMARY KEY (cid, user, id)" +
-               ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetAttachmentName() {
-        return "snippetAttachment";
-    }
-
-    private String getSnippetAttachmentTable() {
-        return "CREATE TABLE "+getSnippetAttachmentName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id INT4 unsigned NOT NULL," +
-               " referenceId VARCHAR(255) CHARACTER SET latin1 NOT NULL," +
-               " fileName VARCHAR(255) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL," +
-               " PRIMARY KEY (cid, user, id, referenceId(64))" +
-               ") ENGINE=InnoDB";
-    }
-
-    /*-
-     * --------------------------------------------------------------------------------------------------
-     */
-
-    private String getSnippetMiscName() {
-        return "snippetMisc";
-    }
-
-    private String getSnippetMiscTable() {
-        return "CREATE TABLE "+getSnippetMiscName()+" (" +
-               " cid INT4 unsigned NOT NULL," +
-               " user INT4 unsigned NOT NULL," +
-               " id INT4 unsigned NOT NULL," +
-               " json TEXT CHARACTER SET latin1 NOT NULL," +
-               " PRIMARY KEY (cid, user, id)" +
-               ") ENGINE=InnoDB";
-    }
-
     @Override
     protected String[] getCreateStatements() {
-        return new String[] { Tables.getSnippetTable(), getSnippetContentTable(), getSnippetAttachmentTable(), getSnippetMiscTable() };
+        return new String[] { Tables.getSnippetTable(), RdbSnippetTables.getSnippetContentTable(), RdbSnippetTables.getSnippetAttachmentTable(), RdbSnippetTables.getSnippetMiscTable() };
     }
 
     @Override
@@ -160,9 +105,9 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
         final Connection writeCon = ds.getForUpdateTask(contextId);
         try {
             createTable(Tables.getSnippetName(), Tables.getSnippetTable(), writeCon);
-            createTable(getSnippetContentName(), getSnippetContentTable(), writeCon);
-            createTable(getSnippetAttachmentName(), getSnippetAttachmentTable(), writeCon);
-            createTable(getSnippetMiscName(), getSnippetMiscTable(), writeCon);
+            createTable(RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetContentTable(), writeCon);
+            createTable(RdbSnippetTables.getSnippetAttachmentName(), RdbSnippetTables.getSnippetAttachmentTable(), writeCon);
+            createTable(RdbSnippetTables.getSnippetMiscName(), RdbSnippetTables.getSnippetMiscTable(), writeCon);
         } finally {
             ds.backForUpdateTask(contextId, writeCon);
         }
@@ -220,7 +165,7 @@ public final class RdbSnippetCreateTableTask extends AbstractCreateTableImpl imp
 
     @Override
     public String[] tablesToCreate() {
-        return new String[] { Tables.getSnippetName(), getSnippetContentName(), getSnippetAttachmentName(), getSnippetMiscName() };
+        return new String[] { Tables.getSnippetName(), RdbSnippetTables.getSnippetContentName(), RdbSnippetTables.getSnippetAttachmentName(), RdbSnippetTables.getSnippetMiscName() };
     }
 
     private <S> S getService(final Class<? extends S> clazz) throws OXException {

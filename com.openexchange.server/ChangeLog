@@ -1,3 +1,7 @@
+* 2015-07-15 - ioannis.chouklis@open-xchange.com
+
+ - Fix for bug 39767: Introduced an update task along side the create table service task for the 'snippetAttachmentBinary' table
+
 * 2015-07-15 - thorben.betten@open-xchange.com
 
  - Fix for bug 39769: Introduced remote look-up of local sessions to verify a session does exist
