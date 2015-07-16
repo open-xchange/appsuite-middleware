@@ -73,12 +73,12 @@ import com.openexchange.user.UserService;
 
 
 /**
- * {@link UpdatePerformer}
+ * {@link UpdateLinkPerformer}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class UpdatePerformer extends AbstractPerformer<Void> {
+public class UpdateLinkPerformer extends AbstractPerformer<Void> {
 
     private final ShareInfo originalShare;
     private final Date clientLastModified;
@@ -98,25 +98,25 @@ public class UpdatePerformer extends AbstractPerformer<Void> {
      * @param originalShare The original share link
      * @param clientLastModified The last client timestamp to catch concurrent modifications
      */
-    public UpdatePerformer(ServerSession session, ServiceLookup services, ShareInfo originalShare, Date clientLastModified) {
+    public UpdateLinkPerformer(ServerSession session, ServiceLookup services, ShareInfo originalShare, Date clientLastModified) {
         super(session, services);
         this.originalShare = originalShare;
         this.clientLastModified = clientLastModified;
     }
 
-    public UpdatePerformer setPasword(String password) {
+    public UpdateLinkPerformer setPasword(String password) {
         this.password = password;
         this.passwordSet = true;
         return this;
     }
 
-    public UpdatePerformer setEypiryDate(Date expiryDate) {
+    public UpdateLinkPerformer setEypiryDate(Date expiryDate) {
         this.expiryDate= expiryDate;
         this.expiryDateSet = true;
         return this;
     }
 
-    public UpdatePerformer setMeta(Map<String, Object> meta) {
+    public UpdateLinkPerformer setMeta(Map<String, Object> meta) {
         this.meta = meta;
         this.metaSet = true;
         return this;

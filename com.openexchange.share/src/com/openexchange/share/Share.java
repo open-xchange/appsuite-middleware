@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * {@link Share}
@@ -68,7 +69,10 @@ public class Share implements Serializable {
     private int createdBy;
     private Date modified;
     private int modifiedBy;
+    private boolean containsExpiryDate;
     private Date expiryDate;
+    private Map<String, Object> meta;
+    private boolean containsMeta;
 
     /**
      * Initializes a new, empty {@link Share}.
@@ -213,6 +217,7 @@ public class Share implements Serializable {
      */
     public void setExpiryDate(Date expiryDate) {
         this.expiryDate = expiryDate;
+        containsExpiryDate = true;
     }
 
     /**
@@ -222,6 +227,45 @@ public class Share implements Serializable {
      */
     public boolean isExpired() {
         return expiryDate != null && new Date().after(expiryDate);
+    }
+
+    /**
+     * Gets a value indicating whether an expiry date has been set in the {@link Share} instance, including a set operation with a value of
+     * <code>null</code>.
+     *
+     * @return The <code>true</code> if an expiry date was set, <code>false</code>, otherwise
+     */
+    public boolean containsExpiryDate() {
+        return containsExpiryDate;
+    }
+
+    /**
+     * Gets arbitrary metadata in a map.
+     *
+     * @return The metadata
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * Sets the metadata,
+     *
+     * @param meta The metadata to set
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
+        containsMeta = true;
+    }
+
+    /**
+     * Gets a value indicating whether a the arbitrary metadata has been set in the {@link Share} instance, including a set operation with
+     * a value of <code>null</code>.
+     *
+     * @return The <code>true</code> if an metdata was set, <code>false</code>, otherwise
+     */
+    public boolean containsMeta() {
+        return containsMeta;
     }
 
     @Override

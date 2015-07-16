@@ -50,6 +50,8 @@
 package com.openexchange.ajax.share.actions;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Assert;
@@ -78,6 +80,7 @@ public class ParsedShare {
     private ParsedShareTarget target;
     private ShareRecipient recipient;
     private int guest;
+    private Map<String, Object> meta;
 
     /**
      * Initializes a new {@link ParsedShare}.
@@ -108,6 +111,13 @@ public class ParsedShare {
         modifiedBy = json.optInt("modified_by");
         if (json.has("target")) {
             target = new ParsedShareTarget(json.getJSONObject("target"));
+        }
+        if (json.hasAndNotNull("meta")) {
+            Map<String, Object> meta = new HashMap<String, Object>();
+            for (String key : json.getJSONObject("meta").keySet()) {
+                meta.put(key, json.getJSONObject("meta").get(key));
+            }
+            setMeta(meta);
         }
         if (json.has("recipient")) {
             JSONObject jsonObject = json.getJSONObject("recipient");
@@ -239,6 +249,24 @@ public class ParsedShare {
      */
     public void setToken(String token) {
         this.token = token;
+    }
+
+    /**
+     * Gets the meta
+     *
+     * @return The meta
+     */
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    /**
+     * Sets the meta
+     *
+     * @param meta The meta to set
+     */
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
 }

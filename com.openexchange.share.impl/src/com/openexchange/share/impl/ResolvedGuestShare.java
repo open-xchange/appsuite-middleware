@@ -52,6 +52,7 @@ package com.openexchange.share.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.ServiceLookup;
@@ -72,8 +73,9 @@ public class ResolvedGuestShare implements GuestShare {
 
     protected final List<ShareTarget> targets;
     protected final DefaultGuestInfo guestInfo;
-    protected ServiceLookup services;
-    protected Date expiryDate;
+    protected final ServiceLookup services;
+    protected final Date expiryDate;
+    protected final Map<String, Object> meta;
 
     /**
      * Initializes a new {@link ResolvedGuestShare}.
@@ -103,13 +105,19 @@ public class ResolvedGuestShare implements GuestShare {
         super();
         this.services = services;
         this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
+        if (1 == shares.size()) {
+            expiryDate = shares.get(0).getExpiryDate();
+            meta = shares.get(0).getMeta();
+        } else {
+            expiryDate = null;
+            meta = null;
+        }
         ModuleSupport moduleSupport = adjustTargets ? services.getService(ModuleSupport.class) : null;;
         this.targets = new ArrayList<ShareTarget>(shares.size());
         for (Share share : shares) {
             if (share.getGuest() != guestUser.getId()) {
                 throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Share " + share + " does not belong to guest " + guestUser);
             }
-            expiryDate = share.getExpiryDate(); //TODO: expiry date as user attribute for the anonymous guest?
             if (null == moduleSupport) {
                 targets.add(share.getTarget());
             } else {
@@ -191,6 +199,11 @@ public class ResolvedGuestShare implements GuestShare {
     @Override
     public Date getExpiryDate() {
         return expiryDate;
+    }
+
+    @Override
+    public Map<String, Object> getMeta() {
+        return meta;
     }
 
     @Override

@@ -50,7 +50,6 @@
 package com.openexchange.share.impl.groupware;
 
 import java.util.List;
-import java.util.Map;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
 import com.openexchange.share.groupware.TargetProxy;
@@ -135,11 +134,7 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     }
 
     private static String getTitle(ShareTarget target) {
-        Map<String, Object> meta = target.getMeta();
-        if (null != meta && meta.containsKey("title")) {
-            return String.valueOf(meta.get("title"));
-        }
-        return target.toString();
+        return null != target.getItem() ? target.getItem() : target.toString();
     }
 
     @Override

@@ -50,7 +50,6 @@
 package com.openexchange.share;
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * {@link ShareTarget}
@@ -66,7 +65,6 @@ public class ShareTarget implements Cloneable, Serializable {
     private String folder;
     private String item;
     private int ownedBy;
-    private Map<String, Object> meta;
 
     /**
      * Initializes a new, empty {@link ShareTarget}.
@@ -107,7 +105,6 @@ public class ShareTarget implements Cloneable, Serializable {
     public ShareTarget(ShareTarget target) {
         this(target.getModule(), target.getFolder(), target.getItem());
         this.ownedBy = target.getOwnedBy();
-        this.meta = target.getMeta();
     }
 
     /**
@@ -191,24 +188,6 @@ public class ShareTarget implements Cloneable, Serializable {
      */
     public void setOwnedBy(int ownedBy) {
         this.ownedBy = ownedBy;
-    }
-
-    /**
-     * Gets arbitrary metadata in a map.
-     *
-     * @return The metadata
-     */
-    public Map<String, Object> getMeta() {
-        return meta;
-    }
-
-    /**
-     * Sets the metadata,
-     *
-     * @param meta The metadata to set
-     */
-    public void setMeta(Map<String, Object> meta) {
-        this.meta = meta;
     }
 
     /**

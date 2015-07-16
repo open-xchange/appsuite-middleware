@@ -120,8 +120,6 @@ import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.performer.CreatePerformer;
-import com.openexchange.share.core.performer.UpdatePerformer;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -576,16 +574,16 @@ public class DriveServiceImpl implements DriveService {
 
     @Override
     public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
-        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
-        updatePerformer.setMeta(meta);
-        if (password != null || bits != -1 || null != expiry) {
-            AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setPassword(password);
-            recipient.setBits(bits);
-            recipient.setExpiryDate(expiry);
-            updatePerformer.setRecipient(recipient);
-        }
-        updatePerformer.perform();
+//        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
+//        updatePerformer.setMeta(meta);
+//        if (password != null || bits != -1 || null != expiry) {
+//            AnonymousRecipient recipient = new AnonymousRecipient();
+//            recipient.setPassword(password);
+//            recipient.setBits(bits);
+//            recipient.setExpiryDate(expiry);
+//            updatePerformer.setRecipient(recipient);
+//        }
+//        updatePerformer.perform();
     }
 
     @Override

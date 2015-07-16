@@ -56,7 +56,6 @@ import static com.openexchange.ajax.LoginServlet.getPublicSessionCookieName;
 import static com.openexchange.ajax.LoginServlet.logAndSendException;
 import static com.openexchange.authentication.LoginExceptionCodes.INVALID_CREDENTIALS;
 import java.io.IOException;
-import java.util.Map;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -262,9 +261,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
                             String item = null != target ? target.getItem() :
                                 null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getItem() : null;
                             jLoginResult.putOpt("item", item);
-                            Map<String, Object> meta = null != target ? target.getMeta() :
-                                null != share.getTargets() && 1 == share.getTargets().size() ? share.getTargets().get(0).getMeta() : null;
-                            jLoginResult.putOpt("meta", meta);
+                            jLoginResult.putOpt("meta", share.getMeta());
                         }
                     };
                     retval.setContext(context);

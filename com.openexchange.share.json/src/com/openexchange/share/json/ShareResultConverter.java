@@ -150,6 +150,10 @@ public class ShareResultConverter implements ResultConverter {
         if (null != expiryDate) {
             json.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
         }
+        Map<String, Object> meta = shareInfo.getShare().getMeta();
+        if (null != meta) {
+            json.put("meta", JSONCoercion.coerceToJSON(meta));
+        }
         return json;
     }
 
@@ -194,6 +198,10 @@ public class ShareResultConverter implements ResultConverter {
             if (null != expiryDate) {
                 json.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
             }
+            Map<String, Object> meta = share.getShare().getMeta();
+            if (null != meta) {
+                json.put("meta", JSONCoercion.coerceToJSON(meta));
+            }
             /*
              * share targets & recipient
              */
@@ -219,10 +227,6 @@ public class ShareResultConverter implements ResultConverter {
         jsonTarget.put("module", module.isEmpty() ? String.valueOf(target.getModule()) : module);
         jsonTarget.putOpt("folder", target.getFolder());
         jsonTarget.putOpt("item", target.getItem());
-        Map<String, Object> meta = target.getMeta();
-        if (null != meta) {
-            jsonTarget.put("meta", JSONCoercion.coerceToJSON(meta));
-        }
         return jsonTarget;
     }
 

@@ -50,7 +50,6 @@
 package com.openexchange.ajax.share.actions;
 
 import java.util.List;
-import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -133,14 +132,6 @@ public class ShareWriter {
         jTarget.put("module", Module.getModuleString(target.getModule(), -1));
         jTarget.put("folder", target.getFolder());
         jTarget.put("item", target.getItem());
-        if (null != target.getMeta()) {
-            Set<String> keySet = target.getMeta().keySet();
-            JSONObject meta = new JSONObject(keySet.size());
-            for (String key : keySet) {
-                meta.put(key, target.getMeta().get(key));
-            }
-            jTarget.put("meta", meta);
-        }
         return jTarget;
     }
 

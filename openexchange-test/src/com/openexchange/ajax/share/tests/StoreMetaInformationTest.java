@@ -116,7 +116,7 @@ public class StoreMetaInformationTest extends ShareTest {
         AnonymousRecipient recipient = new AnonymousRecipient();
         recipient.setBits(FOLDER_READ_PERMISSION);
         target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), Integer.toString(folder.getObjectID()));
-        target.setMeta(meta);
+//        target.setMeta(meta);//TODO: meta in invite request
         InviteRequest request = new InviteRequest(Collections.singletonList(target), Collections.<ShareRecipient>singletonList(recipient), true);
         client.execute(request);
     }
@@ -134,7 +134,7 @@ public class StoreMetaInformationTest extends ShareTest {
         for (ParsedShare ps : response.getParsedShares()) {
             if (ps.getTarget().equals(target)) {
                 toDelete = ps;
-                assertEquals("Meta information was not stored for target", meta, ps.getTarget().getMeta());
+                assertEquals("Meta information was not stored for target", meta, ps.getMeta());
                 return;
             }
         }

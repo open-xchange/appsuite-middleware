@@ -50,15 +50,12 @@
 package com.openexchange.share.json.actions;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import com.openexchange.share.ShareTarget;
@@ -125,14 +122,14 @@ public class ShareJSONParser {
             target = new ShareTarget(module, folder);
         }
 
-        if (jsonTarget.hasAndNotNull("meta")) {
-            if (jsonTarget.isNull("meta")) {
-                target.setMeta(Collections.<String, Object> emptyMap());
-            } else {
-                target.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonTarget.getJSONObject("meta")));
-            }
-        }
-
+//        if (jsonTarget.hasAndNotNull("meta")) {
+//            if (jsonTarget.isNull("meta")) {
+//                target.setMeta(Collections.<String, Object> emptyMap());
+//            } else {
+//                target.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonTarget.getJSONObject("meta")));
+//            }
+//        }
+//
         return target;
     }
 

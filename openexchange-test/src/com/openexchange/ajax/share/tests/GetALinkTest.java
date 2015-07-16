@@ -128,16 +128,16 @@ public class GetALinkTest extends ShareTest {
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()));
         GetLinkRequest getLinkRequest = new GetLinkRequest(target);
-        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
-        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        getLinkRequest.setPassword(password);
+//        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
+//        String password = UUIDs.getUnformattedString(UUID.randomUUID());
+//        getLinkRequest.setPassword(password);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
         String url = getLinkResponse.getUrl();
 
         /*
          * Resolve the link and check read permission for folder
          */
-        GuestClient guestClient = resolveShare(url, null, password);
+        GuestClient guestClient = resolveShare(url, null, null);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), expectedPermission);
@@ -145,25 +145,20 @@ public class GetALinkTest extends ShareTest {
         assertNotNull(reloaded);
 
         /*
-         * Update permission, password and expiry
+         * Update password and expiry
          */
-//        OCLGuestPermission allPermission = createAnonymousGuestPermission();
-//        allPermission.setEntity(guestClient.getValues().getUserId());
-//        allPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
         UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getLinkResponse.getTimestamp().getTime());
-//        updateLinkRequest.setBits(allPermission.getPermissionBits());
         updateLinkRequest.setExpiry(newExpiry.getTime());
         updateLinkRequest.setPassword(newPassword);
         UpdateLinkResponse updateLinkResponse = client.execute(updateLinkRequest);
 
         /*
-         * Resolve link with new credentials and check permission and expiry
+         * Resolve link with new credentials and check expiry
          */
         GuestClient newClient = resolveShare(url, null, newPassword);
         int guestId = newClient.getValues().getUserId();
-//        newClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), allPermission);
         ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, infostore.getObjectID(), guestId);
         assertNotNull(guest);
         assertEquals(newExpiry, guest.getExpiry());
@@ -183,16 +178,13 @@ public class GetALinkTest extends ShareTest {
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
         GetLinkRequest getLinkRequest = new GetLinkRequest(target);
-        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
-        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-        getLinkRequest.setPassword(password);
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
         String url = getLinkResponse.getUrl();
 
         /*
          * Resolve the link and check read permission for file
          */
-        GuestClient guestClient = resolveShare(url, null, password);
+        GuestClient guestClient = resolveShare(url, null, null);
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(file.getId(), expectedPermission);

@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.share.actions;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.groupware.modules.Module;
@@ -87,13 +85,6 @@ public class ParsedShareTarget extends ShareTarget {
         }
         if (json.hasAndNotNull("item")) {
             setItem(json.getString("item"));
-        }
-        if (json.hasAndNotNull("meta")) {
-            Map<String, Object> meta = new HashMap<String, Object>();
-            for (String key : json.getJSONObject("meta").keySet()) {
-                meta.put(key, json.getJSONObject("meta").get(key));
-            }
-            setMeta(meta);
         }
     }
 

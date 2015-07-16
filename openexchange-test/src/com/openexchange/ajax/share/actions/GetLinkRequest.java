@@ -72,8 +72,6 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     private final ShareTarget target;
     private boolean failOnError = true;
-    private int bits = -1;
-    private String password = null;
 
     /**
      * Initializes a new {@link GetLinkRequest}.
@@ -83,14 +81,6 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
     public GetLinkRequest(ShareTarget target) {
         super();
         this.target = target;
-    }
-
-    public void setBits(int bits) {
-        this.bits = bits;
-    }
-
-    public void setPassword(String password) {
-        this.password  = password;
     }
 
     @Override
@@ -117,14 +107,7 @@ public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
 
     @Override
     public Object getBody() throws IOException, JSONException {
-        JSONObject json = ShareWriter.writeTarget(target);
-        if (bits >= 0) {
-            json.put("bits", bits);
-        }
-        if (password != null) {
-            json.put("password", password);
-        }
-        return json;
+        return  ShareWriter.writeTarget(target);
     }
 
     @Override
