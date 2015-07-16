@@ -343,6 +343,28 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                             comparedPermissions.getNewGuestPermissions(), transactionManager.getConnection());
                     }
                     /*
+                     * Cascade folder permissions
+                     */
+                    if (cascadePermissions) {
+                        // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
+                        boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
+
+                        decorator.put("cascadePermissions", false);
+                        checkOpenedStorage(storage, openedStorages);
+                        List<String> ids = new ArrayList<String>();
+                        try {
+                            gatherSubfolders(folder, storage, treeId, ids, ignoreWarnings);
+                            cascadeFolderPermissions(folder, storage, treeId, ids);
+                        } catch (OXException e) {
+                            if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
+                                addWarning(e);
+                                transactionManager.rollback();
+                                return;
+                            }
+                            throw e;
+                        }
+                    }
+                    /*
                      * Change permissions either in real or in virtual storage
                      */
                     if (FolderStorage.REAL_TREE_ID.equals(folder.getTreeID())) {
@@ -352,22 +374,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         if (null == realStorage) {
                             throw FolderExceptionErrorMessage.NO_STORAGE_FOR_ID.create(FolderStorage.REAL_TREE_ID, folder.getID());
                         }
-                        /*
-                         * Cascade folder permissions
-                         */
-                        if (cascadePermissions) {
-                            // Switch back to false due to the recursive nature of FolderStorage.updateFolder in some implementations
-                            boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
 
-                            decorator.put("cascadePermissions", false);
-                            checkOpenedStorage(realStorage, openedStorages);
-                            List<String> ids = new ArrayList<String>();
-                            gatherSubfolders(folder, realStorage, treeId, ids, ignoreWarnings);
-
-                            if (ignoreWarnings) {
-                                cascadeFolderPermissions(folder, realStorage, treeId, ids);
-                            }
-                        }
                         if (storage.equals(realStorage)) {
                             storage.updateFolder(folder, storageParameters);
                         } else {
@@ -468,9 +475,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             Permission permission = CalculatePermission.calculate(f, this, ALL_ALLOWED);
             if (!permission.isAdmin()) {
                 if (!ignoreWarnings) {
-                    OXException noAdminAccess = OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
-                    storageParameters.addWarning(noAdminAccess);
-                    throw noAdminAccess;
+                    throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(OXFolderUtility.getUserName(session.getUserId(), context), f.getName(), Integer.valueOf(context.getContextId()));
                 }
             } else {
                 ids.add(f.getID());
