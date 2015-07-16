@@ -55,7 +55,6 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.server.ServiceLookup;
@@ -161,8 +160,8 @@ public abstract class AbstractShareAction implements AJAXActionService {
      * @param target The share target
      * @return The module string
      */
-    protected static String moduleFor(ShareTarget target) {
-        return Module.getModuleString(target.getModule(), -1);
+    protected String moduleFor(ShareTarget target) throws OXException {
+        return getModuleSupport().getShareModule(target.getModule());
     }
 
 }
