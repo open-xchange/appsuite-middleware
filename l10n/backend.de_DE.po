@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-07-15 09:45+0100\n"
+"PO-Revision-Date: 2015-07-16 12:41+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -4529,12 +4529,12 @@ msgstr "Die Anfrage ergab kein Ergebnis."
 
 #. * The GroupDispatcher %1$s was already disposed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:101
+#, fuzzy
 msgid "The GroupDispatcher %1$s was already disposed."
-msgstr ""
+msgstr "Der GroupDispatcher %1$s wurde bereits entfernt (dispose)."
 
 #. * "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:104
-#, fuzzy
 msgid "The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s."
 msgstr ""
 "Die Verarbeitung eines Stanza von %2$s nach %3$s durch den GroupDispatcher "
@@ -4542,19 +4542,16 @@ msgstr ""
 
 #. * Joining the GroupDispatcher %1$s failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:107
-#, fuzzy
 msgid "Joining the GroupDispatcher %1$s failed."
 msgstr "Beitreten zum GroupDispatcher %1$s ist fehlgeschlagen."
 
 #. * Leaving the GroupDispatcher %1$s failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:110
-#, fuzzy
 msgid "Leaving the GroupDispatcher %1$s failed."
 msgstr "Verlassen des GroupDispatcher %1$s ist fehlgeschlagen."
 
 #. * ResponseChannel timed out while simulating synchronous behaviour.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:113
-#, fuzzy
 msgid "ResponseChannel timed out while simulating synchronous behaviour."
 msgstr ""
 "ResponseChannel-Zeitüberschreitung während der Simulation synchronen "
@@ -4562,7 +4559,6 @@ msgstr ""
 
 #. * You are already a member of the GroupDispatcher %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:116
-#, fuzzy
 msgid "You are already a member of the GroupDispatcher %1$s"
 msgstr "Sie sind bereits Mitglied des GroupDispatcher %1$s"
 
@@ -9163,7 +9159,6 @@ msgstr "Der Link läuft ab am %1$s"
 #. * OX App Suite - Forgot your password?
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:182
-#, fuzzy
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Passwort vergessen?"
 
@@ -9173,7 +9168,6 @@ msgstr "Hallo,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
-#, fuzzy
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
@@ -9183,13 +9177,11 @@ msgstr ""
 
 #. * Set password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
-#, fuzzy
 msgid "Set password"
 msgstr "Passwort festlegen"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
-#, fuzzy
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
@@ -9237,12 +9229,10 @@ msgstr ""
 "sich bitte an."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:72
-#, fuzzy
 msgid "%1$s has shared some files with you. "
 msgstr "%1$s hat einige Dateien für Sie freigegeben. "
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:74
-#, fuzzy
 msgid ""
 "We sent a message to %1$s with further instructions on how to set a new "
 "password."
@@ -9251,7 +9241,6 @@ msgstr ""
 "wurde an %1$s gesendet."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:76
-#, fuzzy
 msgid "Please set a new password to regain access."
 msgstr "Bitte legen Sie ein neues Passwort fest, um wieder Zugang zu erhalten."
 
@@ -9260,7 +9249,6 @@ msgid "The share you are looking for does not exist."
 msgstr "Die von Ihnen gesuchte Freigabe ist nicht vorhanden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.servlet/src/com/openexchange/share/servlet/ShareServletStrings.java:80
-#, fuzzy
 msgid "We were unable to process your request."
 msgstr "Wir konnten Ihre Anfrage nicht verarbeiten."
 
@@ -9332,7 +9320,6 @@ msgid "You don't have sufficient permissions to invite guests."
 msgstr "Sie haben keine ausreichenden Berechtigungen zum Einladen von Gästen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/ShareExceptionMessages.java:92
-#, fuzzy
 msgid "You can't create links for multiple targets."
 msgstr "Sie können keine Links für mehrere Ziele anlegen."
 
