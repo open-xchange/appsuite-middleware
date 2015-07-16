@@ -11,10 +11,10 @@
   * [Developer Guide](../Components/OAuth Provider/developer_guide.md)
   * [Operator Guide](../Components/OAuth Provider/operator_guide.md)
   * [Security Considerations](../Components/OAuth Provider/security_considerations.md)
-  - - - -
+  ---
   * # Cross-Context Databases (GlobalDB)
   * [Basics](../Components/GlobalDB/globaldb.md)
-  - - - -
-  * [Sharing & Guest Mode](../Components/sharing/sharing.md)
+  ---
+  * [Sharing & Guest Mode](../Components/Sharing/sharing.md)
 
 [gimmick:theme](cerulean)
