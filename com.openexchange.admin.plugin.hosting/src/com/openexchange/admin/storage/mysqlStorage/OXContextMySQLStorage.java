@@ -1359,7 +1359,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         switch (effectiveStrategy.getStrategy()) {
             case SCHEMA:
                 // Pre-defined schema name
-                db.setScheme(effectiveStrategy.getSchema());
+                applyPredefinedSchemaName(effectiveStrategy.getSchema(), db);
                 break;
             case IN_MEMORY:
                 // Get the schema name advertised by cache
@@ -1370,6 +1370,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 break;
         }
         return cacheRollback;
+    }
+
+    private void applyPredefinedSchemaName(String schemaName, Database db) throws StorageException {
+        SchemaCache optCache = SchemaCacheProvider.getInstance().optSchemaCache();
+        if (null != optCache) {
+            optCache.clearFor(db.getId().intValue());
+        }
+
+        // Pre-defined schema name
+        db.setScheme(schemaName);
     }
 
     private SchemaCacheRollback inMemoryLookupSchema(Connection configCon, Database db) throws StorageException {

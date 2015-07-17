@@ -148,6 +148,10 @@ public class InMemorySchemaCache implements SchemaCache {
     public void clearFor(int poolId) throws StorageException {
         SchemaInfo schemaInfo = cache.get(Integer.valueOf(poolId));
         if (null != schemaInfo) {
+            if (schemaInfo.isDeprecated()) {
+                // Already deprecated
+                return;
+            }
             synchronized (schemaInfo) {
                 schemaInfo.clear();
             }

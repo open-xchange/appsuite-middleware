@@ -54,7 +54,17 @@ import java.util.Map;
 import java.util.PriorityQueue;
 
 /**
- * {@link SchemaInfo}
+ * {@link SchemaInfo} - Provides the cached information for a certain database/pool.
+ * <p>
+ * This implementation is <b>not</b> thread-safe.<br>
+ * Accessing methods needs to be performed by acquiring the lock:
+ * <pre>
+ * SchemaInfo schemaInfo = ...;
+ * synchronized (schemaInfo) {
+ *     ...
+ * }
+ * </pre>
+ * The only exception is the {@link #isDeprecated()} method, which is allowed to be called w/o holding instance lock.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
@@ -64,8 +74,8 @@ public class SchemaInfo {
     private final PriorityQueue<SchemaCount> queue;
     private final int poolId;
     private long stamp;
-    private boolean deprecated;
     private long modCount;
+    private volatile boolean deprecated; // Declare as "volatile" for non-synchronized access
 
     /**
      * Initializes a new {@link SchemaInfo}.
@@ -89,6 +99,8 @@ public class SchemaInfo {
 
     /**
      * Checks if this schema info is deprecated
+     * <p>
+     * Except all other methods this method is allowed to be called w/o holding the lock on this {@code SchemaInfo} instance.
      *
      * @return <code>true</code> if deprecated; otherwise <code>false</code>
      */
