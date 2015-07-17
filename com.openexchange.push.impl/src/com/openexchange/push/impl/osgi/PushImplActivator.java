@@ -174,12 +174,13 @@ public final class PushImplActivator extends HousekeepingActivator  {
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
 
+            // Register portables
+            registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
+            registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
+            registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
+            registerService(CustomPortableFactory.class, new PortableOwnerFactory());
+
             if (pushManagerRegistry.isPermanentPushAllowed()) {
-                // Register portable
-                registerService(CustomPortableFactory.class, new PortableCheckForExtendedServiceCallableFactory());
-                registerService(CustomPortableFactory.class, new PortableDropPermanentListenerCallableFactory());
-                registerService(CustomPortableFactory.class, new PortablePlanRescheduleCallableFactory());
-                registerService(CustomPortableFactory.class, new PortableOwnerFactory());
 
                 // Track HazelcastInstance
                 HazelcastConfigurationService hazelcastConfig = getService(HazelcastConfigurationService.class);
