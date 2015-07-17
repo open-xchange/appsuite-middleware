@@ -232,7 +232,7 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
             Map<Long, FolderObject> folders = new HashMap<Long, FolderObject>(documents.size() * 2);
 
             List<Pair<Integer, Integer>> foldersAndDocuments = new ArrayList<Pair<Integer, Integer>>(documents.size());
-            Map<Integer, Map<Integer, EffectiveObjectPermission>> objectPermissionsByFolder = EffectiveObjectPermissions.load(ctx, user, userPermissions, FolderObject.INFOSTORE, foldersAndDocuments, con);
+            Map<Integer, Map<Integer, EffectiveObjectPermission>> objectPermissionsByFolder = new HashMap<Integer, Map<Integer, EffectiveObjectPermission>>();
             for (DocumentMetadata document : documents) {
                 long folderId = document.getFolderId();
                 EffectiveObjectPermission effectiveObjectPermission = null;
