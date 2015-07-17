@@ -61,6 +61,7 @@ import com.openexchange.ajax.share.tests.CreateSubfolderTest;
 import com.openexchange.ajax.share.tests.CreateWithGuestPermissionTest;
 import com.openexchange.ajax.share.tests.DeleteTest;
 import com.openexchange.ajax.share.tests.DownloadHandlerTest;
+import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
 import com.openexchange.ajax.share.tests.ExpiredSharesTest;
 import com.openexchange.ajax.share.tests.FileStorageTransactionTest;
 import com.openexchange.ajax.share.tests.FolderItemCountTest;
@@ -69,9 +70,9 @@ import com.openexchange.ajax.share.tests.GetALinkTest;
 import com.openexchange.ajax.share.tests.GetTest;
 import com.openexchange.ajax.share.tests.GuestAutologinTest;
 import com.openexchange.ajax.share.tests.GuestContactTest;
-import com.openexchange.ajax.share.tests.EmptyGuestPasswordTest;
 import com.openexchange.ajax.share.tests.GuestPasswordTest;
 import com.openexchange.ajax.share.tests.InviteTest;
+import com.openexchange.ajax.share.tests.LinkUpdateTest;
 import com.openexchange.ajax.share.tests.MailNotificationTest;
 import com.openexchange.ajax.share.tests.ParallelGuestSessionsTest;
 import com.openexchange.ajax.share.tests.PasswordResetServletTest;
@@ -124,6 +125,7 @@ public class ShareAJAXSuite extends TestSuite {
         tests.addTestSuite(FolderItemCountTest.class);
         tests.addTestSuite(ShowSharedFilesFolderTest.class);
         tests.addTestSuite(AnonymousGuestTest.class);
+        tests.addTestSuite(LinkUpdateTest.class);
         return tests;
     }
 

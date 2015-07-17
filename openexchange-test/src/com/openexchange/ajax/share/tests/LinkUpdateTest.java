@@ -50,6 +50,8 @@
 package com.openexchange.ajax.share.tests;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.share.ShareTest;
@@ -97,7 +99,7 @@ public class LinkUpdateTest extends ShareTest {
         /*
          * create link for a new folder
          */
-        FolderObject folder = insertPublicFolder(api, module);
+        FolderObject folder = insertPrivateFolder(api, module, parent);
         ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
         GetLinkResponse getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
@@ -179,7 +181,7 @@ public class LinkUpdateTest extends ShareTest {
         /*
          * create link for a new folder
          */
-        FolderObject folder = insertPublicFolder(api, module);
+        FolderObject folder = insertPrivateFolder(api, module, parent);
         ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
         GetLinkResponse getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
@@ -239,6 +241,89 @@ public class LinkUpdateTest extends ShareTest {
         assertEquals(link.getShareURL(), updatedLink.getShareURL());
         assertFalse(updatedLink.isNew());
         assertEquals("password wrong", null, updatedLink.getPassword());
+    }
+
+    public void testLinkMetaRandomly() throws Exception {
+        testLinkExpiryDate(randomFolderAPI(), randomModule());
+    }
+
+    public void noTestMetaExtensively() throws Exception {
+        for (EnumAPI api : TESTED_FOLDER_APIS) {
+            for (int module : TESTED_MODULES) {
+                testLinkMeta(api, module);
+            }
+        }
+    }
+
+    private void testLinkMeta(EnumAPI api, int module) throws Exception {
+        testLinkMeta(api, module, getDefaultFolder(module));
+    }
+
+    private void testLinkMeta(EnumAPI api, int module, int parent) throws Exception {
+        /*
+         * create link for a new folder
+         */
+        FolderObject folder = insertPrivateFolder(api, module, parent);
+        ShareTarget target = new ShareTarget(module, String.valueOf(folder.getObjectID()));
+        GetLinkResponse getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
+        ShareLink link = getResponse.getShareLink();
+        assertNotNull("got no link", link);
+        assertTrue(link.isNew());
+        /*
+         * update link & apply metadata
+         */
+        Map<String, Object> meta = new HashMap<String, Object>();
+        meta.put("test", Boolean.TRUE);
+        UpdateLinkRequest updateRequest = new UpdateLinkRequest(target, getTimeZone(), getResponse.getTimestamp().getTime());
+        updateRequest.setMeta(meta);
+        UpdateLinkResponse updateResponse = client.execute(updateRequest);
+        assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
+        /*
+         * verify updated link
+         */
+        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
+        ShareLink updatedLink = getResponse.getShareLink();
+        assertNotNull("got no updated link", updatedLink);
+        assertEquals(link.getShareURL(), updatedLink.getShareURL());
+        assertFalse(updatedLink.isNew());
+        assertEquals("meta wrong", meta, updatedLink.getMeta());
+        /*
+         * update link & change metadata
+         */
+        meta.put("test", Boolean.FALSE);
+        updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
+        updateRequest.setMeta(meta);
+        updateResponse = client.execute(updateRequest);
+        assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
+        /*
+         * verify updated link
+         */
+        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
+        updatedLink = getResponse.getShareLink();
+        assertNotNull("got no updated link", updatedLink);
+        assertEquals(link.getShareURL(), updatedLink.getShareURL());
+        assertFalse(updatedLink.isNew());
+        assertEquals("meta wrong", meta, updatedLink.getMeta());
+        /*
+         * update link & remove metadata
+         */
+        updateRequest = new UpdateLinkRequest(target, getTimeZone(), updateResponse.getTimestamp().getTime());
+        updateRequest.setMeta(null);
+        updateResponse = client.execute(updateRequest);
+        assertFalse(updateResponse.getErrorMessage(), updateResponse.hasError());
+        /*
+         * verify updated link
+         */
+        getResponse = client.execute(new GetLinkRequest(target, getTimeZone()));
+        assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
+        updatedLink = getResponse.getShareLink();
+        assertNotNull("got no updated link", updatedLink);
+        assertEquals(link.getShareURL(), updatedLink.getShareURL());
+        assertFalse(updatedLink.isNew());
+        assertEquals("meta wrong", null, updatedLink.getMeta());
     }
 
 }
