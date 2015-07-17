@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.TimeZone;
 import java.util.UUID;
 import org.json.JSONException;
 import org.junit.Assert;
@@ -87,7 +88,10 @@ import com.openexchange.ajax.share.actions.FileShare;
 import com.openexchange.ajax.share.actions.FileSharesRequest;
 import com.openexchange.ajax.share.actions.FolderShare;
 import com.openexchange.ajax.share.actions.FolderSharesRequest;
+import com.openexchange.ajax.share.actions.GetLinkRequest;
+import com.openexchange.ajax.share.actions.GetLinkResponse;
 import com.openexchange.ajax.share.actions.ParsedShare;
+import com.openexchange.ajax.share.actions.ShareLink;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageGuestObjectPermission;
@@ -103,6 +107,7 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.RequestContext;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -181,6 +186,27 @@ public abstract class ShareTest extends AbstractAJAXSession {
                 return "/ajax/";
             }
         };
+    }
+
+    /**
+     * Gets the client timezone
+     *
+     * @return The client timezone
+     */
+    protected TimeZone getTimeZone() throws OXException, IOException, JSONException {
+        return client.getValues().getTimeZone();
+    }
+
+    /**
+     * Gets a share link for a specific target by issuing an appropriate "get link" request.
+     *
+     * @param target The share target to get the share link for
+     * @return The share link
+     */
+    protected ShareLink getLink(ShareTarget target) throws OXException, IOException, JSONException {
+        GetLinkResponse response = client.execute(new GetLinkRequest(target, getTimeZone()));
+        assertFalse(response.getErrorMessage(), response.hasError());
+        return response.getShareLink();
     }
 
     /**
