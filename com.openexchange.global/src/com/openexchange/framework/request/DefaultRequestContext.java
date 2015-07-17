@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,33 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname;
+package com.openexchange.framework.request;
 
-import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.groupware.notify.hostname.HostData;
+
 
 /**
- * {@link HostnameService} - A simple interface providing the host name part in generated links to internal objects, e.g. for notifications:
+ * Default implementation of {@link RequestContext}.
  *
- * <pre>
- * http://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]
- * </pre>
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-@SingletonService
-public interface HostnameService {
+public class DefaultRequestContext implements RequestContext {
+
+    private HostData hostData;
+
+    @Override
+    public HostData getHostData() {
+        return hostData;
+    }
 
     /**
-     * The parameter name for host data.
+     * Sets the hostData
      *
-     * @type <code>com.openexchange.groupware.notify.hostname.HostData</code>
+     * @param hostData The hostData to set
      */
-    public static final String PARAM_HOST_DATA = "com.openexchange.groupware.hostdata";
-
-    /**
-     * Returns the host name part used in generated links to internal objects; meaning the replacement for &quot;[hostname]&quot; in URL
-     * template defined by property &quot;object_link&quot; in properties file &quot;notification.properties&quot;. Additionally this
-     * service may be used for the host name when generating direct links into the UI.
-     *
-     * @param userId The user ID or a value less than/equal to zero if not available
-     * @param contextId The context ID or a value less than/equal to zero if not available
-     * @return The host name part used in generated links to internal objects or <code>null</code> (if user ID and/or context ID could not
-     *         be resolved or any error occurred).
-     */
-    String getHostname(int userId, int contextId);
+    public void setHostData(HostData hostData) {
+        this.hostData = hostData;
+    }
 
 }

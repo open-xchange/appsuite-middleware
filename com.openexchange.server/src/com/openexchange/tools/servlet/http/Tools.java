@@ -77,10 +77,17 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.osgi.util.ServiceCallWrapper;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
+import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
@@ -652,6 +659,21 @@ public final class Tools {
     }
 
     /**
+     * Creates a new {@link HostData} instance based on the given servlet request and an optional
+     * user information.
+     *
+     * @param servletRequest The servlet request
+     * @param contextId The context id or <code>-1</code> if none is available
+     * @param userId The user id or <code>-1</code> if none is available
+     * @return The host data
+     */
+    public static HostData createHostData(HttpServletRequest request, int contextId, int userId) {
+        String hostname = determineHostname(request, contextId, userId);
+        String servletPrefix = determineServletPrefix();
+        return new HostDataImpl(considerSecure(request), hostname, request.getServerPort(), request.getSession(true).getId(), servletPrefix);
+    }
+
+    /**
      * Sends an error response having a JSON body using given HTTP response
      *
      * @param httpResponse The HTTP response to use
@@ -806,6 +828,39 @@ public final class Tools {
     public static boolean isByteRangeHeader(String range) {
         // Range header should match format "bytes=n-n,n-n,n-n...".
         return ((null != range) && PATTERN_BYTE_RANGES.matcher(range).matches());
+    }
+
+    private static String determineServletPrefix() {
+        try {
+            return ServiceCallWrapper.tryServiceCall(Tools.class, DispatcherPrefixService.class, new ServiceUser<DispatcherPrefixService, String>() {
+                @Override
+                public String call(DispatcherPrefixService service) throws Exception {
+                    return service.getPrefix();
+                }
+            }, DispatcherPrefixService.DEFAULT_PREFIX);
+        } catch (ServiceException e) {
+            return DispatcherPrefixService.DEFAULT_PREFIX;
+        }
+    }
+
+    private static String determineHostname(HttpServletRequest servletRequest, final int contextId, final int userId) {
+        String hostname = null;
+        try {
+            hostname = ServiceCallWrapper.tryServiceCall(Tools.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+                @Override
+                public String call(HostnameService service) throws Exception {
+                    return service.getHostname(userId, contextId);
+                }
+            }, null);
+        } catch (ServiceException e) {
+            // ignore
+        }
+
+        if (hostname == null) {
+            hostname = servletRequest.getServerName();
+        }
+
+        return hostname;
     }
 
 }

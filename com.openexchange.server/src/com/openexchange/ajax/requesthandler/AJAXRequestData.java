@@ -77,6 +77,8 @@ import com.openexchange.annotation.NonNull;
 import com.openexchange.annotation.Nullable;
 import com.openexchange.dispatcher.Parameterizable;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.groupware.upload.impl.UploadEvent;
 import com.openexchange.java.Strings;
@@ -193,6 +195,9 @@ public class AJAXRequestData {
 
     /** The request's last-modified time stamp as parsed from <code>"If-Modified-Since"</code> request header */
     private @Nullable Long lastModified;
+
+    /** The requests host data **/
+    private @Nullable HostData hostData;
 
     /** The maximum allowed size of a single uploaded file or <code>-1</code> */
     private long maxUploadFileSize = -1L;
@@ -1442,6 +1447,24 @@ public class AJAXRequestData {
      */
     public String getHostname() {
         return hostname;
+    }
+
+    /**
+     * Gets the host data. The result will not be <code>null</code> on instances
+     * created by the dispatcher on normal HTTP requests.
+     *
+     * @return The host data
+     */
+    public @Nullable HostData getHostData() {
+        if (hostData == null) {
+            synchronized (this) {
+                if (hostData == null && hostname != null && httpServletRequest != null && route != null && prefix != null) {
+                    hostData = new HostDataImpl(secure, hostname, httpServletRequest.getServerPort(), route, prefix);
+                }
+            }
+        }
+
+        return hostData;
     }
 
     /**

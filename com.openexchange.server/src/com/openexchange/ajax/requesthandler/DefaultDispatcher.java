@@ -71,6 +71,10 @@ import com.openexchange.continuation.ContinuationExceptionCodes;
 import com.openexchange.continuation.ContinuationRegistryService;
 import com.openexchange.continuation.ContinuationResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.DefaultRequestContext;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -137,6 +141,12 @@ public class DefaultDispatcher implements Dispatcher {
         try {
             final List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
             final AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
+
+            /*
+             * Set request context
+             */
+            RequestContextHolder.set(buildRequestContext(modifiedRequestData));
+
             final AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
             if (factory == null) {
                 throw AjaxExceptionCodes.UNKNOWN_MODULE.create(modifiedRequestData.getModule());
@@ -212,7 +222,20 @@ public class DefaultDispatcher implements Dispatcher {
             // Wrap unchecked exception
             addLogProperties(requestData, true);
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            RequestContextHolder.reset();
         }
+    }
+
+    private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
+        HostData hostData = requestData.getHostData();
+        if (hostData == null) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("Host data was null. AJAX request data has not been initialized correctly!");
+        }
+
+        DefaultRequestContext context = new DefaultRequestContext();
+        context.setHostData(hostData);
+        return context;
     }
 
     /**

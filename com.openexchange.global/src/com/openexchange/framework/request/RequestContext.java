@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,29 @@
  *
  */
 
-package com.openexchange.groupware.notify.hostname;
+package com.openexchange.framework.request;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
- * {@link HostData} - Provides host data.
+ * A {@link RequestContext} holds contextual information about the current HTTP request.
+ * A request context is always bound to the scope of a single request. It must not be
+ * passed to asynchronous tasks whose lifetime is not determined by the request which
+ * caused their scheduling. For the same reason instances of this object cannot be considered
+ * thread-safe.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public interface HostData {
+@NotThreadSafe
+public interface RequestContext {
 
     /**
-     * Gets the route: : &lt;http-session-id&gt; + <code>"." </code>+ &lt;route&gt;
+     * Gets the host data.
      *
-     * @return The route
+     * @return The host data; never <code>null</code>
      */
-    String getRoute();
-
-    /**
-     * Gets the host name.
-     *
-     * @return The host name
-     */
-    String getHost();
-
-    /**
-     * Gets the port.
-     *
-     * @return The port
-     */
-    int getPort();
-
-    /**
-     * Indicates if a secure connection has been established.
-     *
-     * @return <code>true</code> for a secure connection; otherwise <code>false</code>
-     */
-    boolean isSecure();
-
-    /**
-     * Gets the prefix of the dispatcher servlet, e.g. /appsuite/api/
-     *
-     * @return The servlet prefix
-     */
-    String getDispatcherPrefix();
+    HostData getHostData();
 
 }

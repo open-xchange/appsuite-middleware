@@ -69,6 +69,10 @@ import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.DefaultRequestContext;
+import com.openexchange.framework.request.RequestContext;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
@@ -270,8 +274,9 @@ public abstract class OXServlet extends WebDavServlet {
         if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer(), useCookies)) {
             return;
         }
+        Session session = getSession(req);
+        RequestContextHolder.set(buildRequestContext(req, resp, session));
         try {
-            Session session = getSession(req);
             if (session != null) {
                 LogProperties.putSessionProperties(session);
                 LOG.trace("Entering HTTP sub method. Session: {}", session);
@@ -285,7 +290,22 @@ public abstract class OXServlet extends WebDavServlet {
             LOG.error("", e);
             final ServletException se = new ServletException(e.getMessage(), e);
             throw se;
+        } finally {
+            RequestContextHolder.reset();
         }
+    }
+
+    private RequestContext buildRequestContext(HttpServletRequest req, HttpServletResponse resp, Session session) {
+        int contextId = -1;
+        int userId = -1;
+        if (session != null) {
+            contextId = session.getContextId();
+            userId = session.getUserId();
+        }
+        HostData hostData = Tools.createHostData(req, contextId, userId);
+        DefaultRequestContext context = new DefaultRequestContext();
+        context.setHostData(hostData);
+        return context;
     }
 
     protected LoginCustomizer getLoginCustomizer() {
