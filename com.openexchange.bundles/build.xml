@@ -6,11 +6,6 @@
     </description>
 
 	<import file="build-project.xml" />
-	<import file="java-commons.xml" />
-
-	<target name="prepare">
-		<antcall target="download_check_and_add_jars" />
-	</target>
 
 	<target name="postInstall">
 		<delete dir="${destDir}/${bundle.dDir}">
