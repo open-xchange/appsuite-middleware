@@ -49,97 +49,67 @@
 
 package com.openexchange.ajax.share.actions;
 
-import java.io.IOException;
+import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.Response;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXParser;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.ajax.framework.Params;
-import com.openexchange.ajax.writer.ResponseWriter;
-import com.openexchange.share.ShareTarget;
-
+import com.openexchange.ajax.tools.JSONCoercion;
 
 /**
- * {@link GetLinkRequest}
+ * {@link ShareLink}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class GetLinkRequest implements AJAXRequest<GetLinkResponse> {
+public class ShareLink {
 
-    private final ShareTarget target;
-    private boolean failOnError = true;
-    private final TimeZone timeZone;
+    private final String shareURL;
+    private final String password;
+    private final Date expiry;
+    private final boolean isNew;
+    private final Map<String, Object> meta;
 
     /**
-     * Initializes a new {@link GetLinkRequest}.
+     * Initializes a new {@link ShareLink}.
      *
-     * @param target The share target
-     * @param timeZone The client timezone
+     * @param json The JSON object to parse
+     * @param timeZone The timezone to use
      */
-    public GetLinkRequest(ShareTarget target, TimeZone timeZone) {
+    public ShareLink(JSONObject json, TimeZone timeZone) throws JSONException {
         super();
-        this.target = target;
-        this.timeZone = timeZone;
-    }
-
-    @Override
-    public Method getMethod() {
-        return Method.PUT;
-    }
-
-    @Override
-    public String getServletPath() {
-        return "/ajax/share/management";
-    }
-
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Params(
-            AJAXServlet.PARAMETER_ACTION, "getLink"
-        ).toArray();
-    }
-
-    @Override
-    public AbstractAJAXParser<GetLinkResponse> getParser() {
-        return new Parser(failOnError, timeZone);
-    }
-
-    @Override
-    public Object getBody() throws IOException, JSONException {
-        return ShareWriter.writeTarget(target);
-    }
-
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    private static final class Parser extends AbstractAJAXParser<GetLinkResponse> {
-
-        private final TimeZone timeZone;
-
-        /**
-         * Initializes a new {@link Parser}.
-         *
-         * @param failOnError
-         */
-        protected Parser(boolean failOnError, TimeZone timeZone) {
-            super(failOnError);
-            this.timeZone = timeZone;
+        shareURL = json.optString("url", null);
+        password = json.optString("password", null);
+        isNew = json.optBoolean("is_new", false);
+        if (json.hasAndNotNull("expiry_date")) {
+            long date = json.getLong("expiry_date");
+            if (null != timeZone) {
+                date -= timeZone.getOffset(date);
+            }
+            expiry = new Date(date);
+        } else {
+            expiry = null;
         }
+        meta = (Map<String, Object>) JSONCoercion.coerceToNative(json.optJSONObject("meta"));
+    }
 
-        @Override
-        protected GetLinkResponse createResponse(Response response) throws JSONException {
-            JSONObject json = ResponseWriter.getJSON(response).getJSONObject("data");
-            ShareLink shareLink = new ShareLink(json, timeZone);
-            return new GetLinkResponse(response, shareLink);
-        }
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
 
+    public boolean isNew() {
+        return isNew;
+    }
+
+    public String getShareURL() {
+        return shareURL;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public Date getExpiry() {
+        return expiry;
     }
 
 }

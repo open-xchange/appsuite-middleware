@@ -118,7 +118,6 @@ public class GetALinkTest extends ShareTest {
         if (itm != null) {
             itm.cleanUp();
         }
-
         super.tearDown();
     }
 
@@ -127,13 +126,9 @@ public class GetALinkTest extends ShareTest {
          * Get a link for the new drive subfolder
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()));
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target);
-//        getLinkRequest.setBits(createAnonymousGuestPermission().getPermissionBits());
-//        String password = UUIDs.getUnformattedString(UUID.randomUUID());
-//        getLinkRequest.setPassword(password);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
-        String url = getLinkResponse.getUrl();
-
+        String url = getLinkResponse.getShareLink().getShareURL();
         /*
          * Resolve the link and check read permission for folder
          */
@@ -143,17 +138,15 @@ public class GetALinkTest extends ShareTest {
         guestClient.checkFolderAccessible(Integer.toString(infostore.getObjectID()), expectedPermission);
         File reloaded = (File) guestClient.getItem(infostore, file.getId(), false);
         assertNotNull(reloaded);
-
         /*
          * Update password and expiry
          */
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getLinkResponse.getTimestamp().getTime());
-        updateLinkRequest.setExpiry(newExpiry.getTime());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, client.getValues().getTimeZone(), getLinkResponse.getTimestamp().getTime());
+        updateLinkRequest.setExpiryDate(newExpiry);
         updateLinkRequest.setPassword(newPassword);
         UpdateLinkResponse updateLinkResponse = client.execute(updateLinkRequest);
-
         /*
          * Resolve link with new credentials and check expiry
          */
@@ -177,10 +170,9 @@ public class GetALinkTest extends ShareTest {
          * Get a link for the file
          */
         ShareTarget target = new ShareTarget(FolderObject.INFOSTORE, Integer.toString(infostore.getObjectID()), file.getId());
-        GetLinkRequest getLinkRequest = new GetLinkRequest(target);
+        GetLinkRequest getLinkRequest = new GetLinkRequest(target, client.getValues().getTimeZone());
         GetLinkResponse getLinkResponse = client.execute(getLinkRequest);
-        String url = getLinkResponse.getUrl();
-
+        String url = getLinkResponse.getShareLink().getShareURL();
         /*
          * Resolve the link and check read permission for file
          */
@@ -188,27 +180,21 @@ public class GetALinkTest extends ShareTest {
         OCLGuestPermission expectedPermission = createAnonymousGuestPermission();
         expectedPermission.setEntity(guestClient.getValues().getUserId());
         guestClient.checkFileAccessible(file.getId(), expectedPermission);
-
         /*
          * Update permission, password and expiry
          */
-//        OCLGuestPermission allPermission = createAnonymousGuestPermission();
-//        allPermission.setEntity(guestClient.getValues().getUserId());
-//        allPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
         String newPassword = UUIDs.getUnformattedString(UUID.randomUUID());
         Date newExpiry = new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, getLinkResponse.getTimestamp().getTime());
-//        updateLinkRequest.setBits(allPermission.getPermissionBits());
-        updateLinkRequest.setExpiry(newExpiry.getTime());
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(target, client.getValues().getTimeZone(), getLinkResponse.getTimestamp().getTime());
+        updateLinkRequest.setExpiryDate(newExpiry);
         updateLinkRequest.setPassword(newPassword);
         UpdateLinkResponse updateLinkResponse = client.execute(updateLinkRequest);
-
         /*
          * Resolve link with new credentials and check permission and expiry
          */
         GuestClient newClient = resolveShare(url, null, newPassword);
         int guestId = newClient.getValues().getUserId();
-//        newClient.checkFileAccessible(file.getId(), allPermission);
+        newClient.checkFileAccessible(file.getId(), expectedPermission);
         ExtendedPermissionEntity guest = discoverGuestEntity(file.getFolderId(), file.getId(), guestId);
         assertNotNull(guest);
         assertEquals(newExpiry, guest.getExpiry());
