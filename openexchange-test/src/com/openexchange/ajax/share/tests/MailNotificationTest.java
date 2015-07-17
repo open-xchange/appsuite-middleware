@@ -53,7 +53,7 @@ import static org.junit.Assert.assertArrayEquals;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.mail.BodyPart;
@@ -398,11 +398,18 @@ public class MailNotificationTest extends ShareTest {
         File testFile = insertFile(testFolder1.getObjectID());
 
         DefaultFile toUpdate = new DefaultFile();
-        toUpdate.setFolderId(testFile.getFolderId());
         toUpdate.setId(testFile.getId());
+        toUpdate.setFolderId(testFile.getFolderId());
         toUpdate.setLastModified(testFile.getLastModified());
-        toUpdate.setObjectPermissions(Collections.singletonList(guestPermission));
-        updateFile(testFile, new Field[] { Field.OBJECT_PERMISSIONS });
+        List<FileStorageObjectPermission> newPermissions = new ArrayList<>(2);
+        List<FileStorageObjectPermission> oldPermissions = testFile.getObjectPermissions();
+        if (oldPermissions != null) {
+            newPermissions.addAll(oldPermissions);
+        }
+
+        newPermissions.add(guestPermission);
+        toUpdate.setObjectPermissions(newPermissions);
+        testFile = updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS });
 
         Message message = assertAndGetMessage();
         Document document = message.getHtml();
@@ -450,9 +457,6 @@ public class MailNotificationTest extends ShareTest {
 
         if (shareMessage != null) {
             assertShareMessage(document, shareMessage);
-        }
-        if (expiryDate != null) {
-            assertExpiryDate(document, expiryDate);
         }
 
         assertSignatureText(document, "");

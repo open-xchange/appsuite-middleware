@@ -598,20 +598,24 @@ public class DefaultShareService implements ShareService {
      * @return The number of affected shares
      */
     public int removeShares(int contextID, int userID) throws OXException {
-        List<Share> shares;
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
+        List<Share> shares = shareStorage.loadSharesCreatedBy(contextID, userID, -1, connectionHelper.getParameters());
         try {
-            connectionHelper.start();
             /*
              * load & delete all shares in the context, removing associated target permissions
              */
-            shares = shareStorage.loadSharesCreatedBy(contextID, userID, -1, connectionHelper.getParameters());
             if (0 < shares.size()) {
-                shareStorage.deleteShares(contextID, shares, connectionHelper.getParameters());
-                removeTargetPermissions(null, connectionHelper, shares);
+                for (Share share : shares) {
+                    try {
+                        List<Share> toRemove = Collections.singletonList(share);
+                        shareStorage.deleteShares(contextID, toRemove, connectionHelper.getParameters());
+                        removeTargetPermissions(null, connectionHelper, toRemove);
+                    } catch (Exception e) {
+                        LOG.error("Could not delete share {}", share, e);
+                    }
+                }
             }
-            connectionHelper.commit();
         } finally {
             connectionHelper.finish();
         }

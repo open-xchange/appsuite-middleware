@@ -130,8 +130,7 @@ public final class CreateAction extends AbstractFolderAction {
          * Parse parameters
          */
         FolderServiceDecorator decorator = new FolderServiceDecorator()
-            .put("autorename", request.getParameter("autorename"))
-            .put("ajaxRequestData", request);
+            .put("autorename", request.getParameter("autorename"));
         final FolderResponse<String> newIdResponse = folderService.createFolder(folder, session, decorator);
         final String newId = newIdResponse.getResponse();
         return new AJAXRequestResult(newId, folderService.getFolder(treeId, newId, session, null).getLastModifiedUTC()).addWarnings(newIdResponse.getWarnings());

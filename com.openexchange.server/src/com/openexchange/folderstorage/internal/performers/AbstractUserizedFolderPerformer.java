@@ -52,6 +52,7 @@ package com.openexchange.folderstorage.internal.performers;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -106,6 +107,7 @@ import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
+import com.openexchange.share.notification.Entities.PermissionType;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
@@ -646,8 +648,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
     }
 
     protected void sendCreatedShareNotifications(ComparedFolderPermissions comparedPermissions, Folder folder) throws OXException {
-        Permission[] permissions = folder.getPermissions();
-        if (permissions == null || permissions.length == 0) {
+        Collection<Permission> permissions = comparedPermissions.getNewPermissions();
+        if (permissions == null || permissions.isEmpty()) {
             return;
         }
 
@@ -656,12 +658,12 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         for (Permission p : permissions) {
             // gather all new user entities except the one executing this operation
             if (!p.isGroup() && p.getEntity() != session.getUserId() && !modifiedGuests.contains(p.getEntity())) {
-                entities.addUser(p.getEntity(), Permissions.createPermissionBits(p));
+                entities.addUser(p.getEntity(), PermissionType.FOLDER, Permissions.createPermissionBits(p));
             }
         }
 
         for (Permission p : comparedPermissions.getAddedGroupPermissions()) {
-            entities.addGroupt(p.getEntity(), Permissions.createPermissionBits(p));
+            entities.addGroup(p.getEntity(), PermissionType.FOLDER, Permissions.createPermissionBits(p));
         }
 
         if (entities.size() == 0) {
@@ -671,9 +673,9 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
         HostData hostData = Tools.getHostData(session);
         if (hostData == null) {
-            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.");
+            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Host data for constructing share links was not available.");
             Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
-            logger.warn("Cannot send out notification mails for new guests because the necessary request context could not be constructed.", e);
+            logger.warn("Cannot send out notification mails for new guests because the necessary host data for constructing share links was not available.", e);
             if (storageParameters != null) {
                 storageParameters.addWarning(e);
             }

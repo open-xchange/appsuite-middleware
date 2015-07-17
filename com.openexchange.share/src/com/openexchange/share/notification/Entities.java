@@ -61,6 +61,10 @@ import java.util.Set;
  */
 public class Entities {
 
+    public static enum PermissionType {
+        FOLDER, OBJECT;
+    }
+
     private final Map<Integer, Integer> users;
 
     private final Map<Integer, Integer> groups;
@@ -75,20 +79,22 @@ public class Entities {
      * Adds a user entity.
      *
      * @param userId The user ID
-     * @param permissionBits The permission bits as folder permission bit mask
+     * @param type The permission type
+     * @param permissions The permissions according to the passed type
      */
-    public void addUser(int userId, int permissionBits) {
-        users.put(userId, permissionBits);
+    public void addUser(int userId, PermissionType type, int permissions) {
+        users.put(userId, adjustPermissions(type, permissions));
     }
 
     /**
      * Adds a group entity.
      *
      * @param groupId The group ID
-     * @param permissionBits The permission bits as folder permission bit mask
+     * @param type The permission type
+     * @param permissions The permissions according to the passed type
      */
-    public void addGroupt(int groupId, int permissionBits) {
-        groups.put(groupId, permissionBits);
+    public void addGroup(int groupId, PermissionType type, int permissions) {
+        groups.put(groupId, adjustPermissions(type, permissions));
     }
 
     public Set<Integer> getUsers() {
@@ -121,6 +127,24 @@ public class Entities {
 
     public int size() {
         return users.size() + groups.size();
+    }
+
+    /**
+     * Converts the passed permissions to a folder permission bit mask if necessary
+     *
+     * @param type
+     * @param permissions
+     * @return
+     */
+    private static int adjustPermissions(PermissionType type, int permissions) {
+        switch (type) {
+            case FOLDER:
+                return permissions;
+            case OBJECT:
+//                Permissi
+            default:
+                throw new IllegalArgumentException("Unknown permission type: " + type);
+        }
     }
 
 }

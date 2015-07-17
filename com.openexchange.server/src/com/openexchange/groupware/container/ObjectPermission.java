@@ -50,6 +50,7 @@
 package com.openexchange.groupware.container;
 
 import java.io.Serializable;
+import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 
@@ -190,6 +191,24 @@ public class ObjectPermission implements java.security.acl.Permission, Serializa
      */
     public boolean canDelete() {
         return permissions >= DELETE;
+    }
+
+    /**
+     * Takes a object permission and converts it into an equivalent folder permission bit mask.
+     *
+     * @param permission The object permission
+     * @return The folder permission bit mask
+     */
+    public static int toFolderPermissionBits(ObjectPermission permission) {
+        DefaultPermission fp = new DefaultPermission();
+        fp.setEntity(permission.entity);
+        fp.setGroup(false);
+        fp.setAdmin(false);
+        fp.setFolderPermission(Permission.READ_FOLDER);
+        fp.setReadPermission(permission.canRead() ? Permission.READ_ALL_OBJECTS : Permission.NO_PERMISSIONS);
+        fp.setWritePermission(permission.canWrite() ? Permission.WRITE_ALL_OBJECTS : Permission.NO_PERMISSIONS);
+        fp.setDeletePermission(permission.canDelete() ? Permission.DELETE_ALL_OBJECTS : Permission.NO_PERMISSIONS);
+        return Permissions.createPermissionBits(fp);
     }
 
     /**

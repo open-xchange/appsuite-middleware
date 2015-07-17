@@ -100,6 +100,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageIgnorableVersionFileAccess;
 import com.openexchange.file.storage.FileStorageLockedFileAccess;
+import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.FileStorageRandomFileAccess;
 import com.openexchange.file.storage.FileStorageRangeFileAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
@@ -775,11 +776,35 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     }
 
-    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<IDTuple> saveDelegation) throws OXException {
+    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
         return save(document, data, sequenceNumber, modifiedColumns, false, saveDelegation);
     }
 
-    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<IDTuple> saveDelegation) throws OXException {
+    private static final class SaveResult {
+
+        private IDTuple idTuple;
+
+        private List<FileStorageObjectPermission> addedPermissions;
+
+        public IDTuple getIDTuple() {
+            return idTuple;
+        }
+
+        public List<FileStorageObjectPermission> getAddedPermissions() {
+            return addedPermissions;
+        }
+
+        public void setIDTuple(IDTuple idTuple) {
+            this.idTuple = idTuple;
+        }
+
+        public void setAddedPermissions(List<FileStorageObjectPermission> addedPermissions) {
+            this.addedPermissions = addedPermissions;
+        }
+
+    }
+
+    protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
         if (FileStorageFileAccess.NEW == document.getId()) {
             /*
              * create new file, determine target file storage
@@ -805,13 +830,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             /*
              * perform save operation & return resulting file identifier
              */
-            IDTuple result = saveDelegation.call(fileAccess);
-            FileID newID = new FileID(serviceID, accountID, result.getFolder(), result.getId());
-            FolderID newFolderID = new FolderID(serviceID, accountID, result.getFolder());
+            SaveResult result = saveDelegation.call(fileAccess);
+            IDTuple idTuple = result.getIDTuple();
+            FileID newID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
+            FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
             document.setId(newID.toUniqueID());
             document.setFolderId(newFolderID.toUniqueID());
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
+            addWarnings(ShareHelper.sendNotificationMails(result.getAddedPermissions(), document, session));
             return newID.toUniqueID();
         }
         /*
@@ -889,13 +916,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
          */
         document.setFolderId(targetFolderID.getFolderId());
         document.setId(sourceFileID.getFileId());
-        IDTuple result = saveDelegation.call(getFileAccess(serviceID, accountID));
-        FileID newFileID = new FileID(serviceID, accountID, result.getFolder(), result.getId());
-        FolderID newFolderID = new FolderID(serviceID, accountID, result.getFolder());
+        SaveResult result = saveDelegation.call(getFileAccess(serviceID, accountID));
+        IDTuple idTuple = result.getIDTuple();
+        FileID newFileID = new FileID(serviceID, accountID, idTuple.getFolder(), idTuple.getId());
+        FolderID newFolderID = new FolderID(serviceID, accountID, idTuple.getFolder());
         document.setId(newFileID.toUniqueID());
         document.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
             session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
+        addWarnings(ShareHelper.sendNotificationMails(result.getAddedPermissions(), document, session));
         return newFileID.toUniqueID();
     }
 
@@ -1008,15 +1037,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveDocument(final File document, final InputStream data, final long sequenceNumber) throws OXException {
-        return save(document, data, sequenceNumber, null, new TransactionAwareFileAccessDelegation<IDTuple>() {
+        return save(document, data, sequenceNumber, null, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
-            protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
+            protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, null);
                 IDTuple result = access.saveDocument(document, data, sequenceNumber);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
-                return ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                SaveResult saveResult = new SaveResult();
+                saveResult.setIDTuple(idTuple);
+                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
+                return saveResult;
             }
         });
     }
@@ -1033,10 +1066,10 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final boolean ignoreVersion, boolean ignoreWarnings) throws OXException {
-        return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<IDTuple>() {
+        return save(document, data, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
-            protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
+            protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
                 IDTuple result;
                 if (ignoreVersion && FileStorageFileAccess.NEW != document.getId() &&
@@ -1054,17 +1087,21 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 }
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
-                return ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                SaveResult saveResult = new SaveResult();
+                saveResult.setIDTuple(idTuple);
+                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
+                return saveResult;
             }
         });
     }
 
     @Override
     public String saveDocument(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, final long offset) throws OXException {
-        return save(document, data, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<IDTuple>() {
+        return save(document, data, sequenceNumber, modifiedColumns, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
-            protected IDTuple callInTransaction(FileStorageFileAccess access) throws OXException {
+            protected SaveResult callInTransaction(FileStorageFileAccess access) throws OXException {
                 if (false == FileStorageTools.supports(access, FileStorageCapability.RANDOM_FILE_ACCESS)) {
                     throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(access.getAccountAccess().getService());
                 }
@@ -1072,22 +1109,30 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 IDTuple result = ((FileStorageRandomFileAccess) access).saveDocument(document, data, sequenceNumber, modifiedColumns, offset);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
-                return ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                SaveResult saveResult = new SaveResult();
+                saveResult.setIDTuple(idTuple);
+                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
+                return saveResult;
             }
         });
     }
 
     @Override
     public String saveFileMetadata(final File document, final long sequenceNumber) throws OXException {
-        return save(document, null, sequenceNumber, null, new TransactionAwareFileAccessDelegation<IDTuple>() {
+        return save(document, null, sequenceNumber, null, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
-            protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
+            protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, null);
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
-                return ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                SaveResult saveResult = new SaveResult();
+                saveResult.setIDTuple(idTuple);
+                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
+                return saveResult;
             }
         });
     }
@@ -1099,15 +1144,19 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     @Override
     public String saveFileMetadata(final File document, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings) throws OXException {
-        return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<IDTuple>() {
+        return save(document, null, sequenceNumber, modifiedColumns, ignoreWarnings, new TransactionAwareFileAccessDelegation<SaveResult>() {
 
             @Override
-            protected IDTuple callInTransaction(final FileStorageFileAccess access) throws OXException {
+            protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());
-                return ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                IDTuple idTuple = ShareHelper.applyGuestPermissions(session, access, document, comparedPermissions);
+                SaveResult saveResult = new SaveResult();
+                saveResult.setIDTuple(idTuple);
+                saveResult.setAddedPermissions(ShareHelper.collectAddedObjectPermissions(comparedPermissions, session));
+                return saveResult;
             }
         });
     }

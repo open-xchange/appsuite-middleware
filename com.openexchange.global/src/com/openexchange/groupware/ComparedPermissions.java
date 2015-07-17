@@ -373,4 +373,22 @@ public abstract class ComparedPermissions<P, GP extends P> {
         return modifiedGuests.get(guestId);
     }
 
+    /**
+     * Gets the collection of original (storage) permissions that were used to calculate the changes.
+     *
+     * @return The original permissions
+     */
+    public Collection<P> getOriginalPermissions() {
+        return originalPermissions;
+    }
+
+    /**
+     * Gets the collection of the new (updated) permissions that were used to calculate the changes.
+     *
+     * @return The new permissions
+     */
+    public Collection<P> getNewPermissions() {
+        return newPermissions;
+    }
+
 }
