@@ -65,4 +65,6 @@ public class MailFilterExceptionMessages implements LocalizableStrings {
 
     public static final String INVALID_SIEVE_RULE2_MSG = "Please review your mail filter rules as they seem to be invalid. Response from server: \"%1$s\"";
 
+    public static final String MAILFILTER_NOT_AVAILABLE_MSG = "Managing mail filter rules is not available for your account.";
+
 }

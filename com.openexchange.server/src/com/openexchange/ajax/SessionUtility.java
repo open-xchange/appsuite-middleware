@@ -701,6 +701,27 @@ public final class SessionUtility {
     }
 
     /**
+     * Extracts the secret string from the cookies supplied with the HTTP servlet request, based on the remembered hash-, client-
+     * and original user-agent-values stored in the session.
+     *
+     * @param hashSource The hash source for the secret cookie
+     * @param request The underlying HTTP servlet request
+     * @return The secret string, or <code>null</code> if no matching secret cookie was found in the request
+     */
+    public static String extractSecret(CookieHashSource hashSource, HttpServletRequest request, Session session) {
+        String hash = session.getHash();
+        String client = session.getClient();
+        String originalUserAgent = (String) session.getParameter("user-agent");
+        String[] additionalsForHash;
+        if (Boolean.TRUE.equals(session.getParameter(Session.PARAM_GUEST))) {
+            additionalsForHash = new String[] { String.valueOf(session.getContextId()), String.valueOf(session.getUserId()) };
+        } else {
+            additionalsForHash = null;
+        }
+        return extractSecret(hashSource, request, hash, client, originalUserAgent, additionalsForHash);
+    }
+
+    /**
      * Extracts the secret string from specified cookies using given hash string.
      *
      * @param hashSource The hash source for the secret cookie
