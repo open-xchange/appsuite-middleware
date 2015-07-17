@@ -94,6 +94,8 @@ public class LinkCreatedMail extends NotificationMail {
 
     private static final String USE_PASSWORD = "use_password";
 
+    private static final String PASSWORD = "password";
+
     /**
      * Initializes a new {@link LinkCreatedMail}.
      * @param data
@@ -123,7 +125,7 @@ public class LinkCreatedMail extends NotificationMail {
         String shareOwnerName = FullNameBuilder.buildFullName(sharingUser, translator);
 
         ServerConfig serverConfig = serverConfigService.getServerConfig(
-            notification.getRequestContext().getHostname(),
+            notification.getHostData().getHost(),
             targetUser.getId(),
             context.getContextId());
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
@@ -138,7 +140,7 @@ public class LinkCreatedMail extends NotificationMail {
         if (hasMessage) {
             vars.put(ShareCreatedMail.USER_MESSAGE, notification.getMessage());
         } else {
-            vars.put(ShareCreatedMail.PLEASE_CLICK, textSnippets.linkIntro());
+            vars.put(ShareCreatedMail.PLEASE_CLICK, textSnippets.linkIntro(targetProxies));
         }
 
         vars.put(ShareCreatedMail.VIEW_ITEMS_LINK, shareUrl);
@@ -146,7 +148,8 @@ public class LinkCreatedMail extends NotificationMail {
 
         String password = notification.getPassword();
         if (Strings.isNotEmpty(password)) {
-            vars.put(USE_PASSWORD, String.format(translator.translate(NotificationStrings.USE_PASSWORD), password));
+            vars.put(USE_PASSWORD, translator.translate(NotificationStrings.USE_PASSWORD));
+            vars.put(PASSWORD, password);
         }
 
         Date expiryDate = notification.getExpiryDate();

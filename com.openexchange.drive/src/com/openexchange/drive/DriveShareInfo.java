@@ -50,8 +50,8 @@
 package com.openexchange.drive;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareInfo;
 
 /**
@@ -82,8 +82,8 @@ public class DriveShareInfo {
         return delegate.getToken();
     }
 
-    public String getShareURL(RequestContext requestContext) {
-        return delegate.getShareURL(requestContext);
+    public String getShareURL(HostData hostData) {
+        return delegate.getShareURL(hostData);
     }
 
     public GuestInfo getGuest() {

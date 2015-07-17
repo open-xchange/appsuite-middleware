@@ -49,6 +49,7 @@
 
 package com.openexchange.share;
 
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -136,10 +137,10 @@ public interface CreatedShare {
      * whether this share has multiple targets or not. The latter behavior is subject to change in
      * the future.
      *
-     * @param requestContext
+     * @param hostData The host data
      * @return The URL
      */
-    String getUrl(RequestContext requestContext);
+    String getUrl(HostData hostData);
 
     /**
      * Gets whether this share is internal, meaning that the recipient is either a user or a group.

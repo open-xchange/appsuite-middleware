@@ -138,7 +138,7 @@ public class ShareCreatedMail extends NotificationMail {
         data.textSnippets = textSnippets;
 
         ServerConfig serverConfig = serverConfigService.getServerConfig(
-            notification.getRequestContext().getHostname(),
+            notification.getHostData().getHost(),
             targetUser.getId(),
             context.getContextId());
         NotificationMailConfig mailConfig = serverConfig.getNotificationMailConfig();
@@ -184,20 +184,11 @@ public class ShareCreatedMail extends NotificationMail {
         if (hasMessage) {
             vars.put(USER_MESSAGE, data.notification.getMessage());
         } else {
-            vars.put(PLEASE_CLICK, data.textSnippets.linkIntro());
+            vars.put(PLEASE_CLICK, data.textSnippets.linkIntro(data.targetProxies.values()));
         }
 
         vars.put(VIEW_ITEMS_LINK, shareUrl);
         vars.put(VIEW_ITEMS_LABEL, data.textSnippets.linkLabel(data.targetProxies.values()));
-
-//        FIXME: for anonymous
-//        Date expiryDate = data.notification.getShareTargets().iterator().next().getExpiryDate();
-//        if (data.targetUser.isGuest() && expiryDate != null) { // no expiry for internal users yet
-//            DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.MEDIUM, data.targetUser.getLocale());
-//            Date localExpiry = new Date(expiryDate.getTime() + TimeZone.getTimeZone(data.targetUser.getTimeZone()).getOffset(expiryDate.getTime()));
-//            vars.put(WILL_EXPIRE, String.format(data.translator.translate(NotificationStrings.LINK_EXPIRE), dateFormat.format(localExpiry)));
-//        }
-
         return vars;
     }
 

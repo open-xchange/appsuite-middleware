@@ -64,7 +64,6 @@ import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -144,7 +143,7 @@ public class ShareResultConverter implements ResultConverter {
     private JSONObject convert(ShareLink link, TimeZone timeZone, AJAXRequestData requestData) throws OXException, JSONException {
         JSONObject json = new JSONObject();
         ShareInfo shareInfo = link.getShareInfo();
-        json.put("url", shareInfo.getShareURL(DefaultRequestContext.newInstance(requestData)));
+        json.put("url", shareInfo.getShareURL(requestData.getHostData()));
         json.put("is_new", link.isNew());
         Date expiryDate = shareInfo.getShare().getExpiryDate();
         if (null != expiryDate) {
@@ -187,7 +186,7 @@ public class ShareResultConverter implements ResultConverter {
             /*
              * common share properties
              */
-            json.putOpt("share_url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
+            json.putOpt("share_url", share.getShareURL(requestData.getHostData()));
             json.put("token", share.getToken());
             json.putOpt("authentication", null != share.getGuest().getAuthentication() ? share.getGuest().getAuthentication().toString().toLowerCase() : null);
             json.putOpt("created", null != share.getShare().getCreated() ? addTimeZoneOffset(share.getShare().getCreated().getTime(), timeZone) : null);

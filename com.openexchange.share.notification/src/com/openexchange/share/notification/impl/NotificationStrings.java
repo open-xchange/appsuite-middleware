@@ -171,7 +171,7 @@ public class NotificationStrings implements LocalizableStrings {
     public static final String LINK_EXPIRE = "The link will expire on %1$s";
 
     /** The link is password protected. To see it you must use the following password: kac7Nede **/
-    public static final String USE_PASSWORD = "The link is password protected. To see it you must use the following password: %1$s";
+    public static final String USE_PASSWORD = "This link is password protected. You need the following password to open it:";
 
     /*
      * Password reset confirm mails

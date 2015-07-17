@@ -49,6 +49,8 @@
 
 package com.openexchange.share;
 
+import com.openexchange.groupware.notify.hostname.HostData;
+
 /**
  * {@link ShareInfo}
  *
@@ -81,8 +83,9 @@ public interface ShareInfo {
     /**
      * Gets the (base) share URL to access the share as guest user and jump to the underlying target directly.
      *
-     * @param requestContext The context of the current HTTP request to determine protocol, hostname and servlet prefix
+     * @param hostData The host data of the current HTTP request to determine protocol, hostname and servlet prefix
      * @return The share URL as used to access the share as guest
      */
-    String getShareURL(RequestContext requestContext);
+    String getShareURL(HostData hostData);
+
 }

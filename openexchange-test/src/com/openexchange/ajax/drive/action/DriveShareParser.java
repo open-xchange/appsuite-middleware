@@ -58,9 +58,9 @@ import org.junit.Assert;
 import com.openexchange.drive.DriveShare;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.folder.json.FolderField;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Enums;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -122,7 +122,7 @@ public class DriveShareParser {
             }
 
             @Override
-            public String getShareURL(RequestContext context) {
+            public String getShareURL(HostData hostData) {
                 if (json.hasAndNotNull("share_url")) {
                     try {
                         return json.getString("share_url");

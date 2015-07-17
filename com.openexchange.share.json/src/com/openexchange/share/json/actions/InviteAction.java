@@ -65,7 +65,6 @@ import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.RecipientType;
@@ -108,7 +107,7 @@ public class InviteAction extends AbstractShareAction {
              */
             CreatedShares createdShares = new CreatePerformer(recipients, targets, meta, session, services).perform();
             List<OXException> warnings = getNotificationService().sendShareCreatedNotifications(
-                Transport.MAIL, createdShares, message, session, DefaultRequestContext.newInstance(requestData));
+                Transport.MAIL, createdShares, message, session, requestData.getHostData());
             /*
              * construct & return appropriate json result
              */

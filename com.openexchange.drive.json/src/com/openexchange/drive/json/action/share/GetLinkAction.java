@@ -66,7 +66,6 @@ import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
-import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -99,7 +98,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
                 for (DriveShareInfo info : shares) {
                     if (info.getDriveShare().getTarget().equals(target) && RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
                         JSONObject jResult = new JSONObject();
-                        jResult.put("url", info.getShareURL(DefaultRequestContext.newInstance(requestData)));
+                        jResult.put("url", info.getShareURL(session.getHostData()));
                         if (null != info.getDriveShare().getTarget().getExpiryDate()) {
                             jResult.put("expiry_date", info.getDriveShare().getTarget().getExpiryDate().getTime());
                         }
@@ -127,7 +126,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
              * wrap share token & url into JSON result & return
              */
             JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getUrl(DefaultRequestContext.newInstance(requestData)));
+            jResult.put("url", share.getUrl(session.getHostData()));
             if (null != target.getExpiryDate()) {
                 jResult.put("expiry_date", target.getExpiryDate().getTime());
             }

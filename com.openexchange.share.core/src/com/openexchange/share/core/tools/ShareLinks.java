@@ -51,8 +51,8 @@ package com.openexchange.share.core.tools;
 
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.ShareConstants;
 
@@ -69,24 +69,24 @@ public class ShareLinks {
      * Generates a share link for a guest user based on the passed share token.
      * The token can be a base token or an absolute one.
      *
-     * @param context The request context
+     * @param hostData The host data
      * @param shareToken The share token
      * @return The link
      */
-    public static String generateExternal(RequestContext context, String shareToken) {
-        return prepare(context)
-            .setPath(serverPath(context, "/" + shareToken))
+    public static String generateExternal(HostData hostData, String shareToken) {
+        return prepare(hostData)
+            .setPath(serverPath(hostData, "/" + shareToken))
             .toString();
     }
 
     /**
      * Generates a share link for an internal user with a concrete target to jump to.
      *
-     * @param context The request context
+     * @param hostData The host data
      * @param target The share target
      * @return The link
      */
-    public static String generateInternal(RequestContext context, ShareTarget target) {
+    public static String generateInternal(HostData hostData, ShareTarget target) {
         String module = Module.getForFolderConstant(target.getModule()).getName();
         String folder = target.getFolder();
         String item = target.getItem();
@@ -95,7 +95,7 @@ public class ShareLinks {
             fragment.append("&item=").append(item);
         }
 
-        return prepare(context)
+        return prepare(hostData)
             .setPath("/appsuite/ui")
             .setFragment(fragment.toString())
             .toString();
@@ -104,27 +104,27 @@ public class ShareLinks {
     /**
      * Generates the link for confirming a requested password reset.
      *
-     * @param context The request context
+     * @param hostData The host data
      * @param baseShareToken The base token of the according share
      * @param confirmToken The confirm token
      * @return The link
      */
-    public static String generateConfirmPasswordReset(RequestContext context, String baseShareToken, String confirmToken) {
-            return prepare(context)
-                .setPath(serverPath(context, "/reset/password"))
+    public static String generateConfirmPasswordReset(HostData hostData, String baseShareToken, String confirmToken) {
+            return prepare(hostData)
+                .setPath(serverPath(hostData, "/reset/password"))
                 .addParameter("share", baseShareToken)
                 .addParameter("confirm", confirmToken)
                 .toString();
     }
 
-    private static URIBuilder prepare(RequestContext context) {
+    private static URIBuilder prepare(HostData hostData) {
         return new URIBuilder()
-            .setScheme(context.getProtocol())
-            .setHost(context.getHostname());
+            .setScheme(hostData.isSecure() ? "https" : "http")
+            .setHost(hostData.getHost());
     }
 
-    private static String serverPath(RequestContext context, String endpoint) {
-        return context.getServletPrefix() + ShareConstants.SHARE_SERVLET + endpoint;
+    private static String serverPath(HostData hostData, String endpoint) {
+        return hostData.getDispatcherPrefix() + ShareConstants.SHARE_SERVLET + endpoint;
     }
 
 }

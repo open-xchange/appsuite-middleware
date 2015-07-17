@@ -62,7 +62,6 @@ import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -146,7 +145,7 @@ public class DriveShareInfoResultConverter implements ResultConverter {
             /*
              * common share properties
              */
-            json.putOpt("share_url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
+            json.putOpt("share_url", share.getShareURL(requestData.getHostData()));
             json.put("token", share.getToken());
             /*
              * share targets & recipient

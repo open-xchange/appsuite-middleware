@@ -67,7 +67,6 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.DefaultRequestContext;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
@@ -128,7 +127,7 @@ public class SendLinkAction extends AbstractShareAction {
                     json.optString("message", null),
                     link,
                     session,
-                    DefaultRequestContext.newInstance(requestData));
+                    requestData.getHostData());
 
                 AJAXRequestResult result = new AJAXRequestResult();
                 result.addWarnings(warnings);

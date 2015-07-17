@@ -51,9 +51,9 @@ package com.openexchange.share.impl;
 
 import java.util.Locale;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.core.tools.ShareLinks;
@@ -155,8 +155,8 @@ public class InternalUserShareInfo implements ShareInfo {
     }
 
     @Override
-    public String getShareURL(RequestContext requestContext) {
-        return ShareLinks.generateInternal(requestContext, share.getTarget());
+    public String getShareURL(HostData hostData) {
+        return ShareLinks.generateInternal(hostData, share.getTarget());
     }
 
 }

@@ -50,7 +50,7 @@
 package com.openexchange.share.notification.impl;
 
 import java.util.Locale;
-import com.openexchange.share.RequestContext;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 
@@ -99,11 +99,11 @@ public interface ShareNotification<T> {
     Locale getLocale();
 
     /**
-     * Gets context information about the HTTP request that led to the generation of this
+     * Gets host information of the HTTP request that led to the generation of this
      * notification.
      *
-     * @return The request context
+     * @return The host data
      */
-    RequestContext getRequestContext();
+    HostData getHostData();
 
 }

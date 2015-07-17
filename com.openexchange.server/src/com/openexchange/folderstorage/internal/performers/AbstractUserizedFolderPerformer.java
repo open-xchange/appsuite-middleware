@@ -99,10 +99,10 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.Entities;
@@ -669,8 +669,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         }
 
         ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
-        RequestContext requestContext = Tools.getRequestContext(session, decorator);
-        if (requestContext == null) {
+        HostData hostData = Tools.getHostData(session);
+        if (hostData == null) {
             OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Request context could not be constructed.");
             Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
             logger.warn("Cannot send out notification mails for new guests because the necessary request context could not be constructed.", e);
@@ -678,7 +678,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 storageParameters.addWarning(e);
             }
         } else {
-            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, null, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, requestContext);
+            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, null, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, hostData);
             if (storageParameters != null) {
                 for (OXException warning : warnings) {
                     storageParameters.addWarning(warning);

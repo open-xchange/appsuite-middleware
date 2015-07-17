@@ -27,7 +27,10 @@
   
   <#-- if the sharing user specified a password -->
   <#if use_password?has_content>
-    <p id="use_password">${use_password}</p>
+    <p id="use_password">
+      ${use_password}<br>
+      ${password}
+    </p>
   </#if>
   
   <#-- if the sharing user specified an expiration date -->

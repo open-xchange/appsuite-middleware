@@ -61,7 +61,6 @@ import com.openexchange.group.Group;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.core.DefaultRequestContext;
 
 /**
  * {@link ExtendedPermission}
@@ -127,7 +126,7 @@ public abstract class ExtendedPermission {
     protected void addShareInfo(AJAXRequestData requestData, JSONObject jsonObject, ShareInfo share) throws JSONException {
         if (null != share) {
             if (null != requestData) {
-                jsonObject.putOpt("share_url", share.getShareURL(DefaultRequestContext.newInstance(requestData)));
+                jsonObject.putOpt("share_url", share.getShareURL(requestData.getHostData()));
             }
             Date expiryDate = share.getShare().getExpiryDate();
             if (null != expiryDate) {

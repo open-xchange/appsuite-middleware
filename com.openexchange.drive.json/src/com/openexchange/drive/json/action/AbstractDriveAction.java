@@ -68,6 +68,7 @@ import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.json.DriveFieldMapper;
 import com.openexchange.exception.OXException;
+import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.LocaleTools;
@@ -202,9 +203,13 @@ public abstract class AbstractDriveAction implements AJAXActionService {
      * @return The extracted host data
      */
     private static HostData extractHostData(AJAXRequestData requestData, ServerSession session) {
-        // TODO: "always-on" osgi service to reliably getting host data?
+        com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+        if (requestContext != null) {
+            return requestContext.getHostData();
+        }
+
         /*
-         * try session parameter first
+         * try session parameter as alternative
          */
         HostData hostData = (HostData)session.getParameter(HostnameService.PARAM_HOST_DATA);
         if (null == hostData) {

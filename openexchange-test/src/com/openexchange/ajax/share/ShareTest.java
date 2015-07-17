@@ -61,6 +61,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
+import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.Create;
@@ -101,12 +102,12 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.AuthenticationMode;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
@@ -167,23 +168,45 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
-     * Gets a request context based on the AJAX clients values.
+     * Gets a host data based on the AJAX clients values.
      */
-    protected RequestContext getRequestContext() {
-        return new RequestContext() {
-            @Override
-            public String getProtocol() {
-                return client.getProtocol();
-            }
+    protected HostData getRequestContext() {
+        return new HostData() {
 
             @Override
-            public String getHostname() {
+            public String getHost() {
                 return client.getHostname();
             }
 
             @Override
-            public String getServletPrefix() {
+            public String getDispatcherPrefix() {
                 return "/ajax/";
+            }
+
+            @Override
+            public String getRoute() {
+                try {
+                    List<Cookie> cookies = client.getSession().getHttpClient().getCookieStore().getCookies();
+                    for (Cookie cookie : cookies) {
+                        if ("JSESSIONID".equals(cookie.getName())) {
+                            return cookie.getValue();
+                        }
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+
+                return "1234567890.OX1";
+            }
+
+            @Override
+            public int getPort() {
+                return 80;
+            }
+
+            @Override
+            public boolean isSecure() {
+                return "https".equalsIgnoreCase(client.getProtocol());
             }
         };
     }

@@ -211,10 +211,15 @@ public class TextSnippets {
     /**
      * Gets a string advising the recipient to click the share link. E.g.: Please click the button below to view it.
      *
+     * @param targetProxies The collection of shared targets as {@link TargetProxy}s
      * @return The translated and formatted string
      */
-    public String linkIntro() {
-        return translator.translate(NotificationStrings.PLEASE_CLICK_IT);
+    public String linkIntro(Collection<TargetProxy> targetProxies) {
+        if (targetProxies.size() == 1) {
+            return translator.translate(NotificationStrings.PLEASE_CLICK_IT);
+        }
+
+        return translator.translate(NotificationStrings.PLEASE_CLICK_THEM);
     }
 
     /**

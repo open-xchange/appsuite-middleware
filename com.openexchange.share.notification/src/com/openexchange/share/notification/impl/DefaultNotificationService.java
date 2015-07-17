@@ -66,6 +66,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -73,7 +74,6 @@ import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
@@ -137,7 +137,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares createdShares, String message, Session session, RequestContext requestContext) {
+    public List<OXException> sendShareCreatedNotifications(Transport transport, CreatedShares createdShares, String message, Session session, HostData hostData) {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -184,7 +184,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 user = userService.getUser(userId, session.getContextId());
                 CreatedShare share = sharesByUser.get(userId);
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, toList(share.getTargets()), message, share.getUrl(requestContext), session, requestContext);
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, toList(share.getTargets()), message, share.getUrl(hostData), session, hostData);
                 send(shareNotification);
             } catch (Exception e) {
                 String mailAddress = null;
@@ -199,7 +199,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, RequestContext requestContext) {
+    public List<OXException> sendShareCreatedNotifications(Transport transport, Entities entities, String message, ShareTarget target, Session session, HostData hostData) {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -266,11 +266,11 @@ public class DefaultNotificationService implements ShareNotificationService {
                 user = usersById.get(userId);
                 String shareUrl;
                 if (user.isGuest()) {
-                    shareUrl = ShareLinks.generateExternal(requestContext, new ShareToken(context.getContextId(), user).getToken() + '/' + target.getPath());
+                    shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken() + '/' + target.getPath());
                 } else {
-                    shareUrl = ShareLinks.generateInternal(requestContext, target);
+                    shareUrl = ShareLinks.generateInternal(hostData, target);
                 }
-                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, Collections.singletonList(target), message, shareUrl, session, requestContext);
+                ShareNotification<InternetAddress> shareNotification = buildShareCreatedMailNotification(user, Collections.singletonList(target), message, shareUrl, session, hostData);
                 send(shareNotification);
             } catch (Exception e) {
                 String mailAddress = null;
@@ -285,7 +285,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public List<OXException> sendLinkNotifications(Transport transport, List<Object> transportInfos, String message, ShareInfo link, Session session, RequestContext requestContext) {
+    public List<OXException> sendLinkNotifications(Transport transport, List<Object> transportInfos, String message, ShareInfo link, Session session, HostData hostData) {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -305,8 +305,8 @@ public class DefaultNotificationService implements ShareNotificationService {
                     .setSession(session)
                     .setTarget(share.getTarget())
                     .setMessage(message)
-                    .setRequestContext(requestContext)
-                    .setShareUrl(link.getShareURL(requestContext))
+                    .setHostData(hostData)
+                    .setShareUrl(link.getShareURL(hostData))
                     .setExpiryDate(share.getExpiryDate())
                     .setPassword(guestInfo.getPassword())
                     .build();
@@ -324,7 +324,7 @@ public class DefaultNotificationService implements ShareNotificationService {
     }
 
     @Override
-    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, RequestContext requestContext) throws OXException {
+    public void sendPasswordResetConfirmationNotification(Transport transport, GuestShare guestShare, String confirmToken, HostData hostData) throws OXException {
         if (transport != Transport.MAIL) {
             throw new IllegalArgumentException("Transport '" + transport.toString() + "' is not implemented yet!");
         }
@@ -341,9 +341,9 @@ public class DefaultNotificationService implements ShareNotificationService {
                 .setContextID(guestInfo.getContextID())
                 .setGuestID(guestInfo.getGuestID())
                 .setLocale(guest.getLocale())
-                .setRequestContext(requestContext)
-                .setShareUrl(ShareLinks.generateExternal(requestContext, baseToken))
-                .setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(requestContext, baseToken, confirmToken))
+                .setHostData(hostData)
+                .setShareUrl(ShareLinks.generateExternal(hostData, baseToken))
+                .setConfirmPasswordResetUrl(ShareLinks.generateConfirmPasswordReset(hostData, baseToken, confirmToken))
                 .build();
 
             send(notification);
@@ -372,7 +372,7 @@ public class DefaultNotificationService implements ShareNotificationService {
      * @return the built ShareNotification
      * @throws OXException
      */
-    private ShareNotification<InternetAddress> buildShareCreatedMailNotification(User user, List<ShareTarget> targets, String message, String shareUrl, Session session, RequestContext requestContext) throws OXException {
+    private ShareNotification<InternetAddress> buildShareCreatedMailNotification(User user, List<ShareTarget> targets, String message, String shareUrl, Session session, HostData hostData) throws OXException {
         if (Strings.isEmpty(user.getMail())) {
             String guestName = user.getDisplayName();
             if (Strings.isEmpty(guestName)) {
@@ -391,7 +391,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                 .setSession(session)
                 .setTargets(targets)
                 .setMessage(message)
-                .setRequestContext(requestContext)
+                .setHostData(hostData)
                 .setShareUrl(shareUrl);
 
             return shareCreatedBuilder.build();

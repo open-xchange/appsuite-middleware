@@ -61,8 +61,8 @@ import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.RequestContext;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
@@ -160,13 +160,13 @@ public class DefaultShareInfo extends ResolvedGuestShare implements ShareInfo {
     }
 
     @Override
-    public String getShareURL(RequestContext context) {
+    public String getShareURL(HostData hostData) {
         ShareTarget target = getSingleTarget();
         if (target == null) {
-            return ShareLinks.generateExternal(context, guestInfo.getBaseToken());
+            return ShareLinks.generateExternal(hostData, guestInfo.getBaseToken());
         }
 
-        return ShareLinks.generateExternal(context, getToken());
+        return ShareLinks.generateExternal(hostData, getToken());
     }
 
 }
