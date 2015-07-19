@@ -1850,18 +1850,26 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void updateProperty(final int contextId, final int userId, final int accountId, final String name, final String newValue, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
-            stmt = con.prepareStatement("DELETE FROM "+table+" WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            if (transportProps) {
+                stmt = con.prepareStatement("DELETE FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            } else {
+                stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ? AND name = ?");
+            }
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
             stmt.setInt(pos++, accountId);
             stmt.setString(pos++, name);
             stmt.executeUpdate();
+            closeSQLStuff(stmt);
+            stmt = null;
 
             if (null != newValue && newValue.length() > 0) {
-                closeSQLStuff(stmt);
-                stmt = con.prepareStatement("INSERT INTO "+table+" (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                if (transportProps) {
+                    stmt = con.prepareStatement("INSERT INTO user_transport_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                } else {
+                    stmt = con.prepareStatement("INSERT INTO user_mail_account_properties (cid, user, id, name, value) VALUES (?, ?, ?, ?, ?)");
+                }
                 pos = 1;
                 stmt.setInt(pos++, contextId);
                 stmt.setInt(pos++, userId);
@@ -1869,6 +1877,8 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 stmt.setString(pos++, name);
                 stmt.setString(pos++, newValue);
                 stmt.executeUpdate();
+                closeSQLStuff(stmt);
+                stmt = null;
             }
         } finally {
             closeSQLStuff(stmt);
@@ -1878,8 +1888,11 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
     private void deleteProperties(final int contextId, final int userId, final int accountId, final boolean transportProps, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            final String table = transportProps ? "user_transport_account_properties" : "user_mail_account_properties";
-            stmt = con.prepareStatement("DELETE FROM "+table+" WHERE cid = ? AND user = ? AND id = ?");
+            if (transportProps) {
+                stmt = con.prepareStatement("DELETE FROM user_transport_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            } else {
+                stmt = con.prepareStatement("DELETE FROM user_mail_account_properties WHERE cid = ? AND user = ? AND id = ?");
+            }
             int pos = 1;
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos++, userId);
