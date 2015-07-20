@@ -102,13 +102,13 @@ public class NotificationMail {
 
     private final List<AttachmentMetadata> attachments = new ArrayList<AttachmentMetadata>();
 
-	private Type stateType;
+    private Type stateType;
 
-	private boolean attachmentUpdate;
+    private boolean attachmentUpdate;
 
-	private boolean sortedParticipants;
+    private boolean sortedParticipants;
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -192,72 +192,72 @@ public class NotificationMail {
     }
 
     public NotificationParticipant getPrincipal() {
-    	if (principal == null) {
-    		return principal = organizer;
-    	}
-		return principal;
-	}
+        if (principal == null) {
+            return principal = organizer;
+        }
+        return principal;
+    }
 
-	public void setPrincipal(NotificationParticipant principal) {
-		this.principal = principal;
-	}
+    public void setPrincipal(NotificationParticipant principal) {
+        this.principal = principal;
+    }
 
-	public NotificationParticipant getOnBehalfOf() {
-		if (isAboutActorsStateChangeOnly()) {
-			return actor;
-		}
+    public NotificationParticipant getOnBehalfOf() {
+        if (isAboutActorsStateChangeOnly()) {
+            return actor;
+        }
 
-		if (sharedCalendarOwner != null) {
-			return sharedCalendarOwner;
-		}
+        if (sharedCalendarOwner != null) {
+            return sharedCalendarOwner;
+        }
 
-		return sender;
-	}
+        return sender;
+    }
 
-	public NotificationParticipant getSharedCalendarOwner() {
-		return sharedCalendarOwner;
-	}
+    public NotificationParticipant getSharedCalendarOwner() {
+        return sharedCalendarOwner;
+    }
 
-	public void setSharedCalendarOwner(NotificationParticipant sharedCalendarOwner) {
-		this.sharedCalendarOwner = sharedCalendarOwner;
-	}
+    public void setSharedCalendarOwner(NotificationParticipant sharedCalendarOwner) {
+        this.sharedCalendarOwner = sharedCalendarOwner;
+    }
 
-	public boolean actionIsDoneOnBehalfOfAnother() {
-		if (getActor().hasRole(ITipRole.PRINCIPAL)) {
-			return false;
-		}
-		return !getActor().equals(getOnBehalfOf());
-	}
+    public boolean actionIsDoneOnBehalfOfAnother() {
+        if (getActor().hasRole(ITipRole.PRINCIPAL)) {
+            return false;
+        }
+        return !getActor().equals(getOnBehalfOf());
+    }
 
-	public boolean actionIsDoneOnMyBehalf() {
-		if (isAboutActorsStateChangeOnly()) {
-			return false;
-		}
-		if (actor.hasRole(ITipRole.PRINCIPAL)) {
-			return false;
-		}
+    public boolean actionIsDoneOnMyBehalf() {
+        if (isAboutActorsStateChangeOnly()) {
+            return false;
+        }
+        if (actor.hasRole(ITipRole.PRINCIPAL)) {
+            return false;
+        }
 
-		return recipient.equals(principal) ||recipient.equals(sharedCalendarOwner);
-	}
+        return recipient.equals(principal) ||recipient.equals(sharedCalendarOwner);
+    }
 
-	public void setParticipants(List<NotificationParticipant> recipients) {
-		sortedParticipants = false;
+    public void setParticipants(List<NotificationParticipant> recipients) {
+        sortedParticipants = false;
         this.participants = recipients;
     }
 
     public List<NotificationParticipant> getParticipants() {
-    	if (!sortedParticipants) {
-    		Collections.sort(participants, new Comparator<NotificationParticipant>() {
+        if (!sortedParticipants) {
+            Collections.sort(participants, new Comparator<NotificationParticipant>() {
 
-				@Override
+                @Override
                 public int compare(NotificationParticipant p1,
-						NotificationParticipant p2) {
-					return p1.getDisplayName().compareTo(p2.getDisplayName());
-				}
+                        NotificationParticipant p2) {
+                    return p1.getDisplayName().compareTo(p2.getDisplayName());
+                }
 
-    		});
-    	}
-    	return participants;
+            });
+        }
+        return participants;
     }
 
     public void setResources(List<NotificationParticipant> resources) {
@@ -277,12 +277,12 @@ public class NotificationMail {
     }
 
     public void setAttachmentUpdate(boolean attachmentUpdate) {
-		this.attachmentUpdate = attachmentUpdate;
-	}
+        this.attachmentUpdate = attachmentUpdate;
+    }
 
     public boolean isAttachmentUpdate() {
-		return attachmentUpdate;
-	}
+        return attachmentUpdate;
+    }
 
     public boolean shouldBeSent() {
         if (endsInPast(appointment)) {
@@ -324,15 +324,61 @@ public class NotificationMail {
 
         // Interested in state changes, but not in other changes
         if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
+            LOG.debug("NotificationMail.shouldBeSend (1), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChanges() + "\nDiffering Fields: " + diffs());
             return isAboutStateChanges();
         }
 
         // Interested in other changes, but not in state changes
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
+            LOG.debug("NotificationMail.shouldBeSend (2), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
             return !isAboutStateChangesOnly();
         }
-
+        LOG.debug("NotificationMail.shouldBeSend, User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
         return true;
+    }
+
+    private String id() {
+        try {
+            return getRecipient().getUser().getId() + "";
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+
+    private String getUserDiff() {
+        try {
+            if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
+                FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
+
+            }
+        } catch (Exception e) {
+            return "Error";
+        }
+        return "";
+    }
+
+    private String diffs() {
+        try {
+            return getDiff().getDifferingFieldNames().toString();
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+
+    private String changes() {
+        try {
+            return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
+        } catch (Exception e) {
+            return "NPE";
+        }
+    }
+
+    private String stateChanges() {
+        try {
+            return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
+        } catch (Exception e) {
+            return "NPE";
+        }
     }
 
     private boolean onlyPseudoChangesOnParticipants() {
@@ -427,57 +473,56 @@ public class NotificationMail {
         }
     }
 
-	private boolean isCancelMail() {
-		return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
-	}
-
-
-	private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
-			AppointmentFields.LOCATION,
-			AppointmentFields.FULL_TIME,
-			AppointmentFields.TIMEZONE,
-			AppointmentFields.RECURRENCE_START,
-			AppointmentFields.TITLE,
-			AppointmentFields.START_DATE,
-			AppointmentFields.END_DATE,
-			AppointmentFields.NOTE,
-			AppointmentFields.RECURRENCE_DATE_POSITION,
-			AppointmentFields.RECURRENCE_POSITION,
-			AppointmentFields.RECURRENCE_TYPE,
-			AppointmentFields.DAYS,
-			AppointmentFields.DAY_IN_MONTH,
-			AppointmentFields.MONTH,
-			AppointmentFields.INTERVAL,
-			AppointmentFields.UNTIL,
-			AppointmentFields.RECURRENCE_CALCULATOR,
-			AppointmentFields.PARTICIPANTS,
-			AppointmentFields.USERS,
-			AppointmentFields.CONFIRMATIONS
-		));
-
-    private boolean anInterestingFieldChanged() {
-    	if (getDiff() == null) {
-    		return true;
-    	}
-    	if (isAttachmentUpdate()) {
-    		return true;
-    	}
-
-    	return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
+    private boolean isCancelMail() {
+        return itipMessage != null && itipMessage.getMethod() == ITipMethod.CANCEL;
     }
 
-	public boolean isAboutStateChangesOnly() {
+
+    private static final Set<String> FIELDS_TO_REPORT = new HashSet<String>(Arrays.asList(
+            AppointmentFields.LOCATION,
+            AppointmentFields.FULL_TIME,
+            AppointmentFields.RECURRENCE_START,
+            AppointmentFields.TITLE,
+            AppointmentFields.START_DATE,
+            AppointmentFields.END_DATE,
+            AppointmentFields.NOTE,
+            AppointmentFields.RECURRENCE_DATE_POSITION,
+            AppointmentFields.RECURRENCE_POSITION,
+            AppointmentFields.RECURRENCE_TYPE,
+            AppointmentFields.DAYS,
+            AppointmentFields.DAY_IN_MONTH,
+            AppointmentFields.MONTH,
+            AppointmentFields.INTERVAL,
+            AppointmentFields.UNTIL,
+            AppointmentFields.RECURRENCE_CALCULATOR,
+            AppointmentFields.PARTICIPANTS,
+            AppointmentFields.USERS,
+            AppointmentFields.CONFIRMATIONS
+        ));
+
+    private boolean anInterestingFieldChanged() {
+        if (getDiff() == null) {
+            return true;
+        }
+        if (isAttachmentUpdate()) {
+            return true;
+        }
+
+        return getDiff().anyFieldChangedOf(FIELDS_TO_REPORT);
+    }
+
+    public boolean isAboutStateChangesOnly() {
         if (getDiff() == null) {
             return false;
         }
 
         if (isAttachmentUpdate()) {
-        	return false;
+            return false;
         }
-        return diff.isAboutStateChangesOnly();
+        return diff.isAboutStateChangesOnly(FIELDS_TO_REPORT);
     }
 
-	public boolean isAboutStateChanges() {
+    public boolean isAboutStateChanges() {
         if (getDiff() == null) {
             return false;
         }
@@ -485,26 +530,26 @@ public class NotificationMail {
         return diff.isAboutStateChanges();
     }
 
-	public boolean isAboutActorsStateChangeOnly() {
-    	if (!isAboutStateChangesOnly()) {
-    		return false;
-    	}
-		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
-	}
+    public boolean isAboutActorsStateChangeOnly() {
+        if (!isAboutStateChangesOnly()) {
+            return false;
+        }
+        return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(actor.getIdentifier()));
+    }
 
-	public boolean someoneElseChangedPrincipalsState() {
-		if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
-			return false;
-		}
-		return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
-	}
+    public boolean someoneElseChangedPrincipalsState() {
+        if (actor.getIdentifier() == getPrincipal().getIdentifier()) {
+            return false;
+        }
+        return diff.isAboutCertainParticipantsStateChangeOnly(Integer.toString(getPrincipal().getIdentifier()));
+    }
 
     private boolean isAboutRecipientsStateChangeOnly() {
-    	if (!isAboutStateChangesOnly()) {
-    		return false;
-    	}
-		return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
-	}
+        if (!isAboutStateChangesOnly()) {
+            return false;
+        }
+        return diff.isAboutCertainParticipantsStateChangeOnly(recipient.getEmail());
+    }
 
     public void setActor(NotificationParticipant actor) {
         this.actor = actor;
@@ -514,21 +559,21 @@ public class NotificationMail {
         return actor;
     }
 
-	public Type getStateType() {
-		return stateType;
-	}
+    public Type getStateType() {
+        return stateType;
+    }
 
-	public void setStateType(Type stateType) {
-		this.stateType = stateType;
-	}
+    public void setStateType(Type stateType) {
+        this.stateType = stateType;
+    }
 
     public void addAttachment(AttachmentMetadata attachment) {
-    	attachments.add(attachment);
+        attachments.add(attachment);
     }
 
     public List<AttachmentMetadata> getAttachments() {
-		return attachments;
-	}
+        return attachments;
+    }
 
 
 }
