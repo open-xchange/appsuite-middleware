@@ -93,15 +93,19 @@ public class ShareJSONParser {
      * @param jsonTargets The JSON array holding the share targets
      * @return The share targets
      */
-    public List<ShareTarget> parseTargets(JSONArray jsonTargets) throws OXException, JSONException {
-        if (null == jsonTargets || 0 == jsonTargets.length()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
+    public List<ShareTarget> parseTargets(JSONArray jsonTargets) throws OXException {
+        try {
+            if (null == jsonTargets || 0 == jsonTargets.length()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
+            }
+            List<ShareTarget> targets = new ArrayList<ShareTarget>();
+            for (int i = 0; i < jsonTargets.length(); i++) {
+                targets.add(parseTarget(jsonTargets.getJSONObject(i)));
+            }
+            return targets;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-        List<ShareTarget> targets = new ArrayList<ShareTarget>();
-        for (int i = 0; i < jsonTargets.length(); i++) {
-            targets.add(parseTarget(jsonTargets.getJSONObject(i)));
-        }
-        return targets;
     }
 
     /**

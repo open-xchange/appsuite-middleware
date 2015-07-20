@@ -59,7 +59,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.json.ShareLink;
 import com.openexchange.share.json.ShareResultConverter;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -99,7 +98,7 @@ public class GetLinkAction extends AbstractShareAction {
         ShareInfo shareInfo = discoverLink(session, target);
         if (null == shareInfo) {
             AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
-            CreatedShare createdShare = new CreatePerformer(recipient, target, null, session, services).perform().getShare(recipient);
+            CreatedShare createdShare = getShareService().addShare(session, target, recipient, null);
             shareInfo = createdShare.getFirstInfo();
             isNew = true;
         }

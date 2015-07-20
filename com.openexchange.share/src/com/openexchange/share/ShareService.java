@@ -191,6 +191,23 @@ public interface ShareService {
     CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
+     * Adds a share to a single target for a specific recipient. An appropriate guest user is created implicitly as needed.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated permissions of the guest user on the share target are updated implicitly via corresponding target proxies
+     * automatically</li>
+     * <li>Permissions checks are performed implicitly during the update of the referenced target</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param target The share target to add
+     * @param recipient The recipient for the share
+     * @return The created share
+     */
+    CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException;
+
+    /**
      * Deletes a list of share targets for all shares that belong to a certain list of guests.
      * <p/>
      * <b>Remarks:</b>
