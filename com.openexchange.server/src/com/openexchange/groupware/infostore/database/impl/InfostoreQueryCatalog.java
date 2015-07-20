@@ -767,6 +767,7 @@ public class InfostoreQueryCatalog {
             .append(" JOIN infostore_document ON infostore.cid = infostore_document.cid AND")
             .append(" infostore.version = infostore_document.version_number AND infostore.id = infostore_document.infostore_id")
             .append(" WHERE object_permission.created_by = ").append(userId)
+            .append(" AND object_permission.permission_id != ").append(userId)
         ;
         if (sort != null) {
             stringBuilder.append(STR_ORDER_BY).append(fieldName(sort, wins)).append(' ').append(order(order));
@@ -778,7 +779,6 @@ public class InfostoreQueryCatalog {
             }
             stringBuilder.append(end - start);
         }
-
         return stringBuilder.toString();
     }
 
