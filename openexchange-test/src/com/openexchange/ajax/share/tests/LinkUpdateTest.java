@@ -162,7 +162,7 @@ public class LinkUpdateTest extends ShareTest {
     }
 
     public void testLinkPasswordRandomly() throws Exception {
-        testLinkExpiryDate(randomFolderAPI(), randomModule());
+        testLinkPassword(randomFolderAPI(), randomModule());
     }
 
     public void noTestPasswordExtensively() throws Exception {
@@ -244,7 +244,7 @@ public class LinkUpdateTest extends ShareTest {
     }
 
     public void testLinkMetaRandomly() throws Exception {
-        testLinkExpiryDate(randomFolderAPI(), randomModule());
+        testLinkMeta(randomFolderAPI(), randomModule());
     }
 
     public void noTestMetaExtensively() throws Exception {

@@ -149,6 +149,7 @@ public class ShareResultConverter implements ResultConverter {
         if (null != expiryDate) {
             json.put("expiry_date", addTimeZoneOffset(expiryDate.getTime(), timeZone));
         }
+        json.putOpt("password", shareInfo.getGuest().getPassword());
         Map<String, Object> meta = shareInfo.getShare().getMeta();
         if (null != meta) {
             json.put("meta", JSONCoercion.coerceToJSON(meta));

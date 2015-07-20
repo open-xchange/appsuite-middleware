@@ -111,7 +111,7 @@ public class UpdateLinkAction extends AbstractShareAction {
                 updatePerformer.setMeta(json.isNull("meta") ? null : (Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
             }
             if (json.has("password")) {
-                updatePerformer.setPasword(json.getString("password"));
+                updatePerformer.setPasword(json.isNull("password") ? null : json.getString("password"));
             }
             if (json.has("expiry_date")) {
                 if (json.isNull("expiry_date")) {

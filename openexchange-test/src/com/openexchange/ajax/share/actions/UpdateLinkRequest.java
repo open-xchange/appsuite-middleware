@@ -152,7 +152,7 @@ public class UpdateLinkRequest implements AJAXRequest<UpdateLinkResponse> {
             }
         }
         if (containsPassword) {
-            json.put("password", password);
+            json.put("password", null == password ? JSONObject.NULL : password);
         }
         if (containsMeta) {
             json.put("meta", JSONCoercion.coerceToJSON(meta));
