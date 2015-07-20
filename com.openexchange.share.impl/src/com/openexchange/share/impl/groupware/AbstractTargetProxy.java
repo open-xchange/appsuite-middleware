@@ -87,6 +87,8 @@ public abstract class AbstractTargetProxy implements TargetProxy {
 
         T convert(TargetPermission permission);
 
+        TargetPermission convert(T permission);
+
     }
 
     protected static <T> List<T> removePermissions(List<T> origPermissions, List<TargetPermission> permissions, PermissionConverter<T> converter) {

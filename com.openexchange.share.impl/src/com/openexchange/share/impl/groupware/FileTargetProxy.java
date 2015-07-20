@@ -49,6 +49,8 @@
 
 package com.openexchange.share.impl.groupware;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
@@ -95,6 +97,19 @@ public class FileTargetProxy extends AbstractTargetProxy {
     @Override
     public String getTitle() {
         return file.getTitle();
+    }
+
+    @Override
+    public List<TargetPermission> getPermissions() {
+        List<FileStorageObjectPermission> permissions = file.getObjectPermissions();
+        if (null == permissions) {
+            return Collections.emptyList();
+        }
+        List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(permissions.size());
+        for (FileStorageObjectPermission permission : permissions) {
+            targetPermissions.add(CONVERTER.convert(permission));
+        }
+        return targetPermissions;
     }
 
     @Override
@@ -150,6 +165,12 @@ public class FileTargetProxy extends AbstractTargetProxy {
         public FileStorageObjectPermission convert(TargetPermission permission) {
             return new DefaultFileStorageObjectPermission(permission.getEntity(), permission.isGroup(), ObjectPermission.convertFolderPermissionBits(permission.getBits()));
         }
+
+        @Override
+        public TargetPermission convert(FileStorageObjectPermission permission) {
+            return new TargetPermission(permission.getEntity(), permission.isGroup(), getBits(permission));
+        }
+
     };
 
 }

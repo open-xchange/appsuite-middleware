@@ -49,6 +49,7 @@
 
 package com.openexchange.share.impl.groupware;
 
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.TargetPermission;
@@ -116,6 +117,11 @@ public class VirtualTargetProxy extends AbstractTargetProxy {
     @Override
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public List<TargetPermission> getPermissions() {
+        return Collections.emptyList();
     }
 
     @Override

@@ -92,6 +92,13 @@ public interface TargetProxy {
     String getTitle();
 
     /**
+     * Gets the existing permissions of the target.
+     *
+     * @return The permissions
+     */
+    List<TargetPermission> getPermissions();
+
+    /**
      * Applies a list of permissions, i.e. the permissions are merged. New ones
      * are added and existing ones are updated. No permissions are removed.
      * Furthermore only the in-memory representation of this object is
