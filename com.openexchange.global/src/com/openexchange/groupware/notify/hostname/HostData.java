@@ -76,7 +76,7 @@ public interface HostData {
     /**
      * Gets the port.
      *
-     * @return The port
+     * @return The port or the well-known port according to used protocol (HTTPS vs. HTTP)
      */
     int getPort();
 

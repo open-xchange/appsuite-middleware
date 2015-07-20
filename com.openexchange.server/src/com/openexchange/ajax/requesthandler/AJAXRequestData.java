@@ -184,6 +184,9 @@ public class AJAXRequestData {
     /** The decorator identifiers */
     private final @NonNull List<String> decoratorIds;
 
+    /** The port number to which the request was sent */
+    private int serverPort;
+
     /** The multipart flag. */
     private boolean multipart;
 
@@ -214,6 +217,7 @@ public class AJAXRequestData {
     public AJAXRequestData(final @Nullable JSONObject json) throws OXException {
         this();
         data = DataParser.checkJSONObject(json, RequestConstants.DATA);
+        serverPort = -1;
     }
 
     /**
@@ -224,6 +228,7 @@ public class AJAXRequestData {
     public AJAXRequestData(final @Nullable Object data) {
         this();
         this.data = data;
+        serverPort = -1;
     }
 
     /**
@@ -237,6 +242,7 @@ public class AJAXRequestData {
         files = new LinkedList<UploadFile>();
         decoratorIds = new LinkedList<String>();
         expires = -1;
+        serverPort = -1;
     }
 
     /**
@@ -272,6 +278,7 @@ public class AJAXRequestData {
         copy.route = route;
         copy.servletRequestUri = servletRequestUri;
         copy.userAgent = userAgent;
+        copy.serverPort = serverPort;
         /*
          * Not sure about following members, therefore leave to null
          */
@@ -315,6 +322,25 @@ public class AJAXRequestData {
      */
     public @Nullable String getUserAgent() {
         return userAgent;
+    }
+
+
+    /**
+     * Gets the port number to which the request was sent
+     *
+     * @return The port or <code>-1</code> if not set
+     */
+    public int getServerPort() {
+        return serverPort;
+    }
+
+    /**
+     * Sets the port number to which the request was sent
+     *
+     * @param serverPort The port to set
+     */
+    public void setServerPort(int serverPort) {
+        this.serverPort = serverPort;
     }
 
     /**
@@ -547,6 +573,9 @@ public class AJAXRequestData {
     public void setHttpServletRequest(final @Nullable HttpServletRequest httpServletRequest) {
         examineServletRequest(httpServletRequest);
         this.httpServletRequest = httpServletRequest;
+        if (null != httpServletRequest && serverPort < 0) {
+            serverPort = httpServletRequest.getServerPort();
+        }
     }
 
     /**
@@ -1458,8 +1487,8 @@ public class AJAXRequestData {
     public @Nullable HostData getHostData() {
         if (hostData == null) {
             synchronized (this) {
-                if (hostData == null && hostname != null && httpServletRequest != null && route != null && prefix != null) {
-                    hostData = new HostDataImpl(secure, hostname, httpServletRequest.getServerPort(), route, prefix);
+                if (hostData == null && hostname != null && route != null && prefix != null) {
+                    hostData = new HostDataImpl(secure, hostname, serverPort, route, prefix);
                 }
             }
         }
