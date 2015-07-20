@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
+import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
@@ -179,6 +180,8 @@ public class DefaultNotificationService implements ShareNotificationService {
             }
         }
 
+        // remove sharing user if he somehow made it into the list of recipients
+        sharesByUser.remove(session.getUserId());
         for (int userId : sharesByUser.keySet()) {
             User user = null;
             try {
@@ -221,7 +224,7 @@ public class DefaultNotificationService implements ShareNotificationService {
             User user = null;
             try {
                 user = userService.getUser(userId, context);
-                if (notifyDecision.notifyAboutCreatedShare(Transport.MAIL, user, false, entities.getUserPermissionBits(userId), Collections.singletonList(target), session)) {
+                if (notifyDecision.notifyAboutCreatedShare(Transport.MAIL, user, false, adjustPermissions(entities.getUserPermissionBits(userId)), Collections.singletonList(target), session)) {
                     usersById.put(userId, user);
                 }
             } catch (OXException e) {
@@ -246,7 +249,7 @@ public class DefaultNotificationService implements ShareNotificationService {
                     User user = null;
                     try {
                         user = userService.getUser(userId, context);
-                        if (notifyDecision.notifyAboutCreatedShare(Transport.MAIL, user, true, entities.getGroupPermissionBits(groupId), Collections.singletonList(target), session)) {
+                        if (notifyDecision.notifyAboutCreatedShare(Transport.MAIL, user, true, adjustPermissions(entities.getGroupPermissionBits(groupId)), Collections.singletonList(target), session)) {
                             usersById.put(userId, user);
                         }
                     } catch (OXException e) {
@@ -260,6 +263,8 @@ public class DefaultNotificationService implements ShareNotificationService {
             }
         }
 
+        // remove sharing user if he somehow made it into the list of recipients
+        usersById.remove(session.getUserId());
         for (int userId : usersById.keySet()) {
             User user = null;
             try {
@@ -447,6 +452,24 @@ public class DefaultNotificationService implements ShareNotificationService {
         }
 
         return list;
+    }
+
+    /**
+     * Converts the passed permissions to a folder permission bit mask if necessary
+     *
+     * @param type
+     * @param permissions
+     * @return
+     */
+    private static int adjustPermissions(Entities.Permission permission) {
+        switch (permission.getType()) {
+            case FOLDER:
+                return permission.getPermissions();
+            case OBJECT:
+                return ObjectPermission.convertFolderPermissionBits(permission.getPermissions());
+            default:
+                throw new IllegalArgumentException("Unknown permission type: " + permission.getType());
+        }
     }
 
 }

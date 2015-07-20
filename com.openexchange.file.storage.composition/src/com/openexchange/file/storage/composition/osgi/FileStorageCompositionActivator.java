@@ -71,6 +71,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.threadpool.ThreadPoolService;
 
 
@@ -175,6 +176,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         AbstractCompositingIDBasedFileAccess.setHandlerRegistry(registry);
         rememberTracker(registry);
         trackService(ShareService.class);
+        trackService(ShareNotificationService.class);
         openTrackers();
         registerService(FileStreamHandlerRegistry.class, registry);
     }

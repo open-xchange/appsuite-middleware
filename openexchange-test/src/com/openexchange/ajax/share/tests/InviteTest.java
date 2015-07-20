@@ -80,7 +80,7 @@ import com.openexchange.groupware.modules.Module;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.ShareRecipient;
 
@@ -195,12 +195,12 @@ public class InviteTest extends ShareTest {
         int userId2 = client2.getValues().getUserId();
         internalRecipient.setEntity(userId2);
         internalRecipient.setBits(FOLDER_READ_PERMISSION);
-        AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-        anonymousRecipient.setBits(FOLDER_READ_PERMISSION);
-        anonymousRecipient.setPassword("1234");
+        GuestRecipient guestRecipient = new GuestRecipient();
+        guestRecipient.setBits(FOLDER_READ_PERMISSION);
+        guestRecipient.setEmailAddress(randomUID() + "@example.com");
         List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(2);
         recipients.add(internalRecipient);
-        recipients.add(anonymousRecipient);
+        recipients.add(guestRecipient);
 
         client.execute(new InviteRequest(targets, recipients));
 
@@ -210,7 +210,7 @@ public class InviteTest extends ShareTest {
         List<ParsedShare> allShares = client.execute(new AllRequest()).getParsedShares();
         List<ParsedShare> shares = getSharesForTargets(allShares, targets);
         assertEquals(targets.size(), shares.size());
-        GuestClient guestClient = new GuestClient(shares.get(0).getShareURL(), null, anonymousRecipient.getPassword());
+        GuestClient guestClient = new GuestClient(shares.get(0).getShareURL(), guestRecipient);
 
         /*
          * Check folder permissions for internal recipient

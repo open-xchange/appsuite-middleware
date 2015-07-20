@@ -65,9 +65,9 @@ public class Entities {
         FOLDER, OBJECT;
     }
 
-    private final Map<Integer, Integer> users;
+    private final Map<Integer, Permission> users;
 
-    private final Map<Integer, Integer> groups;
+    private final Map<Integer, Permission> groups;
 
     public Entities() {
         super();
@@ -83,7 +83,7 @@ public class Entities {
      * @param permissions The permissions according to the passed type
      */
     public void addUser(int userId, PermissionType type, int permissions) {
-        users.put(userId, adjustPermissions(type, permissions));
+        users.put(userId, new Permission(type, permissions));
     }
 
     /**
@@ -94,7 +94,7 @@ public class Entities {
      * @param permissions The permissions according to the passed type
      */
     public void addGroup(int groupId, PermissionType type, int permissions) {
-        groups.put(groupId, adjustPermissions(type, permissions));
+        groups.put(groupId, new Permission(type, permissions));
     }
 
     public Set<Integer> getUsers() {
@@ -111,7 +111,7 @@ public class Entities {
      * @param userId The user ID
      * @return The permission bits as folder permission bit mask
      */
-    public int getUserPermissionBits(int userId) {
+    public Permission getUserPermissionBits(int userId) {
         return users.get(userId);
     }
 
@@ -121,7 +121,7 @@ public class Entities {
      * @param groupId The group ID
      * @return The permission bits as folder permission bit mask
      */
-    public int getGroupPermissionBits(int groupId) {
+    public Permission getGroupPermissionBits(int groupId) {
         return groups.get(groupId);
     }
 
@@ -129,21 +129,34 @@ public class Entities {
         return users.size() + groups.size();
     }
 
-    /**
-     * Converts the passed permissions to a folder permission bit mask if necessary
-     *
-     * @param type
-     * @param permissions
-     * @return
-     */
-    private static int adjustPermissions(PermissionType type, int permissions) {
-        switch (type) {
-            case FOLDER:
-                return permissions;
-            case OBJECT:
-//                Permissi
-            default:
-                throw new IllegalArgumentException("Unknown permission type: " + type);
+    public static final class Permission {
+
+        private final PermissionType type;
+
+        private final int permissions;
+
+        public Permission(PermissionType type, int permissions) {
+            super();
+            this.type = type;
+            this.permissions = permissions;
+        }
+
+        /**
+         * Gets the type
+         *
+         * @return The type
+         */
+        public PermissionType getType() {
+            return type;
+        }
+
+        /**
+         * Gets the permissions
+         *
+         * @return The permissions
+         */
+        public int getPermissions() {
+            return permissions;
         }
     }
 

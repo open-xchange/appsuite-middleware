@@ -281,7 +281,9 @@ public class DefaultShareService implements ShareService {
                 /*
                  * prepare shares for this recipient & remember for storing
                  */
-                sharesToStore.addAll(prepareShares(connectionHelper, sharingUser, recipient, targets, meta));
+                List<ShareInfo> shareInfos = prepareShares(connectionHelper, sharingUser, recipient, targets, meta);
+                sharesToStore.addAll(shareInfos);
+                sharesPerRecipient.put(recipient, shareInfos);
             }
             /*
              * store shares & trigger collection of e-mail addresses
