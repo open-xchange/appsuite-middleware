@@ -51,7 +51,6 @@ package com.openexchange.share.json.actions;
 
 import java.util.Collections;
 import java.util.Date;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -60,7 +59,6 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -87,12 +85,7 @@ public class DeleteLinkAction extends AbstractShareAction {
          */
         Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
         JSONObject json = (JSONObject) requestData.requireData();
-        ShareTarget target;
-        try {
-            target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session), getModuleSupport());
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
+        ShareTarget target = getParser().parseTarget(json);
         /*
          * lookup share
          */

@@ -50,7 +50,6 @@
 package com.openexchange.share.json.actions;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONArray;
@@ -58,9 +57,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
-import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -76,20 +75,31 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class ShareJSONParser {
 
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link ShareJSONParser}.
+     *
+     * @param services A service lookup reference
+     */
+    public ShareJSONParser(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
     /**
      * Parses a list of share targets from the supplied JSON array.
      *
      * @param jsonTargets The JSON array holding the share targets
-     * @param timeZone
      * @return The share targets
      */
-    public static List<ShareTarget> parseTargets(JSONArray jsonTargets, TimeZone timeZone, ModuleSupport service) throws OXException, JSONException {
+    public List<ShareTarget> parseTargets(JSONArray jsonTargets) throws OXException, JSONException {
         if (null == jsonTargets || 0 == jsonTargets.length()) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("targets");
         }
         List<ShareTarget> targets = new ArrayList<ShareTarget>();
         for (int i = 0; i < jsonTargets.length(); i++) {
-            targets.add(parseTarget(jsonTargets.getJSONObject(i), timeZone, service));
+            targets.add(parseTarget(jsonTargets.getJSONObject(i)));
         }
         return targets;
     }
@@ -98,42 +108,38 @@ public class ShareJSONParser {
      * Parses a share target from the supplied JSON object.
      *
      * @param jsonTargets The JSON object holding the share target
-     * @param timeZone The timezone to consider
-     * @param service A reference to the module support service
-     * @return The share target
-     * @throws OXException
+     * @return The parsed share target
      */
-    public static ShareTarget parseTarget(JSONObject jsonTarget, TimeZone timeZone, ModuleSupport service) throws JSONException, OXException {
-        if (false == jsonTarget.hasAndNotNull("module")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("module");
+    public ShareTarget parseTarget(JSONObject jsonTarget) throws OXException {
+        try {
+            if (false == jsonTarget.hasAndNotNull("module")) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("module");
+            }
+            int module = services.getService(ModuleSupport.class).getShareModuleId(jsonTarget.getString("module"));
+            if (false == jsonTarget.hasAndNotNull("folder")) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
+            }
+            String folder = jsonTarget.getString("folder");
+            ShareTarget target;
+            if (jsonTarget.hasAndNotNull("item")) {
+                target = new ShareTarget(module, folder, jsonTarget.getString("item"));
+            } else {
+                target = new ShareTarget(module, folder);
+            }
+            return target;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-
-        int module = service.getShareModuleId(jsonTarget.getString("module"));
-        if (false == jsonTarget.hasAndNotNull("folder")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("folder");
-        }
-
-        String folder = jsonTarget.getString("folder");
-
-        ShareTarget target;
-        if (jsonTarget.hasAndNotNull("item")) {
-            target = new ShareTarget(module, folder, jsonTarget.getString("item"));
-        } else {
-            target = new ShareTarget(module, folder);
-        }
-
-//        if (jsonTarget.hasAndNotNull("meta")) {
-//            if (jsonTarget.isNull("meta")) {
-//                target.setMeta(Collections.<String, Object> emptyMap());
-//            } else {
-//                target.setMeta((Map<String, Object>)JSONCoercion.coerceToNative(jsonTarget.getJSONObject("meta")));
-//            }
-//        }
-//
-        return target;
     }
 
-    public static long removeTimeZoneOffset(final long date, final TimeZone timeZone) {
+    /**
+     * Removes the timezone offset from the supplied timestamp.
+     *
+     * @param date The timestamp to remove the timezone offset from
+     * @param timeZone The timezone
+     * @return The timestamp with removed timezone offset
+     */
+    public long removeTimeZoneOffset(long date, TimeZone timeZone) {
         return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 
@@ -141,28 +147,30 @@ public class ShareJSONParser {
      * Parses a list of share recipients from the supplied JSON array.
      *
      * @param jsonRecipients The JSON array holding the share recipients
-     * @param timeZone The timezone
      * @return The share recipients
      */
-    public static List<ShareRecipient> parseRecipients(JSONArray jsonRecipients, TimeZone timeZone) throws OXException, JSONException {
-        if (null == jsonRecipients || 0 == jsonRecipients.length()) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("recipients");
+    public List<ShareRecipient> parseRecipients(JSONArray jsonRecipients) throws OXException {
+        try {
+            if (null == jsonRecipients || 0 == jsonRecipients.length()) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("recipients");
+            }
+            List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
+            for (int i = 0; i < jsonRecipients.length(); i++) {
+                recipients.add(parseRecipient(jsonRecipients.getJSONObject(i)));
+            }
+            return recipients;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
-        List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
-        for (int i = 0; i < jsonRecipients.length(); i++) {
-            recipients.add(parseRecipient(jsonRecipients.getJSONObject(i), timeZone));
-        }
-        return recipients;
     }
 
     /**
      * Parses a share recipient from the supplied JSON object.
      *
      * @param jsonTargets The JSON object holding the share recipient
-     * @param timeZone The timezone
      * @return The share recipient
      */
-    public static ShareRecipient parseRecipient(JSONObject jsonRecipient, TimeZone timeZone) throws JSONException, OXException {
+    public ShareRecipient parseRecipient(JSONObject jsonRecipient) throws OXException, JSONException {
         /*
          * determine type
          */
@@ -189,17 +197,6 @@ public class ShareJSONParser {
             }
             internalRecipient.setEntity(jsonRecipient.getInt("entity"));
             recipient = internalRecipient;
-            break;
-        case ANONYMOUS:
-            AnonymousRecipient anonymousRecipient = new AnonymousRecipient();
-            if (jsonRecipient.hasAndNotNull("password")) {
-                anonymousRecipient.setPassword(jsonRecipient.getString("password"));
-            }
-            if (jsonRecipient.hasAndNotNull("expiry_date")) {
-                anonymousRecipient.setExpiryDate(new Date(removeTimeZoneOffset(jsonRecipient.getLong("expiry_date"), timeZone)));
-            }
-
-            recipient = anonymousRecipient;
             break;
         case GUEST:
             GuestRecipient guestRecipient = new GuestRecipient();

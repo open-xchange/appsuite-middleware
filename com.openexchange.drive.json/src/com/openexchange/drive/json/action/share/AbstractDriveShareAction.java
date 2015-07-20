@@ -62,6 +62,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public abstract class AbstractDriveShareAction extends AbstractDriveAction {
 
+    private final DriveShareJSONParser parser;
+
+    /**
+     * Initializes a new {@link AbstractDriveShareAction}.
+     */
+    protected AbstractDriveShareAction() {
+        super();
+        this.parser = new DriveShareJSONParser();
+    }
+
     protected TimeZone getTimeZone(AJAXRequestData requestData, ServerSession session) {
         String timeZoneID = requestData.getParameter("timezone");
         if (null == timeZoneID) {
@@ -69,6 +79,15 @@ public abstract class AbstractDriveShareAction extends AbstractDriveAction {
         }
         TimeZone timeZone = TimeZone.getTimeZone(timeZoneID);
         return timeZone;
+    }
+
+    /**
+     * Gets the drive share parser.
+     *
+     * @return The parser
+     */
+    protected DriveShareJSONParser getParser() {
+        return parser;
     }
 
 }

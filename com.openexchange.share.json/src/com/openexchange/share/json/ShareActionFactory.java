@@ -64,7 +64,6 @@ import com.openexchange.share.json.actions.GetLinkAction;
 import com.openexchange.share.json.actions.InviteAction;
 import com.openexchange.share.json.actions.SendLinkAction;
 import com.openexchange.share.json.actions.UpdateLinkAction;
-import com.openexchange.share.json.actions.UpdateRecipientAction;
 
 
 /**
@@ -89,7 +88,6 @@ public class ShareActionFactory implements AJAXActionServiceFactory {
         actions.put("get", new GetAction(services));
         actions.put("update", new UpdateLinkAction(services));
         actions.put("invite", new InviteAction(services));
-        actions.put("updateRecipient", new UpdateRecipientAction(services));
         actions.put("getLink", new GetLinkAction(services));
         actions.put("updateLink", new UpdateLinkAction(services));
         actions.put("deleteLink", new DeleteLinkAction(services));

@@ -77,16 +77,26 @@ import com.openexchange.user.UserService;
 public abstract class AbstractShareAction implements AJAXActionService {
 
     protected final ServiceLookup services;
+    private final ShareJSONParser parser;
 
     /**
      * Initializes a new {@link AbstractShareAction}.
      *
      * @param services The service lookup reference
-     * @param translatorFactory
      */
     public AbstractShareAction(ServiceLookup services) {
         super();
         this.services = services;
+        this.parser = new ShareJSONParser(services);
+    }
+
+    /**
+     * Gets the JSON parser.
+     *
+     * @return The parser
+     */
+    protected ShareJSONParser getParser() {
+        return parser;
     }
 
     /**

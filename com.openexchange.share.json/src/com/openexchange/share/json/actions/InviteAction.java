@@ -52,7 +52,6 @@ package com.openexchange.share.json.actions;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -96,10 +95,9 @@ public class InviteAction extends AbstractShareAction {
              * parse targets, recipients & further parameters
              */
             JSONObject data = (JSONObject) requestData.requireData();
-            TimeZone clientTimeZone = getTimeZone(requestData, session);
-            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"), clientTimeZone);
+            List<ShareRecipient> recipients = getParser().parseRecipients(data.getJSONArray("recipients"));
             checkRecipients(recipients);
-            List<ShareTarget> targets = ShareJSONParser.parseTargets(data.getJSONArray("targets"), clientTimeZone, getModuleSupport());
+            List<ShareTarget> targets = getParser().parseTargets(data.getJSONArray("targets"));
             String message = data.optString("message", null);
             Map<String, Object> meta = (Map<String, Object>) JSONCoercion.coerceToNative(data.optJSONObject("meta"));
             /*

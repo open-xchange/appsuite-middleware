@@ -66,7 +66,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -92,7 +91,7 @@ public class UpdateLinkAction extends AbstractDriveShareAction {
 
             JSONObject json = (JSONObject) requestData.requireData();
 
-            DriveShareTarget target = DriveShareJSONParser.parseTarget(json, getTimeZone(requestData, session.getServerSession()));
+            DriveShareTarget target = getParser().parseTarget(json);
 
             DriveService driveService = Services.getService(DriveService.class, true);
             List<DriveShareInfo> shares = driveService.getAllLinks(session);
@@ -102,7 +101,7 @@ public class UpdateLinkAction extends AbstractDriveShareAction {
                         Date expiry = null;
                         if (json.hasAndNotNull("expiry_date")) {
                             try {
-                                expiry = new Date(ShareJSONParser.removeTimeZoneOffset(Long.parseLong(json.getString("expiry_date")), getTimeZone(requestData, session.getServerSession())));
+                                expiry = new Date(getParser().removeTimeZoneOffset(Long.parseLong(json.getString("expiry_date")), getTimeZone(requestData, session.getServerSession())));
                             } catch (NumberFormatException e) {
                                 throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
                             }

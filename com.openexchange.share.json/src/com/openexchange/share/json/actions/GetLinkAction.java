@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -64,7 +63,6 @@ import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.json.ShareLink;
 import com.openexchange.share.json.ShareResultConverter;
 import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -93,12 +91,7 @@ public class GetLinkAction extends AbstractShareAction {
         /*
          * parse target
          */
-        ShareTarget target;
-        try {
-            target = ShareJSONParser.parseTarget((JSONObject) requestData.requireData(), getTimeZone(requestData, session), getModuleSupport());
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
+        ShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
         /*
          * reuse existing or create a new anonymous share as needed
          */

@@ -63,7 +63,6 @@ import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
-import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -81,8 +80,8 @@ public class InviteAction extends AbstractDriveShareAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = ShareJSONParser.parseRecipients(data.getJSONArray("recipients"), getTimeZone(requestData, session.getServerSession()));
-            List<DriveShareTarget> targets = DriveShareJSONParser.parseTargets(data, getTimeZone(requestData, session.getServerSession()));
+            List<ShareRecipient> recipients = getParser().parseRecipients(data.getJSONArray("recipients"));
+            List<DriveShareTarget> targets = getParser().parseTargets(data);
             String message = data.optString("message", null);
             /*
              * create the shares

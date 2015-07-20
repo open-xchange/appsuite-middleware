@@ -67,7 +67,6 @@ import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.ShareNotifyExceptionCodes;
@@ -97,7 +96,7 @@ public class SendLinkAction extends AbstractShareAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            ShareTarget target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session), services.getService(ModuleSupport.class));
+            ShareTarget target = getParser().parseTarget(json);
             String jTransport = json.optString("transport", null);
             if (jTransport == null || "mail".equals(jTransport)) {
                 ShareService shareService = services.getService(ShareService.class);

@@ -90,7 +90,7 @@ public class GetLinkAction extends AbstractDriveShareAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         try {
             JSONObject json = (JSONObject) requestData.requireData();
-            DriveShareTarget target = DriveShareJSONParser.parseTarget(json, getTimeZone(requestData, session.getServerSession()));
+            DriveShareTarget target = getParser().parseTarget(json);
             DriveService driveService = Services.getService(DriveService.class, true);
 
             List<DriveShareInfo> shares = driveService.getAllLinks(session);
@@ -99,9 +99,10 @@ public class GetLinkAction extends AbstractDriveShareAction {
                     if (info.getDriveShare().getTarget().equals(target) && RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
                         JSONObject jResult = new JSONObject();
                         jResult.put("url", info.getShareURL(session.getHostData()));
-                        if (null != info.getDriveShare().getTarget().getExpiryDate()) {
-                            jResult.put("expiry_date", info.getDriveShare().getTarget().getExpiryDate().getTime());
-                        }
+                        //TODO
+//                        if (null != info.getDriveShare().getTarget().getExpiryDate()) {
+//                            jResult.put("expiry_date", info.getDriveShare().getTarget().getExpiryDate().getTime());
+//                        }
                         if (null != info.getGuest().getPassword()) {
                             jResult.put("password", info.getGuest().getPassword());
                         }
@@ -127,8 +128,9 @@ public class GetLinkAction extends AbstractDriveShareAction {
              */
             JSONObject jResult = new JSONObject();
             jResult.put("url", share.getUrl(session.getHostData()));
-            if (null != target.getExpiryDate()) {
-                jResult.put("expiry_date", target.getExpiryDate().getTime());
+            Date expiryDate = share.getFirstInfo().getShare().getExpiryDate();
+            if (null != expiryDate) {
+                json.put("expiry_date", expiryDate.getTime());
             }
             return new AJAXRequestResult(jResult, new Date(), "json");
         } catch (JSONException e) {

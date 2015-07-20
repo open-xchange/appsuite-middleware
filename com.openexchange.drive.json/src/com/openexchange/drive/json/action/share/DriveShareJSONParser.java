@@ -50,14 +50,14 @@
 package com.openexchange.drive.json.action.share;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.json.internal.Services;
 import com.openexchange.exception.OXException;
+import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -66,28 +66,33 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveShareJSONParser {
+public class DriveShareJSONParser extends ShareJSONParser {
 
     private static final String DIRECTORY_VERSIONS = "directoryVersions";
-
     private static final String FILE_VERSIONS = "fileVersions";
+
+    /**
+     * Initializes a new {@link DriveShareJSONParser}.
+     */
+    public DriveShareJSONParser() {
+        super(Services.get());
+    }
 
     /**
      * Parses a list of drive share targets from the supplied JSON object.
      *
      * @param jsonTargets The JSON array holding the share targets
-     * @param timeZone
      * @return The share targets
      */
-    public static List<DriveShareTarget> parseTargets(JSONObject jsonTargets, TimeZone timezone) throws OXException, JSONException {
+    public List<DriveShareTarget> parseTargets(JSONObject jsonTargets) throws OXException, JSONException {
         List<DriveShareTarget> targets = new ArrayList<DriveShareTarget>();
 
         if (jsonTargets.has(DIRECTORY_VERSIONS) && jsonTargets.getJSONArray(DIRECTORY_VERSIONS).length() != 0) {
-            targets.addAll(parseDirectoryTargets(jsonTargets.getJSONArray(DIRECTORY_VERSIONS), timezone));
+            targets.addAll(parseDirectoryTargets(jsonTargets.getJSONArray(DIRECTORY_VERSIONS)));
         }
 
         if (jsonTargets.has(FILE_VERSIONS) && jsonTargets.getJSONArray(FILE_VERSIONS).length() != 0) {
-            targets.addAll(parseFileTargets(jsonTargets.getJSONArray(FILE_VERSIONS), timezone));
+            targets.addAll(parseFileTargets(jsonTargets.getJSONArray(FILE_VERSIONS)));
         }
 
         return targets;
@@ -95,13 +100,11 @@ public class DriveShareJSONParser {
 
     /**
      * Parses a list of drive share targets containing directories from the supplied JSON Array.
-     * 
-     * @param jsonTargets
-     * @return
-     * @throws OXException
-     * @throws JSONException
+     *
+     * @param jsonTargets The JSON targets
+     * @return The drive share targets
      */
-    public static List<DriveShareTarget> parseDirectoryTargets(JSONArray jsonTargets, TimeZone timezone) throws OXException, JSONException {
+    public List<DriveShareTarget> parseDirectoryTargets(JSONArray jsonTargets) throws OXException, JSONException {
         if (jsonTargets == null || jsonTargets.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(DIRECTORY_VERSIONS);
         }
@@ -110,7 +113,7 @@ public class DriveShareJSONParser {
 
         for (int i = 0; i < jsonTargets.length(); i++) {
             JSONObject jsonTarget = jsonTargets.getJSONObject(i);
-            targets.add(parseTarget(jsonTarget, timezone));
+            targets.add(parseTarget(jsonTarget));
         }
 
         return targets;
@@ -118,13 +121,11 @@ public class DriveShareJSONParser {
 
     /**
      * Parses a list of drive share targets containing files from the supplied JSON Array.
-     * 
-     * @param jsonTargets
-     * @return
-     * @throws OXException
-     * @throws JSONException
+     *
+     * @param jsonTargets The JSON targets
+     * @return The drive share targets
      */
-    public static List<DriveShareTarget> parseFileTargets(JSONArray jsonTargets, TimeZone timezone) throws OXException, JSONException {
+    public List<DriveShareTarget> parseFileTargets(JSONArray jsonTargets) throws OXException, JSONException {
         if (jsonTargets == null || jsonTargets.length() == 0) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(FILE_VERSIONS);
         }
@@ -137,7 +138,7 @@ public class DriveShareJSONParser {
                 throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
             }
 
-            targets.add(parseTarget(jsonTarget, timezone));
+            targets.add(parseTarget(jsonTarget));
         }
 
         return targets;
@@ -145,38 +146,32 @@ public class DriveShareJSONParser {
 
     /**
      * Parses a drive share target from the supplied JSON Object.
-     * 
-     * @param jsonTarget
-     * @return
-     * @throws OXException
-     * @throws JSONException
+     *
+     * @param jsonTarget The JSON target
+     * @return The drive share target
      */
-    public static DriveShareTarget parseTarget(JSONObject jsonTarget, TimeZone timezone) throws OXException, JSONException {
-        if (!jsonTarget.hasAndNotNull("path")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
+    @Override
+    public DriveShareTarget parseTarget(JSONObject jsonTarget) throws OXException {
+        try {
+            if (!jsonTarget.hasAndNotNull("path")) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
+            }
+
+            if (!jsonTarget.hasAndNotNull("checksum")) {
+                throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
+            }
+
+            DriveShareTarget target = new DriveShareTarget();
+            target.setPath(jsonTarget.getString("path"));
+            target.setChecksum(jsonTarget.getString("checksum"));
+
+            if (jsonTarget.hasAndNotNull("name")) {
+                target.setName(jsonTarget.getString("name"));
+            }
+            return target;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-
-        if (!jsonTarget.hasAndNotNull("checksum")) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
-        }
-
-        DriveShareTarget target = new DriveShareTarget();
-        target.setPath(jsonTarget.getString("path"));
-        target.setChecksum(jsonTarget.getString("checksum"));
-
-        if (jsonTarget.hasAndNotNull("name")) {
-            target.setName(jsonTarget.getString("name"));
-        }
-
-        if (jsonTarget.hasAndNotNull("expiry_date")) {
-            target.setExpiryDate(new Date(removeTimeZoneOffset(jsonTarget.getLong("expiry_date"), timezone)));
-        }
-
-        return target;
-    }
-
-    public static long removeTimeZoneOffset(final long date, final TimeZone timeZone) {
-        return null == timeZone ? date : date - timeZone.getOffset(date);
     }
 
 }

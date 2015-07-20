@@ -89,12 +89,7 @@ public class UpdateLinkAction extends AbstractShareAction {
          */
         Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
         JSONObject json = (JSONObject) requestData.requireData();
-        ShareTarget target;
-        try {
-            target = ShareJSONParser.parseTarget(json, getTimeZone(requestData, session), getModuleSupport());
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
+        ShareTarget target = getParser().parseTarget(json);
         /*
          * lookup share
          */
@@ -117,7 +112,7 @@ public class UpdateLinkAction extends AbstractShareAction {
                 if (json.isNull("expiry_date")) {
                     updatePerformer.setEypiryDate(null);
                 } else {
-                    updatePerformer.setEypiryDate(new Date(ShareJSONParser.removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session))));
+                    updatePerformer.setEypiryDate(new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session))));
                 }
             }
         } catch (JSONException e) {
