@@ -131,6 +131,7 @@ public class DefaultShareService implements ShareService {
 
     private final ServiceLookup services;
     private final GuestCleaner guestCleaner;
+    private final ShareUtils utils;
 
     /**
      * Initializes a new {@link DefaultShareService}.
@@ -142,6 +143,7 @@ public class DefaultShareService implements ShareService {
         super();
         this.services = services;
         this.guestCleaner = guestCleaner;
+        this.utils = new ShareUtils(services);
     }
 
     @Override
@@ -183,7 +185,6 @@ public class DefaultShareService implements ShareService {
              * implicitly adjust share targets if the session's user is the guest himself
              */
             return createShareInfos(services, contextID, shares, true);
-
         }
         /*
          * filter share targets not accessible for the session's user before returning results
@@ -262,43 +263,34 @@ public class DefaultShareService implements ShareService {
             return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
         }
         ShareTool.validateTargets(targets);
-        int contextID = session.getContextId();
-        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(contextID));
+        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(session.getContextId()));
         Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
         ShareStorage shareStorage = services.getService(ShareStorage.class);
-        Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
             /*
-             * prepare guest users and resulting shares
-             */
-            Connection connection = connectionHelper.getConnection();
-            UserService userService = services.getService(UserService.class);
-            User sharingUser = userService.getUser(connection, session.getUserId(), context);
-            /*
              * Initial checks
              */
             checkRecipients(recipients, session);
-            checkForDuplicateLinks(recipients, targets, context, shareStorage, userService, connectionHelper);
-
+            checkForDuplicateLinks(recipients, targets, utils.getContext(session), shareStorage, services.getService(UserService.class), connectionHelper);
+            /*
+             * prepare guest users and resulting shares
+             */
             List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>(targets.size() * recipients.size());
+            User sharingUser = utils.getUser(session);
             for (ShareRecipient recipient : recipients) {
                 /*
-                 * prepare shares for this recipient
+                 * prepare shares for this recipient & remember for storing
                  */
-                List<ShareInfo> shareInfos = prepareShares(connectionHelper, sharingUser, recipient, targets, meta);
-                /*
-                 * remember to store share info for external guest entities
-                 */
-                sharesToStore.addAll(removeInternal(shareInfos));
+                sharesToStore.addAll(prepareShares(connectionHelper, sharingUser, recipient, targets, meta));
             }
             /*
              * store shares & trigger collection of e-mail addresses
              */
             storeShares(session, connectionHelper, sharesToStore);
             connectionHelper.commit();
-            LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(contextID));
+            LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
             collectAddresses(session, recipients);
             return new CreatedSharesImpl(sharesPerRecipient);
         } finally {
@@ -318,30 +310,29 @@ public class DefaultShareService implements ShareService {
         checkRecipients(recipients, session);
         LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(session.getContextId()));
         Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
-        Context context = services.getService(ContextService.class).getContext(session.getContextId());
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         TargetUpdate targetUpdate = null;
         try {
             connectionHelper.start();
-            Connection connection = connectionHelper.getConnection();
             /*
              * pre-fetch targets (implicitly checking access to them as current session's user)
              */
-            targetUpdate = services.getService(ModuleSupport.class).prepareUpdate(session, connection);
+            targetUpdate = services.getService(ModuleSupport.class).prepareUpdate(session, connectionHelper.getConnection());
             targetUpdate.fetch(targets);
             /*
              * prepare guest users, target permissions and resulting shares
              */
             List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>();
-            User sharingUser = services.getService(UserService.class).getUser(connection, session.getUserId(), context);
+            User sharingUser = utils.getUser(session);
             for (ShareTarget target : targets) {
                 target.setOwnedBy(targetUpdate.get(target).getOwner()); //TODO: owner into Share?
                 List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(recipients.size());
                 for (ShareRecipient recipient : recipients) {
                     /*
-                     * prepare share for the recipient
+                     * prepare share for the recipient & remember for storing
                      */
                     ShareInfo shareInfo = prepareShare(connectionHelper, sharingUser, recipient, target, meta);
+                    sharesToStore.add(shareInfo);
                     List<ShareInfo> shareInfos = sharesPerRecipient.get(recipient);
                     if (null == shareInfos) {
                         shareInfos = new ArrayList<ShareInfo>(targets.size());
@@ -353,12 +344,6 @@ public class DefaultShareService implements ShareService {
                      */
                     RecipientType type = shareInfo.getGuest().getRecipientType();
                     targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), RecipientType.GROUP.equals(type), recipient.getBits()));
-                    /*
-                     * remember to store share info for external guest entities
-                     */
-                    if (RecipientType.ANONYMOUS.equals(type) || RecipientType.GUEST.equals(type)) {
-                        sharesToStore.add(shareInfo);
-                    }
                 }
                 /*
                  * apply permissions for this target
@@ -995,7 +980,8 @@ public class DefaultShareService implements ShareService {
     }
 
     /**
-     * Stores one or more shares in the storage.
+     * Stores one or more shares in the storage. This includes only share for external entities, i.e. for anonymous or named guest users.
+     * Share infos pointing to internal users and groups are skipped implicitly.
      *
      * @param session The session
      * @param connectionHelper A (started) connection helper
@@ -1012,13 +998,12 @@ public class DefaultShareService implements ShareService {
         List<Share> guestShares = new ArrayList<Share>();
         List<Share> sharesToStore = new ArrayList<Share>(shareInfos.size());
         for (ShareInfo shareInfo : shareInfos) {
-            sharesToStore.add(shareInfo.getShare());
             if (RecipientType.ANONYMOUS.equals(shareInfo.getGuest().getRecipientType())) {
+                sharesToStore.add(shareInfo.getShare());
                 anonymousShares.add(shareInfo.getShare());
             } else if (RecipientType.GUEST.equals(shareInfo.getGuest().getRecipientType())) {
+                sharesToStore.add(shareInfo.getShare());
                 guestShares.add(shareInfo.getShare());
-            } else {
-                throw new UnsupportedOperationException("can't store shares for recipient " + shareInfo.getGuest().getRecipientType());
             }
         }
         if (0 < anonymousShares.size()) {
@@ -1059,7 +1044,9 @@ public class DefaultShareService implements ShareService {
         /*
          * store shares
          */
-        services.getService(ShareStorage.class).storeShares(session.getContextId(), sharesToStore, connectionHelper.getParameters());
+        if (0 < sharesToStore.size()) {
+            services.getService(ShareStorage.class).storeShares(session.getContextId(), sharesToStore, connectionHelper.getParameters());
+        }
     }
 
     /**
@@ -1250,26 +1237,6 @@ public class DefaultShareService implements ShareService {
             }
         }
         return addrs;
-    }
-
-    /**
-     * Filters a list of share infos to only contain those shares that belong to external entities, i.e. those of type
-     * {@link RecipientType#ANONYMOUS} or {@link RecipientType#GUEST}.
-     *
-     * @param shareInfos The shares to filter
-     * @return The filtered shares
-     */
-    private static List<ShareInfo> removeInternal(List<ShareInfo> shareInfos) {
-        List<ShareInfo> externalShares = new ArrayList<ShareInfo>();
-        if (null != shareInfos && 0 < shareInfos.size()) {
-            for (ShareInfo shareInfo : externalShares) {
-                RecipientType type = shareInfo.getGuest().getRecipientType();
-                if (RecipientType.ANONYMOUS.equals(type) || RecipientType.GUEST.equals(type)) {
-                    externalShares.add(shareInfo);
-                }
-            }
-        }
-        return externalShares;
     }
 
 }
