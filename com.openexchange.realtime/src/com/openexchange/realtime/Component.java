@@ -50,18 +50,20 @@
 package com.openexchange.realtime;
 
 import java.util.concurrent.TimeUnit;
+import com.openexchange.realtime.exception.RealtimeException;
+import com.openexchange.realtime.exception.RealtimeExceptionCodes;
 import com.openexchange.realtime.packet.ID;
 
 /**
  * A {@link Component} is a service that manages synthetic resources, i.e. addressees that represent a system component.
- * It is a factory for {@link ComponentHandle}s and manages their state. 
+ * It is a factory for {@link ComponentHandle}s and manages their state.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public interface Component {
-    
+
     /**
-     * 
+     *
      * An {@link EvictionPolicy} determines how and when a ComponentHandle should be disposed of.
      *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -69,9 +71,9 @@ public interface Component {
     public interface EvictionPolicy {
         // Marker interface
     }
-    
+
     /**
-     * 
+     *
      * An eviction policy that closes the ComponentHandler after the {@link Timeout} has elapsed
      *
      * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
@@ -118,18 +120,25 @@ public interface Component {
     public EvictionPolicy NONE = new EvictionPolicy() {
         // Nothing to do
     };
-    
+
     /**
-     * Create a component handle for the given ID. Can return null, if it doesn't want to create the handle. 
+     * Create a component handle for the given ID. May return <code>null</code>.
+     * <p>
+     * Moreover the specific error code {@link RealtimeExceptionCodes#COMPONENT_HANDLE_CREATION_DENIED COMPONENT_HANDLE_CREATION_DENIED} may
+     * be used to signal denial of component handle creation.
+     *
+     * @param id The identifier for which a new component handle is supposed to be created
+     * @return The newly created component handle or <code>null</code>
+     * @throws RealtimeException If this component doesn't want to create the handle; e.g. current load reaches a non-acceptable threshold
      */
-    ComponentHandle create(ID id);
-    
+    ComponentHandle create(ID id) throws RealtimeException;
+
     /**
-     * Get's the name of this component type. This is used along with the 'synthetic' protocol to construct a component handles ID. 
+     * Get's the name of this component type. This is used along with the 'synthetic' protocol to construct a component handles ID.
      * The general form of a components ID is: synthetic.[name]://[restOfId]
      */
     String getId();
-    
+
     /**
      * Provide the eviction policy for the component handle
      */

@@ -65,6 +65,7 @@ import com.openexchange.realtime.Component;
 import com.openexchange.realtime.ComponentHandle;
 import com.openexchange.realtime.LoadFactorCalculator;
 import com.openexchange.realtime.SimServiceLookup;
+import com.openexchange.realtime.exception.RealtimeException;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Stanza;
 
@@ -175,7 +176,7 @@ public class RunLoopManagerTest {
 
         String id;
 
-        public ComponentHandle create() {
+        public ComponentHandle create() throws RealtimeException {
             return create(new ID("synthetic", id, "operations", "1", UUID.randomUUID().toString()));
         }
 
@@ -193,7 +194,7 @@ public class RunLoopManagerTest {
         public void setLoadFactorCalculator(LoadFactorCalculator loadFactorCalculator) {
             //not interested
         }
-        
+
     }
 
     private class ManagerTestComponent1 extends ManagerTestComponent {

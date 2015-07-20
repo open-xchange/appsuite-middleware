@@ -1,3 +1,8 @@
+* 2015-07-20 - thorben.betten@open-xchange.com
+
+ - Fix for bug 39462: Introduced new error code to indicate denial of creation for a new component handle.
+                      Thus a GroupDispatcher is able to signal that for instance the current load reaches a non-acceptable threshold
+
 * 2015-07-17 - tobias.friedrich@open-xchange.com
 
  - Fix for bug 39801: Don't try to put something into an empty map constant

@@ -177,15 +177,15 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
     /** You are no member of the GroupDispatcher: %1$s. Please join first. */
     NOT_A_MEMBER("You are no member of the GroupDispatcher: %1$s. Please join first.", CATEGORY_ERROR, 1008,
         RealtimeExceptionMessages.NOT_A_MEMBER_MSG, STANZA_BAD_REQUEST, STANZA_BAD_REQUEST),
-        
+
     /** The request didn't yield any response. */
     RESULT_MISSING("The request didn't yield any response.", CATEGORY_ERROR, 1009, RealtimeExceptionMessages.RESULT_MISSING_MSG,
         null, null),
-        
+
     /** The GroupDispatcher was already disposed. */
     GROUP_DISPOSED("The GroupDispatcher %1$s was already disposed.", CATEGORY_ERROR, 1010, RealtimeExceptionMessages.GROUP_DISPOSED_MSG,
         null, null),
-        
+
     /** The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s. */
     STANZA_PROCESSING_FAILED("The GroupDispatcher %1$s failed to process a Stanza from %2$s to %3$s.", CATEGORY_ERROR, 1011, RealtimeExceptionMessages.STANZA_PROCESSING_FAILED_MSG,
         null, null),
@@ -203,8 +203,11 @@ public enum RealtimeExceptionCodes implements DisplayableOXExceptionCode {
        null, null),
 
     /** You are already a member of the GroupDispatcher %1$s. */
-    ALREADY_MEMBER("You are already a member of the GroupDispatcher %1$s", CATEGORY_ERROR, 1015, RealtimeExceptionMessages.ALREADY_MEMBER_MSG,
-        null, null),
+    ALREADY_MEMBER("You are already a member of the GroupDispatcher %1$s", CATEGORY_ERROR, 1015, RealtimeExceptionMessages.ALREADY_MEMBER_MSG, null, null),
+
+    /** GroupDispatcher denies to create another component handle for the given ID %1$s */
+    COMPONENT_HANDLE_CREATION_DENIED("GroupDispatcher denies to create another component handle for the given ID %1$s", CATEGORY_ERROR, 1016, null, null, null),
+
      ;
 
     private int number;
