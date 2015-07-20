@@ -2,6 +2,7 @@
 
  - Fix for bug 39462: Introduced new error code to indicate denial of creation for a new component handle.
                       Thus a GroupDispatcher is able to signal that for instance the current load reaches a non-acceptable threshold
+ - Fix for bug 39838: Fixed possible null dereference on runtime shut-down
 
 * 2015-07-17 - tobias.friedrich@open-xchange.com
 
