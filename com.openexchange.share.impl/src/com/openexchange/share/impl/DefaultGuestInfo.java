@@ -57,6 +57,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
@@ -73,16 +74,18 @@ public class DefaultGuestInfo implements GuestInfo {
     private final User guestUser;
     private final int contextID;
     private final String token;
+    private final ShareTarget linkTarget;
 
     /**
      * Initializes a new {@link DefaultGuestInfo}.
      *
      * @param services A service lookup reference
      * @param contextID The identifier of the context this guest user belongs to
+     * @param linkTarget The link target if this guest is anonymous; otherwise <code>null</code>
      * @param guestUser The guest user
      */
-    public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser) throws OXException {
-        this(services, guestUser, new ShareToken(contextID, guestUser));
+    public DefaultGuestInfo(ServiceLookup services, int contextID, User guestUser, ShareTarget linkTarget) throws OXException {
+        this(services, guestUser, new ShareToken(contextID, guestUser), linkTarget);
     }
 
     /**
@@ -91,13 +94,15 @@ public class DefaultGuestInfo implements GuestInfo {
      * @param services A service lookup reference
      * @param guestUser The guest user
      * @param shareToken The share token
+     * @param linkTarget The link target if this guest is anonymous; otherwise <code>null</code>
      */
-    public DefaultGuestInfo(ServiceLookup services, User guestUser, ShareToken shareToken) {
+    public DefaultGuestInfo(ServiceLookup services, User guestUser, ShareToken shareToken, ShareTarget linkTarget) {
         super();
         this.services = services;
         this.guestUser = guestUser;
         this.contextID = shareToken.getContextID();
         this.token = shareToken.getToken();
+        this.linkTarget = linkTarget;
     }
 
     @Override
@@ -209,6 +214,11 @@ public class DefaultGuestInfo implements GuestInfo {
     public String toString() {
         return "DefaultGuestInfo [guestID=" + getGuestID() + ", baseToken=" + getBaseToken() + ", eMailAddress=" + getEmailAddress()
             + ", contextID=" + contextID + "]";
+    }
+
+    @Override
+    public ShareTarget getLinkTarget() {
+        return linkTarget;
     }
 
 }

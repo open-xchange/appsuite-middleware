@@ -62,6 +62,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.RecipientType;
 
 /**
@@ -218,6 +219,11 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
 
         @Override
         public AuthenticationMode getAuthentication() {
+            return null;
+        }
+
+        @Override
+        public ShareTarget getLinkTarget() {
             return null;
         }
     };

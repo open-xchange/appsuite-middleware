@@ -168,7 +168,7 @@ public class GuestCleanupTask extends AbstractTask<Void> {
         /*
          * check to which modules the user has access to (if any)
          */
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
         ShareStorage shareStorage = services.getService(ShareStorage.class);
         Set<Integer> modules = shareStorage.getSharedModules(contextID, guestID, connectionHelper.getParameters());
         if (0 == modules.size()) {

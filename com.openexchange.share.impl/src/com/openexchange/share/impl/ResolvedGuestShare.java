@@ -61,6 +61,7 @@ import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 
 /**
@@ -104,7 +105,11 @@ public class ResolvedGuestShare implements GuestShare {
     public ResolvedGuestShare(ServiceLookup services, int contextID, User guestUser, List<Share> shares, boolean adjustTargets) throws OXException {
         super();
         this.services = services;
-        this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser);
+        if (ShareTool.isAnonymousGuest(guestUser)) {
+            this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, shares.get(0).getTarget());
+        } else {
+            this.guestInfo = new DefaultGuestInfo(services, contextID, guestUser, null);
+        }
         if (1 == shares.size()) {
             expiryDate = shares.get(0).getExpiryDate();
             meta = shares.get(0).getMeta();

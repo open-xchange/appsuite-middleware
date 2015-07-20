@@ -130,4 +130,11 @@ public interface GuestInfo {
      */
     Locale getLocale();
 
+    /**
+     * Returns the share target for an anonymous guest.
+     *
+     * @return The target or <code>null</code> if the guest is not anonymous
+     */
+    ShareTarget getLinkTarget();
+
 }

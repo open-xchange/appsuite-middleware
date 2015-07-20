@@ -62,6 +62,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
@@ -97,6 +99,11 @@ import com.openexchange.userconf.UserPermissionService;
 public class ShareTool {
 
     /**
+     * The user attribute key for a link target
+     */
+    public static final String LINK_TARGET_USER_ATTRIBUTE = "com.openexchange.share.LinkTarget";
+
+    /**
      * Extracts the first value of a specific attribute from a user.
      *
      * @param user The user to get the attribute value for
@@ -115,6 +122,25 @@ public class ShareTool {
         }
 
         return match.iterator().next();
+    }
+
+    /**
+     * Adds an attribute to the given user while preserving existing ones.
+     *
+     * @param user The user impl
+     * @param name The attribute name
+     * @param value The attribute value
+     */
+    public static void assignUserAttribute(UserImpl user, String name, String value) {
+        Map<String, Set<String>> existingAttributes = user.getAttributes();
+        Map<String, Set<String>> attributes;
+        if (null != existingAttributes) {
+            attributes = new HashMap<String, Set<String>>(existingAttributes);
+        } else {
+            attributes = new HashMap<String, Set<String>>();
+        }
+        attributes.put(name, Collections.singleton(value));
+        user.setAttributes(attributes);
     }
 
     /**
@@ -222,11 +248,12 @@ public class ShareTool {
      * @param services The service lookup reference
      * @param sharingUser The sharing user
      * @param recipient The recipient description
+     * @param targets
      * @return The guest user
      */
-    public static UserImpl prepareGuestUser(ServiceLookup services, int contextId, User sharingUser, ShareRecipient recipient) throws OXException {
+    public static UserImpl prepareGuestUser(ServiceLookup services, int contextId, User sharingUser, ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
         if (AnonymousRecipient.class.isInstance(recipient)) {
-            return prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient);
+            return prepareGuestUser(services, sharingUser, (AnonymousRecipient) recipient, targets.get(0));
         } else if (GuestRecipient.class.isInstance(recipient)) {
             return prepareGuestUser(services, contextId, sharingUser, (GuestRecipient) recipient);
         } else {
@@ -275,9 +302,10 @@ public class ShareTool {
      * @param services The service lookup reference
      * @param sharingUser The sharing user
      * @param recipient The recipient description
+     * @param target The link target
      * @return The guest user
      */
-    private static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AnonymousRecipient recipient) throws OXException {
+    private static UserImpl prepareGuestUser(ServiceLookup services, User sharingUser, AnonymousRecipient recipient, ShareTarget target) throws OXException {
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName("Guest");
         guestUser.setMail("");
@@ -287,7 +315,57 @@ public class ShareTool {
         } else {
             guestUser.setPasswordMech("");
         }
+        try {
+            assignUserAttribute(guestUser, LINK_TARGET_USER_ATTRIBUTE, targetToJSON(target).toString());
+        } catch (JSONException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
         return guestUser;
+    }
+
+    /**
+     * Converts the passed share target to a JSON representation, e.g.:
+     * <code>
+     * <pre>
+     * {
+     *  "m":8,
+     *  "f":"247689",
+     *  "i":"247689/6592"
+     * }
+     * </pre>
+     * </code>
+     * @param target The target
+     * @return The JSON object
+     * @throws JSONException
+     */
+    public static JSONObject targetToJSON(ShareTarget target) throws JSONException {
+        JSONObject jTarget = new JSONObject();
+        jTarget.put("m", target.getModule());
+        jTarget.put("f", target.getFolder());
+        jTarget.put("i", target.getItem());
+        return jTarget;
+    }
+
+    /**
+     * Parses a JSON target into a {@link ShareTarget} instance. JSON targets must be in the form of:
+     * <code>
+     * <pre>
+     * {
+     *  "m":8,
+     *  "f":"247689",
+     *  "i":"247689/6592"
+     * }
+     * </pre>
+     * </code>
+     * @param jTarget The JSON object
+     * @return The target
+     * @throws JSONException
+     */
+    public static ShareTarget jsonToTarget(JSONObject jTarget) throws JSONException {
+        int module = jTarget.getInt("m");
+        String folder = jTarget.getString("f");
+        String item = jTarget.optString("i", null);
+        return new ShareTarget(module, folder, item);
     }
 
     /**

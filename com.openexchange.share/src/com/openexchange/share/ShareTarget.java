@@ -108,6 +108,15 @@ public class ShareTarget implements Cloneable, Serializable {
     }
 
     /**
+     * @param targetPath
+     * @return
+     */
+    public static ShareTarget fromPath(String targetPath) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    /**
      * Gets the groupware module of the share's target folder.
      *
      * @return The module

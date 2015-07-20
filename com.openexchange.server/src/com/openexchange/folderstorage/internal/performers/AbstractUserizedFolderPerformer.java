@@ -616,34 +616,36 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
      * @param ownedBy The identifier of the user considered as the owner of the folder
      * @param folderID The ID of the parent folder
      * @param contentType The content type / module of the parent folder
-     * @param addedPermissions The added permissions; the entity identifiers of the corresponding guest users will be inserted implicitly
-     *            upon share creation
+     * @param comparedPermissions The compared permissions
      * @param connection The database connection to use or <code>null</code>
      */
-    protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, List<GuestPermission> addedPermissions, Connection connection) throws OXException {
-        Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, addedPermissions);
-        ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+    protected void processAddedGuestPermissions(int ownedBy, String folderID, ContentType contentType, ComparedFolderPermissions comparedPermissions, Connection connection) throws OXException {
+        if (comparedPermissions.hasNewGuests()) {
+            Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(ownedBy, folderID, contentType, comparedPermissions.getNewGuestPermissions());
+            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
 
-        CreatedShares shares = null;
-        try {
-            session.setParameter(Connection.class.getName(), connection);
-            for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
-                List<GuestPermission> permissions = entry.getValue();
-                List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
-                for (GuestPermission permission : permissions) {
-                    recipients.add(permission.getRecipient());
+            CreatedShares shares = null;
+            try {
+                session.setParameter(Connection.class.getName(), connection);
+                for (Map.Entry<ShareTarget, List<GuestPermission>> entry : permissionsPerTarget.entrySet()) {
+                    List<GuestPermission> permissions = entry.getValue();
+                    List<ShareRecipient> recipients = new ArrayList<ShareRecipient>(permissions.size());
+                    for (GuestPermission permission : permissions) {
+                        recipients.add(permission.getRecipient());
+                    }
+                    shares = shareService.addTarget(session, entry.getKey(), recipients);
+                    if (null == shares || shares.size() != permissions.size()) {
+                        throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
+                    }
+                    for (GuestPermission permission : permissions) {
+                        CreatedShare share = shares.getShare(permission.getRecipient());
+                        permission.setEntity(share.getGuestInfo().getGuestID());
+                        comparedPermissions.rememberGuestInfo(share.getGuestInfo());
+                    }
                 }
-                shares = shareService.addTarget(session, entry.getKey(), recipients);
-                if (null == shares || shares.size() != permissions.size()) {
-                    throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create("Shares not created as expected");
-                }
-                for (GuestPermission permission : permissions) {
-                    CreatedShare share = shares.getShare(permission.getRecipient());
-                    permission.setEntity(share.getGuestInfo().getGuestID());
-                }
+            } finally {
+                session.setParameter(Connection.class.getName(), null);
             }
-        } finally {
-            session.setParameter(Connection.class.getName(), null);
         }
     }
 
@@ -732,7 +734,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasAddedGuests()) {
             List<Integer> addedGuests = comparedPermissions.getAddedGuests();
             for (Integer addedGuest : addedGuests) {
-                if (isAnonymous(comparedPermissions.getGuestInfo(addedGuest))) {
+                GuestInfo guestInfo = comparedPermissions.getGuestInfo(addedGuest);
+                if (isAnonymous(guestInfo) && isNotEqualsTarget(folder, guestInfo.getLinkTarget())) {
                     Permission permission = comparedPermissions.getAddedGuestPermission(addedGuest);
                     throw FolderExceptionErrorMessage.INVALID_PERMISSIONS.create(Permissions.createPermissionBits(permission), addedGuest.intValue(), folder.getID() == null ? folder.getName() : folder.getID());
                 }
@@ -754,6 +757,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 }
             }
         }
+    }
+
+    private static boolean isNotEqualsTarget(Folder folder, ShareTarget target) {
+        return !(new ShareTarget(folder.getContentType().getModule(), folder.getID()).equals(target));
     }
 
     private static void checkReadOnly(Folder folder, Permission p) throws OXException {

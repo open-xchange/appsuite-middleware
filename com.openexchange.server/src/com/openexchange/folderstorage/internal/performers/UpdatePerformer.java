@@ -338,7 +338,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                      */
                     if (!isRecursion && comparedPermissions.hasNewGuests()) {
                         processAddedGuestPermissions(storageFolder.getCreatedBy(), folderId, storageFolder.getContentType(),
-                            comparedPermissions.getNewGuestPermissions(), transactionManager.getConnection());
+                            comparedPermissions, transactionManager.getConnection());
                     }
                     /*
                      * Cascade folder permissions

@@ -62,6 +62,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -184,7 +188,8 @@ public class DefaultShareService implements ShareService {
         /*
          * filter share targets not accessible for the session's user before returning results
          */
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken);
+
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken, getLinkTarget(contextID, guest));
         if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
             shares = removeInaccessible(session, shares);
         }
@@ -275,6 +280,9 @@ public class DefaultShareService implements ShareService {
             List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>(targets.size() * recipients.size());
             User sharingUser = utils.getUser(session);
             for (ShareRecipient recipient : recipients) {
+                int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
+                User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient, targets);
+                List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
                 /*
                  * prepare shares for this recipient & remember for storing
                  */
@@ -548,7 +556,7 @@ public class DefaultShareService implements ShareService {
             }
             throw e;
         }
-        return new DefaultGuestInfo(services, guestUser, shareToken);
+        return new DefaultGuestInfo(services, guestUser, shareToken, getLinkTarget(contextID, guestUser));
     }
 
     @Override
@@ -556,7 +564,7 @@ public class DefaultShareService implements ShareService {
         try {
             User user = services.getService(UserService.class).getUser(userId, contextId);
             if (user.isGuest()) {
-                return new DefaultGuestInfo(services, contextId, user);
+                return new DefaultGuestInfo(services, contextId, user, getLinkTarget(contextId, user));
             }
         } catch (OXException e) {
             if (!UserExceptionCode.USER_NOT_FOUND.equals(e)) {
@@ -1054,9 +1062,10 @@ public class DefaultShareService implements ShareService {
      * @param sharingUser The sharing user
      * @param permissionBits The permission bits to apply to the guest user
      * @param recipient The recipient description
+     * @param targets The share targets
      * @return The guest user
      */
-    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient) throws OXException {
+    private User getGuestUser(Connection connection, Context context, User sharingUser, int permissionBits, ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
         UserService userService = services.getService(UserService.class);
         if (GuestRecipient.class.isInstance(recipient)) {
             /*
@@ -1102,7 +1111,7 @@ public class DefaultShareService implements ShareService {
          * create new guest user & contact in this context
          */
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-        UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient);
+        UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient, targets);
         Contact contact = ShareTool.prepareGuestContact(services, context.getContextId(), sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         guestUser.setContactId(contactId);
@@ -1147,6 +1156,133 @@ public class DefaultShareService implements ShareService {
         } else {
             guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
         }
+    }
+
+    /**
+     * Checks the quota for the user associated to the session
+     *
+     * @param connectionHelper The ConnectionHelper
+     * @param session The session
+     * @param additionalQuotaUsage The quota that should be added to existing one
+     * @throws OXException
+     */
+    protected void checkQuota(ConnectionHelper connectionHelper, Session session, int additionalQuotaUsage) throws OXException {
+
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        }
+
+        QuotaService quotaService = services.getService(QuotaService.class);
+        if (null == quotaService) {
+            throw ServiceExceptionCode.absentService(QuotaService.class);
+        }
+        QuotaProvider provider = quotaService.getProvider("share_links");
+        AccountQuota shareLinksQuota = null;
+        if (null != provider) {
+            shareLinksQuota = provider.getFor(session, "0");
+        } else {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+        }
+        provider = quotaService.getProvider("invite_guests");
+        AccountQuota inviteGuestsQuota = null;
+        if (null != provider) {
+            inviteGuestsQuota = provider.getFor(session, "0");
+        } else {
+            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
+        }
+        if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
+            if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
+            }
+        }
+        if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
+            if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
+            }
+        }
+    }
+
+    /**
+     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
+     *
+     * @param session - the {@link Session} of the user to collect the addresses for
+     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
+     * @throws OXException
+     */
+    private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
+        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
+            if (!addrs.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    /**
+     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
+     *
+     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
+     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
+     * @throws OXException
+     */
+    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
+        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+        for (ShareRecipient shareRecipient : shareRecipients) {
+            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
+                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
+                if (emailAddress != null) {
+                    try {
+                        addrs.add(new InternetAddress(emailAddress));
+                    } catch (final AddressException addressException) {
+                        LOG.warn("Unable to add address to ContactCollector.", addressException);
+                    }
+                }
+            }
+        }
+        return addrs;
+    }
+
+    /**
+     * Gets the link target for the given anonymous guest user. If no target is set (via an user attribute)
+     * this method tries to restore the consistency by setting the attribute.
+     *
+     * @param contextId The context ID
+     * @param guestUser The guest user
+     * @return The target or <code>null</code> if the user is no guest at all or not anonymous
+     * @throws OXException
+     */
+    private ShareTarget getLinkTarget(int contextId, User guestUser) throws OXException {
+        if (guestUser.isGuest() && ShareTool.isAnonymousGuest(guestUser)) {
+            try {
+                String targetAttr = ShareTool.getUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE);
+                if (targetAttr == null) {
+                    LOG.warn("Found anonymous guest {} without link target attribute in context {}. Trying to restore consistency...", guestUser.getId(), contextId);
+                    List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextId, guestUser.getId(), StorageParameters.NO_PARAMETERS);
+                    Share share;
+                    if (shares.isEmpty()) {
+                        throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Anonymous guest " + guestUser.getId() + " in context " + contextId + " is in inconsistent state - no share target exists.");
+                    } else if (shares.size() > 1) {
+                        LOG.warn("Anonymous guest {} in context {} is in inconsistent state - multiple share targets exist.", guestUser.getId(), contextId);
+                        share = shares.get(0);
+                    } else {
+                        share = shares.get(0);
+                    }
+
+                    ShareTarget target = share.getTarget();
+                    Context context = services.getService(ContextService.class).getContext(contextId);
+                    services.getService(UserService.class).setAttribute(ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString(), guestUser.getId(), context);
+                    return target;
+                }
+
+                return ShareTool.jsonToTarget(new JSONObject(targetAttr));
+            } catch (JSONException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Could not compile or resolve share target", e);
+            }
+        }
+
+        return null;
     }
 
 }
