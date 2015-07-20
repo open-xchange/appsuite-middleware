@@ -57,19 +57,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
-import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
@@ -85,7 +81,6 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
-import com.openexchange.quota.QuotaProvider;
 import com.openexchange.quota.QuotaService;
 import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceExceptionCode;
@@ -291,7 +286,7 @@ public class DefaultShareService implements ShareService {
             storeShares(session, connectionHelper, sharesToStore);
             connectionHelper.commit();
             LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
-            collectAddresses(session, recipients);
+            utils.collectAddresses(session, recipients);
             return new CreatedSharesImpl(sharesPerRecipient);
         } finally {
             connectionHelper.finish();
@@ -360,7 +355,7 @@ public class DefaultShareService implements ShareService {
             targetUpdate.run();
             connectionHelper.commit();
             LOG.info("Shares to targets {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
-            collectAddresses(session, recipients);
+            utils.collectAddresses(session, recipients);
             return new CreatedSharesImpl(sharesPerRecipient);
         } finally {
             if (null != targetUpdate) {
@@ -448,10 +443,10 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
-        Context context = services.getService(ContextService.class).getContext(session.getContextId());
         if (null == share.getTarget() || 0 >= share.getGuest()) {
             throw ShareExceptionCodes.UNEXPECTED_ERROR.create("not enough information to update share");
         }
+        Context context = utils.getContext(session);
         if (false == share.containsExpiryDate() && false == share.containsMeta()) {
             /*
              * nothing to update
@@ -470,7 +465,8 @@ public class DefaultShareService implements ShareService {
             }
             /*
              * update share & return appropriate share info
-             */share.setModified(new Date());
+             */
+            share.setModified(new Date());
             share.setModifiedBy(session.getUserId());
             services.getService(ShareStorage.class).updateShares(
                 session.getContextId(), Collections.singletonList(share), clientTimestamp, connectionHelper.getParameters());
@@ -1151,92 +1147,6 @@ public class DefaultShareService implements ShareService {
         } else {
             guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
         }
-    }
-
-    /**
-     * Checks the quota for the user associated to the session
-     *
-     * @param connectionHelper The ConnectionHelper
-     * @param session The session
-     * @param additionalQuotaUsage The quota that should be added to existing one
-     * @throws OXException
-     */
-    protected void checkQuota(ConnectionHelper connectionHelper, Session session, int additionalQuotaUsage) throws OXException {
-
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        if (viewFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
-        }
-
-        QuotaService quotaService = services.getService(QuotaService.class);
-        if (null == quotaService) {
-            throw ServiceExceptionCode.absentService(QuotaService.class);
-        }
-        QuotaProvider provider = quotaService.getProvider("share_links");
-        AccountQuota shareLinksQuota = null;
-        if (null != provider) {
-            shareLinksQuota = provider.getFor(session, "0");
-        } else {
-            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
-        }
-        provider = quotaService.getProvider("invite_guests");
-        AccountQuota inviteGuestsQuota = null;
-        if (null != provider) {
-            inviteGuestsQuota = provider.getFor(session, "0");
-        } else {
-            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
-        }
-        if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
-            if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
-            }
-        }
-        if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
-            if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
-            }
-        }
-    }
-
-    /**
-     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
-     *
-     * @param session - the {@link Session} of the user to collect the addresses for
-     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
-     * @throws OXException
-     */
-    private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
-        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
-        if (null != ccs) {
-            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
-            if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
-    }
-
-    /**
-     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
-     *
-     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
-     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
-     * @throws OXException
-     */
-    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
-        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-        for (ShareRecipient shareRecipient : shareRecipients) {
-            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
-                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
-                if (emailAddress != null) {
-                    try {
-                        addrs.add(new InternetAddress(emailAddress));
-                    } catch (final AddressException addressException) {
-                        LOG.warn("Unable to add address to ContactCollector.", addressException);
-                    }
-                }
-            }
-        }
-        return addrs;
     }
 
 }

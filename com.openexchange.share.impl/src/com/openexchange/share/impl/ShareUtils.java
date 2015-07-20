@@ -50,7 +50,12 @@
 package com.openexchange.share.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -59,7 +64,9 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -141,6 +148,47 @@ public class ShareUtils {
             throw ServiceExceptionCode.absentService(clazz);
         }
         return service;
+    }
+
+    /**
+     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
+     *
+     * @param session - the {@link Session} of the user to collect the addresses for
+     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
+     * @throws OXException
+     */
+    public void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
+        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
+        if (null != ccs) {
+            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
+            if (!addrs.isEmpty()) {
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+            }
+        }
+    }
+
+    /**
+     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
+     *
+     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
+     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
+     * @throws OXException
+     */
+    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
+        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
+        for (ShareRecipient shareRecipient : shareRecipients) {
+            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
+                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
+                if (emailAddress != null) {
+                    try {
+                        addrs.add(new InternetAddress(emailAddress));
+                    } catch (final AddressException addressException) {
+                        org.slf4j.LoggerFactory.getLogger(ShareUtils.class).warn("Unable to add address to ContactCollector.", addressException);
+                    }
+                }
+            }
+        }
+        return addrs;
     }
 
 }
