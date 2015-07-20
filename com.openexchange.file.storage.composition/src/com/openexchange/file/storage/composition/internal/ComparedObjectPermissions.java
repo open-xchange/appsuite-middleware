@@ -153,6 +153,25 @@ public class ComparedObjectPermissions extends ComparedPermissions<FileStorageOb
         return getGuestInfo(userId) != null;
     }
 
+    /**
+     * Remembers a guest info. A guest info must be set for every new guest permission,
+     * after the according guest entity has been created. Other guest infos (i.e. for added
+     * but not new guests) don't need to be set, they will be loaded on-demand when calling
+     * {@link #getGuestInfo(int)}.
+     *
+     * @param guestInfo The guest info
+     */
+    public void rememberGuestInfo(GuestInfo guestInfo) {
+        guestInfos.put(guestInfo.getGuestID(), guestInfo);
+    }
+
+    /**
+     * Gets a guest info for every new, modified or added guest permissions entity.
+     *
+     * @param guestId The user ID of the guest
+     * @return The guest info or <code>null</code> if the passed id does not belong to a guest user
+     * @throws OXException If loading the guest info fails
+     */
     public GuestInfo getGuestInfo(int guestId) throws OXException {
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {

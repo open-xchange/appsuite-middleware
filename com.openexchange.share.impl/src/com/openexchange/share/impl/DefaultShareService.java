@@ -62,8 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.capabilities.CapabilityService;
@@ -280,9 +278,6 @@ public class DefaultShareService implements ShareService {
             List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>(targets.size() * recipients.size());
             User sharingUser = utils.getUser(session);
             for (ShareRecipient recipient : recipients) {
-                int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
-                User guestUser = getGuestUser(connection, context, sharingUser, permissionBits, recipient, targets);
-                List<ShareInfo> sharesForGuest = new ArrayList<ShareInfo>(targets.size());
                 /*
                  * prepare shares for this recipient & remember for storing
                  */
@@ -968,7 +963,7 @@ public class DefaultShareService implements ShareService {
              * prepare guest or internal user shares for other recipient types
              */
             int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
-            User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient);
+            User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, targets);
             Date expiry = RecipientType.ANONYMOUS.equals(recipient.getType()) ? ((AnonymousRecipient) recipient).getExpiryDate() : null;
             for (ShareTarget target : targets) {
                 Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, expiry);
@@ -1156,92 +1151,6 @@ public class DefaultShareService implements ShareService {
         } else {
             guestCleaner.scheduleGuestCleanup(contextID, guestIDs);
         }
-    }
-
-    /**
-     * Checks the quota for the user associated to the session
-     *
-     * @param connectionHelper The ConnectionHelper
-     * @param session The session
-     * @param additionalQuotaUsage The quota that should be added to existing one
-     * @throws OXException
-     */
-    protected void checkQuota(ConnectionHelper connectionHelper, Session session, int additionalQuotaUsage) throws OXException {
-
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        if (viewFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
-        }
-
-        QuotaService quotaService = services.getService(QuotaService.class);
-        if (null == quotaService) {
-            throw ServiceExceptionCode.absentService(QuotaService.class);
-        }
-        QuotaProvider provider = quotaService.getProvider("share_links");
-        AccountQuota shareLinksQuota = null;
-        if (null != provider) {
-            shareLinksQuota = provider.getFor(session, "0");
-        } else {
-            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
-        }
-        provider = quotaService.getProvider("invite_guests");
-        AccountQuota inviteGuestsQuota = null;
-        if (null != provider) {
-            inviteGuestsQuota = provider.getFor(session, "0");
-        } else {
-            LOG.warn("ShareQuotaProvider is not available. A share will be created without quota check!");
-        }
-        if (null != shareLinksQuota && shareLinksQuota.hasQuota(QuotaType.AMOUNT)) {
-            if (shareLinksQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!shareLinksQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && shareLinksQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SHARE_LINKS.create(shareLinksQuota.getQuota(QuotaType.AMOUNT).getUsage(), shareLinksQuota.getQuota(QuotaType.AMOUNT).getLimit());
-            }
-        }
-        if (null != inviteGuestsQuota && inviteGuestsQuota.hasQuota(QuotaType.AMOUNT)) {
-            if (inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isExceeded() || (!inviteGuestsQuota.getQuota(QuotaType.AMOUNT).isUnlimited() && inviteGuestsQuota.getQuota(QuotaType.AMOUNT).willExceed(additionalQuotaUsage))) {
-                throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getUsage(), inviteGuestsQuota.getQuota(QuotaType.AMOUNT).getLimit());
-            }
-        }
-    }
-
-    /**
-     * Recognizes the email addresses that should be collected and adds them to the ContactCollector.
-     *
-     * @param session - the {@link Session} of the user to collect the addresses for
-     * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
-     * @throws OXException
-     */
-    private void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
-        final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
-        if (null != ccs) {
-            final Set<InternetAddress> addrs = getEmailAddresses(shareRecipients);
-            if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
-            }
-        }
-    }
-
-    /**
-     * Returns a <code>Set</code> of <code>InternetAddress</code>es that should be collected by the {@link ContactCollectorService}
-     *
-     * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
-     * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
-     * @throws OXException
-     */
-    private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
-        Set<InternetAddress> addrs = new HashSet<InternetAddress>();
-        for (ShareRecipient shareRecipient : shareRecipients) {
-            if (RecipientType.GUEST.equals(RecipientType.of(shareRecipient))) {
-                String emailAddress = ((GuestRecipient) shareRecipient).getEmailAddress();
-                if (emailAddress != null) {
-                    try {
-                        addrs.add(new InternetAddress(emailAddress));
-                    } catch (final AddressException addressException) {
-                        LOG.warn("Unable to add address to ContactCollector.", addressException);
-                    }
-                }
-            }
-        }
-        return addrs;
     }
 
     /**

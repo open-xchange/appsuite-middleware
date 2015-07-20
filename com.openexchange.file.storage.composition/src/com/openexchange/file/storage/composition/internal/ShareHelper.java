@@ -137,7 +137,8 @@ public class ShareHelper {
              if (comparedPermissions.hasAddedGuests()) {
                  for (Integer guest : comparedPermissions.getAddedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getAddedGuestPermission(guest);
-                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest), true)) {
+                     GuestInfo guestInfo = comparedPermissions.getGuestInfo(guest);
+                     if (isInvalidGuestPermission(p, guestInfo) || (isAnonymous(guestInfo) && isNotEqualsTarget(document, guestInfo.getLinkTarget()))) {
                          throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                      }
                  }
@@ -145,7 +146,7 @@ public class ShareHelper {
              if (comparedPermissions.hasModifiedGuests()) {
                  for (Integer guest : comparedPermissions.getModifiedGuests()) {
                      FileStorageObjectPermission p = comparedPermissions.getModifiedGuestPermission(guest);
-                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest), false)) {
+                     if (isInvalidGuestPermission(p, comparedPermissions.getGuestInfo(guest))) {
                          throw FileStorageExceptionCodes.INVALID_OBJECT_PERMISSIONS.create(p.getPermissions(), p.getEntity(), document.getId());
                      }
                  }
@@ -154,22 +155,6 @@ public class ShareHelper {
             return comparedPermissions;
         }
         return new ComparedObjectPermissions(session.getContextId(), (File)null, (File)null);
-    }
-
-    private static boolean isInvalidGuestPermission(FileStorageGuestObjectPermission p) {
-        return p.getRecipient().getType() == RecipientType.ANONYMOUS && (p.canWrite() || p.canDelete());
-    }
-
-    private static boolean isInvalidGuestPermission(FileStorageObjectPermission p, GuestInfo guestInfo, boolean prohibitAnonymous) {
-        if (guestInfo.getRecipientType() == RecipientType.ANONYMOUS) {
-            if (prohibitAnonymous) {
-                return true;
-            }
-
-            return (p.canWrite() || p.canDelete());
-        }
-
-        return false;
     }
 
     public static List<FileStorageObjectPermission> collectAddedObjectPermissions(ComparedObjectPermissions comparedPermissions, Session session) throws OXException {
@@ -313,7 +298,7 @@ public class ShareHelper {
         List<FileStorageObjectPermission> updatedPermissions = null;
         if (null != comparedPermissions) {
             if (comparedPermissions.hasNewGuests()) {
-                updatedPermissions = ShareHelper.handleNewGuestPermissions(session, fileAccess, document, comparedPermissions.getNewGuestPermissions());
+                updatedPermissions = ShareHelper.handleNewGuestPermissions(session, fileAccess, document, comparedPermissions);
             }
             if (comparedPermissions.hasRemovedGuests()) {
                 ShareHelper.handleRemovedObjectPermissions(session, fileAccess, document, comparedPermissions.getRemovedGuestPermissions());
@@ -361,13 +346,14 @@ public class ShareHelper {
         }
     }
 
-    private static List<FileStorageObjectPermission> handleNewGuestPermissions(Session session, FileStorageFileAccess access, File document, List<FileStorageGuestObjectPermission> guestPermissions) throws OXException {
+    private static List<FileStorageObjectPermission> handleNewGuestPermissions(Session session, FileStorageFileAccess access, File document, ComparedObjectPermissions comparedPermissions) throws OXException {
         Connection connection = ConnectionHolder.CONNECTION.get();
+        session.setParameter(Connection.class.getName(), connection);
         try {
-            session.setParameter(Connection.class.getName(), connection);
-            if (guestPermissions != null && !guestPermissions.isEmpty()) {
-                List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(guestPermissions.size());
-                for (FileStorageGuestObjectPermission guestPermission : guestPermissions) {
+            if (comparedPermissions.hasNewGuests()) {
+                List<FileStorageGuestObjectPermission> newGuestPermissions = comparedPermissions.getNewGuestPermissions();
+                List<ShareRecipient> shareRecipients = new ArrayList<ShareRecipient>(newGuestPermissions.size());
+                for (FileStorageGuestObjectPermission guestPermission : newGuestPermissions) {
                     shareRecipients.add(guestPermission.getRecipient());
                 }
 
@@ -385,12 +371,12 @@ public class ShareHelper {
                 ShareTarget shareTarget = new ShareTarget(8, folderID, fileID);
                 shareTarget.setOwnedBy(owner);
                 CreatedShares shares = shareService.addTarget(session, shareTarget, shareRecipients);
-                for (int i = 0; i < guestPermissions.size(); i++) {
-                    FileStorageGuestObjectPermission guestPermission = guestPermissions.get(0);
-                    CreatedShare share = shares.getShare(guestPermission.getRecipient());
-                    allPermissions.add(new DefaultFileStorageObjectPermission(share.getGuestInfo().getGuestID(), false, guestPermission.getPermissions()));
+                for (FileStorageGuestObjectPermission permission : newGuestPermissions) {
+                    CreatedShare share = shares.getShare(permission.getRecipient());
+                    GuestInfo guestInfo = share.getGuestInfo();
+                    allPermissions.add(new DefaultFileStorageObjectPermission(guestInfo.getGuestID(), false, permission.getPermissions()));
+                    comparedPermissions.rememberGuestInfo(guestInfo);
                 }
-
                 List<FileStorageObjectPermission> objectPermissions = document.getObjectPermissions();
                 if (objectPermissions != null) {
                     for (FileStorageObjectPermission objectPermission : objectPermissions) {
@@ -418,6 +404,26 @@ public class ShareHelper {
             }
         }
         return affectedUserIDs;
+    }
+
+    private static boolean isAnonymous(GuestInfo guestInfo) {
+        return guestInfo.getRecipientType() == RecipientType.ANONYMOUS;
+    }
+
+    private static boolean isNotEqualsTarget(File document, ShareTarget target) {
+        return !(new ShareTarget(8, document.getFolderId(), document.getId()).equals(target));
+    }
+
+    private static boolean isInvalidGuestPermission(FileStorageGuestObjectPermission p) {
+        return p.getRecipient().getType() == RecipientType.ANONYMOUS && (p.canWrite() || p.canDelete());
+    }
+
+    private static boolean isInvalidGuestPermission(FileStorageObjectPermission p, GuestInfo guestInfo) {
+        if (guestInfo.getRecipientType() == RecipientType.ANONYMOUS) {
+            return (p.canWrite() || p.canDelete());
+        }
+
+        return false;
     }
 
 }

@@ -56,6 +56,7 @@ import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.Share;
 import com.openexchange.share.ShareInfo;
+import com.openexchange.share.ShareTarget;
 import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.recipient.RecipientType;
 
@@ -144,6 +145,11 @@ public class InternalGroupShareInfo implements ShareInfo {
 
             @Override
             public AuthenticationMode getAuthentication() {
+                return null;
+            }
+
+            @Override
+            public ShareTarget getLinkTarget() {
                 return null;
             }
         };
