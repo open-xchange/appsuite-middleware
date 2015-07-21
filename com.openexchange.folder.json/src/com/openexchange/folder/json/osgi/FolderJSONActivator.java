@@ -145,7 +145,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
                 }
                 track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
             }
-            trackService(ShareNotificationService.class);
+            track(ShareNotificationService.class, new RegistryServiceTrackerCustomizer<ShareNotificationService>(context, getInstance(), ShareNotificationService.class));
             /*
              * Open trackers
              */
