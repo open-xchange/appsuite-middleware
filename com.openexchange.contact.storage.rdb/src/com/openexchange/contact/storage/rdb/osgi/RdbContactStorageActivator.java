@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.storage.rdb.osgi;
 
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.ContactStorage;
@@ -65,7 +66,7 @@ import com.openexchange.i18n.I18nService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
-
+import com.openexchange.tools.images.ImageTransformationService;
 
 /**
  * {@link RdbContactStorageActivator}
@@ -85,7 +86,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContextService.class, ConfigViewFactory.class };
+        return new Class<?>[] { DatabaseService.class, ContextService.class, ConfigViewFactory.class, ImageTransformationService.class, ConfigurationService.class };
     }
 
     @Override
@@ -100,7 +101,7 @@ public class RdbContactStorageActivator extends HousekeepingActivator {
             registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(
                 new AddFilenameColumnTask(dbService),
                 new CorrectNumberOfImagesTask(dbService)
-            ));
+                ));
             registerService(QuotaProvider.class, new RdbContactQuotaProvider());
             track(I18nService.class, new I18nTracker(context));
             track(ManagementService.class, new ManagementRegisterer(context));
