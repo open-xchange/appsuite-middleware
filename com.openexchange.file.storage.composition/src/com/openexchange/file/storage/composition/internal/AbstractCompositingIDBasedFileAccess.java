@@ -838,7 +838,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             document.setFolderId(newFolderID.toUniqueID());
             postEvent(FileStorageEventHelper.buildCreateEvent(
                 session, serviceID, accountID, newFolderID.toUniqueID(), newID.toUniqueID(), document.getFileName()));
-            addWarnings(ShareHelper.sendNotificationMails(result.getAddedPermissions(), document, session));
             return newID.toUniqueID();
         }
         /*
@@ -924,7 +923,6 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         document.setFolderId(newFolderID.toUniqueID());
         postEvent(FileStorageEventHelper.buildUpdateEvent(
             session, serviceID, accountID, newFolderID.toUniqueID(), newFileID.toUniqueID(), document.getFileName()));
-        addWarnings(ShareHelper.sendNotificationMails(result.getAddedPermissions(), document, session));
         return newFileID.toUniqueID();
     }
 

@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.rdiff.RdiffService;
+import com.openexchange.share.notification.ShareNotificationService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -93,6 +94,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             Services.setFieldCollector(fieldCollector);
             rememberTracker(new ServiceTracker<AdditionalFileField, AdditionalFileField>(context, AdditionalFileField.class.getName(), fieldCollector));
 
+            trackService(ShareNotificationService.class);
             trackService(RdiffService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");

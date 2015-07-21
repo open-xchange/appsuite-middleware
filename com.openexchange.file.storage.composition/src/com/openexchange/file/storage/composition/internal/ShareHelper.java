@@ -55,8 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
@@ -69,20 +67,12 @@ import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.framework.request.RequestContext;
-import com.openexchange.framework.request.RequestContextHolder;
-import com.openexchange.osgi.Tools;
 import com.openexchange.session.Session;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.Entities;
-import com.openexchange.share.notification.Entities.PermissionType;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tx.ConnectionHolder;
@@ -177,32 +167,6 @@ public class ShareHelper {
         }
 
         return addedPermissions;
-    }
-
-    public static List<OXException> sendNotificationMails(List<FileStorageObjectPermission> permissions, File file, Session session) throws OXException {
-        if (permissions == null || permissions.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        Entities entities = new Entities();
-        for (FileStorageObjectPermission p : permissions) {
-            if (p.isGroup()) {
-                entities.addGroup(p.getEntity(), PermissionType.OBJECT, p.getPermissions());
-            } else {
-                entities.addUser(p.getEntity(), PermissionType.OBJECT, p.getPermissions());
-            }
-        }
-
-        ShareNotificationService notificationService = Tools.requireService(ShareNotificationService.class, Services.getServiceLookup());
-        RequestContext requestContext = RequestContextHolder.get();
-        if (requestContext == null) {
-            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Host data for constructing share links was not available");
-            Logger logger = LoggerFactory.getLogger(ShareHelper.class);
-            logger.warn("Cannot send out notification mails for new guests because the necessary host data for constructing share links was not available.", e);
-            return Collections.singletonList(e);
-        } else {
-            return notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, null, new ShareTarget(8, file.getFolderId(), file.getId()), session, requestContext.getHostData());
-        }
     }
 
     /**

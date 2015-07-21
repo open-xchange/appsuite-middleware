@@ -440,13 +440,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              */
             transactionManager.commit();
 
-            /*
-             * Send out share notifications
-             */
-            if (!isRecursion) {
-                sendCreatedShareNotifications(comparedPermissions, storageFolder);
-            }
-
             final Set<OXException> warnings = storageParameters.getWarnings();
             if (null != warnings) {
                 for (final OXException warning : warnings) {

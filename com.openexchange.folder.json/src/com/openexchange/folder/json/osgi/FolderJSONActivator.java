@@ -69,6 +69,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.RegistryServiceTrackerCustomizer;
+import com.openexchange.share.notification.ShareNotificationService;
 
 /**
  * {@link FolderJSONActivator} - Activator for JSON folder interface.
@@ -144,6 +145,7 @@ public class FolderJSONActivator extends AJAXModuleActivator {
                 }
                 track(MetaContributorRegistry.class, new MetaContributorRegistryCustomizer(context));
             }
+            trackService(ShareNotificationService.class);
             /*
              * Open trackers
              */

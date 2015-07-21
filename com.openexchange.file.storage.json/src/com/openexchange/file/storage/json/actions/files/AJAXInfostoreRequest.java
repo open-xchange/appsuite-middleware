@@ -90,6 +90,7 @@ import com.openexchange.groupware.upload.UploadFile;
 import com.openexchange.java.FileKnowingInputStream;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -127,6 +128,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
     private List<String> ids;
     private Field sortingField;
     private String[] versions;
+    private boolean notifyPermissionEntities;
+    private Transport notificationTransport;
+    private String notificationMessage;
 	protected AJAXRequestData data;
 
     public AJAXInfostoreRequest(final AJAXRequestData requestData, final ServerSession session) {
@@ -552,6 +556,24 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         return this.data.getProperty(DocumentAction.DOCUMENT);
     }
 
+    @Override
+    public boolean notifyPermissionEntities() throws OXException {
+        parseFile();
+        return notifyPermissionEntities;
+    }
+
+    @Override
+    public Transport getNotificationTransport() throws OXException {
+        parseFile();
+        return notificationTransport;
+    }
+
+    @Override
+    public String getNotifiactionMessage() throws OXException {
+        parseFile();
+        return notificationMessage;
+    }
+
     private int getInt(final Param param) {
         return Integer.parseInt(data.getParameter(param.getName()));
     }
@@ -677,6 +699,7 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
         }
         requireFileMetadata();
 
+        JSONObject jFile;
         JSONObject object = (JSONObject) data.getData();
         if (object == null) {
             try {
@@ -684,6 +707,32 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             } catch (final JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
             }
+        }
+
+        if (object.hasAndNotNull("file")) {
+            try {
+                jFile = object.getJSONObject("file");
+                JSONObject jNotification = object.optJSONObject("notification");
+                if (jNotification != null) {
+                    Transport transport = Transport.MAIL;
+                    if (jNotification.hasAndNotNull("transport")) {
+                        transport = Transport.forID(jNotification.getString("transport"));
+                        if (transport == null) {
+                            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+                        }
+                    }
+                    notificationTransport = transport;
+                    notifyPermissionEntities = true;
+                    String message = jNotification.optString("message", null);
+                    if (Strings.isNotEmpty(message)) {
+                        notificationMessage = message;
+                    }
+                }
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create(e);
+            }
+        } else {
+            jFile = object;
         }
 
         UploadFile uploadFile = null;
@@ -701,9 +750,10 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             }
         }
 
+
         FileMetadataParser parser = FileMetadataParser.getInstance();
-        file = parser.parse(object);
-        fields = parser.getFields(object);
+        file = parser.parse(jFile);
+        fields = parser.getFields(jFile);
         if (uploadFile != null) {
             if (!fields.contains(File.Field.FILENAME) || file.getFileName() == null || file.getFileName().trim().length() == 0) {
                 file.setFileName(uploadFile.getPreparedFileName());
@@ -731,9 +781,9 @@ public class AJAXInfostoreRequest implements InfostoreRequest {
             fields.add(File.Field.ID);
         }
 
-        if (object.has("content")) {
+        if (jFile.has("content")) {
             try {
-                contentData = object.opt("content").toString().getBytes("UTF-8");
+                contentData = jFile.opt("content").toString().getBytes("UTF-8");
 
                 file.setFileSize(contentData.length);
                 fields.add(File.Field.FILE_SIZE);

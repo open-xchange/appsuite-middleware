@@ -52,7 +52,6 @@ package com.openexchange.folderstorage.internal.performers;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,8 +64,6 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -90,7 +87,6 @@ import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.internal.FolderI18nNamesServiceImpl;
-import com.openexchange.folderstorage.internal.Tools;
 import com.openexchange.folderstorage.internal.UserizedFolderImpl;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.type.PrivateType;
@@ -100,17 +96,11 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
-import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.notification.Entities;
-import com.openexchange.share.notification.Entities.PermissionType;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.threadpool.ThreadPools;
@@ -645,48 +635,6 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                 }
             } finally {
                 session.setParameter(Connection.class.getName(), null);
-            }
-        }
-    }
-
-    protected void sendCreatedShareNotifications(ComparedFolderPermissions comparedPermissions, Folder folder) throws OXException {
-        Collection<Permission> permissions = comparedPermissions.getNewPermissions();
-        if (permissions == null || permissions.isEmpty()) {
-            return;
-        }
-
-        Entities entities = new Entities();
-        List<Integer> modifiedGuests = comparedPermissions.getModifiedGuests();
-        for (Permission p : permissions) {
-            // gather all new user entities except the one executing this operation
-            if (!p.isGroup() && p.getEntity() != session.getUserId() && !modifiedGuests.contains(p.getEntity())) {
-                entities.addUser(p.getEntity(), PermissionType.FOLDER, Permissions.createPermissionBits(p));
-            }
-        }
-
-        for (Permission p : comparedPermissions.getAddedGroupPermissions()) {
-            entities.addGroup(p.getEntity(), PermissionType.FOLDER, Permissions.createPermissionBits(p));
-        }
-
-        if (entities.size() == 0) {
-            return;
-        }
-
-        ShareNotificationService notificationService = FolderStorageServices.requireService(ShareNotificationService.class);
-        HostData hostData = Tools.getHostData(session);
-        if (hostData == null) {
-            OXException e = ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Host data for constructing share links was not available.");
-            Logger logger = LoggerFactory.getLogger(AbstractUserizedFolderPerformer.class);
-            logger.warn("Cannot send out notification mails for new guests because the necessary host data for constructing share links was not available.", e);
-            if (storageParameters != null) {
-                storageParameters.addWarning(e);
-            }
-        } else {
-            List<OXException> warnings = notificationService.sendShareCreatedNotifications(Transport.MAIL, entities, null, new ShareTarget(folder.getContentType().getModule(), folder.getID()), session, hostData);
-            if (storageParameters != null) {
-                for (OXException warning : warnings) {
-                    storageParameters.addWarning(warning);
-                }
             }
         }
     }

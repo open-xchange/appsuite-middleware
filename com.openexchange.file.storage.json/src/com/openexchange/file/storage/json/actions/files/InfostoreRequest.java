@@ -63,6 +63,7 @@ import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.groupware.attach.AttachmentBase;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -317,4 +318,33 @@ public interface InfostoreRequest {
     boolean extendedResponse() throws OXException;
 
     public Document getCachedDocument();
+
+    /**
+     * Gets whether entities of object permissions shall be notified if they
+     * were added to a new or existing file. This method is only useful for
+     * create and update requests.
+     *
+     * @return <code>true</code> if notifications shall be sent
+     * @throws OXException If parsing the request body fails
+     */
+    boolean notifyPermissionEntities() throws OXException;
+
+    /**
+     * Gets the transport for notification messages. This method is only useful for
+     * create and update requests.
+     *
+     * @return The transport; <code>null</code> if {@link #notifyPermissionEntities()} returns <code>false</code>.
+     * @throws OXException If parsing the request body fails
+     */
+    Transport getNotificationTransport() throws OXException;
+
+    /**
+     * Gets an optional user-defined notification message for permission entities.
+     * This method is only useful for create and update requests.
+     *
+     * @return The message or <code>null</code>
+     * @throws OXException If parsing the request body fails
+     */
+    String getNotifiactionMessage() throws OXException;
+
 }

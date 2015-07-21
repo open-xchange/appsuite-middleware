@@ -257,13 +257,6 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            /*
-             * Send out share notifications
-             */
-            if (!isRecursion) {
-                sendCreatedShareNotifications(comparedPermissions, toCreate);
-            }
-
             final Set<OXException> warnings = storageParameters.getWarnings();
             if (null != warnings) {
                 for (final OXException warning : warnings) {

@@ -71,7 +71,37 @@ public interface ShareNotificationService {
      * The transport mechanism to use for notification messages.
      */
     public enum Transport {
-        MAIL
+        MAIL("mail");
+
+        private final String id;
+        private Transport(String id) {
+            this.id = id;
+        }
+
+        /**
+         * Gets the transports unique identifier
+         *
+         * @return The identifier
+         */
+        public String getID() {
+            return id;
+        }
+
+        /**
+         * Gets the transport by its unique identifier
+         *
+         * @param id The identifier
+         * @return The transport or <code>null</code> if the identifier is invalid
+         */
+        public static Transport forID(String id) {
+            for (Transport t : values()) {
+                if (t.getID().equals(id)) {
+                    return t;
+                }
+            }
+
+            return null;
+        }
     }
 
     /**

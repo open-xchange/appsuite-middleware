@@ -59,6 +59,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.notification.ShareNotificationService;
 
 /**
  * {@link Services}
@@ -130,5 +131,10 @@ public class Services {
     public static FolderService getFolderService() {
         final ServiceLookup lookup = LOOKUP_REF.get();
         return null == lookup ? null : lookup.getService(FolderService.class);
+    }
+
+    public static ShareNotificationService getShareNotificationService() {
+        final ServiceLookup lookup = LOOKUP_REF.get();
+        return null == lookup ? null : lookup.getService(ShareNotificationService.class);
     }
 }
