@@ -97,6 +97,7 @@ import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
 import com.openexchange.admin.rmi.exceptions.ContextExistsException;
+import com.openexchange.admin.rmi.exceptions.EnforceableDataObjectException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.OXContextException;
 import com.openexchange.admin.rmi.exceptions.PoolException;
@@ -1135,15 +1136,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     private Context writeContext(final Context ctx, final User adminUser, final UserModuleAccess access) throws StorageException {
         final int contextId = ctx.getId().intValue();
-        Connection oxCon;
+        Connection oxCon = null;
+        boolean rollback = false;
         try {
             oxCon = cache.getConnectionForContext(contextId);
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        try {
             oxCon.setAutoCommit(false);
+            rollback = true;
 
             contextCommon.initSequenceTables(contextId, oxCon);
             contextCommon.initReplicationMonitor(oxCon, contextId);
@@ -1194,39 +1192,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             oxa.addContextSystemFolders(contextId, display, adminUser.getLanguage(), oxCon);
 
             oxCon.commit();
+            rollback = false;
+
             ctx.setEnabled(Boolean.TRUE);
             adminUser.setId(I(adminId));
             return ctx;
         } catch (final DataTruncation e) {
             LOG.error(AdminCache.DATA_TRUNCATION_ERROR_MSG, e);
-            rollback(oxCon);
             throw AdminCache.parseDataTruncation(e);
         } catch (final OXException e) {
             LOG.error("Error", e);
-            rollback(oxCon);
             throw new StorageException(e.toString());
         } catch (final StorageException e) {
             LOG.error("Storage Error", e);
-            rollback(oxCon);
             throw e;
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
-            rollback(oxCon);
             throw new StorageException(e);
         } catch (final InvalidDataException e) {
             LOG.error("InvalidData Error", e);
-            rollback(oxCon);
             throw new StorageException(e);
-        } catch (final Exception e) {
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final EnforceableDataObjectException e) {
+            LOG.error("Enforceable DataObject Error", e);
+            throw new StorageException(e);
+        } catch (final RuntimeException e) {
             LOG.error("Internal Error", e);
-            rollback(oxCon);
-            throw new StorageException("Internal server error occured");
+            throw new StorageException("Internal server error occured", e);
         } finally {
+            if (rollback) {
+                rollback(oxCon);
+            }
             autocommit(oxCon);
-            try {
-                cache.pushConnectionForContext(contextId, oxCon);
-            } catch (final PoolException ecp) {
-                LOG.error("Error pushing ox write connection to pool!", ecp);
+            if (null != oxCon) {
+                try {
+                    cache.pushConnectionForContext(contextId, oxCon);
+                } catch (final PoolException ecp) {
+                    LOG.error("Error pushing ox write connection to pool!", ecp);
+                }
             }
         }
     }
