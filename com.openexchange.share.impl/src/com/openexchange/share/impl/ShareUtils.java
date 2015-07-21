@@ -49,26 +49,52 @@
 
 package com.openexchange.share.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
+import org.json.JSONException;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserImpl;
+import com.openexchange.groupware.modules.Module;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.guest.GuestService;
+import com.openexchange.java.Strings;
+import com.openexchange.passwordmechs.PasswordMech;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.share.ShareInfo;
+import com.openexchange.share.AuthenticationMode;
+import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.core.tools.ShareToken;
+import com.openexchange.share.core.tools.ShareTool;
+import com.openexchange.share.recipient.AnonymousRecipient;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
+import com.openexchange.userconf.UserPermissionService;
 
 /**
  * {@link ShareUtils}
@@ -88,6 +114,20 @@ public class ShareUtils {
     public ShareUtils(ServiceLookup services) {
         super();
         this.services = services;
+    }
+
+    /**
+     * Gets the service of specified type, throwing an appropriate excpetion if it's missing.
+     *
+     * @param clazz The service's class
+     * @return The service
+     */
+    public <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
+        S service = services.getService(clazz);
+        if (null == service) {
+            throw ServiceExceptionCode.absentService(clazz);
+        }
+        return service;
     }
 
     /**
@@ -117,37 +157,279 @@ public class ShareUtils {
     }
 
     /**
-     * Filters a list of share infos to only contain those shares that belong to external entities, i.e. those of type
-     * {@link RecipientType#ANONYMOUS} or {@link RecipientType#GUEST}.
+     * Prepares a new share.
      *
-     * @param shareInfos The shares to filter
-     * @return The filtered shares
+     * @param contextID The context ID
+     * @param sharingUser The sharing user
+     * @param guestUserID The guest user ID
+     * @param target The share target
+     * @param expiryDate The date when this share expires, i.e. it should be no longer accessible, or <code>null</code> if not defined
+     * @return The share
      */
-    public List<ShareInfo> removeInternal(List<ShareInfo> shareInfos) {
-        List<ShareInfo> externalShares = new ArrayList<ShareInfo>();
-        if (null != shareInfos && 0 < shareInfos.size()) {
-            for (ShareInfo shareInfo : externalShares) {
-                RecipientType type = shareInfo.getGuest().getRecipientType();
-                if (RecipientType.ANONYMOUS.equals(type) || RecipientType.GUEST.equals(type)) {
-                    externalShares.add(shareInfo);
-                }
-            }
-        }
-        return externalShares;
+    public Share prepareShare(int contextID, User sharingUser, int guestUserID, ShareTarget target, Date expiryDate) {
+        Date now = new Date();
+        Share share = new Share();
+        share.setTarget(target);
+        share.setCreated(now);
+        share.setModified(now);
+        share.setCreatedBy(sharingUser.getId());
+        share.setModifiedBy(sharingUser.getId());
+        share.setGuest(guestUserID);
+        share.setExpiryDate(expiryDate);
+        return share;
     }
 
     /**
-     * Gets the service of specified type, throwing an appropriate excpetion if it's missing.
+     * Prepares a guest user instance based on the supplied share recipient.
      *
-     * @param clazz The service's class
-     * @return The service
+     * @param sharingUser The sharing user
+     * @param recipient The recipient description
+     * @param targets
+     * @return The guest user
      */
-    public <S extends Object> S requireService(Class<? extends S> clazz) throws OXException {
-        S service = services.getService(clazz);
-        if (null == service) {
-            throw ServiceExceptionCode.absentService(clazz);
+    public UserImpl prepareGuestUser(int contextId, User sharingUser, ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
+        if (AnonymousRecipient.class.isInstance(recipient)) {
+            return prepareGuestUser(sharingUser, (AnonymousRecipient) recipient, targets.get(0));
+        } else if (GuestRecipient.class.isInstance(recipient)) {
+            return prepareGuestUser(contextId, sharingUser, (GuestRecipient) recipient);
+        } else {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("unsupported share recipient: " + recipient);
         }
-        return service;
+    }
+
+    /**
+     * Prepares a (named) guest user instance. If no password is defined in the supplied guest recipient, an auto-generated one is used.
+     *
+     * @param sharingUser The sharing user
+     * @param recipient The recipient description
+     * @return The guest user
+     */
+    private UserImpl prepareGuestUser(int contextId, User sharingUser, GuestRecipient recipient) throws OXException {
+        String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+        /*
+         * try to lookup & reuse data from existing guest in other context via guest service
+         */
+        UserImpl copiedUser = requireService(GuestService.class).createUserCopy(recipient.getEmailAddress(), groupId, contextId);
+        if (copiedUser != null) {
+            return prepareGuestUser(sharingUser, copiedUser);
+        }
+        /*
+         * prepare new guest user for recipient & set "was created" marker
+         */
+        UserImpl guestUser = prepareGuestUser(sharingUser);
+        guestUser.setDisplayName(recipient.getDisplayName());
+        guestUser.setMail(recipient.getEmailAddress());
+        guestUser.setLoginInfo(recipient.getEmailAddress());
+        guestUser.setPasswordMech(PasswordMech.BCRYPT.getIdentifier());
+        if (Strings.isNotEmpty(recipient.getPassword())) {
+            try {
+                guestUser.setUserPassword(PasswordMech.BCRYPT.encode(recipient.getPassword()));
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, "Could not encode new password for guest user");
+            }
+        }
+        return guestUser;
+    }
+
+    /**
+     * Prepares an anonymous guest user instance.
+     *
+     * @param sharingUser The sharing user
+     * @param recipient The recipient description
+     * @param target The link target
+     * @return The guest user
+     */
+    private UserImpl prepareGuestUser(User sharingUser, AnonymousRecipient recipient, ShareTarget target) throws OXException {
+        UserImpl guestUser = prepareGuestUser(sharingUser);
+        guestUser.setDisplayName("Guest");
+        guestUser.setMail("");
+        if (null != recipient.getPassword()) {
+            guestUser.setUserPassword(requireService(ShareCryptoService.class).encrypt(recipient.getPassword()));
+            guestUser.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+        } else {
+            guestUser.setPasswordMech("");
+        }
+        try {
+            ShareTool.assignUserAttribute(guestUser, ShareTool.LINK_TARGET_USER_ATTRIBUTE, ShareTool.targetToJSON(target).toString());
+        } catch (JSONException e) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+        return guestUser;
+    }
+
+    /**
+     * Prepares a guest user instance based on a "parent" sharing user.
+     *
+     * @param sharingUser The sharing user
+     * @return The guest user
+     */
+    private UserImpl prepareGuestUser(User sharingUser) {
+        UserImpl guestUser = new UserImpl();
+        guestUser.setCreatedBy(sharingUser.getId());
+        guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
+        guestUser.setTimeZone(sharingUser.getTimeZone());
+        guestUser.setMailEnabled(true);
+        ShareToken.assignBaseToken(guestUser);
+        return guestUser;
+    }
+
+    /**
+     * Prepares a guest user instance based on a "parent" sharing user.
+     *
+     * @param sharingUser The sharing user
+     * @param guestUser The existing guest user to prepare
+     * @return The guest user
+     */
+    private UserImpl prepareGuestUser(User sharingUser, UserImpl guestUser) {
+        if (guestUser == null) {
+            return prepareGuestUser(sharingUser);
+        }
+        guestUser.setCreatedBy(sharingUser.getId());
+        guestUser.setPreferredLanguage(sharingUser.getPreferredLanguage());
+        guestUser.setTimeZone(sharingUser.getTimeZone());
+        guestUser.setMailEnabled(true);
+        ShareToken.assignBaseToken(guestUser);
+        return guestUser;
+    }
+
+    /**
+     * Prepares a user contact for a guest user.
+     *
+     * @param contextId The context identifier
+     * @param sharingUser The sharing user
+     * @param guestUser The guest user
+     * @return The guest contact
+     */
+    public Contact prepareGuestContact(int contextId, User sharingUser, User guestUser) throws OXException {
+        String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+        /*
+         * try to lookup & reuse data from existing guest in other context via guest service
+         */
+        Contact copiedContact = requireService(GuestService.class).createContactCopy(guestUser.getMail(), groupId, contextId, guestUser.getId());
+        if (null != copiedContact) {
+            return copiedContact;
+        }
+        /*
+         * prepare new contact for recipient
+         */
+        Contact contact = new Contact();
+        contact.setParentFolderID(FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
+        contact.setCreatedBy(sharingUser.getId());
+        contact.setDisplayName(guestUser.getDisplayName());
+        contact.setEmail1(guestUser.getMail());
+        return contact;
+    }
+
+    /**
+     * Sets a user's permission bits. This includes assigning initial permission bits, as well as updating already existing permissions.
+     *
+     * @param connection The database connection to use
+     * @param context The context
+     * @param userID The identifier of the user to set the permission bits for
+     * @param permissionBits The permission bits to set
+     * @param merge <code>true</code> to merge with the previously assigned permissions, <code>false</code> to overwrite
+     * @return The updated permission bits
+     */
+    public UserPermissionBits setPermissionBits(Connection connection, Context context, int userID, int permissionBits, boolean merge) throws OXException {
+        UserPermissionService userPermissionService = requireService(UserPermissionService.class);
+        UserPermissionBits userPermissionBits = null;
+        try {
+            userPermissionBits = userPermissionService.getUserPermissionBits(connection, userID, context);
+        } catch (OXException e) {
+            if (false == UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                throw e;
+            }
+        }
+        if (null == userPermissionBits) {
+            /*
+             * save permission bits
+             */
+            userPermissionBits = new UserPermissionBits(permissionBits, userID, context.getContextId());
+            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+        } else if (userPermissionBits.getPermissionBits() != permissionBits) {
+            /*
+             * update permission bits
+             */
+            userPermissionBits.setPermissionBits(merge ? permissionBits | userPermissionBits.getPermissionBits() : permissionBits);
+            userPermissionService.saveUserPermissionBits(connection, userPermissionBits);
+            /*
+             * invalidate affected user configuration
+             */
+            requireService(UserConfigurationService.class).removeUserConfiguration(userID, context);
+        }
+        return userPermissionBits;
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied share targets. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param recipient The share recipient
+     * @param targets The share targets
+     * @return The permission bits
+     */
+    public int getRequiredPermissionBits(ShareRecipient recipient, List<ShareTarget> targets) throws OXException {
+        Set<Integer> modules = new HashSet<Integer>(targets.size());
+        for (ShareTarget target : targets) {
+            modules.add(target.getModule());
+        }
+        return getRequiredPermissionBits(ShareTool.getAuthenticationMode(recipient), modules);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied modules. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param guest The guest user
+     * @param modules The module identifiers
+     * @return The permission bits
+     */
+    public int getRequiredPermissionBits(User guest, Collection<Integer> modules) throws OXException {
+        return getRequiredPermissionBits(ShareTool.getAuthenticationMode(guest), modules);
+    }
+
+    /**
+     * Gets permission bits suitable for a guest user being allowed to access all supplied modules. Besides the concrete module
+     * permission(s), this includes the permission bits to access shared and public folders, as well as the bit to turn off portal
+     * access.
+     *
+     * @param guest The guest user
+     * @param modules The module identifiers
+     * @return The permission bits
+     */
+    private int getRequiredPermissionBits(AuthenticationMode authentication, Collection<Integer> modules) throws OXException {
+        Set<Permission> perms = new HashSet<Permission>(8);
+        perms.add(Permission.DENIED_PORTAL);
+        perms.add(Permission.EDIT_PUBLIC_FOLDERS);
+        perms.add(Permission.READ_CREATE_SHARED_FOLDERS);
+        if (AuthenticationMode.GUEST == authentication || AuthenticationMode.GUEST_PASSWORD == authentication) {
+            perms.add(Permission.EDIT_PASSWORD);
+        }
+        for (Integer module : modules) {
+            addModulePermissions(perms, module.intValue());
+        }
+        return Permission.toBits(perms);
+    }
+
+    /**
+     * Adds a module permission to the supplied permission set.
+     *
+     * @param perms The permission set
+     * @param module The module to add the permissions for
+     * @return The adjusted permission set
+     */
+    private Set<Permission> addModulePermissions(Set<Permission> perms, int module) throws OXException {
+        Module matchingModule = Module.getForFolderConstant(module);
+        if (null != matchingModule) {
+            Permission modulePermission = matchingModule.getPermission();
+            if (null == modulePermission) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("No module permission for module " + matchingModule);
+            }
+            perms.add(modulePermission);
+        }
+        return perms;
     }
 
     /**
@@ -155,7 +437,6 @@ public class ShareUtils {
      *
      * @param session - the {@link Session} of the user to collect the addresses for
      * @param shareRecipients - List of {@link ShareRecipient}s to collect addresses for
-     * @throws OXException
      */
     public void collectAddresses(final Session session, final List<ShareRecipient> shareRecipients) throws OXException {
         final ContactCollectorService ccs = services.getService(ContactCollectorService.class);
@@ -172,7 +453,6 @@ public class ShareUtils {
      *
      * @param shareRecipients - a list of {@link ShareRecipient}s to get addresses from
      * @return <code>Set</code> of <code>InternetAddress</code>es for further processing
-     * @throws OXException
      */
     private Set<InternetAddress> getEmailAddresses(List<ShareRecipient> shareRecipients) throws OXException {
         Set<InternetAddress> addrs = new HashSet<InternetAddress>();

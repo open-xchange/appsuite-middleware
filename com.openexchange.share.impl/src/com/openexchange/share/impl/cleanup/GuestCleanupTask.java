@@ -69,10 +69,10 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.Share;
-import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.groupware.ModuleSupport;
 import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.impl.DefaultGuestInfo;
+import com.openexchange.share.impl.ShareUtils;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.threadpool.AbstractTask;
@@ -218,9 +218,9 @@ public class GuestCleanupTask extends AbstractTask<Void> {
             /*
              * guest user still has shares, adjust permissions as needed
              */
-            int requiredPermissionBits = ShareTool.getRequiredPermissionBits(guestUser, modules);
-            UserPermissionBits updatedPermissionBits = ShareTool.setPermissionBits(
-                services, connectionHelper.getConnection(), context, guestID, requiredPermissionBits, false);
+            ShareUtils utils = new ShareUtils(services);
+            int requiredPermissionBits = utils.getRequiredPermissionBits(guestUser, modules);
+            UserPermissionBits updatedPermissionBits = utils.setPermissionBits(connectionHelper.getConnection(), context, guestID, requiredPermissionBits, false);
             if (updatedPermissionBits.getPermissionBits() != requiredPermissionBits) {
                 LOG.debug("Shares in modules {} still available for {}, permission bits adjusted to {}.",
                     modules, guestInfo, updatedPermissionBits);

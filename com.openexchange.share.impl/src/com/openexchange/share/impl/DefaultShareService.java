@@ -957,18 +957,18 @@ public class DefaultShareService implements ShareService {
              */
             Group group = services.getService(GroupService.class).getGroup(context, ((InternalRecipient) recipient).getEntity());
             for (ShareTarget target : targets) {
-                Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, group.getIdentifier(), target, null);
+                Share share = utils.prepareShare(context.getContextId(), sharingUser, group.getIdentifier(), target, null);
                 shareInfos.add(new InternalGroupShareInfo(context.getContextId(), group, share));
             }
         } else {
             /*
              * prepare guest or internal user shares for other recipient types
              */
-            int permissionBits = ShareTool.getRequiredPermissionBits(recipient, targets);
+            int permissionBits = utils.getRequiredPermissionBits(recipient, targets);
             User guestUser = getGuestUser(connectionHelper.getConnection(), context, sharingUser, permissionBits, recipient, targets);
             Date expiry = RecipientType.ANONYMOUS.equals(recipient.getType()) ? ((AnonymousRecipient) recipient).getExpiryDate() : null;
             for (ShareTarget target : targets) {
-                Share share = ShareTool.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, expiry);
+                Share share = utils.prepareShare(context.getContextId(), sharingUser, guestUser.getId(), target, expiry);
                 if (false == guestUser.isGuest()) {
                     shareInfos.add(new InternalUserShareInfo(context.getContextId(), guestUser, share));
                 } else {
@@ -1079,7 +1079,7 @@ public class DefaultShareService implements ShareService {
                     /*
                      * combine permission bits with existing ones, reset any last modified marker if present
                      */
-                    UserPermissionBits userPermissionBits = ShareTool.setPermissionBits(services, connection, context, existingUser.getId(), permissionBits, true);
+                    UserPermissionBits userPermissionBits = utils.setPermissionBits(connection, context, existingUser.getId(), permissionBits, true);
                     GuestLastModifiedMarker.clearLastModified(services, context, existingUser);
                     LOG.debug("Using existing guest user {} with permissions {} in context {}: {}", existingUser.getMail(), userPermissionBits.getPermissionBits(), context.getContextId(), existingUser.getId());
                     /*
@@ -1105,8 +1105,8 @@ public class DefaultShareService implements ShareService {
          * create new guest user & contact in this context
          */
         ContactUserStorage contactUserStorage = services.getService(ContactUserStorage.class);
-        UserImpl guestUser = ShareTool.prepareGuestUser(services, context.getContextId(), sharingUser, recipient, targets);
-        Contact contact = ShareTool.prepareGuestContact(services, context.getContextId(), sharingUser, guestUser);
+        UserImpl guestUser = utils.prepareGuestUser(context.getContextId(), sharingUser, recipient, targets);
+        Contact contact = utils.prepareGuestContact(context.getContextId(), sharingUser, guestUser);
         int contactId = contactUserStorage.createGuestContact(context.getContextId(), contact, connection);
         guestUser.setContactId(contactId);
         int guestID = userService.createUser(connection, context, guestUser);
