@@ -116,7 +116,7 @@ public class BasicDriveTest extends AbstractFindTest {
      *
      * @param name
      */
-    public BasicDriveTest(String name) {
+    public BasicDriveTest(final String name) {
         super(name);
     }
 
@@ -125,10 +125,10 @@ public class BasicDriveTest extends AbstractFindTest {
         super.setUp();
         client = new AJAXClient(User.User1);
         MailConfig.init();
-        String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
-        java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
+        final String testDataDir = MailConfig.getProperty(MailConfig.Property.TEST_MAIL_DIR);
+        final java.io.File file = new java.io.File(testDataDir, "BasicDriveTest.tmp");
 
-        String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
+        final String folderName = "findApiDriveTestFolder_" + System.currentTimeMillis();
         testFolder = folderManager.generatePrivateFolder(
             folderName,
             FolderObject.INFOSTORE,
@@ -155,12 +155,12 @@ public class BasicDriveTest extends AbstractFindTest {
 
     public void testSearch() throws Exception {
         verifyDocumentExists();
-        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+        final ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
             Collections.singletonList(Constants.FIELD_FILE_NAME),
             SEARCH));
-        QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileNameFacet), Module.DRIVE.getIdentifier());
-        QueryResponse response = client.execute(request);
-        SearchResult result = response.getSearchResult();
+        final QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileNameFacet), Module.DRIVE.getIdentifier());
+        final QueryResponse response = client.execute(request);
+        final SearchResult result = response.getSearchResult();
         assertTrue("Nothing found in BasicDriveTest", result.getSize() > 0);
     }
     
@@ -200,43 +200,43 @@ public class BasicDriveTest extends AbstractFindTest {
             files.add(f);
         }
 
-        ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
+        final ActiveFacet fileNameFacet = new ActiveFacet(CommonFacetType.GLOBAL, "global", new Filter(
             Collections.singletonList(Constants.FIELD_FILE_NAME),
             SUBFOLDER_SEARCH));
-        ActiveFacet fileNameFacet2 = new ActiveFacet(CommonFacetType.FOLDER, String.valueOf(testFolder.getObjectID()), new Filter(
+        final ActiveFacet fileNameFacet2 = new ActiveFacet(CommonFacetType.FOLDER, String.valueOf(testFolder.getObjectID()), new Filter(
             Collections.singletonList(Constants.FIELD_FILE_NAME),
             SUBFOLDER_SEARCH));
-        List<ActiveFacet> facetList = new LinkedList<ActiveFacet>();
+        final List<ActiveFacet> facetList = new LinkedList<ActiveFacet>();
         facetList.add(fileNameFacet);
         facetList.add(fileNameFacet2);
-        QueryRequest request = new QueryRequest(0, 10, facetList, Module.DRIVE.getIdentifier());
-        QueryResponse response = client.execute(request);
-        SearchResult result = response.getSearchResult();
+        final QueryRequest request = new QueryRequest(0, 10, facetList, Module.DRIVE.getIdentifier());
+        final QueryResponse response = client.execute(request);
+        final SearchResult result = response.getSearchResult();
         assertTrue("Found " + result.getSize() + " instead of " + files.size() + " files.", result.getSize() == files.size());
     }
 
     public void testSizeFacet() throws Exception {
         verifyDocumentExists();
-        ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSize.MB1.getSize(), new Filter(
+        final ActiveFacet fileSizeFacet = new ActiveFacet(DriveFacetType.FILE_SIZE, FileSize.MB1.getSize(), new Filter(
             Collections.singletonList(Constants.FIELD_FILE_SIZE),
             FileSize.MB1.getSize()));
-        QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileSizeFacet), Module.DRIVE.getIdentifier());
-        QueryResponse response = client.execute(request);
-        SearchResult result = response.getSearchResult();
+        final QueryRequest request = new QueryRequest(0, 10, Collections.singletonList(fileSizeFacet), Module.DRIVE.getIdentifier());
+        final QueryResponse response = client.execute(request);
+        final SearchResult result = response.getSearchResult();
         assertNotNull("No search result", result);
         assertTrue("Nothing found in file size test", result.getSize() > 0);
-        for (Document d : result.getDocuments()) {
-            PropDocument file = (PropDocument) d;
+        for (final Document d : result.getDocuments()) {
+            final PropDocument file = (PropDocument) d;
             assertTrue("File is too small", (Integer) file.getProps().get("file_size") >= 1024 * 1024);
         }
     }
 
     private void verifyDocumentExists() throws Exception {
-        int[] columns = new int[] {1, 20, 700}; // id, folder, title
-        SearchInfostoreResponse verificationResponse = client.execute(new SearchInfostoreRequest(testFolder.getObjectID(), metadata.getTitle(), columns));
-        JSONArray foundFiles = (JSONArray) verificationResponse.getData();
+        final int[] columns = new int[] {1, 20, 700}; // id, folder, title
+        final SearchInfostoreResponse verificationResponse = client.execute(new SearchInfostoreRequest(testFolder.getObjectID(), metadata.getTitle(), columns));
+        final JSONArray foundFiles = (JSONArray) verificationResponse.getData();
         assertEquals("Wrong number of documents found via conventional search", 1, foundFiles.length());
-        JSONArray desiredFile = foundFiles.getJSONArray(0);
+        final JSONArray desiredFile = foundFiles.getJSONArray(0);
         assertEquals("Wrong id for file found via conventional search", metadata.getId(), desiredFile.get(0).toString());
         assertEquals("Wrong folder for file found via conventional search", testFolder.getObjectID(), Integer.parseInt(desiredFile.get(1).toString()));
         assertEquals("Wrong title for file found via conventional search", metadata.getTitle(), desiredFile.get(2).toString());
@@ -244,18 +244,18 @@ public class BasicDriveTest extends AbstractFindTest {
 
     public void testExclusiveFacetValues() throws Exception {
         List<Facet> facets = autocomplete("");
-        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        final Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
         assertEquals("Expected all 3 folder types", 3, ((ExclusiveFacet) folderTypeFacet).getValues().size());
 
-        FacetValue chosenType = ((ExclusiveFacet) folderTypeFacet).getValues().get(0);
+        final FacetValue chosenType = ((ExclusiveFacet) folderTypeFacet).getValues().get(0);
         facets = autocomplete("", Collections.singletonList(createFolderTypeFacet(FolderType.getByIdentifier(chosenType.getId()))));
         assertNull("Folder type facet was returned", findByType(CommonFacetType.FOLDER_TYPE, facets));
     }
 
     public void testExclusiveFacets() throws Exception {
         List<Facet> facets = autocomplete("");
-        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        final Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
         assertEquals("Expected all 3 folder types", 3, ((ExclusiveFacet) folderTypeFacet).getValues().size());
         facets = autocomplete("", Collections.singletonList(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER)));
@@ -263,13 +263,13 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testConflictsFolderFlag() throws Exception {
-        List<Facet> facets = autocomplete("");
-        Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
+        final List<Facet> facets = autocomplete("");
+        final Facet folderTypeFacet = findByType(CommonFacetType.FOLDER_TYPE, facets);
         assertNotNull("Missing folder type facet", folderTypeFacet);
         boolean found = false;
-        String prefix = "conflicts:";
-        for (String flag : folderTypeFacet.getFlags()) {
-            int index = flag.indexOf(prefix);
+        final String prefix = "conflicts:";
+        for (final String flag : folderTypeFacet.getFlags()) {
+            final int index = flag.indexOf(prefix);
             if (index > -1) {
                 if (CommonFacetType.FOLDER.getId().equals(flag.substring(index + prefix.length()))) {
                     found = true;
@@ -282,7 +282,7 @@ public class BasicDriveTest extends AbstractFindTest {
 
     public void testDefaultColumnsAreEquivalentToListRequest() throws Exception {
         // 20,23,1,5,700,702,703,704,707,3 from api.js
-        Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
+        final Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
         Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
         Field.LOCKED_UNTIL, Field.MODIFIED_BY};
         testWithFields(fields, false);
@@ -290,31 +290,31 @@ public class BasicDriveTest extends AbstractFindTest {
 
     public void testWithExplicitColumns1() throws Exception {
         // 20,23,1,5,700,702,703,704,707,3 from api.js
-        Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
+        final Field[] fields = new Field[] {Field.FOLDER_ID, Field.META, Field.ID, Field.LAST_MODIFIED,
         Field.TITLE, Field.FILENAME, Field.FILE_MIMETYPE, Field.FILE_SIZE,
         Field.LOCKED_UNTIL, Field.MODIFIED_BY};
         testWithFields(fields, true);
     }
 
     public void testWithExplicitColumns2() throws Exception {
-        Field[] fields = new Field[] {Field.FOLDER_ID, Field.ID, Field.META, Field.LAST_MODIFIED,
+        final Field[] fields = new Field[] {Field.FOLDER_ID, Field.ID, Field.META, Field.LAST_MODIFIED,
         Field.TITLE, Field.FILENAME };
         testWithFields(fields, true);
     }
 
-    private void testWithFields(Field fields[], boolean withColumns) throws Exception {
-        int columns[] = new int[fields.length];
+    private void testWithFields(final Field fields[], final boolean withColumns) throws Exception {
+        final int columns[] = new int[fields.length];
         for (int i = 0; i < fields.length; i++) {
             columns[i] = fields[i].getNumber();
         }
 
-        ListInfostoreRequest listRequest = new ListInfostoreRequest(columns);
+        final ListInfostoreRequest listRequest = new ListInfostoreRequest(columns);
         listRequest.addItem(new ListItem(metadata));
-        ListInfostoreResponse listResponse = client.execute(listRequest);
-        Object[] listDocument = listResponse.getArray()[0];
+        final ListInfostoreResponse listResponse = client.execute(listRequest);
+        final Object[] listDocument = listResponse.getArray()[0];
 
         // Search the same item and compare fields
-        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        final List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(createActiveFieldFacet(DriveFacetType.FILE_NAME, Constants.FIELD_FILE_NAME, SEARCH));
         facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER));
         QueryRequest queryRequest;
@@ -323,13 +323,13 @@ public class BasicDriveTest extends AbstractFindTest {
         } else {
             queryRequest = new QueryRequest(0, 10, facets, Module.DRIVE.getIdentifier());
         }
-        QueryResponse queryResponse = client.execute(queryRequest);
-        PropDocument queryDocument = (PropDocument) queryResponse.getSearchResult().getDocuments().get(0);
+        final QueryResponse queryResponse = client.execute(queryRequest);
+        final PropDocument queryDocument = (PropDocument) queryResponse.getSearchResult().getDocuments().get(0);
         for (int i = 0; i < fields.length; i++) {
-            Field field = fields[i];
-            Object listValue = listDocument[i];
+            final Field field = fields[i];
+            final Object listValue = listDocument[i];
             if (field == Field.META) {
-                Map<String, Object> asMap = (Map<String, Object>) listValue;
+                final Map<String, Object> asMap = (Map<String, Object>) listValue;
                 assertTrue(asMap.equals(queryDocument.getProps().get(field.getName())));
             } else {
                 assertEquals("Unexpected value for field " + field.getName(), listValue, queryDocument.getProps().get(field.getName()));
@@ -338,11 +338,11 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testConflictingFacetsCauseException() throws Exception {
-        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        final List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(createActiveFacet(CommonFacetType.FOLDER, testFolder.getObjectID(), Filter.NO_FILTER));
         facets.add(createFolderTypeFacet(FolderType.PRIVATE));
-        AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
-        AutocompleteResponse resp = client.execute(autocompleteRequest);
+        final AutocompleteRequest autocompleteRequest = new AutocompleteRequest("", Module.DRIVE.getIdentifier(), facets, (Map<String, String>) null, false);
+        final AutocompleteResponse resp = client.execute(autocompleteRequest);
         assertTrue("Wrong exception", FindExceptionCode.FACET_CONFLICT.equals(resp.getException()));
     }
 
@@ -364,11 +364,11 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testFolderTypeFacet() throws Exception {
-        AJAXClient client2 = new AJAXClient(User.User2);
+        final AJAXClient client2 = new AJAXClient(User.User2);
         try {
-            FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
-            AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
-            FolderObject[] folders = new FolderObject[3];
+            final FolderType[] typesInOrder = new FolderType[] { FolderType.PRIVATE, FolderType.PUBLIC, FolderType.SHARED };
+            final AJAXClient[] clients = new AJAXClient[] { client, client, client2 };
+            final FolderObject[] folders = new FolderObject[3];
             folders[0] = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
                 randomUID(),
                 FolderObject.INFOSTORE,
@@ -386,7 +386,7 @@ public class BasicDriveTest extends AbstractFindTest {
                 client.getValues().getUserId(),
                 client2.getValues().getUserId()));
 
-            File[] documents = new File[3];
+            final File[] documents = new File[3];
             documents[0] = new DefaultFile(metadata);
             documents[0].setTitle(randomUID());
             documents[0].setFolderId(String.valueOf(folders[0].getObjectID()));
@@ -401,14 +401,14 @@ public class BasicDriveTest extends AbstractFindTest {
             manager.newAction(documents[2]);
 
             for (int i = 0; i < 3; i++) {
-                FolderType folderType = typesInOrder[i];
-                List<Facet> facets = autocomplete(clients[i], "");
-                ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
-                FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
-                List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
-                PropDocument[] foundDocs = new PropDocument[3];
-                for (PropDocument doc : docs) {
-                    Map<String, Object> props = doc.getProps();
+                final FolderType folderType = typesInOrder[i];
+                final List<Facet> facets = autocomplete(clients[i], "");
+                final ExclusiveFacet folderTypeFacet = (ExclusiveFacet) findByType(CommonFacetType.FOLDER_TYPE, facets);
+                final FacetValue typeValue = findByValueId(folderType.getIdentifier(), folderTypeFacet);
+                final List<PropDocument> docs = query(clients[i], Collections.singletonList(createActiveFacet(folderTypeFacet, typeValue)));
+                final PropDocument[] foundDocs = new PropDocument[3];
+                for (final PropDocument doc : docs) {
+                    final Map<String, Object> props = doc.getProps();
                     if (documents[0].getTitle().equals(props.get("title"))) {
                         foundDocs[0] = doc;
                         continue;
@@ -447,29 +447,29 @@ public class BasicDriveTest extends AbstractFindTest {
     }
 
     public void testDeletedFilesAreIgnored() throws Exception {
-        FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
+        final FolderObject deletedFolder = folderManager.insertFolderOnServer(folderManager.generatePrivateFolder(
             randomUID(),
             FolderObject.INFOSTORE,
             client.getValues().getPrivateInfostoreFolder(),
             client.getValues().getUserId()));
-        File deletedDocument = new DefaultFile(metadata);
+        final File deletedDocument = new DefaultFile(metadata);
         deletedDocument.setTitle(randomUID());
         deletedDocument.setFolderId(String.valueOf(deletedFolder.getObjectID()));
         manager.newAction(deletedDocument);
         folderManager.deleteFolderOnServer(deletedFolder);
-        FolderObject reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getFolder();
-        FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentFolderID())).getFolder();
+        final FolderObject reloadedFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, deletedFolder.getObjectID())).getFolder();
+        final FolderObject trashFolder = client.execute(new GetRequest(EnumAPI.OX_NEW, reloadedFolder.getParentFolderID())).getFolder();
         assertEquals("Wrong type", FolderObject.TRASH, trashFolder.getType());
 
-        List<Facet> autocompleteResponse = autocomplete(deletedDocument.getTitle());
-        DefaultFacet folderTypeFacet = (DefaultFacet) findByType(CommonFacetType.FOLDER_TYPE, autocompleteResponse);
-        ActiveFacet[] folderTypeFacets = new ActiveFacet[3];
+        final List<Facet> autocompleteResponse = autocomplete(deletedDocument.getTitle());
+        final DefaultFacet folderTypeFacet = (DefaultFacet) findByType(CommonFacetType.FOLDER_TYPE, autocompleteResponse);
+        final ActiveFacet[] folderTypeFacets = new ActiveFacet[3];
         folderTypeFacets[0] = createActiveFacet(folderTypeFacet, findByValueId(FolderType.PRIVATE.getIdentifier(), folderTypeFacet));
         folderTypeFacets[1] = createActiveFacet(folderTypeFacet, findByValueId(FolderType.PUBLIC.getIdentifier(), folderTypeFacet));
         folderTypeFacets[2] = createActiveFacet(folderTypeFacet, findByValueId(FolderType.SHARED.getIdentifier(), folderTypeFacet));
 
-        ActiveFacet fileNameFacet = createActiveFacet((SimpleFacet) findByType(DriveFacetType.FILE_NAME, autocompleteResponse));
-        List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
+        final ActiveFacet fileNameFacet = createActiveFacet((SimpleFacet) findByType(DriveFacetType.FILE_NAME, autocompleteResponse));
+        final List<ActiveFacet> facets = new LinkedList<ActiveFacet>();
         facets.add(fileNameFacet);
         facets.add(createActiveFacet(CommonFacetType.FOLDER, reloadedFolder.getObjectID(), Filter.NO_FILTER));
         List<PropDocument> documents = query(client, facets);
@@ -545,29 +545,29 @@ public class BasicDriveTest extends AbstractFindTest {
 //        assertEquals("Wrong order", firstDoc.getTitle(), found.get(2));
 //    }
 
-    protected List<Facet> autocomplete(AJAXClient client, String prefix) throws Exception {
-        AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.DRIVE.getIdentifier());
-        AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
+    protected List<Facet> autocomplete(final AJAXClient client, final String prefix) throws Exception {
+        final AutocompleteRequest autocompleteRequest = new AutocompleteRequest(prefix, Module.DRIVE.getIdentifier());
+        final AutocompleteResponse autocompleteResponse = client.execute(autocompleteRequest);
         return autocompleteResponse.getFacets();
     }
 
-    protected List<PropDocument> query(AJAXClient client, List<ActiveFacet> facets) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.DRIVE.getIdentifier());
-        QueryResponse queryResponse = client.execute(queryRequest);
-        SearchResult result = queryResponse.getSearchResult();
-        List<PropDocument> propDocuments = new ArrayList<PropDocument>();
-        List<Document> documents = result.getDocuments();
-        for (Document document : documents) {
+    protected List<PropDocument> query(final AJAXClient client, final List<ActiveFacet> facets) throws Exception {
+        final QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, Module.DRIVE.getIdentifier());
+        final QueryResponse queryResponse = client.execute(queryRequest);
+        final SearchResult result = queryResponse.getSearchResult();
+        final List<PropDocument> propDocuments = new ArrayList<PropDocument>();
+        final List<Document> documents = result.getDocuments();
+        for (final Document document : documents) {
             propDocuments.add((PropDocument) document);
         }
         return propDocuments;
     }
 
-    protected List<Facet> autocomplete(String prefix) throws Exception {
+    protected List<Facet> autocomplete(final String prefix) throws Exception {
         return autocomplete(Module.DRIVE, prefix);
     }
 
-    protected List<Facet> autocomplete(String prefix, List<ActiveFacet> facets) throws Exception {
+    protected List<Facet> autocomplete(final String prefix, final List<ActiveFacet> facets) throws Exception {
         return autocomplete(Module.DRIVE, prefix, facets);
     }
 
