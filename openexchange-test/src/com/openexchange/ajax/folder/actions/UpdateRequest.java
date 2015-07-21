@@ -79,12 +79,12 @@ public class UpdateRequest extends InsertRequest {
         this.handDown = handDown;
         return this;
     }
-    
+
     public UpdateRequest setCascadePermissions(boolean cascade) {
         this.cascade = cascade;
         return this;
     }
-    
+
     public UpdateRequest setIgnoreWarnings(boolean ignoreWarnings) {
         this.ignoreWarnings = ignoreWarnings;
         return this;

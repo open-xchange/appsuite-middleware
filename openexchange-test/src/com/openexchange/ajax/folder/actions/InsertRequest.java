@@ -52,9 +52,11 @@ package com.openexchange.ajax.folder.actions;
 import java.util.List;
 import java.util.TimeZone;
 import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.fields.FolderFields;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
@@ -69,6 +71,10 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
      * Should the parser fail on error in server response.
      */
     final boolean failOnError;
+
+    private Transport notificationTransport;
+
+    private String notificationMessage;
 
     /**
      * Initializes a new {@link InsertRequest}.
@@ -118,8 +124,38 @@ public class InsertRequest extends AbstractFolderRequest<InsertResponse> {
         this.folder = folder;
     }
 
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     */
+    public void setNotifyPermissionEntities(Transport transport) {
+        setNotifyPermissionEntities(transport, null);
+    }
+
+    /**
+     * Enables the notification of added permission entities via the given transport.
+     *
+     * @param transport The transport
+     * @param message The user-defined message
+     */
+    public void setNotifyPermissionEntities(Transport transport, String message) {
+        notificationTransport = transport;
+        notificationMessage = message;
+    }
+
     @Override
     public Object getBody() throws JSONException {
+        if (notificationTransport != null) {
+            JSONObject data = new JSONObject();
+            data.put("folder", convert(folder));
+            JSONObject jNotification = new JSONObject();
+            jNotification.put("transport", notificationTransport.getID());
+            jNotification.put("message", notificationMessage);
+            data.put("notification", jNotification);
+            return data;
+        }
+
         return convert(folder);
     }
 

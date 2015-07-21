@@ -74,6 +74,7 @@ import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
+import com.openexchange.ajax.framework.AJAXRequest;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.infostore.actions.DeleteInfostoreRequest;
 import com.openexchange.ajax.infostore.actions.GetInfostoreRequest;
@@ -392,13 +393,17 @@ public abstract class ShareTest extends AbstractAJAXSession {
         return createdFile;
     }
 
+    protected interface RequestCustomizer<R extends AJAXRequest<?>> {
+        void customize(R request);
+    }
+
 
     /**
      * Updates and remembers a folder without cascading permission.
      *
      * @param api The folder tree to use
-     * @param folder The folder to udpate
-     * @return The udpated folder
+     * @param folder The folder to update
+     * @return The updated folder
      * @throws Exception
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder) throws Exception {
@@ -409,14 +414,34 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * Updates and remembers a folder.
      *
      * @param api The folder tree to use
-     * @param folder The folder to udpate
+     * @param folder The folder to update
      * @param cascadePermissions If changed permissions shall be also applied to subfolders
-     * @return The udpated folder
+     * @return The updated folder
      * @throws Exception
      */
-    protected FolderObject updateFolder(EnumAPI api, FolderObject folder, boolean cascadePermissions) throws Exception {
+    protected FolderObject updateFolder(EnumAPI api, FolderObject folder, final boolean cascadePermissions) throws Exception {
+        return updateFolder(api, folder, new RequestCustomizer<UpdateRequest>() {
+            @Override
+            public void customize(UpdateRequest request) {
+                request.setCascadePermissions(cascadePermissions);
+            }
+        });
+    }
+
+    /**
+     * Updates and remembers a folder without cascading permission.
+     *
+     * @param api The folder tree to use
+     * @param folder The folder to update
+     * @param customizer The request customizer or <code>null</code>
+     * @return The updated folder
+     * @throws Exception
+     */
+    protected FolderObject updateFolder(EnumAPI api, FolderObject folder, RequestCustomizer<UpdateRequest> customizer) throws Exception {
         UpdateRequest request = new UpdateRequest(api, folder);
-        request.setCascadePermissions(cascadePermissions);
+        if (customizer != null) {
+            customizer.customize(request);
+        }
         InsertResponse insertResponse = client.execute(request);
         insertResponse.fillObject(folder);
         remember(folder);
@@ -429,13 +454,30 @@ public abstract class ShareTest extends AbstractAJAXSession {
     /**
      * Updates and remembers a file.
      *
-     * @param file The file to udpate
+     * @param file The file to update
+     * @param modifiedColumns The modified columns
      * @return The updated file, re-fetched from the server
      * @throws Exception
      */
     protected File updateFile(File file, Field[] modifiedColumns) throws Exception {
+        return updateFile(file, modifiedColumns, null);
+    }
+
+    /**
+     * Updates and remembers a file.
+     *
+     * @param file The file to update
+     * @param modifiedColumns The modified columns
+     * @param customizer The request customizer or <code>null</code>
+     * @return The updated file, re-fetched from the server
+     * @throws Exception
+     */
+    protected File updateFile(File file, Field[] modifiedColumns, RequestCustomizer<UpdateInfostoreRequest> customizer) throws Exception {
         UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, modifiedColumns, file.getLastModified());
         updateInfostoreRequest.setFailOnError(true);
+        if (customizer != null) {
+            customizer.customize(updateInfostoreRequest);
+        }
         UpdateInfostoreResponse updateInfostoreResponse = getClient().execute(updateInfostoreRequest);
         assertFalse(updateInfostoreResponse.hasError());
         GetInfostoreRequest getInfostoreRequest = new GetInfostoreRequest(file.getId());

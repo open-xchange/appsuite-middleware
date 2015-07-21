@@ -66,10 +66,12 @@ import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
+import com.openexchange.ajax.folder.actions.UpdateRequest;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.UserValues;
 import com.openexchange.ajax.infostore.actions.InfostoreTestManager;
+import com.openexchange.ajax.infostore.actions.UpdateInfostoreRequest;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.InviteRequest;
 import com.openexchange.ajax.share.actions.StartSMTPRequest;
@@ -85,6 +87,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.notification.impl.NotificationStrings;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.test.TestInit;
@@ -377,17 +380,23 @@ public class MailNotificationTest extends ShareTest {
         toUpdate.setFolderName(testFolder1.getFolderName());
         toUpdate.setPermissions(testFolder1.getPermissions());
         toUpdate.addPermission(guestPermission);
-        updateFolder(EnumAPI.OX_NEW, toUpdate);
+        updateFolder(EnumAPI.OX_NEW, toUpdate, new RequestCustomizer<UpdateRequest>() {
+            @Override
+            public void customize(UpdateRequest request) {
+                request.setNotifyPermissionEntities(Transport.MAIL, clientShareMessage);
+            }
+        });
 
         Message message = assertAndGetMessage();
         Document document = message.getHtml();
         String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName());
-        String hasSharedString = String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_FOLDER, clientFullName, clientEmail, testFolder1.getFolderName()), NotificationStrings.PLEASE_CLICK_IT);
+        String hasSharedString = String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName());
         String viewItemStringString = NotificationStrings.VIEW_FOLDER;
 
         assertSubject(message.getMimeMessage(), initialSubject);
         assertHasSharedItems(document, hasSharedString);
         assertViewItems(document, viewItemStringString);
+        assertShareMessage(document, clientShareMessage);
 
         assertSignatureText(document, "");
         assertSignatureImage(message);
@@ -409,17 +418,23 @@ public class MailNotificationTest extends ShareTest {
 
         newPermissions.add(guestPermission);
         toUpdate.setObjectPermissions(newPermissions);
-        testFile = updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS });
+        testFile = updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, new RequestCustomizer<UpdateInfostoreRequest>() {
+            @Override
+            public void customize(UpdateInfostoreRequest request) {
+                request.setNotifyPermissionEntities(Transport.MAIL, clientShareMessage);
+            }
+        });
 
         Message message = assertAndGetMessage();
         Document document = message.getHtml();
-        String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, testFolder1.getFolderName());
-        String hasSharedString = String.format("%1$s %2$s", String.format(NotificationStrings.HAS_SHARED_FILE, clientFullName, clientEmail, testFolder1.getFolderName()), NotificationStrings.PLEASE_CLICK_IT);
+        String initialSubject = String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, testFile.getFileName());
+        String hasSharedString = String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, testFile.getFileName());
         String viewItemStringString = NotificationStrings.VIEW_FILE;
 
         assertSubject(message.getMimeMessage(), initialSubject);
         assertHasSharedItems(document, hasSharedString);
         assertViewItems(document, viewItemStringString);
+        assertShareMessage(document, clientShareMessage);
 
         assertSignatureText(document, "");
         assertSignatureImage(message);

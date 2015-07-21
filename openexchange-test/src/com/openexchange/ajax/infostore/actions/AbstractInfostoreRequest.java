@@ -89,20 +89,20 @@ public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> i
         return NO_HEADER;
     }
 
-    public String writeJSON(File data) throws JSONException {
+    public JSONObject writeJSON(File data) throws JSONException {
         return convertToJSON(data, null);
     }
 
-    public String writeJSON(File data, Field[] fields) throws JSONException {
+    public JSONObject writeJSON(File data, Field[] fields) throws JSONException {
         return convertToJSON(data,fields);
     }
 
-    public static String convertToJSON(File data, Field[] fields) throws JSONException{
+    public static JSONObject convertToJSON(File data, Field[] fields) throws JSONException{
         if (fields == null) {
             fields = Field.values();
         }
         FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
-        return writer.write(new TestFriendlyInfostoreRequest("UTC"), data).toString();
+        return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
     }
 
     public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {
