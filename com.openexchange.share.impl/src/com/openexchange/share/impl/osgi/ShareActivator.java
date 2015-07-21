@@ -88,11 +88,10 @@ import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.ShareCryptoServiceImpl;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
 import com.openexchange.share.impl.groupware.FileStorageShareCleanUp;
-import com.openexchange.share.impl.groupware.InviteGuestsQuotaProvider;
 import com.openexchange.share.impl.groupware.ModuleSupportImpl;
-import com.openexchange.share.impl.groupware.ShareLinksQuotaProvider;
 import com.openexchange.share.impl.groupware.ShareModuleMapping;
-import com.openexchange.share.impl.groupware.ShareQuotaProvider;
+import com.openexchange.share.impl.quota.InviteGuestsQuotaProvider;
+import com.openexchange.share.impl.quota.ShareLinksQuotaProvider;
 import com.openexchange.share.storage.ShareStorage;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -191,11 +190,8 @@ public class ShareActivator extends HousekeepingActivator {
             }
         });
 
-
-
         ModuleSupport moduleSupport = new ModuleSupportImpl(this);
         registerService(ModuleSupport.class, moduleSupport);
-        registerService(QuotaProvider.class, new ShareQuotaProvider(this));
         registerService(QuotaProvider.class, new ShareLinksQuotaProvider(this));
         registerService(QuotaProvider.class, new InviteGuestsQuotaProvider(this));
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,14 +47,11 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.share.impl.quota;
 
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.lang.Validate;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.DefaultAccountQuota;
@@ -66,63 +63,59 @@ import com.openexchange.quota.groupware.AmountQuotas;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.share.impl.ConnectionHelper;
 import com.openexchange.share.storage.ShareStorage;
-import com.openexchange.share.storage.StorageParameters;
-
 
 /**
- * {@link ShareLinksQuotaProvider}
+ * {@link ShareQuotaProvider}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.0
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public class ShareLinksQuotaProvider implements QuotaProvider {
+public abstract class ShareQuotaProvider implements QuotaProvider {
 
-    private static final long DEFAULT_SHARE_LINKS_QUOTA_LIMIT = 150;
+    protected final ServiceLookup services;
 
-    private static final String MODULE_ID = "share_links";
-
-    private final ServiceLookup services;
-
-    public ShareLinksQuotaProvider(ServiceLookup services) {
+    /**
+     * Initializes a new {@link ShareQuotaProvider}.
+     *
+     * @param services A service lookup reference
+     */
+    protected ShareQuotaProvider(ServiceLookup services) {
         super();
-        Validate.notNull(services, "ServiceLookup might not be null!");
         this.services = services;
     }
 
-    @Override
-    public String getModuleID() {
-        return MODULE_ID;
-    }
+    /**
+     * Gets the default amount quota limitation.
+     *
+     * @return The default quota limitation
+     */
+    protected abstract long getDefaultLimit();
 
-    @Override
-    public String getDisplayName() {
-        return "Share links";
-    }
+    /**
+     * Gets the used amount quota for a specific user.
+     *
+     * @param storage The share storage
+     * @param connectionHelper A (started) connection helper
+     * @param userID The identifier of the user to get the quota usage for
+     * @return The used quota
+     */
+    protected abstract long getUsedQuota(ShareStorage storage, ConnectionHelper connectionHelper, int userID) throws OXException;
 
     @Override
     public AccountQuota getFor(Session session, String accountID) throws OXException {
-        if (accountID.equals("0")) {
-            ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-            if (viewFactory == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
-            }
-
-            DatabaseService databaseService = services.getService(DatabaseService.class);
-            if (databaseService == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class.getName());
-            }
-
-            int contextId = session.getContextId();
-            Connection con = databaseService.getReadOnly(contextId);
-            try {
-                Quota quota = getAmountQuota(session, con, StorageParameters.NO_PARAMETERS, viewFactory);
-                return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(quota);
-            } finally {
-                databaseService.backReadOnly(contextId, con);
-            }
+        if (false == "0".equals(accountID)) {
+            throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, getModuleID());
         }
-        throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
+        Quota amountQuota;
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, false);
+        try {
+            amountQuota = getAmountQuota(connectionHelper, session);
+        } finally {
+            connectionHelper.finish();
+        }
+        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota);
     }
 
     @Override
@@ -133,38 +126,25 @@ public class ShareLinksQuotaProvider implements QuotaProvider {
     /**
      * Returns the quota available for the user associated to the session
      *
-     * @param session - the session to get quota for
-     * @param connection - connection for quota retrieving
-     * @param viewFactory - ConfigViewFactory
-     * @return current existing/available Quota
-     * @throws OXException
+     * @param connectionHelper A (started) connection helper
+     * @param session The session to get quota for
+     * @return The amount quota for the session's user
      */
-    public Quota getAmountQuota(Session session, Connection connection, StorageParameters parameters, ConfigViewFactory viewFactory) throws OXException {
-        long limit = AmountQuotas.getLimit(session, MODULE_ID, viewFactory, connection, DEFAULT_SHARE_LINKS_QUOTA_LIMIT);
+    private Quota getAmountQuota(ConnectionHelper connectionHelper, Session session) throws OXException {
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        }
+        long limit = AmountQuotas.getLimit(session, getModuleID(), viewFactory, connectionHelper.getConnection(), getDefaultLimit());
         if (limit == Quota.UNLIMITED) {
             return Quota.UNLIMITED_AMOUNT;
         }
-
-        long usage = this.getUsedQuota(session.getContextId(), session.getUserId(), parameters);
-        return new Quota(QuotaType.AMOUNT, limit, usage);
-    }
-
-    /**
-     * Returns the currently existing number of share links for the given user.
-     *
-     * @param contextId - id of the relevant context
-     * @param userId - id of the user to get the count for
-     * @return int - number of currently existing share links
-     * @throws OXException
-     */
-    private int getUsedQuota(int contextId, int userId, StorageParameters parameters) throws OXException {
         ShareStorage shareStorage = services.getService(ShareStorage.class);
-        if (shareStorage == null) {
+        if (null == shareStorage) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareStorage.class.getName());
         }
-
-        int usedCount = shareStorage.countLinks(contextId, userId, parameters);
-        return usedCount;
+        long usage = getUsedQuota(shareStorage, connectionHelper, session.getUserId());
+        return new Quota(QuotaType.AMOUNT, limit, usage);
     }
 
 }

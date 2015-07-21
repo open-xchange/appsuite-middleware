@@ -1031,9 +1031,6 @@ public class DefaultShareService implements ShareService {
             if (null == capabilities || false == capabilities.contains("invite_guests")) {
                 throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
             }
-            /*
-             * check quota restrictions
-             */
             AccountQuota quota = services.getService(QuotaService.class).getProvider("invite_guests").getFor(session, "0");
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
