@@ -54,8 +54,8 @@ import java.util.concurrent.ConcurrentMap;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.schemacache.ContextCountPerSchemaClosure;
 import com.openexchange.admin.schemacache.SchemaCache;
-import com.openexchange.admin.schemacache.SchemaCacheRollback;
-import com.openexchange.admin.schemacache.SchemaResult;
+import com.openexchange.admin.schemacache.SchemaCacheFinalize;
+import com.openexchange.admin.schemacache.SchemaCacheResult;
 
 /**
  * {@link InMemorySchemaCache} - The in-memory schema cache implementation.
@@ -65,14 +65,14 @@ import com.openexchange.admin.schemacache.SchemaResult;
  */
 public class InMemorySchemaCache implements SchemaCache {
 
-    private static final class InMemoryRollback implements SchemaCacheRollback {
+    private static final class InMemoryFinalize implements SchemaCacheFinalize {
 
         private final int poolId;
         private final ConcurrentMap<Integer, SchemaInfo> cache;
         private final long modCount;
         private final String schemaName;
 
-        InMemoryRollback(String schemaName, long modCount, int poolId, ConcurrentMap<Integer, SchemaInfo> cache) {
+        InMemoryFinalize(String schemaName, long modCount, int poolId, ConcurrentMap<Integer, SchemaInfo> cache) {
             super();
             this.poolId = poolId;
             this.cache = cache;
@@ -81,11 +81,11 @@ public class InMemorySchemaCache implements SchemaCache {
         }
 
         @Override
-        public void rollback() {
+        public void finalize(boolean contextCreated) {
             SchemaInfo schemaInfo = cache.get(Integer.valueOf(poolId));
             if (null != schemaInfo) {
                 synchronized (schemaInfo) {
-                    schemaInfo.decrementSchema(schemaName, modCount);
+                    schemaInfo.releaseSchema(schemaName, false == contextCreated, modCount);
                 }
             }
         }
@@ -119,20 +119,27 @@ public class InMemorySchemaCache implements SchemaCache {
     }
 
     @Override
-    public SchemaResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException {
+    public SchemaCacheResult getNextSchemaFor(int poolId, int maxContexts, ContextCountPerSchemaClosure closure) throws StorageException {
         SchemaInfo schemaInfo = getSchemaInfo(poolId);
         synchronized (schemaInfo) {
             if (false == isAccessible(schemaInfo)) {
                 schemaInfo.initializeWith(closure.getContextCountPerSchema(poolId, maxContexts));
             }
-            SchemaCount schemaCount = schemaInfo.getAndIncrementNextSchema(maxContexts);
-            if (null == schemaCount) {
-                // No further schema available. Force reinitialization on next access attempt and return null.
-                schemaInfo.clear();
-                return null;
+
+            try {
+                long currentModCount = schemaInfo.getModCount();
+                SchemaCount schemaCount = schemaInfo.getAndIncrementNextSchema(maxContexts, currentModCount);
+                if (null == schemaCount) {
+                    // No further schema available. Force re-initialization on next access attempt and return null.
+                    schemaInfo.clear();
+                    return null;
+                }
+                String schemaName = schemaCount.name;
+                return new SchemaCacheResult(schemaName, new InMemoryFinalize(schemaName, schemaCount.modCount, poolId, cache));
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new StorageException("Thread interrupted while getting next schema from cache", e);
             }
-            String schemaName = schemaCount.name;
-            return new SchemaResult(schemaName, new InMemoryRollback(schemaName, schemaCount.modCount, poolId, cache));
         }
     }
 

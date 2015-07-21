@@ -51,15 +51,17 @@ package com.openexchange.admin.schemacache;
 
 
 /**
- * {@link SchemaCacheRollback}
+ * {@link SchemaCacheFinalize}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public interface SchemaCacheRollback {
+public interface SchemaCacheFinalize {
 
     /**
-     * Performs a roll-back on schema cache.
+     * Performs a finalization on schema cache.
+     *
+     * @param contextCreated Whether the context has been successfully created or not
      */
-    void rollback();
+    void finalize(boolean contextCreated);
 }

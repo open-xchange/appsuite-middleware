@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,47 +47,69 @@
  *
  */
 
-package com.openexchange.admin.schemacache;
+package com.openexchange.admin.storage.mysqlStorage;
+
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy;
+import com.openexchange.admin.rmi.dataobjects.SchemaSelectStrategy.Strategy;
+import com.openexchange.admin.schemacache.SchemaCacheFinalize;
 
 /**
- * {@link SchemaResult}
+ * {@link SchemaResult} - A simple class to reflect how a context's schema has been determined.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
 public class SchemaResult {
 
-    private final String schemaName;
-    private final SchemaCacheRollback rollback;
+    /** The constant for automatic schema creation/detection */
+    public static final SchemaResult AUTOMATIC = new SchemaResult(Strategy.AUTOMATIC, null);
+
+    /** The constant for pre-defined schema name */
+    public static final SchemaResult SCHEMA_NAME = new SchemaResult(Strategy.SCHEMA, null);
+
+    /**
+     * Gets a result for in-memory schema detection with given roll-back.
+     *
+     * @param cacheFinalize The cache finalize
+     * @return The result for in-memory schema detection
+     */
+    public static SchemaResult inMemoryWith(SchemaCacheFinalize cacheFinalize) {
+        return new SchemaResult(Strategy.IN_MEMORY, cacheFinalize);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------
+
+    private final SchemaSelectStrategy.Strategy strategy;
+    private final SchemaCacheFinalize cacheRollback;
 
     /**
      * Initializes a new {@link SchemaResult}.
      *
-     * @param schemaName The schema name
-     * @param rollback The roll-back instance or <code>null</code>
+     * @param strategy The utilized strategy
+     * @param cacheRollback The optional cach roll-back
      */
-    public SchemaResult(String schemaName, SchemaCacheRollback rollback) {
+    private SchemaResult(Strategy strategy, SchemaCacheFinalize cacheRollback) {
         super();
-        this.schemaName = schemaName;
-        this.rollback = rollback;
+        this.strategy = strategy;
+        this.cacheRollback = cacheRollback;
     }
 
     /**
-     * Gets the schema name
+     * Gets the utilized strategy
      *
-     * @return The schema name
+     * @return The utilized strategy
      */
-    public String getSchemaName() {
-        return schemaName;
+    public SchemaSelectStrategy.Strategy getStrategy() {
+        return strategy;
     }
 
     /**
-     * Gets the optional roll-back instance
+     * Gets the optional cache roll-back.
      *
-     * @return The roll-back instance or <code>null</code>
+     * @return The cacheRollback or <code>null</code>
      */
-    public SchemaCacheRollback getRollback() {
-        return rollback;
+    public SchemaCacheFinalize getCacheFinalize() {
+        return cacheRollback;
     }
 
 }

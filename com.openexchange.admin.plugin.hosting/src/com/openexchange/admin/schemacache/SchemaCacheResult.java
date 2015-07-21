@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,29 @@
  *
  */
 
-package com.openexchange.admin.schemacache.inmemory;
+package com.openexchange.admin.schemacache;
 
 /**
- * Manages the number of contexts for a certain database schema.
+ * {@link SchemaCacheResult}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.0
  */
-final class SchemaCount implements Comparable<SchemaCount> {
+public class SchemaCacheResult {
 
-    final String name;
-    final long modCount;
-    int count;
-
-    SchemaCount(String name, int count, long modCount) {
-        super();
-        this.modCount = modCount;
-        this.name = name;
-        this.count = count;
-    }
-
-    @Override
-    public int compareTo(SchemaCount o) {
-        int thisCount = this.count;
-        int otherCount = o.count;
-        return thisCount < otherCount ? -1 : (thisCount == otherCount ? 0 : 1);
-    }
+    private final String schemaName;
+    private final SchemaCacheFinalize finalize;
 
     /**
-     * Gets the modification count
+     * Initializes a new {@link SchemaCacheResult}.
      *
-     * @return The modification count
+     * @param schemaName The schema name
+     * @param finalize The finalize instance or <code>null</code>
      */
-    public long getModCount() {
-        return modCount;
+    public SchemaCacheResult(String schemaName, SchemaCacheFinalize finalize) {
+        super();
+        this.schemaName = schemaName;
+        this.finalize = finalize;
     }
 
     /**
@@ -88,34 +77,17 @@ final class SchemaCount implements Comparable<SchemaCount> {
      *
      * @return The schema name
      */
-    public String getName() {
-        return name;
+    public String getSchemaName() {
+        return schemaName;
     }
 
     /**
-     * Gets the current count; that is the number of contexts using associated schema.
+     * Gets the finalize instance
      *
-     * @return The current count
+     * @return The finalize instance or <code>null</code>
      */
-    public int getCount() {
-        return count;
+    public SchemaCacheFinalize getFinalize() {
+        return finalize;
     }
 
-    void incrementCount() {
-        count++;
-    }
-
-    void decrementCount() {
-        count--;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder(24).append("SchemaCount [");
-        if (name != null) {
-            builder.append("name=").append(name).append(", ");
-        }
-        builder.append("count=").append(count).append("]");
-        return builder.toString();
-    }
 }

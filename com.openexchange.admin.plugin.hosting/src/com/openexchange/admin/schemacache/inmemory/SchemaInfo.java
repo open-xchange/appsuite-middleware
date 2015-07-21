@@ -49,7 +49,7 @@
 
 package com.openexchange.admin.schemacache.inmemory;
 
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.PriorityQueue;
 
@@ -72,6 +72,7 @@ import java.util.PriorityQueue;
 public class SchemaInfo {
 
     private final PriorityQueue<SchemaCount> queue;
+    private final Map<String, SchemaCount> inUse;
     private final int poolId;
     private long stamp;
     private long modCount;
@@ -84,8 +85,18 @@ public class SchemaInfo {
         super();
         this.poolId = poolId;
         queue = new PriorityQueue<SchemaCount>(32);
+        inUse = new HashMap<String, SchemaCount>(32, 0.9F);
         deprecated = true; // Deprecated by default
         modCount = 0L;
+    }
+
+    /**
+     * Gets the current modification Count
+     *
+     * @return The current modification Count
+     */
+    public long getModCount() {
+        return modCount;
     }
 
     /**
@@ -125,6 +136,7 @@ public class SchemaInfo {
      * @param modCount The modification count
      */
     public void initializeWith(Map<String, Integer> contextCountPerSchema) {
+        // Clear, increase modification count and refill queue
         queue.clear();
         modCount++;
         for (Map.Entry<String, Integer> entry : contextCountPerSchema.entrySet()) {
@@ -132,50 +144,78 @@ public class SchemaInfo {
         }
         stamp = System.currentTimeMillis();
         deprecated = false;
+
+        // Notify possibly waiting threads
+        this.notifyAll();
     }
 
     /**
      * Gets (and increments used count) for next available schema
      *
      * @param maxContexts The configured max. number of contexts allowed per schema
+     * @param modCount The modification count at the time when the schema should be obtained
      * @return The next schema or <code>null</code>
+     * @throws InterruptedException If threads gets interrupted
      */
-    public SchemaCount getAndIncrementNextSchema(int maxContexts) {
+    public SchemaCount getAndIncrementNextSchema(int maxContexts, long modCount) throws InterruptedException {
         if (deprecated) {
             return null;
         }
-        for (SchemaCount nextSchema; (nextSchema = queue.poll()) != null;) {
-            if (nextSchema.count < maxContexts) {
-                nextSchema.incrementCount();
-                queue.offer(nextSchema);
-                return nextSchema;
+
+        while (true) {
+            if (this.modCount != modCount) {
+                // Reinitialized in the meantime
+                return null;
             }
+
+            for (SchemaCount nextSchema; (nextSchema = queue.poll()) != null;) {
+                if (nextSchema.count < maxContexts) {
+                    // May be used for at least one more context
+                    nextSchema.incrementCount();
+
+                    // Put into in-use collection if suitable to hold another context
+                    if (nextSchema.count < maxContexts) {
+                        inUse.put(nextSchema.name, nextSchema);
+                    }
+                    return nextSchema;
+                }
+            }
+
+            // Found no available schema. Are there schemas currently in use?
+            if (inUse.isEmpty()) {
+                return null;
+            }
+
+            // Await until an in-use one becomes available
+            this.wait();
         }
-        return null;
     }
 
     /**
-     * Decrements the schema count
+     * Releases the used schema count
      *
      * @param schemaName The schema name
+     * @param decrement <code>true</code> to decrement counter; otherwise <code>false</code> to leave as-is (incremented before)
      * @param modCount The modification count at the time when the schema count was obtained
      */
-    public void decrementSchema(String schemaName, long modCount) {
-        if (this.modCount != modCount) {
-            // Reinitialized in the meantime
-            return;
-        }
-        SchemaCount schemaCount = null;
-        for (Iterator<SchemaCount> it = queue.iterator(); null == schemaCount && it.hasNext();) {
-            SchemaCount current = it.next();
-            if (current.name.equals(schemaName)) {
-                it.remove();
-                schemaCount = current;
+    public void releaseSchema(String schemaName, boolean decrement, long modCount) {
+        try {
+            if (this.modCount != modCount) {
+                // Reinitialized in the meantime
+                return;
             }
-        }
-        if (null != schemaCount) {
-            schemaCount.decrementCount();
-            queue.offer(schemaCount);
+
+            SchemaCount usedSchemaCount = inUse.get(schemaName);
+            if (null != usedSchemaCount) {
+                // Decrement counter and make it re-available
+                if (decrement) {
+                    usedSchemaCount.decrementCount();
+                }
+                queue.offer(usedSchemaCount);
+            }
+        } finally {
+            // Notify possibly waiting threads
+            this.notifyAll();
         }
     }
 
