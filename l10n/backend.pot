@@ -3,6 +3,8 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:226
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:118
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:66
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime/src/com/openexchange/realtime/exception/RealtimeExceptionMessages.java:68
@@ -70,6 +72,58 @@ msgstr ""
 #. Written to the log file if the session does not contain a Kerberos subject for the delegation.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:81
 msgid "No Kerberos delegation ticket found in session."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
+msgid "/servlet/dav/caldav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:107
+msgid "/servlet/dav/dev/null"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:170
+msgid "caldav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:170
+msgid "modules"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:170
+msgid "module"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:183
+msgid "modules/caldav/active"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:188
+msgid "io.ox/caldav//active"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:193
+msgid "modules/caldav/active > io.ox/caldav//active"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:200
+msgid "modules/caldav/url"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:205
+msgid "io.ox/caldav//url"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:210
+msgid "modules/caldav/url > io.ox/caldav//url"
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Synchronize your calendars and appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:252
+msgid "Synchronize your calendars and appointments."
 msgstr ""
 
 #. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
@@ -849,6 +903,30 @@ msgstr ""
 msgid ""
 "You have received this E-Mail because this appointment contains the resource "
 "%1$s which is managed by you."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:90
+msgid "starting bundle: \"com.openexchange.carddav\""
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:139
+msgid "/servlet/dav/carddav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:103
+msgid "carddav"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:125
+msgid "stopping bundle: \"com.openexchange.carddav\""
+msgstr ""
+
+#. Application 'xyz' requires following permissions:
+#. - Synchronize your address books and contacts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:149
+msgid "Synchronize your address books and contacts."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
