@@ -99,7 +99,8 @@ import com.openexchange.tools.sql.DBUtils;
 /**
  * {@link RdbContactStorage} - Database storage for contacts.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias
+ *         Friedrich</a>
  */
 public class RdbContactStorage extends DefaultContactStorage implements ContactUserStorage {
 
@@ -182,7 +183,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * add attachment information in advance if needed
              */
-            // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+            // TODO: at this stage, we break the storage separation, since we
+            // assume that attachments are stored in the same database
             if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
                 contact.setLastModifiedOfNewestAttachment(executor.selectNewestAttachmentDate(connection, contextID, objectID));
             }
@@ -328,7 +330,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
             final int[] objectIDs = getObjectIDs(contacts);
             /*
-             * delete contacts - per convention, don't check last modification time when clearing a folder
+             * delete contacts - per convention, don't check last modification
+             * time when clearing a folder
              */
             deletedContacts = deleteContacts(serverSession, connection, folderID, objectIDs, Long.MIN_VALUE);
             /*
@@ -427,7 +430,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             contact.setLastModified(now);
             final QueryFields queryFields = new QueryFields(Mappers.CONTACT.getAssignedFields(contact));
             /*
-             * insert copied records to 'deleted' tables with updated metadata when parent folder changes
+             * insert copied records to 'deleted' tables with updated metadata
+             * when parent folder changes
              */
             if (contact.containsParentFolderID() && false == Integer.toString(contact.getParentFolderID()).equals(folderId)) {
                 final Contact update = new Contact();
@@ -537,7 +541,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                     final DistListMemberField[] updatedFields = Tools.updateMember(member, updatedContact);
                     if (null != updatedFields && 0 < updatedFields.length) {
                         /*
-                         * Update member, remember affected parent contact id of the list
+                         * Update member, remember affected parent contact id of
+                         * the list
                          */
                         if (0 < executor.updateMember(connectionHelper.getWritable(), Table.DISTLIST, contextID, member, updatedFields)) {
                             affectedDistributionLists.add(Integer.valueOf(member.getParentContactID()));
@@ -672,7 +677,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 /*
                  * merge attachment information in advance if needed
                  */
-                // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                // TODO: at this stage, we break the storage separation, since
+                // we assume that attachments are stored in the same database
                 if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                     contacts = mergeAttachmentData(connection, contextID, contacts);
                 }
@@ -721,7 +727,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 /*
                  * merge attachment information in advance if needed
                  */
-                // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                // TODO: at this stage, we break the storage separation, since
+                // we assume that attachments are stored in the same database
                 if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                     contacts = mergeAttachmentData(connection, contextID, contacts);
                 }
@@ -737,14 +744,23 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     /**
      * Gets contacts from the database.
      *
-     * @param deleted whether to query the tables for deleted objects or not
-     * @param contextID the context ID
-     * @param folderID the folder ID, or <code>null</code> if not used
-     * @param ids the object IDs, or <code>null</code> if not used
-     * @param since the exclusive minimum modification time to consider, or <code>null</code> if not used
-     * @param fields the contact fields that should be retrieved
-     * @param term a search term to apply, or <code>null</code> if not used
-     * @param sortOptions the sort options to use, or <code>null</code> if not used
+     * @param deleted
+     *            whether to query the tables for deleted objects or not
+     * @param contextID
+     *            the context ID
+     * @param folderID
+     *            the folder ID, or <code>null</code> if not used
+     * @param ids
+     *            the object IDs, or <code>null</code> if not used
+     * @param since
+     *            the exclusive minimum modification time to consider, or
+     *            <code>null</code> if not used
+     * @param fields
+     *            the contact fields that should be retrieved
+     * @param term
+     *            a search term to apply, or <code>null</code> if not used
+     * @param sortOptions
+     *            the sort options to use, or <code>null</code> if not used
      * @return the contacts
      * @throws OXException
      */
@@ -772,7 +788,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             List<Contact> contacts;
             if (deleted) {
                 /*
-                 * pay attention to limited field availability when querying deleted contacts
+                 * pay attention to limited field availability when querying
+                 * deleted contacts
                  */
                 final ContactField[] requestedFields = queryFields.getContactDataFields();
                 final List<ContactField> availableFields = new ArrayList<ContactField>();
@@ -800,7 +817,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                     /*
                      * merge attachment information in advance if needed
                      */
-                    // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same
+                    // TODO: at this stage, we break the storage separation,
+                    // since we assume that attachments are stored in the same
                     // database
                     if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                         contacts = mergeAttachmentData(connection, contextID, contacts);
@@ -854,7 +872,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 /*
                  * merge attachment information in advance if needed
                  */
-                // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+                // TODO: at this stage, we break the storage separation, since
+                // we assume that attachments are stored in the same database
                 if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData()) {
                     contacts = mergeAttachmentData(connection, contextID, contacts);
                 }
@@ -887,7 +906,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             final int[] currentObjectIDs = new int[length];
             System.arraycopy(objectIDs, i, currentObjectIDs, 0, length);
             /*
-             * insert copied records to 'deleted' contact-table with updated metadata
+             * insert copied records to 'deleted' contact-table with updated
+             * metadata
              */
             executor.replaceToDeletedContactsAndUpdate(connection, contextID, folderID, currentObjectIDs, maxLastModified, updatedMetadata, updatedFields);
             /*
@@ -1062,22 +1082,18 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
 
     private void checkImageSize(final Contact contact) {
         try {
-            if (!contact.containsImage1())
-            {
+            if (!contact.containsImage1()) {
                 return;
             }
 
-            if (!configuration_loaded)
-            {
+            if (!configuration_loaded) {
                 final ConfigurationService confService = RdbServiceLookup.getService(ConfigurationService.class);
-                if (confService != null)
-                {
+                if (confService != null) {
                     scale_images = confService.getBoolProperty("com.openexchange.contact.image.scaleImages", DEFAULT_SCALE_IMAGES);
                     image_width = confService.getIntProperty("com.openexchange.contact.image.maxWidth", image_width);
                     image_height = confService.getIntProperty("com.openexchange.contact.image.maxHeight", image_height);
                     final int typeNumber = confService.getIntProperty("com.openexchange.contact.image.scaleType", 1);
-                    switch (typeNumber)
-                    {
+                    switch (typeNumber) {
                         case 1:
                             type = ScaleType.CONTAIN;
                             break;
@@ -1093,29 +1109,26 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             }
 
             final byte[] imageBytes = contact.getImage1();
-            if (!scale_images || imageBytes == null || imageBytes.length == 0)
-            {
+
+            if (!scale_images || imageBytes == null || imageBytes.length == 0) {
                 return;
             }
+
             final ImageTransformationService resizeService = RdbServiceLookup.getService(ImageTransformationService.class, true);
             final ImageTransformations transform = resizeService.transfom(contact.getImage1());
-            if (transform == null)
-            {
+            if (transform == null) {
                 return;
             }
             final BufferedImage oldImage = transform.getImage();
-            if (oldImage == null || oldImage.getWidth() < image_width || oldImage.getHeight() < image_height)
-            {
+            if (oldImage == null || oldImage.getWidth() < image_width || oldImage.getHeight() < image_height) {
                 return;
             }
             transform.scale(image_width, image_height, type);
             final byte[] image = transform.getBytes("jpg");
-            if (image != null && image.length != 0)
-            {
+            if (image != null && image.length != 0) {
                 contact.setImage1(image);
             }
-        } catch (OXException | IOException ex)
-        {
+        } catch (OXException | IOException ex) {
             LOG.error("Unable to resize contact image due to " + ex.getMessage());
         }
     }
@@ -1209,7 +1222,8 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * add attachment information in advance if needed
              */
-            // TODO: at this stage, we break the storage separation, since we assume that attachments are stored in the same database
+            // TODO: at this stage, we break the storage separation, since we
+            // assume that attachments are stored in the same database
             if (PREFETCH_ATTACHMENT_INFO && queryFields.hasAttachmentData() && 0 < contact.getNumberOfAttachments()) {
                 contact.setLastModifiedOfNewestAttachment(executor.selectNewestAttachmentDate(con, contextId, contact.getObjectID()));
             }
