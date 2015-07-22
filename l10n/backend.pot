@@ -7684,6 +7684,10 @@ msgstr ""
 msgid "Invalid JSON data received from client"
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
+msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
+msgstr ""
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
