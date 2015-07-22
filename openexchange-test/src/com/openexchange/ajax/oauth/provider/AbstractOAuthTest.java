@@ -94,9 +94,7 @@ public abstract class AbstractOAuthTest {
     @Before
     public void before() throws Exception {
         // register client application
-        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
-        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        clientApp = clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
+        clientApp = registerTestClient();
         if (scope == null) {
             scope = Scope.parseScope(clientApp.getDefaultScope());
         }
@@ -108,8 +106,13 @@ public abstract class AbstractOAuthTest {
     public void after() throws Exception {
         ajaxClient.logout();
         client.logout();
+        unregisterTestClient(clientApp);
+    }
+
+    public static ClientDto registerTestClient() throws Exception {
+        ClientDataDto clientData = prepareClient("Test App " + System.currentTimeMillis());
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        clientManagement.unregisterClient(clientApp.getId(), getMasterAdminCredentials());
+        return clientManagement.registerClient(RemoteClientManagement.DEFAULT_GID, clientData, getMasterAdminCredentials());
     }
 
     public static ClientDataDto prepareClient(String name) {
@@ -136,6 +139,11 @@ public abstract class AbstractOAuthTest {
         String username = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER);
         String password = AJAXConfig.getProperty(AJAXConfig.Property.OX_ADMIN_MASTER_PWD);
         return new Credentials(username, password);
+    }
+
+    public static void unregisterTestClient(ClientDto oAuthClientApp) throws Exception {
+        RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
+        clientManagement.unregisterClient(oAuthClientApp.getId(), getMasterAdminCredentials());
     }
 
 }

@@ -60,10 +60,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.MoveMethod;
 import org.apache.jackrabbit.webdav.client.methods.PutMethod;
@@ -78,7 +76,6 @@ import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.WebDAVTest;
-import com.openexchange.dav.caldav.ical.SimpleICal.SimpleICalException;
 import com.openexchange.dav.caldav.methods.MkCalendarMethod;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
@@ -168,28 +165,28 @@ public abstract class CalDAVTest extends WebDAVTest {
     }
 
     @Override
-    protected String fetchSyncToken(String folderID) throws OXException, IOException, DavException {
+    protected String fetchSyncToken(String folderID) throws Exception {
         return super.fetchSyncToken("/caldav/" + folderID);
     }
 
-    protected String fetchSyncToken() throws OXException, IOException, DavException {
+    protected String fetchSyncToken() throws Exception {
         return fetchSyncToken(getDefaultFolderID());
     }
 
     @Override
-    protected SyncCollectionResponse syncCollection(SyncToken syncToken, String folderID) throws OXException, IOException, DavException {
+    protected SyncCollectionResponse syncCollection(SyncToken syncToken, String folderID) throws Exception {
         return super.syncCollection(syncToken, "/caldav/" + folderID);
     }
 
-    protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws OXException, IOException, DavException {
+    protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
         return this.syncCollection(syncToken, getDefaultFolderID());
     }
 
-    protected List<ICalResource> calendarMultiget(Collection<String> hrefs) throws OXException, IOException, DavException, SimpleICalException {
+    protected List<ICalResource> calendarMultiget(Collection<String> hrefs) throws Exception {
         return calendarMultiget(getDefaultFolderID(), hrefs);
     }
 
-    protected List<ICalResource> calendarMultiget(String folderID, Collection<String> hrefs) throws OXException, IOException, DavException, SimpleICalException {
+    protected List<ICalResource> calendarMultiget(String folderID, Collection<String> hrefs) throws Exception {
         List<ICalResource> calendarData = new ArrayList<ICalResource>();
         DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.GETETAG);
@@ -210,18 +207,18 @@ public abstract class CalDAVTest extends WebDAVTest {
         return calendarData;
     }
 
-    protected int putICal(String resourceName, String iCal) throws HttpException, IOException, OXException, URISyntaxException {
+    protected int putICal(String resourceName, String iCal) throws Exception {
         return putICal(getDefaultFolderID(), resourceName, iCal);
     }
 
-    protected int putICal(String folderID, String resourceName, String iCal) throws HttpException, IOException, OXException, URISyntaxException {
+    protected int putICal(String folderID, String resourceName, String iCal) throws Exception {
         Map<String, String> headers = new HashMap<String, String>();
         headers.put(Headers.IF_NONE_MATCH, "*");
 
         return putICal(folderID, resourceName, iCal, headers);
     }
 
-    protected int putICal(String folderID, String resourceName, String iCal, Map<String, String> headers) throws HttpException, IOException, OXException, URISyntaxException {
+    protected int putICal(String folderID, String resourceName, String iCal, Map<String, String> headers) throws Exception {
         PutMethod put = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
@@ -236,7 +233,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected int move(ICalResource iCalResource, String targetFolderID) throws OXException, HttpException, IOException {
+    protected int move(ICalResource iCalResource, String targetFolderID) throws Exception {
         MoveMethod move = null;
         try {
             String targetHref = "/caldav/" + targetFolderID + "/" +
@@ -255,7 +252,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected void mkCalendar(String targetResourceName, DavPropertySet setProperties) throws OXException, HttpException, IOException {
+    protected void mkCalendar(String targetResourceName, DavPropertySet setProperties) throws Exception {
         MkCalendarMethod mkCalendar = null;
         try {
             String targetHref = "/caldav/" + targetResourceName + '/';
@@ -266,11 +263,11 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException, SimpleICalException {
+    protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws Exception {
         return get(getDefaultFolderID(), resourceName, ifNoneMatchEtag);
     }
 
-    protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws HttpException, IOException, OXException, URISyntaxException, SimpleICalException {
+    protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws Exception {
         GetMethod get = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
@@ -289,11 +286,11 @@ public abstract class CalDAVTest extends WebDAVTest {
         return new URI(null, name, null).toString();
     }
 
-    protected int putICalUpdate(String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+    protected int putICalUpdate(String resourceName, String iCal, String ifMatchEtag) throws Exception {
         return this.putICalUpdate(getDefaultFolderID(), resourceName, iCal, ifMatchEtag);
     }
 
-    protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws HttpException, IOException, OXException, URISyntaxException {
+    protected int putICalUpdate(String folderID, String resourceName, String iCal, String ifMatchEtag) throws Exception {
         PutMethod put = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
@@ -308,7 +305,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected int putICalUpdate(ICalResource iCalResource) throws HttpException, IOException, OXException {
+    protected int putICalUpdate(ICalResource iCalResource) throws Exception {
         PutMethod put = null;
         try {
             put = new PutMethod(getBaseUri() + iCalResource.getHref());

@@ -50,8 +50,10 @@
 package com.openexchange.tools.webdav;
 
 import static com.openexchange.tools.servlet.http.Tools.copyHeaders;
+import static com.openexchange.tools.servlet.http.Tools.sendEmptyErrorResponse;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,10 +64,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import com.google.common.net.HttpHeaders;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fields.Header;
 import com.openexchange.ajax.fields.LoginFields;
 import com.openexchange.ajax.login.LoginTools;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.authentication.LoginExceptionCodes;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -78,14 +82,16 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Authorization.Credentials;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.tools.webdav.digest.Authorization;
-import com.openexchange.tools.webdav.digest.DigestUtility;
 import com.openexchange.webdav.WebdavExceptionCode;
 import com.openexchange.xml.jdom.JDOMParser;
 
@@ -227,8 +233,6 @@ public abstract class OXServlet extends WebDavServlet {
      */
     private static final String basicRealm = "OX WebDAV";
 
-    private static final String digestRealm = "Open-Xchange";
-
     protected static final String COOKIE_SESSIONID = "sessionid";
 
     private static final LoginPerformer loginPerformer = LoginPerformer.getInstance();
@@ -244,6 +248,34 @@ public abstract class OXServlet extends WebDavServlet {
      */
     protected boolean useHttpAuth() {
         return true;
+    }
+
+    /**
+     * Defines if this servlet supports OAuth access, i.e. the bearer authentication scheme may be used to provide an OAuth 2.0 access
+     * token. OAuth is only taken into account, if {@link #useHttpAuth()} returns <code>true</code>. If OAuth is allowed you are responsible
+     * on your own to check the granted scope on every request! After successful OAuth authentication you'll find the according {@link OAuthGrant}
+     * instances as attribute on the servlet request under the {@link OAuthConstants#PARAM_OAUTH_GRANT} key.
+     * <br>
+     * <strong>Note:</strong> You must also implement {@link #getOAuthResourceService()} and {@link #getOAuthSessionProvider()} if <code>true</code> is returned!
+     */
+    protected boolean allowOAuthAccess() {
+        return false;
+    }
+
+    /**
+     * Gets the {@link OAuthResourceService} if available. Must be overridden by servlets that allow OAuth access.
+     * @return The service or <code>null</code> if unavailable.
+     */
+    protected OAuthResourceService getOAuthResourceService() {
+        return null;
+    }
+
+    /**
+     * Gets the {@link OAuthSessionProvider} if available. Must be overridden by servlets that allow OAuth access.
+     * @return The service or <code>null</code> if unavailable.
+     */
+    protected OAuthSessionProvider getOAuthSessionProvider() {
+        return null;
     }
 
     /**
@@ -266,12 +298,11 @@ public abstract class OXServlet extends WebDavServlet {
 
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        boolean useCookies = useCookies();
-        if (useCookies) {
+        if (useCookies()) {
             // create a new HttpSession it it's missing
             req.getSession(true);
         }
-        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !doAuth(req, resp, getInterface(), getLoginCustomizer(), useCookies)) {
+        if (!"TRACE".equals(req.getMethod()) && useHttpAuth() && !authenticate(req, resp)) {
             return;
         }
         Session session = getSession(req);
@@ -312,17 +343,174 @@ public abstract class OXServlet extends WebDavServlet {
         return null;
     }
 
+    /**
+     * Tries to authenticate the user via any of the supported HTTP auth schemes.
+     *
+     * @param req The HTTP servlet request.
+     * @param resp The HTTP servlet response.
+     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>. In that case the response is already committed.
+     * @throws IOException If an I/O error occurs
+     */
+    private boolean authenticate(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        Session session = null;
+        if (useCookies()) {
+            /*
+             * try by cookie
+             */
+            try {
+                session = findSessionByCookie(req, resp);
+            } catch (OXException e) {
+                LOG.error("", e);
+                resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                return false;
+            }
+        }
+        if (null == session) {
+            AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(Header.AUTH_HEADER));
+            if (authHeader == null) {
+                addUnauthorizedHeader(req, resp);
+                return false;
+            }
+
+            switch (authHeader.getScheme().toLowerCase()) {
+                case "basic":
+                    session = doBasicAuth(authHeader, req, resp);
+                    break;
+
+                case "bearer":
+                    session = doOAuth(authHeader, req, resp);
+                    break;
+            }
+
+            if (session == null) {
+                return false;
+            }
+        } else {
+            /*
+             * Session found by cookie
+             */
+            final String address = req.getRemoteAddr();
+            if (null == address || !address.equals(session.getLocalIp())) {
+                LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
+                addUnauthorizedHeader(req, resp);
+                removeSession(session.getSessionID());
+                removeCookie(req, resp, COOKIE_SESSIONID);
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+                return false;
+            }
+        }
+        req.setAttribute(SESSION, session);
+        return true;
+    }
+
+    /**
+     * Handles OXExceptions thrown during login requests by responding with an HTTP error code.
+     *
+     * @param e the exception
+     * @param req The servlet request
+     * @param resp The servlet response
+     * @throws IOException
+     */
+    private void handleFailedWebDAVLogin(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
+            addUnauthorizedHeader(req, resp);
+            resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
+        } else if (LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+        } else {
+            LOG.error("WebDAV login failed", e);
+            resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        }
+    }
+
+    private Session doBasicAuth(AuthorizationHeader authHeader, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        try {
+            Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(authHeader.getRawValue());
+            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
+                return null;
+            }
+
+            return performWebDAVLogin(new LoginRequestImpl(creds.getLogin(), creds.getPassword(), getInterface(), req), req, resp);
+        } catch (OXException e) {
+            handleFailedWebDAVLogin(e, req, resp);
+            return null;
+        }
+    }
+
+    private Session performWebDAVLogin(LoginRequest loginRequest, HttpServletRequest req, HttpServletResponse resp) throws OXException {
+        LoginCustomizer customizer = getLoginCustomizer();
+        if (customizer != null) {
+            loginRequest = customizer.modifyLogin(loginRequest);
+        }
+
+        if (false == useCookies()) {
+            /*
+             * try to get session indirectly from store
+             */
+            return WebDAVSessionStore.getInstance().getSession(loginRequest);
+        } else {
+            /*
+             * login as usual
+             */
+            final Map<String, Object> properties = new HashMap<String, Object>(1);
+            Session session = addSession(loginRequest, properties);
+            resp.addCookie(new Cookie(COOKIE_SESSIONID, session.getSessionID()));
+            return session;
+        }
+    }
+
+    private Session doOAuth(AuthorizationHeader authHeader, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        OAuthResourceService oAuthResourceService = getOAuthResourceService();
+        OAuthSessionProvider sessionProvider = getOAuthSessionProvider();
+        if (oAuthResourceService == null || sessionProvider == null) {
+            httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return null;
+        }
+
+        try {
+            OAuthGrant grant = oAuthResourceService.validate(authHeader.getAuthString());
+            httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);
+            return sessionProvider.getSession(grant, httpRequest);
+        } catch (OXException e) {
+            if (e instanceof OAuthInvalidTokenException) {
+                OAuthInvalidTokenException ex = (OAuthInvalidTokenException) e;
+                String errorDescription = ex.getErrorDescription();
+                StringBuilder sb = new StringBuilder(OAuthConstants.BEARER_SCHEME);
+                sb.append(",error=\"invalid_token\"");
+                if (errorDescription != null) {
+                    sb.append(",error_description=\"").append(errorDescription).append("\"");
+                }
+
+                sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, Collections.singletonMap(HttpHeaders.WWW_AUTHENTICATE, sb.toString()));
+            } else {
+                handleFailedWebDAVLogin(e, httpRequest, httpResponse);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Tries to authenticate the user via HTTP Basic Auth.
+     *
+     * @param req The HTTP servlet request.
+     * @param resp The HTTP servlet response.
+     * @param face the used interface.
+     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>. In that case the response is already committed.
+     * @throws IOException If an I/O error occurs
+     */
     public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face) throws IOException {
         return doAuth(req, resp, face, null);
     }
 
     /**
-     * Performs authentication.
+     * Tries to authenticate the user via HTTP Basic Auth.
      *
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      * @param face the used interface.
-     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
+     * @param customizer The login customizer, or <code>null</code> if not used
+     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>. In that case the response is already committed.
      * @throws IOException If an I/O error occurs
      */
     public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face, final LoginCustomizer customizer) throws IOException {
@@ -330,14 +518,14 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     /**
-     * Performs authentication.
+     * Tries to authenticate the user via HTTP Basic Auth.
      *
      * @param req The HTTP servlet request.
      * @param resp The HTTP servlet response.
      * @param face the used interface.
      * @param customizer The login customizer, or <code>null</code> if not used
      * @param useCookies <code>true</code> if cookies should be used, <code>false</code>, otherwise
-     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>.
+     * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>. In that case the response is already committed.
      * @throws IOException If an I/O error occurs
      */
     public static boolean doAuth(final HttpServletRequest req, final HttpServletResponse resp, final Interface face, final LoginCustomizer customizer, boolean useCookies) throws IOException {
@@ -366,7 +554,7 @@ public abstract class OXServlet extends WebDavServlet {
                 }
             } catch (final OXException e) {
                 LOG.debug("", e);
-                addUnauthorizedHeader(req, resp);
+                addBasicAuthenticateHeader(resp);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
             }
@@ -386,7 +574,7 @@ public abstract class OXServlet extends WebDavServlet {
                 }
             } catch (final OXException e) {
                 if (e.getCategory() == Category.CATEGORY_USER_INPUT) {
-                    addUnauthorizedHeader(req, resp);
+                    addBasicAuthenticateHeader(resp);
                     resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 } else if (LoginExceptionCodes.AUTHENTICATION_DISABLED.equals(e)) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -403,7 +591,7 @@ public abstract class OXServlet extends WebDavServlet {
             final String address = req.getRemoteAddr();
             if (null == address || !address.equals(session.getLocalIp())) {
                 LOG.info("Request to server denied for session: {}. in WebDAV XML interface. Client login IP changed from {} to {}{}", session.getSessionID(), session.getLocalIp(), address, '.');
-                addUnauthorizedHeader(req, resp);
+                addBasicAuthenticateHeader(resp);
                 removeSession(session.getSessionID());
                 removeCookie(req, resp, COOKIE_SESSIONID);
                 resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
@@ -443,31 +631,41 @@ public abstract class OXServlet extends WebDavServlet {
     }
 
     /**
-     * Adds the header to the response message for authorization. Only add this header if the authorization of the user failed.
+     * Adds the <code>WWW-Authenticate</code> header for the enabled schemes to the given HTTP response.
      *
      * @param resp the response to that the header should be added.
      */
-    protected static void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
-        final StringBuilder builder = new StringBuilder(64);
-        builder.append("Basic realm=\"").append(basicRealm).append("\", encoding=\"UTF-8\"");
-        resp.setHeader("WWW-Authenticate", builder.toString());
-        /*-
-         * Digest realm="testrealm@host.com",
-         * qop="auth,auth-int",
-         * nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093",
-         * opaque="5ccc069c403ebaf9f0171e9517f40e41"
-         */
-        builder.setLength(0);
-        builder.append("Digest realm=\"").append(digestRealm).append('"').append(", ");
-        builder.append("qop=\"auth,auth-int\"").append(", ");
-        builder.append("nonce=\"").append(DigestUtility.getInstance().generateNOnce(req)).append('"').append(", ");
-        final String opaque = UUIDs.getUnformattedString(UUID.randomUUID());
-        builder.append("opaque=\"").append(opaque).append('"').append(", ");
-        builder.append("stale=\"false\"").append(", ");
-        builder.append("algorithm=\"MD5\"");
-//        resp.addHeader("WWW-Authenticate", builder.toString());
+    private void addUnauthorizedHeader(final HttpServletRequest req, final HttpServletResponse resp) {
+        if (useHttpAuth()) {
+            resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
+            if (allowOAuthAccess()) {
+                OAuthResourceService oAuthResourceService = getOAuthResourceService();
+                OAuthSessionProvider sessionProvider = getOAuthSessionProvider();
+                if (oAuthResourceService != null && sessionProvider != null) {
+                    resp.addHeader("WWW-Authenticate", "Bearer");
+                }
+            }
+        }
     }
 
+    /**
+     * Adds the <code>WWW-Authenticate</code> header for the <code>Basic</code> scheme to the given HTTP response.
+     *
+     * @param resp the response to that the header should be added.
+     */
+    private static void addBasicAuthenticateHeader(HttpServletResponse resp) {
+        resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
+    }
+
+    /**
+     * Parses the HTTP requests <code>Authorization</code> header and creates a login request based on the provided
+     * Basic Auth credentials.
+     *
+     * @param req
+     * @param face
+     * @return the login request
+     * @throws OXException If the request contains no valid <code>Authorization</code> header with Basic Auth scheme
+     */
     private static LoginRequest parseLogin(final HttpServletRequest req, final Interface face) throws OXException {
         final String auth = req.getHeader(Header.AUTH_HEADER);
         if (null == auth) {
@@ -480,35 +678,6 @@ public abstract class OXServlet extends WebDavServlet {
                 throw WebdavExceptionCode.EMPTY_PASSWORD.create();
             }
             return new LoginRequestImpl(creds.getLogin(), creds.getPassword(), face, req);
-        }
-        if (com.openexchange.tools.servlet.http.Authorization.checkForDigestAuthorization(auth)) {
-            /*
-             * Digest auth
-             */
-            final DigestUtility digestUtility = DigestUtility.getInstance();
-            final Authorization authorization = digestUtility.parseDigestAuthorization(auth);
-            /*
-             * Determine user by "username"
-             */
-            final String userName = authorization.getUser();
-            final String password = digestUtility.getPasswordByUserName(userName);
-            if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(password)) {
-                throw WebdavExceptionCode.UNSUPPORTED_AUTH_MECH.create("Digest");
-            }
-            /*
-             * Calculate MD5
-             */
-            final String serverDigest = digestUtility.generateServerDigest(req, password);
-            /*
-             * Compare to client "response"
-             */
-            if (!serverDigest.equals(authorization.getResponse())) {
-                throw WebdavExceptionCode.AUTH_FAILED.create(userName);
-            }
-            /*
-             * Return appropriate login request to generate a session
-             */
-            return new LoginRequestImpl(userName, password, face, req);
         }
         /*
          * No known auth mechanism

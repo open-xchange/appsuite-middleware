@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.ajax.requesthandler.oauth;
+package com.openexchange.oauth.provider.impl;
 
 import static com.openexchange.osgi.Tools.requireService;
 import java.util.ArrayList;
@@ -85,6 +85,7 @@ import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.login.internal.LoginResultImpl;
 import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -105,10 +106,13 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
 
     private final ServiceLookup services;
 
+    private final OAuthResourceService oAuthResourceService;
+
     private final Cache<String, String> sessionCache;
 
-    public DefaultSessionProvider(ServiceLookup services) {
+    public DefaultSessionProvider(OAuthResourceService oAuthResourceService, ServiceLookup services) {
         super();
+        this.oAuthResourceService = oAuthResourceService;
         this.services = services;
         sessionCache = CacheBuilder.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
@@ -174,7 +178,6 @@ public class DefaultSessionProvider implements OAuthSessionProvider {
     private Session login(OAuthGrant grant, HttpServletRequest httpRequest) throws OXException {
         ContextService contextService = requireService(ContextService.class, services);
         UserService userService = requireService(UserService.class, services);
-        OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
 
         final Context context = contextService.getContext(grant.getContextId());
         final User user = userService.getUser(grant.getUserId(), context);

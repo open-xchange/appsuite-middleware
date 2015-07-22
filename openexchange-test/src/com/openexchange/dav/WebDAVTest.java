@@ -81,6 +81,7 @@ import com.openexchange.ajax.folder.actions.VisibleFoldersResponse;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.oauth.provider.AbstractOAuthTest;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -88,54 +89,71 @@ import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
 
 /**
  * {@link WebDAVTest} - Common base class for WebDAV tests
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public abstract class WebDAVTest extends AbstractAJAXSession {
-	
+
 	protected static final int TIMEOUT = 10000;
-	
+
 	private List<FolderObject> foldersToCleanUp;
 	private Map<Long, WebDAVClient> webDAVClients;
+
+    private ClientDto oAuthClientApp;
 
 	public WebDAVTest(String name) {
 		super(name);
 	}
-	
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         this.webDAVClients = new HashMap<Long, WebDAVClient>();
         getAJAXClient().setHostname(getHostname());
         getAJAXClient().setProtocol(getProtocol());
+        if (useOAuth()) {
+            oAuthClientApp = AbstractOAuthTest.registerTestClient();
+        }
         /*
          * init
          */
         this.foldersToCleanUp = new ArrayList<FolderObject>();
     }
-    
+
     @Override
     protected void tearDown() throws Exception {
     	this.cleanupFolders();
+    	if (oAuthClientApp != null) {
+    	    try {
+    	        AbstractOAuthTest.unregisterTestClient(oAuthClientApp);
+    	    } catch (Exception e) {
+    	        e.printStackTrace();
+    	    }
+    	}
         super.tearDown();
     }
-    
+
     protected abstract String getDefaultUserAgent();
-    
-    protected WebDAVClient getWebDAVClient() throws OXException {
+
+    protected WebDAVClient getWebDAVClient() throws Exception {
     	Long threadID = Long.valueOf(Thread.currentThread().getId());
     	if (false == this.webDAVClients.containsKey(threadID)) {
-    		WebDAVClient webDAVClient = new WebDAVClient(getDefaultUserAgent());
+    		WebDAVClient webDAVClient = new WebDAVClient(getDefaultUserAgent(), oAuthClientApp);
     		this.webDAVClients.put(threadID, webDAVClient);
     		return webDAVClient;
     	} else {
     		return this.webDAVClients.get(threadID);
     	}
     }
-    
+
+    private boolean useOAuth() {
+        return false;
+    }
+
     private void cleanupFolders() {
     	if (null != this.foldersToCleanUp) {
     		for (FolderObject folder : foldersToCleanUp) {
@@ -148,20 +166,20 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 			}
     	}
     }
-    
+
     /**
-     * Remembers the supplied folder for deletion after the test is finished 
+     * Remembers the supplied folder for deletion after the test is finished
      * in the <code>tearDown()</code> method.
-     *   
+     *
      * @param folder
      */
     protected void rememberForCleanUp(FolderObject folder) {
     	this.foldersToCleanUp.add(folder);
     }
-	
+
     /**
      * Gets a folder by its name.
-     * 
+     *
      * @param folderName
      * @return
      * @throws OXException
@@ -170,7 +188,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
      */
     protected FolderObject getFolder(String folderName) throws OXException, IOException, JSONException {
         VisibleFoldersResponse response = client.execute(
-                new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts", 
+                new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "contacts",
                         new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
         FolderObject folder = findByName(response.getPrivateFolders(), folderName);
         if (null == folder) {
@@ -178,16 +196,16 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             if (null == folder) {
                 folder = findByName(response.getSharedFolders(), folderName);
             }
-        }       
+        }
         if (null != folder) {
             folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
         }
         return folder;
     }
-    
+
     /**
      * Gets a folder by its name.
-     * 
+     *
      * @param folderName
      * @return
      * @throws OXException
@@ -196,7 +214,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
      */
     protected FolderObject getCalendarFolder(String folderName) throws OXException, IOException, JSONException {
         VisibleFoldersResponse response = client.execute(
-                new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar", 
+                new com.openexchange.ajax.folder.actions.VisibleFoldersRequest(EnumAPI.OX_NEW, "calendar",
                         new int[] { FolderObject.OBJECT_ID, FolderObject.FOLDER_NAME }));
         FolderObject folder = findByName(response.getPrivateFolders(), folderName);
         if (null == folder) {
@@ -204,13 +222,13 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             if (null == folder) {
                 folder = findByName(response.getSharedFolders(), folderName);
             }
-        }       
+        }
         if (null != folder) {
             folder = client.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID())).getFolder();
         }
         return folder;
     }
-    
+
 	private static FolderObject findByName(Iterator<FolderObject> iter, String folderName) {
 		while (iter.hasNext()) {
 			FolderObject folder = iter.next();
@@ -220,7 +238,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 		}
 		return null;
 	}
-	
+
 	protected boolean removeFromETags(Map<String, String> eTags, String uid) {
 		String href = this.getHrefFromETags(eTags, uid);
 		if (null != href) {
@@ -230,22 +248,22 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 			return false;
 		}
 	}
-	
+
 	protected String getHrefFromETags(Map<String, String> eTags, String uid) {
 		for (String href : eTags.keySet()) {
 			if (href.contains(uid)) {
 				return href;
 			}
 		}
-		return null; 
+		return null;
 	}
-	
+
 	protected List<String> getChangedHrefs(Map<String, String> previousETags, Map<String, String> newETags) {
 		List<String> hrefs = new ArrayList<String>();
 		for (String href : newETags.keySet()) {
 			if (false == previousETags.containsKey(href) || false == newETags.get(href).equals(newETags.get(href))) {
 				hrefs.add(href);
-			} 
+			}
 		}
 		return hrefs;
 	}
@@ -257,13 +275,13 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         this.rememberForCleanUp(folder);
 		return folder;
     }
-    
+
     protected FolderObject updateFolder(FolderObject folder) throws OXException, IOException, JSONException {
 		InsertResponse response = getClient().execute(new com.openexchange.ajax.folder.actions.UpdateRequest(EnumAPI.OX_NEW, folder));
         folder.setLastModified(response.getTimestamp());
 		return folder;
     }
-    
+
     protected FolderObject getFolder(int folderID) throws OXException, IOException, JSONException {
         return getClient().execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folderID)).getFolder();
     }
@@ -281,27 +299,27 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     	folder.setPermissions(parent.getPermissions());
     	return this.createFolder(folder);
     }
-    
+
     protected static String getBaseUri() throws OXException {
         return getProtocol() + "://" + getHostname();
     }
-    
+
     protected static User getUser() {
     	return User.User1;
     }
-    
+
     protected static String getLogin() throws OXException {
     	return getLogin(getUser());
     }
-    
+
     protected static String getusername() throws OXException {
     	return getUsername(getUser());
     }
-    
+
     protected static String getPassword() throws OXException {
     	return getPassword(getUser());
     }
-    
+
     protected static String getHostname() throws OXException {
         final String hostname = AJAXConfig.getProperty(Property.HOSTNAME);
         if (null == hostname) {
@@ -309,7 +327,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         }
         return hostname;
     }
-    
+
     protected static String getProtocol() throws OXException {
         final String hostname = AJAXConfig.getProperty(Property.PROTOCOL);
         if (null == hostname) {
@@ -317,7 +335,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         }
         return hostname;
     }
-    
+
     protected static String getLogin(final User user) throws OXException {
         final String login = AJAXConfig.getProperty(user.getLogin());
         if (null == login) {
@@ -332,7 +350,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
             return login + "@" + context;
         }
     }
-    
+
     protected static String getUsername(final User user) throws OXException {
         final String username = AJAXConfig.getProperty(user.getLogin());
         if (null == username) {
@@ -341,21 +359,21 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         	return username.contains("@") ? username.substring(0, username.indexOf("@")) : username;
         }
     }
-    
+
     protected static String getPassword(final User user) throws OXException {
         final String password = AJAXConfig.getProperty(user.getPassword());
         if (null == password) {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(user.getPassword().getPropertyName());
         }
         return password;
-    }    
-    
+    }
+
 	protected static void release(HttpMethodBase method) {
 		if (null != method) {
 			method.releaseConnection();
 		}
 	}
-	
+
 	protected static String randomUID() {
 		return UUID.randomUUID().toString();
 	}
@@ -363,8 +381,8 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     protected AJAXClient getAJAXClient() {
     	return super.getClient();
     }
-    
-	protected String fetchSyncToken(String relativeUrl) throws OXException, IOException, DavException {
+
+	protected String fetchSyncToken(String relativeUrl) throws Exception {
 		PropFindMethod propFind = null;
 		try {
 			DavPropertyNameSet props = new DavPropertyNameSet();
@@ -377,19 +395,19 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 			release(propFind);
 		}
 	}
-	
+
 	/**
-	 * Performs a REPORT method at the specified URL with a Depth of 1, 
-	 * requesting the ETag property of all resources that were changed since 
-	 * the supplied sync token. 
-	 * 
+	 * Performs a REPORT method at the specified URL with a Depth of 1,
+	 * requesting the ETag property of all resources that were changed since
+	 * the supplied sync token.
+	 *
 	 * @param syncToken
 	 * @return
-	 * @throws IOException 
-	 * @throws ConfigurationException 
-	 * @throws DavException 
+	 * @throws IOException
+	 * @throws ConfigurationException
+	 * @throws DavException
 	 */
-	protected Map<String, String> syncCollection(String syncToken, String relativeUrl) throws OXException, IOException, DavException {
+	protected Map<String, String> syncCollection(String syncToken, String relativeUrl) throws Exception {
 		Map<String, String> eTags = new HashMap<String, String>();
     	DavPropertyNameSet props = new DavPropertyNameSet();
     	props.add(PropertyNames.GETETAG);
@@ -406,8 +424,8 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 		}
     	return eTags;
 	}
-	
-	protected SyncCollectionResponse syncCollection(SyncToken syncToken, String relativeUrl) throws OXException, IOException, DavException {
+
+	protected SyncCollectionResponse syncCollection(SyncToken syncToken, String relativeUrl) throws Exception {
     	DavPropertyNameSet props = new DavPropertyNameSet();
     	props.add(PropertyNames.GETETAG);
     	SyncCollectionReportInfo reportInfo = new SyncCollectionReportInfo(syncToken.getToken(), props);
@@ -415,7 +433,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         syncToken.setToken(syncCollectionResponse.getSyncToken());
         return syncCollectionResponse;
 	}
-    
+
     protected String extractHref(DavPropertyName propertyName, MultiStatusResponse response) {
     	Node node = this.extractNodeValue(propertyName, response);
     	assertMatches(PropertyNames.HREF, node);
@@ -423,35 +441,35 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     	assertNotNull("no text content in " + PropertyNames.HREF + " child for " + propertyName, content);
     	return content;
     }
-    
+
     protected Node extractNodeValue(final DavPropertyName propertyName, final MultiStatusResponse response) {
     	assertNotEmpty(propertyName, response);
     	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
     	assertTrue("value is not a node in " + propertyName, value instanceof Node);
     	return (Node)value;
     }
-    
+
     protected List<Node> extractNodeListValue(DavPropertyName propertyName, MultiStatusResponse response) {
     	assertNotEmpty(propertyName, response);
     	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
     	assertTrue("value is not a node list in " + propertyName, value instanceof List<?>);
     	return (List<Node>)value;
     }
-    
+
     protected DavProperty<?> extractProperty(DavPropertyName propertyName, MultiStatusResponse response) {
     	assertNotEmpty(propertyName, response);
     	DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(propertyName);
     	assertNotNull("property " + propertyName + " not found", property);
     	return property;
     }
-    
+
     protected String extractTextContent(final DavPropertyName propertyName, final MultiStatusResponse response) {
     	assertNotEmpty(propertyName, response);
     	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
     	assertTrue("value is not a string in " + propertyName, value instanceof String);
     	return (String)value;
     }
-    
+
     protected static String extractChildTextContent(DavPropertyName propertyName, Element element) {
     	NodeList nodes = element.getElementsByTagNameNS(propertyName.getNamespace().getURI(), propertyName.getName());
     	assertNotNull("no child elements found by property name", nodes);
@@ -460,49 +478,49 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
     	assertNotNull("no child element found by property name", node);
     	return node.getTextContent();
     }
-    
+
     protected static String formatAsUTC(final Date date) {
 		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return dateFormat.format(date);
     }
-    
+
     protected static String formatAsDate(Date date) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 		return dateFormat.format(date);
     }
-    
+
     /*
      * Additional assertXXX methods
      */
-    
+
 	public static void assertMatches(final DavPropertyName propertyName, final Node node) {
     	assertEquals("wrong element name", propertyName.getName(), node.getLocalName());
     	assertEquals("wrong element namespace", propertyName.getNamespace().getURI(), node.getNamespaceURI());
 	}
-	
+
 	public static void assertContains(DavPropertyName propertyName, List<Node> nodeList) {
 		for (Node node : nodeList) {
-			if (propertyName.getName().equals(node.getLocalName()) && 
+			if (propertyName.getName().equals(node.getLocalName()) &&
 					propertyName.getNamespace().getURI().equals(node.getNamespaceURI())) {
 				return;
 			}
 		}
 		fail("property " + propertyName + " not found in list");
 	}
-	
+
 	public static void assertIsPresent(DavPropertyName propertyName, MultiStatusResponse response) {
     	final DavProperty<?> property = response.getProperties(StatusCodes.SC_OK).get(propertyName);
     	assertNotNull("property " + propertyName + " not found", property);
 	}
-	
+
 	public static void assertNotEmpty(DavPropertyName propertyName, MultiStatusResponse response) {
 		assertIsPresent(propertyName, response);
     	final Object value = response.getProperties(StatusCodes.SC_OK).get(propertyName).getValue();
     	assertNotNull("no value for " + propertyName, value);
 	}
-	
+
 	public static MultiStatusResponse assertSingleResponse(MultiStatusResponse[] responses) {
         assertNotNull("got no multistatus responses", responses);
         assertTrue("got zero multistatus responses", 0 < responses.length);
@@ -511,7 +529,7 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
         assertNotNull("no multistatus response", response);
         return response;
 	}
-	
+
 	public static void assertResponseHeaders(String[] expected, String headerName, HttpMethod method) {
 		for (String expectedHeader : expected) {
 			boolean found = false;
@@ -533,5 +551,5 @@ public abstract class WebDAVTest extends AbstractAJAXSession {
 			assertTrue("header element '" + expectedHeader + "'not found in header '" + headerName + "'", found);
 		}
 	}
-	
+
 }

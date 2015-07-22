@@ -59,6 +59,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jackrabbit.webdav.DavException;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
@@ -67,11 +68,16 @@ import org.apache.jackrabbit.webdav.client.methods.PutMethod;
 import org.apache.jackrabbit.webdav.client.methods.ReportMethod;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.junit.Assert;
+import com.openexchange.ajax.oauth.provider.OAuthSession;
+import com.openexchange.ajax.oauth.provider.protocol.Grant;
+import com.openexchange.ajax.oauth.provider.protocol.OAuthParams;
+import com.openexchange.ajax.oauth.provider.protocol.Protocol;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.reports.SyncCollectionReportInfo;
 import com.openexchange.dav.reports.SyncCollectionReportMethod;
 import com.openexchange.dav.reports.SyncCollectionResponse;
-import com.openexchange.exception.OXException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
 
 /**
  * {@link WebDAVClient}
@@ -81,28 +87,58 @@ import com.openexchange.exception.OXException;
 public class WebDAVClient {
 
 	private final HttpClient httpClient;
+	private final boolean useOAuth;
+	private Grant oauthGrant;
+
 	private String baseURI = null;
 
-	public WebDAVClient(String userAgent) throws OXException {
+
+	public WebDAVClient(String userAgent, ClientDto oAuthClientApp) throws Exception {
 		super();
-        /*
-         * setup log
-         */
-//		System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.SimpleLog");
-//		System.setProperty("org.apache.commons.logging.simplelog.showdatetime", "true");
-//		System.setProperty("org.apache.commons.logging.simplelog.log.httpclient.wire", "debug");
-//		System.setProperty("org.apache.commons.logging.simplelog.log.org.apache.commons.httpclient", "debug");
+		this.useOAuth = oAuthClientApp != null;
 		/*
 		 * init web client
 		 */
-        this.httpClient = new HttpClient();
-        this.httpClient.getParams().setAuthenticationPreemptive(true); // authentication should be attempted preemptively in tests
-        this.httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        this.httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-        this.setCredentials(Config.getLogin(), Config.getPassword());
+        if (useOAuth) {
+            httpClient = newOAuthHTTPClient();
+            oauthGrant = obtainOAuthAccess(oAuthClientApp);
+        } else {
+            httpClient = newDefaultHTTPClient();
+            this.setCredentials(Config.getLogin(), Config.getPassword());
+        }
         this.setBaseURI(Config.getBaseUri());
         this.setUserAgent(userAgent);
 	}
+
+	 private static HttpClient newOAuthHTTPClient() {
+	     HttpClient httpClient = new HttpClient();
+	     httpClient.getParams().setAuthenticationPreemptive(false);
+	     httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+	     httpClient.getParams().setParameter("http.protocol.max-redirects", 0);
+	     httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+	     return httpClient;
+    }
+
+	 private static HttpClient newDefaultHTTPClient() {
+         HttpClient httpClient = new HttpClient();
+         httpClient.getParams().setAuthenticationPreemptive(true);
+         httpClient.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
+         httpClient.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
+         return httpClient;
+    }
+
+	 private Grant obtainOAuthAccess(ClientDto clientApp) throws Exception {
+	     DefaultHttpClient client = OAuthSession.newOAuthHttpClient();
+	     String state = UUIDs.getUnformattedStringFromRandom();
+	     OAuthParams params = new OAuthParams()
+	            .setHostname(Config.getHostname())
+	            .setClientId(clientApp.getId())
+	            .setClientSecret(clientApp.getSecret())
+	            .setRedirectURI(clientApp.getRedirectURIs().get(0))
+	            .setScope("carddav caldav")
+	            .setState(state);
+	     return Protocol.obtainAccess(client, params, Config.getLogin(), Config.getPassword());
+	 }
 
 	/**
 	 * @return the baseUrl
@@ -135,12 +171,15 @@ public class WebDAVClient {
 	}
 
 	public int executeMethod(final HttpMethod method) throws HttpException, IOException {
-		return this.httpClient.executeMethod(method);
+	    if (useOAuth) {
+	        method.addRequestHeader("Authorization", "Bearer " + oauthGrant.getAccessToken());
+	    }
+	    return this.httpClient.executeMethod(method);
 	}
 
 	public void doPut(final PutMethod put, final int expectedStatus) throws HttpException, IOException {
 		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(put));
+	    	Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(put));
 		} finally {
 			release(put);
 		}
@@ -152,7 +191,7 @@ public class WebDAVClient {
 
 	public MultiStatusResponse[] doReport(final ReportMethod report, final int expectedStatus) throws HttpException, IOException, DavException {
 		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(report));
+	    	Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
 	    	return report.getResponseBodyAsMultiStatus().getResponses();
 		} catch (final DavException e) {
 	    	Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
@@ -164,7 +203,7 @@ public class WebDAVClient {
 
 	public SyncCollectionResponse doReport(SyncCollectionReportMethod report, int expectedStatus) throws HttpException, IOException, DavException {
 		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(report));
+	    	Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(report));
 	    	return report.getResponseBodyAsSyncCollection();
 		} catch (final DavException e) {
 	    	Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
@@ -206,7 +245,7 @@ public class WebDAVClient {
 
     public MultiStatusResponse[] doPropFind(final PropFindMethod propFind, final int expectedStatus) throws HttpException, IOException, DavException {
         try {
-            int executeMethod = this.httpClient.executeMethod(propFind);
+            int executeMethod = executeMethod(propFind);
             Assert.assertEquals("unexpected http status", expectedStatus, executeMethod);
             return propFind.getResponseBodyAsMultiStatus().getResponses();
         } catch (final DavException e) {
@@ -219,7 +258,7 @@ public class WebDAVClient {
 
     public MultiStatusResponse[] doPropPatch(PropPatchMethod propPatch, int expectedStatus) throws HttpException, IOException, DavException {
         try {
-            Assert.assertEquals("unexpected http status", expectedStatus, httpClient.executeMethod(propPatch));
+            Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(propPatch));
             return propPatch.getResponseBodyAsMultiStatus().getResponses();
         } catch (DavException e) {
             Assert.assertEquals("unexpected http status", expectedStatus, e.getErrorCode());
@@ -239,7 +278,7 @@ public class WebDAVClient {
 
 	public String doPost(PostMethod post, int expectedStatus) throws HttpException, IOException {
 		try {
-	    	Assert.assertEquals("unexpected http status", expectedStatus, this.httpClient.executeMethod(post));
+	    	Assert.assertEquals("unexpected http status", expectedStatus, executeMethod(post));
 	    	return post.getResponseBodyAsString();
 		} finally {
 			release(post);

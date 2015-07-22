@@ -67,6 +67,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class Tools {
 
+    public static final String OAUTH_SCOPE = "caldav";
 
     public static Date getLatestModified(Date lastModified1, Date lastModified2) {
         return lastModified1.after(lastModified2) ? lastModified1 : lastModified2;

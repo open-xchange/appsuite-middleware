@@ -71,6 +71,7 @@ import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
@@ -101,12 +102,9 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
     private final ServiceLookup services;
 
-    private final OAuthSessionProvider sessionProvider;
-
-    public OAuthDispatcherServlet(ServiceLookup services, OAuthSessionProvider sessionProvider, String prefix) {
+    public OAuthDispatcherServlet(ServiceLookup services, String prefix) {
         super(prefix);
         this.services = services;
-        this.sessionProvider = sessionProvider;
     }
 
     @Override
@@ -128,7 +126,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
 
         OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
         OAuthGrant grant = oAuthResourceService.validate(authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1));
-        session = sessionProvider.getSession(grant, httpRequest);
+        session = requireService(OAuthSessionProvider.class, services).getSession(grant, httpRequest);
         SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
         httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);
         return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
@@ -197,7 +195,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
                 }
 
                 if (result == null) {
-                    sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED);
+                    sendEmptyErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, Collections.singletonMap(HttpHeaders.WWW_AUTHENTICATE, sb.toString()));
                 } else {
                     sendErrorResponse(httpResponse, HttpServletResponse.SC_UNAUTHORIZED, Collections.singletonMap(HttpHeaders.WWW_AUTHENTICATE, sb.toString()), result.toString());
                 }

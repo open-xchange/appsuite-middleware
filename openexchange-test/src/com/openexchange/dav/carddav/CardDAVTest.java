@@ -63,7 +63,6 @@ import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
 import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
-import org.apache.commons.httpclient.HttpException;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -170,7 +169,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	return this.vCardEngine;
     }
 
-    protected int delete(final String uid) throws OXException, HttpException, IOException {
+    protected int delete(final String uid) throws Exception {
     	DeleteMethod delete = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -185,7 +184,7 @@ public abstract class CardDAVTest extends WebDAVTest {
     	getManager().deleteAction(contact);
     }
 
-    protected String getCTag() throws OXException, IOException, DavException {
+    protected String getCTag() throws Exception {
 		PropFindMethod propFind = null;
 		try {
 			DavPropertyNameSet props = new DavPropertyNameSet();
@@ -200,7 +199,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 		}
     }
 
-	protected int putVCard(String uid, String vCard) throws HttpException, IOException, OXException {
+	protected int putVCard(String uid, String vCard) throws Exception {
         PutMethod put = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -213,11 +212,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
 	}
 
-	protected int putVCardUpdate(String uid, String vCard) throws HttpException, IOException, OXException {
+	protected int putVCardUpdate(String uid, String vCard) throws Exception {
 		return this.putVCardUpdate(uid, vCard, null);
 	}
 
-	protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws HttpException, IOException, OXException {
+	protected int putVCardUpdate(String uid, String vCard, String ifMatchEtag) throws Exception {
         PutMethod put = null;
         try {
             final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -232,7 +231,7 @@ public abstract class CardDAVTest extends WebDAVTest {
         }
 	}
 
-	protected String fetchSyncToken() throws OXException, IOException, DavException {
+	protected String fetchSyncToken() throws Exception {
 		return super.fetchSyncToken("/carddav/Contacts");
 	}
 
@@ -246,11 +245,11 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws ConfigurationException
 	 * @throws DavException
 	 */
-	protected Map<String, String> syncCollection(final String syncToken) throws OXException, IOException, DavException {
+	protected Map<String, String> syncCollection(final String syncToken) throws Exception {
 		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
 
-	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws OXException, IOException, DavException {
+	protected SyncCollectionResponse syncCollection(SyncToken syncToken) throws Exception {
 		return super.syncCollection(syncToken, "/carddav/Contacts");
 	}
 
@@ -326,7 +325,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws IOException
 	 * @throws ConfigurationException
 	 */
-	protected Map<String, String> getAllETags() throws OXException, IOException, DavException {
+	protected Map<String, String> getAllETags() throws Exception {
 		final Map<String, String> eTags = new HashMap<String, String>();
     	final DavPropertyNameSet propertyNames = new DavPropertyNameSet();
     	propertyNames.add(PropertyNames.GETETAG);
@@ -355,7 +354,7 @@ public abstract class CardDAVTest extends WebDAVTest {
 	 * @throws VCardParseException
 	 * @throws VCardException
 	 */
-	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws OXException, IOException, DavException, VCardParseException {
+	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws Exception {
 		final List<VCardResource> addressData = new ArrayList<VCardResource>();
     	final DavPropertyNameSet props = new DavPropertyNameSet();
     	props.add(PropertyNames.GETETAG);

@@ -51,6 +51,7 @@ package com.openexchange.caldav.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.caldav.CalDAVServiceLookup;
+import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
@@ -58,6 +59,7 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
@@ -73,8 +75,14 @@ import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
@@ -203,6 +211,16 @@ public class CaldavActivator extends HousekeepingActivator {
                 }
             });
 
+            registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CALENDAR) {
+                @Override
+                public boolean canBeGranted(CapabilitySet capabilities) {
+                    return capabilities.contains(Permission.CALDAV.getCapabilityName());
+                }
+            });
+
+            trackService(OAuthResourceService.class);
+            trackService(OAuthSessionProvider.class);
+
             openTrackers();
         } catch (final Exception e) {
             LOG.error("", e);
@@ -224,6 +242,15 @@ public class CaldavActivator extends HousekeepingActivator {
         }
         CalDAVServiceLookup.set(null);
         super.stopBundle();
+    }
+
+    private static final class OAuthStrings implements LocalizableStrings {
+
+        // Application 'xyz' requires following permissions:
+        //  - Synchronize your calendars and appointments.
+        //  - ...
+        public static final String SYNC_CALENDAR = "Synchronize your calendars and appointments.";
+
     }
 
 }

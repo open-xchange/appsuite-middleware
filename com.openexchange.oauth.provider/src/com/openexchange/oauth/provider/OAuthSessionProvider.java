@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,130 +47,33 @@
  *
  */
 
-package com.openexchange.tools.webdav.digest;
+package com.openexchange.oauth.provider;
+
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.exception.OXException;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Authorization}
+ * This is a bridge between OAuth 2.0 access tokens and the internal session mechanism.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @since v7.8.0
  */
-public final class Authorization {
-
-    String algorithm;
-
-    String cnonce;
-
-    String nOnce;
-
-    String nc;
-
-    String opaque;
-
-    String qop;
-
-    String realm;
-
-    String response;
-
-    String uri;
-
-    String user;
+public interface OAuthSessionProvider {
 
     /**
-     * Initializes a new {@link Authorization}.
-     */
-    Authorization() {
-        super();
-    }
-
-    /**
-     * Gets the algorithm
+     * Gets a valid {@link ServerSession} according to the passed OAuth grant. A validation of
+     * the grants token does not take place here, it must be performed before calling this method.
+     * An implementation may decide to cache sessions across multiple calls to this method (i.e.
+     * across multiple OAuth requests).
      *
-     * @return The algorithm
+     * @param grant The grant
+     * @param httpRequest The servlet request
+     * @return The session
+     * @throws OXException If an internal error occurs
      */
-    public String getAlgorithm() {
-        return algorithm;
-    }
-
-    /**
-     * Gets the cnonce
-     *
-     * @return The cnonce
-     */
-    public String getCnonce() {
-        return cnonce;
-    }
-
-    /**
-     * Gets the nOnce
-     *
-     * @return The nOnce
-     */
-    public String getnOnce() {
-        return nOnce;
-    }
-
-    /**
-     * Gets the nc
-     *
-     * @return The nc
-     */
-    public String getNc() {
-        return nc;
-    }
-
-    /**
-     * Gets the opaque
-     *
-     * @return The opaque
-     */
-    public String getOpaque() {
-        return opaque;
-    }
-
-    /**
-     * Gets the qop
-     *
-     * @return The qop
-     */
-    public String getQop() {
-        return qop;
-    }
-
-    /**
-     * Gets the realm
-     *
-     * @return The realm
-     */
-    public String getRealm() {
-        return realm;
-    }
-
-    /**
-     * Gets the response
-     *
-     * @return The response
-     */
-    public String getResponse() {
-        return response;
-    }
-
-    /**
-     * Gets the uri
-     *
-     * @return The uri
-     */
-    public String getUri() {
-        return uri;
-    }
-
-    /**
-     * Gets the user
-     *
-     * @return The user
-     */
-    public String getUser() {
-        return user;
-    }
+    Session getSession(OAuthGrant grant, HttpServletRequest httpRequest) throws OXException;
 
 }

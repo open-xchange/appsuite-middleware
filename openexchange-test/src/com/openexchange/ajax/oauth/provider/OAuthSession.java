@@ -107,7 +107,7 @@ public class OAuthSession extends AJAXSession {
         }
     }
 
-    private static DefaultHttpClient newOAuthHttpClient() {
+    public static DefaultHttpClient newOAuthHttpClient() {
         DefaultHttpClient client = newHttpClient();
         try {
             SSLSocketFactory ssf = new SSLSocketFactory(new TrustSelfSignedStrategy(), new AllowAllHostnameVerifier());
