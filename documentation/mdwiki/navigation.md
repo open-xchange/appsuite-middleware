@@ -4,6 +4,7 @@
 
   * # HTTP API
   * [Introduction](../API/HTTP/introduction.md)
+  * [Folders](../API/HTTP/folders.md)
 
 [Components]()
 
