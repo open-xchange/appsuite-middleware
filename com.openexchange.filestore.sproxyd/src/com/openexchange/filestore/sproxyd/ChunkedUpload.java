@@ -50,6 +50,7 @@
 package com.openexchange.filestore.sproxyd;
 
 import java.io.Closeable;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -71,9 +72,8 @@ public class ChunkedUpload implements Closeable {
      * Initializes a new {@link ChunkedUpload}.
      *
      * @param data The underlying input stream
-     * @throws OXException
      */
-    public ChunkedUpload(InputStream data) throws OXException {
+    public ChunkedUpload(InputStream data) {
         super();
         this.inputStream = data;
         hasNext = true;
@@ -83,9 +83,12 @@ public class ChunkedUpload implements Closeable {
      * Gets the next upload chunk.
      *
      * @return The next upload chunk
-     * @throws OXException
+     * @throws OXException If next chunk cannot be returned due to an I/O error or because end of stream was already reached ({@link #hasNext()} signals <code>false</code>)
      */
     public UploadChunk next() throws OXException {
+        if (false == hasNext) {
+            throw FileStorageCodes.IOERROR.create(new EOFException("End of input reached"));
+        }
         try {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             byte[] buffer = new byte[0xFFFF]; // 64k
@@ -119,7 +122,7 @@ public class ChunkedUpload implements Closeable {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         Streams.close(inputStream);
     }
 
