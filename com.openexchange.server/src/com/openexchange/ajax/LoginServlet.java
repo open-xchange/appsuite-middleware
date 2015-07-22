@@ -226,7 +226,7 @@ public class LoginServlet extends AJAXServlet {
      * Gets the name of the public session cookie for specified HTTP request.
      *
      * <pre>
-     *  "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
+     * "open-xchange-public-session-" + &lt;hash(req.userAgent)&gt;
      * </pre>
      *
      * @param req The HTTP request
@@ -297,8 +297,7 @@ public class LoginServlet extends AJAXServlet {
                         } else {
                             additionalsForHash = null;
                         }
-                        final String secret = SessionUtility.extractSecret(
-                            conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
+                        final String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient(), null, additionalsForHash);
 
                         if (secret == null || !session.getSecret().equals(secret)) {
                             LOG.info("Status code 403 (FORBIDDEN): Missing or non-matching secret.");
@@ -352,12 +351,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info(
-                                        "Changing IP of session {} with authID: {} from {} to {}.",
-                                        session.getSessionID(),
-                                        session.getAuthId(),
-                                        oldIP,
-                                        newIP);
+                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -387,10 +381,7 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info(
-                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
-                            context.getContextId(),
-                            user.getId());
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -399,10 +390,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info(
-                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
-                        session.getContextId(),
-                        session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -421,11 +409,7 @@ public class LoginServlet extends AJAXServlet {
                     session.setHash(hash);
                 }
                 writeSecretCookie(req, resp, session, hash, req.isSecure(), req.getServerName(), conf);
-                resp.sendRedirect(LoginTools.generateRedirectURL(
-                    req.getParameter(LoginFields.UI_WEB_PATH_PARAM),
-                    req.getParameter("store"),
-                    session.getSessionID(),
-                    conf.getUiWebPath()));
+                resp.sendRedirect(LoginTools.generateRedirectURL(req.getParameter(LoginFields.UI_WEB_PATH_PARAM), req.getParameter("store"), session.getSessionID(), conf.getUiWebPath()));
             }
         });
         handlerMap.put(ACTION_CHANGEIP, new LoginRequestHandler() {
@@ -453,29 +437,17 @@ public class LoginServlet extends AJAXServlet {
                         // Check
                         final LoginConfiguration conf = confReference.get();
                         SessionUtility.checkIP(conf.isIpCheck(), conf.getRanges(), session, req.getRemoteAddr(), conf.getIpCheckWhitelist());
-                        final String secret = SessionUtility.extractSecret(
-                            conf.getHashSource(),
-                            req,
-                            session.getHash(),
-                            session.getClient());
+                        final String secret = SessionUtility.extractSecret(conf.getHashSource(), req, session.getHash(), session.getClient());
                         if (secret == null || !session.getSecret().equals(secret)) {
                             if (null != secret) {
-                                LOG.info(
-                                    "Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".",
-                                    secret,
-                                    session.getSecret());
+                                LOG.info("Session secret is different. Given secret \"{}\" differs from secret in session \"{}\".", secret, session.getSecret());
                             }
                             throw SessionExceptionCodes.WRONG_SESSION_SECRET.create();
                         }
                         final String oldIP = session.getLocalIp();
                         if (!newIP.equals(oldIP)) {
                             // In case changing IP is intentionally requested by client, log it only if DEBUG aka FINE log level is enabled
-                            LOG.info(
-                                "Changing IP of session {} with authID: {} from {} to {}",
-                                session.getSessionID(),
-                                session.getAuthId(),
-                                oldIP,
-                                newIP);
+                            LOG.info("Changing IP of session {} with authID: {} from {} to {}", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                             session.setLocalIp(newIP);
                         }
                         response.setData("1");
@@ -534,12 +506,7 @@ public class LoginServlet extends AJAXServlet {
                             if (null == oldIP || SessionUtility.isWhitelistedFromIPCheck(oldIP, conf.getRanges())) {
                                 final String newIP = req.getRemoteAddr();
                                 if (!newIP.equals(oldIP)) {
-                                    LOG.info(
-                                        "Changing IP of session {} with authID: {} from {} to {}.",
-                                        session.getSessionID(),
-                                        session.getAuthId(),
-                                        oldIP,
-                                        newIP);
+                                    LOG.info("Changing IP of session {} with authID: {} from {} to {}.", session.getSessionID(), session.getAuthId(), oldIP, newIP);
                                     session.setLocalIp(newIP);
                                 }
                             }
@@ -569,10 +536,7 @@ public class LoginServlet extends AJAXServlet {
                     final Context context = ContextStorage.getInstance().getContext(session.getContextId());
                     final User user = UserStorage.getInstance().getUser(session.getUserId(), context);
                     if (!context.isEnabled() || !user.isMailEnabled()) {
-                        LOG.info(
-                            "Status code 403 (FORBIDDEN): Either context {} or user {} not enabled",
-                            context.getContextId(),
-                            user.getId());
+                        LOG.info("Status code 403 (FORBIDDEN): Either context {} or user {} not enabled", context.getContextId(), user.getId());
                         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                         return;
                     }
@@ -581,10 +545,7 @@ public class LoginServlet extends AJAXServlet {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 } catch (final OXException e) {
-                    LOG.info(
-                        "Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}",
-                        session.getContextId(),
-                        session.getUserId());
+                    LOG.info("Status code 403 (FORBIDDEN): Couldn't resolve context/user by identifier: {}/{}", session.getContextId(), session.getUserId());
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -661,24 +622,7 @@ public class LoginServlet extends AJAXServlet {
         final boolean disableTrimLogin = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.DISABLE_TRIM_LOGIN.getPropertyName()));
         final boolean formLoginWithoutAuthId = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.FORM_LOGIN_WITHOUT_AUTHID.getPropertyName()));
         final boolean isRandomTokenEnabled = Boolean.parseBoolean(config.getInitParameter(ConfigurationProperty.RANDOM_TOKEN.getPropertyName()));
-        LoginConfiguration conf = new LoginConfiguration(
-            uiWebPath,
-            sessiondAutoLogin,
-            hashSource,
-            httpAuthAutoLogin,
-            defaultClient,
-            clientVersion,
-            errorPageTemplate,
-            cookieExpiry,
-            cookieForceHTTPS,
-            insecure,
-            ipCheck,
-            ipCheckWhitelist,
-            redirectIPChangeAllowed,
-            ranges,
-            disableTrimLogin,
-            formLoginWithoutAuthId,
-            isRandomTokenEnabled);
+        LoginConfiguration conf = new LoginConfiguration(uiWebPath, sessiondAutoLogin, hashSource, httpAuthAutoLogin, defaultClient, clientVersion, errorPageTemplate, cookieExpiry, cookieForceHTTPS, insecure, ipCheck, ipCheckWhitelist, redirectIPChangeAllowed, ranges, disableTrimLogin, formLoginWithoutAuthId, isRandomTokenEnabled);
         confReference.set(conf);
         handlerMap.put(ACTION_FORMLOGIN, new FormLogin(conf));
         handlerMap.put(ACTION_TOKENLOGIN, new TokenLogin(conf));
@@ -704,6 +648,13 @@ public class LoginServlet extends AJAXServlet {
 
     @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+        try {
+            Tools.checkNonExistence(req, PARAMETER_PASSWORD);
+        } catch (OXException oxException) {
+            logAndSendException(resp, oxException);
+            return;
+        }
+
         try {
             final String action = req.getParameter(PARAMETER_ACTION);
             final String subPath = getServletSpecificURI(req);

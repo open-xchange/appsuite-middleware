@@ -183,6 +183,10 @@ public enum AjaxExceptionCodes implements DisplayableOXExceptionCode {
      * Client sent invalid JSON data in request body.
      */
     INVALID_JSON_REQUEST_BODY("Client sent invalid JSON data in request body.", AjaxExceptionMessages.INVALID_JSON_REQUEST_BODY, Category.CATEGORY_ERROR, 29),
+    /**
+     * Client sent not allowed request parameter \"%1$s\".
+     */
+    NOT_ALLOWED_URI_PARAM("Client sent not allowed request parameter \"%1$s\" within the URI.", AjaxExceptionMessages.NOT_ALLOWED_URI_PARAM_MSG, Category.CATEGORY_ERROR, 30),
 
     ;
 

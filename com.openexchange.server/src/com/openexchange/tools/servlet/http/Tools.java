@@ -54,13 +54,16 @@ import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +87,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.groupware.notify.hostname.internal.HostDataImpl;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.osgi.util.ServiceCallWrapper;
 import com.openexchange.osgi.util.ServiceCallWrapper.ServiceException;
@@ -91,6 +95,7 @@ import com.openexchange.osgi.util.ServiceCallWrapper.ServiceUser;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.systemname.SystemNameService;
 import com.openexchange.tools.encoding.Helper;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * Convenience methods for servlets.
@@ -98,6 +103,8 @@ import com.openexchange.tools.encoding.Helper;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
     /**
      * DateFormat for HTTP header.
@@ -232,7 +239,7 @@ public final class Tools {
     public static void setETag(final String eTag, final long expiry, final HttpServletResponse resp) {
         removeCachingHeader(resp);
         if (null != eTag) {
-            resp.setHeader(NAME_ETAG, eTag); // ETag
+            resp.setHeader(NAME_ETAG, eTag);// ETag
         }
         if (expiry <= 0) {
             synchronized (HEADER_DATEFORMAT) {
@@ -296,7 +303,7 @@ public final class Tools {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_HOUR)));
         }
-        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600"); // 1 hour
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=3600");// 1 hour
     }
 
     /**
@@ -308,7 +315,7 @@ public final class Tools {
         synchronized (HEADER_DATEFORMAT) {
             resp.setHeader(NAME_EXPIRES, HEADER_DATEFORMAT.format(new Date(System.currentTimeMillis() + MILLIS_YEAR)));
         }
-        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018"); // 1 year
+        resp.setHeader(NAME_CACHE_CONTROL, "private, max-age=31521018");// 1 year
     }
 
     /**
@@ -683,7 +690,7 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendErrorResponse(HttpServletResponse httpResponse, int statusCode, String body) throws IOException {
-        sendErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap(), body);
+        sendErrorResponse(httpResponse, statusCode, Collections.<String, String> emptyMap(), body);
     }
 
     /**
@@ -719,7 +726,7 @@ public final class Tools {
      * @throws IllegalStateException If the response has already been committed
      */
     public static void sendEmptyErrorResponse(HttpServletResponse httpResponse, int statusCode) throws IOException {
-        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String>emptyMap());
+        sendEmptyErrorResponse(httpResponse, statusCode, Collections.<String, String> emptyMap());
     }
 
     /**
@@ -743,6 +750,7 @@ public final class Tools {
 
     /**
      * Sends an HTML error page to HTTP response.
+     *
      * @param httpResponse The HTTP response
      * @param statusCode The HTTP status code
      * @param desc The error description
@@ -863,4 +871,58 @@ public final class Tools {
         return hostname;
     }
 
+    /**
+     * Checks the existence of the given parameters within the request URL and throws an exception if at least one param hurts this rule
+     *
+     * @param req - the request to look for URL
+     * @param parameters - the URL parameter that should not occur
+     * @throws OXException - if the parameters was sent by the client
+     */
+    public static void checkNonExistence(final HttpServletRequest req, String... parameters) throws OXException {
+        if ((req == null) || (parameters == null)) {
+            return;
+        }
+
+        String queryString = req.getQueryString();
+        if ((queryString == null) || (queryString.isEmpty())) {
+            return;
+        }
+
+        Map<String, List<String>> parameterMap = null;
+        try {
+            parameterMap = splitQuery(queryString);
+        } catch (UnsupportedEncodingException e) {
+            LOG.warn("Unable to analyze query string. Will not check for undesired URI params.", e);
+            return;
+        }
+        if (parameterMap == null) {
+            return;
+        }
+
+        List<String> notAllowed = new ArrayList<>();
+        for (String parameter : parameters) {
+            if (parameterMap.containsKey(parameter)) {
+                notAllowed.add(parameter);
+            }
+        }
+
+        if (!notAllowed.isEmpty()) {
+            throw AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.create(Strings.concat(", ", notAllowed));
+        }
+    }
+
+    private static Map<String, List<String>> splitQuery(String queryString) throws UnsupportedEncodingException {
+        final Map<String, List<String>> queryPairs = new LinkedHashMap<String, List<String>>();
+        final String[] pairs = queryString.split("&");
+        for (String pair : pairs) {
+            final int idx = pair.indexOf("=");
+            final String key = idx > 0 ? URLDecoder.decode(pair.substring(0, idx), Charsets.UTF_8_NAME) : pair;
+            if (!queryPairs.containsKey(key)) {
+                queryPairs.put(key, new LinkedList<String>());
+            }
+            final String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), Charsets.UTF_8_NAME) : null;
+            queryPairs.get(key).add(value);
+        }
+        return queryPairs;
+    }
 }
