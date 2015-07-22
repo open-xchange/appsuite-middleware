@@ -59,7 +59,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.storage.ContactUserStorage;
@@ -73,6 +72,7 @@ import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contact.ContactConfig;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -111,16 +111,6 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
     private static int DELETE_CHUNK_SIZE = 50;
 
     private final Executor executor;
-
-    private static final int DEFAULT_IMAGE_WIDTH = 200;
-    private static final int DEFAULT_IMAGE_HEIGHT = 200;
-    private static final ScaleType DEFAULT_SCALE_TYPE = ScaleType.CONTAIN;
-    private static final boolean DEFAULT_SCALE_IMAGES = false;
-    int image_width = DEFAULT_IMAGE_WIDTH;
-    int image_height = DEFAULT_IMAGE_HEIGHT;
-    ScaleType type = DEFAULT_SCALE_TYPE;
-    boolean scale_images = DEFAULT_SCALE_IMAGES;
-    boolean configuration_loaded = false;
 
     /**
      * Initializes a new {@link RdbContactStorage}.
@@ -1086,31 +1076,30 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                 return;
             }
 
-            if (!configuration_loaded) {
-                final ConfigurationService confService = RdbServiceLookup.getService(ConfigurationService.class);
-                if (confService != null) {
-                    scale_images = confService.getBoolProperty("com.openexchange.contact.image.scaleImages", DEFAULT_SCALE_IMAGES);
-                    image_width = confService.getIntProperty("com.openexchange.contact.image.maxWidth", image_width);
-                    image_height = confService.getIntProperty("com.openexchange.contact.image.maxHeight", image_height);
-                    final int typeNumber = confService.getIntProperty("com.openexchange.contact.image.scaleType", 1);
-                    switch (typeNumber) {
-                        case 1:
-                            type = ScaleType.CONTAIN;
-                            break;
-                        case 2:
-                            type = ScaleType.COVER;
-                            break;
-                        case 3:
-                            type = ScaleType.AUTO;
-                            break;
-                    }
-                }
-                configuration_loaded = true;
+            final ContactConfig conf = ContactConfig.getInstance();
+            final boolean scale_images = conf.getBoolean(ContactConfig.Property.SCALE_IMAGES);
+            if (!scale_images) {
+                return;
             }
-
+            final int image_width = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_WIDTH));
+            final int image_height = Integer.valueOf(conf.getString(ContactConfig.Property.SCALED_IMAGE_HEIGHT));
+            int typeNumber = 1;
+            typeNumber = Integer.valueOf(conf.getString(ContactConfig.Property.SCALE_TYPE));
+            ScaleType type = ScaleType.CONTAIN;
+            switch (typeNumber) {
+                case 1:
+                    type = ScaleType.CONTAIN;
+                    break;
+                case 2:
+                    type = ScaleType.COVER;
+                    break;
+                case 3:
+                    type = ScaleType.AUTO;
+                    break;
+            }
             final byte[] imageBytes = contact.getImage1();
 
-            if (!scale_images || imageBytes == null || imageBytes.length == 0) {
+            if (imageBytes == null || imageBytes.length == 0) {
                 return;
             }
 
@@ -1128,7 +1117,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (image != null && image.length != 0) {
                 contact.setImage1(image);
             }
-        } catch (OXException | IOException ex) {
+        } catch (OXException | IOException | NumberFormatException ex) {
             LOG.error("Unable to resize contact image due to " + ex.getMessage());
         }
     }

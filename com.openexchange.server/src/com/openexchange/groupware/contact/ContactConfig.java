@@ -110,6 +110,7 @@ public class ContactConfig {
 
     /**
      * Gets the value of a property from the file.
+     * 
      * @param key name of the property.
      * @return the value of the property.
      */
@@ -120,6 +121,7 @@ public class ContactConfig {
 
     /**
      * Gets the value of a property from the file.
+     * 
      * @param key name of the property.
      * @return the value of the property.
      */
@@ -180,7 +182,27 @@ public class ContactConfig {
          * Check the entered email address from a new contact for correctness
          * (syntactic check user@domain.tld)
          */
-        VALIDATE_CONTACT_EMAIL("validate_contact_email", Boolean.TRUE.toString());
+        VALIDATE_CONTACT_EMAIL("validate_contact_email", Boolean.TRUE.toString()),
+
+        /**
+         * Enables / Disables scaling of contact images
+         */
+        SCALE_IMAGES("com.openexchange.contact.image.scaleImages", Boolean.TRUE.toString()),
+
+        /**
+         * Defines the width of scaled contact images
+         */
+        SCALED_IMAGE_WIDTH("com.openexchange.contact.image.maxWidth", "200"),
+
+        /**
+         * Defines the height of scaled contact images
+         */
+        SCALED_IMAGE_HEIGHT("com.openexchange.contact.image.maxHeight", "200"),
+
+        /**
+         * Defines the scale type
+         */
+        SCALE_TYPE("com.openexchange.contact.image.scaleType", "1");
 
         /**
          * Name of the property in the participant.properties file.
@@ -194,8 +216,9 @@ public class ContactConfig {
 
         /**
          * Default constructor.
+         * 
          * @param keyName Name of the property in the participant.properties
-         * file.
+         *            file.
          * @param value Default value of the property.
          */
         private Property(final String keyName, final String value) {
