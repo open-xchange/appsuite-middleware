@@ -47,42 +47,49 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.accounts;
+package com.openexchange.file.storage.json.actions.services;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.json.FileStorageAccountWriter;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link AccountActionFactory}
+ * The common superclass for all AJAXActionServices handling file storage account management. Provides a unified handling
+ * for JSONExceptions and stores commonly used services (the registry, a writer and a parser) for subclasses.
+ * Subclasses must implement the {@link #doIt(AJAXRequestData, ServerSession)} method.
  *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AccountActionFactory implements AJAXActionServiceFactory {
+public abstract class AbstractFileStorageServiceAction implements AJAXActionService {
 
-    private final Map<String, AJAXActionService> actions;
+    protected FileStorageServiceRegistry registry;
+    protected FileStorageAccountWriter writer;
 
-    public AccountActionFactory(final FileStorageServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>(8, 0.9F);
-        actions.put("all", new AllAction(registry));
-        actions.put("delete", new DeleteAction(registry));
-        actions.put("get", new GetAction(registry));
-        actions.put("new", new NewAction(registry));
-        actions.put("update", new UpdateAction(registry));
+    /**
+     * Initializes a new {@link AbstractFileStorageServiceAction}.
+     */
+    protected AbstractFileStorageServiceAction(final FileStorageServiceRegistry registry) {
+        this.registry = registry;
+        writer = new FileStorageAccountWriter();
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public AJAXRequestResult perform(final AJAXRequestData requestData, final ServerSession session) throws OXException {
+        try {
+            return doIt(requestData, session);
+        } catch (final JSONException x) {
+            throw FileStorageExceptionCodes.JSON_ERROR.create(x,x.toString());
+        }
     }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+    protected abstract AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException;
 
 }

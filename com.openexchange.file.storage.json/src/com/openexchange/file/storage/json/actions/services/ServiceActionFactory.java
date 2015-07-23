@@ -47,41 +47,39 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.accounts;
+package com.openexchange.file.storage.json.actions.services;
 
-import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
- * A class implementing the "services" action for listing all file storage services.
+ * {@link ServiceActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ServicesAction extends AbstractFileStorageAccountAction {
+public class ServiceActionFactory implements AJAXActionServiceFactory {
 
-    public ServicesAction(final FileStorageServiceRegistry registry) {
-        super(registry);
+    private final Map<String, AJAXActionService> actions;
+
+    public ServiceActionFactory(final FileStorageServiceRegistry registry) {
+        actions = new HashMap<String, AJAXActionService>(4, 0.9F);
+        actions.put("all", new AllAction(registry));
+        actions.put("get", new GetAction(registry));
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        List<FileStorageService> allServices = registry.getAllServices();
-        JSONArray jServices = new JSONArray(allServices.size());
-        for (FileStorageService service : allServices) {
-            JSONObject jService = writer.write(service);
-            jServices.put(jService);
-        }
+    public AJAXActionService createActionService(final String action) throws OXException {
+        return actions.get(action);
+    }
 
-        return new AJAXRequestResult(jServices);
+    @Override
+    public Collection<? extends AJAXActionService> getSupportedServices() {
+        return java.util.Collections.unmodifiableCollection(actions.values());
     }
 
 }

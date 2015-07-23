@@ -47,42 +47,41 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.accounts;
+package com.openexchange.file.storage.json.actions.services;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.tools.session.ServerSession;
+
 
 /**
- * {@link AccountActionFactory}
+ * A class implementing the "all" action for listing all file storage services.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class AccountActionFactory implements AJAXActionServiceFactory {
+public class AllAction extends AbstractFileStorageServiceAction {
 
-    private final Map<String, AJAXActionService> actions;
-
-    public AccountActionFactory(final FileStorageServiceRegistry registry) {
-        actions = new HashMap<String, AJAXActionService>(8, 0.9F);
-        actions.put("all", new AllAction(registry));
-        actions.put("delete", new DeleteAction(registry));
-        actions.put("get", new GetAction(registry));
-        actions.put("new", new NewAction(registry));
-        actions.put("update", new UpdateAction(registry));
+    public AllAction(final FileStorageServiceRegistry registry) {
+        super(registry);
     }
 
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
+    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
+        List<FileStorageService> allServices = registry.getAllServices();
+        JSONArray jServices = new JSONArray(allServices.size());
+        for (FileStorageService service : allServices) {
+            JSONObject jService = writer.write(service);
+            jServices.put(jService);
+        }
 
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+        return new AJAXRequestResult(jServices);
     }
 
 }

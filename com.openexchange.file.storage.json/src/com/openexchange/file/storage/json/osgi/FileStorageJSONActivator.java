@@ -62,6 +62,7 @@ import com.openexchange.file.storage.json.FileMetadataParser;
 import com.openexchange.file.storage.json.actions.accounts.AccountActionFactory;
 import com.openexchange.file.storage.json.actions.files.AliasFileActionFactory;
 import com.openexchange.file.storage.json.actions.files.FileActionFactory;
+import com.openexchange.file.storage.json.actions.services.ServiceActionFactory;
 import com.openexchange.file.storage.json.services.Services;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -101,6 +102,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
             registerModule(FileActionFactory.INSTANCE, "infostore");
             registerModule(AliasFileActionFactory.ALIAS_INSTANCE, "files");
             registerModule(new AccountActionFactory(getService(FileStorageServiceRegistry.class)), "fileaccount");
+            registerModule(new ServiceActionFactory(getService(FileStorageServiceRegistry.class)), "fileservice");
             registerService(FileMetadataParserService.class, FileMetadataParser.getInstance(), null);
             registerService(ResultConverter.class, new FileConverter(fieldCollector));
         } catch (final Exception x) {
