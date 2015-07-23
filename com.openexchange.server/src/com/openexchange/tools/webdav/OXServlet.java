@@ -369,6 +369,7 @@ public abstract class OXServlet extends WebDavServlet {
             AuthorizationHeader authHeader = AuthorizationHeader.parseSafe(req.getHeader(Header.AUTH_HEADER));
             if (authHeader == null) {
                 addUnauthorizedHeader(req, resp);
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return false;
             }
 
@@ -380,6 +381,10 @@ public abstract class OXServlet extends WebDavServlet {
                 case "bearer":
                     session = doOAuth(authHeader, req, resp);
                     break;
+                default:
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    break;
+
             }
 
             if (session == null) {
@@ -427,6 +432,7 @@ public abstract class OXServlet extends WebDavServlet {
         try {
             Credentials creds = com.openexchange.tools.servlet.http.Authorization.decode(authHeader.getRawValue());
             if (!com.openexchange.tools.servlet.http.Authorization.checkLogin(creds.getPassword())) {
+                resp.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authorization Required!");
                 return null;
             }
 
