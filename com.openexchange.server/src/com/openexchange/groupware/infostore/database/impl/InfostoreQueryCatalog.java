@@ -759,7 +759,7 @@ public class InfostoreQueryCatalog {
     }
 
     public String getSharedDocumentsByUserQuery(int contextId, int userId, Metadata[] metadata, Metadata sort, int order, int start, int end, DocumentWins wins) {
-        StringBuilder stringBuilder = new StringBuilder(STR_SELECT)
+        StringBuilder stringBuilder = new StringBuilder("SELECT DISTINCT ")
             .append(fields(metadata, wins))
             .append(" FROM object_permission JOIN infostore ON object_permission.cid = ").append(contextId)
             .append(" AND object_permission.module = 8 AND object_permission.cid = infostore.cid")
