@@ -69,6 +69,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
@@ -103,6 +104,8 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class Tools {
+
+    public static final String COM_OPENEXCHANGE_CHECK_URL_PARAMS = "com.openexchange.check.url.params";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Tools.class);
 
@@ -153,6 +156,8 @@ public final class Tools {
      * Pragma HTTP header value.
      */
     private static final String PRAGMA_VALUE = "no-cache";
+
+    private static final AtomicReference<ConfigurationService> CONFIG_SERVICE_REF = new AtomicReference<ConfigurationService>();
 
     static {
         /*
@@ -841,6 +846,7 @@ public final class Tools {
     private static String determineServletPrefix() {
         try {
             return ServiceCallWrapper.tryServiceCall(Tools.class, DispatcherPrefixService.class, new ServiceUser<DispatcherPrefixService, String>() {
+
                 @Override
                 public String call(DispatcherPrefixService service) throws Exception {
                     return service.getPrefix();
@@ -855,6 +861,7 @@ public final class Tools {
         String hostname = null;
         try {
             hostname = ServiceCallWrapper.tryServiceCall(Tools.class, HostnameService.class, new ServiceUser<HostnameService, String>() {
+
                 @Override
                 public String call(HostnameService service) throws Exception {
                     return service.getHostname(userId, contextId);
@@ -872,14 +879,20 @@ public final class Tools {
     }
 
     /**
-     * Checks the existence of the given parameters within the request URL and throws an exception if at least one param hurts this rule
+     * Checks the existence of the given parameters within the request URL and throws an exception if at least one param hurts this rule. If the {@link ConfigurationService} is <code>null</code> no check is performed
      *
      * @param req - the request to look for URL
      * @param parameters - the URL parameter that should not occur
      * @throws OXException - if the parameters was sent by the client
      */
     public static void checkNonExistence(final HttpServletRequest req, String... parameters) throws OXException {
-        if ((req == null) || (parameters == null)) {
+        ConfigurationService configService = CONFIG_SERVICE_REF.get();
+        if ((configService == null) || (req == null) || (parameters == null)) {
+            LOG.debug("One of the provided parameters is null. Return without checking parameters.");
+            return;
+        }
+        if (!configService.getBoolProperty(COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)) {
+            LOG.debug(COM_OPENEXCHANGE_CHECK_URL_PARAMS + " configured to false. return without checking parameters.");
             return;
         }
 
@@ -924,5 +937,9 @@ public final class Tools {
             queryPairs.get(key).add(value);
         }
         return queryPairs;
+    }
+
+    public static void setConfigurationService(final ConfigurationService configurationService) {
+        CONFIG_SERVICE_REF.set(configurationService);
     }
 }

@@ -53,7 +53,11 @@ import javax.servlet.http.sim.SimHttpServletRequest;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 
 /**
@@ -70,8 +74,15 @@ public class ToolsTest {
 
     private SimHttpServletRequest request;
 
+    @Mock
+    private ConfigurationService configurationService;
+
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        Mockito.when(configurationService.getBoolProperty(Tools.COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)).thenReturn(Boolean.TRUE);
+        Tools.setConfigurationService(configurationService);
+
         request = new SimHttpServletRequest();
         request.setQueryString(QUERY_STRING_WITHOUT_PASSWORD);
     }
@@ -147,6 +158,22 @@ public class ToolsTest {
 
     @Test
     public void testCheckNonExistence_multipleParamsAndNotAllowedFieldNotIncluded_ignore() throws OXException {
+        request.setQueryString(QUERY_STRING_WITHOUT_PASSWORD);
+
+        Tools.checkNonExistence(request, AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_MAIL, AJAXServlet.PARAMETER_PASSWORD, AJAXServlet.PARAMETER_SESSION);
+    }
+
+    @Test
+    public void testCheckNonExistence_configurationServiceNull_ignore() throws OXException {
+        Tools.setConfigurationService(null);
+
+        Tools.checkNonExistence(request, AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_MAIL, AJAXServlet.PARAMETER_PASSWORD, AJAXServlet.PARAMETER_SESSION);
+    }
+
+    @Test
+    public void testCheckNonExistence_configuredToNotCheck_ignore() throws OXException {
+        Mockito.when(configurationService.getBoolProperty(Tools.COM_OPENEXCHANGE_CHECK_URL_PARAMS, true)).thenReturn(Boolean.FALSE);
+
         request.setQueryString(QUERY_STRING_WITHOUT_PASSWORD);
 
         Tools.checkNonExistence(request, AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_MAIL, AJAXServlet.PARAMETER_PASSWORD, AJAXServlet.PARAMETER_SESSION);
