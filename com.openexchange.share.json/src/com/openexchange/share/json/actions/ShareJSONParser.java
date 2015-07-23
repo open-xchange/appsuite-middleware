@@ -49,19 +49,28 @@
 
 package com.openexchange.share.json.actions;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
+import com.openexchange.share.notification.ShareNotifyExceptionCodes;
 import com.openexchange.share.recipient.GuestRecipient;
 import com.openexchange.share.recipient.InternalRecipient;
 import com.openexchange.share.recipient.RecipientType;
@@ -136,6 +145,54 @@ public class ShareJSONParser {
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
+    }
+
+    /**
+     * Parses the "transport" property of the supplied JSON object, throwing an appropriate exception in case of an unknown transport, as
+     * well as falling back to the default <code>mail</code>-transport if none is specified.
+     *
+     * @param json The JSON object holding the transport
+     * @return The transport
+     */
+    public Transport parseNotificationTransport(JSONObject json) throws OXException {
+        String value = json.optString("transport", null);
+        if (Strings.isEmpty(value)) {
+            return Transport.MAIL;
+        }
+        try {
+            return Enums.parse(Transport.class, value);
+        } catch (IllegalArgumentException e) {
+            throw ShareNotifyExceptionCodes.UNKNOWN_NOTIFICATION_TRANSPORT.create(e, value);
+        }
+    }
+
+    /**
+     * Parses the transport-specific infos for the supplied array of recipients.
+     *
+     * @param transport The transport
+     * @param recipients The transport-specific JSON data for each recipient
+     * @return The transport infos
+     */
+    public List<Object> parseTransportInfos(Transport transport, JSONArray recipients) throws OXException {
+        if (null == recipients || 0 == recipients.length()) {
+            return Collections.emptyList();
+        }
+        List<Object> transportInfos = new ArrayList<Object>(recipients.length());
+        for (int i = 0; i < recipients.length(); i++) {
+            switch (transport) {
+                case MAIL:
+                    try {
+                        transportInfos.add(recipients.getJSONArray(i));
+                    } catch (JSONException e) {
+                        throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+                    }
+                    break;
+                default:
+                    throw ShareNotifyExceptionCodes.UNKNOWN_NOTIFICATION_TRANSPORT.create(transport.toString());
+            }
+
+        }
+        return transportInfos;
     }
 
     /**
@@ -252,6 +309,20 @@ public class ShareJSONParser {
         recipient.setBits(bits);
 
         return recipient;
+    }
+
+    private static InternetAddress parseAddress(JSONArray jRecipient) throws JSONException, OXException {
+        try {
+            if (jRecipient.length() == 1) {
+                return new QuotedInternetAddress(jRecipient.getString(0));
+            } else if (jRecipient.length() == 2) {
+                return new QuotedInternetAddress(jRecipient.getString(1), jRecipient.getString(0), "UTF-8");
+            }
+
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+        } catch (AddressException | UnsupportedEncodingException e) {
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(jRecipient.get(0));
+        }
     }
 
 }

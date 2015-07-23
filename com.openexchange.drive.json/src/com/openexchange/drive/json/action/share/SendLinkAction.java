@@ -47,48 +47,39 @@
  *
  */
 
-package com.openexchange.share.json.actions;
+package com.openexchange.drive.json.action.share;
 
 import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.json.internal.DefaultDriveSession;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareInfo;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareTarget;
 import com.openexchange.share.notification.ShareNotificationService;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
  * {@link SendLinkAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class SendLinkAction extends AbstractShareAction {
-
-    /**
-     * Initializes a new {@link SendLinkAction}.
-     *
-     * @param services The service lookup
-     */
-    public SendLinkAction(ServiceLookup services) {
-        super(services);
-    }
+public class SendLinkAction extends AbstractDriveShareAction {
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
          * parse parameters & target
          */
         JSONObject json = (JSONObject) requestData.requireData();
-        ShareTarget target = getParser().parseTarget(json);
+        DriveShareTarget target = getParser().parseTarget(json);
         Transport transport = getParser().parseNotificationTransport(json);
         String message = json.optString("message", null);
         List<Object> transportInfos;
@@ -100,16 +91,16 @@ public class SendLinkAction extends AbstractShareAction {
         /*
          * lookup share
          */
-        ShareInfo shareInfo = discoverLink(session, target);
+        DriveShareInfo shareInfo = discoverLink(session, target);
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
         /*
          * process notification(s)
          */
-        ShareNotificationService shareNotificationService = services.getService(ShareNotificationService.class);
+        ShareNotificationService shareNotificationService = Services.getService(ShareNotificationService.class, true);
         List<OXException> warnings = shareNotificationService.sendLinkNotifications(
-            transport, transportInfos, message, shareInfo, session, requestData.getHostData());
+            transport, transportInfos, message, shareInfo, session.getServerSession(), requestData.getHostData());
         /*
          * return empty result (including warnings) in case of success
          */
