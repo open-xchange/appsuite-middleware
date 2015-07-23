@@ -223,7 +223,7 @@ public class ReportingMBean implements DynamicMBean {
                     rs.close();
                     stmt.close();
 
-                    stmt = connection.prepareStatement("SELECT c.cid,COUNT(c.permissions),c.permissions,COUNT(IF(u.mailEnabled=0,1,null)) FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user GROUP BY permissions,cid ORDER BY cid;");
+                    stmt = connection.prepareStatement("SELECT c.cid,COUNT(c.permissions),c.permissions,COUNT(IF(u.mailEnabled=0,1,null)) FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user WHERE u.guestCreatedBy=0 GROUP BY permissions,cid ORDER BY cid;");
                     rs = stmt.executeQuery();
                     while (rs.next()) {
                         final ReportContext rc = allctx.get(I(rs.getInt(1)));
@@ -339,7 +339,7 @@ public class ReportingMBean implements DynamicMBean {
                 PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = connection.prepareStatement("SELECT c.permissions,COUNT(c.permissions) AS count,COUNT(IF(c.user=2,1,null)) AS nradm,COUNT(IF(u.mailEnabled=0,1,null)) AS nrdisabled FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user GROUP BY c.permissions");
+                    stmt = connection.prepareStatement("SELECT c.permissions,COUNT(c.permissions) AS count,COUNT(IF(c.user=2,1,null)) AS nradm,COUNT(IF(u.mailEnabled=0,1,null)) AS nrdisabled FROM user_configuration AS c JOIN user AS u ON u.cid=c.cid AND u.id=c.user WHERE u.guestCreatedBy=0 GROUP BY c.permissions");
                     rs = stmt.executeQuery();
                     while (rs.next()) {
                         Integer mac = rs.getInt(1);
