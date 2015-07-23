@@ -49,26 +49,20 @@
 
 package com.openexchange.drive.json.action.share;
 
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareInfo;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.CreatedShares;
 import com.openexchange.share.recipient.AnonymousRecipient;
-import com.openexchange.share.recipient.RecipientType;
-import com.openexchange.share.recipient.ShareRecipient;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -79,63 +73,44 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class GetLinkAction extends AbstractDriveShareAction {
 
-    private static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
-        Permission.READ_FOLDER,
-        Permission.READ_ALL_OBJECTS,
-        Permission.NO_PERMISSIONS,
-        Permission.NO_PERMISSIONS,
-        false);
+    /** The default permission bits to use for anonymous link shares */
+    static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
+        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * parse target
+         */
+        DriveShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
+        /*
+         * reuse existing or create a new anonymous share as needed
+         */
+        boolean isNew = false;
+        DriveShareInfo shareInfo = discoverLink(session, target);
+        if (null == shareInfo) {
+            AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
+            shareInfo = getDriveShareService().addShare(session, target, recipient, null);
+            isNew = true;
+        }
+        /*
+         * return appropriate JSON result
+         */
         try {
-            JSONObject json = (JSONObject) requestData.requireData();
-            DriveShareTarget target = getParser().parseTarget(json);
-            DriveService driveService = Services.getService(DriveService.class, true);
-
-            List<DriveShareInfo> shares = driveService.getAllLinks(session);
-            if (!shares.isEmpty()) {
-                for (DriveShareInfo info : shares) {
-                    if (info.getDriveShare().getTarget().equals(target) && RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
-                        JSONObject jResult = new JSONObject();
-                        jResult.put("url", info.getShareURL(session.getHostData()));
-                        //TODO
-//                        if (null != info.getDriveShare().getTarget().getExpiryDate()) {
-//                            jResult.put("expiry_date", info.getDriveShare().getTarget().getExpiryDate().getTime());
-//                        }
-                        if (null != info.getGuest().getPassword()) {
-                            jResult.put("password", info.getGuest().getPassword());
-                        }
-                        return new AJAXRequestResult(jResult, new Date(), "json");
-                    }
-                }
-            }
-
-            String password = json.hasAndNotNull("password") ? json.getString("password") : null;
-            /*
-             * prepare anonymous recipient
-             */
-            AnonymousRecipient recipient = new AnonymousRecipient();
-            recipient.setBits(DEFAULT_READONLY_PERMISSION_BITS);
-            recipient.setPassword(password);
-            /*
-             * create share
-             */
-            CreatedShares createdShares = driveService.createShare(session, Collections.<ShareRecipient> singletonList(recipient), Collections.<DriveShareTarget> singletonList(target));
-            CreatedShare share = createdShares.getShare(recipient);
-            /*
-             * wrap share token & url into JSON result & return
-             */
-            JSONObject jResult = new JSONObject();
-            jResult.put("url", share.getUrl(session.getHostData()));
-            Date expiryDate = share.getFirstInfo().getShare().getExpiryDate();
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
+            jsonResult.put("is_new", isNew);
+            Date expiryDate = shareInfo.getShare().getExpiryDate();
             if (null != expiryDate) {
-                json.put("expiry_date", expiryDate.getTime());
+                jsonResult.put("expiry_date", expiryDate.getTime());
             }
-            return new AJAXRequestResult(jResult, new Date(), "json");
+            jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
+            Map<String, Object> meta = shareInfo.getShare().getMeta();
+            if (null != meta) {
+                jsonResult.put("meta", JSONCoercion.coerceToJSON(meta));
+            }
+            return new AJAXRequestResult(jsonResult, "json");
         } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        } catch (ClassCastException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
     }

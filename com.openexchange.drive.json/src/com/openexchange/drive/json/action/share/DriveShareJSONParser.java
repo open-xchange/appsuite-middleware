@@ -54,8 +54,8 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.json.actions.ShareJSONParser;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -162,7 +162,7 @@ public class DriveShareJSONParser extends ShareJSONParser {
             }
 
             DriveShareTarget target = new DriveShareTarget();
-            target.setPath(jsonTarget.getString("path"));
+            target.setDrivePath(jsonTarget.getString("path"));
             target.setChecksum(jsonTarget.getString("checksum"));
 
             if (jsonTarget.hasAndNotNull("name")) {

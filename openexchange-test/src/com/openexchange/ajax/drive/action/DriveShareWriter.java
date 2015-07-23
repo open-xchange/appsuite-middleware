@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.java.Strings;
 
 /**
@@ -79,4 +79,11 @@ public class DriveShareWriter {
         json.put("directoryVersions", jsonDirectoryTargets);
         json.put("fileVersions", jsonFileTargets);
     }
+
+    public static void writeDriveTarget(DriveShareTarget target, JSONObject json) throws JSONException {
+        json.put("path", target.getDrivePath());
+        json.putOpt("name", target.getName());
+        json.put("checksum", target.getChecksum());
+    }
+
 }

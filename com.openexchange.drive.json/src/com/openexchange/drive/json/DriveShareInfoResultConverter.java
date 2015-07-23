@@ -58,10 +58,9 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.share.DriveShareInfo;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -151,12 +150,12 @@ public class DriveShareInfoResultConverter implements ResultConverter {
              * share targets & recipient
              */
 
-            DriveShareTarget target = share.getDriveShare().getTarget();
-            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
-                json.put("fileVersion", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
-            } else {
-                json.put("directoryVersion", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
-            }
+//            DriveShareTarget target = share.getDriveShare().getTarget();
+//            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
+//                json.put("fileVersion", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
+//            } else {
+//                json.put("directoryVersion", serializeShareTarget(share.getDriveShare().getTarget(), timeZone));
+//            }
 
             json.put("recipient", serializeShareRecipient(share, timeZone));
             return json;
@@ -175,7 +174,7 @@ public class DriveShareInfoResultConverter implements ResultConverter {
      */
     private JSONObject serializeShareTarget(DriveShareTarget target, TimeZone timeZone) throws JSONException {
         JSONObject jsonTarget = new JSONObject();
-        jsonTarget.putOpt("path", target.getPath());
+        jsonTarget.putOpt("path", target.getDrivePath());
         jsonTarget.putOpt("name", target.getName());
         jsonTarget.putOpt("checksum", target.getChecksum());
         return jsonTarget;
@@ -195,7 +194,7 @@ public class DriveShareInfoResultConverter implements ResultConverter {
         jsonRecipient.put("base_token", share.getGuest().getBaseToken());
         jsonRecipient.putOpt("password", share.getGuest().getPassword());
         jsonRecipient.putOpt("email_address", share.getGuest().getEmailAddress());
-        jsonRecipient.put("entity", String.valueOf(share.getDriveShare().getGuest()));
+//        jsonRecipient.put("entity", String.valueOf(share.getDriveShare().getGuest()));
         return jsonRecipient;
     }
 

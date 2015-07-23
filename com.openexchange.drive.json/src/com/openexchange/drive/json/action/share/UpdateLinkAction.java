@@ -50,23 +50,16 @@
 package com.openexchange.drive.json.action.share;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareInfo;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.Permissions;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
@@ -77,58 +70,50 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
  */
 public class UpdateLinkAction extends AbstractDriveShareAction {
 
-    private static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
-        Permission.READ_FOLDER,
-        Permission.READ_ALL_OBJECTS,
-        Permission.NO_PERMISSIONS,
-        Permission.NO_PERMISSIONS,
-        false);
-
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * parse parameters & target
+         */
+        JSONObject json = (JSONObject) requestData.requireData();
+        DriveShareTarget target = getParser().parseTarget(json);
+        /*
+         * lookup share, assume latest timestamp if client checksum matches
+         */
+        DriveShareInfo shareInfo = discoverLink(session, target);
+        if (null == shareInfo) {
+            throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
+        }
+        Date clientTimestamp = shareInfo.getShare().getModified();
+        /*
+         * update share based on present data in update request
+         */
+        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
         try {
-            Date clientTimestamp = new Date(requestData.getParameter("timestamp", Long.class).longValue());
-
-            JSONObject json = (JSONObject) requestData.requireData();
-
-            DriveShareTarget target = getParser().parseTarget(json);
-
-            DriveService driveService = Services.getService(DriveService.class, true);
-            List<DriveShareInfo> shares = driveService.getAllLinks(session);
-            if (!shares.isEmpty()) {
-                for (DriveShareInfo info : shares) {
-                    if (info.getDriveShare().getTarget().equals(target) && RecipientType.ANONYMOUS.equals(info.getGuest().getRecipientType())) {
-                        Date expiry = null;
-                        if (json.hasAndNotNull("expiry_date")) {
-                            try {
-                                expiry = new Date(getParser().removeTimeZoneOffset(Long.parseLong(json.getString("expiry_date")), getTimeZone(requestData, session.getServerSession())));
-                            } catch (NumberFormatException e) {
-                                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create("expiry_date", expiry, e);
-                            }
-                        }
-
-                        Map<String, Object> meta = null;
-                        if (json.has("meta")) {
-                            meta = (Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta"));
-                        }
-
-                        String password = json.optString("password", null);
-
-                        driveService.updateShare(session, clientTimestamp, info.getToken(), expiry, meta, password, DEFAULT_READONLY_PERMISSION_BITS);
-                        /*
-                         * return empty result in case of success
-                         */
-                        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
-                        result.setTimestamp(new Date());
-                        return result;
-                    }
+            if (json.has("meta")) {
+                toUpdate.setMeta(json.isNull("meta") ? null : getParser().parseMeta(json.getJSONObject("meta")));
+            }
+            if (json.has("expiry_date")) {
+                if (json.isNull("expiry_date")) {
+                    toUpdate.setExpiryDate(null);
+                } else {
+                    toUpdate.setExpiryDate(new Date(json.getLong("expiry_date")));
                 }
             }
-            throw ShareExceptionCodes.UNKNOWN_SHARE.create();
+            if (json.has("password")) {
+                String newPassword = json.isNull("password") ? null : json.getString("password");
+                getShareService().updateShare(session.getServerSession(), toUpdate, newPassword, clientTimestamp);
+            } else {
+                getShareService().updateShare(session.getServerSession(), toUpdate, clientTimestamp);
 
+            }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
+        /*
+         * return empty result in case of success
+         */
+        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 
 }

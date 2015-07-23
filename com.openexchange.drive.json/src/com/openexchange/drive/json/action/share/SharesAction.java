@@ -54,10 +54,10 @@ import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveShareInfo;
 import com.openexchange.drive.json.DriveShareInfoResultConverter;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareInfo;
 import com.openexchange.exception.OXException;
 
 /**
@@ -71,7 +71,7 @@ public class SharesAction extends AbstractDriveShareAction {
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         DriveService driveService = Services.getService(DriveService.class, true);
-        List<DriveShareInfo> shares = driveService.getAllLinks(session);
+        List<DriveShareInfo> shares = null;//driveService.getAllLinks(session);
 
         if (null == shares || 0 == shares.size()) {
             return new AJAXRequestResult(new JSONArray());

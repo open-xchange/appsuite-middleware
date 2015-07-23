@@ -49,10 +49,13 @@
 
 package com.openexchange.ajax.drive.action;
 
+import java.util.Date;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.xing.util.JSONCoercion;
 
 /**
  * {@link GetLinkParser}
@@ -64,7 +67,7 @@ public class GetLinkParser extends AbstractAJAXParser<GetLinkResponse> {
 
     /**
      * Initializes a new {@link GetLinkParser}.
-     * 
+     *
      * @param failOnError
      */
     protected GetLinkParser(boolean failOnError) {
@@ -74,18 +77,24 @@ public class GetLinkParser extends AbstractAJAXParser<GetLinkResponse> {
     @Override
     protected GetLinkResponse createResponse(Response response) throws JSONException {
         JSONObject json = (JSONObject) response.getData();
-        
+
         GetLinkResponse retval = new GetLinkResponse(response);
-        
+
         if (json == null) {
             return retval;
         }
-        
-        if (json.has("url")) {
+
+        if (json.hasAndNotNull("url")) {
             retval.setUrl(json.getString("url"));
         }
-        if (json.has("token")) {
-            retval.setToken(json.getString("token"));
+        if (json.hasAndNotNull("is_new")) {
+            retval.setNew(json.getBoolean("is_new"));
+        }
+        if (json.hasAndNotNull("expiry_date")) {
+            retval.setExpiryDate(new Date(json.getLong("expiry_date")));
+        }
+        if (json.hasAndNotNull("meta")) {
+            retval.setMeta((Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
         }
         return retval;
     }

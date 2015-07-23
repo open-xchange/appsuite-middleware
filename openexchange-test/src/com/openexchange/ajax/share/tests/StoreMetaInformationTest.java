@@ -49,7 +49,6 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -100,7 +99,7 @@ public class StoreMetaInformationTest extends ShareTest {
         folder = insertPrivateFolder(EnumAPI.OX_NEW, Module.INFOSTORE.getFolderConstant(), client.getValues().getPrivateInfostoreFolder());
         ShareRecipient recipient = randomGuestPermission(RecipientType.GUEST).getRecipient();
         target = new ShareTarget(Module.INFOSTORE.getFolderConstant(), Integer.toString(folder.getObjectID()));
-        InviteRequest request = new InviteRequest(Collections.singletonList(target), Collections.singletonList(recipient), true);
+        InviteRequest request = new InviteRequest(target, recipient, true);
         request.setMeta(meta);
         client.execute(request);
     }

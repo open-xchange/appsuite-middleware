@@ -52,13 +52,10 @@ package com.openexchange.drive;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.Capability;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.recipient.ShareRecipient;
 
 
 /**
@@ -189,48 +186,4 @@ public interface DriveService {
      */
     DriveUtility getUtility();
 
-    /**
-     * Creates shares of the given targets for the given recipients.
-     *
-     * @param session The session
-     * @param recipients The recipients
-     * @param targets The targets
-     * @return The created shares
-     * @throws OXException
-     */
-    CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException;
-
-    /**
-     * Updates a single share.
-     *
-     * @param session The session
-     * @param clientTimestamp The client timnestamp
-     * @param token The share token to be updated
-     * @param expiry The expiration date of the share
-     * @param meta Optional meta data
-     * @param password The password
-     * @param bits Th permission bits for the share
-     * @throws OXException
-     */
-    void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException;
-
-    /**
-     * Removes share links
-     *
-     * @param session The session
-     * @param links The links to be removed
-     * @throws OXException
-     */
-    void deleteLinks(DriveSession session, List<String> links) throws OXException;
-
-    /**
-     * Gets all currently active shares of the user
-     *
-     * @param session The session
-     * @return A list of all shares
-     * @throws OXException
-     */
-    List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException;
-
 }
-

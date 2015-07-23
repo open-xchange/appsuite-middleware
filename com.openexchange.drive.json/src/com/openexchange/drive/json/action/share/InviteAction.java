@@ -57,9 +57,9 @@ import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.drive.DriveService;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
@@ -87,7 +87,7 @@ public class InviteAction extends AbstractDriveShareAction {
              * create the shares
              */
             DriveService driveService = Services.getService(DriveService.class, true);
-            CreatedShares createdShares = driveService.createShare(session, recipients, targets);
+            CreatedShares createdShares = null;//driveService.createShare(session, recipients, targets);
             /*
              * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
              */

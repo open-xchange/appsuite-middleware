@@ -51,10 +51,12 @@ package com.openexchange.share.json.actions;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Enums;
 import com.openexchange.server.ServiceLookup;
@@ -131,6 +133,20 @@ public class ShareJSONParser {
                 target = new ShareTarget(module, folder);
             }
             return target;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    /**
+     * Parses arbitrary metadata from the supplied JSON object.
+     *
+     * @param jsonMeta The JSON object holding the metadata
+     * @return The parsed metadata
+     */
+    public Map<String, Object> parseMeta(JSONObject jsonMeta) throws OXException {
+        try {
+            return (Map<String, Object>) JSONCoercion.coerceToNative(jsonMeta);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }

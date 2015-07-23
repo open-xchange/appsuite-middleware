@@ -50,18 +50,16 @@
 package com.openexchange.share.json.actions;
 
 import java.util.Date;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.UpdatePerformer;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -98,30 +96,33 @@ public class UpdateLinkAction extends AbstractShareAction {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
         /*
-         * prepare update based on present data in update request
+         * update share based on present data in update request
          */
-        UpdatePerformer updatePerformer = new UpdatePerformer(session, services, shareInfo, clientTimestamp);
+        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
         try {
             if (json.has("meta")) {
-                updatePerformer.setMeta(json.isNull("meta") ? null : (Map<String, Object>) JSONCoercion.coerceToNative(json.getJSONObject("meta")));
-            }
-            if (json.has("password")) {
-                updatePerformer.setPasword(json.isNull("password") ? null : json.getString("password"));
+                toUpdate.setMeta(json.isNull("meta") ? null : getParser().parseMeta(json.getJSONObject("meta")));
             }
             if (json.has("expiry_date")) {
                 if (json.isNull("expiry_date")) {
-                    updatePerformer.setEypiryDate(null);
+                    toUpdate.setExpiryDate(null);
                 } else {
-                    updatePerformer.setEypiryDate(new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session))));
+                    toUpdate.setExpiryDate(new Date(getParser().removeTimeZoneOffset(json.getLong("expiry_date"), getTimeZone(requestData, session))));
                 }
+            }
+            if (json.has("password")) {
+                String newPassword = json.isNull("password") ? null : json.getString("password");
+                getShareService().updateShare(session, toUpdate, newPassword, clientTimestamp);
+            } else {
+                getShareService().updateShare(session, toUpdate, clientTimestamp);
+
             }
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
         /*
-         * perform the update, return empty result in case of success
+         * return empty result in case of success
          */
-        updatePerformer.perform();
         return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 

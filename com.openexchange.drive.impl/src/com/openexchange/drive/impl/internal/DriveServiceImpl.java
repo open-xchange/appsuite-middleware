@@ -54,9 +54,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
@@ -71,9 +69,6 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
-import com.openexchange.drive.DriveShare;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.FileVersion;
@@ -89,7 +84,6 @@ import com.openexchange.drive.impl.actions.ErrorFileAction;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
 import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.checksum.FileChecksum;
-import com.openexchange.drive.impl.checksum.StoredChecksum;
 import com.openexchange.drive.impl.comparison.Change;
 import com.openexchange.drive.impl.comparison.DirectoryVersionMapper;
 import com.openexchange.drive.impl.comparison.FileVersionMapper;
@@ -111,16 +105,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.Quota;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
-import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.java.Strings;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.ShareInfo;
-import com.openexchange.share.ShareService;
-import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.CreatePerformer;
-import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link DriveServiceImpl}
@@ -530,136 +515,6 @@ public class DriveServiceImpl implements DriveService {
     @Override
     public DriveUtility getUtility() {
         return DriveUtilityImpl.getInstance();
-    }
-
-    @Override
-    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
-        SyncSession syncSession = new SyncSession(session);
-        DriveStorage storage = syncSession.getStorage();
-        Map<String, String> folderIds = new HashMap<String, String>();
-        List<ShareTarget> shareTargets = new ArrayList<ShareTarget>();
-        for (DriveShareTarget target : targets) {
-            String path = target.getPath();
-            ShareTarget shareTarget = new ShareTarget();
-            shareTarget.setModule(FolderObject.INFOSTORE);
-            if (target.getName() != null && !Strings.isEmpty(target.getName())) {
-                String name = target.getName();
-                File file = storage.getFileByName(path, name);
-                if (file == null) {
-                    throw DriveExceptionCodes.FILE_NOT_FOUND.create(name, path);
-                }
-                if (!ChecksumProvider.matches(syncSession, file, target.getChecksum())) {
-                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(name, target.getChecksum(), path);
-                }
-                shareTarget.setFolder(file.getFolderId());
-                shareTarget.setItem(file.getId());
-            } else {
-                if (!folderIds.containsKey(path)) {
-                    String folderID = storage.getFolderID(path);
-                    folderIds.put(path, folderID);
-                }
-                DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderIds.get(path))).get(0);
-                if (!target.getChecksum().equals(directoryChecksum.getChecksum())) {
-                    throw DriveExceptionCodes.DIRECTORYVERSION_NOT_FOUND.create(path, target.getChecksum());
-                }
-                shareTarget.setFolder(folderIds.get(path));
-            }
-            shareTargets.add(shareTarget);
-
-        }
-
-        CreatePerformer cp = new CreatePerformer(recipients, shareTargets, null, session.getServerSession(), DriveServiceLookup.get());
-        return cp.perform();
-    }
-
-    @Override
-    public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
-//        UpdatePerformer updatePerformer = new UpdatePerformer(token, clientTimestamp, session.getServerSession(), DriveServiceLookup.get());
-//        updatePerformer.setMeta(meta);
-//        if (password != null || bits != -1 || null != expiry) {
-//            AnonymousRecipient recipient = new AnonymousRecipient();
-//            recipient.setPassword(password);
-//            recipient.setBits(bits);
-//            recipient.setExpiryDate(expiry);
-//            updatePerformer.setRecipient(recipient);
-//        }
-//        updatePerformer.perform();
-    }
-
-    @Override
-    public void deleteLinks(DriveSession session, List<String> tokens) throws OXException {
-        ShareService shareService = DriveServiceLookup.getService(ShareService.class);
-        shareService.deleteShares(session.getServerSession(), tokens);
-    }
-
-    @Override
-    public List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException {
-        SyncSession syncSession = new SyncSession(session);
-        DriveStorage storage = syncSession.getStorage();
-        ShareService shareService = DriveServiceLookup.getService(ShareService.class);
-
-        // Get all Shares for infostore
-        List<ShareInfo> allShares = shareService.getAllShares(session.getServerSession(), "infostore");
-        List<DriveShareInfo> retval = new ArrayList<DriveShareInfo>();
-
-        Map<String, File> fileId2File = new HashMap<String, File>();
-        Map<String, String> folderId2Directory = new HashMap<String, String>();
-        for (ShareInfo shareInfo : allShares) {
-            ShareTarget shareTarget = shareInfo.getShare().getTarget();
-            DriveShareTarget driveShareTarget = new DriveShareTarget();
-
-            // Set drive fileName
-            String fileId = null;
-            if (shareTarget.getItem() != null && !Strings.isEmpty(shareTarget.getItem())) {
-                fileId = new FileID(shareTarget.getItem()).getFileId();
-                if (!fileId2File.containsKey(fileId)) {
-                    try {
-                        File file = storage.getFile(fileId);
-                        fileId2File.put(fileId, file);
-                    } catch (OXException e) {
-                        LOG.warn("A Share (" + shareTarget + ") is pointing to a file which seems not to exist.");
-                    }
-                }
-            }
-
-            // Set drive path
-            String folderId = shareTarget.getFolder();
-            if (!folderId2Directory.containsKey(folderId)) {
-                try {
-                    folderId2Directory.put(folderId, storage.getPath(folderId));
-                } catch (OXException e) {
-                    LOG.warn("A Share (" + shareTarget + ") is pointing to a folder which seems not to exist.");
-                }
-            }
-
-            String folderName = folderId2Directory.get(folderId);
-            File file = fileId2File.get(fileId);
-            if (folderName != null) {
-                driveShareTarget.setPath(folderName);
-                driveShareTarget.setChecksum(calculateChecksum(folderId, file, syncSession).getChecksum());
-
-                DriveShareInfo driveShareInfo = new DriveShareInfo(shareInfo);
-                DriveShare driveShare = new DriveShare(shareInfo.getShare());
-                driveShare.setTarget(driveShareTarget);
-                driveShareInfo.setDriveShare(driveShare);
-
-                if (file != null) {
-                    driveShareTarget.setName(file.getFileName());
-                }
-
-                retval.add(driveShareInfo);
-            }
-        }
-
-        return retval;
-    }
-
-    private StoredChecksum calculateChecksum(String folderId, File file, SyncSession syncSession) throws OXException {
-        if (file != null) {
-            return ChecksumProvider.getChecksum(syncSession, file);
-        }
-
-        return ChecksumProvider.getChecksums(syncSession, Collections.<String> singletonList(folderId)).get(0);
     }
 
 }

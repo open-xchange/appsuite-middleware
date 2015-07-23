@@ -72,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class GetLinkAction extends AbstractShareAction {
 
-    /** The default permission bits to use if not supplied by the client */
+    /** The default permission bits to use for anonymous link shares */
     static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
         Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
 

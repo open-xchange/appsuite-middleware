@@ -47,8 +47,9 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.drive.share;
 
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.share.ShareTarget;
 
 /**
@@ -59,13 +60,66 @@ import com.openexchange.share.ShareTarget;
  */
 public class DriveShareTarget extends ShareTarget {
 
-    private static final long serialVersionUID = -8117255569746533421L;
+    private static final long serialVersionUID = -8685321482126335866L;
+    private static final int MODULE_ID = FolderObject.INFOSTORE;
 
     private String name;
-
     private String path;
-
     private String checksum;
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     */
+    public DriveShareTarget() {
+        super();
+        setModule(MODULE_ID);
+    }
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     *
+     * @param shareTarget The parent share target
+     */
+    public DriveShareTarget(ShareTarget shareTarget) {
+        super(shareTarget);
+        setModule(MODULE_ID);
+    }
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     *
+     * @param shareTarget The parent share target
+     * @param path The drive path
+     * @param checksum The checksum
+     */
+    public DriveShareTarget(ShareTarget shareTarget, String path, String checksum) {
+        this(shareTarget, path, null, checksum);
+    }
+
+    /**
+     * Initializes a new {@link DriveShareTarget}.
+     *
+     * @param shareTarget The parent share target
+     * @param path The drive path
+     * @param name The filename, or <code>null</code> if this is a folder target
+     * @param checksum The checksum
+     */
+    public DriveShareTarget(ShareTarget shareTarget, String path, String name, String checksum) {
+        this(shareTarget);
+        this.path = path;
+        this.name = name;
+        this.checksum = checksum;
+    }
+
+    /**
+     * Gets a value indicating whether this share target points to a folder, i.e. there is no item defined, or not.
+     *
+     * @return <code>true</code> if this target points to a folder, <code>false</code>, otherwise
+     */
+    @Override
+    public boolean isFolder() {
+        return null == name;
+    }
 
     public String getChecksum() {
         return checksum;
@@ -83,12 +137,11 @@ public class DriveShareTarget extends ShareTarget {
         this.name = name;
     }
 
-    @Override
-    public String getPath() {
+    public String getDrivePath() {
         return path;
     }
 
-    public void setPath(String path) {
+    public void setDrivePath(String path) {
         this.path = path;
     }
 

@@ -49,22 +49,19 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
-import com.openexchange.share.core.performer.CreatePerformer;
+import com.openexchange.share.core.CreatedSharesImpl;
 import com.openexchange.share.notification.ShareNotificationService.Transport;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.share.recipient.ShareRecipient;
@@ -95,44 +92,32 @@ public class InviteAction extends AbstractShareAction {
              * parse targets, recipients & further parameters
              */
             JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = getParser().parseRecipients(data.getJSONArray("recipients"));
-            checkRecipients(recipients);
-            List<ShareTarget> targets = getParser().parseTargets(data.getJSONArray("targets"));
+            ShareRecipient recipient = getParser().parseRecipient(data.getJSONObject("recipient"));
+            checkRecipient(recipient);
+            ShareTarget target = getParser().parseTarget(data.getJSONObject("target"));
             String message = data.optString("message", null);
-            Map<String, Object> meta = (Map<String, Object>) JSONCoercion.coerceToNative(data.optJSONObject("meta"));
+            Map<String, Object> meta = getParser().parseMeta(data.optJSONObject("meta"));
             /*
              * create the shares, notify recipients via mail
              */
-            CreatedShares createdShares = new CreatePerformer(recipients, targets, meta, session, services).perform();
+            ShareInfo shareInfo = getShareService().addShare(session, target, recipient, meta).getFirstInfo();
+            CreatedSharesImpl createdShares = new CreatedSharesImpl(Collections.singletonMap(recipient, Collections.singletonList(shareInfo)));
             List<OXException> warnings = getNotificationService().sendShareCreatedNotifications(
                 Transport.MAIL, createdShares, message, session, requestData.getHostData());
             /*
-             * construct & return appropriate json result
+             * return empty result (including warnings) in case of success
              */
-            AJAXRequestResult result = new AJAXRequestResult();
+            AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), shareInfo.getShare().getModified(), "json");
             result.addWarnings(warnings);
-            JSONArray jTokens = new JSONArray(recipients.size());
-            for (ShareRecipient recipient : recipients) {
-                if (recipient.isInternal()) {
-                    jTokens.put(JSONObject.NULL);
-                } else {
-                    CreatedShare share = createdShares.getShare(recipient);
-                    jTokens.put(share.getToken());
-                }
-            }
-            result.setResultObject(jTokens, "json");
-            result.setTimestamp(new Date());
             return result;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private static void checkRecipients(List<ShareRecipient> recipients ) throws OXException {
-        for (ShareRecipient recipient : recipients) {
-            if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
-                throw ShareExceptionCodes.NO_INVITE_ANONYMOUS.create();
-            }
+    private static void checkRecipient(ShareRecipient recipient) throws OXException {
+        if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+            throw ShareExceptionCodes.NO_INVITE_ANONYMOUS.create();
         }
     }
 

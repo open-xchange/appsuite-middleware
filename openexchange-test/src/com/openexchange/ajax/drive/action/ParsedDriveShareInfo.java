@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.drive.action;
 
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.share.ShareInfo;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
@@ -59,17 +57,15 @@ import com.openexchange.share.recipient.ShareRecipient;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class ParsedDriveShareInfo extends DriveShareInfo {
+public class ParsedDriveShareInfo {
 
     private ShareRecipient recipient;
 
     /**
      * Initializes a new {@link ParsedDriveShareInfo}.
-     * 
-     * @param shareInfo
      */
-    public ParsedDriveShareInfo(ShareInfo shareInfo) {
-        super(shareInfo);
+    public ParsedDriveShareInfo() {
+        super();
     }
 
     public ShareRecipient getRecipient() {

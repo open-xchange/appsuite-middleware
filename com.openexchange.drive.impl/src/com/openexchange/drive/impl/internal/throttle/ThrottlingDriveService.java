@@ -52,7 +52,6 @@ package com.openexchange.drive.impl.internal.throttle;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.DirectoryMetadata;
@@ -64,15 +63,11 @@ import com.openexchange.drive.DriveQuota;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.DriveSettings;
-import com.openexchange.drive.DriveShareInfo;
-import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.DriveUtility;
 import com.openexchange.drive.FileVersion;
 import com.openexchange.drive.SyncResult;
 import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.recipient.ShareRecipient;
 
 /**
  * {@link ThrottlingDriveService}
@@ -184,26 +179,6 @@ public class ThrottlingDriveService implements DriveService {
 
     private void leaveSyncOperation() {
         currentSyncOperations.decrementAndGet();
-    }
-
-    @Override
-    public CreatedShares createShare(DriveSession session, List<ShareRecipient> recipients, List<DriveShareTarget> targets) throws OXException {
-        return delegate.createShare(session, recipients, targets);
-    }
-
-    @Override
-    public void updateShare(DriveSession session, Date clientTimestamp, String token, Date expiry, Map<String, Object> meta, String password, int bits) throws OXException {
-        delegate.updateShare(session, clientTimestamp, token, expiry, meta, password, bits);
-    }
-
-    @Override
-    public void deleteLinks(DriveSession session, List<String> singletonList) throws OXException {
-        delegate.deleteLinks(session, singletonList);
-    }
-
-    @Override
-    public List<DriveShareInfo> getAllLinks(DriveSession session) throws OXException {
-        return delegate.getAllLinks(session);
     }
 
 }

@@ -50,9 +50,6 @@
 package com.openexchange.ajax.share.actions;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,37 +71,25 @@ import com.openexchange.share.recipient.ShareRecipient;
 public class InviteRequest implements AJAXRequest<InviteResponse> {
 
     private final boolean failOnError;
-    private final List<ShareTarget> targets = new ArrayList<ShareTarget>();
-    private final List<ShareRecipient> recipients = new ArrayList<ShareRecipient>();
+    private final ShareTarget target;
+    private final ShareRecipient recipient;
     private String message;
     private Map<String, Object> meta;
 
-    public InviteRequest() {
-        this(Collections.<ShareTarget>emptyList(), Collections.<ShareRecipient>emptyList(), true);
+    public InviteRequest(ShareTarget target, ShareRecipient recipient) {
+        this(target, recipient, true);
     }
 
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients) {
-        this(targets, recipients, true);
+    public InviteRequest(ShareTarget target, ShareRecipient recipient, boolean failOnError) {
+        this(target, recipient, failOnError, null);
     }
 
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError) {
-        this(targets, recipients, failOnError, null);
-    }
-
-    public InviteRequest(List<ShareTarget> targets, List<ShareRecipient> recipients, boolean failOnError, String message) {
+    public InviteRequest(ShareTarget target, ShareRecipient recipient, boolean failOnError, String message) {
         super();
-        this.targets.addAll(targets);
-        this.recipients.addAll(recipients);
+        this.target = target;
+        this.recipient = recipient;
         this.failOnError = failOnError;
         this.message = message;
-    }
-
-    public void addTarget(ShareTarget target) {
-        targets.add(target);
-    }
-
-    public void addRecipient(ShareRecipient recipient) {
-        recipients.add(recipient);
     }
 
     /**
@@ -157,8 +142,8 @@ public class InviteRequest implements AJAXRequest<InviteResponse> {
     @Override
     public Object getBody() throws IOException, JSONException {
         JSONObject json = new JSONObject();
-        json.put("targets", ShareWriter.writeTargets(targets));
-        json.put("recipients", ShareWriter.writeRecipients(recipients));
+        json.put("target", ShareWriter.writeTarget(target));
+        json.put("recipient", ShareWriter.writeRecipient(recipient));
         if (message != null) {
             json.put("message", message);
         }

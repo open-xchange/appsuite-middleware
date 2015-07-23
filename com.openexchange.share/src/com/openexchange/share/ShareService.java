@@ -283,6 +283,29 @@ public interface ShareService {
     ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException;
 
     /**
+     * Updates certain properties of a specific "anonymous" share. This currently includes the expiry date and the arbitrary meta-field,
+     * and/or the password of the share's guest user.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Permissions are checked based on the the session's user being able to update the referenced share target or not, throwing an
+     * appropriate exception if the permissions are not sufficient</li>
+     * <li>The supplied share must contain the target, as well as the referenced guest identifier</li>
+     * <li>Only modified properties are updated, i.e. those properties where the {@link Share#containsXXX}</li>-methods return
+     * <code>true</code></li>
+     * <li>This method should only be called when updating the password of the anonymous guest behind the share - passing
+     * <code>null</code> as password will remove it!</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param share The share to update, with only modified fields being set
+     * @param password The password to set for the anonymous guest user, or <code>null</code> to remove the password protection
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
+     * @return A share info representing the updated share
+     */
+    ShareInfo updateShare(Session session, Share share, String password, Date clientTimestamp) throws OXException;
+
+    /**
      * Gets all shares that were created by the supplied session's user.
      *
      * @param session The session

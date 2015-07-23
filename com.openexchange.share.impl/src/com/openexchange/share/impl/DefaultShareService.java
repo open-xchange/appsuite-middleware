@@ -80,6 +80,7 @@ import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
+import com.openexchange.java.Strings;
 import com.openexchange.quota.AccountQuota;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -93,6 +94,7 @@ import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.GuestShare;
 import com.openexchange.share.Share;
+import com.openexchange.share.ShareCryptoService;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareService;
@@ -448,36 +450,38 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public ShareInfo updateShare(Session session, Share share, Date clientTimestamp) throws OXException {
-        if (null == share.getTarget() || 0 >= share.getGuest()) {
-            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("not enough information to update share");
-        }
-        Context context = utils.getContext(session);
-        if (false == share.containsExpiryDate() && false == share.containsMeta()) {
-            /*
-             * nothing to update
-             */
-            User guest = services.getService(UserService.class).getUser(share.getGuest(), context);
-            return new DefaultShareInfo(services, session.getContextId(), guest, share, false);
-        }
+        /*
+         * update share & return appropriate share info
+         */
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            /*
-             * check permissions prior update
-             */
-            if (false == services.getService(ModuleSupport.class).mayAdjust(share.getTarget(), session)) {
-                throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), I(session.getContextId()), share);
-            }
-            /*
-             * update share & return appropriate share info
-             */
-            share.setModified(new Date());
-            share.setModifiedBy(session.getUserId());
-            services.getService(ShareStorage.class).updateShares(
-                session.getContextId(), Collections.singletonList(share), clientTimestamp, connectionHelper.getParameters());
-            User guest = services.getService(UserService.class).getUser(connectionHelper.getConnection(), share.getGuest(), context);
+            Share updatedShare = updateShare(connectionHelper, session, share, clientTimestamp);
+            User guest = services.getService(UserService.class).getUser(connectionHelper.getConnection(), share.getGuest(), utils.getContext(session));
             connectionHelper.commit();
-            return new DefaultShareInfo(services, session.getContextId(), guest, share, false);
+            return new DefaultShareInfo(services, session.getContextId(), guest, updatedShare, false);
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    @Override
+    public ShareInfo updateShare(Session session, Share share, String password, Date clientTimestamp) throws OXException {
+        /*
+         * update share & password of anonymous user & return appropriate share info
+         */
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            Share updatedShare = updateShare(connectionHelper, session, share, clientTimestamp);
+            Context context = utils.getContext(session);
+            User guest = services.getService(UserService.class).getUser(connectionHelper.getConnection(), share.getGuest(), context);
+            boolean guestUserUpdated = updatePassword(connectionHelper, context, guest, password);
+            connectionHelper.commit();
+            if (guestUserUpdated) {
+                utils.requireService(UserService.class).invalidateUser(context, guest.getId());
+            }
+            return new DefaultShareInfo(services, session.getContextId(), guest, updatedShare, false);
         } finally {
             connectionHelper.finish();
         }
@@ -1045,6 +1049,74 @@ public class DefaultShareService implements ShareService {
         if (0 < sharesToStore.size()) {
             services.getService(ShareStorage.class).storeShares(session.getContextId(), sharesToStore, connectionHelper.getParameters());
         }
+    }
+
+    /**
+     * Updates certain properties of a specific share. This currently includes the expiry date and the arbitrary meta-field.
+     *
+     * @param connectionHelper A (started) connection helper
+     * @param session The session
+     * @param share The share to update, with only modified fields being set
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
+     * @return The updated share
+     */
+    private Share updateShare(ConnectionHelper connectionHelper, Session session, Share share, Date clientTimestamp) throws OXException {
+        if (null == share.getTarget() || 0 >= share.getGuest()) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("not enough information to update share");
+        }
+        /*
+         * check permissions prior update
+         */
+        if (false == services.getService(ModuleSupport.class).mayAdjust(share.getTarget(), session)) {
+            throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), I(session.getContextId()), share);
+        }
+        if (false == share.containsExpiryDate() && false == share.containsMeta()) {
+            /*
+             * nothing to update, create & return share info for convenience
+             */
+            return share;
+        }
+        /*
+         * update share & return appropriate share info
+         */
+        share.setModified(new Date());
+        share.setModifiedBy(session.getUserId());
+        services.getService(ShareStorage.class).updateShares(
+            session.getContextId(), Collections.singletonList(share), clientTimestamp, connectionHelper.getParameters());
+        return share;
+    }
+
+    /**
+     * Updates the guest user behind the anonymous recipient as needed, i.e. adjusts the defined password mechanism and the password
+     * itself in case it differs from the updated recipient.
+     *
+     * @param connection A (writable) connection to the database
+     * @param context The context
+     * @param guestUser The guest user to update the password for
+     * @param password The password to set for the anonymous guest user, or <code>null</code> to remove the password protection
+     * @return <code>true</code> if the user was updated, <code>false</code>, otherwise
+     */
+    private boolean updatePassword(ConnectionHelper connectionHelper, Context context, User guestUser, String password) throws OXException {
+        String originalPassword = guestUser.getUserPassword();
+        if (null == password && null != originalPassword || null != password && null == originalPassword ||
+            null != password && null != originalPassword && false == password.equals(originalPassword)) {
+            if (false == ShareTool.isAnonymousGuest(guestUser)) {
+                throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Can't change password for non-anonymous guest");
+            }
+            UserImpl updatedGuest = new UserImpl();
+            updatedGuest.setId(guestUser.getId());
+            updatedGuest.setCreatedBy(guestUser.getCreatedBy());
+            if (Strings.isEmpty(password)) {
+                updatedGuest.setPasswordMech("");
+                updatedGuest.setUserPassword(null);
+            } else {
+                updatedGuest.setUserPassword(services.getService(ShareCryptoService.class).encrypt(password));
+                updatedGuest.setPasswordMech(ShareCryptoService.PASSWORD_MECH_ID);
+            }
+            services.getService(UserService.class).updateUser(connectionHelper.getConnection(), updatedGuest, context);
+            return true;
+        }
+        return false;
     }
 
     /**

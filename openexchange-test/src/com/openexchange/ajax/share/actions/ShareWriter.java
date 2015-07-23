@@ -53,7 +53,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;
@@ -137,7 +137,7 @@ public class ShareWriter {
 
     public static JSONObject writeDriveTarget(DriveShareTarget target) throws JSONException {
         JSONObject jTarget = new JSONObject(6);
-        jTarget.put("path", target.getPath());
+        jTarget.put("path", target.getDrivePath());
         jTarget.putOpt("name", target.getName());
         jTarget.put("checksum", target.getChecksum());
         return jTarget;

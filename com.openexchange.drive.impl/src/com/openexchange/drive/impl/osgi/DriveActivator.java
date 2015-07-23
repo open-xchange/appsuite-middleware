@@ -70,6 +70,8 @@ import com.openexchange.drive.impl.internal.throttle.BucketInputStream;
 import com.openexchange.drive.impl.internal.throttle.DriveTokenBucket;
 import com.openexchange.drive.impl.internal.throttle.ThrottlingDriveService;
 import com.openexchange.drive.impl.management.DriveConfig;
+import com.openexchange.drive.impl.share.DriveShareServiceImpl;
+import com.openexchange.drive.share.DriveShareService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -123,6 +125,7 @@ public class DriveActivator extends HousekeepingActivator {
          * register services
          */
         registerService(DriveService.class, new ThrottlingDriveService(new DriveServiceImpl()));
+        registerService(DriveShareService.class, new DriveShareServiceImpl());
         registerService(CreateTableService.class, new DriveCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(SQL.getUpdateTasks()));
         registerService(DeleteListener.class, new DriveDeleteListener());

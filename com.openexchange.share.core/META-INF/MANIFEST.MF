@@ -40,5 +40,4 @@ Import-Package: com.openexchange.ajax.requesthandler,
  org.apache.http.client.utils,
  org.json
 Export-Package: com.openexchange.share.core,
- com.openexchange.share.core.performer,
  com.openexchange.share.core.tools

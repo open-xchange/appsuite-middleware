@@ -50,9 +50,12 @@
 package com.openexchange.ajax.drive.action;
 
 import java.io.IOException;
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
+import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.xing.util.JSONCoercion;
 
 /**
  * {@link UpdateLinkRequest}
@@ -63,23 +66,21 @@ import com.openexchange.ajax.AJAXServlet;
 public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> {
 
     private boolean failOnError;
-    private Long timestamp;
-    private String token;
+    private DriveShareTarget target;
     private Long expiry;
     private String password;
-    private Integer bits;
+    private Map<String, Object> meta;
 
-    public UpdateLinkRequest(Integer root, String token, Long timestamp) {
-        this(root, token, timestamp, null, null, null, true);
+    public UpdateLinkRequest(Integer root, DriveShareTarget target, Long timestamp) {
+        this(root, target, null, null, null, true);
     }
 
-    public UpdateLinkRequest(Integer root, String token, Long timestamp, Long expiry, String password, Integer bits, boolean failOnError) {
+    public UpdateLinkRequest(Integer root, DriveShareTarget target, Long expiry, String password, Map<String, Object> meta, boolean failOnError) {
         super(root);
-        this.token = token;
-        this.timestamp = timestamp;
+        this.target = target;
         this.expiry = expiry;
         this.password = password;
-        this.bits = bits;
+        this.meta = meta;
         this.failOnError = failOnError;
     }
 
@@ -92,7 +93,6 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
     public Parameter[] getParameters() throws IOException, JSONException {
         return new Parameter[] {
             new Parameter(AJAXServlet.PARAMETER_ACTION, "updateLink"),
-            new Parameter(AJAXServlet.PARAMETER_TIMESTAMP, timestamp.toString()),
             new Parameter("root", root)
         };
     }
@@ -105,9 +105,9 @@ public class UpdateLinkRequest extends AbstractDriveRequest<UpdateLinkResponse> 
     @Override
     public JSONObject getBody() throws IOException, JSONException {
         JSONObject retval = new JSONObject();
-        retval.put("token", token);
+        DriveShareWriter.writeDriveTarget(target, retval);
         retval.putOpt("expiry_date", expiry);
-        retval.putOpt("bits", bits);
+        retval.putOpt("meta", null != meta ? JSONCoercion.coerceToJSON(meta) : null);
         retval.putOpt("password", password);
         return retval;
     }

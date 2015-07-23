@@ -49,9 +49,19 @@
 
 package com.openexchange.drive.json.action.share;
 
+import static com.openexchange.osgi.Tools.requireService;
+import java.util.List;
 import java.util.TimeZone;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.drive.DriveSession;
 import com.openexchange.drive.json.action.AbstractDriveAction;
+import com.openexchange.drive.json.internal.Services;
+import com.openexchange.drive.share.DriveShareInfo;
+import com.openexchange.drive.share.DriveShareService;
+import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -88,6 +98,45 @@ public abstract class AbstractDriveShareAction extends AbstractDriveAction {
      */
     protected DriveShareJSONParser getParser() {
         return parser;
+    }
+
+    /**
+     * Gets the drive share service.
+     *
+     * @return The share service
+     * @throws OXException if the service is unavailable
+     */
+    protected DriveShareService getDriveShareService() throws OXException {
+        return requireService(DriveShareService.class, Services.get());
+    }
+
+    /**
+     * Gets the default share service.
+     *
+     * @return The share service
+     * @throws OXException if the service is unavailable
+     */
+    protected ShareService getShareService() throws OXException {
+        return requireService(ShareService.class, Services.get());
+    }
+
+    /**
+     * Gets an existing link, i.e. an anonymous share, for a specific share target.
+     *
+     * @param session The session
+     * @param target The target to get the link for
+     * @return Share information for the link, or <code>null</code> if no anonymous share for the target exists yet
+     */
+    protected DriveShareInfo discoverLink(DriveSession session, DriveShareTarget target) throws OXException {
+        List<DriveShareInfo> shares = getDriveShareService().getShares(session, target);
+        if (null != shares && 0 < shares.size()) {
+            for (DriveShareInfo share : shares) {
+                if (RecipientType.ANONYMOUS.equals(share.getGuest().getRecipientType())) {
+                    return share;
+                }
+            }
+        }
+        return null;
     }
 
 }

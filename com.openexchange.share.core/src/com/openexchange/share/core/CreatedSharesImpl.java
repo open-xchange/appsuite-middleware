@@ -57,7 +57,6 @@ import java.util.Map.Entry;
 import com.openexchange.share.CreatedShare;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.ShareInfo;
-import com.openexchange.share.core.performer.CreatePerformer;
 import com.openexchange.share.recipient.ShareRecipient;
 
 

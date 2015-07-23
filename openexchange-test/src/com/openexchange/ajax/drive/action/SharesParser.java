@@ -49,8 +49,6 @@
 
 package com.openexchange.ajax.drive.action;
 
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXParser;
@@ -71,9 +69,9 @@ public class SharesParser extends AbstractAJAXParser<SharesResponse> {
     protected SharesResponse createResponse(Response response) throws JSONException {
         SharesResponse retval = new SharesResponse(response);
 
-        List<ParsedDriveShareInfo> parsedShares = DriveShareParser.parseDriveShareInfos((JSONArray) response.getData());
-
-        retval.setShares(parsedShares);
+//        List<ParsedDriveShareInfo> parsedShares = DriveShareParser.parseDriveShareInfos((JSONArray) response.getData());
+//
+//        retval.setShares(parsedShares);
 
         return retval;
     }

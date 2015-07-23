@@ -47,11 +47,8 @@
  *
  */
 
-package com.openexchange.drive;
+package com.openexchange.drive.share;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostData;
-import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
 
 /**
@@ -60,34 +57,14 @@ import com.openexchange.share.ShareInfo;
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class DriveShareInfo {
+public interface DriveShareInfo extends ShareInfo {
 
-    private DriveShare driveShare;
-
-    private final ShareInfo delegate;
-
-    public DriveShareInfo(ShareInfo shareInfo) {
-        this.delegate = shareInfo;
-    }
-
-    public DriveShare getDriveShare() {
-        return driveShare;
-    }
-
-    public void setDriveShare(DriveShare driveShare) {
-        this.driveShare = driveShare;
-    }
-
-    public String getToken() throws OXException {
-        return delegate.getToken();
-    }
-
-    public String getShareURL(HostData hostData) {
-        return delegate.getShareURL(hostData);
-    }
-
-    public GuestInfo getGuest() {
-        return delegate.getGuest();
-    }
+    /**
+     * Gets the underlying share.
+     *
+     * @return The share
+     */
+    @Override
+    DriveShare getShare();
 
 }
