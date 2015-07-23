@@ -644,6 +644,9 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 fileHolder = (IFileHolder) resultObject;
 
                 if (0 == fileHolder.getLength()) {
+                    // get rid of resource warning
+                    IOUtils.closeQuietly(fileHolder);
+
                     throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
                 }
 
@@ -700,6 +703,77 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
         }
 
         return ret;
+    }
+
+    /**
+     * Trigger the conversion of a resource from the preview service.
+     * The trigger call is handled asynchronously, future conversion
+     * calls to the preview service may then be handled immediately
+     * from the cache.
+     *
+     * @param session The current session
+     * @param cacheKey The cacheKey
+     * @param resourceCache The resourceCache to use
+     */
+    public static void triggerPreviewService(ServerSession session, AJAXRequestResult result, AJAXRequestData requestData, PreviewService previewService, PreviewOutput output) {
+        final Object resultObject = result.getResultObject();
+        final String mimeType = ((null != resultObject) && (resultObject instanceof IFileHolder)) ? MimeType2ExtMap.getContentType(((IFileHolder) resultObject).getName(), null) : null;
+        PreviewService candidate = (previewService instanceof RemoteInternalPreviewService ? previewService : null);
+
+        if ((null == candidate) && (previewService instanceof Delegating) && (null != mimeType)) {
+            // Determine candidate
+            try {
+                candidate = ((Delegating) previewService).getBestFitOrDelegate(mimeType, output);
+            } catch (OXException e) {
+                LOGGER.debug("Error while trying to look up CachedResource from RemoteInternalPeviewService in context {}", e);
+            }
+
+            if ((null != candidate) && !(candidate instanceof RemoteInternalPreviewService)) {
+                candidate = null;
+            }
+        }
+
+        if (null != candidate) {
+            IFileHolder fileHolder = null;
+
+            // Check file holder's content
+            try {
+                if (!(resultObject instanceof IFileHolder)) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(IFileHolder.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                }
+
+                fileHolder = (IFileHolder) resultObject;
+
+                if (0 == fileHolder.getLength()) {
+                    // get rid of resource warning
+                    IOUtils.closeQuietly(fileHolder);
+
+                    throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("File holder has not content, hence no preview can be generated.");
+                }
+
+                // Prepare properties for preview generation
+                final DataProperties dataProperties = new DataProperties(12);
+                final String srcMimeType = getContentType(fileHolder, previewService instanceof ContentTypeChecker ? (ContentTypeChecker) previewService : null);
+
+                dataProperties.put(DataProperties.PROPERTY_CONTENT_TYPE, srcMimeType);
+                dataProperties.put(DataProperties.PROPERTY_DISPOSITION, fileHolder.getDisposition());
+                dataProperties.put(DataProperties.PROPERTY_NAME, fileHolder.getName());
+                dataProperties.put(DataProperties.PROPERTY_SIZE, Long.toString(fileHolder.getLength()));
+                dataProperties.put("PreviewType", requestData.getModule().equals("files") ? "DetailView" : "Thumbnail");
+                dataProperties.put("PreviewWidth", requestData.getParameter("width"));
+                dataProperties.put("PreviewHeight", requestData.getParameter("height"));
+                dataProperties.put("PreviewDelivery", requestData.getParameter("delivery"));
+                dataProperties.put("PreviewScaleType", requestData.getParameter("scaleType"));
+                dataProperties.put("PreviewLanguage", getUserLanguage(session));
+
+                // Generate preview
+                final Data<InputStream> data = new SimpleData<InputStream>(fileHolder.getStream(), dataProperties);
+
+                ((RemoteInternalPreviewService) candidate).triggerGetPreviewFor(data, output, session, 1);
+            } catch (OXException e) {
+                LOGGER.debug("Error while triggering RemotePreviewService", e);
+            }
+        }
     }
 
     /**
