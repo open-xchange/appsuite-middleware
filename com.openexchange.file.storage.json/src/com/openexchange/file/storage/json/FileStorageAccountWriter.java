@@ -49,10 +49,12 @@
 
 package com.openexchange.file.storage.json;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
+import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageService;
 
@@ -78,8 +80,8 @@ public class FileStorageAccountWriter {
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
      */
-    public JSONObject write(final FileStorageAccount account) throws JSONException {
-        final JSONObject accountJSON = new JSONObject();
+    public JSONObject write(FileStorageAccount account) throws JSONException {
+        JSONObject accountJSON = new JSONObject(6);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
         final FileStorageService fsService = account.getFileStorageService();
@@ -88,6 +90,28 @@ public class FileStorageAccountWriter {
         if (null != formDescription && null != account.getConfiguration()) {
             final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
+        }
+        return accountJSON;
+    }
+
+    /**
+     * Writes the given file storage service into its JSON representation.
+     *
+     * @param service The file storage service
+     * @return The resulting JSON
+     * @throws JSONException If writing JSON fails
+     */
+    public JSONObject write(FileStorageService service) throws JSONException {
+        JSONObject accountJSON = new JSONObject(6);
+        accountJSON.put(FileStorageAccountConstants.ID, service.getId());
+        accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, service.getDisplayName());
+
+        DynamicFormDescription formDescription = service.getFormDescription();
+        if (null != formDescription) {
+            JSONArray jFormDescription = new FormDescriptionWriter().write(formDescription);
+            if (jFormDescription.length() > 0) {
+                accountJSON.put(FileStorageAccountConstants.CONFIGURATION, jFormDescription);
+            }
         }
         return accountJSON;
     }
