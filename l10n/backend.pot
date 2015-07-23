@@ -6143,6 +6143,13 @@ msgstr ""
 msgid "Unsupported character. Please correct your input."
 msgstr ""
 
+#. Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:131
+msgid ""
+"Due to limited capabilities of user \"%1$s\", it is not possible to apply "
+"the permission changes."
+msgstr ""
+
 #. A document's description
 #. Task attribute name
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreStrings.java:73
