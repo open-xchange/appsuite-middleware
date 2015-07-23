@@ -325,7 +325,7 @@ public class DocumentAction extends AbstractFileAction implements ETagAwareAJAXA
                 IDBasedFileAccess newFileAccess = Services.getFileAccessFactory().createAccess(session);
                 partialIn = newFileAccess.getDocument(id, version, pos, length);
                 int read = partialIn.read(b, off, length);
-                pos += length;
+                pos += read;
                 return read;
             } catch (OXException e) {
                 Throwable cause = e.getCause();
