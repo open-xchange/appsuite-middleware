@@ -129,6 +129,7 @@ import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.validation.FilenamesMayNotContainSlashesValidator;
 import com.openexchange.groupware.infostore.validation.InvalidCharactersValidator;
+import com.openexchange.groupware.infostore.validation.ObjectPermissionValidator;
 import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
@@ -171,7 +172,11 @@ import com.openexchange.tx.UndoableAction;
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
-    private static final ValidationChain VALIDATION = new ValidationChain(new InvalidCharactersValidator(), new FilenamesMayNotContainSlashesValidator());
+    private static final ValidationChain VALIDATION = new ValidationChain(
+        new InvalidCharactersValidator(),
+        new FilenamesMayNotContainSlashesValidator(),
+        new ObjectPermissionValidator()
+    );
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
@@ -579,7 +584,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         setDefaults(document);
 
-        VALIDATION.validate(document);
+        VALIDATION.validate(session, document);
         CheckSizeSwitch.checkSizes(document, this, context);
 
         FilenameReserver filenameReserver = null;
@@ -823,7 +828,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        VALIDATION.validate(document);
+        VALIDATION.validate(session, document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
         SaveParameters saveParameters = new SaveParameters(context, session, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());
@@ -860,7 +865,6 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        VALIDATION.validate(document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(load(document.getId(), context), context, null);
         return saveModifiedDocument(new SaveParameters(context, null, document, oldDocument, sequenceNumber, updatedCols, security.getFolderOwner(folderId, context)));

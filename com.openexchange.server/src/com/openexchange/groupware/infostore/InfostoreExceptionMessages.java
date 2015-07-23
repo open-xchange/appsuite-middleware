@@ -127,6 +127,10 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // Unsupported character. Please correct your input.
     public static final String INVALID_CHARACTER_SIMPLE_MSG_DISPLAY = "Unsupported character. Please correct your input.";
 
+    // Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.
+    public static final String VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS_MSG_DISPLAY = "Due to limited capabilities of user \"%1$s\", it is not possible to apply the permission changes.";
+
+
     private InfostoreExceptionMessages() {
         super();
     }
