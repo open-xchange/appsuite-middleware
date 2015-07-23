@@ -108,6 +108,7 @@ import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
+import com.openexchange.tools.io.IOUtils;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -563,7 +564,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                         resp.setHeader("Content-Range", new StringBuilder("bytes ").append(r.start).append('-').append(r.end).append('/').append(r.total).toString());
 
                         // Copy full range.
-                        copy(documentData, outputStream, r.start, r.length);
+                        copy(documentData, outputStream);
                     } else if (ranges.size() == 1) {
 
                         // Return single part of file.
@@ -610,26 +611,8 @@ public class FileResponseRenderer implements ResponseRenderer {
                             return;
                         }
                     } else {
-                        final int len = BUFLEN;
-                        final byte[] buf = new byte[len];
-                        if (length > 0) {
-                            // Check actual transferred number of bytes against provided length
-                            long count = 0L;
-                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                                outputStream.write(buf, 0, read);
-                                count += read;
-                            }
-                            if (length != count) {
-                                final StringBuilder sb = new StringBuilder("Transferred ").append((length > count ? "less" : "more"));
-                                sb.append(" bytes than signaled through \"Content-Length\" response header. File download may get paused (less) or be corrupted (more).");
-                                sb.append(" Associated file \"").append(fileName).append("\" with indicated length of ").append(length).append(", but is ").append(count);
-                                LOG.warn(sb.toString());
-                            }
-                        } else {
-                            for (int read; (read = documentData.read(buf, 0, len)) > 0;) {
-                                outputStream.write(buf, 0, read);
-                            }
-                        }
+                        // Copy full range.
+                        copy(documentData, outputStream);
                     }
                 }
                 outputStream.flush();
@@ -1070,8 +1053,9 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param start Start of the byte range.
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
+     * @throws OXException
      */
-    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException {
+    private void copy(Readable inputStream, OutputStream output, long start, long length) throws IOException, OXException {
         if (inputStream instanceof IFileHolder.RandomAccess) {
             copy((IFileHolder.RandomAccess) inputStream, output, start, length);
             return;
@@ -1111,16 +1095,10 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param length Length of the byte range.
      * @throws IOException If something fails at I/O level.
      */
-    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException {
-        int buflen = BUFLEN;
-        byte[] buffer = new byte[buflen];
-        int read;
-
+    private static void copy(IFileHolder.RandomAccess input, OutputStream output, long start, long length) throws IOException, OXException {
         if (input.length() == length) {
             // Write full range.
-            while ((read = input.read(buffer, 0, buflen)) > 0) {
-                output.write(buffer, 0, read);
-            }
+            copy(input, output);
         } else {
             // Write partial range.
             input.seek(start);   // ----> OffsetOutOfRangeIOException
@@ -1141,6 +1119,10 @@ public class FileResponseRenderer implements ResponseRenderer {
                 readMe.unread(bs[0] & 0xff);
             }
 
+            int buflen = BUFLEN;
+            byte[] buffer = new byte[buflen];
+            int read;
+
             while ((read = readMe.read(buffer, 0, buflen)) > 0) {
                 if ((toRead -= read) > 0) {
                     output.write(buffer, 0, read);
@@ -1148,6 +1130,33 @@ public class FileResponseRenderer implements ResponseRenderer {
                     output.write(buffer, 0, (int) toRead + read);
                     break;
                 }
+            }
+        }
+    }
+
+    /**
+     * Copies the given input to the given output.
+     *
+     * @param input The input to copy to the given output.
+     * @param output The output to copy from the given input.
+     * @throws IOException If something fails at I/O level.
+     */
+    private static void copy(Readable input, OutputStream output) throws IOException, OXException {
+        // Write full range.
+        if (IFileHolder.InputStreamClosure.class.isInstance(input)) {
+            InputStream stream = null;
+            try {
+                stream = ((IFileHolder.InputStreamClosure) input).newStream();
+                IOUtils.transfer(stream, output);
+            } finally {
+                Streams.close(stream);
+            }
+        } else {
+            int buflen = BUFLEN;
+            byte[] buffer = new byte[buflen];
+            int read;
+            while ((read = input.read(buffer, 0, buflen)) > 0) {
+                output.write(buffer, 0, read);
             }
         }
     }
