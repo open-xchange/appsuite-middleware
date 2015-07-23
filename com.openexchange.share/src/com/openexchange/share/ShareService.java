@@ -86,17 +86,14 @@ public interface ShareService {
     GuestInfo resolveGuest(String token) throws OXException;
 
     /**
-     * Resolves the supplied base token to a list of shares. If the session's user is the guest user behind the base token himself, the
-     * share targets are adjusted implicitly for the guest user's point of view. Otherwise, the share targets are kept in their original
-     * form (i.e. not personalized for the guest user).
+     * Gets the guest info for the given user. If the user is no guest, <code>null</code> is returned.
      *
-     * @param session The session
-     * @param token The token to resolve
-     * @return A list of shares the guest user behind the token has access to, or <code>null</code> if no valid share could be looked up
-     * @throws OXException If any of the passed tokens is invalid (i.e. malformed or does not match the encoded guest user) {@link ShareExceptionCodes#INVALID_TOKEN}
-     * is thrown.
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @return The guest info or <code>null</code>
+     * @throws OXException If loading the according user object fails
      */
-    List<ShareInfo> getShares(Session session, String token) throws OXException;
+    GuestInfo getGuestInfo(int contextId, int userId) throws OXException;
 
     /**
      * Resolves the supplied token and path to a single share. If the session's user is the guest user behind the base token himself, the
@@ -113,43 +110,22 @@ public interface ShareService {
     ShareInfo getShare(Session session, String token, String path) throws OXException;
 
     /**
-     * Adds multiple targets to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
+     * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
      * <p/>
      * <b>Remarks:</b>
      * <ul>
-     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
-     * caller to take care of the referenced share targets on his own</li>
-     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
+     * <li>Associated permissions of the guest users on the share target are not updated implicitly, so that it's up to the
+     * caller to take care of the referenced share target on his own</li>
+     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
      * or not, so again it's up to the caller to perform the necessary checks</li>
      * </ul>
      *
      * @param session The session
-     * @param targets The share targets to add
+     * @param target The share target to add
      * @param recipients The recipients for the shares
-     * @return The created shares for each recipient, where each share corresponds to a target, in the same order as the supplied target list
+     * @return The created shares for each recipient, in the same order as the supplied recipient list
      */
-    CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException;
-
-    /**
-     * Adds multiple targets to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest users on the share targets are not updated implicitly, so that it's up to the
-     * caller to take care of the referenced share targets on his own</li>
-     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share targets
-     * or not, so again it's up to the caller to perform the necessary checks</li>
-     * <li>If specified, the metadata is is stored for each created share (i.e. for each recipient & target). If different metadata is
-     * required for different recipients or targets, this method should be invoked multiple times.</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param targets The share targets to add
-     * @param recipients The recipients for the shares
-     * @param meta Additional metadata to store along with the created share(s), or <code>null</code> if not needed
-     * @return The created shares for each recipient, where each share corresponds to a target, in the same order as the supplied target list
-     */
-    CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException;
+    CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
@@ -171,24 +147,6 @@ public interface ShareService {
      * @return The created shares for each recipient, in the same order as the supplied recipient list
      */
     CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException;
-
-    /**
-     * Adds a single target to the shares of guest users. Guest users for each individual recipient are created implicitly as needed.
-     * <p/>
-     * <b>Remarks:</b>
-     * <ul>
-     * <li>Associated permissions of the guest users on the share target are not updated implicitly, so that it's up to the
-     * caller to take care of the referenced share target on his own</li>
-     * <li>No permissions checks are performed, especially regarding the session's user being able to update the referenced share target
-     * or not, so again it's up to the caller to perform the necessary checks</li>
-     * </ul>
-     *
-     * @param session The session
-     * @param target The share target to add
-     * @param recipients The recipients for the shares
-     * @return The created shares for each recipient, in the same order as the supplied recipient list
-     */
-    CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients) throws OXException;
 
     /**
      * Adds a share to a single target for a specific recipient. An appropriate guest user is created implicitly as needed.
@@ -262,6 +220,24 @@ public interface ShareService {
      * @param tokens The tokens to delete the shares for
      */
     void deleteShares(Session session, List<String> tokens) throws OXException;
+
+    /**
+     * Deletes a share.
+     * <p/>
+     * <b>Remarks:</b>
+     * <ul>
+     * <li>Associated guest permission entities from the referenced share targets are removed implicitly, so there's no need to take care
+     * of those for the caller</li>
+     * <li>Since the referenced share targets are updated accordingly, depending permissions checks are performed, especially
+     * regarding the session's user being able to update the referenced share targets or not, throwing an appropriate exception if the
+     * permissions are not sufficient</li>
+     * </ul>
+     *
+     * @param session The session
+     * @param share The share to delete
+     * @param clientTimestamp The time the associated shares were last read from the client to catch concurrent modifications
+     */
+    void deleteShare(Session session, Share share, Date clientTimestamp) throws OXException;
 
     /**
      * Updates certain properties of a specific share. This currently includes the expiry date and the arbitrary meta-field.
@@ -341,15 +317,5 @@ public interface ShareService {
      * @return The identifiers from sharing users or an empty set
      */
     Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
-
-    /**
-     * Gets the guest info for the given user. If the user is no guest, <code>null</code> is returned.
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return The guest info or <code>null</code>
-     * @throws OXException If loading the according user object fails
-     */
-    GuestInfo getGuestInfo(int contextId, int userId) throws OXException;
 
 }

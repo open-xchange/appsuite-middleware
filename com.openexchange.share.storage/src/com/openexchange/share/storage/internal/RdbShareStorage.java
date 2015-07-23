@@ -228,6 +228,18 @@ public class RdbShareStorage implements ShareStorage {
     }
 
     @Override
+    public boolean deleteShare(int contextID, Share share, Date clientLastModified, StorageParameters parameters) throws OXException {
+        ConnectionProvider provider = getWriteProvider(contextID, parameters);
+        try {
+            return 0 < deleteShare(provider.get(), contextID, share, clientLastModified.getTime());
+        } catch (SQLException e) {
+            throw ShareExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            provider.close();
+        }
+    }
+
+    @Override
     public int[] deleteTargets(int contextID, List<ShareTarget> targets, StorageParameters parameters) throws OXException {
         return deleteTargets(contextID, targets, false, parameters);
     }
@@ -354,6 +366,27 @@ public class RdbShareStorage implements ShareStorage {
                 stmt.addBatch();
             }
             return SQL.logExecuteBatch(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int deleteShare(Connection connection, int contextID, Share share, long maxLastModified) throws SQLException, OXException {
+        StringBuilder stringBuilder = new StringBuilder().append("DELETE FROM share WHERE ")
+            .append(SHARE_MAPPER.get(ShareField.CONTEXT_ID).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.GUEST).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.MODULE).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.FOLDER).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.ITEM).getColumnLabel()).append("=? AND ")
+            .append(SHARE_MAPPER.get(ShareField.MODIFIED).getColumnLabel()).append("<=?;")
+        ;
+        ShareField[] fields = { ShareField.CONTEXT_ID, ShareField.GUEST, ShareField.MODULE, ShareField.FOLDER, ShareField.ITEM };
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(stringBuilder.toString());
+            SHARE_MAPPER.setParameters(stmt, new RdbShare(contextID, share), fields);
+            stmt.setLong(6, maxLastModified);
+            return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }

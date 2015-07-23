@@ -49,7 +49,6 @@
 
 package com.openexchange.share.json.actions;
 
-import java.util.Collections;
 import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -93,13 +92,10 @@ public class DeleteLinkAction extends AbstractShareAction {
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
-        if (clientTimestamp.before(shareInfo.getShare().getModified())) {
-            throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(target);
-        }
         /*
          * perform the deletion, return empty result in case of success
          */
-        getShareService().deleteShares(session, Collections.singletonList(shareInfo.getToken()));
+        getShareService().deleteShare(session, shareInfo.getShare(), clientTimestamp);
         return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 

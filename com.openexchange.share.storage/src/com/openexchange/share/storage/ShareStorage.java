@@ -169,6 +169,17 @@ public interface ShareStorage {
     int deleteShares(int contextID, List<Share> shares, StorageParameters parameters) throws OXException;
 
     /**
+     * Deletes a share from the storage, based its guest- and target-information.
+     *
+     * @param contextID The context ID
+     * @param share The share to delete
+     * @param clientLastModified The time the shares were last read from the client to catch concurrent modifications
+     * @param parameters The storage parameters
+     * @return <code>true</code> if there was at least one share deleted, <code>false</code>, otherwise
+     */
+    boolean deleteShare(int contextID, Share shares, Date clientLastModified, StorageParameters parameters) throws OXException;
+
+    /**
      * Deletes multiple shares targets associated to any guest user from the storage.
      *
      * @param contextID The context ID

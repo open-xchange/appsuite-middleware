@@ -166,46 +166,6 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public List<ShareInfo> getShares(Session session, String token) throws OXException {
-        /*
-         * resolve share token & get associated guest user
-         */
-        ShareToken shareToken = new ShareToken(token);
-        int contextID = session.getContextId();
-        User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
-        shareToken.verifyGuest(contextID, guest);
-        /*
-         * get shares for guest and filter results as needed
-         */
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
-        shares = removeExpired(contextID, shares);
-        if (guest.getId() == session.getUserId()) {
-            /*
-             * implicitly adjust share targets if the session's user is the guest himself
-             */
-            return createShareInfos(services, contextID, shares, true);
-        }
-        /*
-         * filter share targets not accessible for the session's user before returning results
-         */
-
-        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken, getLinkTarget(contextID, guest));
-        if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
-            shares = removeInaccessible(session, shares);
-        }
-        return createShareInfos(services, contextID, shares, false);
-    }
-
-    @Override
-    public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
-        int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
-        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
-        shares = removeExpired(session.getContextId(), shares);
-        shares = removeInaccessible(session, shares);
-        return createShareInfos(services, session.getContextId(), shares);
-    }
-
-    @Override
     public ShareInfo getShare(Session session, String token, String path) throws OXException {
         List<ShareInfo> shareInfos = getShares(session, token);
         for (ShareInfo shareInfo : shareInfos) {
@@ -215,6 +175,15 @@ public class DefaultShareService implements ShareService {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<ShareInfo> getShares(Session session, String module, String folder, String item) throws OXException {
+        int moduleId = null == module ? -1 : ShareModuleMapping.moduleMapping2int(module);
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForTarget(session.getContextId(), moduleId, folder, item, StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(session.getContextId(), shares);
+        shares = removeInaccessible(session, shares);
+        return createShareInfos(services, session.getContextId(), shares);
     }
 
     @Override
@@ -242,7 +211,7 @@ public class DefaultShareService implements ShareService {
 
     @Override
     public CreatedShares addTarget(Session session, ShareTarget target, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
-        CreatedShares created = addTargets(session, Collections.singletonList(target), recipients);
+        CreatedShares created = addTargets(session, Collections.singletonList(target), recipients, meta);
         for (ShareRecipient recipient : recipients) {
             CreatedShare share = created.getShare(recipient);
             if (null == share || 1 != share.size()) {
@@ -253,199 +222,13 @@ public class DefaultShareService implements ShareService {
     }
 
     @Override
-    public CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients) throws OXException {
-        return addTargets(session, targets, recipients, null);
-    }
-
-    @Override
-    public CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
-        if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
-            return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
-        }
-        ShareTool.validateTargets(targets);
-        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(session.getContextId()));
-        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
-        ShareStorage shareStorage = services.getService(ShareStorage.class);
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        try {
-            connectionHelper.start();
-            /*
-             * Initial checks
-             */
-            checkRecipients(recipients, session);
-            checkForDuplicateLinks(recipients, targets, utils.getContext(session), shareStorage, services.getService(UserService.class), connectionHelper);
-            /*
-             * prepare guest users and resulting shares
-             */
-            List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>(targets.size() * recipients.size());
-            User sharingUser = utils.getUser(session);
-            for (ShareRecipient recipient : recipients) {
-                /*
-                 * prepare shares for this recipient & remember for storing
-                 */
-                List<ShareInfo> shareInfos = prepareShares(connectionHelper, sharingUser, recipient, targets, meta);
-                sharesToStore.addAll(shareInfos);
-                sharesPerRecipient.put(recipient, shareInfos);
-            }
-            /*
-             * store shares & trigger collection of e-mail addresses
-             */
-            storeShares(session, connectionHelper, sharesToStore);
-            connectionHelper.commit();
-            LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
-            return new CreatedSharesImpl(sharesPerRecipient);
-        } finally {
-            connectionHelper.finish();
-        }
-    }
-
-    @Override
     public CreatedShare addShare(Session session, ShareTarget target, ShareRecipient recipient, Map<String, Object> meta) throws OXException {
-        return addShares(session, Collections.singletonList(target), Collections.singletonList(recipient), meta).getShare(recipient);
-    }
-
-    private CreatedShares addShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
-        if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
-            return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
+        CreatedShares created = addShares(session, Collections.singletonList(target), Collections.singletonList(recipient), meta);
+        CreatedShare share = created.getShare(recipient);
+        if (null == share || 1 != share.size()) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("Unexpected number of shares created for recipient " + recipient);
         }
-        checkRecipients(recipients, session);
-        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(session.getContextId()));
-        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
-        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
-        TargetUpdate targetUpdate = null;
-        try {
-            connectionHelper.start();
-            /*
-             * pre-fetch targets (implicitly checking access to them as current session's user)
-             */
-            targetUpdate = services.getService(ModuleSupport.class).prepareUpdate(session, connectionHelper.getConnection());
-            targetUpdate.fetch(targets);
-            /*
-             * prepare guest users, target permissions and resulting shares
-             */
-            List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>();
-            User sharingUser = utils.getUser(session);
-            for (ShareTarget target : targets) {
-                target.setOwnedBy(targetUpdate.get(target).getOwner()); //TODO: owner into Share?
-                List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(recipients.size());
-                for (ShareRecipient recipient : recipients) {
-                    /*
-                     * prepare share for the recipient & remember for storing
-                     */
-                    ShareInfo shareInfo = prepareShare(connectionHelper, sharingUser, recipient, target, meta);
-                    sharesToStore.add(shareInfo);
-                    List<ShareInfo> shareInfos = sharesPerRecipient.get(recipient);
-                    if (null == shareInfos) {
-                        shareInfos = new ArrayList<ShareInfo>(targets.size());
-                        sharesPerRecipient.put(recipient, shareInfos);
-                    }
-                    shareInfos.add(shareInfo);
-                    /*
-                     * remember target permission
-                     */
-                    RecipientType type = shareInfo.getGuest().getRecipientType();
-                    targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), RecipientType.GROUP.equals(type), recipient.getBits()));
-                }
-                /*
-                 * apply permissions for this target
-                 */
-                targetUpdate.get(target).applyPermissions(targetPermissions);
-            }
-            /*
-             * store shares in storage as needed
-             */
-            storeShares(session, connectionHelper, sharesToStore);
-            /*
-             * run target update, commit transaction & return created shares result
-             */
-            targetUpdate.run();
-            connectionHelper.commit();
-            LOG.info("Shares to targets {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
-            utils.collectAddresses(session, recipients);
-            return new CreatedSharesImpl(sharesPerRecipient);
-        } finally {
-            if (null != targetUpdate) {
-                targetUpdate.close();
-            }
-            connectionHelper.finish();
-        }
-    }
-
-    /**
-     * Checks that the sharing user doesn't try to share targets to himself and has sufficient permissions
-     * to create links or invite guests.
-     *
-     * @param recipients The recipients
-     * @param userId the sharing users ID
-     * @throws OXException {@link ShareExceptionCodes#NO_SHARING_WITH_YOURSELF)
-     */
-    private void checkRecipients(List<ShareRecipient> recipients, Session session) throws OXException {
-        boolean shareLinks = false;
-        boolean inviteGuests = false;
-        CapabilityService capabilityService = services.getService(CapabilityService.class);
-        if (null == capabilityService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
-        }
-        CapabilitySet capabilities = capabilityService.getCapabilities(session);
-        if (null != capabilities && capabilities.contains("share_links")) {
-            shareLinks = true;
-        }
-        if (null != capabilities && capabilities.contains("invite_guests")) {
-            inviteGuests = true;
-        }
-
-        int userId = session.getUserId();
-        for (ShareRecipient recipient : recipients) {
-            if (recipient.isInternal()) {
-                InternalRecipient internal = recipient.toInternal();
-                if (!internal.isGroup() && internal.getEntity() == userId) {
-                    throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
-                }
-            }
-            if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
-                if (!shareLinks) {
-                    throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
-                }
-            }
-            if (RecipientType.GUEST.equals(recipient.getType())) {
-                if (!inviteGuests) {
-                    throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
-                }
-            }
-        }
-    }
-
-    /**
-     * Checks that for every target at most one link exists
-     * @param recipients
-     * @param targets
-     * @param context
-     * @param shareStorage
-     * @param userService
-     * @param connectionHelper
-     * @throws OXException
-     */
-    private static void checkForDuplicateLinks(List<ShareRecipient> recipients, List<ShareTarget> targets, Context context, ShareStorage shareStorage, UserService userService, ConnectionHelper connectionHelper) throws OXException {
-        int numLinks = 0;
-        for (ShareRecipient recipient : recipients) {
-            if (recipient.getType() == RecipientType.ANONYMOUS) {
-                if (numLinks > 0) {
-                    throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
-                }
-                numLinks++;
-
-                for (ShareTarget target : targets) {
-                    List<Share> existingShares = shareStorage.loadSharesForTarget(context.getContextId(), target.getModule(), target.getFolder(), target.getItem(), connectionHelper.getParameters());
-                    for (Share share : existingShares) {
-                        User guestUser = userService.getUser(connectionHelper.getConnection(), share.getGuest(), context);
-                        if (ShareTool.isAnonymousGuest(guestUser)) {
-                            throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
-                        }
-                    }
-                }
-            }
-        }
+        return share;
     }
 
     @Override
@@ -540,6 +323,38 @@ public class DefaultShareService implements ShareService {
     @Override
     public void deleteShares(Session session, List<String> tokens) throws OXException {
         removeShares(session, session.getContextId(), tokens);
+    }
+
+    @Override
+    public void deleteShare(Session session, Share share, Date clientTimestamp) throws OXException {
+        if (null == share.getTarget() || 0 >= share.getGuest()) {
+            throw ShareExceptionCodes.UNEXPECTED_ERROR.create("not enough information to delete share");
+        }
+        boolean deleted;
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * delete the shares in storage, checking the provided last modification timestamp
+             */
+            deleted = services.getService(ShareStorage.class).deleteShare(session.getContextId(), share, clientTimestamp, connectionHelper.getParameters());
+            if (false == deleted) {
+                throw ShareExceptionCodes.CONCURRENT_MODIFICATION.create(share);
+            }
+            /*
+             * remove target permissions (implicitly checking the session user's permissions)
+             */
+            removeTargetPermissions(session, connectionHelper, Collections.singletonList(share));
+            connectionHelper.commit();
+        } finally {
+            connectionHelper.finish();
+        }
+        /*
+         * schedule cleanup tasks as needed
+         */
+        if (deleted) {
+            scheduleGuestCleanup(session.getContextId(), new int[] { share.getGuest() });
+        }
     }
 
     @Override
@@ -749,6 +564,221 @@ public class DefaultShareService implements ShareService {
          */
         if (null != affectedGuests && 0 < affectedGuests.length) {
             scheduleGuestCleanup(contextID, affectedGuests);
+        }
+    }
+
+    private CreatedShares addTargets(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
+        if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
+            return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
+        }
+        ShareTool.validateTargets(targets);
+        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(session.getContextId()));
+        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
+        ShareStorage shareStorage = services.getService(ShareStorage.class);
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        try {
+            connectionHelper.start();
+            /*
+             * Initial checks
+             */
+            checkRecipients(recipients, session);
+            checkForDuplicateLinks(recipients, targets, utils.getContext(session), shareStorage, services.getService(UserService.class), connectionHelper);
+            /*
+             * prepare guest users and resulting shares
+             */
+            List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>(targets.size() * recipients.size());
+            User sharingUser = utils.getUser(session);
+            for (ShareRecipient recipient : recipients) {
+                /*
+                 * prepare shares for this recipient & remember for storing
+                 */
+                List<ShareInfo> shareInfos = prepareShares(connectionHelper, sharingUser, recipient, targets, meta);
+                sharesToStore.addAll(shareInfos);
+                sharesPerRecipient.put(recipient, shareInfos);
+            }
+            /*
+             * store shares & trigger collection of e-mail addresses
+             */
+            storeShares(session, connectionHelper, sharesToStore);
+            connectionHelper.commit();
+            LOG.info("Share target(s) {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
+            utils.collectAddresses(session, recipients);
+            return new CreatedSharesImpl(sharesPerRecipient);
+        } finally {
+            connectionHelper.finish();
+        }
+    }
+
+    private CreatedShares addShares(Session session, List<ShareTarget> targets, List<ShareRecipient> recipients, Map<String, Object> meta) throws OXException {
+        if (null == targets || 0 == targets.size() || null == recipients || 0 == recipients.size()) {
+            return new CreatedSharesImpl(Collections.<ShareRecipient, List<ShareInfo>>emptyMap());
+        }
+        checkRecipients(recipients, session);
+        LOG.info("Adding share target(s) {} for recipients {} in context {}...", targets, recipients, I(session.getContextId()));
+        Map<ShareRecipient, List<ShareInfo>> sharesPerRecipient = new HashMap<ShareRecipient, List<ShareInfo>>(recipients.size());
+        ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
+        TargetUpdate targetUpdate = null;
+        try {
+            connectionHelper.start();
+            /*
+             * pre-fetch targets (implicitly checking access to them as current session's user)
+             */
+            targetUpdate = services.getService(ModuleSupport.class).prepareUpdate(session, connectionHelper.getConnection());
+            targetUpdate.fetch(targets);
+            /*
+             * prepare guest users, target permissions and resulting shares
+             */
+            List<ShareInfo> sharesToStore = new ArrayList<ShareInfo>();
+            User sharingUser = utils.getUser(session);
+            for (ShareTarget target : targets) {
+                target.setOwnedBy(targetUpdate.get(target).getOwner()); //TODO: owner into Share?
+                List<TargetPermission> targetPermissions = new ArrayList<TargetPermission>(recipients.size());
+                for (ShareRecipient recipient : recipients) {
+                    /*
+                     * prepare share for the recipient & remember for storing
+                     */
+                    ShareInfo shareInfo = prepareShare(connectionHelper, sharingUser, recipient, target, meta);
+                    sharesToStore.add(shareInfo);
+                    List<ShareInfo> shareInfos = sharesPerRecipient.get(recipient);
+                    if (null == shareInfos) {
+                        shareInfos = new ArrayList<ShareInfo>(targets.size());
+                        sharesPerRecipient.put(recipient, shareInfos);
+                    }
+                    shareInfos.add(shareInfo);
+                    /*
+                     * remember target permission
+                     */
+                    RecipientType type = shareInfo.getGuest().getRecipientType();
+                    targetPermissions.add(new TargetPermission(shareInfo.getGuest().getGuestID(), RecipientType.GROUP.equals(type), recipient.getBits()));
+                }
+                /*
+                 * apply permissions for this target
+                 */
+                targetUpdate.get(target).applyPermissions(targetPermissions);
+            }
+            /*
+             * store shares in storage as needed
+             */
+            storeShares(session, connectionHelper, sharesToStore);
+            /*
+             * run target update, commit transaction & return created shares result
+             */
+            targetUpdate.run();
+            connectionHelper.commit();
+            LOG.info("Shares to targets {} for recipients {} in context {} added successfully.", targets, recipients, I(session.getContextId()));
+            utils.collectAddresses(session, recipients);
+            return new CreatedSharesImpl(sharesPerRecipient);
+        } finally {
+            if (null != targetUpdate) {
+                targetUpdate.close();
+            }
+            connectionHelper.finish();
+        }
+    }
+
+    private List<ShareInfo> getShares(Session session, String token) throws OXException {
+        /*
+         * resolve share token & get associated guest user
+         */
+        ShareToken shareToken = new ShareToken(token);
+        int contextID = session.getContextId();
+        User guest = services.getService(UserService.class).getUser(shareToken.getUserID(), contextID);
+        shareToken.verifyGuest(contextID, guest);
+        /*
+         * get shares for guest and filter results as needed
+         */
+        List<Share> shares = services.getService(ShareStorage.class).loadSharesForGuest(contextID, guest.getId(), StorageParameters.NO_PARAMETERS);
+        shares = removeExpired(contextID, shares);
+        if (guest.getId() == session.getUserId()) {
+            /*
+             * implicitly adjust share targets if the session's user is the guest himself
+             */
+            return createShareInfos(services, contextID, shares, true);
+        }
+        /*
+         * filter share targets not accessible for the session's user before returning results
+         */
+
+        DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, guest, shareToken, getLinkTarget(contextID, guest));
+        if (false == RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType()) || session.getUserId() != guestInfo.getCreatedBy()) {
+            shares = removeInaccessible(session, shares);
+        }
+        return createShareInfos(services, contextID, shares, false);
+    }
+
+    /**
+     * Checks that the sharing user doesn't try to share targets to himself and has sufficient permissions
+     * to create links or invite guests.
+     *
+     * @param recipients The recipients
+     * @param userId the sharing users ID
+     * @throws OXException {@link ShareExceptionCodes#NO_SHARING_WITH_YOURSELF)
+     */
+    private void checkRecipients(List<ShareRecipient> recipients, Session session) throws OXException {
+        boolean shareLinks = false;
+        boolean inviteGuests = false;
+        CapabilityService capabilityService = services.getService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+        CapabilitySet capabilities = capabilityService.getCapabilities(session);
+        if (null != capabilities && capabilities.contains("share_links")) {
+            shareLinks = true;
+        }
+        if (null != capabilities && capabilities.contains("invite_guests")) {
+            inviteGuests = true;
+        }
+
+        int userId = session.getUserId();
+        for (ShareRecipient recipient : recipients) {
+            if (recipient.isInternal()) {
+                InternalRecipient internal = recipient.toInternal();
+                if (!internal.isGroup() && internal.getEntity() == userId) {
+                    throw ShareExceptionCodes.NO_SHARING_WITH_YOURSELF.create();
+                }
+            }
+            if (RecipientType.ANONYMOUS.equals(recipient.getType())) {
+                if (!shareLinks) {
+                    throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                }
+            }
+            if (RecipientType.GUEST.equals(recipient.getType())) {
+                if (!inviteGuests) {
+                    throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+                }
+            }
+        }
+    }
+
+    /**
+     * Checks that for every target at most one link exists
+     * @param recipients
+     * @param targets
+     * @param context
+     * @param shareStorage
+     * @param userService
+     * @param connectionHelper
+     * @throws OXException
+     */
+    private static void checkForDuplicateLinks(List<ShareRecipient> recipients, List<ShareTarget> targets, Context context, ShareStorage shareStorage, UserService userService, ConnectionHelper connectionHelper) throws OXException {
+        int numLinks = 0;
+        for (ShareRecipient recipient : recipients) {
+            if (recipient.getType() == RecipientType.ANONYMOUS) {
+                if (numLinks > 0) {
+                    throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
+                }
+                numLinks++;
+
+                for (ShareTarget target : targets) {
+                    List<Share> existingShares = shareStorage.loadSharesForTarget(context.getContextId(), target.getModule(), target.getFolder(), target.getItem(), connectionHelper.getParameters());
+                    for (Share share : existingShares) {
+                        User guestUser = userService.getUser(connectionHelper.getConnection(), share.getGuest(), context);
+                        if (ShareTool.isAnonymousGuest(guestUser)) {
+                            throw ShareExceptionCodes.LINK_ALREADY_EXISTS.create();
+                        }
+                    }
+                }
+            }
         }
     }
 

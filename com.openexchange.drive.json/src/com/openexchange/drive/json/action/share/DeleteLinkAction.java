@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.json.action.share;
 
-import java.util.Collections;
 import java.util.Date;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -75,16 +74,17 @@ public class DeleteLinkAction extends AbstractDriveShareAction {
          */
         DriveShareTarget target = getParser().parseTarget((JSONObject) requestData.requireData());
         /*
-         * lookup share
+         * lookup share, assume latest timestamp if client checksum matches
          */
         DriveShareInfo shareInfo = discoverLink(session, target);
         if (null == shareInfo) {
             throw ShareExceptionCodes.INVALID_LINK_TARGET.create(target.getModule(), target.getFolder(), target.getItem());
         }
+        Date clientTimestamp = shareInfo.getShare().getModified();
         /*
          * perform the deletion, return empty result in case of success
          */
-        getShareService().deleteShares(session.getServerSession(), Collections.singletonList(shareInfo.getToken()));
+        getShareService().deleteShare(session.getServerSession(), shareInfo.getShare(), clientTimestamp);
         return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 
