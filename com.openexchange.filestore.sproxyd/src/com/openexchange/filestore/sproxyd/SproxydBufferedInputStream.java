@@ -71,10 +71,10 @@ import com.openexchange.java.Streams;
 public class SproxydBufferedInputStream extends InputStream {
 
     private final List<Chunk> documentChunks;
-    private final int chunksSize;
+    private final int numberOfChunks;
     private final SproxydClient client;
     private InputStream current;
-    private int pos;
+    private int chunkPos;
     private final long start;
     private final long end;
 
@@ -99,34 +99,90 @@ public class SproxydBufferedInputStream extends InputStream {
     public SproxydBufferedInputStream(List<Chunk> documentChunks, SproxydClient client, long start, long end) {
         super();
         this.documentChunks = documentChunks;
-        this.chunksSize = documentChunks.size();
+        this.numberOfChunks = documentChunks.size();
         this.client = client;
         this.start = start;
         this.end = end;
-        this.pos = 0;
+        this.chunkPos = 0;
     }
 
     private InputStream initNext() throws OXException {
-        if (pos >= chunksSize) {
-            return null;
+        // Initialize next applicable chunk
+        while (true) {
+            if (chunkPos >= numberOfChunks) {
+                // No more chunks available
+                return null;
+            }
+            // Next chunk
+            Chunk chunk = documentChunks.get(chunkPos++);
+            long[] relativeRange = getRelativeRange(chunk, start, end);
+            if (null != relativeRange) {
+                InputStream in = (0 == relativeRange.length) ? client.get(chunk.getScalityId()) : client.get(chunk.getScalityId(), relativeRange[0], relativeRange[1]);
+                if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
+                    in = new FastBufferedInputStream(in);
+                }
+
+                current = in;
+                return in;
+            }
         }
-        // Next chunk
-        Chunk chunk = documentChunks.get(pos++);
-        long[] relativeRange = getRelativeRange(chunk, start, end);
-        if (null == relativeRange) {
-            return initNext();
+    }
+
+    @Override
+    public int read(byte[] b, int offset, int length) throws IOException {
+        if (b == null) {
+            throw new NullPointerException("Byte array is null");
+        } else if (offset < 0) {
+            throw new IndexOutOfBoundsException("Offset is negative");
+        } else if (length < 0) {
+            throw new IndexOutOfBoundsException("Length is negative");
+        } else if (length > b.length - offset) {
+            throw new IndexOutOfBoundsException("The number of bytes to read ("+length+") does not fit into byte array capacity " + (b.length - offset));
         }
-        InputStream in;
-        if (0 == relativeRange.length) {
-            in = client.get(chunk.getScalityId());
-        } else {
-            in = client.get(chunk.getScalityId(), relativeRange[0], relativeRange[1]);
+
+        if (length == 0) {
+            return 0;
         }
-        if (!(in instanceof BufferedInputStream) && !(in instanceof ByteArrayInputStream)) {
-            in = new FastBufferedInputStream(in);
+
+        try {
+            InputStream in = current;
+
+            if (null == in) {
+                in = initNext();
+                if (null == in) {
+                    return -1;
+                }
+            }
+
+            int off = offset;
+            int len = length;
+
+            int retval = -1;
+            while (retval < length) {
+                int read = in.read(b, off, len);
+                if (read <= 0) {
+                    // Current stream reached EOF
+                    Streams.close(in);
+                    current = null;
+                    in = initNext();
+                    if (null == in) {
+                        return retval;
+                    }
+                } else {
+                    retval = (0 > retval ? read : (retval + read));
+                    if (retval >= length) {
+                        return retval;
+                    }
+
+                    off += read;
+                    len -= read;
+                }
+            }
+            return retval;
+
+        } catch (OXException e) {
+            throw toIOException(e);
         }
-        current = in;
-        return in;
     }
 
     @Override

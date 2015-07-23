@@ -656,7 +656,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                      */
                     LOG.debug("Client dropped connection while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 } else {
-                    LOG.warn("Lost connection to client while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
+                    LOG.warn("Lost connection to input or output end-point while trying to output file{}", (isEmpty(fileName) ? "" : " " + fileName), e);
                 }
             }
         } catch (final OXException e) {
