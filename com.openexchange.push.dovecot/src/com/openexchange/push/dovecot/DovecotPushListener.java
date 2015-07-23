@@ -65,6 +65,7 @@ import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.push.PushExceptionCodes;
@@ -261,6 +262,12 @@ public class DovecotPushListener implements PushListener, Runnable {
 
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
+        } catch (OXException e) {
+            if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
+                Throwable cause = null == e.getCause() ? e : e.getCause();
+                throw PushExceptionCodes.AUTHENTICATION_ERROR.create(cause, new Object[0]);
+            }
+            throw e;
         } finally {
             closeMailAccess(mailAccess);
             mailAccess = null;
@@ -353,6 +360,12 @@ public class DovecotPushListener implements PushListener, Runnable {
             }
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
+        } catch (OXException e) {
+            if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
+                Throwable cause = null == e.getCause() ? e : e.getCause();
+                throw PushExceptionCodes.AUTHENTICATION_ERROR.create(cause, new Object[0]);
+            }
+            throw e;
         } finally {
             closeMailAccess(mailAccess);
             mailAccess = null;
