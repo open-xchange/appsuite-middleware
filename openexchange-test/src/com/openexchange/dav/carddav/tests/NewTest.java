@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -68,10 +70,11 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class NewTest extends CardDAVTest {
 
-	public NewTest(String name) {
-		super(name);
+	public NewTest() {
+		super();
 	}
 
+	@Test
 	public void testCreateSimpleOnClient() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -119,6 +122,7 @@ public class NewTest extends CardDAVTest {
         assertEquals("FN wrong", firstName + " " + lastName, card.getFN());
 	}
 
+	@Test
 	public void testCreateSimpleOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -156,6 +160,7 @@ public class NewTest extends CardDAVTest {
         assertEquals("lastname wrong", lastName, contact.getSurName());
 	}
 
+	@Test
 	public void testAddContactInSubfolderServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization

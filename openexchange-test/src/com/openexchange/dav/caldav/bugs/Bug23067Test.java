@@ -49,9 +49,11 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -61,18 +63,15 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.UserParticipant;
 
 /**
- * {@link Bug23067Test} 
- * 
- * appointment can not be accepted within iCal, status can not be changed 
- * 
+ * {@link Bug23067Test}
+ *
+ * appointment can not be accepted within iCal, status can not be changed
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug23067Test extends CalDAVTest {
 
-	public Bug23067Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testAcceptImportedAppointment() throws Exception {
 		/*
 		 * create appointment
@@ -80,7 +79,7 @@ public class Bug23067Test extends CalDAVTest {
 		String uid = randomUID();
     	Date start = TimeTools.D("next thursday at 17:15");
     	Date end = TimeTools.D("next thursday at 18:45");
-		String iCal = 
+		String iCal =
 				"BEGIN:VCALENDAR" + "\r\n" +
                 "VERSION:2.0" + "\r\n" +
                 "METHOD:REQUEST" + "\r\n" +
@@ -183,5 +182,5 @@ public class Bug23067Test extends CalDAVTest {
         assertNotNull("accepting attendee not found", attendee);
         assertEquals("partstat status wrong", "ACCEPTED", attendee.getAttribute("PARTSTAT"));
 	}
-	
+
 }

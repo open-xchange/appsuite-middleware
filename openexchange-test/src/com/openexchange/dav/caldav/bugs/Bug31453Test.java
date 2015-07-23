@@ -49,7 +49,10 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -70,22 +73,13 @@ public class Bug31453Test extends CalDAVTest {
     private FolderObject publicFolder = null;
     private String publicFolderID = null;
 
-    public Bug31453Test(String name) {
-        super(name);
-    }
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         publicFolder = createPublicFolder();
         publicFolderID = String.valueOf(publicFolder.getObjectID());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
+    @Test
 	public void testCreateReminderInClient() throws Exception {
         /*
          * create appointment
@@ -156,6 +150,7 @@ public class Bug31453Test extends CalDAVTest {
         assertEquals("ALARM wrong", "-PT15M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
 	}
 
+    @Test
     public void testRemoveReminderInClient() throws Exception {
         /*
          * create appointment
@@ -246,6 +241,7 @@ public class Bug31453Test extends CalDAVTest {
         assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
     }
 
+    @Test
     public void testEditReminderInClient() throws Exception {
         /*
          * create appointment
@@ -336,6 +332,7 @@ public class Bug31453Test extends CalDAVTest {
         assertEquals("ALARM wrong", "-PT20M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
     }
 
+    @Test
     public void testCreateReminderAtServer() throws Exception {
         /*
          * create appointment
@@ -356,6 +353,7 @@ public class Bug31453Test extends CalDAVTest {
         assertEquals("ALARM wrong", "-PT30M", iCalResource.getVEvent().getVAlarm().getPropertyValue("TRIGGER"));
     }
 
+    @Test
     public void testRemoveReminderAtServer() throws Exception {
         /*
          * create appointment
@@ -388,6 +386,7 @@ public class Bug31453Test extends CalDAVTest {
         assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
     }
 
+    @Test
     public void testEditReminderAtServer() throws Exception {
         /*
          * create appointment

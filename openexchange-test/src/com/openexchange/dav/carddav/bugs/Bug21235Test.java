@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
-
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 import com.openexchange.dav.carddav.UserAgents;
@@ -58,23 +60,23 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link Bug21235Test}
- * 
+ *
  * Contact can't be updated with Addressbook client on Mac OS 10.6.8
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21235Test extends CardDAVTest {
 
-	public Bug21235Test(String name) {
-		super(name);
+	public Bug21235Test() {
+		super();
 	}
-	
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+
+    @Before
+    public void setUserAgent() throws Exception {
 		super.getWebDAVClient().setUserAgent(UserAgents.MACOS_10_6_8);
     }
-    
+
+    @Test
 	public void testUpdateContact() throws Exception {
 		/*
 		 * create contact
@@ -83,7 +85,7 @@ public class Bug21235Test extends CardDAVTest {
     	final String pathUid = randomUID() + "-ABSPlugin";
     	final String firstName = "test";
     	final String lastName = "heinz";
-    	final String vCard = 
+    	final String vCard =
     			"BEGIN:VCARD" + "\r\n" +
 				"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + firstName + ";;;" + "\r\n" +
@@ -99,7 +101,7 @@ public class Bug21235Test extends CardDAVTest {
          * verify contact on server
          */
         final Contact contact = super.getContact(uid);
-        super.rememberForCleanUp(contact);        
+        super.rememberForCleanUp(contact);
         assertEquals("uid wrong", uid, contact.getUid());
         assertEquals("firstname wrong", firstName, contact.getGivenName());
         assertEquals("lastname wrong", lastName, contact.getSurName());
@@ -107,7 +109,7 @@ public class Bug21235Test extends CardDAVTest {
 		 * update contact
 		 */
         final String updatedFirstName = "test2";
-        final String updatedVCard = 
+        final String updatedVCard =
     			"BEGIN:VCARD" + "\r\n" +
 				"VERSION:3.0" + "\r\n" +
 				"N:" + lastName + ";" + updatedFirstName + ";;;" + "\r\n" +

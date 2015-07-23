@@ -49,11 +49,12 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
-
+import org.junit.Test;
 import com.openexchange.ajax.framework.Executor;
 import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.ajax.user.actions.GetResponse;
@@ -64,22 +65,23 @@ import com.openexchange.groupware.container.Contact;
 
 /**
  * {@link PrincipalPropertiesTest}
- * 
- * Tests discovery of additional properties for WebDAV principal resources, 
- * simulating the steps happening during account creation of the addressbook client. 
- * 
+ *
+ * Tests discovery of additional properties for WebDAV principal resources,
+ * simulating the steps happening during account creation of the addressbook client.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class PrincipalPropertiesTest extends CardDAVTest {
 
-	public PrincipalPropertiesTest(String name) {
-		super(name);
+	public PrincipalPropertiesTest() {
+		super();
 	}
-	
+
 	/**
-	 * Checks if the CardDAV server reports some information about the current user principal. 
+	 * Checks if the CardDAV server reports some information about the current user principal.
 	 * @throws Exception
 	 */
+	@Test
 	public void testDiscoverPrincipalProperties() throws Exception {
 		final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADDRESSBOOK_HOME_SET);
@@ -91,20 +93,20 @@ public class PrincipalPropertiesTest extends CardDAVTest {
         props.add(PropertyNames.RESOURCE_ID);
         props.add(PropertyNames.SUPPORTED_REPORT_SET);
         final PropFindMethod propFind = new PropFindMethod(
-        		super.getWebDAVClient().getBaseURI() + "/principals/users/" + Config.getUsername() + "/", 
+        		super.getWebDAVClient().getBaseURI() + "/principals/users/" + Config.getUsername() + "/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
-        final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(), 
+        final GetRequest getRequest = new GetRequest(super.getAJAXClient().getValues().getUserId(),
         		super.getAJAXClient().getValues().getTimeZone());
         final GetResponse getResponse = Executor.execute(client, getRequest);
         final Contact contact = getResponse.getContact();
         final String expectedDisplayName = contact.getDisplayName();
-        assertEquals(PropertyNames.DISPLAYNAME + " wrong", expectedDisplayName, 
+        assertEquals(PropertyNames.DISPLAYNAME + " wrong", expectedDisplayName,
         		super.extractTextContent(PropertyNames.DISPLAYNAME, response));
         final String principalURL = super.extractHref(PropertyNames.PRINCIPAL_URL, response);
     	assertTrue("username not found in href child of " + PropertyNames.PRINCIPAL_URL, principalURL.contains(Config.getUsername()));
         final String addressbookHome = super.extractHref(PropertyNames.ADDRESSBOOK_HOME_SET, response);
     	assertEquals(PropertyNames.ADDRESSBOOK_HOME_SET + " wrong", "/carddav/", addressbookHome);
-    	
+
 	}
 }

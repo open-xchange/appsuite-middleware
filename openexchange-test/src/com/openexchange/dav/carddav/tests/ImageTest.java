@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.List;
@@ -58,6 +59,7 @@ import net.sourceforge.cardme.vcard.arch.EncodingType;
 import net.sourceforge.cardme.vcard.types.PhotoType;
 import net.sourceforge.cardme.vcard.types.media.ImageMediaType;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -238,10 +240,11 @@ public class ImageTest extends CardDAVTest {
         -33, -95, 25, -58, -69, -49, 48, 31, -1, -39
     };
 
-	public ImageTest(String name) {
-		super(name);
+	public ImageTest() {
+		super();
 	}
 
+	@Test
 	public void testCroppedImage() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -342,6 +345,7 @@ public class ImageTest extends CardDAVTest {
         assertEquals("POHTO height wrong", 25, vCardImage.getHeight());
 	}
 
+	@Test
 	public void testNegativeCropOffset() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -437,6 +441,7 @@ public class ImageTest extends CardDAVTest {
         assertEquals("POHTO height wrong", 200, vCardImage.getHeight());
 	}
 
+	@Test
 	public void testAddPhotoOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -491,6 +496,7 @@ public class ImageTest extends CardDAVTest {
         Assert.assertArrayEquals("image data wrong", contact.getImage1(), vCardPhoto);
     }
 
+	@Test
 	public void testAddPhotoOnClient() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -547,6 +553,7 @@ public class ImageTest extends CardDAVTest {
         Assert.assertArrayEquals("image data wrong", updatedContact.getImage1(), vCardPhoto);
     }
 
+	@Test
 	public void testRemovePhotoOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -596,6 +603,7 @@ public class ImageTest extends CardDAVTest {
         assertTrue("PHOTO wrong", null == card.getVCard().getPhotos() || 0 == card.getVCard().getPhotos().size());
     }
 
+	@Test
     public void testRemovePhotoOnClient() throws Exception {
         /*
          * fetch sync token for later synchronization
@@ -651,6 +659,7 @@ public class ImageTest extends CardDAVTest {
         assertTrue("PHOTO wrong", null == card.getVCard().getPhotos() || 0 == card.getVCard().getPhotos().size());
     }
 
+	@Test
     public void testScalingImagesOnServer() throws Exception {
         /*
          * fetch sync token for later synchronization

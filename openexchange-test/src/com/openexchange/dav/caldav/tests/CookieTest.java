@@ -54,6 +54,7 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Assert;
+import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -65,10 +66,7 @@ import com.openexchange.dav.caldav.CalDAVTest;
  */
 public class CookieTest extends CalDAVTest {
 
-	public CookieTest(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testNoSessionCookieForCalDAV() throws Exception {
 	    /*
          * execute simple propfind

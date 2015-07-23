@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -65,10 +67,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug31490Test extends CalDAVTest {
 
-	public Bug31490Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testImportMalformedAttendee() throws Exception {
 		/*
 		 * create appointment at client

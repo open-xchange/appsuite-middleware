@@ -53,28 +53,32 @@ import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
-
+import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
+import com.openexchange.exception.OXException;
+
+import static org.junit.Assert.*;
 
 /**
  * {@link AddressbookPropertiesTest}
- * 
- * Tests discovery of additional properties for WebDAV address books, 
- * simulating the steps happening during account creation of the Mac addressbook client. 
- * 
+ *
+ * Tests discovery of additional properties for WebDAV address books,
+ * simulating the steps happening during account creation of the Mac addressbook client.
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class AddressbookPropertiesTest extends CardDAVTest {
 
-	public AddressbookPropertiesTest(String name) {
-		super(name);
+	public AddressbookPropertiesTest() throws OXException {
+		super();
 	}
-	
+
 	/**
-	 * Checks if the CardDAV server reports some information about the address book. 
+	 * Checks if the CardDAV server reports some information about the address book.
 	 * @throws Exception
 	 */
+	@Test
 	public void testDiscoverAddressbookProperties() throws Exception {
 		final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.ADD_MEMBER);
@@ -97,6 +101,6 @@ public class AddressbookPropertiesTest extends CardDAVTest {
         final MultiStatusResponse[] responses = super.getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 0 < responses.length);
-    	
+
 	}
 }

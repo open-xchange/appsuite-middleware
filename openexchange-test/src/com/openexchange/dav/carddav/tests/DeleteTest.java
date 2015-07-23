@@ -49,8 +49,10 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import java.util.Map;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -66,10 +68,11 @@ import com.openexchange.groupware.container.FolderObject;
  */
 public class DeleteTest extends CardDAVTest {
 
-	public DeleteTest(String name) {
-		super(name);
+	public DeleteTest() {
+		super();
 	}
 
+	@Test
 	public void testDeleteContactOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -109,6 +112,7 @@ public class DeleteTest extends CardDAVTest {
         eTags = syncCollectionResponse.getETagsStatusOK();
     }
 
+	@Test
 	public void testDeleteContactInSubfolderOnServer() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
@@ -150,6 +154,7 @@ public class DeleteTest extends CardDAVTest {
         assertTrue("no resource deletions reported on sync collection", 0 < syncCollectionResponse.getHrefsStatusNotFound().size());
     }
 
+	@Test
 	public void testDeleteContactOnClient() throws Throwable {
 		/*
 		 * fetch sync token for later synchronization

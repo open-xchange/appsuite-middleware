@@ -49,11 +49,15 @@
 
 package com.openexchange.dav.caldav.tests;
 
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.framework.AJAXClient;
 import com.openexchange.ajax.framework.AJAXClient.User;
 import com.openexchange.dav.StatusCodes;
@@ -78,33 +82,23 @@ public class ConfirmationTest extends CalDAVTest {
 
     private CalendarTestManager manager2;
 
-    /**
-     * Initializes a new {@link ConfirmationTest}.
-     *
-     * @param name The test name
-     */
-	public ConfirmationTest(String name) {
-		super(name);
-	}
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         manager2 = new CalendarTestManager(new AJAXClient(User.User2));
         manager2.setFailOnError(true);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (null != this.manager2) {
             this.manager2.cleanUp();
             if (null != manager2.getClient()) {
                 manager2.getClient().logout();
             }
         }
-        super.tearDown();
     }
 
+    @Test
     public void testConfirmSeriesOnClient() throws Exception {
         /*
          * fetch sync token for later synchronization
@@ -172,6 +166,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("PARTSTAT wrong", "ACCEPTED", attendee.getAttribute("PARTSTAT"));
     }
 
+    @Test
     public void testConfirmSeriesOnServer() throws Exception {
         /*
          * fetch sync token for later synchronization
@@ -238,6 +233,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("PARTSTAT wrong", "ACCEPTED", attendee.getAttribute("PARTSTAT"));
     }
 
+    @Test
     public void testConfirmOccurrenceOnClient() throws Exception {
         /*
          * fetch sync token for later synchronization
@@ -354,6 +350,7 @@ public class ConfirmationTest extends CalDAVTest {
         assertEquals("PARTSTAT wrong", "ACCEPTED", attendee.getAttribute("PARTSTAT"));
     }
 
+    @Test
     public void testConfirmOccurrenceOnServer() throws Exception {
         /*
          * fetch sync token for later synchronization

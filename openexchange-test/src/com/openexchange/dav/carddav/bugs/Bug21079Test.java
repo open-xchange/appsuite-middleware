@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.carddav.bugs;
 
+import static org.junit.Assert.*;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
@@ -56,28 +57,29 @@ import org.apache.jackrabbit.webdav.property.DavProperty;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.security.CurrentUserPrivilegeSetProperty;
 import org.apache.jackrabbit.webdav.security.Privilege;
-
+import org.junit.Test;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
 
 /**
  * {@link Bug21079Test}
- * 
+ *
  * Contacts can't be edited in Mac OS 10.7.3 Addressbook
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug21079Test extends CardDAVTest {
 
-	public Bug21079Test(String name) {
-		super(name);
-	}	
-	
+	public Bug21079Test() {
+		super();
+	}
+
 	/**
 	 * Checks that at least one resource with "write-content" privileges is present in the carddav collections
 	 * @throws Exception
 	 */
+	@Test
 	public void testCheckWriteContentPrivilige() throws Exception {
 		final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRIVILEGE_SET);
@@ -95,7 +97,7 @@ public class Bug21079Test extends CardDAVTest {
             		if (Privilege.PRIVILEGE_WRITE_CONTENT.equals(privilege)) {
             			canWriteContent = true;
             			break;
-            		}            		
+            		}
 				}
             	if (canWriteContent) {
             		break;

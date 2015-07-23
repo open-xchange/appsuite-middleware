@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -59,16 +61,13 @@ import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.FolderObject;
 
 /**
- * {@link Bug22723Test} - appointments deleted in webgui do not disappear in Lightning 
- * 
+ * {@link Bug22723Test} - appointments deleted in webgui do not disappear in Lightning
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22723Test extends CalDAVTest {
 
-	public Bug22723Test(String name) {
-		super(name);
-	}
-	
+	@Test
 	public void testSynchronizeDeletion() throws Exception {
 	    /*
 	     * create a new folder on the server
@@ -96,7 +95,7 @@ public class Bug22723Test extends CalDAVTest {
          */
         Appointment appointment = super.getAppointment(subFolderID, uid);
         super.rememberForCleanUp(appointment);
-        assertEquals(appointment, start, end, uid, summary, location);
+        assertAppointmentEquals(appointment, start, end, uid, summary, location);
         /*
          * delete appointment on server
          */

@@ -49,12 +49,14 @@
 
 package com.openexchange.dav.carddav.tests;
 
+import static org.junit.Assert.*;
 import java.util.List;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyName;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
+import org.junit.Test;
 import org.w3c.dom.Node;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -69,10 +71,11 @@ import com.openexchange.dav.carddav.UserAgents;
  */
 public class CollectionsTest extends CardDAVTest {
 
-	public CollectionsTest(String name) {
-		super(name);
+	public CollectionsTest() {
+		super();
 	}
 
+	@Test
 	public void testMacOSClients() throws Exception {
 		for (String userAgent : UserAgents.MACOS_ALL) {
 			super.getWebDAVClient().setUserAgent(userAgent);
@@ -83,6 +86,7 @@ public class CollectionsTest extends CardDAVTest {
 		}
 	}
 
+	@Test
 	public void testIOSClients() throws Exception {
 		for (String userAgent : UserAgents.IOS_ALL) {
 			super.getWebDAVClient().setUserAgent(userAgent);
@@ -93,6 +97,7 @@ public class CollectionsTest extends CardDAVTest {
 		}
 	}
 
+	@Test
 	public void testOtherClients() throws Exception {
 		for (String userAgent : UserAgents.OTHER_ALL) {
 			super.getWebDAVClient().setUserAgent(userAgent);

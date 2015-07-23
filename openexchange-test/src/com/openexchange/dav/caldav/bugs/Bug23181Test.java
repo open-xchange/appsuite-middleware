@@ -49,9 +49,13 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.config.actions.GetRequest;
 import com.openexchange.ajax.config.actions.Tree;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -68,43 +72,38 @@ import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.test.CalendarTestManager;
 
 /**
- * {@link Bug23181Test} 
- * 
- * Unable to import external appointment update with newly added participant from Thunderbird/Lightning 
- * 
+ * {@link Bug23181Test}
+ *
+ * Unable to import external appointment update with newly added participant from Thunderbird/Lightning
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug23181Test extends CalDAVTest {
-    
+
     private CalendarTestManager manager2;
-    
-	public Bug23181Test(String name) {
-		super(name);
-	}
-	
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+
+    @Before
+    public void setUp() throws Exception {
         manager2 = new CalendarTestManager(new AJAXClient(User.User2));
         manager2.setFailOnError(true);
     }
-    
-    @Override
-    protected void tearDown() throws Exception {
+
+    @After
+    public void tearDown() throws Exception {
         if (null != this.manager2) {
             this.manager2.cleanUp();
             if (null != manager2.getClient()) {
                 manager2.getClient().logout();
             }
         }
-        super.tearDown();
     }
 
+    @Test
     public void testImportAppointment() throws Exception {
         /*
          * fetch sync token for later synchronization
          */
-        SyncToken syncToken = new SyncToken(super.fetchSyncToken());        
+        SyncToken syncToken = new SyncToken(super.fetchSyncToken());
         /*
          * Create appointment in user B's calendar on server
          */
@@ -127,7 +126,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * confirm updated appointment as user A in client
          */
-        String iCal = 
+        String iCal =
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
@@ -214,7 +213,8 @@ public class Bug23181Test extends CalDAVTest {
         assertNotNull("previous attendee not found", attendeeB);
         assertEquals("partstat status wrong", "ACCEPTED", attendeeA.getAttribute("PARTSTAT"));
     }
-    
+
+    @Test
     public void testDontImportOutSequencedAppointment() throws Exception {
         /*
          * Create appointment in user B's calendar on server
@@ -238,7 +238,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * try to confirm updated appointment as user A in client
          */
-        String iCal = 
+        String iCal =
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
@@ -265,7 +265,8 @@ public class Bug23181Test extends CalDAVTest {
         ;
         assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
     }
-    
+
+    @Test
     public void testDontImportOtherOrganizersAppointment() throws Exception {
         /*
          * Create appointment in user B's calendar on server
@@ -289,7 +290,7 @@ public class Bug23181Test extends CalDAVTest {
         /*
          * try to confirm updated appointment as user A in client
          */
-        String iCal = 
+        String iCal =
             "BEGIN:VCALENDAR" + "\r\n" +
             "METHOD:REQUEST" + "\r\n" +
             "PRODID:Microsoft Exchange Server 2007" + "\r\n" +
@@ -316,5 +317,5 @@ public class Bug23181Test extends CalDAVTest {
         ;
         assertEquals("response code wrong", StatusCodes.SC_CONFLICT, super.putICal(uid, iCal));
     }
-    
+
 }

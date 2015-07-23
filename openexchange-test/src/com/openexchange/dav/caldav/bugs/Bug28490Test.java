@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
 import com.openexchange.groupware.calendar.TimeTools;
@@ -64,10 +66,7 @@ import com.openexchange.groupware.container.Appointment;
  */
 public class Bug28490Test extends CalDAVTest {
 
-	public Bug28490Test(String name) {
-		super(name);
-	}
-
+	@Test
 	public void testTimeZoneCET() throws Exception {
 		/*
 		 * create appointment series on server

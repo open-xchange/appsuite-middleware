@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -56,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -66,21 +68,18 @@ import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
 
 /**
- * {@link Bug22395Test} - Change exceptions created in iCal client appear one day off 
- * 
+ * {@link Bug22395Test} - Change exceptions created in iCal client appear one day off
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class Bug22395Test extends CalDAVTest {
 
-	public Bug22395Test(String name) {
-		super(name);
-	}	
-	
+	@Test
 	public void testDateOfChangeExceptions() throws Exception {
 		/*
 		 * fetch sync token for later synchronization
 		 */
-		SyncToken syncToken = new SyncToken(super.fetchSyncToken());		
+		SyncToken syncToken = new SyncToken(super.fetchSyncToken());
 		/*
 		 * create appointment series on server
 		 */
@@ -141,7 +140,7 @@ public class Bug22395Test extends CalDAVTest {
             assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         }
         /*
-         * verify exceptions on server        
+         * verify exceptions on server
          */
         List<Appointment> updates = super.getManager().updates(parse(getDefaultFolderID()), clientLastModified, false);
         assertNotNull("no updates found on server", updates);
@@ -197,7 +196,7 @@ public class Bug22395Test extends CalDAVTest {
                     assertEquals("DTEND wrong", appointment.getEndDate(), vEvent.getDTEnd());
                 }
             }
-            
+
         }
 	}
 

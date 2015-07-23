@@ -69,13 +69,19 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.property.DavPropertySet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.Headers;
+import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.caldav.methods.MkCalendarMethod;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
@@ -88,11 +94,15 @@ import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.PermissionTools;
 import com.openexchange.test.TaskTestManager;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
 /**
  * {@link CalDAVTest} - Common base class for CalDAV tests
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Parameterized.class)
 public abstract class CalDAVTest extends WebDAVTest {
 
     protected static final int TIMEOUT = 10000;
@@ -102,21 +112,21 @@ public abstract class CalDAVTest extends WebDAVTest {
     private int folderId;
     private final List<FolderObject> createdFolders = new ArrayList<FolderObject>();
 
-    public CalDAVTest(final String name) {
-        super(name);
+    @Parameters(name = "AuthMethod={0}")
+    public static Iterable<Object[]> params() {
+        return availableAuthMethods();
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUpFixtures() throws Exception {
         this.folderId = this.getAJAXClient().getValues().getPrivateAppointmentFolder();
         this.testManager = new CalendarTestManager(this.getAJAXClient());
         this.testManager.setFailOnError(true);
         this.taskTestManager = new TaskTestManager(getAJAXClient());
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void cleanUp() throws Exception {
         if (null != createdFolders && 0 < createdFolders.size()) {
             client.execute(new DeleteRequest(EnumAPI.OX_NEW, createdFolders.toArray(new FolderObject[0])));
         }
@@ -126,7 +136,6 @@ public abstract class CalDAVTest extends WebDAVTest {
         if (null != taskTestManager) {
             taskTestManager.cleanUp();
         }
-        super.tearDown();
     }
 
     /**
@@ -257,7 +266,7 @@ public abstract class CalDAVTest extends WebDAVTest {
         try {
             String targetHref = "/caldav/" + targetResourceName + '/';
             mkCalendar = new MkCalendarMethod(getBaseUri() + targetHref, setProperties);
-            assertEquals("response code wrong", StatusCodes.SC_CREATED, getWebDAVClient().executeMethod(mkCalendar));
+            Assert.assertEquals("response code wrong", StatusCodes.SC_CREATED, getWebDAVClient().executeMethod(mkCalendar));
         } finally {
             release(mkCalendar);
         }
@@ -273,7 +282,7 @@ public abstract class CalDAVTest extends WebDAVTest {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
             get = new GetMethod(getBaseUri() + href);
             get.addRequestHeader(Headers.IF_NONE_MATCH, null != ifNoneMatchEtag ? ifNoneMatchEtag : "*");
-            assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
+            Assert.assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
             byte[] responseBody = get.getResponseBody();
             assertNotNull("got no response body", responseBody);
             return new ICalResource(new String(responseBody, Charsets.UTF_8), href, get.getResponseHeader("ETag").getValue());
@@ -486,14 +495,14 @@ public abstract class CalDAVTest extends WebDAVTest {
         return stringBuilder.toString();
     }
 
-    public static void assertEquals(Appointment appointment, Date expectedStart, Date expectedEnd, String expectedUid,
+    public static void assertAppointmentEquals(Appointment appointment, Date expectedStart, Date expectedEnd, String expectedUid,
         String expectedTitle, String expectedLocation) {
         assertNotNull("appointment is null", appointment);
-        assertEquals("start date wrong", expectedStart, appointment.getStartDate());
-        assertEquals("end date wrong", expectedEnd, appointment.getEndDate());
-        assertEquals("uid wrong", expectedUid, appointment.getUid());
-        assertEquals("title wrong", expectedTitle, appointment.getTitle());
-        assertEquals("location wrong", expectedLocation, appointment.getLocation());
+        Assert.assertEquals("start date wrong", expectedStart, appointment.getStartDate());
+        Assert.assertEquals("end date wrong", expectedEnd, appointment.getEndDate());
+        Assert.assertEquals("uid wrong", expectedUid, appointment.getUid());
+        Assert.assertEquals("title wrong", expectedTitle, appointment.getTitle());
+        Assert.assertEquals("location wrong", expectedLocation, appointment.getLocation());
     }
 
     public static ICalResource assertContains(String uid, Collection<ICalResource> iCalResources) {

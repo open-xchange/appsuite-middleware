@@ -74,15 +74,20 @@ import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.apache.jackrabbit.webdav.version.report.ReportInfo;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.GetResponse;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.configuration.ConfigurationException;
 import com.openexchange.dav.Headers;
+import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
-import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.carddav.reports.AddressbookMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
 import com.openexchange.exception.OXException;
@@ -91,11 +96,14 @@ import com.openexchange.groupware.container.DistributionListEntryObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.test.ContactTestManager;
 
+import static org.junit.Assert.*;
+
 /**
  * {@link CardDAVTest} - Common base class for CardDAV tests
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
+@RunWith(Parameterized.class)
 public abstract class CardDAVTest extends WebDAVTest {
 
 	protected static final int TIMEOUT = 10000;
@@ -104,13 +112,17 @@ public abstract class CardDAVTest extends WebDAVTest {
 	private int folderId;
 	private VCardEngine vCardEngine;
 
-	public CardDAVTest(final String name) {
-		super(name);
+	public CardDAVTest() {
+		super();
 	}
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Parameters(name = "AuthMethod={0}")
+    public static Iterable<Object[]> params() {
+        return availableAuthMethods();
+    }
+
+    @Before
+    public void setUpFixtures() throws Exception {
         /*
          * init
          */
@@ -120,12 +132,11 @@ public abstract class CardDAVTest extends WebDAVTest {
         this.vCardEngine = new VCardEngine(CompatibilityMode.MAC_ADDRESS_BOOK);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void closeTestManager() throws Exception {
     	if (null != this.getManager()) {
     		this.getManager().cleanUp();
     	}
-        super.tearDown();
     }
 
     @Override

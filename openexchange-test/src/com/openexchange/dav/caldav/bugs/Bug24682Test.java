@@ -49,11 +49,15 @@
 
 package com.openexchange.dav.caldav.bugs;
 
+import static org.junit.Assert.*;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import com.openexchange.ajax.folder.FolderTools;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.framework.AJAXClient;
@@ -81,13 +85,8 @@ public class Bug24682Test extends CalDAVTest {
 
     CalendarTestManager userA, userB, userC, userD;
 
-	public Bug24682Test(String name) {
-		super(name);
-	}
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         /*
          * setup managers for other users
          */
@@ -113,8 +112,8 @@ public class Bug24682Test extends CalDAVTest {
             OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.DELETE_ALL_OBJECTS);
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         /*
          * cleanup
          */
@@ -148,9 +147,9 @@ public class Bug24682Test extends CalDAVTest {
                 }
             }
         }
-        super.tearDown();
     }
 
+    @Test
     public void testGetChangeExceptionsInSharedFolder() throws Exception {
         /*
          * fetch sync token for later synchronization
