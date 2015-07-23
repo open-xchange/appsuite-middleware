@@ -100,7 +100,10 @@ public class ExtendedFolderPermission extends ExtendedPermission {
             addGroupInfo(requestData, jsonObject, resolver.getGroup(permission.getEntity()));
         } else {
             User user = resolver.getUser(permission.getEntity());
-            if (user.isGuest()) {
+            if (null == user) {
+                org.slf4j.LoggerFactory.getLogger(ExtendedObjectPermissionsField.class).warn(
+                    "Can't resolve user permission entity {} for folder {}", permission.getEntity(), folder);
+            } else if (user.isGuest()) {
                 GuestInfo guest = resolver.getGuest(user.getId());
                 jsonObject.put("type", guest.getRecipientType().toString().toLowerCase());
                 if (RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
