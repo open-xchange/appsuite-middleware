@@ -66,32 +66,26 @@ import com.openexchange.ajax.session.LoginTools;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link TokenLoginRequest}
+ * {@link TokenLoginJSONRequest}
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since 7.8.0
  */
-public final class TokenLoginRequest extends AbstractRequest<TokenLoginResponse> {
+public final class TokenLoginJSONRequest extends AbstractRequest<TokenLoginJSONResponse> {
 
-    private final String clientToken;
-
-    public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken) {
-        this(login, password, authId, client, version, autologin, clientToken, false);
+    public TokenLoginJSONRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken, boolean json) {
+        super(createParameter(login, password, authId, client, version, autologin, clientToken, json, false));
     }
 
-    public TokenLoginRequest(String login, String password, String authId, String client, String version, boolean autologin, String clientToken, boolean passwordInURL) {
-        super(createParameter(login, password, authId, client, version, autologin, clientToken, passwordInURL));
-        this.clientToken = clientToken;
+    public TokenLoginJSONRequest(String login, String password, boolean jsonResponse) {
+        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()), jsonResponse);
     }
 
-    public TokenLoginRequest(String login, String password) {
-        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()));
+    public TokenLoginJSONRequest(String login, String password, boolean jsonResponse, boolean passwordInURL) {
+        super(createParameter(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()), jsonResponse, passwordInURL));
     }
 
-    public TokenLoginRequest(String login, String password, boolean passwordInURL) {
-        this(login, password, LoginTools.generateAuthId(), AJAXClient.class.getName(), AJAXClient.VERSION, true, UUIDs.getUnformattedString(UUID.randomUUID()), passwordInURL);
-    }
-
-    private static Parameter[] createParameter(String login, String password, String authId, String client, String version, boolean autologin, String clientToken, boolean passwordInURL) {
+    private static Parameter[] createParameter(String login, String password, String authId, String client, String version, boolean autologin, String clientToken, boolean json, boolean passwordInURL) {
         List<Parameter> retval = new ArrayList<Parameter>();
         if (passwordInURL) {
             retval.add(new URLParameter(PASSWORD_PARAM, password));
@@ -104,11 +98,14 @@ public final class TokenLoginRequest extends AbstractRequest<TokenLoginResponse>
         retval.add(new FieldParameter(VERSION_PARAM, version));
         retval.add(new FieldParameter(AUTOLOGIN_PARAM, Boolean.toString(autologin)));
         retval.add(new FieldParameter(CLIENT_TOKEN, clientToken));
+        if (json) {
+            retval.add(new URLParameter("jsonResponse", true));
+        }
         return retval.toArray(new Parameter[retval.size()]);
     }
 
     @Override
-    public TokenLoginParser getParser() {
-        return new TokenLoginParser(clientToken);
+    public TokenLoginJSONParser getParser() {
+        return new TokenLoginJSONParser(false);
     }
 }

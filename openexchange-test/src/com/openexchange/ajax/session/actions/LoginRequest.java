@@ -190,6 +190,18 @@ public class LoginRequest extends AbstractRequest<LoginResponse> {
         }, failOnError);
     }
 
+    public LoginRequest(String login, String password, String authId, String client, String version, boolean failOnError, boolean passwordInURL) {
+        this(new Parameter[] {
+            new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),
+            new URLParameter(LoginFields.AUTHID_PARAM, authId),
+            new URLParameter(LoginFields.CLIENT_PARAM, client),
+            new URLParameter(LoginFields.VERSION_PARAM, version),
+            new URLParameter(LoginFields.PASSWORD_PARAM, password),
+            new FieldParameter(PARAM_NAME, login),
+            new FieldParameter(PARAM_PASSWORD, password)
+        }, failOnError);
+    }
+
     public LoginRequest(String login, String password, String authId, String client, String version, String language, boolean failOnError) {
         this(new Parameter[] {
             new URLParameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_LOGIN),

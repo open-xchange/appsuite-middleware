@@ -60,6 +60,7 @@ import com.openexchange.ajax.session.actions.TokenLoginV2Request;
 import com.openexchange.ajax.session.actions.TokenLoginV2Response;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.tokenlogin.TokenLoginExceptionCodes;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
  * {@link TokenLoginV2Test}
@@ -180,9 +181,17 @@ public class TokenLoginV2Test extends AbstractAJAXSession {
         assertEquals("Redirect urls does not match.", REDIRECT, loginResponse.getRedirectUrl());
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
+    public void testLoginWithPasswordInURI_doNotAccept() throws Exception {
+        AcquireTokenRequest request = new AcquireTokenRequest();
+        AcquireTokenResponse response = getClient().execute(request);
+        String token = response.getToken();
+
+        LoginRequest login = new LoginRequest(token, SECRET_1, generateAuthId(), TokenLoginV2Test.class.getName(), "7.4.0", false, true);
+        LoginResponse loginResponse = client.execute(login);
+
+        assertTrue("Error expected.", loginResponse.hasError());
+        assertEquals("Wrong error.", AjaxExceptionCodes.NOT_ALLOWED_URI_PARAM.getNumber(), loginResponse.getException().getCode());
+        assertTrue("Wrong param", loginResponse.getErrorMessage().contains("password"));
     }
 
 }
