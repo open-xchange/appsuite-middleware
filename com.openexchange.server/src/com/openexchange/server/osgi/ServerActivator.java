@@ -203,6 +203,8 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
+import com.openexchange.oauth.provider.OAuthResourceService;
+import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -578,6 +580,12 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track UnifiedViewService
          */
         track(UnifiedViewService.class, new RegistryCustomizer<UnifiedViewService>(context, UnifiedViewService.class));
+
+        /*
+         * Track OAuth provider services
+         */
+        track(OAuthResourceService.class, new RegistryCustomizer<OAuthResourceService>(context, OAuthResourceService.class));
+        track(OAuthSessionProvider.class, new RegistryCustomizer<OAuthSessionProvider>(context, OAuthSessionProvider.class));
 
         /*
          * User Alias Service

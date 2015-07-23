@@ -60,8 +60,6 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -214,16 +212,6 @@ public class CalDAV extends OXServlet {
     @Override
     protected boolean allowOAuthAccess() {
         return true;
-    }
-
-    @Override
-    protected OAuthResourceService getOAuthResourceService() {
-        return CalDAVServiceLookup.getService(OAuthResourceService.class);
-    }
-
-    @Override
-    protected OAuthSessionProvider getOAuthSessionProvider() {
-        return CalDAVServiceLookup.getService(OAuthSessionProvider.class);
     }
 
 }

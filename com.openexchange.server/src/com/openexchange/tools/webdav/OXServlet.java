@@ -255,27 +255,18 @@ public abstract class OXServlet extends WebDavServlet {
      * token. OAuth is only taken into account, if {@link #useHttpAuth()} returns <code>true</code>. If OAuth is allowed you are responsible
      * on your own to check the granted scope on every request! After successful OAuth authentication you'll find the according {@link OAuthGrant}
      * instances as attribute on the servlet request under the {@link OAuthConstants#PARAM_OAUTH_GRANT} key.
-     * <br>
-     * <strong>Note:</strong> You must also implement {@link #getOAuthResourceService()} and {@link #getOAuthSessionProvider()} if <code>true</code> is returned!
      */
     protected boolean allowOAuthAccess() {
         return false;
     }
 
-    /**
-     * Gets the {@link OAuthResourceService} if available. Must be overridden by servlets that allow OAuth access.
-     * @return The service or <code>null</code> if unavailable.
-     */
-    protected OAuthResourceService getOAuthResourceService() {
-        return null;
+    private OAuthResourceService getOAuthResourceService() {
+        return ServerServiceRegistry.getInstance().getService(OAuthResourceService.class);
     }
 
-    /**
-     * Gets the {@link OAuthSessionProvider} if available. Must be overridden by servlets that allow OAuth access.
-     * @return The service or <code>null</code> if unavailable.
-     */
-    protected OAuthSessionProvider getOAuthSessionProvider() {
-        return null;
+
+    private OAuthSessionProvider getOAuthSessionProvider() {
+        return ServerServiceRegistry.getInstance().getService(OAuthSessionProvider.class);
     }
 
     /**

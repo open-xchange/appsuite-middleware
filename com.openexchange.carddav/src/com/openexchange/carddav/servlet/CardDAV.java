@@ -62,8 +62,6 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -243,16 +241,6 @@ public class CardDAV extends OXServlet {
         }
 
         return false;
-    }
-
-    @Override
-    protected OAuthResourceService getOAuthResourceService() {
-        return services.getService(OAuthResourceService.class);
-    }
-
-    @Override
-    protected OAuthSessionProvider getOAuthSessionProvider() {
-        return services.getService(OAuthSessionProvider.class);
     }
 
 }

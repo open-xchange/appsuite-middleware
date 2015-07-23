@@ -79,8 +79,6 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -217,9 +215,6 @@ public class CaldavActivator extends HousekeepingActivator {
                     return capabilities.contains(Permission.CALDAV.getCapabilityName());
                 }
             });
-
-            trackService(OAuthResourceService.class);
-            trackService(OAuthSessionProvider.class);
 
             openTrackers();
         } catch (final Exception e) {
