@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-07-16 12:41+0100\n"
+"PO-Revision-Date: 2015-07-23 13:19+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -65,6 +65,58 @@ msgstr "Kein Ticket im Principal %1$s gefunden, das erneuert werden muss. "
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:81
 msgid "No Kerberos delegation ticket found in session."
 msgstr "Kein Kerberos-Weiterleitungsticket in der Sitzung gefunden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:105
+msgid "/servlet/dav/caldav"
+msgstr "/servlet/dav/caldav"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:107
+msgid "/servlet/dav/dev/null"
+msgstr "/servlet/dav/dev/null"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:147
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:170
+msgid "caldav"
+msgstr "CalDAV"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:170
+msgid "modules"
+msgstr "Module"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:170
+msgid "module"
+msgstr "Modul"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:183
+msgid "modules/caldav/active"
+msgstr "modules/caldav/active"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:188
+msgid "io.ox/caldav//active"
+msgstr "io.ox/caldav//active"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:193
+msgid "modules/caldav/active > io.ox/caldav//active"
+msgstr "modules/caldav/active > io.ox/caldav//active"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:200
+msgid "modules/caldav/url"
+msgstr "modules/caldav/url"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:205
+msgid "io.ox/caldav//url"
+msgstr "io.ox/caldav//url"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:210
+msgid "modules/caldav/url > io.ox/caldav//url"
+msgstr "modules/caldav/url > io.ox/caldav//url"
+
+#. Application 'xyz' requires following permissions:
+#. - Synchronize your calendars and appointments.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.caldav/src/com/openexchange/caldav/osgi/CaldavActivator.java:252
+msgid "Synchronize your calendars and appointments."
+msgstr "Synchronisieren Sie Ihre Kalender und Termine."
 
 #. final Dictionary<String, Integer> props = new Hashtable<String, Integer>(1, 1);
 #. props.put(TargetService.MODULE_PROPERTY, I(Types.APPOINTMENT));
@@ -891,6 +943,33 @@ msgid ""
 msgstr ""
 "Sie erhalten diese E-Mail, da der Termin die Ressource %1$s enthält, die Sie "
 "verwalten."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:90
+#, fuzzy
+msgid "starting bundle: \"com.openexchange.carddav\""
+msgstr "Bundle starten: \"com.openexchange.carddav\""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:139
+msgid "/servlet/dav/carddav"
+msgstr "/servlet/dav/carddav"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:103
+#, fuzzy
+msgid "carddav"
+msgstr "CardDAV"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:125
+#, fuzzy
+msgid "stopping bundle: \"com.openexchange.carddav\""
+msgstr "Bundle anhalten: \"com.openexchange.carddav\""
+
+#. Application 'xyz' requires following permissions:
+#. - Synchronize your address books and contacts.
+#. - ...
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.carddav/src/com/openexchange/carddav/osgi/CarddavActivator.java:149
+msgid "Synchronize your address books and contacts."
+msgstr "Synchronisieren Sie Ihre Adressbücher und Kontakte."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
 msgid "LDAP contacts cannot be deleted."
@@ -3397,6 +3476,12 @@ msgid ""
 msgstr ""
 "Bitte prüfen Sie Ihre Mailfilter-Regeln. Diese scheinen ungültig zu sein. "
 "Antwort von Server: \"%1$s\" "
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:68
+#, fuzzy
+msgid "Managing mail filter rules is not available for your account."
+msgstr ""
+"Das Verwalten von Mailfilterregeln ist für Ihren Account nicht vorhanden."
 
 #. Maximum number of messages already stored for client %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.message.timeline/src/com/openexchange/message/timeline/MessageTimelineExceptionMessages.java:63
@@ -8900,6 +8985,13 @@ msgstr ""
 msgid "Invalid JSON data received from client"
 msgstr "Ungültige JSON-Daten vom Client erhalten"
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/servlet/AjaxExceptionMessages.java:71
+#, fuzzy
+msgid "Client sent not allowed request parameter \"%1$s\" within the URI."
+msgstr ""
+"Der Client hat den nicht zulässigen Anfrageparameter \"%1$s\" in der URI "
+"gesendet."
+
 #. *
 #. * The provided cookie is invalid. Please login.
 #.
@@ -9145,12 +9237,19 @@ msgstr "Objekt anzeigen"
 msgid "View items"
 msgstr "Objekte anzeigen"
 
-#. expires
-#. * The link will expire on $preformatted_date
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:173
+#. * The link will expire on 01/01/16 *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:171
 #, fuzzy
 msgid "The link will expire on %1$s"
 msgstr "Der Link läuft ab am %1$s"
+
+#. * The link is password protected. To see it you must use the following password: kac7Nede *
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:174
+msgid ""
+"This link is password protected. You need the following password to open it:"
+msgstr ""
+"Dieser Link ist passwortgeschützt. Sie benötigen das folgende Passwort, um "
+"ihn zu öffnen:"
 
 #.
 #. * Password reset confirm mails
@@ -9158,16 +9257,16 @@ msgstr "Der Link läuft ab am %1$s"
 #. *
 #. * OX App Suite - Forgot your password?
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:182
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:183
 msgid "%1$s - Forgot your password?"
 msgstr "%1$s - Passwort vergessen?"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:184
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:185
 msgid "Hello,"
 msgstr "Hallo,"
 
 #. * we got informed that you forgot your password. You can set a new password here:
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:187
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:188
 msgid ""
 "we got informed that you forgot your password. You can set a new password "
 "here:"
@@ -9176,12 +9275,12 @@ msgstr ""
 "ein neues Passwort festlegen:"
 
 #. * Set password
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:190
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:191
 msgid "Set password"
 msgstr "Passwort festlegen"
 
 #. * If you didn't request this, please ignore this email. Your password won't change until you access the button above and set a new one.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:194
 msgid ""
 "If you didn't request this, please ignore this email. Your password won't "
 "change until you access the button above and set a new one."
@@ -9191,13 +9290,13 @@ msgstr ""
 "neues einrichten."
 
 #. * This is an automated message, please do not reply.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:196
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:197
 #, fuzzy
 msgid "This is an automated message, please do not reply."
 msgstr "Dies ist eine automatisierte Nachricht. Bitte nicht antworten."
 
 #. An error occurred for user 'unknown'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:199
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share.notification/src/com/openexchange/share/notification/impl/NotificationStrings.java:200
 msgid "unknown"
 msgstr "unbekannt"
 
