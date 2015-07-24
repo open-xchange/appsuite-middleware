@@ -5,7 +5,7 @@
     </description>
 
     <property name="tmp_dir" value="commons_tmp" />
-    <property name="logback.jar.url" value="https://artifactory.open-xchange.com/artifactory/simple/libs-release/com/openexchange/java-commons/logback-extensions/1.0.0/logback-extensions-1.0.0.jar" />
+    <property name="logback.jar.url" value="https://artifactory.open-xchange.com/artifactory/simple/libs-release/com/openexchange/java-commons/logback-extensions/1.0.6/logback-extensions-1.0.6.jar" />
 
     <target name="download_check_and_add_jars">
         <antcall target="download_check_and_add_jar">
@@ -58,8 +58,21 @@
         <delete file="${tmp_dir}/${file}.md5" />
     </target>
 
-    <target name="add_to_jars">
+    <target name="add_to_jars" depends="remove_other_versions">
         <move file="${tmp_dir}/${file}" todir="jars" />
+    </target>
+
+    <target name="remove_other_versions">
+        <basename property="jar.filename" file="${jar.url}" />
+        <script language="javascript">
+            var before = new String(project.getProperty("jar.filename"));
+            project.setProperty("prefix", before.replace(/\d\.\d\.\d\.jar$/g,"*"));
+        </script>
+        <delete>
+            <fileset dir="jars">
+                <include name="**/${prefix}" />
+            </fileset>
+        </delete>
     </target>
 
 </project>
