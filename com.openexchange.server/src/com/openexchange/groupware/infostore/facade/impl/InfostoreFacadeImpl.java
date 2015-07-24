@@ -281,7 +281,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * add further metadata and return
          */
-        document.setShareable(permission.canWriteObject());
+        document.setShareable(permission.canShareObject());
         return numberOfVersionsLoader.add(lockedUntilLoader.add(document, context, null), context, null);
     }
 
@@ -366,7 +366,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         if (false == permission.canReadObjectInFolder()) {
             metadata.setFolderId(getSharedFilesFolderID(session));
         }
-        metadata.setShareable(permission.canWriteObject());
+        metadata.setShareable(permission.canShareObject());
         metadata = numberOfVersionsLoader.add(lockedUntilLoader.add(metadata, context, null), context, null);
         /*
          * check client E-Tag if supplied
@@ -1737,11 +1737,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             timedResult = numberOfVersionsLoader.add(timedResult, context, objectIDs);
         }
         if (addShareable) {
+            final boolean hasSharedFolderAccess = session.getUserConfiguration().hasFullSharedFolderAccess();
             timedResult = new CustomizableTimedResult<DocumentMetadata>(timedResult, new Customizer<DocumentMetadata>() {
 
                 @Override
                 public DocumentMetadata customize(DocumentMetadata document) throws OXException {
-                    if (sharedFilesFolderID == folderId) {
+                    if (false == hasSharedFolderAccess) {
+                        /*
+                         * no permissions to share
+                         */
+                        document.setShareable(false);
+                    } else if (sharedFilesFolderID == folderId) {
                         /*
                          * set "shareable" flag based on object permissions
                          */
@@ -1806,19 +1812,19 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         Context context = session.getContext();
         final User user = session.getUser();
         final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, context, user, session.getUserPermissionBits());
-        if (!infoPerm.canReadObject()) {
+        if (false == infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
         Metadata[] cols = addLastModifiedIfNeeded(columns);
-        final InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
+        InfostoreIterator iter = InfostoreIterator.versions(id, cols, sort, order, this, context);
         iter.setCustomizer(new DocumentCustomizer() {
+
             @Override
             public DocumentMetadata handle(DocumentMetadata document) {
-                if (!infoPerm.canReadObjectInFolder()) {
+                if (false == infoPerm.canReadObjectInFolder()) {
                     document.setFolderId(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
                 }
-                document.setShareable(infoPerm.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS ||
-                    infoPerm.getWritePermission() >= OCLPermission.WRITE_OWN_OBJECTS && document.getCreatedBy() == user.getId());
+                document.setShareable(infoPerm.canShareObject());
                 return document;
             }
         });
@@ -1896,7 +1902,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                          * adjust parent folder id to match requested identifier
                          */
                         document.setFolderId(getSharedFilesFolderID(session));
-                        document.setShareable(infostorePermission.canWriteObject());
+                        document.setShareable(infostorePermission.canShareObject());
                     }
                 } else {
                     /*
@@ -1906,8 +1912,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     if (getSharedFilesFolderID(session) == requestedFolderID.intValue()) {
                         document.setFolderId(requestedFolderID.longValue());
                     }
-                    document.setShareable(folderPermission.getWritePermission() >= OCLPermission.WRITE_ALL_OBJECTS ||
-                        folderPermission.getWritePermission() >= OCLPermission.WRITE_OWN_OBJECTS && document.getCreatedBy() == user.getId());
+                    document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == user.getId());
                 }
                 return document;
             }
@@ -2242,13 +2247,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             documents = numberOfVersionsLoader.add(documents, session.getContext(), objectIDs);
         }
         if (addShareable || containsSharedFilesResults) {
+            boolean hasSharedFolderAccess = session.getUserConfiguration().hasFullSharedFolderAccess();
             for (DocumentMetadata document : documents) {
                 int physicalFolderID = (int) document.getFolderId();
                 if (null == permissionsByFolderID) {
                     /*
                      * assume document shareable & readable at physical location
                      */
-                    document.setShareable(true);
+                    document.setShareable(hasSharedFolderAccess);
                     continue;
                 }
                 EffectiveInfostoreFolderPermission folderPermission = permissionsByFolderID.get(I(physicalFolderID));
@@ -2256,7 +2262,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                     /*
                      * document is readable at physical location
                      */
-                    document.setShareable(folderPermission.canWriteAllObjects() || folderPermission.canWriteOwnObjects() && document.getCreatedBy() == session.getUserId());
+                    document.setShareable(folderPermission.canShareAllObjects() || folderPermission.canShareOwnObjects() && document.getCreatedBy() == session.getUserId());
                 } else {
                     /*
                      * set 'shareable' flag and parent folder based on object permissions
@@ -2266,7 +2272,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                         ObjectPermission matchingPermission = EffectiveObjectPermissions.find(session.getUser(), objectPermissions);
                         if (null != matchingPermission && matchingPermission.canRead()) {
                             document.setFolderId(sharedFilesFolderID);
-                            document.setShareable(matchingPermission.canWrite());
+                            document.setShareable(hasSharedFolderAccess && matchingPermission.canWrite());
                         } else {
                             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                         }

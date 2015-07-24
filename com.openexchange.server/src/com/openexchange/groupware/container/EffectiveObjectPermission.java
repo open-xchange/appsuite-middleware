@@ -183,6 +183,15 @@ public class EffectiveObjectPermission {
         return permission;
     }
 
+    /**
+     * Whether the user may share the affected object.
+     *
+     * @return If so, <code>true</code> is returned Otherwise <code>false</code>.
+     */
+    public boolean canShare() {
+        return canWrite() && permissionBits.hasFullSharedFolderAccess();
+    }
+
     private boolean hasModulePermission() {
         return permissionBits.hasModuleAccess(module);
     }

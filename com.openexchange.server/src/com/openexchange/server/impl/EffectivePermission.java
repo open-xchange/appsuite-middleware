@@ -398,6 +398,26 @@ public class EffectivePermission extends OCLPermission {
         return (getDeletePermission() >= DELETE_ALL_OBJECTS);
     }
 
+    /**
+     * Gets a value indicating whether the user's permissions allow public folder access, i.e. the bit
+     * {@link UserPermissionBits#EDIT_PUBLIC_FOLDERS} is set or not.
+     *
+     * @return <code>true</code> if public folder access is available, <code>false</code>, otherwise
+     */
+    public boolean hasFullPublicFolderAccess() {
+        return permissionBits.hasFullPublicFolderAccess();
+    }
+
+    /**
+     * Gets a value indicating whether the user's permissions allow shared folder access, i.e. the bit
+     * {@link UserPermissionBits#READ_CREATE_SHARED_FOLDERS} is set or not.
+     *
+     * @return <code>true</code> if shared folder access is available, <code>false</code>, otherwise
+     */
+    public boolean hasFullSharedFolderAccess() {
+        return permissionBits.hasFullSharedFolderAccess();
+    }
+
     public OCLPermission getUnderlyingPermission() {
         if (underlyingPerm == null) {
             underlyingPerm = new OCLPermission();

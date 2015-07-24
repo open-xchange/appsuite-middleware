@@ -210,6 +210,24 @@ public class EffectiveInfostoreFolderPermission {
         return permission.canDeleteAllObjects();
     }
 
+    /**
+     * Gets a value indicating whether the permissions are sufficient to share "own" items in the folder or not.
+     *
+     * @return <code>true</code> if "own" items can be shared, <code>false</code>, otherwise
+     */
+    public boolean canShareOwnObjects() {
+        return permission.canWriteOwnObjects() && permission.hasFullSharedFolderAccess();
+    }
+
+    /**
+     * Gets a value indicating whether the permissions are sufficient to share all items in the folder or not.
+     *
+     * @return <code>true</code> if all items can be shared, <code>false</code>, otherwise
+     */
+    public boolean canShareAllObjects() {
+        return permission.canWriteAllObjects() && permission.hasFullSharedFolderAccess();
+    }
+
     public OCLPermission getUnderlyingPermission() {
         return permission.getUnderlyingPermission();
     }
