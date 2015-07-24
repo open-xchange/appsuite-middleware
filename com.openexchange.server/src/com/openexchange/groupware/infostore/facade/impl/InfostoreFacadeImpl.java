@@ -173,11 +173,6 @@ import com.openexchange.tx.UndoableAction;
  */
 public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, InfostoreSearchEngine {
 
-    private static final ValidationChain VALIDATION = new ValidationChain(
-        new InvalidCharactersValidator(),
-        new FilenamesMayNotContainSlashesValidator(),
-        new ObjectPermissionValidator()
-    );
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(InfostoreFacadeImpl.class);
     private static final InfostoreQueryCatalog QUERIES = InfostoreQueryCatalog.getInstance();
     private static final AtomicReference<QuotaFileStorageService> QFS_REF = new AtomicReference<QuotaFileStorageService>();
@@ -574,8 +569,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         setDefaults(document);
-
-        VALIDATION.validate(session, document);
+        getValidationChain().validate(session, document);
         CheckSizeSwitch.checkSizes(document, this, context);
 
         FilenameReserver filenameReserver = null;
@@ -813,7 +807,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        VALIDATION.validate(session, document);
+        getValidationChain().validate(session, document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
         SaveParameters saveParameters = new SaveParameters(context, session, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());
@@ -2475,4 +2469,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         return tuples;
     }
+
+    /**
+     * Gets an chain of validation checks to use before saving documents.
+     *
+     * @return The validation chain
+     */
+    private ValidationChain getValidationChain() {
+        return new ValidationChain(
+            new InvalidCharactersValidator(),
+            new FilenamesMayNotContainSlashesValidator(),
+            new ObjectPermissionValidator(this)
+        );
+    }
+
 }

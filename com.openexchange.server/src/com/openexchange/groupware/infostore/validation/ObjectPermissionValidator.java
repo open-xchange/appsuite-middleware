@@ -49,19 +49,24 @@
 
 package com.openexchange.groupware.infostore.validation;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.I2i;
+import static org.slf4j.LoggerFactory.getLogger;
+import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.List;
+import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.utils.Metadata;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
+import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
-import com.openexchange.userconf.UserConfigurationService;
 
 
 /**
@@ -70,6 +75,18 @@ import com.openexchange.userconf.UserConfigurationService;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ObjectPermissionValidator implements InfostoreValidator {
+
+    private final DBProvider dbProvider;
+
+    /**
+     * Initializes a new {@link ObjectPermissionValidator}.
+     *
+     * @param dbProvider
+     */
+    public ObjectPermissionValidator(DBProvider dbProvider) {
+        super();
+        this.dbProvider = dbProvider;
+    }
 
     @Override
     public String getName() {
@@ -91,47 +108,87 @@ public class ObjectPermissionValidator implements InfostoreValidator {
                 return validation;
             }
             /*
-             * check capabilities of each permission entity, too, as well as there existence
+             * check existence of each group permission entity
              */
-            UserConfigurationService userConfigurationService = ServerServiceRegistry.getServize(UserConfigurationService.class);
-            for (ObjectPermission permission : metadata.getObjectPermissions()) {
-                if (false == permission.isGroup()) {
+            int[] groupIDs = getGroupEntities(objectPermissions);
+            if (null != groupIDs) {
+                for (int groupID : groupIDs) {
                     try {
-                        UserConfiguration userConfig = userConfigurationService.getUserConfiguration(permission.getEntity(), session.getContext(), false);
-                        if (false == userConfig.hasFullSharedFolderAccess() || false == userConfig.hasInfostore()) {
-                            User user = ServerServiceRegistry.getServize(UserService.class).getUser(permission.getEntity(), session.getContext());
-                            String name = user.getDisplayName();
-                            validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "User " + name + " has no permission to see share items.");
-                            validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(name));
-                            return validation;
-                        }
-                    } catch (OXException e) {
-                        if ("USR-0010".equals(e.getErrorCode())) {
-                            // user not found
-                            validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, e.getDisplayMessage(session.getUser().getLocale()));
-                            validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(permission.getEntity()));
-                            return validation;
-                        }
-                        org.slf4j.LoggerFactory.getLogger(ObjectPermissionValidator.class).warn(
-                            "Error getting user configuration for permission entity {}", permission.getEntity(), e);
-                    }
-                } else {
-                    try {
-                        ServerServiceRegistry.getServize(GroupService.class).getGroup(session.getContext(), permission.getEntity());
+                        ServerServiceRegistry.getServize(GroupService.class).getGroup(session.getContext(), groupID);
                     } catch (OXException e) {
                         if ("GRP-0017".equals(e.getErrorCode())) {
                             // group not found
                             validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, e.getDisplayMessage(session.getUser().getLocale()));
-                            validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(permission.getEntity()));
+                            validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(groupID)));
                             return validation;
                         }
-                        org.slf4j.LoggerFactory.getLogger(ObjectPermissionValidator.class).warn(
-                            "Error getting group for permission entity {}", permission.getEntity(), e);
+                        getLogger(ObjectPermissionValidator.class).warn("Error getting group for permission entity {}", I(groupID), e);
+                    }
+                }
+            }
+            /*
+             * check capabilities of each user permission entity, too, as well as their existence
+             */
+            int[] userIDs = getUserEntities(objectPermissions);
+            if (null != userIDs) {
+                UserPermissionBitsStorage permissionBitsStorage = UserPermissionBitsStorage.getInstance();
+                Connection connection = null;
+                try {
+                    connection = dbProvider.getReadConnection(session.getContext());
+                    for (int userID : userIDs) {
+                        try {
+                            UserPermissionBits permissionBits = permissionBitsStorage.getUserPermissionBits(connection, userID, session.getContext());
+                            if (false == permissionBits.hasFullSharedFolderAccess() || false == permissionBits.hasInfostore()) {
+                                validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "User " + userID + " has no permission to see share items.");
+                                validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(userID)));
+                                return validation;
+                            }
+                        } catch (OXException e) {
+                            if (UserConfigurationCodes.NOT_FOUND.equals(e)) {
+                                // user not found
+                                validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, e.getDisplayMessage(session.getUser().getLocale()));
+                                validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(I(userID)));
+                                return validation;
+                            }
+                            getLogger(ObjectPermissionValidator.class).warn("Error getting user configuration for permission entity {}", I(userID), e);
+                        }
+                    }
+                } catch (OXException e) {
+                    getLogger(ObjectPermissionValidator.class).warn("Error getting user configuration for permission entities", e);
+                } finally {
+                    if (null != connection) {
+                        dbProvider.releaseReadConnection(session.getContext(), connection);
                     }
                 }
             }
         }
         return validation;
+    }
+
+    private static int[] getGroupEntities(List<ObjectPermission> objectPermissions) {
+        if (null != objectPermissions && 0 < objectPermissions.size()) {
+            List<Integer> groupIDs = new ArrayList<Integer>();
+            for (ObjectPermission objectPermission : objectPermissions) {
+                if (objectPermission.isGroup()) {
+                    groupIDs.add(I(objectPermission.getEntity()));
+                }
+            }
+            return 0 < groupIDs.size() ? I2i(groupIDs) : null;
+        }
+        return null;
+    }
+
+    private static int[] getUserEntities(List<ObjectPermission> objectPermissions) {
+        if (null != objectPermissions && 0 < objectPermissions.size()) {
+            List<Integer> userIDs = new ArrayList<Integer>();
+            for (ObjectPermission objectPermission : objectPermissions) {
+                if (false == objectPermission.isGroup()) {
+                    userIDs.add(I(objectPermission.getEntity()));
+                }
+            }
+            return 0 < userIDs.size() ? I2i(userIDs) : null;
+        }
+        return null;
     }
 
 }
