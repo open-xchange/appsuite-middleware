@@ -467,7 +467,8 @@ public class IMAPDefaultFolderChecker {
         TIntObjectMap<String> toSet = (MailAccount.DEFAULT_ID == accountId) ? null : new TIntObjectHashMap<String>(6);
         boolean added = false;
         for (int index = 0; index < names.length; index++) {
-            if (!checkedIndexes.containsKey(index)) {
+            String preCheckedFullName = checkedIndexes.get(index);
+            if (null == preCheckedFullName) {
                 String checkedFullName = null;
 
                 // Determine the checked full name
@@ -503,6 +504,9 @@ public class IMAPDefaultFolderChecker {
 
                 // Set the checked full name
                 setDefaultMailFolder(index, checkedFullName, cache);
+            } else {
+                // For safety reason set pre-checked full name
+                setDefaultMailFolder(index, preCheckedFullName, cache);
             }
         }
 
