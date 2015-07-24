@@ -280,7 +280,7 @@ public class IMAPDefaultFolderChecker {
                         IMAPFolder inboxFolder;
                         {
                             IMAPFolder tmp = (IMAPFolder) imapStore.getFolder(INBOX);
-                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, ignoreSubscription);
+                            ListLsubEntry entry = ListLsubCache.getCachedLISTEntry(INBOX, accountId, tmp, session, ignoreSubscription, true);
                             if (entry.exists()) {
                                 inboxFolder = tmp;
                             } else {
