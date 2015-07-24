@@ -51,6 +51,7 @@ package com.openexchange.imap.threader.references;
 
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.getFetchCommand;
 import static com.openexchange.imap.command.MailMessageFetchIMAPCommand.handleFetchRespone;
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,6 +68,7 @@ import com.openexchange.imap.command.MailMessageFetchIMAPCommand;
 import com.openexchange.imap.threadsort.MessageInfo;
 import com.openexchange.imap.threadsort.ThreadSortNode;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.dataobjects.IDMailMessage;
@@ -357,16 +359,19 @@ public final class Conversations {
                     if (ImapUtility.isInvalidMessageset(response)) {
                         return Collections.<Conversation> emptyList();
                     }
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new BadCommandException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new CommandFailedException(IMAPException.getFormattedMessage(
                         IMAPException.Code.PROTOCOL_ERROR,
                         command,
                         ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     protocol.handleResult(response);
                 }
                 return Collections.<MailMessage> emptyList();

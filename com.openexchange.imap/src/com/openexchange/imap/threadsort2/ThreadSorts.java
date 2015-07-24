@@ -49,6 +49,7 @@
 
 package com.openexchange.imap.threadsort2;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.java.Strings.isDigit;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPServerInfo;
 import com.openexchange.imap.command.MailMessageFillerIMAPCommand;
 import com.openexchange.imap.threader.references.Conversation;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -105,9 +107,9 @@ public final class ThreadSorts {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
+                final String command = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ").append(sortRange).toString();
                 final Response[] r;
                 {
-                    final String command = new StringBuilder(32).append(uid ? "UID THREAD" : "THREAD").append(" REFERENCES UTF-8 ").append(sortRange).toString();
                     final long start = System.currentTimeMillis();
                     r = p.command(command, null);
                     final long dur = System.currentTimeMillis() - start;
@@ -130,10 +132,13 @@ public final class ThreadSorts {
                     }
                     p.notifyResponseHandlers(r);
                 } else if (response.isBAD()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(response.toString()).toString());
                 } else if (response.isNO()) {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     throw new ProtocolException(new StringBuilder("IMAP server does not support THREAD command: ").append(response.toString()).toString());
                 } else {
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
                 }
                 return retval;

@@ -78,6 +78,7 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.mime.MimeMailException;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.ProtocolException;
@@ -797,8 +798,9 @@ final class ListLsubCollection implements Serializable {
      * @param protocol The IMAP protocol
      */
     protected void doDummyLsub(final IMAPProtocol protocol) {
-        final Response[] r = performCommand(protocol, "LSUB \"\" \"\"");
-        final Response response = r[r.length - 1];
+        String command = "LSUB \"\" \"\"";
+        Response[] r = performCommand(protocol, command);
+        Response response = r[r.length - 1];
         if (response.isOK()) {
             /*
              * Dispatch remaining untagged responses
@@ -810,6 +812,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Dispatch remaining untagged responses
              */
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         } catch (final ProtocolException e) {
@@ -843,7 +846,8 @@ final class ListLsubCollection implements Serializable {
      */
     protected void doListSpecialUse(final IMAPProtocol protocol, final boolean usingSpecualUse) throws ProtocolException {
         String command = "LIST";
-        Response[] r = performCommand(protocol, new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString());
+        String sCmd = new StringBuilder(command).append(usingSpecualUse ? " (SPECIAL-USE) " : " ").append("\"\" \"*\"").toString();
+        Response[] r = performCommand(protocol, sCmd);
         Response response = r[r.length - 1];
         if (response.isOK()) {
             for (int i = 0, len = r.length - 1; i < len; i++) {
@@ -875,6 +879,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Dispatch remaining untagged responses
              */
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -889,14 +894,13 @@ final class ListLsubCollection implements Serializable {
      */
     protected void doListLsubCommand(final IMAPProtocol protocol, final boolean lsub) throws ProtocolException {
         // Perform command
-        final String command = lsub ? "LSUB" : "LIST";
-        final Response[] r;
-        {
-            final String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
-            r = performCommand(protocol, sCmd);
-            LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
-        }
-        final Response response = r[r.length - 1];
+        String command = lsub ? "LSUB" : "LIST";
+        String sCmd = new StringBuilder(command).append(" \"\" \"*\"").toString();
+
+        Response[] r = performCommand(protocol, sCmd);
+        LOG.debug("{} cache filled with >>{}<< which returned {} response line(s).", (command), sCmd, Integer.valueOf(r.length));
+
+        Response response = r[r.length - 1];
         if (response.isOK()) {
             final ConcurrentMap<String, ListLsubEntryImpl> map = lsub ? lsubMap : listMap;
             final Map<String, List<ListLsubEntryImpl>> parentMap = new HashMap<String, List<ListLsubEntryImpl>>(4);
@@ -982,6 +986,7 @@ final class ListLsubCollection implements Serializable {
             protocol.notifyResponseHandlers(r);
         } else {
             // Dispatch remaining untagged responses
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, sCmd);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -1136,10 +1141,11 @@ final class ListLsubCollection implements Serializable {
         /*
          * Perform command: LIST "" ""
          */
-        final Response[] r = performCommand(protocol, "LIST \"\" \"\"");
-        final Response response = r[r.length - 1];
+        String command = "LIST \"\" \"\"";
+        Response[] r = performCommand(protocol, command);
+        Response response = r[r.length - 1];
         if (response.isOK()) {
-            final String cmd = "LIST";
+            String cmd = "LIST";
             for (int i = 0, len = r.length; i < len; i++) {
                 if (!(r[i] instanceof IMAPResponse)) {
                     continue;
@@ -1168,6 +1174,7 @@ final class ListLsubCollection implements Serializable {
             /*
              * Dispatch remaining untagged responses
              */
+            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, command);
             protocol.notifyResponseHandlers(r);
             protocol.handleResult(response);
         }
@@ -1217,6 +1224,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
+        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, new StringBuilder("LIST \"\" ").append(args).toString());
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
         return null; // Never reached if response is not OK
@@ -1259,6 +1267,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
+        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, new StringBuilder("LSUB \"\" ").append(args).toString());
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
         return false; // Never reached if response is not OK
@@ -1517,6 +1526,7 @@ final class ListLsubCollection implements Serializable {
         /*
          * Dispatch remaining untagged responses
          */
+        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, new StringBuilder(command).append(" \"\" ").append(args).toString());
         protocol.notifyResponseHandlers(r);
         protocol.handleResult(response);
         /*

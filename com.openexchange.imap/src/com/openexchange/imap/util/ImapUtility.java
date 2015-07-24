@@ -52,6 +52,7 @@ package com.openexchange.imap.util;
 import java.util.Locale;
 import javax.mail.MessagingException;
 import javax.mail.Store;
+import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 
@@ -174,4 +175,49 @@ public final class ImapUtility {
         sResponse = sResponse.toLowerCase(Locale.US);
         return sResponse.indexOf("invalid messageset") >= 0 || sResponse.indexOf("invalid uidset") >= 0;
     }
+
+    /**
+     * Prepares the IMAP command for logging purpose.
+     *
+     * @param imapCommand The IMAP command to prepare
+     * @param args The command arguments
+     * @return The prepared IMAP command
+     */
+    public static String prepareImapCommandForLogging(String imapCommand, Argument args) {
+        if (null == args) {
+            return prepareImapCommandForLogging(imapCommand);
+        }
+
+        return (null == imapCommand ? null : prepareImapCommandForLogging(new StringBuilder(imapCommand).append(' ').append(args).toString()));
+    }
+
+    /**
+     * Prepares the IMAP command for logging purpose.
+     *
+     * @param imapCommand The IMAP command to prepare
+     * @return The prepared IMAP command
+     */
+    public static String prepareImapCommandForLogging(String imapCommand) {
+        if (null == imapCommand) {
+            return imapCommand;
+        }
+        if (imapCommand.startsWith("FETCH ")) {
+            int openParenthesis = imapCommand.indexOf('(', 6);
+            if (openParenthesis <= 12) {
+                return imapCommand;
+            }
+            return new StringBuilder(imapCommand.length()).append("FETCH ... ").append(imapCommand.substring(openParenthesis)).toString();
+        } else if (imapCommand.startsWith("UID FETCH ")) {
+            int openParenthesis = imapCommand.indexOf('(', 6);
+            if (openParenthesis <= 16) {
+                return imapCommand;
+            }
+            return new StringBuilder(imapCommand.length()).append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).toString();
+        } else if (imapCommand.startsWith("UID EXPUNGE ")) {
+            return imapCommand.length() > 32 ? "UID EXPUNGE ..." : imapCommand;
+        } else {
+            return imapCommand;
+        }
+    }
+
 }

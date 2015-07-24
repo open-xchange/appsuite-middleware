@@ -49,11 +49,8 @@
 
 package com.openexchange.imap.sort;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.array.TLongArrayList;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
@@ -72,6 +69,7 @@ import com.openexchange.imap.search.IMAPSearch;
 import com.openexchange.imap.util.ImapUtility;
 import com.openexchange.imap.util.WrappingProtocolException;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailSortField;
 import com.openexchange.mail.OrderDirection;
@@ -81,12 +79,16 @@ import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
 import com.sun.mail.imap.protocol.SearchSequence;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link IMAPSort} - Perform the IMAP sort.
@@ -530,6 +532,7 @@ public final class IMAPSort {
                     }
 
                     // dispatch remaining untagged responses
+                    LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging("SORT", args));
                     protocol.notifyResponseHandlers(r);
                     protocol.handleResult(response);
                     return new SortPartialResult(matches, SortPartialReason.SUCCESS);
@@ -706,10 +709,13 @@ public final class IMAPSort {
                 }
                 p.notifyResponseHandlers(r);
             } else if (response.isBAD()) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                 throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
             } else if (response.isNO()) {
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                 throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
             } else {
+                LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                 p.handleResult(response);
             }
             /*

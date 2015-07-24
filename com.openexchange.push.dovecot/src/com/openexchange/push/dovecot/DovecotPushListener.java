@@ -49,6 +49,7 @@
 
 package com.openexchange.push.dovecot;
 
+import static com.openexchange.imap.util.ImapUtility.prepareImapCommandForLogging;
 import java.net.URI;
 import javax.mail.MessagingException;
 import org.slf4j.Logger;
@@ -60,6 +61,7 @@ import com.openexchange.imap.IMAPCommandsCollection;
 import com.openexchange.imap.IMAPException;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.util.ImapUtility;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorage;
@@ -260,10 +262,13 @@ public class DovecotPushListener implements PushListener, Runnable {
                         LOGGER.info("Advertised push notification for {} using: {}", imapStore, command);
                         return Boolean.TRUE;
                     } else if (response.isBAD()) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                     } else if (response.isNO()) {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                     } else {
+                        LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                         protocol.handleResult(response);
                     }
                     return Boolean.FALSE;
@@ -364,10 +369,13 @@ public class DovecotPushListener implements PushListener, Runnable {
                         if (response.isOK()) {
                             return Boolean.TRUE;
                         } else if (response.isBAD()) {
+                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                             throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                         } else if (response.isNO()) {
+                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                             throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                         } else {
+                            LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                             protocol.handleResult(response);
                         }
                         return Boolean.FALSE;
