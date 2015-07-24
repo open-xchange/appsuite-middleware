@@ -418,6 +418,38 @@ public class EffectivePermission extends OCLPermission {
         return permissionBits.hasFullSharedFolderAccess();
     }
 
+    /**
+     * Gets the underlying folder's type.
+     *
+     * @return The folder type
+     */
+    public int getFolderType() {
+        if (0 >= folderType) {
+            try {
+                folderType = new OXFolderAccess(permissionBits.getContext()).getFolderType(getFuid(), permissionBits.getUserId());
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return folderType;
+    }
+
+    /**
+     * Gets the underlying folder's module.
+     *
+     * @return The folder module
+     */
+    public int getFolderModule() {
+        if (0 >= folderModule) {
+            try {
+                folderModule = new OXFolderAccess(permissionBits.getContext()).getFolderModule(getFuid());
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+        }
+        return folderModule;
+    }
+
     public OCLPermission getUnderlyingPermission() {
         if (underlyingPerm == null) {
             underlyingPerm = new OCLPermission();

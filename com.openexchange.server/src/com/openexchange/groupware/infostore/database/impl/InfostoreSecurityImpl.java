@@ -49,7 +49,6 @@
 
 package com.openexchange.groupware.infostore.database.impl;
 
-import static com.openexchange.java.Autoboxing.L;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import java.sql.Connection;
@@ -80,6 +79,7 @@ import com.openexchange.tools.collections.OXCollections;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
+import com.openexchange.tools.session.ServerSession;
 
 public class InfostoreSecurityImpl extends DBService implements InfostoreSecurity {
 
@@ -144,12 +144,22 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
+    public EffectiveInfostorePermission getInfostorePermission(ServerSession session, int id) throws OXException {
+        return getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits());
+    }
+
+    @Override
     public EffectiveInfostorePermission getInfostorePermission(final int id, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
         final List<DocumentMetadata> documentData = getFolderIdAndCreatorForDocuments(new int[]{id}, ctx);
         if (documentData == null || documentData.size() <= 0 || documentData.get(0) == null) {
             throw InfostoreExceptionCodes.NOT_EXIST.create();
         }
         return getInfostorePermission(documentData.get(0), ctx, user, userPermissions);
+    }
+
+    @Override
+    public EffectiveInfostorePermission getInfostorePermission(ServerSession session, DocumentMetadata document) throws OXException {
+        return getInfostorePermission(document, session.getContext(), session.getUser(), session.getUserPermissionBits());
     }
 
     @Override
@@ -165,8 +175,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         } finally {
             releaseReadConnection(ctx, readCon);
         }
-
-
     }
 
     @Override
@@ -175,8 +183,13 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
     }
 
     @Override
+    public EffectiveInfostoreFolderPermission getFolderPermission(ServerSession session, long folderId) throws OXException {
+        return getFolderPermission(folderId, session.getContext(), session.getUser(), session.getUserPermissionBits());
+    }
+
+    @Override
     public EffectiveInfostoreFolderPermission getFolderPermission(final long folderId, final Context ctx, final User user, final UserPermissionBits userPermissions) throws OXException {
-    	return getFolderPermission(folderId, ctx, user, userPermissions, null);
+        return getFolderPermission(folderId, ctx, user, userPermissions, null);
     }
 
     @Override
@@ -198,21 +211,6 @@ public class InfostoreSecurityImpl extends DBService implements InfostoreSecurit
         final List<DocumentMetadata> metadata = getFolderIdAndCreatorForDocuments(ids, ctx);
         final List<EffectiveInfostorePermission> infostorePermissions = getInfostorePermissions0(metadata, ctx, user, userPermissions);
         return OXCollections.inject(list, infostorePermissions, injector);
-    }
-
-    @Override
-    public void checkFolderId(final long folderId, final Context ctx) throws OXException {
-        Connection readCon = null;
-        try {
-            readCon = getReadConnection(ctx);
-            OXFolderAccess folderAccess = new OXFolderAccess(readCon, ctx);
-            FolderObject fo = folderAccess.getFolderObject((int) folderId);
-            if (fo.getModule() != FolderObject.INFOSTORE) {
-                throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
-            }
-        } finally {
-            releaseReadConnection(ctx, readCon);
-        }
     }
 
     private List<DocumentMetadata> getFolderIdAndCreatorForDocuments(final int[] is, final Context ctx) throws OXException {

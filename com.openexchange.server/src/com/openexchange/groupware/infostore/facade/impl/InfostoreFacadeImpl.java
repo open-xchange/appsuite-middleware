@@ -50,6 +50,7 @@
 package com.openexchange.groupware.infostore.facade.impl;
 
 import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.tools.arrays.Arrays.contains;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
@@ -246,14 +247,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public boolean exists(final int id, final int version, final ServerSession session) throws OXException {
+    public boolean exists(int id, int version, ServerSession session) throws OXException {
         try {
-            return security.getInfostorePermission(id, session.getContext(), session.getUser(), session.getUserPermissionBits()).canReadObject();
-        } catch (final OXException x) {
-            if (InfostoreExceptionCodes.NOT_EXIST.equals(x)) {
+            return security.getInfostorePermission(session, id).canReadObject();
+        } catch (OXException e) {
+            if (InfostoreExceptionCodes.NOT_EXIST.equals(e)) {
                 return false;
             }
-            throw x;
+            throw e;
         }
     }
 
@@ -267,8 +268,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * check permissions
          */
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            document, context, session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, document);
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -318,8 +318,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * get needed metadata & check read permissions
          */
         DocumentMetadata metadata = load(id, version, session.getContext());
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            metadata, session.getContext(), session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -356,7 +355,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
          * get needed metadata (including object permissions) & check read permissions
          */
         DocumentMetadata metadata = objectPermissionLoader.add(load(id, version, context), context, null);
-        EffectiveInfostorePermission permission = security.getInfostorePermission(metadata, context, session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
         if (false == permission.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }
@@ -394,11 +393,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public void lock(final int id, final long diff, final ServerSession session) throws OXException {
         Context context = session.getContext();
         User user = session.getUser();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            id,
-            context,
-            user,
-            session.getUserPermissionBits());
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
         if (!infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_LOCK_MISSING.create();
         }
@@ -426,14 +421,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
-    public void unlock(final int id, final ServerSession session) throws OXException {
-        final Context context = session.getContext();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            id,
-            context,
-            session.getUser(),
-            session.getUserPermissionBits());
-        if (!infoPerm.canWriteObject()) {
+    public void unlock(int id, ServerSession session) throws OXException {
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
+        if (false == infoPerm.canWriteObject()) {
             throw InfostoreExceptionCodes.WRITE_PERMS_FOR_UNLOCK_MISSING.create();
         }
         checkMayUnlock(id, session);
@@ -561,14 +551,15 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
         // Insert NEW document
         final Context context = session.getContext();
-        security.checkFolderId(document.getFolderId(), context);
-        final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
-            document.getFolderId(),
-            context,
-            session.getUser(),
-            session.getUserPermissionBits());
-        if (!isperm.canCreateObjects()) {
+        EffectiveInfostoreFolderPermission targetFolderPermission = security.getFolderPermission(session, document.getFolderId());
+        if (FolderObject.INFOSTORE != targetFolderPermission.getPermission().getFolderModule()) {
+            throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(document.getFolderId()));
+        }
+        if (false == targetFolderPermission.canCreateObjects()) {
             throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
+        }
+        if (null != document.getObjectPermissions() && false == targetFolderPermission.canShareOwnObjects()) {
+            throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
         }
 
         {
@@ -640,7 +631,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             perform(new CreateVersionAction(this, QUERIES, context, Collections.singletonList(version0), session), true);
 
             if (data != null) {
-                SaveFileAction saveFile = new SaveFileAction(getFileStorage(isperm.getFolderOwner(), session.getContextId()), data, document.getFileSize());
+                SaveFileAction saveFile = new SaveFileAction(getFileStorage(targetFolderPermission.getFolderOwner(), session.getContextId()), data, document.getFileSize());
                 perform(saveFile, false);
                 document.setVersion(1);
                 document.setFilestoreLocation(saveFile.getFileStorageID());
@@ -781,14 +772,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return saveDocument(document, data, sequenceNumber, session);
         }
 
-        // Check permission
+        // Check permissions
         Context context = session.getContext();
-        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(
-            document.getId(),
-            context,
-            session.getUser(),
-            session.getUserPermissionBits());
-        if (!infoPerm.canWriteObject()) {
+        EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, document.getId());
+        if (false == infoPerm.canWriteObject() || contains(modifiedColumns, Metadata.OBJECT_PERMISSIONS_LITERAL) && false == infoPerm.canShareObject()) {
             throw InfostoreExceptionCodes.NO_WRITE_PERMISSION.create();
         }
 
@@ -802,16 +789,14 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 sanitizedColumns.remove(Metadata.FOLDER_ID_LITERAL);
                 modifiedColumns = sanitizedColumns.toArray(new Metadata[sanitizedColumns.size()]);
             } else if (document.getFolderId() != -1 && infoPerm.getObject().getFolderId() != document.getFolderId()) {
-                security.checkFolderId(document.getFolderId(), context);
-                final EffectiveInfostoreFolderPermission isperm = security.getFolderPermission(
-                    document.getFolderId(),
-                    context,
-                    session.getUser(),
-                    session.getUserPermissionBits());
-                if (!(isperm.canCreateObjects())) {
+                EffectiveInfostoreFolderPermission targetFolderPermission = security.getFolderPermission(session, document.getFolderId());
+                if (FolderObject.INFOSTORE != targetFolderPermission.getPermission().getFolderModule()) {
+                    throw InfostoreExceptionCodes.NOT_INFOSTORE_FOLDER.create(L(folderId));
+                }
+                if (false == targetFolderPermission.canCreateObjects()) {
                     throw InfostoreExceptionCodes.NO_CREATE_PERMISSION.create();
                 }
-                if (!infoPerm.canDeleteObject()) {
+                if (false == infoPerm.canDeleteObject()) {
                     throw InfostoreExceptionCodes.NO_SOURCE_DELETE_PERMISSION.create();
                 }
             }
@@ -1534,8 +1519,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         } catch (OXException x) {
             return versionIds;
         }
-        EffectiveInfostorePermission permission = security.getInfostorePermission(
-            metadata, context, session.getUser(), session.getUserPermissionBits());
+        EffectiveInfostorePermission permission = security.getInfostorePermission(session, metadata);
         if (false == permission.canDeleteObject()) {
             throw InfostoreExceptionCodes.NO_DELETE_PERMISSION_FOR_VERSION.create();
         }
@@ -1810,8 +1794,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     @Override
     public TimedResult<DocumentMetadata> getVersions(final int id, Metadata[] columns, final Metadata sort, final int order, final ServerSession session) throws OXException {
         Context context = session.getContext();
-        final User user = session.getUser();
-        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(id, context, user, session.getUserPermissionBits());
+        final EffectiveInfostorePermission infoPerm = security.getInfostorePermission(session, id);
         if (false == infoPerm.canReadObject()) {
             throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
         }

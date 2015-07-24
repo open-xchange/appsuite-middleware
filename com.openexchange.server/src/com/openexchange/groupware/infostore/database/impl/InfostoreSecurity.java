@@ -60,22 +60,48 @@ import com.openexchange.groupware.infostore.EffectiveInfostorePermission;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.collections.Injector;
+import com.openexchange.tools.session.ServerSession;
 
 public interface InfostoreSecurity {
 
+    /**
+     * Gets the effective infostore permissions for a specific document.
+     *
+     * @param session The user's session
+     * @param id The identifier of the document to get the permissions for
+     * @return The effective permissions
+     */
+    EffectiveInfostorePermission getInfostorePermission(ServerSession session, int id) throws OXException;
+
     EffectiveInfostorePermission getInfostorePermission(int id, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
+
+    /**
+     * Gets the effective infostore permissions for a specific document.
+     *
+     * @param session The user's session
+     * @param document The document to get the permissions for
+     * @return The effective permissions
+     */
+    EffectiveInfostorePermission getInfostorePermission(ServerSession session, DocumentMetadata document) throws OXException;
 
     EffectiveInfostorePermission getInfostorePermission(DocumentMetadata document, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
     List<EffectiveInfostorePermission> getInfostorePermissions(List<DocumentMetadata> documents, Context context, User user, UserPermissionBits permissionBits) throws OXException;
+
+    /**
+     * Gets the effective infostore permissions for a specific folder.
+     *
+     * @param session The user's session
+     * @param folderId The identifier of the folder to get the permissions for
+     * @return The effective permissions
+     */
+    EffectiveInfostoreFolderPermission getFolderPermission(ServerSession session, long folderId) throws OXException;
 
     EffectiveInfostoreFolderPermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions) throws OXException;
 
     EffectiveInfostoreFolderPermission getFolderPermission(long folderId, Context ctx, User user, UserPermissionBits userPermissions, Connection readConArg) throws OXException;
 
     <L> L injectInfostorePermissions(int[] ids, Context ctx, User user, UserPermissionBits userPermissions, L list, Injector<L, EffectiveInfostorePermission> injector) throws OXException;
-
-    void checkFolderId(long folderId, Context ctx) throws OXException;
 
     /**
      * Determines the identifier of the folder owner
