@@ -1,3 +1,7 @@
+* 2015-07-24 - martin.herfurth@open-xchange.com
+
+ - Fix for bug 38780: Null guard.
+
 * 2015-07-23 - thorben.betten@open-xchange.com
 
  - Fix for bug 39906: Added appropriate null guard to periodic file cleaner task
