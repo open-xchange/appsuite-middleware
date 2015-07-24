@@ -180,9 +180,10 @@ public class DovecotPushListener implements PushListener, Runnable {
      * @param uri The URL end-point
      * @param authLogin The option login
      * @param authPassword The optional password
+     * @return <code>true</code> if regustratiuon was successful; otherwise <code>false</code>
      * @throws OXException If registration fails
      */
-    public synchronized void initateRegistration(final URI uri, final String authLogin, final String authPassword) throws OXException {
+    public synchronized String initateRegistration(final URI uri, final String authLogin, final String authPassword) throws OXException {
         TimerService timerService = services.getOptionalService(TimerService.class);
         if (null == timerService) {
             throw ServiceExceptionCode.absentService(TimerService.class);
@@ -193,7 +194,7 @@ public class DovecotPushListener implements PushListener, Runnable {
             MailService mailService = services.getOptionalService(MailService.class);
             if (null == mailService) {
                 // Currently no MailService available
-                return;
+                return "Currently no MailService available";
             }
 
             // Connect it
@@ -203,9 +204,18 @@ public class DovecotPushListener implements PushListener, Runnable {
 
             // Get IMAP store
             final IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
+
+            // Check capability
+            if (!imapStore.hasCapability("METADATA")) {
+                // No METADATA support
+                LOGGER.info("No \"METADATA\" capability advertised for {}. Skipping listener registration.", imapStore);
+                return "No \"METADATA\" capability advertised";
+            }
+
+            // Grab INBOX folder
             final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
 
-            imapFolder.doCommand(new ProtocolCommand() {
+            Boolean result = (Boolean) imapFolder.doCommand(new ProtocolCommand() {
 
                 @Override
                 public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
@@ -260,6 +270,13 @@ public class DovecotPushListener implements PushListener, Runnable {
                 }
             });
 
+            if (false == result.booleanValue()) {
+                return "SETMETADATA command failed";
+            }
+
+            long delay = TIMEOUT_THRESHOLD_MILLIS;
+            refreshTask = timerService.scheduleAtFixedRate(this, delay, delay);
+            return null;
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (OXException e) {
@@ -272,9 +289,6 @@ public class DovecotPushListener implements PushListener, Runnable {
             closeMailAccess(mailAccess);
             mailAccess = null;
         }
-
-        long delay = TIMEOUT_THRESHOLD_MILLIS;
-        refreshTask = timerService.scheduleAtFixedRate(this, delay, delay);
     }
 
     /**
@@ -282,44 +296,46 @@ public class DovecotPushListener implements PushListener, Runnable {
      *
      * @throws OXException If unregistration fails
      */
-    public synchronized boolean unregister(boolean tryToReconnect) throws OXException {
-        // Cancel timer task
-        ScheduledTimerTask refreshTask = this.refreshTask;
-        if (null != refreshTask) {
-            this.refreshTask = null;
-            refreshTask.cancel();
-        }
-
-        boolean reconnected = false;
-        DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(session) : null;
-        if (null == anotherListener) {
-            // No other listener available
-            // Give up lock and return
-            try {
-                pushManager.releaseLock(new SessionInfo(session, permanent));
-            } catch (Exception e) {
-                LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+    public boolean unregister(boolean tryToReconnect) throws OXException {
+        synchronized (this) {
+            // Cancel timer task
+            ScheduledTimerTask refreshTask = this.refreshTask;
+            if (null != refreshTask) {
+                this.refreshTask = null;
+                refreshTask.cancel();
             }
-        } else {
-            try {
-                // No need to re-execute registration
-                reconnected = true;
-            } catch (Exception e) {
-                LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+
+            boolean reconnected = false;
+            DovecotPushListener anotherListener = tryToReconnect ? pushManager.injectAnotherListenerFor(session) : null;
+            if (null == anotherListener) {
+                // No other listener available
                 // Give up lock and return
                 try {
                     pushManager.releaseLock(new SessionInfo(session, permanent));
-                } catch (Exception x) {
-                    LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to release lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                }
+            } else {
+                try {
+                    // No need to re-execute registration
+                    reconnected = true;
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to start new listener for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
+                    // Give up lock and return
+                    try {
+                        pushManager.releaseLock(new SessionInfo(session, permanent));
+                    } catch (Exception x) {
+                        LOGGER.warn("Failed to release DB lock for user {} in context {}.", Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), x);
+                    }
                 }
             }
-        }
 
-        if (false == reconnected) {
-            doUnregistration();
-        }
+            if (false == reconnected) {
+                doUnregistration();
+            }
 
-        return reconnected;
+            return reconnected;
+        }
     }
 
     private void doUnregistration() throws OXException {

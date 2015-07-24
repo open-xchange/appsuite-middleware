@@ -53,11 +53,10 @@ import static com.openexchange.java.Autoboxing.I;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -132,7 +131,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
     // --------------------------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
-    private final ConcurrentMap<SimpleKey, DovecotPushListener> listeners;
+    private final Map<SimpleKey, DovecotPushListener> listeners;
     private final DovecotPushClusterLock clusterLock;
     private final String authLogin;
     private final String authPassword;
@@ -145,7 +144,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
         super();
         this.services = services;
         this.clusterLock = clusterLock;
-        listeners = new ConcurrentHashMap<SimpleKey, DovecotPushListener>(512);
+        listeners = new HashMap<SimpleKey, DovecotPushListener>(512, 0.9F);
 
         // Parse auth data
         {
@@ -244,10 +243,12 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      * @throws OXException If operation fails
      */
     public DovecotPushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
-        DovecotPushListener listener = new DovecotPushListener(newSession, permanent, this, services);
-        // Replace old/existing one
-        listeners.put(SimpleKey.valueOf(newSession), listener);
-        return listener;
+        synchronized (this) {
+            DovecotPushListener listener = new DovecotPushListener(newSession, permanent, this, services);
+            // Replace old/existing one
+            listeners.put(SimpleKey.valueOf(newSession), listener);
+            return listener;
+        }
     }
 
     private void stopAll() {
@@ -333,18 +334,31 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             synchronized (this) {
                 // Locked...
                 boolean unlock = true;
+                boolean removeListener = false;
+                SimpleKey key = SimpleKey.valueOf(userId, contextId);
                 try {
-                    DovecotPushListener listener = new DovecotPushListener(session, false, this, services);
-                    if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
-                        listener.initateRegistration(uri, authLogin, authPassword);
-                        unlock = false;
-                        LOGGER.info("Started Dovecot listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
-                        return listener;
-                    }
+                    if (false == listeners.containsKey(key)) {
+                        DovecotPushListener listener = new DovecotPushListener(session, false, this, services);
+                        listeners.put(key, listener);
+                        removeListener = true;
+                        String reason = listener.initateRegistration(uri, authLogin, authPassword);
+                        if (null == reason) {
+                            removeListener = false;
+                            unlock = false;
+                            LOGGER.info("Started Dovecot listener for user {} in context {} with session {}", I(userId), I(contextId), session.getSessionID());
+                            return listener;
+                        }
 
-                    // Already running for session user
-                    LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                        // Registration failed
+                        LOGGER.info("Could not register Dovecot listener for user {} in context {} with session {}: {}", I(userId), I(contextId), session.getSessionID());
+                    } else {
+                        // Already running for session user
+                        LOGGER.info("Did not start Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                    }
                 } finally {
+                    if (removeListener) {
+                        listeners.remove(key);
+                    }
                     if (unlock) {
                         releaseLock(sessionInfo);
                     }
@@ -419,34 +433,55 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
             synchronized (this) {
                 // Locked...
                 boolean unlock = true;
+                boolean removeListener = false;
+                SimpleKey key = SimpleKey.valueOf(userId, contextId);
                 try {
-                    DovecotPushListener listener = new DovecotPushListener(session, true, this, services);
-                    DovecotPushListener current = listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener);
+                    DovecotPushListener current = listeners.get(key);
                     if (null == current) {
-                        listener.initateRegistration(uri, authLogin, authPassword);
-                        unlock = false;
-                        LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
-                        return listener;
+                        DovecotPushListener listener = new DovecotPushListener(session, true, this, services);
+                        listeners.put(key, listener);
+                        removeListener = true;
+                        String reason = listener.initateRegistration(uri, authLogin, authPassword);
+                        if (null == reason) {
+                            removeListener = false;
+                            unlock = false;
+                            LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                            return listener;
+                        }
+
+                        // Registration failed
+                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {} with session {}: {}", I(userId), I(contextId), session.getSessionID());
                     } else if (!current.isPermanent()) {
                         // Cancel current & replace
                         current.unregister(false);
-                        listeners.put(SimpleKey.valueOf(userId, contextId), listener);
-                        listener.initateRegistration(uri, authLogin, authPassword);
-                        unlock = false;
-                        LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
-                        return listener;
-                    }
+                        DovecotPushListener listener = new DovecotPushListener(session, true, this, services);
+                        listeners.put(key, listener);
+                        removeListener = true;
+                        String reason = listener.initateRegistration(uri, authLogin, authPassword);
+                        if (null == reason) {
+                            removeListener = false;
+                            unlock = false;
+                            LOGGER.info("Started permanent Dovecot listener for user {} in context {}", I(userId), I(contextId));
+                            return listener;
+                        }
 
-                    // Already running for session user
-                    LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                        // Registration failed
+                        LOGGER.info("Could not register permanent Dovecot listener for user {} in context {} with session {}: {}", I(userId), I(contextId), session.getSessionID());
+                    } else {
+                        // Already running for session user
+                        LOGGER.info("Did not start permanent Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+                    }
                 } finally {
+                    if (removeListener) {
+                        listeners.remove(key);
+                    }
                     if (unlock) {
                         releaseLock(sessionInfo);
                     }
                 }
             }
         } else {
-            LOGGER.info("Could not acquire lock to start Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
+            LOGGER.info("Could not acquire lock to start permanent Dovecot listener for user {} in context {} with session {} as there is already an associated listener", I(userId), I(contextId), session.getSessionID());
         }
 
         // No listener registered for given session
