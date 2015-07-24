@@ -53,8 +53,11 @@ import java.io.IOException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
+import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
@@ -63,7 +66,6 @@ import com.openexchange.tools.webdav.OXServlet;
 import com.openexchange.webdav.directory.servlets.WebdavDirectoryPerformer.Action;
 import com.openexchange.webdav.protocol.WebdavStatus;
 
-
 /**
  * {@link WebdavDirectoryServlet}
  *
@@ -71,7 +73,7 @@ import com.openexchange.webdav.protocol.WebdavStatus;
  */
 public class WebdavDirectoryServlet extends OXServlet {
 
-    private static final transient org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavDirectoryServlet.class);
+    private static final long serialVersionUID = -3415404351074962478L;
 
     @Override
     protected Interface getInterface() {
@@ -151,16 +153,18 @@ public class WebdavDirectoryServlet extends OXServlet {
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
+        if (!checkPermission(req, session)) {
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
         try {
         	WebdavDirectoryPerformer.getInstance().doIt(req, resp, action, session);
         } catch (final OXException x) {
         	if (WebdavStatus.class.isInstance(x)) {
         		final WebdavStatus status = (WebdavStatus) x;
-        		resp.setStatus(status.getStatus());
         		resp.sendError(status.getStatus());
-
+        		return;
         	}
-        	resp.setStatus(500);
         	resp.sendError(500);
         }
     }
@@ -175,6 +179,22 @@ public class WebdavDirectoryServlet extends OXServlet {
     @Override
     protected boolean useCookies() {
         return false;
+    }
+
+    @Override
+    protected boolean allowOAuthAccess() {
+        return true;
+    }
+
+    private boolean checkPermission(HttpServletRequest req, ServerSession session) {
+        OAuthGrant oAuthGrant = (OAuthGrant) req.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
+        if (oAuthGrant == null) {
+            // basic auth took place
+            return true;
+        } else {
+            Scope scope = oAuthGrant.getScope();
+            return scope.has("caldav") || scope.has("carddav");
+        }
     }
 
 }

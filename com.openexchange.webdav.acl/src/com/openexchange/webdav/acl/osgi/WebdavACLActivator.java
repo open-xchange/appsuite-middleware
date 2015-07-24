@@ -70,7 +70,7 @@ public class WebdavACLActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class };
+        return new Class<?>[] { UserService.class, HttpService.class, ContactService.class,  };
     }
 
     @Override
