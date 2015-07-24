@@ -82,7 +82,6 @@ import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.protocol.FetchResponse;
 import com.sun.mail.imap.protocol.IMAPProtocol;
-import com.sun.mail.imap.protocol.IMAPResponse;
 
 
 /**
@@ -330,11 +329,10 @@ public final class Conversations {
                         final List<MailMessage> mails = new ArrayList<MailMessage>(messageCount);
                         final String fullName = imapFolder.getFullName();
                         final char sep = imapFolder.getSeparator();
-                        final String sFetch = "FETCH";
                         final String sInReplyTo = "In-Reply-To";
                         final String sReferences = "References";
                         for (int j = 0; j < len; j++) {
-                            if (sFetch.equals(((IMAPResponse) r[j]).getKey())) {
+                            if (r[j] instanceof FetchResponse) {
                                 final MailMessage message = handleFetchRespone((FetchResponse) r[j], fullName, sep);
                                 final String references = message.getFirstHeader(sReferences);
                                 if (null == references) {
