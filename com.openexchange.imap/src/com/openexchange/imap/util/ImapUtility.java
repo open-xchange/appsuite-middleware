@@ -212,7 +212,7 @@ public final class ImapUtility {
             if (openParenthesis <= 16) {
                 return surroundWithSingleQuotes(imapCommand);
             }
-            return new StringBuilder(imapCommand.length()).append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).toString();
+            return new StringBuilder(imapCommand.length()).append('\'').append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
         } else if (imapCommand.startsWith("UID EXPUNGE ")) {
             return imapCommand.length() > 32 ? "'UID EXPUNGE ...'" : surroundWithSingleQuotes(imapCommand);
         } else {
