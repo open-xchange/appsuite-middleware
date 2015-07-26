@@ -85,7 +85,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
 }, responseDescription = "Response with timestamp: An array with infoitem data. Each array element describes one infoitem and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
-public class AllAction extends AbstractFileAction {
+public class AllAction extends AbstractListingAction {
 
     @Override
     public AJAXRequestResult handle(final InfostoreRequest request) throws OXException {

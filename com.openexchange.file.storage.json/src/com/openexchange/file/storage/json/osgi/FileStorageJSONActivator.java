@@ -69,8 +69,10 @@ import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.attach.AttachmentBase;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.preview.PreviewService;
 import com.openexchange.rdiff.RdiffService;
 import com.openexchange.share.notification.ShareNotificationService;
+import com.openexchange.threadpool.ThreadPoolService;
 
 /**
  * {@link FileStorageJSONActivator}
@@ -82,13 +84,12 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class[] { FileStorageServiceRegistry.class, IDBasedFileAccessFactory.class, IDBasedFolderAccessFactory.class,
-            AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class };
+            AttachmentBase.class, FolderService.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-
             Services.setServiceLookup(this);
             rememberTracker(new ServiceTracker<I18nService, I18nService>(context, I18nService.class.getName(), new I18nServiceCustomizer(context)));
             FileFieldCollector fieldCollector = new FileFieldCollector(context);
@@ -97,6 +98,7 @@ public class FileStorageJSONActivator extends AJAXModuleActivator {
 
             trackService(ShareNotificationService.class);
             trackService(RdiffService.class);
+            trackService(PreviewService.class);
             openTrackers();
             // registerModule(AccountActionFactory.INSTANCE, "infostore");
             registerModule(FileActionFactory.INSTANCE, "infostore");
