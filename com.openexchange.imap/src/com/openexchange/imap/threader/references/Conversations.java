@@ -214,6 +214,8 @@ public final class Conversations {
             }
         } else {
             // Add 'In-Reply-To' to FetchProfile if absent
+            /*-
+             *
             {
                 boolean found = false;
                 final Item envelope = FetchProfile.Item.ENVELOPE;
@@ -238,6 +240,7 @@ public final class Conversations {
                     }
                 }
             }
+             */
             // Add 'Message-Id' to FetchProfile if absent
             {
                 boolean found = false;
