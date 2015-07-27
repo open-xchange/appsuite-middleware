@@ -626,7 +626,7 @@ public abstract class MailAccess<F extends IMailFolderStorage, M extends IMailMe
     public boolean ping() throws OXException {
         try {
             final MailConfig mailConfig = getMailConfig();
-            if (mailConfig.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection()) {
+            if (mailConfig.isRequireTls() || mailConfig.getMailProperties().isEnforceSecureConnection()) {
                 if (!mailConfig.isSecure()) {
                     throw MailExceptionCode.NON_SECURE_DENIED.create(mailConfig.getServer());
                 }

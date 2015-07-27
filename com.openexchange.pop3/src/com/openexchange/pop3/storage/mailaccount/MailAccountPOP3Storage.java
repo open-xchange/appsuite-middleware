@@ -82,7 +82,6 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailStoreAware;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailFolderDescription;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -586,7 +585,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         POP3Store pop3Store = null;
         try {
             POP3Config pop3Config = pop3Access.getPOP3Config();
-            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || MailProperties.getInstance().isEnforceSecureConnection());
+            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || pop3Config.getMailProperties().isEnforceSecureConnection());
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;
