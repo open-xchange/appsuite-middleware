@@ -1,3 +1,7 @@
+* 2015-07-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 39862: Null guard
+
 * 2015-07-24 - martin.herfurth@open-xchange.com
 
  - Fix for bug 38780: Null guard.
