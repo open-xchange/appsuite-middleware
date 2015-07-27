@@ -283,8 +283,8 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         return Collections.emptyList();
     }
 
-    
-    
+
+
     /*
      * Returns all folders that are below the given folder, including that
      * folder itself, where the user has the necessary permissions.
@@ -312,8 +312,8 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
         addSubfolderIDs(folderIDs, infostoreFolder, folderAccess, context, filter);
         return folderIDs;
     }
-    
-    
+
+
     /*
      * Returns all folders that are below the users default folder (i.e. "My Files"), including that
      * folder itself, where the user has the necessary permissions.
@@ -462,11 +462,11 @@ public class BasicInfostoreDriver extends AbstractModuleSearchDriver {
 
     private static Metadata[] getFields(final SearchRequest searchRequest) {
         Metadata[] fields = DEFAULT_FIELDS;
-        final int[] columns = searchRequest.getColumns();
-        if (columns != null) {
-            final List<Metadata> tmp = new ArrayList<Metadata>(columns.length);
-            for (final int c : columns) {
-                final Metadata field = Metadata.get(c);
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
+            List<Metadata> tmp = new ArrayList<Metadata>(columns.length);
+            for (int c : columns) {
+                Metadata field = Metadata.get(c);
                 if (field != null) {
                     tmp.add(field);
                 }

@@ -74,7 +74,7 @@ public class SearchRequest extends AbstractFindRequest {
 
     private final int size;
 
-    private final int[] columns;
+    private final Columns columns;
 
     private List<Filter> filters;
 
@@ -90,11 +90,11 @@ public class SearchRequest extends AbstractFindRequest {
      * @param options A map containing client and module specific options; must not be <code>null</code>
      * @param columns The columns that shall be returned in the response items or <code>null</code> to use the modules default
      */
-    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options, final int[] columns) {
+    public SearchRequest(final int start, final int size, final List<ActiveFacet> activeFacets, final Map<String, String> options, final String[] columns) {
         super(activeFacets, options);
         this.start = start;
         this.size = size;
-        this.columns = columns;
+        this.columns = new Columns(columns);
     }
 
     /**
@@ -120,9 +120,9 @@ public class SearchRequest extends AbstractFindRequest {
     /**
      * Gets the columns that shall be returned in the response items.
      *
-     * @return An array of columns or <code>null</code> if not present.
+     * @return The columns; never <code>null</code>
      */
-    public int[] getColumns() {
+    public Columns getColumns() {
         return columns;
     }
 

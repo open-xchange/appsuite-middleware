@@ -192,7 +192,14 @@ public abstract class AbstractFindTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected List<PropDocument> query(Module module, List<ActiveFacet> facets, int[] columns) throws Exception {
-        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier(), columns);
+        String[] strColumns = null;
+        if (columns != null) {
+            strColumns = new String[columns.length];
+            for (int i = 0; i < strColumns.length; i++) {
+                strColumns[i] = Integer.toString(columns[i]);
+            }
+        }
+        QueryRequest queryRequest = new QueryRequest(0, Integer.MAX_VALUE, facets, module.getIdentifier(), strColumns);
         QueryResponse queryResponse = client.execute(queryRequest);
         SearchResult result = queryResponse.getSearchResult();
         List<PropDocument> propDocuments = new ArrayList<PropDocument>();
