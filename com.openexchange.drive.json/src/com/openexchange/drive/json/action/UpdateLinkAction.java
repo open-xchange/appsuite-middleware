@@ -113,7 +113,7 @@ public class UpdateLinkAction extends AbstractDriveAction {
         /*
          * return empty result in case of success
          */
-        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
+        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
 }

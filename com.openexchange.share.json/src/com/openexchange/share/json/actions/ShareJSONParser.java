@@ -182,7 +182,7 @@ public class ShareJSONParser {
             switch (transport) {
                 case MAIL:
                     try {
-                        transportInfos.add(recipients.getJSONArray(i));
+                        transportInfos.add(parseAddress(recipients.getJSONArray(i)));
                     } catch (JSONException e) {
                         throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
                     }

@@ -85,6 +85,7 @@ public class DriveActionFactory implements AJAXActionServiceFactory {
         actions.put("getLink", new GetLinkAction());
         actions.put("updateLink", new UpdateLinkAction());
         actions.put("deleteLink", new DeleteLinkAction());
+        actions.put("sendLink", new SendLinkAction());
         actions.put("updateFile", new UpdateFileAction());
         actions.put("updateFolder", new UpdateFolderAction());
     }

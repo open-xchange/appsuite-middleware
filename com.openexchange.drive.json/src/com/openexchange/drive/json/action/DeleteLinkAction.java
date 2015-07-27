@@ -85,7 +85,7 @@ public class DeleteLinkAction extends AbstractDriveAction {
          * perform the deletion, return empty result in case of success
          */
         getShareService().deleteShare(session.getServerSession(), shareInfo.getShare(), clientTimestamp);
-        return new AJAXRequestResult(new JSONObject(), new Date(), "json");
+        return new AJAXRequestResult(new JSONObject(), "json");
     }
 
 }
