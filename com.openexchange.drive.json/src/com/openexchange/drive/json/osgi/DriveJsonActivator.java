@@ -66,7 +66,7 @@ import com.openexchange.drive.json.action.DriveActionFactory;
 import com.openexchange.drive.json.internal.ListenerRegistrar;
 import com.openexchange.drive.json.internal.Services;
 import com.openexchange.drive.json.listener.BlockingListenerFactory;
-import com.openexchange.drive.share.DriveShareService;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.groupware.ModuleSupport;
@@ -92,7 +92,7 @@ public class DriveJsonActivator extends AJAXModuleActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DriveService.class, DriveEventService.class,
             ConfigurationService.class, DriveSubscriptionStore.class, CapabilityService.class, ModuleSupport.class,
-            ShareNotificationService.class, DriveShareService.class, DatabaseService.class, ShareService.class
+            ShareNotificationService.class, DatabaseService.class, ShareService.class, FileMetadataParserService.class
         };
     }
 

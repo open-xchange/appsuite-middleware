@@ -53,7 +53,7 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.recipient.AnonymousRecipient;

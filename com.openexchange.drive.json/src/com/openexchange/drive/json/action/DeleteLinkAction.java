@@ -47,36 +47,32 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
 import java.util.Date;
-import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.drive.share.DriveShareTarget;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.Share;
 import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link UpdateLinkAction}
+ * {@link DeleteLinkAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class UpdateLinkAction extends AbstractDriveShareAction {
+public class DeleteLinkAction extends AbstractDriveAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
         /*
-         * parse parameters & target
+         * parse target
          */
-        JSONObject json = (JSONObject) requestData.requireData();
-        DriveShareTarget target = getParser().parseTarget(json);
+        DriveShareTarget target = getShareParser().parseTarget((JSONObject) requestData.requireData());
         /*
          * lookup share, assume latest timestamp if client checksum matches
          */
@@ -86,33 +82,9 @@ public class UpdateLinkAction extends AbstractDriveShareAction {
         }
         Date clientTimestamp = shareInfo.getShare().getModified();
         /*
-         * update share based on present data in update request
+         * perform the deletion, return empty result in case of success
          */
-        Share toUpdate = new Share(shareInfo.getGuest().getGuestID(), shareInfo.getShare().getTarget());
-        try {
-            if (json.has("meta")) {
-                toUpdate.setMeta(json.isNull("meta") ? null : getParser().parseMeta(json.getJSONObject("meta")));
-            }
-            if (json.has("expiry_date")) {
-                if (json.isNull("expiry_date")) {
-                    toUpdate.setExpiryDate(null);
-                } else {
-                    toUpdate.setExpiryDate(new Date(json.getLong("expiry_date")));
-                }
-            }
-            if (json.has("password")) {
-                String newPassword = json.isNull("password") ? null : json.getString("password");
-                getShareService().updateShare(session.getServerSession(), toUpdate, newPassword, clientTimestamp);
-            } else {
-                getShareService().updateShare(session.getServerSession(), toUpdate, clientTimestamp);
-
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-        }
-        /*
-         * return empty result in case of success
-         */
+        getShareService().deleteShare(session.getServerSession(), shareInfo.getShare(), clientTimestamp);
         return new AJAXRequestResult(new JSONObject(), new Date(), "json");
     }
 

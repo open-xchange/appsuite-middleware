@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,67 +47,41 @@
  *
  */
 
-package com.openexchange.ajax.drive.action;
+package com.openexchange.file.storage.infostore.folder;
 
-import java.io.IOException;
-import java.util.List;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.share.actions.ShareWriter;
-import com.openexchange.drive.DriveShareTarget;
+import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.share.recipient.ShareRecipient;
 
 /**
- * {@link InviteRequest}
+ * {@link ParsedGuestPermission}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @since v7.8.0
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class InviteRequest extends AbstractDriveRequest<InviteResponse> {
+public class ParsedGuestPermission extends ParsedPermission implements GuestPermission {
 
-    private List<DriveShareTarget> targets;
-    private List<ShareRecipient> recipients;
-    private String message;
-    private boolean failOnError;
+    private static final long serialVersionUID = -7466310117990522541L;
 
-    public InviteRequest(Integer root, List<DriveShareTarget> targets, List<ShareRecipient> recipients) {
-        this(root, targets, recipients, null, true);
-    }
+    private ShareRecipient recipient;
 
-    public InviteRequest(Integer root, List<DriveShareTarget> targets, List<ShareRecipient> recipients, String message, boolean failOnError) {
-        super(root);
-        this.targets = targets;
-        this.recipients = recipients;
-        this.message = message;
-        this.failOnError = failOnError;
+    /**
+     * Initializes a new {@link ParsedGuestPermission}.
+     */
+    public ParsedGuestPermission() {
+        super();
     }
 
     @Override
-    public Method getMethod() {
-        return Method.PUT;
+    public ShareRecipient getRecipient() {
+        return recipient;
     }
 
-    @Override
-    public Parameter[] getParameters() throws IOException, JSONException {
-        return new Parameter[] {
-            new Parameter(AJAXServlet.PARAMETER_ACTION, "invite"),
-            new Parameter("root", root)
-        };
-    }
-
-    @Override
-    public InviteParser getParser() {
-        return new InviteParser(failOnError);
-    }
-
-    @Override
-    public JSONObject getBody() throws IOException, JSONException {
-        JSONObject retval = new JSONObject();
-        DriveShareWriter.writeDriveTargets(targets, retval);
-        retval.put("recipients", ShareWriter.writeRecipients(recipients));
-        retval.putOpt("message", message);
-        return retval;
+    /**
+     * Sets the share recipient.
+     *
+     * @param recipient The share recipient to set
+     */
+    public void setRecipient(ShareRecipient recipient) {
+        this.recipient = recipient;
     }
 
 }

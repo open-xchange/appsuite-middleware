@@ -47,72 +47,69 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
-import java.util.Date;
-import java.util.List;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
+import com.openexchange.drive.UpdateParameters;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.drive.json.json.JsonFileVersion;
 import com.openexchange.exception.OXException;
-import com.openexchange.share.CreatedShare;
-import com.openexchange.share.CreatedShares;
-import com.openexchange.share.notification.ShareNotificationService;
-import com.openexchange.share.notification.ShareNotificationService.Transport;
-import com.openexchange.share.recipient.ShareRecipient;
+import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.parse.FileMetadataParserService;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link InviteAction}
+ * {@link UpdateFileAction}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class InviteAction extends AbstractDriveShareAction {
+public class UpdateFileAction extends AbstractDriveAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
+        /*
+         * parse parameters & file metadata
+         */
+        String path = requestData.getParameter("path");
+        if (Strings.isEmpty(path)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("path");
+        }
+        String name = requestData.getParameter("name");
+        if (Strings.isEmpty(name)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("name");
+        }
+        String checksum = requestData.getParameter("checksum");
+        if (Strings.isEmpty(checksum)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("checksum");
+        }
+        JSONObject json = (JSONObject) requestData.requireData();
+        File metadata;
+        UpdateParameters parameters = new UpdateParameters();
         try {
-            JSONObject data = (JSONObject) requestData.requireData();
-            List<ShareRecipient> recipients = getParser().parseRecipients(data.getJSONArray("recipients"));
-            List<DriveShareTarget> targets = getParser().parseTargets(data);
-            String message = data.optString("message", null);
-            /*
-             * create the shares
-             */
-            DriveService driveService = Services.getService(DriveService.class, true);
-            CreatedShares createdShares = null;//driveService.createShare(session, recipients, targets);
-            /*
-             * Send notifications. For now we only have a mail transport. The API might get expanded to allow additional transports.
-             */
-            ShareNotificationService shareNotificationService = Services.getService(ShareNotificationService.class);
-            List<OXException> warnings = shareNotificationService.sendShareCreatedNotifications(Transport.MAIL, createdShares, message, session.getServerSession(), session.getHostData());
-            /*
-             * construct & return appropriate json result
-             */
-            AJAXRequestResult result = new AJAXRequestResult();
-            result.addWarnings(warnings);
-            JSONArray jTokens = new JSONArray(recipients.size());
-            for (ShareRecipient recipient : recipients) {
-                if (recipient.isInternal()) {
-                    jTokens.put(JSONObject.NULL);
-                } else {
-                    CreatedShare share = createdShares.getShare(recipient);
-                    jTokens.put(share.getToken());
-                }
+            metadata = Services.getService(FileMetadataParserService.class, true).parse(json.getJSONObject("file"));
+            JSONObject jsonNotification = json.optJSONObject("notification");
+            if (null != jsonNotification) {
+                parameters.setNotificationTransport(getShareParser().parseNotificationTransport(jsonNotification));
+                parameters.setNotificationMessage(jsonNotification.optString("message", null));
             }
-            result.setResultObject(jTokens, "json");
-            result.setTimestamp(new Date());
-            return result;
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
+        /*
+         * update the file, return empty result in case of success
+         */
+        getDriveService().updateFile(session, path, new JsonFileVersion(checksum, name), metadata, parameters);
+        AJAXRequestResult result = new AJAXRequestResult(new JSONObject(), "json");
+        if (null != result.getWarnings()) {
+            result.addWarnings(parameters.getWarnings());
+        }
+        return result;
     }
 
 }

@@ -47,11 +47,11 @@
  *
  */
 
-package com.openexchange.drive.impl.share;
+package com.openexchange.drive.impl.internal;
 
-import com.openexchange.drive.share.DriveShare;
-import com.openexchange.drive.share.DriveShareInfo;
-import com.openexchange.drive.share.DriveShareTarget;
+import com.openexchange.drive.DriveShare;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;

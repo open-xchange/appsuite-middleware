@@ -49,10 +49,12 @@
 
 package com.openexchange.file.storage.infostore.folder;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.FileStorageGuestPermission;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.folderstorage.ContentType;
@@ -156,33 +158,32 @@ public final class FolderParser {
     }
 
     /**
-     * Parses given permissions.
+     * Parses a list of file storage permissions and transforms them into permissions used by the folder service.
      *
-     * @param permissionsList The permissions to parse
+     * @param fileStoragePermissions The file storage permissions to parse
      * @return The parsed permissions
-     * @throws OXException If parsing fails
      */
-    public static Permission[] parsePermission(final List<FileStoragePermission> permissionsList) throws OXException {
-        try {
-            final int numberOfPermissions = permissionsList.size();
-            final Permission[] perms = new Permission[numberOfPermissions];
-            for (int i = 0; i < numberOfPermissions; i++) {
-                final FileStoragePermission elem = permissionsList.get(i);
-                final int entity = elem.getEntity();
-                final ParsedPermission oclPerm = new ParsedPermission();
-                oclPerm.setEntity(entity);
-                oclPerm.setGroup(elem.isGroup());
-                oclPerm.setAdmin(elem.isAdmin());
-                oclPerm.setAllPermissions(
-                    elem.getFolderPermission(),
-                    elem.getReadPermission(),
-                    elem.getWritePermission(),
-                    elem.getDeletePermission());
-                perms[i] = oclPerm;
-            }
-            return perms;
-        } catch (final RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+    private static Permission[] parsePermission(List<FileStoragePermission> fileStoragePermissions) throws OXException {
+        if (null == fileStoragePermissions) {
+            return null;
         }
+        List<Permission> permissions = new ArrayList<Permission>(fileStoragePermissions.size());
+        for (FileStoragePermission fileStoragePermission : fileStoragePermissions) {
+            ParsedPermission permission;
+            if (FileStorageGuestPermission.class.isInstance(fileStoragePermission)) {
+                ParsedGuestPermission guestPermission = new ParsedGuestPermission();
+                guestPermission.setRecipient(((FileStorageGuestPermission) fileStoragePermission).getRecipient());
+                permission = guestPermission;
+            } else {
+                permission = new ParsedPermission();
+            }
+            permission.setEntity(fileStoragePermission.getEntity());
+            permission.setGroup(fileStoragePermission.isGroup());
+            permission.setAdmin(fileStoragePermission.isAdmin());
+            permission.setAllPermissions(fileStoragePermission.getFolderPermission(), fileStoragePermission.getReadPermission(),
+                fileStoragePermission.getWritePermission(), fileStoragePermission.getDeletePermission());
+            permissions.add(permission);
+        }
+        return permissions.toArray(new Permission[fileStoragePermissions.size()]);
     }
 }

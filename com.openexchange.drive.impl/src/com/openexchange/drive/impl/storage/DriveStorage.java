@@ -639,7 +639,17 @@ public class DriveStorage {
         return getFileByName(path, name, DriveConstants.FILE_FIELDS, normalizeFileNames);
     }
 
-    private File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
+    /**
+     * Gets a file with a specific name in a path.
+     *
+     * @param path The path of the directory to look for the file
+     * @param name The name of the file
+     * @param fields The metadata to load
+     * @param normalizeFileNames <code>true</code> to also consider not-normalized filenames, <code>false</code>, otherwise
+     * @return The file, or <code>null</code> if not found.
+     * @throws OXException
+     */
+    public File getFileByName(String path, final String name, List<Field> fields, final boolean normalizeFileNames) throws OXException {
         if (3 <= session.getDriveSession().getApiVersion() && DriveConstants.METADATA_FILENAME.equals(name)) {
             return new DriveMetadata(session, getFolder(path, false));
         }

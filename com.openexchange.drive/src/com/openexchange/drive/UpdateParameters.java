@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,24 +47,82 @@
  *
  */
 
-package com.openexchange.drive.share;
+package com.openexchange.drive;
 
-import com.openexchange.share.ShareInfo;
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.share.notification.ShareNotificationService.Transport;
 
 /**
- * {@link DriveShareInfo}
+ * {@link UpdateParameters}
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public interface DriveShareInfo extends ShareInfo {
+public class UpdateParameters {
+
+    private Transport notificationTransport;
+    private String notificationMessage;
+    private List<OXException> warnings;
 
     /**
-     * Gets the underlying share.
+     * Gets the notificationTransport
      *
-     * @return The share
+     * @return The notificationTransport
      */
-    @Override
-    DriveShare getShare();
+    public Transport getNotificationTransport() {
+        return notificationTransport;
+    }
+
+    /**
+     * Sets the notificationTransport
+     *
+     * @param notificationTransport The notificationTransport to set
+     */
+    public void setNotificationTransport(Transport notificationTransport) {
+        this.notificationTransport = notificationTransport;
+    }
+
+    /**
+     * Gets the notificationMessage
+     *
+     * @return The notificationMessage
+     */
+    public String getNotificationMessage() {
+        return notificationMessage;
+    }
+
+    /**
+     * Sets the notificationMessage
+     *
+     * @param notificationMessage The notificationMessage to set
+     */
+    public void setNotificationMessage(String notificationMessage) {
+        this.notificationMessage = notificationMessage;
+    }
+
+    /**
+     * Adds one or more warnings.
+     *
+     * @param warnings The warnings to add
+     */
+    public void addWarnings(List<OXException> warnings) {
+        if (null != warnings) {
+            if (null == this.warnings) {
+                this.warnings = new ArrayList<OXException>();
+            }
+            this.warnings.addAll(warnings);
+        }
+    }
+
+    /**
+     * Gets the warnings.
+     *
+     * @return The warnings, or <code>null</code> if there are none
+     */
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
 
 }

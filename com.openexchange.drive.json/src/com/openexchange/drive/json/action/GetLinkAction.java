@@ -47,37 +47,72 @@
  *
  */
 
-package com.openexchange.drive.json.action.share;
+package com.openexchange.drive.json.action;
 
-import java.util.List;
-import org.json.JSONArray;
+import java.util.Date;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveService;
-import com.openexchange.drive.json.DriveShareInfoResultConverter;
+import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.drive.DriveShareInfo;
+import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
-import com.openexchange.drive.json.internal.Services;
-import com.openexchange.drive.share.DriveShareInfo;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.share.recipient.AnonymousRecipient;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * {@link SharesAction}
+ * {@link GetLinkAction}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.8.0
  */
-public class SharesAction extends AbstractDriveShareAction {
+public class GetLinkAction extends AbstractDriveAction {
+
+    /** The default permission bits to use for anonymous link shares */
+    static final int DEFAULT_READONLY_PERMISSION_BITS = Permissions.createPermissionBits(
+        Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false);
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, DefaultDriveSession session) throws OXException {
-        DriveService driveService = Services.getService(DriveService.class, true);
-        List<DriveShareInfo> shares = null;//driveService.getAllLinks(session);
-
-        if (null == shares || 0 == shares.size()) {
-            return new AJAXRequestResult(new JSONArray());
+        /*
+         * parse target
+         */
+        DriveShareTarget target = getShareParser().parseTarget((JSONObject) requestData.requireData());
+        /*
+         * reuse existing or create a new anonymous share as needed
+         */
+        boolean isNew = false;
+        DriveShareInfo shareInfo = discoverLink(session, target);
+        if (null == shareInfo) {
+            AnonymousRecipient recipient = new AnonymousRecipient(DEFAULT_READONLY_PERMISSION_BITS, null, null);
+            shareInfo = getDriveService().addShare(session, target, recipient, null);
+            isNew = true;
         }
-
-        return new AJAXRequestResult(shares, DriveShareInfoResultConverter.INPUT_FORMAT);
+        /*
+         * return appropriate JSON result
+         */
+        try {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("url", shareInfo.getShareURL(requestData.getHostData()));
+            jsonResult.put("is_new", isNew);
+            Date expiryDate = shareInfo.getShare().getExpiryDate();
+            if (null != expiryDate) {
+                jsonResult.put("expiry_date", expiryDate.getTime());
+            }
+            jsonResult.putOpt("password", shareInfo.getGuest().getPassword());
+            Map<String, Object> meta = shareInfo.getShare().getMeta();
+            if (null != meta) {
+                jsonResult.put("meta", JSONCoercion.coerceToJSON(meta));
+            }
+            return new AJAXRequestResult(jsonResult, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
 }
