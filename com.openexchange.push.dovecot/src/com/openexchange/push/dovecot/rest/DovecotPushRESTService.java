@@ -83,13 +83,13 @@ public class DovecotPushRESTService {
          */
 
         try {
-            if ("MessageNew".equals(data.optString("event", null))) {
+            if ("messageNew".equals(data.optString("event", null))) {
                 int[] userAndContext = parseUserAndContext(data.optString("user", null));
                 if (null != userAndContext) {
                     int contextId = userAndContext[1];
                     int userId = userAndContext[0];
                     String folder = data.getString("folder");
-                    long uid = data.getLong("uid");
+                    long uid = data.getLong("imap-uid");
 
                     SessiondService sessiondService = services.getService(SessiondService.class);
                     Session session = sessiondService.findFirstMatchingSessionForUser(userId, contextId, new SessionMatcher() {
