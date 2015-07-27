@@ -1,3 +1,7 @@
+* 2015-06-30 - thorben.betten@open-xchange.com
+
+ - Fix for bug 38605: Extended the "com.openexchange.admin.rmi.OXUserInterface.exists()" method to also accept a display name when performing existence check
+
 * 2015-04-07 - thorbenb.betten@open-xchange.com
 
  - Fix for bug 37501: Consider "AUTO_TO_LOWERCASE_UID" setting all over the place

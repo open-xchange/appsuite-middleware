@@ -47,6 +47,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Wed Jul 15 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-07-20 (2614)
 * Fri Jul 03 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-07-10
 * Fri Jul 03 2015 Marc Arens <marc.arens@open-xchange.com>
@@ -67,6 +69,8 @@ Build for patch 2015-06-08 (2540)
 Build for patch 2015-05-26 (2521)
 * Fri May 15 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-05-15 (2529)
+* Fri May 08 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-05-12 (2478)
 * Thu Apr 30 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-05-04 (2496)
 * Thu Apr 30 2015 Marc Arens <marc.arens@open-xchange.com>

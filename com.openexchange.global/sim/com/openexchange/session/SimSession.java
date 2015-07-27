@@ -67,6 +67,10 @@ public class SimSession implements Session {
     private int contextId;
     private int userId;
     private String password;
+    private String secret;
+    private String hash;
+    private String authId;
+    private String client;
 
     public SimSession() {
 
@@ -84,7 +88,7 @@ public class SimSession implements Session {
 
     @Override
     public String getAuthId() {
-        return null;
+        return authId;
     }
 
     @Override
@@ -140,7 +144,7 @@ public class SimSession implements Session {
 
     @Override
     public String getSecret() {
-        return null;
+        return secret;
     }
 
     @Override
@@ -169,8 +173,7 @@ public class SimSession implements Session {
 
     @Override
     public String getHash() {
-        // Nothing to do
-        return null;
+        return hash;
     }
 
     /*
@@ -189,8 +192,7 @@ public class SimSession implements Session {
      */
     @Override
     public void setHash(final String hash) {
-        // Nothing to do
-
+        this.hash = hash;
     }
 
     /**
@@ -213,18 +215,25 @@ public class SimSession implements Session {
 
     @Override
     public String getClient() {
-        // Nothing to do
-        return null;
+        return client;
     }
 
     @Override
     public void setClient(final String client) {
-        // Nothing to do
+        this.client = client;
     }
 
     @Override
     public boolean isTransient() {
         return false;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public void setAuthId(String authId) {
+        this.authId = authId;
     }
 
     @Override

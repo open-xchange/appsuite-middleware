@@ -53,10 +53,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import com.openexchange.java.util.UUIDs;
+import com.openexchange.session.SimSession;
 import com.openexchange.sessiond.SessionFilter.FilterType;
 import com.openexchange.sessiond.SessionFilter.Matchee;
 import com.openexchange.sessiond.SessionFilter.Matcher;
@@ -179,6 +182,33 @@ public class SessionFilterTest {
     public void testParser10() throws Exception {
         thrown.expect(IllegalArgumentException.class);
         new SessionFilter.Parser("(!(&(!(com.openexchange.attr.A=mumpitz))(com.openexchange.attr.B=sdfsdfsdfsdfd))(com.openexchange.attr.C=asdasfasdf)))asd").parse(); // illegal parenthesis in the middle
+    }
+
+    @Test
+    public void testFilter1() throws Exception {
+        String sessionId = UUIDs.getUnformattedString(UUID.randomUUID());
+        String secret = UUIDs.getUnformattedString(UUID.randomUUID());
+        String hash = UUIDs.getUnformattedString(UUID.randomUUID());
+        String auth = UUIDs.getUnformattedString(UUID.randomUUID());
+        String client = UUIDs.getUnformattedString(UUID.randomUUID());
+        SimSession simSession = new SimSession(24, 48);
+        simSession.setSessionID(sessionId);
+        simSession.setHash(hash);
+        simSession.setSecret(secret);
+        simSession.setAuthId(auth);
+        simSession.setClient(client);
+        simSession.setParameter("com.openexchange.attr.A", "mumpitz");
+        SessionFilter filter = SessionFilter.create("(&"
+            + "(" + SessionFilter.CONTEXT_ID + "=48)"
+            + "(" + SessionFilter.USER_ID + "=24)"
+            + "(" + SessionFilter.SESSION_ID + "=" + sessionId + ")"
+            + "(" + SessionFilter.SECRET + "=" + secret + ")"
+            + "(" + SessionFilter.HASH + "=" + hash + ")"
+            + "(" + SessionFilter.AUTH_ID + "=" + auth + ")"
+            + "(" + SessionFilter.CLIENT + "=" + client + ")"
+            + "(com.openexchange.attr.A=mumpitz)"
+        + ")");
+        Assert.assertTrue(filter.apply(simSession));
     }
 
     private static boolean matches(String filter, Matchee matchee) {

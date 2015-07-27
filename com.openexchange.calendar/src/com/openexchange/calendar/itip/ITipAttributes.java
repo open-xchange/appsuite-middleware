@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,58 +47,34 @@
  *
  */
 
-package com.openexchange.find.json.actions;
-
-import java.util.List;
-import java.util.Map;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.find.Columns;
-import com.openexchange.find.Module;
-import com.openexchange.find.SearchRequest;
-import com.openexchange.find.SearchResult;
-import com.openexchange.find.SearchService;
-import com.openexchange.find.facet.ActiveFacet;
-import com.openexchange.find.json.FindRequest;
-import com.openexchange.find.json.Offset;
-import com.openexchange.find.json.QueryResult;
-import com.openexchange.server.ServiceLookup;
+package com.openexchange.calendar.itip;
 
 /**
- * {@link QueryAction}
+ * Additional, optional attributes for itip mechanisms.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @since v7.8.0
  */
-public class QueryAction extends AbstractFindAction {
+public class ITipAttributes {
+
+    private String confirmationMessage;
 
     /**
-     * Initializes a new {@link QueryAction}.
-     *
-     * @param services The service look-up
+     * Sets a confirmation message.
+     * 
+     * @return The message
      */
-    public QueryAction(final ServiceLookup services) {
-        super(services);
+    public String getConfirmationMessage() {
+        return confirmationMessage;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(final FindRequest request) throws OXException, JSONException {
-        final SearchService searchService = getSearchService();
-        final String[] columns = request.getColumns();
-        final Module module = request.requireModule();
-        final Offset offset = request.getOffset();
-        if (offset.len <= 0) {
-            return new AJAXRequestResult(SearchResult.EMPTY, SearchResult.class.getName());
-        }
-
-        final List<ActiveFacet> activeFacets = request.getActiveFacets();
-        Map<String, String> options = request.getOptions();
-        final SearchRequest searchRequest = new SearchRequest(offset.off, offset.len, activeFacets, options, columns);
-        final SearchResult searchResult = searchService.search(searchRequest, module, request.getServerSession());
-        return new AJAXRequestResult(new QueryResult(searchRequest, searchResult), QueryResult.class.getName());
+    /**
+     * Returns the confirmation message.
+     * 
+     * @param confirmationMessage The message
+     */
+    public void setConfirmationMessage(String confirmationMessage) {
+        this.confirmationMessage = confirmationMessage;
     }
-
 
 }

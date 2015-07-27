@@ -182,8 +182,8 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          * extract requested contact fields
          */
         ContactField[] contactFields;
-        int[] columnIDs = searchRequest.getColumns();
-        if (null == columnIDs || 0 == columnIDs.length) {
+        int[] columnIDs = searchRequest.getColumns().getIntColumns();
+        if (0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
         contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);

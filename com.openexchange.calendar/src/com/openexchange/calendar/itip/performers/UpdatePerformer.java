@@ -60,6 +60,7 @@ import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.itip.ITipAction;
 import com.openexchange.calendar.itip.ITipAnalysis;
+import com.openexchange.calendar.itip.ITipAttributes;
 import com.openexchange.calendar.itip.ITipChange;
 import com.openexchange.calendar.itip.ITipIntegrationUtility;
 import com.openexchange.calendar.itip.generators.ITipMailGeneratorFactory;
@@ -94,7 +95,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     }
 
     @Override
-    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session) throws OXException {
+    public List<Appointment> perform(ITipAction action, ITipAnalysis analysis, Session session, ITipAttributes attributes) throws OXException {
         List<ITipChange> changes = analysis.getChanges();
         List<Appointment> result = new ArrayList<Appointment>(changes.size());
 
@@ -113,7 +114,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
             } else if (appointment.getPrincipalId() > 0) {
                 owner = appointment.getPrincipalId();
             }
-            ensureParticipant(appointment, change.getCurrentAppointment(), action, owner);
+            ensureParticipant(appointment, change.getCurrentAppointment(), action, owner, attributes);
             Appointment original = determineOriginalAppointment(change, processed, session);
             Appointment forMail = appointment;
             if (original != null) {
@@ -204,7 +205,7 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
     }
 
 
-    private void ensureParticipant(CalendarDataObject appointment, Appointment currentAppointment, ITipAction action, int owner) {
+    private void ensureParticipant(CalendarDataObject appointment, Appointment currentAppointment, ITipAction action, int owner, ITipAttributes attributes) {
         int confirm = CalendarObject.NONE;
         switch (action) {
         case ACCEPT: case ACCEPT_AND_IGNORE_CONFLICTS: case CREATE: confirm = CalendarObject.ACCEPT; break;
@@ -214,8 +215,8 @@ public class UpdatePerformer extends AbstrakterDingeMacher {
         default: confirm = -1;
         }
         String message = null;
-        if (action.getMessage() != null && !action.getMessage().trim().equals("")) {
-            message = action.getMessage();
+        if (attributes != null && attributes.getConfirmationMessage() != null && !attributes.getConfirmationMessage().trim().equals("")) {
+            message = attributes.getConfirmationMessage();
         } else {
             message = getCurrentMessage(currentAppointment, owner);
         }

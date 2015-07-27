@@ -50,8 +50,8 @@
 package com.openexchange.sessiond;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.Collections;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.session.Session;

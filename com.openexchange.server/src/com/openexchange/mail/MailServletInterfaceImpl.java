@@ -167,6 +167,7 @@ import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MailMessageComparator;
+import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.utils.MsisdnUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -1864,7 +1865,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 } else {
                     useFields = MailFields.addIfAbsent(useFields, MailField.ID);
                     mails = messageStorage.getMessages(fullName, mailIds, useFields);
-                    enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+                    MessageUtility.enrichWithHeaders(fullName, mails, headerNames, messageStorage);
                 }
             } else {
                 mails = mailAccess.getMessageStorage().getMessages(fullName, mailIds, useFields);
@@ -1919,7 +1920,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mails = ((IMailMessageStorageExt) messageStorage).searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields, headerNames);
             } else {
                 mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
-                enrichWithHeaders(fullName, mails, headerNames, messageStorage);
+                MessageUtility.enrichWithHeaders(fullName, mails, headerNames, messageStorage);
             }
         } else {
             mails = mailAccess.getMessageStorage().searchMessages(fullName, indexRange, sortField, orderDir, searchTerm, useFields);
@@ -1954,36 +1955,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             LOG.error("", e);
         }
         return new SearchIteratorDelegator<MailMessage>(l);
-    }
-
-    private void enrichWithHeaders(String fullName, MailMessage[] mails, String[] headerNames, IMailMessageStorage messageStorage) throws OXException {
-        int length = mails.length;
-        MailMessage[] headers;
-        {
-            String[] ids = new String[length];
-            for (int i = ids.length; i-- > 0;) {
-                MailMessage m = mails[i];
-                ids[i] = null == m ? null : m.getMailId();
-            }
-            headers = messageStorage.getMessages(fullName, ids, MailFields.toArray(MailField.HEADERS));
-        }
-
-        for (int i = length; i-- > 0;) {
-            MailMessage mailMessage = mails[i];
-            if (null != mailMessage) {
-                MailMessage header = headers[i];
-                if (null != header) {
-                    for (String headerName : headerNames) {
-                        String[] values = header.getHeader(headerName);
-                        if (null != values) {
-                            for (String value : values) {
-                                mailMessage.addHeader(headerName, value);
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     private static boolean onlyNull(MailMessage[] mails) {
