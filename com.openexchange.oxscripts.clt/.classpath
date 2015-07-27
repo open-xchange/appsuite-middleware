@@ -22,6 +22,6 @@
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-core-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/org.apache.commons.io_2.2.0.v201405211200.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.push"/>
-	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-extensions-1.0.0.jar"/>
+	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/logback-extensions-1.0.6.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
