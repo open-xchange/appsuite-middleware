@@ -107,12 +107,12 @@ public class BasicAuthenticator extends OXCommonImpl {
      */
     public void doAuthentication(final Credentials authdata) throws InvalidCredentialsException{
         boolean autoLowerCase = cache.getProperties().getUserProp(AdminProperties.User.AUTO_LOWERCASE, false);
-        if (autoLowerCase) {
+        if (autoLowerCase && null != authdata.getLogin()) {
             authdata.setLogin(authdata.getLogin().toLowerCase());
         }
 
         final Credentials master = ClientAdminThread.cache.getMasterCredentials();
-        if (autoLowerCase) {
+        if (autoLowerCase && null != master.getLogin()) {
             master.setLogin(master.getLogin().toLowerCase());
         }
 

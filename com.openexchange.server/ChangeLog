@@ -1,3 +1,7 @@
+* 2015-07-27 - jan.bauerdick@open-xchange.com
+
+ - Fix for bug 39862: Null guard
+
 * 2015-07-09 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 38946: Invalidate caches when rsync is used to move filestore
