@@ -1057,7 +1057,7 @@ public class DefaultShareService implements ShareService {
                 }
             }
         }
-        if (0 < anonymousShares.size()) {
+        if (0 < guestShares.size()) {
             /*
              * check quota restrictions & capability for inviting guests
              */
@@ -1068,7 +1068,7 @@ public class DefaultShareService implements ShareService {
             AccountQuota quota = services.getService(QuotaService.class).getProvider("invite_guests").getFor(session, "0");
             if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
                 Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
-                if (amountQuota.isExceeded() || amountQuota.willExceed(anonymousShares.size())) {
+                if (amountQuota.isExceeded() || amountQuota.willExceed(guestShares.size())) {
                     throw QuotaExceptionCodes.QUOTA_EXCEEDED_INVITE_GUESTS.create(amountQuota.getUsage(), amountQuota.getLimit());
                 }
             }
