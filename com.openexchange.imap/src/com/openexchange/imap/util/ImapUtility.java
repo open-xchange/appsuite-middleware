@@ -203,13 +203,13 @@ public final class ImapUtility {
         }
         if (imapCommand.startsWith("FETCH ")) {
             int openParenthesis = imapCommand.indexOf('(', 6);
-            if (openParenthesis <= 12) {
+            if (openParenthesis <= 32) {
                 return surroundWithSingleQuotes(imapCommand);
             }
             return new StringBuilder(imapCommand.length()).append('\'').append("FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
         } else if (imapCommand.startsWith("UID FETCH ")) {
             int openParenthesis = imapCommand.indexOf('(', 6);
-            if (openParenthesis <= 16) {
+            if (openParenthesis <= 36) {
                 return surroundWithSingleQuotes(imapCommand);
             }
             return new StringBuilder(imapCommand.length()).append('\'').append("UID FETCH ... ").append(imapCommand.substring(openParenthesis)).append('\'').toString();
