@@ -262,23 +262,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return b.booleanValue();
     }
 
-    private static volatile Boolean byEnvelope;
-    /** <b>Only</b> applies to: getThreadSortedMessages(...) in ISimplifiedThreadStructure. Default is <code>true</code> */
-    static boolean byEnvelope() {
-        Boolean b = byEnvelope;
-        if (null == b) {
-            synchronized (IMAPMessageStorage.class) {
-                b = byEnvelope;
-                if (null == b) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
-                    b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.useReferenceOnlyThreaderByEnvelope", true));
-                    byEnvelope = b;
-                }
-            }
-        }
-        return b.booleanValue();
-    }
-
     private static volatile Boolean allowESORT;
     /** Whether ESORT is allowed to be utilized */
     static boolean allowESORT() {
@@ -319,7 +302,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             @SuppressWarnings("synthetic-access")
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
-                byEnvelope = null;
                 useImapThreaderIfSupported = null;
                 allowESORT = null;
                 allowSORTDISPLAY = null;
@@ -2204,13 +2186,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (body && mergeWithSent) {
             throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
         }
-        final boolean byEnvelope = byEnvelope();
+        final boolean byEnvelope = false;
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
         List<Conversation> conversations;
         {
             // Retrieve from actual folder
-            FetchProfile fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            FetchProfile fp;
+            if (byEnvelope) {
+                fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            } else {
+                fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            }
             conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
             // Retrieve from sent folder
             if (mergeWithSent) {
@@ -2343,12 +2330,17 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         if (body && mergeWithSent) {
             throw MailExceptionCode.ILLEGAL_ARGUMENT.create();
         }
-        final boolean byEnvelope = byEnvelope();
+        final boolean byEnvelope = false;
         final boolean isRev1 = imapConfig.getImapCapabilities().hasIMAP4rev1();
 
         List<List<MailMessage>> list;
         if (mergeWithSent) {
-            FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            FetchProfile fp;
+            if (byEnvelope) {
+                fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            } else {
+                fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            }
             List<Conversation> conversations = ThreadSorts.getConversationList(imapFolder, getSortRange(lookAhead, messageCount, order), isRev1, fp, imapServerInfo);
             // Merge with sent folder
             {
