@@ -108,7 +108,7 @@ public class AddGuestPermissionTest extends ShareTest {
         testUpdateSharedFolderWithCascadingPermissions(randomFolderAPI(), module, getDefaultFolder(module), randomGuestPermission());
     }
 
-    public void testUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {
+    public void noTestUpdateSharedFolderWithCascadingPermissionsExtensively() throws Exception {
         for (EnumAPI api : TESTED_FOLDER_APIS) {
             for (OCLGuestPermission guestPermission : TESTED_PERMISSIONS) {
                 for (int module : TESTED_MODULES) {
@@ -168,6 +168,7 @@ public class AddGuestPermissionTest extends ShareTest {
         /*
          * update root folder, add permission for guest
          */
+        rootFolder = getFolder(api, rootFolder.getObjectID());
         rootFolder.addPermission(guestPermission);
         rootFolder = updateFolder(api, rootFolder, true);
         /*

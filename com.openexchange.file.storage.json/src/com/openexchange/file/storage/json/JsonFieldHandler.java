@@ -154,7 +154,7 @@ public class JsonFieldHandler extends AbstractFileFieldHandler {
                             case GUEST:
                                 GuestRecipient guestRecipient = (GuestRecipient) recipient;
                                 json.putOpt("password", guestRecipient.getPassword());
-                                json.putOpt("mail_address", guestRecipient.getEmailAddress());
+                                json.putOpt("email_address", guestRecipient.getEmailAddress());
                                 json.putOpt("display_name", guestRecipient.getDisplayName());
                                 json.putOpt("contact_id", guestRecipient.getContactID());
                                 json.putOpt("contact_folder", guestRecipient.getContactFolder());

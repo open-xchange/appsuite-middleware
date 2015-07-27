@@ -63,6 +63,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import com.openexchange.ajax.folder.Create;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
@@ -523,7 +524,9 @@ public abstract class ShareTest extends AbstractAJAXSession {
     protected FolderObject getFolder(EnumAPI api, int objectID, AJAXClient client) throws Exception {
         GetResponse getResponse = client.execute(new GetRequest(api, objectID));
         FolderObject folder = getResponse.getFolder();
-        folder.setLastModified(getResponse.getTimestamp());
+        JSONObject data = (JSONObject) getResponse.getData();
+        long timestamp = data.getLong("last_modified");
+        folder.setLastModified(new Date(timestamp));
         return getResponse.getFolder();
     }
 
