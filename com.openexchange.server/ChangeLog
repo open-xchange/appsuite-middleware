@@ -1,3 +1,7 @@
+* 2015-07-27 - thorben.betten@open-xchange.
+
+ - Fix for bug 39545: Dropped Ramp-Up class
+
 * 2015-07-27 - jan.bauerdick@open-xchange.com
 
  - Fix for bug 39862: Null guard

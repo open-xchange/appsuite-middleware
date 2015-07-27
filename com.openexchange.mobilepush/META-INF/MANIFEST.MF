@@ -32,4 +32,3 @@ Import-Package: com.fasterxml.jackson.core,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.mobilepush
-Bundle-Activator: com.openexchange.mobilepush.osgi.MobilePushActivator
