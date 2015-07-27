@@ -2210,7 +2210,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         List<Conversation> conversations;
         {
             // Retrieve from actual folder
-            FetchProfile fp = Conversations.getFetchProfileConversationByEnvelope(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
+            FetchProfile fp = Conversations.getFetchProfileConversationByHeaders(null == sortField ? MailField.RECEIVED_DATE : MailField.toField(sortField.getListField()));
             conversations = Conversations.conversationsFor(imapFolder, lookAhead, order, fp, imapServerInfo, byEnvelope);
             // Retrieve from sent folder
             if (mergeWithSent) {

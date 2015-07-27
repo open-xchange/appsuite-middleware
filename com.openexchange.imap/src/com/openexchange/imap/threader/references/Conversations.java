@@ -107,7 +107,7 @@ public final class Conversations {
         fp.add(UIDFolder.FetchProfileItem.UID);
         fp.add("References");
         fp.add("Message-Id");
-        fp.add("In-Reply-To");
+        //fp.add("In-Reply-To");
         FETCH_PROFILE_CONVERSATION_BY_HEADERS = fp;
         fp = new FetchProfile();
         fp.add("References");
@@ -132,6 +132,25 @@ public final class Conversations {
                 if (!MimeStorageUtility.isEnvelopeField(field)) {
                     MimeStorageUtility.addFetchItem(fp, field);
                 }
+            }
+        }
+        return fp;
+    }
+
+    /**
+     * Gets the <i>"by headers"</i> fetch profile including specified fields.
+     *
+     * @param fields The fields to add
+     * @return The <i>"by headers"</i> fetch profile
+     */
+    public static FetchProfile getFetchProfileConversationByHeaders(MailField... fields) {
+        FetchProfile fp = new FetchProfile();
+        fp.add(UIDFolder.FetchProfileItem.UID);
+        fp.add("References");
+        fp.add("Message-Id");
+        if (null != fields) {
+            for (MailField field : fields) {
+                MimeStorageUtility.addFetchItem(fp, field);
             }
         }
         return fp;
